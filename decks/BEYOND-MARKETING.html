@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Provenance — Beyond Marketing</title>
+<style>
+  :root{
+    --navy:#0a2540;--navy-2:#102a43;--slate:#334e68;--slate-2:#486581;--muted:#627d98;
+    --line:#d9e2ec;--line-soft:#eef2f6;
+    --blue-1:#eff6ff;--blue-2:#dbeafe;--blue-3:#93c5fd;--blue-4:#3b82f6;--blue-5:#1d4ed8;--blue-6:#1e40af;
+    --paper:#f7f9fc;--green:#15803d;--green-bg:#f0fdf4;
+    --purple:#6d28d9;--purple-bg:#f5f3ff;--purple-line:#ddd6fe;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--navy-2);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:940px;margin:0 auto;padding:0 28px 80px;}
+  a{color:var(--blue-5);}
+
+  header.mast{background:var(--navy);color:#fff;padding:50px 0 38px;border-bottom:4px solid var(--blue-4);}
+  header.mast .wrap{padding-bottom:0;}
+  .kicker{text-transform:uppercase;letter-spacing:.18em;font-size:12px;font-weight:600;color:var(--blue-3);margin:0 0 14px;}
+  h1.title{font-size:36px;line-height:1.12;margin:0 0 12px;font-weight:700;letter-spacing:-.02em;max-width:780px;}
+  h1.title em{color:var(--blue-3);font-style:normal;}
+  .tagline{font-size:17px;color:#cfdcea;margin:0;max-width:720px;}
+  .tagline b{color:#fff;}
+
+  .pager{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 0;}
+  .pager .pg{font-size:12px;font-weight:600;padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--slate-2);text-decoration:none;}
+  .pager .pg.cur{background:#fff;color:var(--navy);border-color:#fff;}
+  .pager .pg:hover{border-color:var(--blue-4);}
+
+  h2.sec{font-size:13px;text-transform:uppercase;letter-spacing:.16em;color:var(--blue-6);
+    border-bottom:2px solid var(--navy);padding-bottom:8px;margin:38px 0 10px;}
+  .lead{font-size:21px;font-weight:700;color:var(--navy);margin:8px 0 12px;letter-spacing:-.01em;line-height:1.25;}
+  p{font-size:15px;color:var(--slate);margin:0 0 10px;}
+  p b{color:var(--navy-2);}
+
+  .analogy{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;}
+  .analogy .cell{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 14px;text-align:center;font-size:13px;}
+  .analogy .cell .sys{font-weight:700;color:var(--navy);margin-bottom:2px;}
+  .analogy .cell .tracks{color:var(--slate);font-size:12px;}
+  .analogy .cell.core{border:2px solid var(--blue-5);background:var(--blue-1);}
+  .analogy .cell.core .sys{color:var(--blue-6);}
+
+  .strip{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:14px 0;font-size:11px;text-align:center;}
+  .strip .s{background:var(--navy);color:#dbeafe;padding:8px 6px;border-radius:6px;font-weight:600;}
+  .strip .s.opt{background:var(--slate-2);}
+
+  .apps{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+  .app{border:1px solid var(--line);border-radius:10px;background:#fff;padding:16px 18px;border-top:4px solid var(--blue-5);}
+  .app .icon{font-size:20px;margin-bottom:6px;}
+  .app .at{font-size:16px;font-weight:700;color:var(--navy);margin:0 0 6px;}
+  .app .ad{font-size:14px;color:var(--slate);margin:0 0 8px;line-height:1.45;}
+  .app .ex{font-size:12px;color:var(--blue-6);background:var(--blue-1);border-radius:6px;padding:8px 10px;line-height:1.4;}
+  .app .ex b{color:var(--blue-6);}
+
+  .compare{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px;}
+  .compare th{text-align:left;background:var(--navy);color:#fff;padding:10px 14px;font-size:11px;letter-spacing:.04em;text-transform:uppercase;}
+  .compare td{padding:10px 14px;border-bottom:1px solid var(--line);color:var(--slate);vertical-align:top;}
+  .compare tr:nth-child(even) td{background:var(--blue-1);}
+  .compare td b{color:var(--navy-2);}
+
+  .pitch{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;}
+  .pitch .p{background:var(--purple-bg);border:1px solid var(--purple-line);border-radius:8px;padding:12px 14px;}
+  .pitch .p .who{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--purple);margin-bottom:4px;}
+  .pitch .p .line{font-size:13.5px;color:var(--navy-2);line-height:1.45;}
+
+  .callout{background:var(--navy);color:#fff;border-radius:10px;padding:22px 26px;margin-top:28px;}
+  .callout .ct{font-size:20px;font-weight:700;margin:0 0 8px;letter-spacing:-.01em;}
+  .callout p{margin:0;font-size:15px;color:#cfdcea;line-height:1.5;}
+  .callout em{color:var(--blue-3);font-style:normal;}
+
+  footer{margin-top:32px;padding-top:18px;border-top:2px solid var(--navy);font-size:12.5px;color:var(--muted);}
+  footer a{color:var(--slate-2);}
+
+  @media(max-width:720px){.analogy,.apps,.pitch{grid-template-columns:1fr;}.strip{grid-template-columns:1fr 1fr;}h1.title{font-size:28px;}}
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <p class="kicker">Provenance · companion · applications</p>
+    <h1 class="title">Beyond marketing — <em>governed generation</em> for any domain</h1>
+    <p class="tagline">Marketing is the wedge because the pain is visible in 30 seconds. The engine is general: <b>a system of record for claims</b> — verify, permit, keep current, prove — wherever AI (or people at scale) assert something that must be true.</p>
+    <div class="pager">
+      <a class="pg" href="BUSINESS-VISION.html">← Page 1 · Marketing promise</a>
+      <a class="pg cur">Beyond marketing</a>
+      <a class="pg" href="PROVENANCE-SOLUTION.html">Solution detail →</a>
+      <a class="pg" href="SHOWCASE-DEMO.html">Showcase demo</a>
+      <a class="pg" href="index.html">Hub</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <h2 class="sec">The abstraction</h2>
+  <p class="lead">Strip away email, landing pages, and A/B tests. What remains?</p>
+  <div class="analogy">
+    <div class="cell"><div class="sys">General ledger</div><div class="tracks">money</div></div>
+    <div class="cell"><div class="sys">CRM</div><div class="tracks">customers</div></div>
+    <div class="cell"><div class="sys">IAM</div><div class="tracks">permissions</div></div>
+    <div class="cell core"><div class="sys">Provenance</div><div class="tracks"><b>claims</b></div></div>
+  </div>
+  <p>A <b>claim</b> is any specific assertion that can be wrong, impermissible, or stale — in an email, on a webpage, in an agent reply, in a filing, in a tutor's explanation. Provenance tracks each claim through its life: draft → verify against source → clear against rules → (optionally optimize among verified variants) → ship → monitor for drift → prove the checker works.</p>
+
+  <div class="strip">
+    <div class="s">Claims Library</div>
+    <div class="s">The Gate</div>
+    <div class="s">Drift Monitor</div>
+    <div class="s">Assurance Lab</div>
+    <div class="s opt">Optimizer · marketing-heavy</div>
+  </div>
+  <p><b>Drop the Optimizer</b> and you still have a product. <b>Drop the Gate</b> and you don't. That's why the capstone demos marketing (volume + conversion story) but builds an engine that transfers.</p>
+
+  <h2 class="sec">Where else this is useful</h2>
+
+  <div class="apps">
+    <div class="app">
+      <div class="icon">🤖</div>
+      <div class="at">AI agents &amp; copilots</div>
+      <p class="ad">Any agent that speaks or acts on behalf of an org generates claims faster than humans can check them — support refunds, HR policy answers, tool-use justifications, custom proposals.</p>
+      <div class="ex"><b>Ship</b> becomes <b>reply · execute · display</b>. Same Gate; "send" is just one adapter.</div>
+    </div>
+    <div class="app">
+      <div class="icon">⚖️</div>
+      <div class="at">Regulated professional content</div>
+      <p class="ad">Pharma MLR, financial advisor communications, insurance policy summaries, legal memos — industries that already have human review queues at every variant.</p>
+      <div class="ex">Replace <b>per-document</b> review with <b>per-rule</b> governance. Legal sets rules once.</div>
+    </div>
+    <div class="app">
+      <div class="icon">📊</div>
+      <div class="at">Compliance, risk &amp; reporting</div>
+      <p class="ad">ESG disclosures, regulatory filings, audit narratives, citizen-facing eligibility explanations — specific numbers and statements that must trace to source data.</p>
+      <div class="ex"><b>Drift Monitor</b> is the hero here. Stale claims are worse than wrong marketing copy.</div>
+    </div>
+    <div class="app">
+      <div class="icon">🎓</div>
+      <div class="at">Education &amp; training</div>
+      <p class="ad">AI tutors, role-based compliance training, certification prep — personalized explanations that must match canonical curriculum and policy.</p>
+      <div class="ex">Claims library = approved curriculum. Gate = "is this entailed by the source material?"</div>
+    </div>
+    <div class="app">
+      <div class="icon">📰</div>
+      <div class="at">Research &amp; enterprise knowledge</div>
+      <p class="ad">RAG chatbots, research assistants, internal wikis — the failure mode is confident wrong answers with no citation.</p>
+      <div class="ex">Provenance is <b>RAG with a mandatory citation gate</b> and staleness tracking.</div>
+    </div>
+    <div class="app">
+      <div class="icon">💻</div>
+      <div class="at">Software &amp; technical docs</div>
+      <p class="ad">AI-generated docs, API assistants, incident comms, security questionnaires — assertions must match specs, telemetry, and control matrices.</p>
+      <div class="ex">API doc changes → dependency graph invalidates every dependent generated snippet.</div>
+    </div>
+  </div>
+
+  <h2 class="sec">Marketing vs. everything else</h2>
+  <table class="compare">
+    <thead><tr><th></th><th>Marketing (capstone wedge)</th><th>Other domains</th></tr></thead>
+    <tbody>
+      <tr><td><b>Volume driver</b></td><td>100k personalized touchpoints</td><td>Agent turns, tickets, filings, tutor sessions</td></tr>
+      <tr><td><b>Optimizer</b></td><td>Core story — A/B that can't lie</td><td>Often optional; Gate + Drift carry the value</td></tr>
+      <tr><td><b>Gate + ledger</b></td><td>Always core</td><td>Always core</td></tr>
+      <tr><td><b>"Sayable" rules</b></td><td>MLR, FTC, channel, jurisdiction</td><td>Policy, law, role, export controls</td></tr>
+      <tr><td><b>Success metric</b></td><td>Conversion + compliance</td><td>Liability down, throughput up, audit pass</td></tr>
+      <tr><td><b>Demo moment</b></td><td>Try to make it lie → blocked</td><td>Same — inject false claim, watch it fail closed</td></tr>
+    </tbody>
+  </table>
+
+  <h2 class="sec">One-line pitches by audience</h2>
+  <div class="pitch">
+    <div class="p"><div class="who">Compliance / Legal</div><div class="line">"MLR for everything the AI says — automated, auditable, always current."</div></div>
+    <div class="p"><div class="who">Agent / platform team</div><div class="line">"Every agent output passes through a claim gate with citations — or it doesn't run."</div></div>
+    <div class="p"><div class="who">Enterprise RAG team</div><div class="line">"Unsupported sentences don't ship. Retrieval isn't decoration — it's mandatory proof."</div></div>
+    <div class="p"><div class="who">Risk / finance</div><div class="line">"Disclosure management for the age of generative drafts."</div></div>
+  </div>
+
+  <h2 class="sec">Why marketing is still the right capstone demo</h2>
+  <p>Not because the technology is marketing-only — because marketing makes every hard property visible at once:</p>
+  <p>High-volume personalization · verification bottleneck · true ≠ allowed · stale sources · reward-hacking · audit trail. A compliance officer or platform engineer watches the showcase and maps it to their own queue: <i>that's our support bot, our MLR, our filing draft.</i></p>
+  <p>The capstone builds on a <b>standalone demo tenant</b> (email MVP + website adapter in the showcase). Second industry = config, not a rebuild — same Claims Library, same Gate, different sources and rules.</p>
+
+  <div class="callout">
+    <p class="ct">Personalization without proof is a lawsuit.<br><em>Governed generation with proof is infrastructure.</em></p>
+    <p>Marketing is the loudest room to prove it. The application is anywhere a claim meets scale.</p>
+  </div>
+
+  <footer>
+    <p>Provenance · beyond marketing · Jun 2026 · <a href="BUSINESS-VISION.html">← marketing promise</a> · <a href="PROVENANCE-SOLUTION.html">solution detail</a> · <a href="SHOWCASE-DEMO.html">showcase demo</a> · <a href="index.html">hub</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

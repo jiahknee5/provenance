@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solution Deep Dive — Business · Technical · Novel</title>
+<style>
+  :root{
+    --navy:#0a2540;--navy-2:#102a43;--slate:#334e68;--slate-2:#486581;--muted:#627d98;
+    --line:#d9e2ec;--line-soft:#eef2f6;
+    --blue-1:#eff6ff;--blue-2:#dbeafe;--blue-3:#93c5fd;--blue-4:#3b82f6;--blue-5:#1d4ed8;--blue-6:#1e40af;
+    --paper:#f7f9fc;
+    --green:#15803d;--green-bg:#f0fdf4;--green-line:#bbf7d0;
+    --amber:#b45309;--amber-bg:#fffbeb;--amber-line:#fde68a;
+    --biz:#ecfdf5;--biz-line:#a7f3d0;--biz-label:#047857;
+    --tech:#f8fafc;--tech-line:#cbd5e1;--tech-label:#475569;
+    --nov:#fefce8;--nov-line:#fde047;--nov-label:#a16207;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--navy-2);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 28px 90px;}
+  a{color:var(--blue-5);}
+
+  header.mast{background:var(--navy);color:#fff;padding:50px 0 38px;border-bottom:4px solid var(--blue-4);}
+  header.mast .wrap{padding-bottom:0;}
+  .kicker{text-transform:uppercase;letter-spacing:.18em;font-size:12px;font-weight:600;color:var(--blue-3);margin:0 0 14px;}
+  h1.title{font-size:34px;line-height:1.12;margin:0 0 12px;font-weight:700;letter-spacing:-.01em;}
+  .tagline{font-size:16.5px;color:#cfdcea;margin:0;max-width:780px;}
+  .tagline b{color:#fff;}
+
+  .pager{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 0;}
+  .pager .pg{font-size:12px;font-weight:600;padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--slate-2);text-decoration:none;}
+  .pager .pg.cur{background:#fff;color:var(--navy);border-color:#fff;}
+  .pager .pg:hover{border-color:var(--blue-4);}
+
+  .jumpnav{position:sticky;top:0;z-index:10;background:rgba(247,249,252,.95);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);padding:10px 0;margin:0 -28px 24px;padding-left:28px;padding-right:28px;
+    display:flex;flex-wrap:wrap;gap:6px;}
+  .jumpnav a{font-size:11.5px;font-weight:600;color:var(--slate-2);text-decoration:none;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;}
+  .jumpnav a:hover{border-color:var(--blue-4);color:var(--blue-6);}
+
+  .scenario{background:#fff;border:1px solid var(--line);border-left:4px solid var(--blue-5);border-radius:8px;
+    padding:14px 18px;margin:0 0 8px;font-size:14.5px;color:var(--slate);}
+  .scenario b{color:var(--navy-2);}
+
+  /* three-layer legend */
+  .legend{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:16px 0 28px;}
+  .leg{border-radius:8px;padding:12px 14px;border:1px solid;}
+  .leg .ll{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;}
+  .leg .ld{font-size:13px;line-height:1.45;}
+  .leg.biz{background:var(--biz);border-color:var(--biz-line);}.leg.biz .ll{color:var(--biz-label);}.leg.biz .ld{color:var(--slate);}
+  .leg.tech{background:var(--tech);border-color:var(--tech-line);}.leg.tech .ll{color:var(--tech-label);}.leg.tech .ld{color:var(--slate);}
+  .leg.nov{background:var(--nov);border-color:var(--nov-line);}.leg.nov .ll{color:var(--nov-label);}.leg.nov .ld{color:#78350f;}
+
+  /* capability blocks */
+  .cap{margin-top:36px;scroll-margin-top:56px;}
+  .caphead{background:var(--navy);color:#fff;border-radius:10px 10px 0 0;padding:14px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .caphead .num{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--blue-3);}
+  .caphead .name{font-size:20px;font-weight:700;letter-spacing:-.01em;}
+  .caphead .tag{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+    background:rgba(255,255,255,.12);padding:3px 10px;border-radius:5px;color:#dbeafe;}
+  .capbody{border:1px solid var(--line);border-top:none;border-radius:0 0 10px 10px;background:#fff;overflow:hidden;}
+
+  .layer{display:grid;grid-template-columns:140px 1fr;gap:0;border-top:1px solid var(--line-soft);}
+  .layer:first-child{border-top:none;}
+  .layer .lbl{padding:16px 14px;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    display:flex;align-items:flex-start;justify-content:flex-end;text-align:right;line-height:1.4;}
+  .layer .body{padding:16px 20px 16px 0;font-size:14.5px;color:var(--slate);line-height:1.55;}
+  .layer .body p{margin:0 0 8px;}
+  .layer .body p:last-child{margin-bottom:0;}
+  .layer .body b{color:var(--navy-2);}
+  .layer .body ul{margin:6px 0;padding-left:0;list-style:none;}
+  .layer .body li{position:relative;padding-left:18px;margin:5px 0;font-size:14px;}
+  .layer .body li::before{content:"";position:absolute;left:3px;top:8px;width:6px;height:6px;border-radius:1px;background:var(--blue-4);}
+  .layer .body code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;
+    background:var(--line-soft);padding:1px 5px;border-radius:4px;color:var(--navy-2);}
+
+  .layer.biz .lbl{background:var(--biz);color:var(--biz-label);border-right:1px solid var(--biz-line);}
+  .layer.biz .body{background:#fff;}
+  .layer.tech .lbl{background:var(--tech);color:var(--tech-label);border-right:1px solid var(--tech-line);}
+  .layer.tech .body{background:#fcfdfe;}
+  .layer.nov .lbl{background:var(--nov);color:var(--nov-label);border-right:1px solid var(--nov-line);}
+  .layer.nov .body{background:var(--amber-bg);}
+  .layer.nov .body{color:#78350f;}
+  .layer.nov .body b{color:#92400e;}
+
+  .pipe{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;background:var(--navy);color:#dbeafe;
+    border-radius:6px;padding:10px 14px;margin:8px 0;line-height:1.55;overflow-x:auto;}
+  .pipe b{color:#fff;}
+
+  .ex{background:var(--blue-1);border:1px solid var(--blue-2);border-radius:7px;padding:10px 14px;margin-top:8px;font-size:13.5px;color:var(--navy-2);}
+  .ex .xl{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--blue-6);display:block;margin-bottom:3px;}
+
+  .bottom{background:var(--blue-1);border:1px solid var(--blue-2);border-radius:9px;padding:18px 22px;margin-top:36px;}
+  .bottom .bt{font-size:18px;font-weight:700;color:var(--navy);margin:0 0 6px;}
+  .bottom p{margin:0;font-size:15px;color:var(--navy-2);}
+
+  .pagenav{display:flex;justify-content:space-between;gap:12px;margin-top:28px;flex-wrap:wrap;}
+  .pagenav a{font-size:13px;font-weight:700;color:var(--blue-5);text-decoration:none;padding:10px 0;}
+  .pagenav a:hover{color:var(--blue-6);}
+  .pagenav .fwd{margin-left:auto;text-align:right;}
+
+  footer{margin-top:20px;padding-top:18px;border-top:2px solid var(--navy);font-size:12.5px;color:var(--muted);}
+  footer b{color:var(--navy-2);}
+  footer a{color:var(--slate-2);}
+  .illus{font-style:italic;}
+
+  @media (max-width:720px){
+    .legend{grid-template-columns:1fr;}
+    .layer{grid-template-columns:1fr;}
+    .layer .lbl{justify-content:flex-start;text-align:left;border-right:none;border-bottom:1px solid var(--line-soft);padding:10px 16px;}
+    .layer .body{padding:12px 16px 16px;}
+    h1.title{font-size:27px;}
+    .caphead .tag{margin-left:0;}
+  }
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <p class="kicker">Provenance · capstone · page 3 of 5</p>
+    <h1 class="title">The solutions, unpacked</h1>
+    <p class="tagline">Each capability in three layers: <b>what a business person needs to understand</b>, <b>how it actually works technically</b>, and <b>what we're building that's genuinely new</b> — and why. Start with <a href="BUSINESS-VISION.html" style="color:#dbeafe;">page 1</a> for the marketing promise, <a href="BEFORE-AFTER-VALUE.html" style="color:#dbeafe;">page 2</a> for the before/after columns.</p>
+    <div class="pager">
+      <a class="pg" href="BUSINESS-VISION.html">1 · Marketing promise</a>
+      <a class="pg" href="BEFORE-AFTER-VALUE.html">2 · Before → After → Value</a>
+      <a class="pg cur">3 · Solution deep dive</a>
+      <a class="pg" href="WHY-TECHNICALLY-CHALLENGING.html">4 · Why it's hard</a>
+      <a class="pg" href="PROJECT-PLANNING-DOCUMENT.html">5 · Capstone submission</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="scenario"><b>Context:</b> a company sends personalized outbound to 10,000–100,000 prospects. Every specific sentence is a <b>claim</b> — and a wrong one is a fine, not a typo. The five capabilities below are the pieces of Provenance that make 1:1 outreach safe <i>and</i> optimizable.</div>
+
+  <div class="legend">
+    <div class="leg biz"><div class="ll">① Business</div><div class="ld">Plain English. What problem this solves for Legal, Marketing, Sales, and the board — no jargon required.</div></div>
+    <div class="leg tech"><div class="ll">② Technical</div><div class="ld">The actual mechanism: data structures, models, algorithms, and how they connect in the pipeline.</div></div>
+    <div class="leg nov"><div class="ll">③ Solution &amp; novelty</div><div class="ld">What we ship concretely, and why existing tools (RAG, LLM-judge, ESP A/B tests) don't already do this.</div></div>
+  </div>
+
+  <nav class="jumpnav">
+    <a href="#engine">The engine</a>
+    <a href="#lib">1 · Claims Library</a>
+    <a href="#gate">2 · The Gate</a>
+    <a href="#opt">3 · Optimizer</a>
+    <a href="#drift">4 · Drift Monitor</a>
+    <a href="#lab">5 · Assurance Lab</a>
+  </nav>
+
+  <!-- ENGINE OVERVIEW -->
+  <div class="cap" id="engine">
+    <div class="caphead"><span class="num">OVERVIEW</span><span class="name">The Provenance engine</span><span class="tag">the closed loop</span></div>
+    <div class="capbody">
+      <div class="layer biz">
+        <div class="lbl">Business</div>
+        <div class="body">
+          <p>Today you choose between <b>one safe generic email</b> (legal approved it, nobody replies) and <b>personalized AI emails</b> (people reply, but Legal can't read 100,000 versions). Provenance is the layer that sits <b>in front of "Send"</b> — like a firewall, but for factual claims.</p>
+          <p>Legal approves the <b>rules and the claims library once.</b> Marketing launches campaigns as usual. Every generated message is checked automatically: green = provably backed, red = blocked. The system also learns which <i>true</i> messages convert best — without ever being allowed to exaggerate.</p>
+        </div>
+      </div>
+      <div class="layer tech">
+        <div class="lbl">Technical</div>
+        <div class="body">
+          <div class="pipe"><b>Claims Library</b> → Draft (LLM) → <b>The Gate</b> (decompose → bind → NLI+ensemble → rules) → <b>Optimizer</b> (contextual bandit) → Send → <b>Drift Monitor</b> (dependency graph + CDC) · <b>Assurance Lab</b> audits The Gate continuously</div>
+          <p>A <b>claim ledger</b> is the central store: each row is an atomic claim with source span, verification score, clearance status, expiry, and performance stats. Generation draws from the library; The Gate validates net-new claims in drafts; Drift Monitor invalidates rows when upstream sources change.</p>
+        </div>
+      </div>
+      <div class="layer nov">
+        <div class="lbl">Solution &amp; novelty</div>
+        <div class="body">
+          <p><b>What we ship:</b> one integrated pipeline where <b>verification gates optimization</b> — not two separate products bolted together.</p>
+          <p><b>Why it's novel:</b> Every other stack treats generation, compliance review, and A/B testing as separate tools. Provenance treats a <b>claim as the unit of record</b> with a full lifecycle (draft → verify → clear → optimize → send → monitor → prove). The breakthrough is coupling <b>calibrated verification + constrained RL</b> in one loop — optimization happens <i>inside</i> a hard truth boundary, not after the fact.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1 CLAIMS LIBRARY -->
+  <div class="cap" id="lib">
+    <div class="caphead"><span class="num">CAPABILITY 1</span><span class="name">Claims Library</span><span class="tag">system of record</span></div>
+    <div class="capbody">
+      <div class="layer biz">
+        <div class="lbl">Business</div>
+        <div class="body">
+          <p><b>The problem:</b> "What are we allowed to say?" lives in scattered slide decks, old emails, and reps' heads. Someone reuses a claim you retired six months ago — now it's wrong, now it's an incident.</p>
+          <p><b>What this gives you:</b> One living catalog of every factual statement the company may make — each tied to the document that proves it, with an owner and an expiry date. Reps and AI both pull from the same approved set. Retired claims simply aren't selectable.</p>
+          <p><b>Analogy:</b> Like a formulary in pharma, but for marketing claims — not "what drugs exist" but "what sentences are allowed."</p>
+        </div>
+      </div>
+      <div class="layer tech">
+        <div class="lbl">Technical</div>
+        <div class="body">
+          <p><b>Inputs:</b> product specs, clinical/trial PDFs, pricing sheets, case studies, approved-claims docs, legal holds — ingested and versioned.</p>
+          <p><b>Core structure:</b> a <b>claim–evidence graph</b> — nodes are atomic claims (<code>"saves ~$10/head"</code>, <code>"egg-allergen-free"</code>); edges bind each claim to an exact <b>source span</b> (document ID + char offset + version hash).</p>
+          <ul>
+            <li><b>Atomic-claim extraction:</b> LLM splits fluent prose into checkable units; puffery flagged as non-factual.</li>
+            <li><b>Structure-aware retrieval:</b> locate-then-read over docs (not flat RAG chunks) to preserve tables, footnotes, section hierarchy.</li>
+            <li><b>Provenance metadata:</b> owner, approved date, expiry rule (calendar or "on source change"), segment tags, performance history.</li>
+          </ul>
+          <div class="ex"><span class="xl">Example row</span><code>CLAIM #4471</code> · text: "cut reporting cycle 40%" · source: Case Study CS-2026-04 · status: verified+cleared · used in 1,240 touchpoints · 6.8% convert (health-system segment)</div>
+        </div>
+      </div>
+      <div class="layer nov">
+        <div class="lbl">Solution &amp; novelty</div>
+        <div class="body">
+          <p><b>What we ship:</b> A queryable claims database + ingestion pipeline that builds and maintains the claim–evidence graph. Generation and The Gate read/write this store — it's not a sidecar vector DB.</p>
+          <p><b>Why it's novel:</b> Standard RAG gives you chunks; it doesn't give you <b>checkable, versioned, performance-tracked claim objects.</b> The hard part — decomposing marketing prose into atomic facts and binding each to the exact source line — is an open research problem. We're building a structured substrate where verification and optimization operate on <i>claims</i>, not on raw text blobs. The library <b>compounds</b>: every campaign adds verified rows competitors starting from zero can't replicate.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 THE GATE -->
+  <div class="cap" id="gate">
+    <div class="caphead"><span class="num">CAPABILITY 2</span><span class="name">The Gate — verify + clear</span><span class="tag">bottleneck remover</span></div>
+    <div class="capbody">
+      <div class="layer biz">
+        <div class="lbl">Business</div>
+        <div class="body">
+          <p><b>The problem:</b> Legal reads every email, ad, and deck — 2–4 weeks per campaign. Under deadline, someone ships "clinically proven" with no study behind it. Or you send one boring approved template to everyone.</p>
+          <p><b>What this gives you:</b> Every message is checked in seconds before it sends. Each sentence gets a green (proven), amber (uncertain — held for review), or red (blocked) light. Legal sets the rules <b>once</b>; they stop being the bottleneck on every variant.</p>
+          <p><b>Key distinction:</b> <i>True</i> ≠ <i>allowed.</i> A claim can be factually correct and still blocked — legal hold, wrong state, missing disclaimer. The Gate enforces both.</p>
+        </div>
+      </div>
+      <div class="layer tech">
+        <div class="lbl">Technical</div>
+        <div class="body">
+          <p><b>Pipeline (per draft message):</b></p>
+          <div class="pipe">draft → <b>decompose</b> into atomic claims → <b>evidence-bind</b> (retrieve source span per claim) → <b>verify</b> (NLI entailment + judge ensemble) → <b>clear</b> (compliance rules) → claim ledger update</div>
+          <ul>
+            <li><b>NLI entailment:</b> does the source span logically entail the claim? (cheap, deterministic-ish first pass)</li>
+            <li><b>Judge ensemble:</b> diverse LLM families score uncertain cases; scores fused and <b>calibrated</b> (isotonic regression; report ECE on reliability diagram)</li>
+            <li><b>Router-referee cascade:</b> cheap NLI handles ~70% of claims; only low-confidence cases escalate to the expensive ensemble — keeps cost per message viable</li>
+            <li><b>Compliance rule engine:</b> Legal-authored rules (jurisdiction, channel, hold flags, required disclaimers) run after verification</li>
+            <li><b>Optional hidden-state probe:</b> classifier on intermediate LLM activations to pre-flag likely-hallucinated generations before full verification</li>
+          </ul>
+          <div class="ex"><span class="xl">Example</span>Draft: "For your 847-bed system, Helix cuts reporting cycle 40%." → claims: [847-bed] ✓ CMS data · [40% cycle] ✓ case study · [47% TCO] ✗ MLR hold.</div>
+        </div>
+      </div>
+      <div class="layer nov">
+        <div class="lbl">Solution &amp; novelty</div>
+        <div class="body">
+          <p><b>What we ship:</b> The Gate as a load-bearing service — every outbound message passes through it; nothing sends without a claim ledger entry. Output: cited / repaired / blocked, with clickable source lines.</p>
+          <p><b>Why it's novel:</b> The industry default is "ask GPT if this looks right" — LLM-as-judge fails &gt;50% of bias tests and is trivially gameable. We replace a single unreliable judge with <b>calibrated ensemble selective prediction</b>: NLI for entailment structure, diverse judges for semantic nuance, explicit calibration so "94% confident" means 94%. This is the frontier problem Karpathy calls "verification is the bottleneck" — we're building verification that holds under adversarial pressure from both the generator and the optimizer, not a vibes check.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 OPTIMIZER -->
+  <div class="cap" id="opt">
+    <div class="caphead"><span class="num">CAPABILITY 3</span><span class="name">The Optimizer — truth-bounded A/B</span><span class="tag">revenue engine</span></div>
+    <div class="capbody">
+      <div class="layer biz">
+        <div class="lbl">Business</div>
+        <div class="body">
+          <p><b>The problem:</b> One generic email to the whole list — flat conversion. Or manual A/B tests that take weeks, test one variable, and never reach the micro-segments that actually matter.</p>
+          <p><b>What this gives you:</b> The system discovers which <i>true, approved</i> variant works best per audience — on email or on a landing page — and shifts automatically. It can't cheat by exaggerating.</p>
+          <p><b>The safety guarantee:</b> It can never "learn to lie" to get more replies — false claims aren't in the competition.</p>
+        </div>
+      </div>
+      <div class="layer tech">
+        <div class="lbl">Technical</div>
+        <div class="body">
+          <p><b>Formulation:</b> contextual bandit (Thompson sampling or LinUCB) where:</p>
+          <ul>
+            <li><b>Context</b> = prospect/segment features (industry, size, role, geography)</li>
+            <li><b>Action space</b> = verified + cleared message variants only (constrained — this is the key design choice)</li>
+            <li><b>Reward</b> = reply / meeting booked / convert; <b>hard negative</b> = unsubscribe / spam report</li>
+            <li><b>Cold-start:</b> hierarchical priors — borrow strength from parent segments when a micro-segment has no data yet</li>
+            <li><b>Off-policy eval:</b> doubly-robust estimator on logged sends to estimate lift without re-running live experiments</li>
+            <li><b>Anytime-valid confidence:</b> adaptive testing that doesn't require pre-set sample sizes</li>
+          </ul>
+          <div class="ex"><span class="xl">Example</span>For health-system buyers, "lead with cycle-time ROI" beats "lead with HIPAA" on both email and web — adopted automatically. Only verified variants compete.</div>
+        </div>
+      </div>
+      <div class="layer nov">
+        <div class="lbl">Solution &amp; novelty</div>
+        <div class="body">
+          <p><b>What we ship:</b> A bandit policy layer that sits after The Gate, choosing among pre-cleared variants per segment — with a live leaderboard UI and logged off-policy metrics.</p>
+          <p><b>Why it's novel:</b> Every engagement optimizer in production eventually <b>reward-hacks</b> — it learns that exaggeration gets clicks. The usual fix is human oversight or cap the reward signal (which kills performance). Our fix is <b>structural</b>: prune the action space to verified outputs only. Falsehoods never enter the reward loop, so the policy <i>cannot</i> converge to a higher-reward lie. This is constrained optimization as anti-Goodhart — a fresh answer to the problem the whole RL-for-LLMs field is stuck on, not just "we added guardrails."</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 DRIFT MONITOR -->
+  <div class="cap" id="drift">
+    <div class="caphead"><span class="num">CAPABILITY 4</span><span class="name">Drift Monitor</span><span class="tag">truth over time</span></div>
+    <div class="capbody">
+      <div class="layer biz">
+        <div class="lbl">Business</div>
+        <div class="body">
+          <p><b>The problem:</b> A claim verified today can be wrong tomorrow. Legal lifts a hold but nobody re-checks 100k live messages — a now-allowed claim sits unused (lost revenue). Or a prospect's permit changes and you keep emailing "your 4,000-head operation" when they now have 2,000 (liability).</p>
+          <p><b>What this gives you:</b> When any source document changes, every claim that depended on it is automatically re-checked. Stale claims pause before they send. Newly cleared claims unblock everywhere instantly. No manual re-audit of the whole corpus.</p>
+          <p><b>Analogy:</b> Like cache invalidation for truth — when the upstream data changes, downstream messages update automatically.</p>
+        </div>
+      </div>
+      <div class="layer tech">
+        <div class="lbl">Technical</div>
+        <div class="body">
+          <ul>
+            <li><b>Claim-dependency graph:</b> directed edges from claim nodes → source-version nodes. A source update triggers traversal of all dependent claims.</li>
+            <li><b>Change-data-capture (CDC):</b> watch source registry for diffs — document re-upload, permit API refresh, legal-hold flag flip, customer churn.</li>
+            <li><b>Targeted re-verification:</b> only affected claims re-run through The Gate (not the full library)</li>
+            <li><b>Send control:</b> auto-pause live sequences containing invalidated claims; auto-unblock when re-verification passes</li>
+          </ul>
+          <div class="ex"><span class="xl">Examples</span>Legal lifts UTK hold → "13% feed reduction" auto-unblocks in all templates. EPA permit drops 4,000 → 2,000 head → every email still saying "4,000" paused for re-check. Reference customer churns → "trusted by ACME" pulled.</div>
+        </div>
+      </div>
+      <div class="layer nov">
+        <div class="lbl">Solution &amp; novelty</div>
+        <div class="body">
+          <p><b>What we ship:</b> A dependency graph + CDC watcher + re-verification trigger integrated with the send pipeline and claim ledger.</p>
+          <p><b>Why it's novel:</b> Most AI "memory" work tests whether you can <i>retrieve</i> old facts — not whether those facts are still <i>correct.</i> Staleness is the named hard problem in long-running agent systems. Provenance treats truth as a <b>temporal property</b>: verification has an expiry tied to source version, not a calendar date someone sets and forgets. This is incremental cache-invalidation for factual claims — something no ESP, CRM, or compliance tool does today because they don't model claims as first-class objects with dependencies.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 ASSURANCE LAB -->
+  <div class="cap" id="lab">
+    <div class="caphead"><span class="num">CAPABILITY 5</span><span class="name">Assurance Lab</span><span class="tag">proof the checker works</span></div>
+    <div class="capbody">
+      <div class="layer biz">
+        <div class="lbl">Business</div>
+        <div class="body">
+          <p><b>The problem:</b> "Trust us, the AI checks the claims" — but there's no proof. Risk committees, enterprise buyers, and regulators ask "how do you <i>know</i> it works?" and the answer is a shrug. Deals stall for months.</p>
+          <p><b>What this gives you:</b> A dashboard with real numbers — catch-rate, false-reject rate, calibration accuracy — from continuously running tests. You can put "98.7% catch-rate at 2.1% false-reject" in front of Legal, the board, and procurement. Trust becomes a metric, not a promise.</p>
+        </div>
+      </div>
+      <div class="layer tech">
+        <div class="lbl">Technical</div>
+        <div class="body">
+          <ul>
+            <li><b>Synthetic adversarial-trap generator:</b> mutates verified claims into subtle lies — number drift ("$10" → "$15"), unsupported superlatives, false equivalence, true-but-unsayable (passes verification, fails clearance)</li>
+            <li><b>Held-out adversarial set:</b> traps run through The Gate on a schedule; results logged separately from production traffic</li>
+            <li><b>Reliability profiling (decomposed, not one number):</b>
+              <ul>
+                <li>catch-rate at fixed false-reject threshold</li>
+                <li>paraphrase robustness (same claim, different wording)</li>
+                <li>calibration: ECE + reliability diagrams ("when we say 90%, we're right 90% of the time")</li>
+                <li>severity-weighted error buckets (blocked a puffery vs. blocked a material misstatement)</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="layer nov">
+        <div class="lbl">Solution &amp; novelty</div>
+        <div class="body">
+          <p><b>What we ship:</b> An Assurance Lab module that continuously generates traps, runs them through The Gate, and produces an audit-ready reliability report — plus a bake-off comparing single-judge vs. NLI vs. ensemble on catch-rate per dollar.</p>
+          <p><b>Why it's novel:</b> AI eval today is mostly benchmark scores that get gamed (Berkeley RDI broke 8 top agent benchmarks). A single pass-rate hides catastrophic failures in the tail. We build a <b>wind tunnel for the verifier itself</b> — adversarially attacking our own checker and reporting decomposed reliability. This is the direct answer to "how do you know the AI doesn't lie?" — not marketing copy, but a continuously updated reliability profile you can show an auditor. Fittingly, we don't present an unsourced claim as a sourced one.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <p class="bt">How the five pieces fit</p>
+    <p>The <b>Claims Library</b> is what you're allowed to say. <b>The Gate</b> checks every new sentence against it. <b>The Optimizer</b> picks the best verified variant per segment. <b>Drift Monitor</b> keeps it all true over time. <b>Assurance Lab</b> proves the checker itself works. Together they turn "personalized vs. compliant" from a trade-off into a solved problem.</p>
+  </div>
+
+  <div class="pagenav">
+    <a href="BEFORE-AFTER-VALUE.html">← Page 2 · Before → After → Value</a>
+    <a class="fwd" href="WHY-TECHNICALLY-CHALLENGING.html">Page 4 · Why it's hard →</a>
+  </div>
+
+  <footer>
+    <p class="illus">Illustrative figures (catch-rates, volumes) labeled as such where used. Research signals and arXiv IDs anchor to the June 2026 cohort brief.</p>
+    <p>Provenance · capstone page 3 of 5 · Jun 2026 · <a href="BEFORE-AFTER-VALUE.html">← page 2</a> · <a href="WHY-TECHNICALLY-CHALLENGING.html">page 4 →</a> · <a href="index.html">hub</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

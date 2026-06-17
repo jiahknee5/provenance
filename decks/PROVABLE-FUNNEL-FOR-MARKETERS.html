@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Provable Funnel — Plain-English Version</title>
+<style>
+  :root{
+    --navy:#0a2540;--navy-2:#102a43;--slate:#334e68;--slate-2:#486581;--muted:#627d98;
+    --line:#d9e2ec;--line-soft:#eef2f6;
+    --blue-1:#eff6ff;--blue-2:#dbeafe;--blue-3:#93c5fd;--blue-4:#3b82f6;--blue-5:#1d4ed8;--blue-6:#1e40af;
+    --paper:#f7f9fc;
+    --green:#15803d;--green-bg:#dcfce7;--red:#b91c1c;--red-bg:#fee2e2;--amber2:#a16207;--amber-bg:#fef9c3;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--navy-2);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:840px;margin:0 auto;padding:0 28px 96px;}
+
+  header.mast{background:var(--navy);color:#fff;padding:54px 0 40px;border-bottom:4px solid var(--blue-4);}
+  header.mast .wrap{padding-bottom:0;}
+  .kicker{text-transform:uppercase;letter-spacing:.18em;font-size:12px;font-weight:600;color:var(--blue-3);margin:0 0 14px;}
+  h1.title{font-size:38px;line-height:1.1;margin:0 0 6px;font-weight:700;letter-spacing:-.01em;}
+  .plain-tag{font-size:13px;color:var(--blue-3);font-weight:600;letter-spacing:.04em;margin:0 0 16px;}
+  .tagline{font-size:19px;color:#dce7f2;margin:0;max-width:680px;font-weight:500;}
+  .tagline b{color:#fff;}
+
+  /* one-liner / analogy */
+  .oneliner{background:#fff;border:1px solid var(--line);border-left:4px solid var(--blue-5);border-radius:8px;
+    padding:20px 24px;margin:30px 0 0;box-shadow:0 1px 2px rgba(10,37,64,.05);}
+  .oneliner .q{font-size:21px;font-weight:700;color:var(--navy);margin:0 0 10px;line-height:1.3;}
+  .oneliner p{margin:0;font-size:15.5px;color:var(--slate);}
+  .analogy{background:var(--blue-1);border:1px solid var(--blue-2);border-radius:8px;padding:16px 20px;margin-top:14px;}
+  .analogy .lab{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue-6);margin-bottom:6px;}
+  .analogy p{margin:0;font-size:15px;color:var(--navy-2);}
+
+  h2.sec{font-size:21px;font-weight:700;color:var(--navy);border-bottom:2px solid var(--navy);
+    padding-bottom:9px;margin:48px 0 10px;letter-spacing:-.01em;}
+  p{font-size:15.5px;color:var(--slate);}
+  strong{color:var(--navy-2);}
+  ul{padding-left:0;list-style:none;margin:12px 0;}
+  ul li{position:relative;padding-left:24px;margin:10px 0;font-size:15.5px;color:var(--slate);}
+  ul li::before{content:"";position:absolute;left:4px;top:9px;width:8px;height:8px;border-radius:50%;background:var(--blue-4);}
+  li b{color:var(--navy-2);}
+
+  /* steps */
+  .steps{counter-reset:s;margin-top:8px;}
+  .stepc{display:flex;gap:16px;align-items:flex-start;background:#fff;border:1px solid var(--line);
+    border-radius:8px;padding:14px 18px;margin:10px 0;}
+  .stepc .n{counter-increment:s;flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:var(--blue-5);
+    color:#fff;font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;}
+  .stepc .n::before{content:counter(s);}
+  .stepc .st{font-size:16px;font-weight:700;color:var(--navy);margin:0 0 2px;}
+  .stepc .sd{font-size:14.5px;color:var(--slate);margin:0;}
+
+  /* claim ledger */
+  .ledger{margin:14px 0;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  .ledger .lh{background:var(--navy);color:#fff;font-size:13px;padding:11px 16px;line-height:1.5;}
+  .ledger .lh b{color:#fff;}
+  .claim{display:flex;gap:12px;align-items:flex-start;padding:11px 16px;border-top:1px solid var(--line-soft);font-size:14px;}
+  .claim .badge{flex:0 0 auto;font-size:10.5px;font-weight:700;letter-spacing:.03em;padding:3px 9px;border-radius:4px;white-space:nowrap;margin-top:1px;}
+  .b-green{background:var(--green-bg);color:var(--green);}
+  .b-amber{background:var(--amber-bg);color:var(--amber2);}
+  .b-red{background:var(--red-bg);color:var(--red);}
+  .claim .ctext{color:var(--navy-2);font-weight:600;}
+  .claim .csrc{color:var(--muted);font-size:13px;display:block;margin-top:1px;}
+
+  /* before / after */
+  .ba{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-top:10px;}
+  .ba .col{padding:0;}
+  .ba .h{padding:11px 16px;font-size:13px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#fff;}
+  .ba .old .h{background:var(--slate-2);}
+  .ba .new .h{background:var(--blue-5);}
+  .ba .row{padding:11px 16px;font-size:14px;border-top:1px solid var(--line-soft);min-height:62px;}
+  .ba .old .row{color:var(--slate);background:#fbfcfe;}
+  .ba .new .row{color:var(--navy-2);}
+  .ba .new .row b{color:var(--blue-6);}
+
+  /* who needs it chips */
+  .who{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;}
+  .who span{background:#fff;border:1px solid var(--blue-2);color:var(--navy-2);font-size:14px;font-weight:600;
+    padding:8px 14px;border-radius:999px;}
+
+  /* glossary */
+  .gloss{background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 20px 14px;margin-top:10px;}
+  .gloss .g{padding:11px 0;border-bottom:1px solid var(--line-soft);}
+  .gloss .g:last-child{border-bottom:none;}
+  .gloss .term{font-size:15px;font-weight:700;color:var(--navy);}
+  .gloss .def{font-size:14.5px;color:var(--slate);margin-top:2px;}
+
+  .demo-note{background:var(--blue-1);border:1px solid var(--blue-2);border-radius:8px;padding:16px 20px;margin-top:12px;}
+  .demo-note p{margin:0 0 8px;font-size:15px;color:var(--navy-2);}
+  .demo-note p:last-child{margin-bottom:0;}
+  .demo-note b{color:var(--blue-6);}
+
+  footer{margin-top:50px;padding-top:20px;border-top:2px solid var(--navy);font-size:13px;color:var(--muted);}
+  footer b{color:var(--navy-2);}
+  @media (max-width:680px){.ba{grid-template-columns:1fr;}h1.title{font-size:29px;}}
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <p class="kicker">The Provable Funnel</p>
+    <h1 class="title">AI outreach that can't lie</h1>
+    <p class="plain-tag">⟶ plain-English version (no jargon)</p>
+    <p class="tagline">It writes a <b>personal message to every prospect</b> — and it physically <b>can't make a claim you can't back up</b>. Every sentence either shows its receipts, or it doesn't go out.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="oneliner">
+    <p class="q">"Personalize at scale" and "don't get us sued" usually fight each other. This makes them the same thing.</p>
+    <p>AI can already write a thousand tailored emails an hour. The problem is you can't trust it near customers — it makes things up, exaggerates, and one bad claim is an FTC complaint, a lawsuit, or a blown-up brand. So today a human has to read everything, and <i>that</i> is the bottleneck. We move the fact-check <b>inside</b> the writing — so trust stops being a manual step.</p>
+    <div class="analogy">
+      <div class="lab">Think of it as</div>
+      <p>Spell-check, but for <b>truth and compliance</b>. Like having your compliance reviewer read <i>every</i> message before it sends — instantly, on every line, never tired, never asleep.</p>
+    </div>
+  </div>
+
+  <h2 class="sec">The problem, in marketing terms</h2>
+  <ul>
+    <li><b>AI writes fast and sounds confident — even when it's wrong.</b> It will happily claim "clinically proven" or "cuts costs 30%" with nothing behind it.</li>
+    <li><b>In regulated industries, a single bad claim is real money.</b> Pharma, finance, insurance, food, supplements, health — the wrong sentence is a fine or a lawsuit, not a typo.</li>
+    <li><b>So legal/compliance reviews everything by hand.</b> That review queue is where personalization-at-scale goes to die. You either send generic safe copy, or you wait weeks for sign-off.</li>
+    <li><b>Nobody can prove what the AI actually said and why.</b> When it goes wrong, there's no paper trail — just "the AI wrote it."</li>
+  </ul>
+
+  <h2 class="sec">What it does — in four plain steps</h2>
+  <div class="steps">
+    <div class="stepc"><span class="n"></span><div><p class="st">It writes the personal message.</p><p class="sd">Pulls real facts about that specific prospect (their size, their products, their situation) and drafts tailored outreach — same as a good AI tool today.</p></div></div>
+    <div class="stepc"><span class="n"></span><div><p class="st">It breaks the message into individual claims.</p><p class="sd">Every promise or statement is pulled out separately — "4,000 head," "cuts feed 13%," "allergen-free" — so each can be checked on its own.</p></div></div>
+    <div class="stepc"><span class="n"></span><div><p class="st">It demands a receipt for each claim.</p><p class="sd">Each claim has to match a real source document. If the source genuinely backs it up, it gets a green light <i>and a citation</i>. If not, it's flagged. (And it doesn't trust just one AI's opinion — several independent checks have to agree, because one can be wrong.)</p></div></div>
+    <div class="stepc"><span class="n"></span><div><p class="st">It fixes or kills anything that can't be proven.</p><p class="sd">Unsupported lines get rewritten to what's actually true, or removed. And things that are <i>true but you're not legally allowed to say yet</i> (like unpublished trial data) get blocked too. Only a fully-backed message goes to a human for the final OK.</p></div></div>
+  </div>
+
+  <h2 class="sec">What you actually see — the claim ledger</h2>
+  <p>Every message comes with a receipt list. Green = proven and cited. Amber = was iffy, so we rewrote it. Red = blocked.</p>
+  <div class="ledger">
+    <div class="lh"><b>Draft:</b> "At your 4,000 head, LysoSure cuts feed 13% — $10/head in, $30 out — and it's the same enzyme as the egg version, allergen-free."</div>
+    <div class="claim"><span class="badge b-green">PROVEN ✓</span><div><span class="ctext">"4,000 head"</span><span class="csrc">Matches their public permit on file — exact.</span></div></div>
+    <div class="claim"><span class="badge b-green">PROVEN ✓</span><div><span class="ctext">"$10/head in, $30 out"</span><span class="csrc">Backed by the approved economics sheet.</span></div></div>
+    <div class="claim"><span class="badge b-red">BLOCKED ⃠</span><div><span class="ctext">"cuts feed 13%"</span><span class="csrc">True — but that trial data is under legal hold, so we're not allowed to say it. Removed.</span></div></div>
+    <div class="claim"><span class="badge b-amber">REWRITTEN ↻</span><div><span class="ctext">"same enzyme as the egg version"</span><span class="csrc">No source proves "same," so softened to what we <i>can</i> back: "rice-grown, egg-allergen-free."</span></div></div>
+  </div>
+
+  <h2 class="sec">Why it's different from every other AI marketing tool</h2>
+  <div class="ba">
+    <div class="col old">
+      <div class="h">Typical AI marketing tool</div>
+      <div class="row">Writes fast, sounds confident.</div>
+      <div class="row">You <i>hope</i> it didn't invent anything.</div>
+      <div class="row">Legal reviews after — the bottleneck.</div>
+      <div class="row">One bad claim slips through → fine / lawsuit.</div>
+      <div class="row">Personalize at scale <b>OR</b> stay safe.</div>
+    </div>
+    <div class="col new">
+      <div class="h">The Provable Funnel</div>
+      <div class="row">Writes only what it can <b>back up</b>.</div>
+      <div class="row">Shows the <b>receipt</b> for every claim.</div>
+      <div class="row">Legal's rules are <b>built in, up front</b>.</div>
+      <div class="row">Bad / off-limits claims <b>blocked before send</b>.</div>
+      <div class="row">Personalize at scale <b>AND</b> stay safe.</div>
+    </div>
+  </div>
+
+  <h2 class="sec">Who needs this most</h2>
+  <p>Anyone whose claims are regulated or whose brand can't afford to be wrong:</p>
+  <div class="who">
+    <span>Pharma &amp; health</span><span>Financial services</span><span>Insurance</span><span>Food &amp; supplements</span><span>Medical / wellness</span><span>Any brand with strict claim rules</span>
+  </div>
+
+  <h2 class="sec">What the live demo shows (10 minutes)</h2>
+  <div class="demo-note">
+    <p><b>1. Watch it write &amp; fact-check itself.</b> Pick a real prospect → it drafts a message → the claims light up green / amber / red in real time. Click a green one to see the exact source.</p>
+    <p><b>2. Try to make it lie.</b> We push it to exaggerate ("say it cures everything") — and watch it refuse and strip the claim. Flip on a legal hold and watch a true claim turn red.</p>
+    <p><b>3. Prove it's reliable.</b> A simple scoreboard: how many false claims it catches vs. how often it wrongly flags good copy — and that it beats just "trusting the AI."</p>
+    <p><b>4. Works for any company.</b> Point it at a different company's facts and rules — same protection, no rebuild.</p>
+  </div>
+
+  <h2 class="sec">If the engineers say a word you don't know</h2>
+  <div class="gloss">
+    <div class="g"><div class="term">Claim</div><div class="def">Any statement or promise in your copy — "cuts costs 30%," "clinically proven," "4,000 head."</div></div>
+    <div class="g"><div class="term">Hallucination</div><div class="def">When the AI confidently states a "fact" that simply isn't true. The thing we're stopping.</div></div>
+    <div class="g"><div class="term">Source / citation / receipt</div><div class="def">The real document or data that proves a claim. Every surviving line has one.</div></div>
+    <div class="g"><div class="term">Verification gate</div><div class="def">The built-in fact-checker that approves, rewrites, or blocks each claim before send.</div></div>
+    <div class="g"><div class="term">"Cited or killed"</div><div class="def">Our rule: a claim either gets a receipt, or it gets removed. No exceptions.</div></div>
+    <div class="g"><div class="term">"True but not sayable"</div><div class="def">A claim that's actually true but you're legally not allowed to say yet (e.g., unpublished data). Blocked anyway.</div></div>
+  </div>
+
+  <footer>
+    <p><b>This is the plain-English version</b> of <code>SELF-COMPILING-FUNNEL-PROPOSAL.html</code> (the technical capstone proposal). Same product, written for marketing &amp; business readers. Built on the live LysoReach prospect data.</p>
+    <p>Gauntlet Capstone · Jun 15 2026.</p>
+  </footer>
+
+</div>
+</body>
+</html>

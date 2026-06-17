@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Provenance × Gauntlet — Pilot Customer Deck</title>
+<style>
+  :root{
+    --navy:#0a2540;--navy-2:#102a43;--slate:#334e68;--slate-2:#486581;--muted:#627d98;
+    --line:#d9e2ec;--line-soft:#eef2f6;
+    --blue-1:#eff6ff;--blue-2:#dbeafe;--blue-3:#93c5fd;--blue-4:#3b82f6;--blue-5:#1d4ed8;--blue-6:#1e40af;
+    --paper:#eef2f6;
+    --green:#15803d;--green-bg:#dcfce7;--amber:#b45309;--amber-bg:#fef3c7;
+    --red:#b91c1c;--red-bg:#fee2e2;--purple:#6d28d9;--purple-bg:#f5f3ff;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--navy-2);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;overflow:hidden;height:100vh;}
+
+  .chrome{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,37,64,.94);backdrop-filter:blur(10px);
+    border-bottom:1px solid rgba(255,255,255,.1);padding:8px 20px;display:flex;align-items:center;gap:14px;}
+  .chrome .logo{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--blue-3);}
+  .dots{display:flex;gap:5px;flex:1;justify-content:center;flex-wrap:wrap;}
+  .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;border:none;padding:0;}
+  .dot.on{background:var(--blue-4);box-shadow:0 0 8px var(--blue-4);}
+  .prog{font-size:11px;color:#94a3b8;font-variant-numeric:tabular-nums;}
+  .hint{font-size:10px;color:#64748b;} .hint kbd{background:rgba(255,255,255,.1);padding:1px 5px;border-radius:3px;}
+
+  .stage{position:fixed;inset:0;top:40px;display:flex;align-items:center;justify-content:center;padding:20px 24px;
+    opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .35s,transform .35s;}
+  .stage.on{opacity:1;pointer-events:auto;transform:none;}
+
+  .frame{width:100%;max-width:1100px;aspect-ratio:16/9;max-height:calc(100vh - 72px);background:#fff;border-radius:14px;
+    box-shadow:0 18px 50px rgba(10,37,64,.16);border-top:5px solid var(--blue-5);
+    padding:32px 44px;display:flex;flex-direction:column;overflow:hidden;}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--blue-6);margin-bottom:8px;
+    display:flex;justify-content:space-between;}
+  .eyebrow .n{color:var(--muted);}
+  h2.title{font-size:clamp(22px,2.8vw,30px);line-height:1.15;font-weight:700;color:var(--navy);margin:0 0 6px;letter-spacing:-.02em;}
+  h2.title em{color:var(--blue-5);font-style:normal;}
+  .lead{font-size:14px;color:var(--slate);margin:0 0 12px;line-height:1.45;}
+  .lead b{color:var(--navy-2);}
+  .body{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0;}
+  .foot{font-size:11px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px;margin-top:auto;}
+  .foot b{color:var(--navy-2);}
+
+  /* diagrams */
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  .box{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#fff;}
+  .box .bl{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+  .box .bt{font-size:13px;font-weight:700;color:var(--navy);}
+  .box .bd{font-size:11px;color:var(--slate);margin-top:3px;line-height:1.35;}
+  .box.hl{border-color:var(--blue-4);background:var(--blue-1);}
+  .box.prime{border-top:3px solid var(--blue-5);}
+  .box.cat{border-top:3px solid var(--purple);}
+  .box.hire{border-top:3px solid var(--green);}
+
+  .pipe{display:flex;align-items:center;gap:4px;flex-wrap:wrap;justify-content:center;}
+  .pbox{font-size:11px;font-weight:700;padding:7px 11px;border-radius:6px;white-space:nowrap;}
+  .pbox.navy{background:var(--navy);color:#fff;}
+  .pbox.blue{background:var(--blue-5);color:#fff;}
+  .pbox.light{background:var(--blue-1);color:var(--blue-6);border:1px solid var(--blue-3);}
+  .pbox.green{background:var(--green-bg);color:var(--green);border:1px solid #86efac;}
+  .parr{color:var(--blue-3);font-weight:700;font-size:14px;}
+
+  .stack{display:flex;flex-direction:column;align-items:center;gap:0;}
+  .layer{width:100%;max-width:520px;border:1px solid var(--line);border-radius:8px;padding:9px 14px;
+    display:flex;align-items:center;gap:10px;background:#fff;font-size:12px;}
+  .layer .ico{width:26px;height:26px;border-radius:6px;background:var(--blue-1);color:var(--blue-6);
+    display:grid;place-items:center;font-weight:800;font-size:12px;flex-shrink:0;}
+  .layer.core{border:2px solid var(--green);background:#f6fdf9;}
+  .layer.core .ico{background:var(--green-bg);color:var(--green);}
+  .arr{font-size:14px;color:var(--blue-3);line-height:1;margin:2px 0;}
+
+  .ledger{display:flex;flex-direction:column;gap:5px;}
+  .lr{display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border-radius:6px;border:1px solid var(--line);font-size:11px;}
+  .lr .badge{font-size:9px;font-weight:800;padding:3px 6px;border-radius:4px;min-width:52px;text-align:center;flex-shrink:0;}
+  .lr.g .badge{background:var(--green-bg);color:var(--green);}
+  .lr.a .badge{background:var(--amber-bg);color:var(--amber);}
+  .lr.r .badge{background:var(--red-bg);color:var(--red);}
+  .lr .tx{color:var(--navy-2);font-weight:600;}
+  .lr .src{color:var(--muted);font-size:10px;margin-top:1px;}
+
+  .flow-h{display:flex;align-items:stretch;gap:6px;}
+  .flow-col{flex:1;display:flex;flex-direction:column;gap:6px;}
+  .flow-node{border:1px solid var(--line);border-radius:7px;padding:8px 10px;font-size:11px;text-align:center;background:#fff;}
+  .flow-node .fn{font-weight:700;color:var(--navy);}
+  .flow-node .fd{color:var(--slate);font-size:10px;margin-top:2px;}
+  .flow-node.ingest{border-color:var(--blue-3);background:var(--blue-1);}
+  .flow-node.gate{border-color:var(--green);background:#f6fdf9;}
+  .flow-node.opt{border-color:var(--blue-5);background:var(--blue-1);}
+  .vconn{display:flex;justify-content:center;color:var(--blue-3);font-size:12px;}
+
+  .hub-v2{display:flex;flex-direction:column;align-items:center;gap:10px;max-width:560px;margin:0 auto;}
+  .hub-row{display:flex;gap:12px;width:100%;justify-content:center;}
+  .hub-row.single .orbit{max-width:280px;}
+  .hub-gate-row{display:flex;justify-content:center;padding:4px 0;}
+  .hub-center{background:var(--navy);color:#fff;border-radius:50%;width:88px;height:88px;
+    display:flex;align-items:center;justify-content:center;text-align:center;font-size:11px;font-weight:700;
+    box-shadow:0 8px 24px rgba(10,37,64,.25);flex-shrink:0;}
+  .orbit{flex:1;max-width:240px;border:2px solid var(--line);border-radius:10px;padding:10px 12px;text-align:center;font-size:11px;}
+  .orbit.prime{border-color:var(--blue-4);}
+  .orbit.cat{border-color:#c4b5fd;}
+  .orbit.hire{border-color:#86efac;}
+  .orbit .on{font-weight:700;color:var(--navy);font-size:13px;}
+  .orbit .od{color:var(--slate);font-size:10px;margin-top:2px;line-height:1.35;}
+  .hub-arrows{display:flex;justify-content:center;gap:80px;color:var(--blue-3);font-size:14px;line-height:1;}
+
+  .title-slide{text-align:center;justify-content:center;}
+  .title-slide h1{font-size:clamp(28px,4vw,42px);font-weight:800;color:var(--navy);margin:0 0 12px;letter-spacing:-.03em;line-height:1.1;}
+  .title-slide h1 em{color:var(--blue-5);font-style:normal;}
+  .title-slide .tag{font-size:16px;color:var(--slate);max-width:640px;margin:0 auto 20px;}
+  .pills{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+  .pill{font-size:11px;font-weight:700;padding:6px 14px;border-radius:999px;background:var(--blue-1);color:var(--blue-6);border:1px solid var(--blue-3);}
+
+  .compare{width:100%;border-collapse:collapse;font-size:11px;}
+  .compare th{background:var(--navy);color:#fff;padding:7px 10px;text-align:left;font-size:9px;letter-spacing:.04em;text-transform:uppercase;}
+  .compare td{padding:7px 10px;border-bottom:1px solid var(--line);color:var(--slate);vertical-align:top;}
+  .compare td b{color:var(--navy-2);}
+  .compare tr:nth-child(even) td{background:var(--blue-1);}
+
+  .drift{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:8px;align-items:center;}
+  .drift .step{border:1px solid var(--line);border-radius:8px;padding:10px;font-size:11px;}
+  .drift .step .sn{font-weight:700;color:var(--navy);margin-bottom:4px;}
+  .drift .da{color:var(--blue-5);font-size:18px;font-weight:700;text-align:center;}
+
+  svg text{font-family:inherit;}
+  @media(max-width:800px){.frame{padding:20px;aspect-ratio:auto;max-height:none;}.row2,.row3{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="chrome">
+  <span class="logo">Provenance × Gauntlet</span>
+  <div class="dots" id="dots"></div>
+  <span class="prog" id="prog">1 / 13</span>
+  <span class="hint"><kbd>←</kbd> <kbd>→</kbd></span>
+</div>
+
+<!-- SLIDE 1: Title -->
+<section class="stage on" data-i="0">
+  <div class="frame title-slide">
+    <div class="body" style="justify-content:center;">
+      <p class="eyebrow" style="justify-content:center;"><span>Pilot customer · talent routing</span></p>
+      <h1>Gauntlet as <em>pilot customer</em></h1>
+      <p class="tag">Same claim-centric engine — new data model. Provenance sits in front of Gauntlet’s funnels as a <b>talent / lead qualification and routing layer</b>, matching the right humans to <b>Prime</b>, <b>Catalyst</b>, or <b>hiring partners</b>.</p>
+      <div class="pills">
+        <span class="pill">Ingest</span>
+        <span class="pill">The Gate · segment fit</span>
+        <span class="pill">Optimizer · routing</span>
+        <span class="pill">Drift Monitor</span>
+      </div>
+    </div>
+    <p class="foot"><b>Primitives unchanged</b> — Claims Library, Gate, Optimizer, Drift, Assurance Lab. <b>Claims about people &amp; programs</b>, not product features.</p>
+  </div>
+</section>
+
+<!-- SLIDE 2: Same engine, new domain -->
+<section class="stage" data-i="1">
+  <div class="frame">
+    <div class="eyebrow"><span>Reframe</span><span class="n">02</span></div>
+    <h2 class="title">Same engine — <em>claims about people &amp; programs</em></h2>
+    <p class="lead">Marketing tenant: “47% TCO reduction.” Gauntlet tenant: “Candidate has ≥3 yrs backend experience.”</p>
+    <div class="body">
+      <div class="row2">
+        <div>
+          <div class="stack">
+            <div class="layer"><span class="ico">📄</span><div><b>Source registry</b><br><span style="color:var(--slate);font-size:11px;">Program criteria · apps · GitHub · partner JDs</span></div></div>
+            <div class="arr">↓</div>
+            <div class="layer"><span class="ico">📚</span><div><b>Claims Library</b><br><span style="color:var(--slate);font-size:11px;">Atomic claims about people, roles, programs</span></div></div>
+            <div class="arr">↓</div>
+            <div class="layer core"><span class="ico">⚡</span><div><b>The Gate</b><br><span style="color:var(--slate);font-size:11px;">Verify eligibility &amp; fit per segment</span></div></div>
+            <div class="arr">↓</div>
+            <div class="layer"><span class="ico">🎯</span><div><b>Optimizer</b><br><span style="color:var(--slate);font-size:11px;">Route to Prime · Catalyst · hiring partners</span></div></div>
+            <div class="arr">↓</div>
+            <div class="layer"><span class="ico">↻</span><div><b>Drift Monitor</b><br><span style="color:var(--slate);font-size:11px;">Re-verify when criteria or demand shifts</span></div></div>
+          </div>
+        </div>
+        <div>
+          <table class="compare">
+            <thead><tr><th>Marketing tenant</th><th>Gauntlet tenant</th></tr></thead>
+            <tbody>
+              <tr><td>Product fact sheets, trials</td><td><b>Program definitions</b>, admission criteria</td></tr>
+              <tr><td>Prospect CRM fields</td><td><b>Applications</b>, CV, GitHub, in-program rubrics</td></tr>
+              <tr><td>MLR / FTC rules</td><td><b>Admissions &amp; placement rules</b></td></tr>
+              <tr><td>“Claim is true &amp; sayable”</td><td><b>“Person qualifies for segment X”</b></td></tr>
+              <tr><td>Email / website send</td><td><b>Interview invite · cohort slot · partner intro</b></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <p class="foot">Provenance = system of record for <b>claims</b>. Domain swaps; pipeline does not.</p>
+  </div>
+</section>
+
+<!-- SLIDE 3: Three segments -->
+<section class="stage" data-i="2">
+  <div class="frame">
+    <div class="eyebrow"><span>Segments</span><span class="n">03</span></div>
+    <h2 class="title">Three routing surfaces — <em>one qualification layer</em></h2>
+    <p class="lead">The Optimizer allocates verified humans across Gauntlet’s programs and partner network.</p>
+    <div class="body">
+      <div class="hub-v2">
+        <div class="hub-row">
+          <div class="orbit prime"><div class="on">Prime</div><div class="od">Challenger program · 10-week build · Austin / US hubs</div></div>
+          <div class="orbit cat"><div class="on">Catalyst</div><div class="od">Rewire existing teams · engineering · sales &amp; CX · custom</div></div>
+        </div>
+        <div class="hub-arrows"><span>↘</span><span>↙</span></div>
+        <div class="hub-gate-row"><div class="hub-center">The<br>Gate</div></div>
+        <div class="hub-arrows"><span>↓</span></div>
+        <div class="hub-row single">
+          <div class="orbit hire"><div class="on">Hiring partners</div><div class="od">Founding eng · IC · infra · product · pre-purchased placements</div></div>
+        </div>
+      </div>
+      <div class="pipe" style="margin-top:8px;">
+        <span class="pbox light">Applicant / company inbound</span>
+        <span class="parr">→</span>
+        <span class="pbox navy">Eligibility ledger</span>
+        <span class="parr">→</span>
+        <span class="pbox blue">Constrained routing</span>
+        <span class="parr">→</span>
+        <span class="pbox green">Prime · Catalyst · Partner</span>
+      </div>
+    </div>
+    <p class="foot">Every route is an <b>action</b> constrained by verified claims — the bandit never learns illegal placements.</p>
+  </div>
+</section>
+
+<!-- SLIDE 4: What we ingest -->
+<section class="stage" data-i="3">
+  <div class="frame">
+    <div class="eyebrow"><span>1 · Ingest</span><span class="n">04</span></div>
+    <h2 class="title">What the system <em>ingests</em> for Gauntlet</h2>
+    <p class="lead">All sources become documents in the <b>source registry</b>, feeding atomic claims into the Claims Library.</p>
+    <div class="body">
+      <div class="row3">
+        <div class="box hl">
+          <div class="bl">Program definitions</div>
+          <div class="bt">Criteria &amp; rules</div>
+          <div class="bd">Prime requirements (3+ yrs SWE, backend/infra, US work eligibility, relocate). Catalyst formats &amp; time commitments. Partner JDs, comp bands, stacks, role types.</div>
+        </div>
+        <div class="box hl">
+          <div class="bl">People data</div>
+          <div class="bt">Applicants &amp; challengers</div>
+          <div class="bd">Application forms, CV/LinkedIn, GitHub, work samples. In-program signals: shipped apps, demo scores, reasoning/infra/safety rubrics.</div>
+        </div>
+        <div class="box hl">
+          <div class="bl">Client / employer data</div>
+          <div class="bt">Catalyst &amp; partners</div>
+          <div class="bd">Company context, AI maturity, Catalyst rosters, cohort configs, performance in program, hiring velocity.</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;padding:12px;background:var(--navy);border-radius:8px;color:#dbeafe;font-size:11px;line-height:1.5;">
+        <b style="color:#fff;">Example claim nodes →</b>
+        “Candidate X: 4.5 yrs backend experience” · “X shipped 10+ production AI systems in Prime” · “Company Y: AI-first eng roles, SF hybrid” · “Catalyst cohort Z: eng team at Y, Jun 15 start”
+      </div>
+    </div>
+    <p class="foot">Claim–evidence graph unchanged — <b>nodes are about people, roles, and programs</b>.</p>
+  </div>
+</section>
+
+<!-- SLIDE 5: Ingest diagram -->
+<section class="stage" data-i="4">
+  <div class="frame">
+    <div class="eyebrow"><span>1 · Ingest · diagram</span><span class="n">05</span></div>
+    <h2 class="title">Source registry → <em>Claims Library</em></h2>
+    <div class="body">
+      <svg viewBox="0 0 900 320" style="width:100%;height:auto;" xmlns="http://www.w3.org/2000/svg">
+        <!-- sources left -->
+        <rect x="20" y="20" width="140" height="44" rx="6" fill="#eff6ff" stroke="#93c5fd"/>
+        <text x="90" y="38" text-anchor="middle" fill="#1e40af" font-size="11" font-weight="700">Prime criteria</text>
+        <text x="90" y="52" text-anchor="middle" fill="#486581" font-size="9">public reqs</text>
+        <rect x="20" y="80" width="140" height="44" rx="6" fill="#f5f3ff" stroke="#ddd6fe"/>
+        <text x="90" y="98" text-anchor="middle" fill="#6d28d9" font-size="11" font-weight="700">Catalyst guides</text>
+        <text x="90" y="112" text-anchor="middle" fill="#486581" font-size="9">formats · success</text>
+        <rect x="20" y="140" width="140" height="44" rx="6" fill="#f0fdf4" stroke="#86efac"/>
+        <text x="90" y="158" text-anchor="middle" fill="#15803d" font-size="11" font-weight="700">Partner JDs</text>
+        <text x="90" y="172" text-anchor="middle" fill="#486581" font-size="9">stack · location · comp</text>
+        <rect x="20" y="210" width="140" height="44" rx="6" fill="#eff6ff" stroke="#93c5fd"/>
+        <text x="90" y="228" text-anchor="middle" fill="#1e40af" font-size="11" font-weight="700">Applications</text>
+        <text x="90" y="242" text-anchor="middle" fill="#486581" font-size="9">forms · CV · GitHub</text>
+        <rect x="20" y="270" width="140" height="44" rx="6" fill="#eff6ff" stroke="#93c5fd"/>
+        <text x="90" y="288" text-anchor="middle" fill="#1e40af" font-size="11" font-weight="700">In-program signals</text>
+        <text x="90" y="302" text-anchor="middle" fill="#486581" font-size="9">rubrics · demos</text>
+
+        <!-- arrows to registry -->
+        <path d="M160 42 L240 160" stroke="#93c5fd" stroke-width="2" fill="none" marker-end="url(#arr)"/>
+        <path d="M160 102 L240 160" stroke="#93c5fd" stroke-width="2" fill="none"/>
+        <path d="M160 162 L240 160" stroke="#93c5fd" stroke-width="2" fill="none"/>
+        <path d="M160 232 L240 160" stroke="#93c5fd" stroke-width="2" fill="none"/>
+        <path d="M160 292 L240 160" stroke="#93c5fd" stroke-width="2" fill="none"/>
+
+        <!-- registry -->
+        <rect x="240" y="120" width="160" height="80" rx="8" fill="#0a2540"/>
+        <text x="320" y="152" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Source registry</text>
+        <text x="320" y="172" text-anchor="middle" fill="#93c5fd" font-size="10">versioned docs</text>
+
+        <!-- arrow to library -->
+        <path d="M400 160 L480 160" stroke="#3b82f6" stroke-width="3" fill="none" marker-end="url(#arr)"/>
+
+        <!-- claims library -->
+        <rect x="480" y="100" width="180" height="120" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+        <text x="570" y="130" text-anchor="middle" fill="#1e40af" font-size="13" font-weight="700">Claims Library</text>
+        <text x="570" y="152" text-anchor="middle" fill="#334e68" font-size="10">Candidate X · 4.5 yrs backend</text>
+        <text x="570" y="168" text-anchor="middle" fill="#334e68" font-size="10">Prime: 10+ AI systems shipped</text>
+        <text x="570" y="184" text-anchor="middle" fill="#334e68" font-size="10">Co Y · SF hybrid AI roles</text>
+        <text x="570" y="200" text-anchor="middle" fill="#334e68" font-size="10">Catalyst Z · Jun 15 start</text>
+
+        <!-- arrow to gate -->
+        <path d="M660 160 L740 160" stroke="#15803d" stroke-width="3" fill="none" marker-end="url(#arrg)"/>
+
+        <!-- gate -->
+        <rect x="740" y="120" width="140" height="80" rx="8" fill="#f0fdf4" stroke="#15803d" stroke-width="2"/>
+        <text x="810" y="155" text-anchor="middle" fill="#15803d" font-size="13" font-weight="700">The Gate</text>
+        <text x="810" y="175" text-anchor="middle" fill="#486581" font-size="10">eligibility ledger</text>
+
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#93c5fd"/></marker>
+          <marker id="arrg" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#15803d"/></marker>
+        </defs>
+      </svg>
+    </div>
+    <p class="foot">Structured ingestion → atomic claims → evidence links → ready for verification.</p>
+  </div>
+</section>
+
+<!-- SLIDE 6: The Gate overview -->
+<section class="stage" data-i="5">
+  <div class="frame">
+    <div class="eyebrow"><span>2 · The Gate</span><span class="n">06</span></div>
+    <h2 class="title">The Gate verifies <em>segment fit</em> — not just facts</h2>
+    <p class="lead">Eligibility claims: “qualifies for Prime,” “match for Catalyst,” “fit for hiring partner H.”</p>
+    <div class="body">
+      <div class="pipe" style="margin-bottom:14px;">
+        <span class="pbox light">Application + artifacts</span>
+        <span class="parr">→</span>
+        <span class="pbox light">Decompose claims</span>
+        <span class="parr">→</span>
+        <span class="pbox light">Evidence bind</span>
+        <span class="parr">→</span>
+        <span class="pbox light">NLI / judge</span>
+        <span class="parr">→</span>
+        <span class="pbox light">Admissions rules</span>
+        <span class="parr">→</span>
+        <span class="pbox green">Eligibility ledger</span>
+      </div>
+      <div class="row3">
+        <div class="box prime">
+          <div class="bl">Prime</div>
+          <div class="bt">Challenger eligibility</div>
+          <div class="bd">≥3 yrs SWE · backend/infra · US work auth · relocate willingness · hard must-haves</div>
+        </div>
+        <div class="box cat">
+          <div class="bl">Catalyst</div>
+          <div class="bt">Team / company fit</div>
+          <div class="bd">Correct role · employer enrollment · capstone feasibility · eng vs sales &amp; CX format</div>
+        </div>
+        <div class="box hire">
+          <div class="bl">Hiring partners</div>
+          <div class="bt">Placement match</div>
+          <div class="bd">Stack · location · seniority · comp · agents/RAG shipped · no conflicts</div>
+        </div>
+      </div>
+    </div>
+    <p class="foot">Output: <b>green / amber / red</b> per candidate × segment — not ad hoc funnel reasoning.</p>
+  </div>
+</section>
+
+<!-- SLIDE 7: Prime example + ledger -->
+<section class="stage" data-i="6">
+  <div class="frame">
+    <div class="eyebrow"><span>2 · The Gate · Prime</span><span class="n">07</span></div>
+    <h2 class="title">Example: <em>Prime</em> qualification ledger</h2>
+    <p class="lead">Candidate C — application, CV, GitHub parsed into atomic claims, rules applied.</p>
+    <div class="body row2">
+      <div class="ledger">
+        <div class="lr g"><span class="badge">GREEN</span><div><div class="tx">≥ 3 yrs professional SWE (excl. internships)</div><div class="src">↳ application + parsed CV · 4.5 yrs</div></div></div>
+        <div class="lr g"><span class="badge">GREEN</span><div><div class="tx">Recent backend / infra experience</div><div class="src">↳ GitHub + work history · Node, K8s</div></div></div>
+        <div class="lr g"><span class="badge">GREEN</span><div><div class="tx">Eligible to work in US without sponsorship</div><div class="src">↳ form attestation · verified</div></div></div>
+        <div class="lr a"><span class="badge">AMBER</span><div><div class="tx">Willing to relocate to Austin / US hub</div><div class="src">↳ stated preference · confirm in screen</div></div></div>
+        <div class="lr g"><span class="badge">PROVEN</span><div><div class="tx">Prime-Eligibility: Cleared for interview track</div><div class="src">↳ all must-haves satisfied</div></div></div>
+      </div>
+      <div>
+        <div class="box" style="margin-bottom:8px;">
+          <div class="bl">Compliance rules (examples)</div>
+          <div class="bd" style="font-size:11px;line-height:1.5;">
+            • US work eligibility = <b>hard block</b> if false<br>
+            • 3+ yrs experience = must-have (rare exception flag)<br>
+            • Internships excluded unless rule exception<br>
+            • NLI disambiguates “software engineer” vs adjacent titles
+          </div>
+        </div>
+        <div class="lr r"><span class="badge">RED</span><div><div class="tx">Prime-Eligibility: Blocked — no US work eligibility</div><div class="src">↳ example counter-profile</div></div></div>
+      </div>
+    </div>
+    <p class="foot">Same pipeline as marketing Gate — <b>admissions criteria = compliance rules DSL</b>.</p>
+  </div>
+</section>
+
+<!-- SLIDE 8: Catalyst + Hiring -->
+<section class="stage" data-i="7">
+  <div class="frame">
+    <div class="eyebrow"><span>2 · The Gate · Catalyst &amp; partners</span><span class="n">08</span></div>
+    <h2 class="title">Catalyst &amp; <em>hiring partner</em> gating</h2>
+    <div class="body row2">
+      <div>
+        <div class="box cat" style="margin-bottom:10px;">
+          <div class="bl">Catalyst claims verified</div>
+          <div class="bd" style="font-size:11px;line-height:1.55;margin-top:6px;">
+            ✓ Employee E is SWE / PM / designer at company Y<br>
+            ✓ Y enrolls E in engineering or cross-functional squad<br>
+            ✓ Y has scope + buy-in for real AI capstone<br>
+            ✓ Format match: engineering vs sales &amp; CX vs custom
+          </div>
+        </div>
+        <p style="font-size:11px;color:var(--slate);margin:0;">Rules differ: employer handles immigration; eligibility = role + company + program config.</p>
+      </div>
+      <div>
+        <div class="box hire" style="margin-bottom:10px;">
+          <div class="bl">Hiring partner claims verified</div>
+          <div class="bd" style="font-size:11px;line-height:1.55;margin-top:6px;">
+            ✓ C meets H’s min criteria: stack, location, seniority, comp<br>
+            ✓ No conflicting contractual terms<br>
+            ✓ Role reqs: shipped agents / RAG at Gauntlet<br>
+            ✓ Partner JD ↔ challenger performance evidence
+          </div>
+        </div>
+        <p style="font-size:11px;color:var(--slate);margin:0;">All stored in ledger — marketing promises about candidates backed by program data.</p>
+      </div>
+    </div>
+    <p class="foot">Three segment types · one Gate · one ledger schema · different rule packs.</p>
+  </div>
+</section>
+
+<!-- SLIDE 9: Optimizer -->
+<section class="stage" data-i="8">
+  <div class="frame">
+    <div class="eyebrow"><span>3 · Optimizer</span><span class="n">09</span></div>
+    <h2 class="title">Constrained bandit — <em>routing</em> qualified humans</h2>
+    <p class="lead">Actions only enter the pool after Gate clearance. Rewards = program outcomes, not vanity metrics.</p>
+    <div class="body">
+      <div class="row2">
+        <div>
+          <div class="bl" style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:6px;">CONTEXT FEATURES</div>
+          <div class="box" style="margin-bottom:6px;font-size:11px;"><b>Individuals:</b> yrs, stacks, domains, prefs (founding vs IC, location, comp, Prime willingness)</div>
+          <div class="box" style="font-size:11px;"><b>Companies:</b> industry, headcount, AI maturity, Catalyst history, hiring velocity, Prime vs train-in-place preference</div>
+          <div class="bl" style="font-size:10px;font-weight:700;color:var(--muted);margin:12px 0 6px;">ACTIONS (GATE-CONSTRAINED)</div>
+          <div style="font-size:11px;color:var(--slate);line-height:1.55;">
+            <b>Candidates:</b> Prime interview now · defer cohort · partner pool only · suggest Catalyst at employer<br>
+            <b>Companies:</b> pitch Catalyst (eng / sales &amp; CX) · hiring-partner credits · both
+          </div>
+        </div>
+        <div>
+          <svg viewBox="0 0 380 250" style="width:100%;height:auto;">
+            <rect x="130" y="8" width="120" height="44" rx="6" fill="#0a2540"/>
+            <text x="190" y="28" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">Optimizer</text>
+            <text x="190" y="42" text-anchor="middle" fill="#93c5fd" font-size="9">constrained bandit</text>
+            <rect x="10" y="72" width="100" height="32" rx="5" fill="#eff6ff" stroke="#93c5fd"/>
+            <text x="60" y="92" text-anchor="middle" fill="#1e40af" font-size="10" font-weight="600">Eligibility</text>
+            <rect x="10" y="112" width="100" height="32" rx="5" fill="#eff6ff" stroke="#93c5fd"/>
+            <text x="60" y="132" text-anchor="middle" fill="#1e40af" font-size="10" font-weight="600">Demand signals</text>
+            <rect x="10" y="152" width="100" height="32" rx="5" fill="#eff6ff" stroke="#93c5fd"/>
+            <text x="60" y="172" text-anchor="middle" fill="#1e40af" font-size="10" font-weight="600">Partner capacity</text>
+            <line x1="110" y1="88" x2="132" y2="52" stroke="#93c5fd" stroke-width="1.5"/>
+            <line x1="110" y1="128" x2="132" y2="30" stroke="#93c5fd" stroke-width="1.5"/>
+            <line x1="110" y1="168" x2="132" y2="52" stroke="#93c5fd" stroke-width="1.5"/>
+            <rect x="270" y="62" width="100" height="28" rx="5" fill="#dbeafe" stroke="#3b82f6"/>
+            <text x="320" y="80" text-anchor="middle" fill="#1e40af" font-size="10" font-weight="700">Prime</text>
+            <rect x="270" y="102" width="100" height="28" rx="5" fill="#f5f3ff" stroke="#ddd6fe"/>
+            <text x="320" y="120" text-anchor="middle" fill="#6d28d9" font-size="10" font-weight="700">Catalyst</text>
+            <rect x="270" y="142" width="100" height="28" rx="5" fill="#dcfce7" stroke="#86efac"/>
+            <text x="320" y="160" text-anchor="middle" fill="#15803d" font-size="10" font-weight="700">Partners</text>
+            <line x1="250" y1="30" x2="270" y2="76" stroke="#3b82f6" stroke-width="2"/>
+            <line x1="250" y1="30" x2="270" y2="116" stroke="#3b82f6" stroke-width="2"/>
+            <line x1="250" y1="30" x2="270" y2="156" stroke="#3b82f6" stroke-width="2"/>
+            <path d="M320 198 Q190 218 60 198" stroke="#15803d" stroke-width="1.5" fill="none" stroke-dasharray="4 3"/>
+            <text x="190" y="236" text-anchor="middle" fill="#15803d" font-size="9" font-weight="600">reward: placement · completion · retention</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <p class="foot">Never routes to a program the candidate <b>can’t legally or structurally join</b> — structural fix for Goodhart.</p>
+  </div>
+</section>
+
+<!-- SLIDE 10: Rewards table -->
+<section class="stage" data-i="9">
+  <div class="frame">
+    <div class="eyebrow"><span>3 · Optimizer · rewards</span><span class="n">10</span></div>
+    <h2 class="title">Reward signals <em>by segment</em></h2>
+    <div class="body">
+      <table class="compare">
+        <thead><tr><th>Segment</th><th>Routing rewards (what the bandit learns)</th></tr></thead>
+        <tbody>
+          <tr><td><b>Prime</b></td><td>Acceptance · 10-wk completion · apps shipped · demo ratings · successful partner placement · retention</td></tr>
+          <tr><td><b>Catalyst</b></td><td>Capstone completed · internal NPS · measured AI productivity uplift · repeat enrollments</td></tr>
+          <tr><td><b>Hiring partners</b></td><td>Offers accepted · time-to-fill · 6–12 mo performance · retention vs baseline</td></tr>
+          <tr><td><b>Defer / not now</b></td><td>Re-application quality · future conversion · avoided bad-fit churn (negative reward)</td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:12px;padding:10px 14px;background:var(--blue-1);border-radius:8px;border-left:4px solid var(--blue-5);font-size:12px;color:var(--slate);">
+        Bandit adjusts which outreach surfaces and “campaigns” to prioritize for new applicants and partner leads — <b>bounded by verified eligibility</b>.
+      </div>
+    </div>
+    <p class="foot">Same constrained self-optimization primitive — action space = verified routes only.</p>
+  </div>
+</section>
+
+<!-- SLIDE 11: Drift Monitor -->
+<section class="stage" data-i="10">
+  <div class="frame">
+    <div class="eyebrow"><span>4 · Drift Monitor</span><span class="n">11</span></div>
+    <h2 class="title">Adapting when <em>criteria &amp; demand</em> change</h2>
+    <p class="lead">CDC on the rule and demand layer — re-verify stale eligibility, rebalance routing priors.</p>
+    <div class="body">
+      <div class="drift">
+        <div class="step"><div class="sn">1 · Policy change</div>New Prime bar (5+ yrs) · infra demand ↑ · visa rule shift · updated partner JDs → source registry</div>
+        <div class="da">→</div>
+        <div class="step"><div class="sn">2 · Dependency traverse</div>Find claims &amp; routing decisions that depended on old rules</div>
+        <div class="da">→</div>
+        <div class="step"><div class="sn">3 · Re-verify &amp; rebalance</div>Stale “Prime-Eligible” → re-Gate · Optimizer pauses invites for mismatched profiles · surface newly eligible</div>
+      </div>
+      <div class="row3" style="margin-top:10px;">
+        <div class="box"><div class="bl">Trigger examples</div><div class="bd" style="margin-top:4px;">Admissions bar shifts<br><span style="color:var(--muted);">3→5 yrs SWE</span></div></div>
+        <div class="box"><div class="bl">Trigger examples</div><div class="bd" style="margin-top:4px;">Demand mix flips<br><span style="color:var(--muted);">infra &gt; full-stack</span></div></div>
+        <div class="box"><div class="bl">Trigger examples</div><div class="bd" style="margin-top:4px;">Legal / policy<br><span style="color:var(--muted);">work eligibility</span></div></div>
+      </div>
+    </div>
+    <p class="foot">Prevents routing into funnels that no longer fit partner demand — or missing newly eligible candidates.</p>
+  </div>
+</section>
+
+<!-- SLIDE 12: Sourcing flows -->
+<section class="stage" data-i="11">
+  <div class="frame">
+    <div class="eyebrow"><span>5 · Sourcing flows</span><span class="n">12</span></div>
+    <h2 class="title">End-to-end <em>by segment</em></h2>
+    <div class="body">
+      <div class="flow-h">
+        <div class="flow-col">
+          <div class="flow-node ingest" style="border-top:3px solid var(--blue-5);"><div class="fn">Prime</div><div class="fd">App · CV · GitHub · tests</div></div>
+          <div class="vconn">↓</div>
+          <div class="flow-node gate"><div class="fn">Gate</div><div class="fd">Experience · eligibility · stack</div></div>
+          <div class="vconn">↓</div>
+          <div class="flow-node opt"><div class="fn">Optimizer</div><div class="fd">Interview now · defer · partner intro</div></div>
+        </div>
+        <div class="flow-col">
+          <div class="flow-node ingest" style="border-top:3px solid var(--purple);"><div class="fn">Catalyst</div><div class="fd">Company inbound · team roster</div></div>
+          <div class="vconn">↓</div>
+          <div class="flow-node gate"><div class="fn">Gate</div><div class="fd">Format · capstone feasibility</div></div>
+          <div class="vconn">↓</div>
+          <div class="flow-node opt"><div class="fn">Optimizer</div><div class="fd">Eng vs sales &amp; CX · timing</div></div>
+        </div>
+        <div class="flow-col">
+          <div class="flow-node ingest" style="border-top:3px solid var(--green);"><div class="fn">Partners</div><div class="fd">JDs · comp · must-haves</div></div>
+          <div class="vconn">↓</div>
+          <div class="flow-node gate"><div class="fn">Gate</div><div class="fd">Challenger ↔ role fit</div></div>
+          <div class="vconn">↓</div>
+          <div class="flow-node opt"><div class="fn">Optimizer</div><div class="fd">Max offer rate · retention</div></div>
+        </div>
+      </div>
+    </div>
+    <p class="foot"><b>Result:</b> Scale sourcing safely · align with dynamic partner demand · every promise about candidates is provable.</p>
+  </div>
+</section>
+
+<!-- SLIDE 13: Close -->
+<section class="stage" data-i="12">
+  <div class="frame title-slide">
+    <div class="body" style="justify-content:center;">
+      <h2 class="title" style="font-size:clamp(24px,3vw,34px);">Gauntlet pilot = <em>proof the engine transfers</em></h2>
+      <p class="tag" style="font-size:15px;">Marketing wedge demos the primitive. Gauntlet pilot proves the same Gate + Optimizer + Drift stack governs <b>talent routing</b> — claims about people, not products.</p>
+      <div class="pipe" style="margin:16px 0;">
+        <span class="pbox navy">Ingest</span>
+        <span class="parr">→</span>
+        <span class="pbox green">Gate · segment fit</span>
+        <span class="parr">→</span>
+        <span class="pbox blue">Optimizer · route</span>
+        <span class="parr">→</span>
+        <span class="pbox light">Drift · adapt</span>
+      </div>
+      <p style="font-size:13px;color:var(--slate);max-width:560px;margin:0 auto;">Prime · Catalyst · Hiring partners — one qualification layer, one ledger, constrained bandit allocation.</p>
+    </div>
+    <p class="foot">Provenance × Gauntlet · pilot customer deck · <a href="index.html" style="color:var(--blue-5);">document hub</a> · <a href="BEYOND-MARKETING.html" style="color:var(--blue-5);">beyond marketing</a></p>
+  </div>
+</section>
+
+<script>
+(function(){
+  const stages = document.querySelectorAll('.stage');
+  const dotsEl = document.getElementById('dots');
+  const prog = document.getElementById('prog');
+  let cur = 0;
+  stages.forEach((_, i) => {
+    const d = document.createElement('button');
+    d.className = 'dot' + (i === 0 ? ' on' : '');
+    d.setAttribute('aria-label', 'Slide ' + (i + 1));
+    d.onclick = () => go(i);
+    dotsEl.appendChild(d);
+  });
+  const dots = dotsEl.querySelectorAll('.dot');
+  function go(n) {
+    if (n < 0 || n >= stages.length) return;
+    stages[cur].classList.remove('on');
+    dots[cur].classList.remove('on');
+    cur = n;
+    stages[cur].classList.add('on');
+    dots[cur].classList.add('on');
+    prog.textContent = (cur + 1) + ' / ' + stages.length;
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(cur + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); go(cur - 1); }
+  });
+  prog.textContent = '1 / ' + stages.length;
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Provenance — The Ultra-Personalization Agency Deck</title>
+<style>
+  :root{
+    --navy:#0a2540;--navy-2:#102a43;--slate:#334e68;--slate-2:#486581;--muted:#627d98;
+    --line:#d9e2ec;--line-soft:#eef2f6;
+    --blue-1:#eff6ff;--blue-2:#dbeafe;--blue-3:#93c5fd;--blue-4:#3b82f6;--blue-5:#1d4ed8;--blue-6:#1e40af;--blue-7:#1e3a8a;
+    --paper:#f7f9fc;
+    --green:#15803d;--green-bg:#dcfce7;--red:#b91c1c;--red-bg:#fef2f2;--red-line:#fca5a5;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--navy-2);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 30px 96px;}
+  a{color:var(--blue-5);}
+
+  /* HERO */
+  header.hero{background:var(--navy);color:#fff;padding:60px 0 46px;border-bottom:4px solid var(--blue-4);}
+  header.hero .wrap{padding-bottom:0;}
+  .brand{display:flex;align-items:center;gap:10px;margin:0 0 26px;}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--blue-4);}
+  .brand .nm{font-size:13px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;}
+  .brand .tag{font-size:11px;color:var(--blue-3);letter-spacing:.06em;}
+  .govern{font-size:34px;line-height:1.16;font-weight:700;letter-spacing:-.02em;margin:0 0 16px;max-width:830px;}
+  .govern em{color:var(--blue-3);font-style:normal;}
+  .sell{font-size:17px;color:#cfdcea;margin:0;max-width:680px;}
+  .sell b{color:#fff;}
+
+  /* SCR */
+  .scr{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:30px;}
+  .scrb{background:#fff;border:1px solid var(--line);border-radius:9px;padding:16px 18px;border-top:3px solid var(--blue-3);}
+  .scrb.c{border-top-color:var(--red-line);}
+  .scrb.r{border-top-color:var(--blue-5);}
+  .scrb .l{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+  .scrb.c .l{color:var(--red);}
+  .scrb.r .l{color:var(--blue-6);}
+  .scrb p{margin:0;font-size:13.5px;color:var(--slate);}
+  .scrb p b{color:var(--navy-2);}
+
+  h2.sec{font-size:13px;text-transform:uppercase;letter-spacing:.16em;color:var(--blue-6);
+    border-bottom:2px solid var(--navy);padding-bottom:9px;margin:52px 0 6px;}
+  .at{font-size:22px;font-weight:700;color:var(--navy);margin:12px 0 14px;letter-spacing:-.01em;line-height:1.3;}
+  p{font-size:15px;color:var(--slate);}
+  strong{color:var(--navy-2);}
+
+  /* PHASE RIBBON */
+  .ribbon{display:flex;gap:5px;margin-top:6px;}
+  .rseg{flex:1;border:1px solid var(--line);border-radius:7px;padding:9px 8px;text-align:center;background:#fff;position:relative;}
+  .rseg .rn{font-size:12.5px;font-weight:700;color:var(--navy);}
+  .rseg .rs{font-size:9.5px;color:var(--muted);margin-top:1px;}
+  .rseg.break{border:2px solid var(--red-line);background:var(--red-bg);}
+  .rseg.scale{border:2px solid var(--blue-5);background:var(--blue-1);}
+  .rflag{position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-size:8.5px;font-weight:700;letter-spacing:.04em;
+    text-transform:uppercase;padding:2px 6px;border-radius:4px;white-space:nowrap;}
+  .rflag.b{background:var(--red);color:#fff;}
+  .rflag.s{background:var(--blue-5);color:#fff;}
+  .ribkey{font-size:12px;color:var(--muted);margin-top:8px;}
+  .ribkey b{color:var(--slate-2);}
+
+  /* PHASE CARDS */
+  .phase{border:1px solid var(--line);border-radius:11px;background:#fff;overflow:hidden;margin:14px 0;box-shadow:0 1px 2px rgba(10,37,64,.04);}
+  .phase .ph{background:var(--navy);color:#fff;padding:12px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .phase .pnum{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--blue-3);}
+  .phase .pname{font-size:18px;font-weight:700;letter-spacing:-.01em;}
+  .phase .plever{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.04em;background:rgba(255,255,255,.14);padding:3px 9px;border-radius:5px;color:#dbeafe;}
+  .phase .cap{padding:11px 18px;background:var(--blue-1);border-bottom:1px solid var(--blue-2);font-size:14px;color:var(--navy-2);}
+  .phase .cap b{color:var(--blue-6);}
+  .phase .hood{padding:11px 18px;border-bottom:1px solid var(--line-soft);font-size:12.5px;color:var(--slate);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+  .phase .hood .t{font-weight:700;color:var(--navy-2);letter-spacing:.04em;font-size:10px;text-transform:uppercase;display:block;margin-bottom:3px;font-family:-apple-system,sans-serif;color:var(--slate-2);}
+  .ww{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+  .ww .side{padding:13px 18px;}
+  .ww .wo{background:#fffafa;border-right:1px solid var(--line);}
+  .ww .wt{background:#fff;}
+  .ww .h{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+  .ww .wo .h{color:var(--red);}
+  .ww .wt .h{color:var(--blue-6);}
+  .ww p{margin:0;font-size:13.5px;line-height:1.5;}
+  .ww .wo p{color:var(--slate);}
+  .ww .wt p{color:var(--navy-2);}
+  .ww p b{color:inherit;font-weight:700;}
+
+  /* VALUE LEVERS */
+  .vlev{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px;}
+  .vc{border:1px solid var(--line);border-top:4px solid var(--blue-5);border-radius:9px;background:#fff;padding:15px 16px;}
+  .vc .vh{font-size:16px;font-weight:700;color:var(--navy);margin:0 0 5px;}
+  .vc .vm{font-size:12.5px;font-weight:700;color:var(--blue-6);background:var(--blue-1);border-radius:5px;padding:5px 9px;display:inline-block;margin-bottom:8px;}
+  .vc p{margin:0;font-size:13px;color:var(--slate);}
+
+  /* BUYERS */
+  .buyers{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:10px;}
+  .buyer{border:1px solid var(--line);border-radius:9px;background:#fff;padding:13px 16px;}
+  .buyer .bn{font-size:15px;font-weight:700;color:var(--navy);}
+  .buyer .bb{font-size:12px;font-weight:700;color:var(--blue-6);margin:3px 0 5px;}
+  .buyer .bd{font-size:13px;color:var(--slate);}
+
+  /* CLOSE */
+  .close{background:var(--navy);color:#fff;border-radius:11px;padding:24px 26px;margin-top:14px;}
+  .close .ct{font-size:19px;font-weight:700;margin:0 0 10px;}
+  .close p{margin:0 0 8px;font-size:14.5px;color:#cfdcea;}
+  .close p b{color:#fff;}
+  .close .two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+  .close .opt{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:12px 15px;}
+  .close .opt .on{font-size:14px;font-weight:700;color:#fff;}
+  .close .opt .od{font-size:12.5px;color:#bcd0e6;margin-top:3px;}
+
+  footer{margin-top:42px;padding-top:18px;border-top:2px solid var(--navy);font-size:12px;color:var(--muted);}
+  footer b{color:var(--navy-2);}
+  .illus{font-style:italic;}
+  @media (max-width:780px){.scr,.vlev,.buyers,.close .two{grid-template-columns:1fr;}.ww{grid-template-columns:1fr;}.ww .wo{border-right:none;border-bottom:1px solid var(--line);}.ribbon{flex-wrap:wrap;}.rseg{min-width:30%;}.govern{font-size:26px;}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="brand"><span class="dot"></span><span class="nm">Provenance</span><span class="tag">the ultra-personalization agency that can prove every word</span></div>
+    <h1 class="govern">Ultra-personalization breaks human review. <em>We automate the review</em> — so 1:1 at scale becomes your edge, not your liability.</h1>
+    <p class="sell">You can't legally read 100,000 unique messages. So today, "personalize everything" forces a choice: <b>generic-and-safe</b>, or <b>personal-and-risky</b>. We dissolve that choice — every message is personalized <i>and</i> provably true <i>and</i> compliant, automatically.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- SCR -->
+  <div class="scr">
+    <div class="scrb s"><div class="l">Situation</div><p>1:1 personalization is now the standard. Buyers ignore the generic; the winning message is the one written for <b>them</b> — their data, their situation, their objection.</p></div>
+    <div class="scrb c"><div class="l">Complication</div><p>At true 1:1 scale, <b>no human can review every message</b>. In any claims-heavy business, that means you either dumb it down to one reviewed template, or you ship unverified claims and invite a fine.</p></div>
+    <div class="scrb r"><div class="l">Resolution</div><p>Move verification <b>inside the work</b>. Automated, per-claim checking + truth-bounded optimization make ultra-personalization safe by construction — at any volume.</p></div>
+  </div>
+
+  <!-- PHASE MAP -->
+  <h2 class="sec">The operating model</h2>
+  <p class="at">We attach to the six phases your team already runs — and fix the one ultra-personalization makes impossible: <span style="color:var(--red);">Review</span>.</p>
+  <div class="ribbon">
+    <div class="rseg"><div class="rn">1 · Plan</div><div class="rs">target &amp; claims</div></div>
+    <div class="rseg scale"><span class="rflag s">scale</span><div class="rn">2 · Create</div><div class="rs">1:1 drafts</div></div>
+    <div class="rseg break"><span class="rflag b">breaks here</span><div class="rn">3 · Review</div><div class="rs">verify &amp; clear</div></div>
+    <div class="rseg"><div class="rn">4 · Launch</div><div class="rs">send + audit</div></div>
+    <div class="rseg scale"><span class="rflag s">scale</span><div class="rn">5 · Optimize</div><div class="rs">per-segment</div></div>
+    <div class="rseg break"><span class="rflag b">breaks here</span><div class="rn">6 · Monitor</div><div class="rs">drift &amp; assure</div></div>
+  </div>
+  <p class="ribkey"><b>The pattern:</b> ultra-personalization <i>scales</i> phases 2 &amp; 5 — and <i>breaks</i> phases 3 &amp; 6, because you can't hand-check or hand-monitor a million unique messages. That's exactly where our technology lives.</p>
+
+  <!-- PHASE 1 -->
+  <div class="phase">
+    <div class="ph"><span class="pnum">PHASE 1</span><span class="pname">Plan &amp; target</span><span class="plever">risk ↓ · consistency</span></div>
+    <div class="cap"><b>Capability:</b> the Claims Library — your single, current source of truth for what you're allowed to say, plus signal-driven micro-segmentation.</div>
+    <div class="hood"><span class="t">Under the hood</span>Versioned claim store + source registry · embedding-based clustering into hundreds of micro-segments · CRM/CDP + enrichment feature join.</div>
+    <div class="ww">
+      <div class="side wo"><div class="h">✕ Without</div><p>"What can we say?" lives in scattered slide decks and a rep's memory. Segments are three broad buckets. A claim you retired six months ago <b>resurfaces in a live campaign</b>.</p></div>
+      <div class="side wt"><div class="h">✓ With</div><p>One approved, current library. Hundreds of micro-segments from real signals. The retired claim <b>simply isn't selectable</b> — everyone draws from the same verified set.</p></div>
+    </div>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div class="phase">
+    <div class="ph"><span class="pnum">PHASE 2</span><span class="pname">Create — the ultra-personalization engine</span><span class="plever">speed ↑ · scale ↑</span></div>
+    <div class="cap"><b>Capability:</b> a unique, on-target message for every prospect — assembled only from approved claims + that prospect's real facts.</div>
+    <div class="hood"><span class="t">Under the hood</span>Retrieval-grounded LLM generation <i>constrained to the Claims Library</i> · per-prospect feature vector (firmographics, behavior, enrichment) · dynamic per-segment claim selection.</div>
+    <div class="ww">
+      <div class="side wo"><div class="h">✕ Without</div><p>Pick your poison: a <b>generic template</b> (one message for everyone → baseline response), or reps <b>free-write 1:1</b> and embellish ("boosts yield 40%") to stand out — unscalable, and a liability.</p></div>
+      <div class="side wt"><div class="h">✓ With</div><p>A genuinely unique message per prospect, built from <b>only</b> approved claims + their real data. True 1:1 — personal <i>and</i> safe by construction, at any volume.</p></div>
+    </div>
+  </div>
+
+  <!-- PHASE 3 -->
+  <div class="phase">
+    <div class="ph"><span class="pnum">PHASE 3</span><span class="pname">Review &amp; approve — the bottleneck we remove</span><span class="plever">risk ↓↓ · speed ↑↑</span></div>
+    <div class="cap"><b>Capability:</b> The Gate — every message fact-checked and compliance-checked automatically, in seconds, before it sends.</div>
+    <div class="hood"><span class="t">Under the hood</span>Claim decomposition → evidence binding (retrieval) → <b>NLI entailment + diverse LLM-judge ensemble</b> (calibrated, ECE-tracked) → compliance rules engine · <b>router-and-referee cascade</b> (cheap check first, escalate only the uncertain) · optional hidden-state confidence probe to pre-flag risky drafts.</div>
+    <div class="ww">
+      <div class="side wo"><div class="h">✕ Without</div><p>Legal/MLR must read <b>every asset</b> — fine for 10, impossible for 100,000 personalized ones. Ultra-personalization dies here: you fall back to <b>one reviewed generic version</b>, or skip review and ship a non-compliant claim → fine, lawsuit, takedown.</p></div>
+      <div class="side wt"><div class="h">✓ With</div><p>All 100,000 messages auto-verified in seconds — each claim <b>cited or killed</b>, non-compliant lines blocked with a plain-English reason. Legal approved the <b>rules once</b>, not each asset. Review stops being the ceiling on personalization.</p></div>
+    </div>
+  </div>
+
+  <!-- PHASE 4 -->
+  <div class="phase">
+    <div class="ph"><span class="pnum">PHASE 4</span><span class="pname">Launch &amp; send</span><span class="plever">risk ↓ · defensible</span></div>
+    <div class="cap"><b>Capability:</b> send through the tools you already use, with a citation and audit record attached to every claim.</div>
+    <div class="hood"><span class="t">Under the hood</span>Channel adapters (HubSpot/Marketo, Outreach/Salesloft, ads) · immutable per-claim audit log (claim → source → clearing rule → timestamp).</div>
+    <div class="ww">
+      <div class="side wo"><div class="h">✕ Without</div><p>Messages go out with <b>no record</b> of what was claimed or why it was allowed. A complaint or audit arrives and you're reconstructing from memory.</p></div>
+      <div class="side wt"><div class="h">✓ With</div><p>Sent through your existing stack, every claim <b>bundled with its source</b>, full audit trail by default — defensible to a regulator from day one.</p></div>
+    </div>
+  </div>
+
+  <!-- PHASE 5 -->
+  <div class="phase">
+    <div class="ph"><span class="pnum">PHASE 5</span><span class="pname">Optimize — personalization that compounds</span><span class="plever">revenue ↑</span></div>
+    <div class="cap"><b>Capability:</b> The Optimizer — every micro-segment continuously converges to its best-performing message, automatically.</div>
+    <div class="hood"><span class="t">Under the hood</span><b>Contextual bandit</b> (Thompson / LinUCB) per micro-segment over <i>verified</i> variants · reward = reply/convert, unsubscribe = hard negative · <b>hierarchical sharing</b> for cold-start segments · off-policy evaluation · anytime-valid confidence sequences.</div>
+    <div class="ww">
+      <div class="side wo"><div class="h">✕ Without</div><p>Classic A/B tests one variable, slowly, across a whole list. Or an <b>unconstrained</b> AI optimizer learns that hype wins → conversions up, <b>liability up</b>.</p></div>
+      <div class="side wt"><div class="h">✓ With</div><p>Every micro-segment learns its winning <b>verified</b> message and gets smarter weekly. You get the upside of aggressive optimization with <b>zero new liability</b> — it structurally can't win by lying.</p></div>
+    </div>
+  </div>
+
+  <!-- PHASE 6 -->
+  <div class="phase">
+    <div class="ph"><span class="pnum">PHASE 6</span><span class="pname">Monitor &amp; assure</span><span class="plever">risk ↓ · revenue ↑ · trust</span></div>
+    <div class="cap"><b>Capability:</b> the Drift Monitor keeps every live claim true over time; the Assurance Lab proves the checker works — with a number.</div>
+    <div class="hood"><span class="t">Under the hood</span>Source-version diff + <b>claim-dependency graph</b> → targeted re-verification · Assurance Lab = <b>synthetic adversarial-trap generation</b> (true claims mutated into subtle lies) + <b>reliability profiling</b> (catch-rate, false-reject, calibration, severity buckets, paraphrase robustness).</div>
+    <div class="ww">
+      <div class="side wo"><div class="h">✕ Without</div><p>A stat updates or a legal hold lifts and <b>nobody re-checks 100k live messages</b> → you keep sending a now-false claim, or sit on a now-allowed one for months. And you can't prove your checker even works.</p></div>
+      <div class="side wt"><div class="h">✓ With</div><p>Claims <b>auto-re-verify</b> across every live message when a source changes; you capitalize the instant one clears; and you hold an <b>audited catch-rate</b> (e.g., 98.7%) to show a regulator or the board.</p></div>
+    </div>
+  </div>
+
+  <!-- VALUE -->
+  <h2 class="sec">The economics</h2>
+  <p class="at">Every technical part earns its place by moving one of three numbers.</p>
+  <div class="vlev">
+    <div class="vc"><div class="vh">① Risk removed</div><div class="vm">→ ~0 unsubstantiated claims shipped</div><p>Provable, compliant, drift-monitored, audited. The FTC's "no AI exemption" makes this existential in regulated categories.</p></div>
+    <div class="vc"><div class="vh">② Personalization unlocked</div><div class="vm">→ review: weeks/asset → once/rule</div><p>The review ceiling is gone, so 1:1 at scale becomes possible at all — and ships same-day instead of after a multi-week queue.</p></div>
+    <div class="vc"><div class="vh">③ Revenue lifted</div><div class="vm">→ continuous per-segment lift</div><p>Truth-bounded optimization improves every micro-segment, and newly-cleared claims are capitalized the moment they're allowed.</p></div>
+  </div>
+
+  <!-- BUYERS -->
+  <h2 class="sec">Who buys, and why</h2>
+  <div class="buyers">
+    <div class="buyer"><div class="bn">CMO / Growth</div><div class="bb">buys ② personalization + ③ revenue</div><div class="bd">1:1 at scale that was legally impossible — shipped same-day, optimizing itself toward conversion.</div></div>
+    <div class="buyer"><div class="bn">Legal / Compliance / MLR</div><div class="bb">buys ① risk + ② speed</div><div class="bd">The review queue disappears; liability drops to near zero; an audit trail accrues automatically.</div></div>
+    <div class="buyer"><div class="bn">Risk / CISO / Board</div><div class="bb">buys ① assurance</div><div class="bd">An audited "98.7% catch-rate" beats "we have a policy" in front of a risk committee.</div></div>
+    <div class="buyer"><div class="bn">RevOps / Marketing Ops</div><div class="bb">buys the system of record</div><div class="bd">One source of truth for claimable content, wired into the CRM/ESP they already run.</div></div>
+  </div>
+
+  <!-- CLOSE -->
+  <h2 class="sec">How we engage</h2>
+  <div class="close">
+    <p class="ct">Prove it on one regulated vertical, then expand.</p>
+    <p><b>Step 1:</b> we load your claims + sources and show the catch-rate on a planted set of bad claims. <b>Step 2:</b> we run one ultra-personalized campaign and show the lift vs. your generic baseline. <b>Step 3:</b> we widen to the next segment — same engine, no rebuild.</p>
+    <div class="two">
+      <div class="opt"><div class="on">Managed</div><div class="od">We run provable, ultra-personalized campaigns end-to-end and hand you the audit trail.</div></div>
+      <div class="opt"><div class="on">Platform</div><div class="od">We stand the engine up inside your stack; your team runs it, with verification built in.</div></div>
+    </div>
+  </div>
+
+  <footer>
+    <p><b>The one-line read:</b> ultra-personalization is impossible to review by hand, so it forces a trade-off between personal and safe. We automate verification (The Gate), bound the optimizer to the truth, and monitor + prove it continuously — so you ship 1:1 at scale, and can prove every word.</p>
+    <p class="illus">ROI figures and catch-rates shown are illustrative — the structure is the point. (Fittingly, we don't ship unsourced claims either.)</p>
+    <p>Provenance · agency deck · Jun 2026 · companion: <a href="AGENCY-PITCH-TECHNICAL-APPENDIX.html"><b>technical depth &amp; frontier-research appendix</b></a> · <a href="MECHANISM-TO-VALUE.html">mechanism→value</a> · <a href="SOLUTION-MASTER-SLIDE.html">master slide</a> · <a href="index.html">hub</a>.</p>
+  </footer>
+
+</div>
+</body>
+</html>

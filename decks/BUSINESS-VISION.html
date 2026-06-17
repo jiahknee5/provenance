@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Provenance — The Marketing Promise</title>
+<style>
+  :root{
+    --navy:#0a2540;--navy-2:#102a43;--slate:#334e68;--slate-2:#486581;--muted:#627d98;
+    --line:#d9e2ec;--line-soft:#eef2f6;
+    --blue-1:#eff6ff;--blue-2:#dbeafe;--blue-3:#93c5fd;--blue-4:#3b82f6;--blue-5:#1d4ed8;--blue-6:#1e40af;
+    --paper:#f7f9fc;
+    --green:#15803d;--green-bg:#f0fdf4;--green-line:#bbf7d0;
+    --red:#b91c1c;--red-bg:#fef2f2;--red-line:#fecaca;
+    --gold:#b45309;--gold-bg:#fffbeb;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--navy-2);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:920px;margin:0 auto;padding:0 28px 80px;}
+  a{color:var(--blue-5);}
+
+  header.mast{background:var(--navy);color:#fff;padding:52px 0 40px;border-bottom:4px solid var(--blue-4);}
+  header.mast .wrap{padding-bottom:0;}
+  .kicker{text-transform:uppercase;letter-spacing:.18em;font-size:12px;font-weight:600;color:var(--blue-3);margin:0 0 14px;}
+  h1.title{font-size:38px;line-height:1.1;margin:0 0 14px;font-weight:700;letter-spacing:-.02em;max-width:780px;}
+  h1.title em{color:var(--blue-3);font-style:normal;}
+  .tagline{font-size:18px;color:#cfdcea;margin:0;max-width:700px;}
+  .tagline b{color:#fff;}
+
+  .pager{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 0;}
+  .pager .pg{font-size:12px;font-weight:600;padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--slate-2);text-decoration:none;}
+  .pager .pg.cur{background:#fff;color:var(--navy);border-color:#fff;}
+  .pager .pg:hover{border-color:var(--blue-4);}
+
+  /* SCR tension */
+  .scr{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:32px 0 0;}
+  .scrb{background:#fff;border:1px solid var(--line);border-radius:9px;padding:16px 18px;border-top:3px solid var(--blue-3);}
+  .scrb.c{border-top-color:var(--red);}
+  .scrb.r{border-top-color:var(--blue-5);}
+  .scrb .l{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+  .scrb.c .l{color:var(--red);}
+  .scrb.r .l{color:var(--blue-6);}
+  .scrb p{margin:0;font-size:14px;color:var(--slate);}
+  .scrb p b{color:var(--navy-2);}
+
+  h2.sec{font-size:13px;text-transform:uppercase;letter-spacing:.16em;color:var(--blue-6);
+    border-bottom:2px solid var(--navy);padding-bottom:8px;margin:40px 0 10px;}
+  .lead{font-size:22px;font-weight:700;color:var(--navy);margin:8px 0 12px;letter-spacing:-.01em;line-height:1.25;}
+  p{font-size:15px;color:var(--slate);margin:0 0 10px;}
+  p b{color:var(--navy-2);}
+
+  /* fake vs real personalization */
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:14px 0;}
+  .compare .col{padding:18px 20px;}
+  .compare .old{background:var(--red-bg);border-right:1px solid var(--red-line);}
+  .compare .new{background:var(--green-bg);}
+  .compare .hl{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:10px;}
+  .compare .old .hl{color:var(--red);}
+  .compare .new .hl{color:var(--green);}
+  .compare .email{font-family:Georgia,"Times New Roman",serif;font-size:14px;line-height:1.6;color:var(--navy-2);background:#fff;border:1px solid var(--line);border-radius:6px;padding:14px 16px;margin-top:8px;}
+  .compare .email .dim{color:var(--muted);font-style:italic;}
+  .compare .email .hit{color:var(--blue-6);font-weight:600;}
+
+  /* the unlock */
+  .unlock{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0;}
+  .unlock .u{background:#fff;border:1px solid var(--line);border-radius:9px;padding:16px 18px;border-top:4px solid var(--blue-5);}
+  .unlock .u .num{font-size:28px;font-weight:700;color:var(--blue-5);letter-spacing:-.02em;line-height:1;}
+  .unlock .u .lbl{font-size:14px;font-weight:700;color:var(--navy);margin:6px 0 4px;}
+  .unlock .u .desc{font-size:13px;color:var(--slate);margin:0;}
+
+  /* sexy outcomes */
+  .outcomes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+  .out{border:1px solid var(--line);border-radius:9px;background:#fff;padding:16px 18px;}
+  .out .icon{font-size:22px;margin-bottom:6px;}
+  .out .ot{font-size:16px;font-weight:700;color:var(--navy);margin:0 0 4px;}
+  .out .od{font-size:14px;color:var(--slate);margin:0;}
+
+  /* stakeholders */
+  .stakes{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0;}
+  .stake{border:1px solid var(--line);border-radius:8px;background:#fff;padding:14px 16px;}
+  .stake .who{font-size:14px;font-weight:700;color:var(--navy);}
+  .stake .gets{font-size:13px;color:var(--slate);margin-top:4px;}
+  .stake .gets b{color:var(--blue-6);}
+
+  /* old tradeoff vs new */
+  .trade{display:grid;grid-template-columns:1fr auto 1fr;gap:0;align-items:stretch;margin:16px 0;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  .trade .side{padding:20px 22px;}
+  .trade .side.bad{background:#fff;border-right:1px solid var(--line);}
+  .trade .side.good{background:var(--blue-1);}
+  .trade .mid{display:flex;align-items:center;justify-content:center;background:var(--navy);color:#fff;font-size:22px;font-weight:700;padding:0 16px;}
+  .trade .st{font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px;}
+  .trade .bad .st{color:var(--red);}
+  .trade .good .st{color:var(--blue-6);}
+  .trade ul{margin:0;padding:0;list-style:none;}
+  .trade li{font-size:14px;color:var(--slate);margin:6px 0;padding-left:16px;position:relative;}
+  .trade li::before{content:"";position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:50%;}
+  .trade .bad li::before{background:var(--red);}
+  .trade .good li::before{background:var(--blue-5);}
+
+  .close{background:var(--navy);color:#fff;border-radius:11px;padding:24px 28px;margin-top:32px;text-align:center;}
+  .close .line{font-size:24px;font-weight:700;letter-spacing:-.01em;margin:0 0 8px;line-height:1.25;}
+  .close .line em{color:var(--blue-3);font-style:normal;}
+  .close .sub{font-size:15px;color:#cfdcea;margin:0;}
+
+  .nextpage{display:flex;justify-content:flex-end;margin-top:28px;}
+  .nextpage a{display:inline-flex;align-items:center;gap:8px;background:var(--blue-5);color:#fff;font-size:14px;font-weight:700;
+    padding:12px 20px;border-radius:8px;text-decoration:none;box-shadow:0 4px 14px rgba(29,78,216,.25);}
+  .nextpage a:hover{background:var(--blue-6);}
+  .nextpage .sub{display:block;font-size:11px;font-weight:600;opacity:.85;letter-spacing:.02em;}
+
+  footer{margin-top:20px;padding-top:18px;border-top:2px solid var(--navy);font-size:12.5px;color:var(--muted);}
+  footer b{color:var(--navy-2);}
+  footer a{color:var(--slate-2);}
+  .note{font-size:13px;color:var(--muted);font-style:italic;margin-top:8px;}
+
+  @media (max-width:720px){
+    .scr,.unlock,.outcomes,.stakes,.compare,.trade{grid-template-columns:1fr;}
+    .compare .old{border-right:none;border-bottom:1px solid var(--red-line);}
+    .trade .mid{padding:12px;font-size:16px;}
+    h1.title{font-size:28px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <p class="kicker">Provenance · capstone · page 1 of 5 · business view</p>
+    <h1 class="title">Every touchpoint personalized. Every claim proved.</h1>
+    <p class="tagline">The thing marketing has always wanted: <b>true 1:1 personalization</b> on email, <b>websites</b>, ads, and sales — without the compliance nightmare that usually kills it. Provenance is how you get both.</p>
+    <div class="pager">
+      <a class="pg cur">1 · Marketing promise</a>
+      <a class="pg" href="BEYOND-MARKETING.html">1b · Beyond marketing</a>
+      <a class="pg" href="BEFORE-AFTER-VALUE.html">2 · Before → After → Value</a>
+      <a class="pg" href="SOLUTION-DEEP-DIVE.html">3 · Solution deep dive</a>
+      <a class="pg" href="WHY-TECHNICALLY-CHALLENGING.html">4 · Why it's hard</a>
+      <a class="pg" href="PROJECT-PLANNING-DOCUMENT.html">5 · Capstone submission</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="scr">
+    <div class="scrb s"><div class="l">Situation</div><p>Consumers expect Netflix-level relevance everywhere. B2B buyers are no different — they ignore generic outreach. <b>Personalization is the game.</b></p></div>
+    <div class="scrb c"><div class="l">Complication</div><p>In regulated industries, every specific sentence — in an email, on a landing page, in an ad — is a legal claim. Legal can't review 100,000 unique variants. So you ship <b>one safe, generic experience</b> — and wonder why conversion flatlines.</p></div>
+    <div class="scrb r"><div class="l">Resolution</div><p>Provenance sits in front of every channel. Every personalized touchpoint is <b>auto-checked and pre-cleared</b> before it ships — email, web page, or ad copy. Launch same day. Each visitor gets their own verified experience.</p></div>
+  </div>
+
+  <h2 class="sec">What marketers actually want</h2>
+  <p class="lead">Not "Dear {FirstName}." Not one homepage for everyone. Real personalization — on every channel.</p>
+  <p>Imagine every touchpoint built around <b>this specific person or account</b> — their size, industry, regulatory context, ROI profile. That's what converts. AI can generate it. The blocker was always: <b>who verifies 100,000 unique variants before they ship?</b></p>
+
+  <div class="compare">
+    <div class="col old">
+      <div class="hl">✕ What most "personalization" looks like</div>
+      <div class="email">
+        Hi <span class="dim">{FirstName}</span>,<br><br>
+        Our platform helps companies like yours save money and improve outcomes. <em>[Same homepage for every visitor.]</em><br><br>
+        Best,<br>Sales
+      </div>
+      <p class="note" style="margin-top:10px;">Merge tags and A/B buckets ≠ personalization. One pitch, lightly customized.</p>
+    </div>
+    <div class="col new">
+      <div class="hl">✓ What Provenance enables</div>
+      <div class="email">
+        Hi Maya,<br><br>
+        For your <span class="hit">847-bed health system</span>, teams typically <span class="hit">cut reporting cycle ~40%</span> — with a <span class="hit">HIPAA-ready</span> deployment your compliance team can review upfront.<br><br>
+        <span class="hit">[Your landing page shows the same verified story — composed for Northwind Health, not "Healthcare."]</span>
+      </div>
+      <p class="note" style="margin-top:10px;">Email, web, ads — same Gate, same claim ledger. Every fact provably backed before render.</p>
+    </div>
+  </div>
+
+  <h2 class="sec">Ultra-personalized websites — yes, this is the product</h2>
+  <p class="lead">A unique landing page per visitor — with the same proof layer as email.</p>
+  <p>Today's web "personalization" is coarse: industry vertical pages, geo redirects, or {CompanyName} in the hero. Provenance goes further:</p>
+  <div class="unlock">
+    <div class="u"><div class="num">1:1</div><div class="lbl">Visitor-specific pages at scale</div><p class="desc">Known visitor arrives (cookie, CDP, reverse-IP, sales link) → page composes from <i>their</i> facts + your verified Claims Library → The Gate checks every line → page renders. Not 5 segments — <b>this account.</b></p></div>
+    <div class="u"><div class="num">A/B</div><div class="lbl">Truth-bounded web experiments</div><p class="desc">The Optimizer tests verified hero headlines, proof points, and CTAs per micro-segment — same constrained bandit as email. It can't learn to win by exaggerating on the page any more than in an inbox.</p></div>
+    <div class="u"><div class="num">1</div><div class="lbl">One engine, every channel</div><p class="desc">Email is the capstone MVP channel. Website is a <b>channel adapter</b> on the same pipeline — Draft → Gate → Optimizer → Publish. Second tenant = config, not a rebuild.</p></div>
+  </div>
+  <p><b>Capstone scope:</b> Gate + ledger ship on <b>email</b> in two weeks. Website is the ambitious beat in the showcase demo (toggle Email / Website on the same prospect) and the natural next adapter after MVP.</p>
+
+  <h2 class="sec">The trade-off that just disappeared</h2>
+  <div class="trade">
+    <div class="side bad">
+      <div class="st">The old choice</div>
+      <ul>
+        <li><b>Personalized</b> → fast, high-converting, legally risky</li>
+        <li><b>Compliant</b> → slow, generic, low-converting</li>
+        <li>Legal reviews every asset — weeks of queue</li>
+        <li>One approved template to 100,000 people</li>
+        <li>When something goes wrong, no audit trail</li>
+      </ul>
+    </div>
+    <div class="mid">→</div>
+    <div class="side good">
+      <div class="st">With Provenance</div>
+      <ul>
+        <li><b>Personalized AND compliant</b> — not either/or</li>
+        <li>Legal sets the rules once; every message auto-checked</li>
+        <li>Launch campaigns same day, not same quarter</li>
+        <li>100,000 unique touchpoints — email, pages, ads — each pre-cleared</li>
+        <li>Full audit trail — defensible to regulators</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2 class="sec">The sexy part — what you unlock</h2>
+  <p class="lead">This is the marketing superpower nobody in B2B actually has yet.</p>
+
+  <div class="unlock">
+    <div class="u"><div class="num">1:1</div><div class="lbl">True one-to-one on every channel</div><p class="desc">Email, landing page, ad — built around <i>their</i> facts. Feels hand-crafted. Ships at campaign scale.</p></div>
+    <div class="u"><div class="num">Day 1</div><div class="lbl">Campaigns that launch, not queue</div><p class="desc">No more waiting weeks for legal to read every variant. Rules approved once. Messages checked in seconds. Speed becomes a competitive weapon.</p></div>
+    <div class="u"><div class="num">Auto</div><div class="lbl">Experiments that can't cheat</div><p class="desc">The system discovers which <i>verified</i> message or page variant wins per audience — ROI angle vs. compliance vs. peer proof — and shifts automatically.</p></div>
+  </div>
+
+  <div class="outcomes">
+    <div class="out"><div class="icon">🌐</div><div class="ot">Personalized websites, finally</div><p class="od">Not {Industry} pages — <i>your</i> page. Visitor-specific hero, proof points, and CTAs from verified claims. The Gate runs before render, not after Legal finds out.</p></div>
+    <div class="out"><div class="icon">📈</div><div class="ot">Conversion lift without liability</div><p class="od">Aggressive optimization that can't cheat. The system only A/B tests messages that are already proven true — so you get the upside of testing without the downside of exaggeration.</p></div>
+    <div class="out"><div class="icon">🛡️</div><div class="ot">Compliance as enabler, not blocker</div><p class="od">Legal stops being the department that says no. They govern the system once — then every outbound message is pre-cleared by default.</p></div>
+    <div class="out"><div class="icon">📋</div><div class="ot">Proof on demand</div><p class="od">When a prospect pushes back — "where did you get that number?" — your rep clicks one link and shows the source. Trust closes deals faster than hype.</p></div>
+    <div class="out"><div class="icon">♻️</div><div class="ot">Claims that stay current</div><p class="od">When a legal hold lifts or a data source updates, every live message updates automatically. No stale claims sitting in active campaigns for months.</p></div>
+    <div class="out"><div class="icon">💰</div><div class="ot">The long tail, finally reachable</div><p class="od">Small accounts aren't worth a phone call — but they <i>are</i> worth a personalized email with a buy link. Provenance makes the long tail economically viable at scale.</p></div>
+  </div>
+
+  <h2 class="sec">Who wins — and how they talk about it</h2>
+  <div class="stakes">
+    <div class="stake"><div class="who">CMO / Head of Marketing</div><div class="gets">"<b>We finally ship personalized campaigns at scale</b> — without Legal being the bottleneck. Reply rates up, brand risk down, time-to-launch measured in hours."</div></div>
+    <div class="stake"><div class="who">Legal / Compliance</div><div class="gets">"<b>We govern the rules once</b>, not every email. Every claim is sourced and auditable. When a regulator asks why we said something, the answer is one click."</div></div>
+    <div class="stake"><div class="who">Sales / SDR teams</div><div class="gets">"<b>Every line in my outreach is backed</b> — I can show the source if a prospect pushes back. And the message actually references their operation, not just their name."</div></div>
+    <div class="stake"><div class="who">RevOps / Marketing Ops</div><div class="gets">"<b>One source of truth for what's claimable</b> — no more scattered decks and retired claims creeping back into live sends. The library compounds with every campaign."</div></div>
+  </div>
+
+  <h2 class="sec">Why this matters now</h2>
+  <p>Consumer apps cracked personalization years ago. B2B marketing is still stuck on one approved template per channel — because <b>nobody solved verification at scale.</b></p>
+  <p>AI made generation trivial. The bottleneck is trust: <i>can you prove what just rendered?</i> Provenance is that layer — for email, websites, ads, and sales, with proof attached to every touchpoint.</p>
+
+  <div class="close">
+    <p class="line">Personalization without proof is a lawsuit.<br><em>Personalization with proof — on every channel — is a superpower.</em></p>
+    <p class="sub">That's Provenance. The pages that follow unpack exactly how — capability by capability. <a href="SHOWCASE-DEMO.html" style="color:var(--blue-3);">See the live showcase demo →</a></p>
+  </div>
+
+  <div class="nextpage">
+    <a href="BEFORE-AFTER-VALUE.html"><span><span class="sub">Page 2 of 5</span>Before → After → Value — what changes →</span></a>
+  </div>
+
+  <footer>
+    <p>Provenance · capstone page 1 of 5 · business view only · Jun 2026 · <a href="BEYOND-MARKETING.html">companion — beyond marketing →</a> · <a href="BEFORE-AFTER-VALUE.html">page 2 →</a> · <a href="index.html">hub</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

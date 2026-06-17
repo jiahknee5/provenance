@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Self-Optimizing Funnel — 2 Slides</title>
+<style>
+  :root{
+    --navy:#0a2540;--navy-2:#102a43;--slate:#334e68;--slate-2:#486581;--muted:#627d98;
+    --line:#d9e2ec;--line-soft:#eef2f6;
+    --blue-1:#eff6ff;--blue-2:#dbeafe;--blue-3:#93c5fd;--blue-4:#3b82f6;--blue-5:#1d4ed8;--blue-6:#1e40af;
+    --paper:#eef2f6;
+    --green:#15803d;--green-bg:#dcfce7;--red:#b91c1c;--red-bg:#fee2e2;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--navy-2);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    scroll-snap-type:y mandatory;overflow-y:scroll;}
+  .deck{}
+  .slide{min-height:100vh;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;padding:34px;}
+  .frame{width:100%;max-width:1080px;aspect-ratio:16/9;background:#fff;border-radius:14px;
+    box-shadow:0 18px 50px rgba(10,37,64,.16);border:1px solid #fff;border-top:5px solid var(--blue-5);
+    padding:40px 52px;display:flex;flex-direction:column;overflow:hidden;}
+  .eyebrow{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--blue-6);margin-bottom:14px;}
+  .eyebrow .num{color:var(--muted);}
+  .atitle{font-size:30px;line-height:1.18;font-weight:700;color:var(--navy);margin:0 0 6px;letter-spacing:-.01em;}
+  .atitle .hl{color:var(--blue-5);}
+  .sub{font-size:15px;color:var(--slate);margin:0 0 16px;}
+  .grow{flex:1;display:flex;flex-direction:column;justify-content:center;}
+  .foot{border-top:1px solid var(--line);padding-top:10px;font-size:12.5px;color:var(--muted);}
+  .foot b{color:var(--navy-2);}
+
+  /* slide 1 — stack diagram */
+  .stack{display:flex;flex-direction:column;gap:0;align-items:center;}
+  .layer{width:100%;max-width:680px;border:1px solid var(--line);border-radius:9px;background:#fff;
+    padding:11px 18px;display:flex;align-items:center;gap:14px;position:relative;}
+  .layer .ico{flex:0 0 auto;width:30px;height:30px;border-radius:7px;background:var(--blue-1);color:var(--blue-6);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;}
+  .layer .lt{font-size:15px;font-weight:700;color:var(--navy);}
+  .layer .ld{font-size:12.5px;color:var(--slate);}
+  .layer .note{position:absolute;left:calc(100% + 14px);white-space:nowrap;font-size:12px;font-weight:700;}
+  .arrow{color:var(--blue-3);font-size:16px;line-height:1.1;margin:3px 0;}
+  .layer.core{border:2px solid var(--green);background:#f6fdf9;}
+  .layer.core .ico{background:var(--green-bg);color:var(--green);}
+  .layer.core .note{color:var(--green);}
+  .layer.opt{border:2px solid var(--blue-5);background:var(--blue-1);}
+  .layer.opt .ico{background:var(--blue-2);color:var(--blue-6);}
+  .layer.opt .note{color:var(--blue-6);}
+  .loopback{font-size:12px;color:var(--muted);margin-top:8px;font-style:italic;}
+
+  /* slide 2 — the fix */
+  .bigfix{background:var(--navy);color:#fff;border-radius:11px;padding:18px 22px;margin-bottom:14px;
+    display:flex;gap:16px;align-items:center;}
+  .bigfix .gw{font-size:34px;color:var(--blue-3);flex:0 0 auto;}
+  .bigfix .ft{font-size:17px;font-weight:600;line-height:1.4;}
+  .bigfix .ft b{color:var(--blue-3);}
+  table{border-collapse:collapse;width:100%;font-size:13px;}
+  th{text-align:left;background:var(--navy);color:#fff;font-weight:600;padding:8px 12px;font-size:11px;letter-spacing:.04em;text-transform:uppercase;}
+  td{padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
+  td.r{color:var(--slate);width:42%;}
+  td.f{color:var(--navy-2);}
+  td.f b{color:var(--blue-6);}
+  tr:nth-child(even) td{background:var(--blue-1);}
+  .r .x{color:var(--red);font-weight:700;}
+
+  .navhint{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(10,37,64,.85);color:#fff;
+    font-size:12px;padding:6px 14px;border-radius:999px;letter-spacing:.04em;z-index:10;}
+  @media print{.navhint{display:none;}.slide{min-height:auto;page-break-after:always;}body{background:#fff;}}
+  @media (max-width:720px){.frame{aspect-ratio:auto;}.atitle{font-size:23px;}.layer .note{display:none;}}
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+  <!-- SLIDE 1 -->
+  <section class="slide">
+    <div class="frame">
+      <div class="eyebrow"><span>The system</span><span class="num">1 / 2</span></div>
+      <h1 class="atitle">The self-optimizing loop is <span class="hl">one layer</span> — the verifier beneath it is what makes it safe to turn on.</h1>
+      <p class="sub">"Auto-A/B-test yourself" is the part you asked about. It's powerful and dangerous alone. In our system it's one stage in a closed loop, sitting on a truth guardrail.</p>
+      <div class="grow">
+        <div class="stack">
+          <div class="layer"><span class="ico">1</span><div><div class="lt">Data spine</div><div class="ld">real prospects + the sources that ground every claim</div></div></div>
+          <div class="arrow">&#9660;</div>
+          <div class="layer"><span class="ico">2</span><div><div class="lt">Generator (LLM)</div><div class="ld">drafts a personalized message — and variants to test</div></div></div>
+          <div class="arrow">&#9660;</div>
+          <div class="layer core"><span class="ico">&#10003;</span><div><div class="lt">Verification gate</div><div class="ld">every claim cited or killed — the safety core</div></div><span class="note">&#8592; the guardrail</span></div>
+          <div class="arrow">&#9660;</div>
+          <div class="layer opt"><span class="ico">&#8635;</span><div><div class="lt">Self-optimizing loop (RL bandit)</div><div class="ld">auto-A/B per segment: which angle / claim / channel / timing wins</div></div><span class="note">&#8592; the part you asked about</span></div>
+          <div class="arrow">&#9660;</div>
+          <div class="layer"><span class="ico">5</span><div><div class="lt">Outcomes</div><div class="ld">opens · replies · conversions → learning + proof compounds</div></div></div>
+        </div>
+        <p class="loopback">&#8635; Outcomes feed back up: the policy improves, and only verified messages ever compete.</p>
+      </div>
+      <div class="foot"><b>The point:</b> optimization is bolted <i>on top of</i> verification — so the optimizer can only ever search inside the space of true, compliant messages.</div>
+    </div>
+  </section>
+
+  <!-- SLIDE 2 -->
+  <section class="slide">
+    <div class="frame">
+      <div class="eyebrow"><span>Fixing the risk</span><span class="num">2 / 2</span></div>
+      <h1 class="atitle">We bound the optimizer to <span class="hl">only-true messages</span> — so it can't win by lying.</h1>
+      <p class="sub">An optimizer told to maximize replies normally learns to exaggerate (Goodhart / reward-hacking). We make that structurally impossible.</p>
+      <div class="grow">
+        <div class="bigfix">
+          <span class="gw">&#9911;</span>
+          <div class="ft"><b>Constrained self-optimization:</b> a variant only enters the A/B arena <i>after</i> it passes verification. A winning lie can't be discovered, because lies never compete. <b>The guardrail is the product.</b></div>
+        </div>
+        <table>
+          <thead><tr><th>The risk</th><th>How we fix it</th></tr></thead>
+          <tbody>
+            <tr><td class="r"><span class="x">Optimizer learns to lie to win</span> (Goodhart)</td><td class="f">Verifier <b>bounds the search space</b> — only true, sourced, compliant variants ever compete.</td></tr>
+            <tr><td class="r"><span class="x">Reward is sparse, slow, burns real leads</span></td><td class="f">Bootstrap on an <b>LLM-persona simulator</b>; cheap proxies (opens) shape the slow signal; learn <b>off-policy</b> from logged sends.</td></tr>
+            <tr><td class="r"><span class="x">New segment has no data</span> (cold-start)</td><td class="f"><b>Hierarchical bandit</b> — borrow from similar segments; what-works (and proof) <b>compounds across clients</b>.</td></tr>
+            <tr><td class="r"><span class="x">What wins drifts</span> (non-stationary)</td><td class="f">Keep a slice always <b>exploring</b>; discount stale data.</td></tr>
+            <tr><td class="r"><span class="x">Adaptive tests break significance</span></td><td class="f">Use <b>anytime-valid confidence sequences</b>, not naive A/B p-values.</td></tr>
+            <tr><td class="r"><span class="x">Could still get spammy</span></td><td class="f">Brand/tone guards + <b>unsubscribe = hard negative reward</b>.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="foot"><b>The bet:</b> optimize toward conversion, bounded by truth. It's the answer to the reward-hacking problem the whole field is stuck on — applied to marketing.</div>
+    </div>
+  </section>
+
+</div>
+
+<div class="navhint">Scroll ↓ for slide 2 · ⌘P to export PDF</div>
+
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why it's technically hard — Gauntlet + research</title>
+<style>
+  :root{
+    --navy:#0a2540;--navy-2:#102a43;--slate:#334e68;--slate-2:#486581;--muted:#627d98;
+    --line:#d9e2ec;--line-soft:#eef2f6;
+    --blue-1:#eff6ff;--blue-2:#dbeafe;--blue-3:#93c5fd;--blue-4:#3b82f6;--blue-5:#1d4ed8;--blue-6:#1e40af;
+    --paper:#f7f9fc;--amber:#b45309;--amber-bg:#fffbeb;--amber-line:#fde68a;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--navy-2);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:980px;margin:0 auto;padding:0 30px 96px;}
+  a{color:var(--blue-5);}
+
+  header.mast{background:var(--navy);color:#fff;padding:50px 0 38px;border-bottom:4px solid var(--blue-4);}
+  header.mast .wrap{padding-bottom:0;}
+  .kicker{text-transform:uppercase;letter-spacing:.18em;font-size:12px;font-weight:600;color:var(--blue-3);margin:0 0 14px;}
+  h1.title{font-size:33px;line-height:1.13;margin:0 0 12px;font-weight:700;letter-spacing:-.01em;}
+  .tagline{font-size:16.5px;color:#cfdcea;margin:0;max-width:760px;}
+  .tagline b{color:#fff;}
+
+  .pager{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 0;}
+  .pager .pg{font-size:12px;font-weight:600;padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--slate-2);text-decoration:none;}
+  .pager .pg.cur{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .pager .pg:hover{border-color:var(--blue-4);}
+
+  .gbar{background:#fff;border:1px solid var(--line);border-top:4px solid var(--blue-5);border-radius:9px;padding:16px 20px;margin:28px 0 0;}
+  .gbar h3{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--slate-2);}
+  .gbar p{margin:0 0 8px;font-size:14px;color:var(--slate);}
+  .gbar p:last-child{margin-bottom:0;}
+  .gbar b{color:var(--navy-2);}
+  .gbar .dir{background:var(--blue-1);border-radius:6px;padding:8px 12px;font-size:13.5px;color:var(--navy-2);}
+  .gbar .dir b{color:var(--blue-6);}
+
+  h2.sec{font-size:13px;text-transform:uppercase;letter-spacing:.16em;color:var(--blue-6);border-bottom:2px solid var(--navy);padding-bottom:9px;margin:46px 0 14px;}
+
+  .pillar{border:1px solid var(--line);border-radius:11px;background:#fff;overflow:hidden;margin:14px 0;box-shadow:0 1px 2px rgba(10,37,64,.04);}
+  .pillar .ph{background:var(--navy);color:#fff;padding:11px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .pillar .pn{font-size:11px;font-weight:700;letter-spacing:.07em;color:var(--blue-3);}
+  .pillar .pname{font-size:17px;font-weight:700;letter-spacing:-.01em;}
+  .pillar .amb{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 9px;border-radius:5px;}
+  .amb.frontier{background:#0b3a8c;color:#dbeafe;}
+  .amb.emerging{background:rgba(255,255,255,.14);color:#dbeafe;}
+  .pillar .body{padding:6px 18px 16px;}
+  .blk{margin-top:12px;}
+  .blk .t{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;}
+  .blk.crux .t{color:var(--slate-2);}
+  .blk.fit .t{color:var(--blue-6);}
+  .blk.sig .t{color:var(--blue-6);}
+  .blk.bet .t{color:var(--amber);}
+  .blk p{margin:0;font-size:13.5px;color:var(--slate);line-height:1.5;}
+  .blk p b{color:var(--navy-2);}
+  .scodes{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  .sc{font-size:11px;font-weight:700;background:var(--blue-1);border:1px solid var(--blue-2);color:var(--blue-6);padding:2px 8px;border-radius:5px;}
+  .blk.bet{background:var(--amber-bg);border:1px solid var(--amber-line);border-radius:7px;padding:9px 12px;margin-top:12px;}
+  .blk.bet p{color:#78350f;}
+  .blk.bet p b{color:#78350f;}
+  .refmini{font-size:12px;color:var(--muted);margin-top:5px;}
+  .refmini a{color:var(--slate-2);}
+
+  /* legend */
+  .legend{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+  .lg{border:1px solid var(--line);border-radius:7px;background:#fff;padding:9px 12px;font-size:12.5px;color:var(--slate);}
+  .lg b{color:var(--navy-2);}
+  .lg .code{font-weight:700;color:var(--blue-6);}
+
+  .closing{background:var(--navy);color:#fff;border-radius:10px;padding:20px 24px;margin-top:16px;}
+  .closing .ct{font-size:18px;font-weight:700;margin:0 0 8px;}
+  .closing p{margin:0;font-size:14.5px;color:#cfdcea;}
+  .closing b{color:var(--blue-3);}
+
+  footer{margin-top:42px;padding-top:18px;border-top:2px solid var(--navy);font-size:12.5px;color:var(--muted);line-height:1.7;}
+  footer b{color:var(--navy-2);}
+  footer a{color:var(--slate-2);}
+  .disc{font-style:italic;}
+  @media (max-width:760px){.legend{grid-template-columns:1fr;}h1.title{font-size:26px;}.pillar .amb{margin-left:0;}}
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <p class="kicker">Provenance · capstone · page 4 of 5</p>
+    <h1 class="title">Why each capability is technically hard — against the Gauntlet bar and current research</h1>
+    <p class="tagline">Gauntlet scores on <b>ambition</b> — did you attack a genuinely unsolved problem — not polish. For each capability: the <b>technical crux</b>, the <b>Gauntlet fit</b>, the <b>research signals</b> that say it's open, and <b>the bet / where it breaks.</b></p>
+    <div class="pager">
+      <a class="pg" href="BUSINESS-VISION.html">1 · Marketing promise</a>
+      <a class="pg" href="BEFORE-AFTER-VALUE.html">2 · Before → After → Value</a>
+      <a class="pg" href="SOLUTION-DEEP-DIVE.html">3 · Solution deep dive</a>
+      <a class="pg cur">4 · Why it's hard</a>
+      <a class="pg" href="PROJECT-PLANNING-DOCUMENT.html">5 · Capstone submission</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="gbar">
+    <h3>How Gauntlet scores — and our read</h3>
+    <p>The brief's six criteria: <b>the problem</b> (and why it's technically hard — <i>ambition is the criterion</i>), <b>project direction</b>, <b>technical approach</b> (AI as a primitive, not a bolt-on), <b>scope</b> (ambitious vs. minimum shippable in two weeks), <b>why it's compelling</b>, and <b>hard parts / risks</b>.</p>
+    <p class="dir"><b>Our direction: A — Combine ML with LLM.</b> A trained verifier ensemble + a constrained contextual-bandit policy do what the LLM can't (know what's true, decide what to send); the LLM does generation. It also exercises <b>C</b> (we compare verification methods head-to-head) and carries a <b>B</b>-flavored thesis (the org runs through one verified pipeline; humans set rules, not write copy).</p>
+  </div>
+
+  <h2 class="sec">Capability by capability</h2>
+
+  <!-- 1 -->
+  <div class="pillar">
+    <div class="ph"><span class="pn">CAPABILITY 1</span><span class="pname">Claims Library — claim–evidence extraction</span><span class="amb emerging">emerging</span></div>
+    <div class="body">
+      <div class="blk crux"><div class="t">The technical crux</div><p>Extracting <b>atomic, checkable claims</b> from fluent marketing prose (compound claims, implicature, puffery vs. fact) and binding each to the exact source span is unsolved at fidelity — and flat RAG chunking destroys the document structure you need to do it.</p></div>
+      <div class="blk fit"><div class="t">Gauntlet fit</div><p>Technical ambition in knowledge extraction; <b>AI-as-primitive</b> — the claim/evidence substrate is model-extracted, not hand-built. (Direction A.)</p></div>
+      <div class="blk sig"><div class="t">Research says it's open</div><p>Retrieval and generation interact in ways no one has closed; structure-aware reading beats flat chunks, and GraphRAG often underperforms vanilla RAG.</p>
+        <div class="scodes"><span class="sc">S5 · RAG still fails</span><span class="sc">S3 · long context</span></div>
+        <div class="refmini">DeepRead (structure-aware "locate-then-read") · Anthropic Contextual Retrieval · EMNLP 2025 "Context Length Alone Hurts… Despite Perfect Retrieval."</div>
+      </div>
+      <div class="blk bet"><div class="t">The bet · where it breaks</div><p>A missed or mis-split claim is an <b>unverified</b> claim. Mitigation: measure decomposition coverage explicitly; handle puffery as its own class. Breaks if implicature evades extraction.</p></div>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="pillar">
+    <div class="ph"><span class="pn">CAPABILITY 2</span><span class="pname">The Gate — calibrated ensemble verification</span><span class="amb frontier">frontier</span></div>
+    <div class="body">
+      <div class="blk crux"><div class="t">The technical crux</div><p>Decide "is this claim entailed by its source?" with <b>calibrated confidence and no ground truth at inference</b>. The obvious tool — LLM-as-judge — fails &gt;50% of bias tests and is gameable; calibration decays under distribution shift; and the generator is an adversary that wants to embellish. This is the single hottest problem in applied AI: <i>"verification is the bottleneck."</i></p></div>
+      <div class="blk fit"><div class="t">Gauntlet fit</div><p>Highest technical ambition; the purest <b>AI-as-primitive</b> (delete the verifier and there is no product); Direction A, with a C-style method comparison built in.</p></div>
+      <div class="blk sig"><div class="t">Research says it's open</div><p>Quality/reliability is the #1 production blocker; evals lag observability; benchmarks get gamed; the default scalable verifier (LLM-judge) is unreliable.</p>
+        <div class="scodes"><span class="sc">S1 · reliability bottleneck</span><span class="sc">S2 · benchmarks gamed</span><span class="sc">S10 · feedback / judge messy</span></div>
+        <div class="refmini">Karpathy (Sequoia Ascent 2026) · LLM-judge bias <a href="https://arxiv.org/html/2604.16790v1">2604.16790</a> · RLVR reward-hacking <a href="https://arxiv.org/abs/2604.15149">2604.15149</a> · calibration-under-shift <a href="https://arxiv.org/html/2603.04445v2">2603.04445</a> · hidden-state probes <a href="https://arxiv.org/html/2605.24919">2605.24919</a>.</div>
+      </div>
+      <div class="blk bet"><div class="t">The bet · where it breaks</div><p>The verifier is load-bearing: false-negatives ship lies, false-positives kill good copy. Mitigation: NLI + diverse ensemble + calibration, proven by the Assurance Lab. Breaks if calibration won't transfer off the ground-truth domain.</p></div>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="pillar">
+    <div class="ph"><span class="pn">CAPABILITY 3</span><span class="pname">The Optimizer — truth-bounded contextual bandit</span><span class="amb frontier">frontier · most novel</span></div>
+    <div class="body">
+      <div class="blk crux"><div class="t">The technical crux</div><p>Sequential decisions under <b>sparse, delayed, expensive, irreversible</b> feedback (replies are rare, slow, and each send costs a lead); off-policy learning on tiny logged data; per-micro-segment cold-start; <b>and</b> the optimizer is intrinsically prone to reward-hacking — optimizing engagement teaches it to exaggerate.</p></div>
+      <div class="blk fit"><div class="t">Gauntlet fit</div><p>Deep technical ambition (RL/bandits under constraints); <b>AI-as-primitive</b> (a learned policy steers the LLM at runtime); Direction A. <b>The original contribution:</b> bounding the action space to <i>verified</i> outputs is a structural fix for reward-hacking.</p></div>
+      <div class="blk sig"><div class="t">Research says it's open</div><p>Learned routing/policies are becoming standard but tool/sequence choice is "the missing policy"; reward-hacking is an active, unsolved failure mode.</p>
+        <div class="scodes"><span class="sc">S9 · multi-model routing</span><span class="sc">S2 · reward hacking</span><span class="sc">S1 · reliability</span></div>
+        <div class="refmini">Contextual bandits for multi-turn <a href="https://arxiv.org/pdf/2602.03806">2602.03806</a> · RouteLLM · process reward models <a href="https://arxiv.org/pdf/2504.16828">2504.16828</a> · RLVR reward-hacking <a href="https://arxiv.org/abs/2604.15149">2604.15149</a>.</div>
+      </div>
+      <div class="blk bet"><div class="t">The bet · where it breaks</div><p>Sparse/delayed reward + cold-start. Mitigation: persona simulator + hierarchical bandit + off-policy eval. Breaks on sim-to-real gap or negative transfer — but the <b>constrained-optimization-can't-lie</b> claim holds regardless, and is the boldest, most defensible novelty.</p></div>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="pillar">
+    <div class="ph"><span class="pn">CAPABILITY 4</span><span class="pname">Drift Monitor — temporal re-grounding</span><span class="amb frontier">frontier</span></div>
+    <div class="body">
+      <div class="blk crux"><div class="t">The technical crux</div><p>A verified claim is only true <i>until its source changes</i>. Detecting which of N live claims a source change invalidates — and re-verifying only those — is a state/dependency problem. Most "memory" work tests retrieval, not whether state stays <b>correct</b> over time; staleness is the named hard problem.</p></div>
+      <div class="blk fit"><div class="t">Gauntlet fit</div><p>Technical ambition in <b>state management</b> — explicitly where the brief's research says teams get stuck; AI-as-primitive (re-verification is model-driven). Direction A, governance-flavored (B).</p></div>
+      <div class="blk sig"><div class="t">Research says it's open</div><p>Memory and state are under-measured and under-governed; long-running agents need artifacts and re-grounding, not bigger windows; enterprises flag visibility/audit gaps.</p>
+        <div class="scodes"><span class="sc">S4 · memory/state</span><span class="sc">S8 · enterprise governance</span></div>
+        <div class="refmini">Anthropic long-running agents · mem0 <i>State of AI Agent Memory 2026</i> · STATE-Bench <span class="disc">(named in the cohort research doc — directional)</span>.</div>
+      </div>
+      <div class="blk bet"><div class="t">The bet · where it breaks</div><p>Dependency-graph completeness: miss a dependency and a stale claim ships. Mitigation: conservative invalidation. Breaks toward over-invalidation (too many re-checks) or under (staleness slips through).</p></div>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="pillar">
+    <div class="ph"><span class="pn">CAPABILITY 5</span><span class="pname">Assurance Lab — adversarial self-test + reliability profiling</span><span class="amb frontier">frontier</span></div>
+    <div class="body">
+      <div class="blk crux"><div class="t">The technical crux</div><p>Proving a verifier works requires <b>adversarially attacking your own checker</b> and reporting <b>decomposed reliability</b> — catch-rate at fixed false-reject, paraphrase robustness, calibration (ECE), severity buckets — because a single pass-rate hides failures and can be gamed.</p></div>
+      <div class="blk fit"><div class="t">Gauntlet fit</div><p>The research calls evaluation infrastructure the most timely capstone area; high ambition + the strongest <b>evaluation story</b>; AI-as-primitive (synthetic adversarial generation + profiling). Direction C + A.</p></div>
+      <div class="blk sig"><div class="t">Research says it's open</div><p>Reliability must be decomposed beyond average success; benchmarks are gamed so you must adversarially test; synthetic-data verification is what prevents collapse.</p>
+        <div class="scodes"><span class="sc">S1 · decompose reliability</span><span class="sc">S2 · benchmark integrity</span><span class="sc">S10 · synthetic verification</span></div>
+        <div class="refmini">Berkeley RDI (broke 8 top agent benchmarks) · agent-reliability research line · "Mixture of LLMs in the loop" weak supervision.</div>
+      </div>
+      <div class="blk bet"><div class="t">The bet · where it breaks</div><p>Synthetic traps may not represent real failures (sim-to-real for the eval itself). Mitigation: diverse mutation operators + a real held-out slice. Breaks if a verifier passes traps but misses real lies.</p></div>
+    </div>
+  </div>
+
+  <!-- LEGEND -->
+  <h2 class="sec">The research signals (S1–S10), decoded</h2>
+  <p style="font-size:13.5px;color:var(--slate);margin:0 0 8px;">From the deep-research brief — the current ecosystem signals each capability is anchored to.</p>
+  <div class="legend">
+    <div class="lg"><span class="code">S1</span> — <b>Reliability is the production bottleneck.</b> Quality is the top blocker; observability is universal, evals lag.</div>
+    <div class="lg"><span class="code">S2</span> — <b>Benchmarks are distrusted / gameable.</b> Top agent benchmarks exploited; RLVR reward-hacking.</div>
+    <div class="lg"><span class="code">S3</span> — <b>Long context isn't solved.</b> Degrades even with perfect retrieval.</div>
+    <div class="lg"><span class="code">S4</span> — <b>Memory &amp; state under-measured/governed.</b> Staleness is the open problem.</div>
+    <div class="lg"><span class="code">S5</span> — <b>RAG still fails.</b> Flat chunks lose structure; GraphRAG often underperforms.</div>
+    <div class="lg"><span class="code">S8</span> — <b>Enterprise = fleet/governance problem.</b> Audit, identity, oversight gaps.</div>
+    <div class="lg"><span class="code">S9</span> — <b>Multi-model routing is standard.</b> Learned routing/cascades (RouteLLM).</div>
+    <div class="lg"><span class="code">S10</span> — <b>Feedback / labels / synthetic verification are messy.</b> Naive LLM labeling is noisy; external verification prevents collapse.</div>
+  </div>
+
+  <div class="closing">
+    <p class="ct">Where the ambition concentrates</p>
+    <p>The frontier weight sits in <b>The Gate (verification), The Optimizer (truth-bounded RL), and the Assurance Lab (reliability proof)</b> — the hottest current cluster. The single most original bet is <b>constrained optimization as a structural fix for reward-hacking</b>: the policy can't converge to a higher-reward falsehood because falsehoods never enter the reward loop. That's the line that scores on ambition.</p>
+  </div>
+
+  <footer>
+    <p class="disc">Citation discipline: arXiv IDs were surfaced in June-2026 research; "STATE-Bench"/"ReliabilityBench" and the S1–S10 codes come from the cohort's deep-research brief rather than independent verification, and are used as that brief's framework. Fittingly, we don't present an unsourced claim as a sourced one.</p>
+    <p>Provenance · capstone page 4 of 5 · Jun 2026 · <a href="SOLUTION-DEEP-DIVE.html">← page 3</a> · <a href="PROJECT-PLANNING-DOCUMENT.html">page 5 →</a> · <a href="index.html">hub</a>.</p>
+  </footer>
+
+</div>
+</body>
+</html>

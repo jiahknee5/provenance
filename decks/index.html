@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Capstone — Document Hub</title>
+<style>
+  :root{
+    --navy:#0a2540;--navy-2:#102a43;--slate:#334e68;--slate-2:#486581;--muted:#627d98;
+    --line:#d9e2ec;--line-soft:#eef2f6;
+    --blue-1:#eff6ff;--blue-2:#dbeafe;--blue-3:#93c5fd;--blue-4:#3b82f6;--blue-5:#1d4ed8;--blue-6:#1e40af;
+    --paper:#f7f9fc;--gold:#b45309;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--navy-2);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:980px;margin:0 auto;padding:0 28px 90px;}
+  a{text-decoration:none;color:inherit;}
+
+  header.mast{background:var(--navy);color:#fff;padding:52px 0 40px;border-bottom:4px solid var(--blue-4);}
+  header.mast .wrap{padding-bottom:0;}
+  .kicker{text-transform:uppercase;letter-spacing:.18em;font-size:12px;font-weight:600;color:var(--blue-3);margin:0 0 14px;}
+  h1.title{font-size:38px;line-height:1.1;margin:0 0 12px;font-weight:700;letter-spacing:-.01em;}
+  .tagline{font-size:17px;color:#c9d8e8;margin:0 0 22px;max-width:720px;}
+  .tagline b{color:#fff;}
+  .meta-row{display:flex;flex-wrap:wrap;gap:10px;}
+  .chip{font-size:12px;font-weight:600;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);
+    color:#dbeafe;padding:6px 12px;border-radius:999px;}
+
+  h2.sec{font-size:13px;text-transform:uppercase;letter-spacing:.14em;color:var(--blue-6);
+    border-bottom:2px solid var(--navy);padding-bottom:8px;margin:44px 0 4px;}
+  .sub{font-size:14px;color:var(--slate);margin:6px 0 14px;max-width:760px;}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .card{display:block;background:#fff;border:1px solid var(--line);border-radius:10px;padding:20px 22px;
+    box-shadow:0 1px 2px rgba(10,37,64,.05);transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease;}
+  .card:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(10,37,64,.13);border-color:var(--blue-3);}
+  .card .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+  .tag{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:4px;}
+  .t-tech{background:var(--blue-2);color:var(--blue-6);}
+  .t-plain{background:#dcfce7;color:#15803d;}
+  .t-alt{background:var(--line-soft);color:var(--slate-2);}
+  .t-land{background:#fef3c7;color:var(--gold);}
+  .t-dir{background:#ede9fe;color:#6d28d9;}
+  .card h3{font-size:19px;margin:0 0 6px;color:var(--navy);font-weight:700;letter-spacing:-.01em;}
+  .card .star{color:var(--blue-5);}
+  .card p{margin:0;font-size:14.5px;color:var(--slate);}
+  .card .open{margin-top:12px;font-size:13px;font-weight:700;color:var(--blue-5);letter-spacing:.02em;}
+  .card .open::after{content:" \2192";}
+
+  /* hero pitch card spans full width */
+  .card.hero{grid-column:1 / -1;border:2px solid var(--blue-5);box-shadow:0 8px 22px rgba(29,78,216,.12);}
+  .card.hero h3{font-size:23px;}
+  .card.hero .twolinks{display:flex;flex-wrap:wrap;gap:24px;margin-top:14px;}
+  .card.hero .twolinks span{font-size:13px;font-weight:700;color:var(--blue-5);}
+  .card.hero .twolinks span::after{content:" \2192";}
+
+  .order{background:#fff;border:1px solid var(--line);border-left:4px solid var(--blue-5);border-radius:8px;
+    padding:16px 20px;margin-top:8px;}
+  .order p{margin:0;font-size:14.5px;color:var(--slate);}
+  .order b{color:var(--navy-2);}
+
+  footer{margin-top:46px;padding-top:20px;border-top:2px solid var(--navy);font-size:13px;color:var(--muted);}
+  footer b{color:var(--navy-2);}
+  @media (max-width:680px){.grid{grid-template-columns:1fr;}h1.title{font-size:28px;}}
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <p class="kicker">Gauntlet Capstone &middot; Week 1 &middot; Document Hub</p>
+    <h1 class="title">The trust layer for AI claims</h1>
+    <p class="tagline">Everything for the Provenance capstone in one place — <b>governed generation</b> that proves every claim before it ships. Marketing is the wedge; the engine applies everywhere.</p>
+    <div class="meta-row">
+      <span class="chip">Theme: trust / verification</span>
+      <span class="chip">Proposal due: Jun 15</span>
+      <span class="chip">Planning doc: Jun 17 11:59 PM</span>
+      <span class="chip">Showcase: Jun 29</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <h2 class="sec">★ Capstone submission</h2>
+  <p class="sub">The 2-page submission is the one to send. Longer all-in-one and standalone pages are alternates.</p>
+  <div class="grid">
+    <a class="card hero" href="PROVENANCE-SUBMISSION-2PAGE.html">
+      <div class="tags"><span class="tag t-dir">★ The submission · 2 pages</span><span class="tag t-land">Print → PDF</span></div>
+      <h3><span class="star">★</span> Provenance — 2-page submission</h3>
+      <p>Page 1 = the full Project Planning Document (all 6 criteria + owners + demo); Page 2 = the technical-depth / why-it's-hard table with research signals. Prints to exactly 2 pages (⌘P). <b>Send this.</b></p>
+      <div class="twolinks"><a href="PROVENANCE-SUBMISSION-2PAGE.html"><span>Open the 2-page submission</span></a></div>
+    </a>
+    <a class="card" href="PROVENANCE-CAPSTONE.html">
+      <div class="tags"><span class="tag t-tech">All-in-one</span><span class="tag t-dir">Project + Appendices</span></div>
+      <h3>Capstone — combined (longer)</h3>
+      <p>The Planning Document + Appendix A (before→after→value) + Appendix B (why hard), one file with sticky nav. The richer reference behind the 2-pager.</p>
+      <div class="open">Open</div>
+    </a>
+    <a class="card hero" href="SHOWCASE-DEMO.html">
+      <div class="tags"><span class="tag t-dir">★ Live showcase · Jun 29</span><span class="tag t-land">Interactive</span></div>
+      <h3><span class="star">★</span> Showcase demo — what we show on stage</h3>
+      <p>Flashy presenter-mode demo aligned 1:1 with capstone §8: claim ledger lights up, try-to-make-it-lie, legal-hold flip, Assurance Lab metrics, Optimizer learning curve. <b>Open full-screen · use ← →</b></p>
+      <div class="open">Open showcase demo</div>
+    </a>
+    <a class="card" href="MEETING-NOTES-SEGMENTATION-AND-DEMO.md">
+      <div class="tags"><span class="tag t-alt">Team notes</span><span class="tag t-dir">Showcase planning</span></div>
+      <h3>Segmentation, ICP &amp; cohort demo</h3>
+      <p>Meeting notes: adoption-curve segmentation, emotional triggers, Maslow targeting, decision timing, ICP draft — plus the live personalized-website demo idea for Gauntlet cohort (side-by-side, edgy planted profiles, Provenance reveal).</p>
+      <div class="open">Open notes</div>
+    </a>
+    <a class="card hero" href="GAUNTLET-SPRINT-PRD.html">
+      <div class="tags"><span class="tag t-dir">★ Project plan</span><span class="tag t-land">2 weeks</span></div>
+      <h3><span class="star">★</span> Gauntlet sprint — project plan</h3>
+      <p>North star: QR → personalized site on every phone → edgy compare moment → Provenance reveal on same profile. Deliverables · W1 schedule · D7 run of show · W2 codify. Compact 2-page print view.</p>
+      <div class="open">Open plan</div>
+    </a>
+    <a class="card" href="GAUNTLET-SPRINT-PLAN.html">
+      <div class="tags"><span class="tag t-dir">Summary</span><span class="tag t-land">2 weeks</span></div>
+      <h3>Two-week sprint — summary</h3>
+      <p>Condensed timeline + identity section. See project plan for full schedule.</p>
+      <div class="open">Open summary</div>
+    </a>
+    <a class="card" href="WEEK-2-CODIFY-AND-REACH.md">
+      <div class="tags"><span class="tag t-tech">Week 2</span><span class="tag t-dir">Codify + reach</span></div>
+      <h3>Week 2 — codify &amp; reach goals</h3>
+      <p>After Gauntlet day: schemas, Gate pipeline, runbooks, deck hub — then P0 UX reach (compare, segmentation, attribution v2, live email/ad). Provenance components ship Week 1.</p>
+      <div class="open">Open Week 2 plan</div>
+    </a>
+    <a class="card hero" href="ONE-WEEK-GAUNTLET-PLAN.md">
+      <div class="tags"><span class="tag t-dir">★ 7-day sprint</span><span class="tag t-land">Gauntlet day</span></div>
+      <h3><span class="star">★</span> One-week plan — Gauntlet day</h3>
+      <p>Dual demo sites (edgy vs governed) + full Provenance stack (Gate, Optimizer, Drift, Assurance) + deck suite · day-by-day schedule · risks · pushback.</p>
+      <div class="open">Open sprint plan</div>
+    </a>
+    <a class="card hero" href="COHORT-DEMO-PROJECT-PLAN.md">
+      <div class="tags"><span class="tag t-dir">Build plan · Jun 29</span><span class="tag t-tech">Technical</span></div>
+      <h3>Cohort demo — detailed project plan</h3>
+      <p>Competitor analysis + dual-track personalization → Gate architecture → phases, owners, timeline to showcase.</p>
+      <div class="open">Open project plan</div>
+    </a>
+    <a class="card" href="GAUNTLET-PILOT-DECK.html">
+      <div class="tags"><span class="tag t-dir">Slide deck</span><span class="tag t-plain">Pilot customer</span></div>
+      <h3>Gauntlet pilot — talent routing deck</h3>
+      <p>Provenance as qualification layer for Prime, Catalyst &amp; hiring partners: ingest → Gate (segment fit) → Optimizer (routing) → Drift. Diagrams · ← → to advance.</p>
+      <div class="open">Open deck</div>
+    </a>
+    <a class="card hero" href="BUSINESS-VISION.html">
+      <div class="tags"><span class="tag t-plain">Page 1 of 5 · start here</span><span class="tag t-dir">Business only</span></div>
+      <h3><span class="star">★</span> The marketing promise</h3>
+      <p>The sexy business case — true 1:1 personalization on every channel, the trade-off that disappears, who wins, and why now. No technical jargon. <b>Read this first.</b></p>
+      <div class="open">Open page 1</div>
+    </a>
+    <a class="card" href="BEYOND-MARKETING.html">
+      <div class="tags"><span class="tag t-plain">Companion</span><span class="tag t-dir">Applications</span></div>
+      <h3>Beyond marketing</h3>
+      <p>Agents, compliance, RAG, education, filings — the same claim engine outside the martech wedge. One-line pitches by audience and why marketing is still the right demo.</p>
+      <div class="open">Open</div>
+    </a>
+    <a class="card" href="BEFORE-AFTER-VALUE.html">
+      <div class="tags"><span class="tag t-tech">Page 2 of 5</span><span class="tag t-dir">4 columns</span></div>
+      <h3>Before → Solution → After → Value</h3>
+      <p>Per capability: the pain, the deep technical solution (+ ⚡ breakthrough), the outcome, and the value added.</p>
+      <div class="open">Open page 2</div>
+    </a>
+    <a class="card" href="SOLUTION-DEEP-DIVE.html">
+      <div class="tags"><span class="tag t-tech">Page 3 of 5</span><span class="tag t-dir">3 layers</span></div>
+      <h3>Solution deep dive</h3>
+      <p>Each capability unpacked: business-readable, technical mechanism, and what we ship that's genuinely novel — and why existing tools don't do it.</p>
+      <div class="open">Open page 3</div>
+    </a>
+    <a class="card" href="WHY-TECHNICALLY-CHALLENGING.html">
+      <div class="tags"><span class="tag t-tech">Page 4 of 5</span><span class="tag t-land">Gauntlet + research</span></div>
+      <h3>Why it's technically hard</h3>
+      <p>Each capability's technical crux, Gauntlet fit, the S1–S10 research signals that say it's unsolved, and the bet / where it breaks.</p>
+      <div class="open">Open page 4</div>
+    </a>
+    <a class="card hero" href="PROJECT-PLANNING-DOCUMENT.html">
+      <div class="tags"><span class="tag t-dir">Page 5 of 5 · the deliverable</span><span class="tag t-land">Due Wed Jun 17</span></div>
+      <h3><span class="star">★</span> Project Planning Document</h3>
+      <p>The Gauntlet submission: problem · direction · technical approach · scope (MVP vs ambitious) · why compelling · risks · <b>who owns what</b> · the 10-min demo.</p>
+      <div class="twolinks"><a href="PROJECT-PLANNING-DOCUMENT.html"><span>Open the submission</span></a></div>
+    </a>
+  </div>
+
+  <h2 class="sec">★ Start here — the big picture</h2>
+  <p class="sub">The agency-level view: what it is, who it's for, and the business case — before any technical detail.</p>
+  <div class="grid">
+    <a class="card hero" href="THE-BIG-PICTURE.html">
+      <div class="tags"><span class="tag t-land">Vision / agency view</span><span class="tag t-dir">For any business</span></div>
+      <h3><span class="star">★</span> Provenance — Marketing You Can Prove</h3>
+      <p>The big idea, the positioning, who it's for across industries, and the business model (platform + done-for-you agency) — then problem &rarr; solution. Start here for the elevator pitch and the "why now."</p>
+      <div class="twolinks"><a href="THE-BIG-PICTURE.html"><span>Open the big picture</span></a></div>
+    </a>
+  </div>
+
+  <h2 class="sec">★ The agency pitch (start here for selling it)</h2>
+  <p class="sub">Ex-partner-grade sales narrative — the six marketing phases, the deep tech under each, and a without/with for every one.</p>
+  <div class="grid">
+    <a class="card hero" href="AGENCY-PITCH.html">
+      <div class="tags"><span class="tag t-dir">Ultra-personalization agency</span><span class="tag t-land">Business + technical</span></div>
+      <h3><span class="star">★</span> Provenance — The Agency Deck</h3>
+      <p>"Ultra-personalization breaks human review — we automate it." SCR framing, the 6-phase operating model (Plan→Create→Review→Launch→Optimize→Monitor), the specific technical solution under each phase, a concrete <b>without/with</b> for every phase, the economics, and who buys.</p>
+      <div class="twolinks"><a href="AGENCY-PITCH.html"><span>Open the agency deck</span></a></div>
+    </a>
+  </div>
+
+  <h2 class="sec">★ The packaged solution</h2>
+  <p class="sub">The single frame that ties everything together — one object, one category.</p>
+  <div class="grid">
+    <a class="card hero" href="PROVENANCE-SOLUTION.html">
+      <div class="tags"><span class="tag t-dir">System of record</span><span class="tag t-land">The unifying frame</span></div>
+      <h3><span class="star">★</span> The System of Record for Claims</h3>
+      <p>Every claim gets a chain of custody — drafted → verified → cleared → optimized → sent → monitored → proven. Where it sits in the martech stack, the claim record itself, the 7-stage lifecycle with concrete examples, and how it turns legal review from per-asset into per-rule.</p>
+      <div class="twolinks"><a href="PROVENANCE-SOLUTION.html"><span>Open the solution detail</span></a></div>
+    </a>
+    <a class="card" href="SOLUTION-MASTER-SLIDE.html">
+      <div class="tags"><span class="tag t-tech">1 master slide</span><span class="tag t-dir">Funnel + pipeline</span></div>
+      <h3>Master view — where each pillar lives</h3>
+      <p>One slide: the funnel (where we plug in) vs. the claim pipeline (how it works), with all 5 pillars — what's used, how, a practical example, and a 🔵 business + ⚙ technical reading of each.</p>
+      <div class="open">Open</div>
+    </a>
+    <a class="card" href="MECHANISM-TO-VALUE.html">
+      <div class="tags"><span class="tag t-tech">Tech → value</span><span class="tag t-dir">The so-what</span></div>
+      <h3>From mechanism to money</h3>
+      <p>Each capability traced <b>mechanism → business use → value</b>, the three value levers (risk down / speed up / revenue up), a worked ROI, and who writes the check for which value.</p>
+      <div class="open">Open</div>
+    </a>
+    <a class="card" href="BUSINESS-VISION.html">
+      <div class="tags"><span class="tag t-plain">Page 1</span><span class="tag t-dir">Business · start here</span></div>
+      <h3>The marketing promise</h3>
+      <p>The sexy business case: 1:1 on every channel, the trade-off that disappears, stakeholder wins. Then pages 2–5 unpack how.</p>
+      <div class="open">Open page 1</div>
+    </a>
+    <a class="card" href="BEYOND-MARKETING.html">
+      <div class="tags"><span class="tag t-purple" style="background:#f5f3ff;color:#6d28d9;">Applications</span><span class="tag t-dir">Beyond marketing</span></div>
+      <h3>Beyond marketing</h3>
+      <p>Agents, compliance, RAG, education, filings — where else Provenance applies and why the capstone still demos marketing first.</p>
+      <div class="open">Open</div>
+    </a>
+  </div>
+
+  <h2 class="sec">Strategy &amp; competitive view</h2>
+  <p class="sub">The full funnel, how we stack up against big tech, and how the engine improves itself — safely.</p>
+  <div class="grid">
+    <a class="card" href="FULL-FUNNEL-VIEW.html">
+      <div class="tags"><span class="tag t-land">Competitive</span><span class="tag t-dir">Funnel + big tech</span></div>
+      <h3>The Full Funnel View</h3>
+      <p>The end-to-end funnel, what Meta / Google / Salesforce / Adobe / Netflix already do in personalization, and the two differentiators that beat them: provable generation + truth-bounded optimization.</p>
+      <div class="open">Open</div>
+    </a>
+    <a class="card" href="SELF-OPTIMIZING-SLIDES.html">
+      <div class="tags"><span class="tag t-tech">2 slides</span><span class="tag t-dir">RL + safety</span></div>
+      <h3>Self-Optimizing — &amp; how we fix the risk</h3>
+      <p>Two slides: the self-optimizing loop is one layer; the verifier is what makes it safe (constrained self-optimization), plus the full risk → fix table.</p>
+      <div class="open">Open</div>
+    </a>
+  </div>
+
+  <h2 class="sec">★ The pitch</h2>
+  <p class="sub">The repositioned funnel — headlined on its verification core. Two versions of the same product, for two audiences.</p>
+  <div class="grid">
+    <a class="card hero" href="SELF-COMPILING-FUNNEL-PROPOSAL.html">
+      <div class="tags"><span class="tag t-tech">Chosen pitch</span><span class="tag t-dir">Direction A · ML + LLM</span></div>
+      <h3><span class="star">★</span> The Provable Funnel</h3>
+      <p>AI outreach that can't say anything it can't prove — every claim decomposed, cited, verified, or killed before it sends. The verification gate is the AI primitive; the GTM scale is the ambition thread.</p>
+      <div class="twolinks">
+        <a href="SELF-COMPILING-FUNNEL-PROPOSAL.html"><span>Technical version (for judges)</span></a>
+        <a href="PROVABLE-FUNNEL-FOR-MARKETERS.html"><span>Plain-English version (for marketers)</span></a>
+      </div>
+    </a>
+  </div>
+
+  <h2 class="sec">Alternatives — same trust spine, different framing</h2>
+  <p class="sub">If the team skews differently, these are the backups (and they show judges you understand the whole landscape).</p>
+  <div class="grid">
+    <a class="card" href="OVERSIGHT-LAYER-PROPOSAL.html">
+      <div class="tags"><span class="tag t-alt">Alternative #1</span><span class="tag t-dir">Direction B · agent design</span></div>
+      <h3>The Oversight Layer</h3>
+      <p>One shared agent does the work; a trained, calibrated model decides which outputs a human must verify. Answers the brief's own Direction-B example. Most ambitious + recruit-magnetic.</p>
+      <div class="open">Open</div>
+    </a>
+    <a class="card" href="QUALITY-ORACLE-PROPOSAL.html">
+      <div class="tags"><span class="tag t-alt">Alternative #2</span><span class="tag t-dir">Direction A · ML + LLM</span></div>
+      <h3>The Quality Oracle</h3>
+      <p>A small model reads a big LLM's hidden states to predict — before you pay — whether the answer is wrong, then routes / gates / cascades. The densest pure-AI-engineering credential.</p>
+      <div class="open">Open</div>
+    </a>
+  </div>
+
+  <h2 class="sec">The landscape</h2>
+  <p class="sub">The research and the full candidate set the choice was made from.</p>
+  <div class="grid">
+    <a class="card" href="CAPSTONE-IDEA-MENU.html">
+      <div class="tags"><span class="tag t-land">Research</span><span class="tag t-land">7 candidates</span></div>
+      <h3>The Idea Menu</h3>
+      <p>An 8-gap radar of what's actually unsolved in AI (June 2026, sourced from HN / X / arXiv) plus 7 ranked capstone candidates with ambition / feasibility / authority ratings.</p>
+      <div class="open">Open</div>
+    </a>
+  </div>
+
+  <h2 class="sec">Suggested reading order</h2>
+  <div class="order">
+    <p><b>1.</b> <a href="BUSINESS-VISION.html"><b>Marketing promise</b></a> (page 1) → <a href="BEYOND-MARKETING.html"><b>Beyond marketing</b></a> (applications). &nbsp;<b>2.</b> <a href="COHORT-DEMO-PROJECT-PLAN.md"><b>Cohort demo build plan</b></a> + <a href="SHOWCASE-DEMO.html"><b>showcase beats</b></a> (Jun 29). &nbsp;<b>3.</b> Pages <a href="BEFORE-AFTER-VALUE.html">2–5</a> for depth. &nbsp;<b>4.</b> <a href="PROVENANCE-SUBMISSION-2PAGE.html"><b>2-page submission</b></a> to send.</p>
+  </div>
+
+  <footer>
+    <p><b>Next deliverable:</b> the graded Project Planning Document (problem · approach · scope · who-owns-what across the 4 surfaces), due Wed Jun 17 11:59 PM. All files live in <code>~/projects/lyso/docs/</code>.</p>
+    <p>Gauntlet Capstone · Week 1 · Jun 15 2026.</p>
+  </footer>
+
+</div>
+</body>
+</html>

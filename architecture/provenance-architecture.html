@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Provenance — Architecture &amp; Data-Process Diagrams</title>
+<style>
+  :root{
+    --navy:#0a1f44; --navy2:#1f4e79; --blue:#2e6da4; --blue2:#5b9bd5; --blue3:#9dc3e6;
+    --ink:#1d2b45; --gray:#5a6b86; --rule:#e3e9f2; --bg:#ffffff; --panel:#f6f9fd;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    font-size:16px;line-height:1.55}
+  header.top{background:var(--navy);color:#fff;padding:34px 40px 30px}
+  header.top .kicker{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--blue3);margin:0 0 8px}
+  header.top h1{margin:0;font-size:30px;font-weight:700;letter-spacing:-.01em}
+  header.top p{margin:10px 0 0;color:#cdd9ea;max-width:880px;font-size:15px}
+  nav.toc{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--rule);
+    padding:12px 40px;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;box-shadow:0 1px 0 rgba(10,31,68,.03)}
+  nav.toc a{color:var(--navy2);text-decoration:none;font-size:13px;font-weight:600;padding:4px 2px;border-bottom:2px solid transparent}
+  nav.toc a:hover{border-bottom-color:var(--blue2)}
+  nav.toc .lbl{color:var(--gray);font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin-right:6px}
+  main{max-width:1160px;margin:0 auto;padding:8px 40px 80px}
+  section.module{padding:40px 0;border-bottom:1px solid var(--rule)}
+  .modhead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  .badge{display:inline-block;background:var(--navy2);color:#fff;font-weight:700;font-size:13px;
+    width:30px;height:30px;line-height:30px;text-align:center;border-radius:6px;flex:0 0 auto}
+  .badge.proof{background:var(--blue2);color:var(--navy)}
+  h2.action{margin:0;font-size:23px;font-weight:700;color:var(--navy);letter-spacing:-.01em}
+  .pillar{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);
+    border:1px solid var(--blue3);border-radius:20px;padding:3px 11px}
+  .role{margin:12px 0 0;color:#33415c;max-width:920px}
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:24px}
+  @media(max-width:900px){.pair{grid-template-columns:1fr}}
+  .diagram{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:18px 18px 14px}
+  .diagram h3{margin:0 0 4px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--navy2)}
+  .diagram h3 .t{display:block;font-size:16px;letter-spacing:0;text-transform:none;color:var(--navy);font-weight:700;margin-top:2px}
+  .diagram .target{overflow-x:auto;padding:8px 0 4px;text-align:center}
+  .diagram .target svg{max-width:100%;height:auto}
+  .cap{margin:10px 2px 0;font-size:13.5px;color:#46546f}
+  .cap b{color:var(--navy)}
+  .src{margin-top:14px;font-size:12px;color:var(--gray)}
+  .src a{color:var(--blue)}
+  .legend{background:#fff;border:1px dashed var(--blue3);border-radius:10px;padding:14px 18px;margin:26px 0 0;font-size:13.5px;color:#33415c}
+  .legend b{color:var(--navy)}
+  footer{max-width:1160px;margin:0 auto;padding:26px 40px 60px;color:var(--gray);font-size:12.5px}
+  .loaderr{color:#9a3412;font-size:13px}
+</style>
+</head>
+<body>
+<header class="top">
+  <p class="kicker">Provenance · Gauntlet Capstone · Architecture</p>
+  <h1>Architecture &amp; Data-Process Diagrams</h1>
+  <p>The product is a <b style="color:#fff">system of record for claims</b>. Five modules form a closed trust loop — generate → verify → optimize → send → monitor → re-verify — with the Assurance Lab proving the verifier works. Each module below shows its <b style="color:#fff">architecture</b> (structure) and its <b style="color:#fff">data process</b> (flow from system input to output).</p>
+</header>
+
+<nav class="toc">
+  <span class="lbl">Jump to</span>
+  <a href="#overview">Overview</a>
+  <a href="#m1">1 · Claims Library</a>
+  <a href="#m2">2 · The Gate</a>
+  <a href="#m3">3 · The Optimizer</a>
+  <a href="#m4">4 · Drift Monitor</a>
+  <a href="#m5">5 · Assurance Lab</a>
+</nav>
+
+<main>
+  <section class="module" id="overview">
+    <div class="modhead">
+      <span class="badge" style="background:var(--navy)">◆</span>
+      <h2 class="action">One closed loop: generate, verify, optimize, monitor — truth is the boundary</h2>
+    </div>
+    <p class="role">The Claims Library feeds generation and the Gate. The Gate clears only entailed, permissible claims; cleared variants are the only arms the Optimizer may pull. The Drift Monitor re-triggers the Gate when a source changes. The Assurance Lab continuously attacks the Gate so reliability is a measured number.</p>
+    <div class="pair">
+      <div class="diagram"><h3>Architecture<span class="t">The claim system of record</span></h3><div class="target" id="ov-arch"></div>
+        <p class="cap">The Library feeds both generation and the Gate; every verdict lands in the <b>ledger + audit trail</b>; Drift and Assurance wrap the Gate.</p></div>
+      <div class="diagram"><h3>Data process<span class="t">The claim lifecycle</span></h3><div class="target" id="ov-flow"></div>
+        <p class="cap">Falsehoods <b>never enter the reward loop</b>, so the Optimizer cannot converge to a higher-reward lie — constrained optimization as a structural fix for reward-hacking.</p></div>
+    </div>
+    <div class="legend"><b>The single most original bet:</b> bounding the Optimizer's action space to <i>verified</i> outputs makes reward-hacking structurally impossible — the policy can't win by lying because lies are never on the menu.</div>
+  </section>
+
+  <section class="module" id="m1">
+    <div class="modhead"><span class="badge">1</span><h2 class="action">Claims Library — messy docs become a versioned, source-bound claim graph</h2><span class="pillar">Input · substrate</span></div>
+    <p class="role">Atomic-claim extraction + evidence-binding + MLR approval turn approved documents into a queryable claim–evidence graph. Generation and reps pull <b>only</b> from the approved, in-date set — a retired claim is not selectable.</p>
+    <div class="pair">
+      <div class="diagram"><h3>Architecture<span class="t">Extract → bind → approve → graph</span></h3><div class="target" id="m1-arch"></div>
+        <p class="cap">Output consumers: <b>Generation</b>, <b>The Gate</b> (evidence retrieval), and <b>Drift Monitor</b> (source versions).</p></div>
+      <div class="diagram"><h3>Data process<span class="t">Source doc → queryable claim</span></h3><div class="target" id="m1-flow"></div>
+        <p class="cap">An unstructured document becomes versioned, source-bound, approved claim nodes; rejects are quarantined and <b>not selectable</b>.</p></div>
+    </div>
+  </section>
+
+  <section class="module" id="m2">
+    <div class="modhead"><span class="badge">2</span><h2 class="action">The Gate — every claim is cited or killed before it can be sent</h2><span class="pillar">Verification · core</span></div>
+    <p class="role">Decompose → bind → NLI + calibrated diverse-judge ensemble → compliance rules → cheap-first router-referee cascade. Replaces the gameable single LLM-judge with calibrated selective prediction. Output: a green / amber / red claim ledger.</p>
+    <div class="pair">
+      <div class="diagram"><h3>Architecture<span class="t">Calibrated-ensemble verification</span></h3><div class="target" id="m2-arch"></div>
+        <p class="cap">Cheap NLI runs first; only the <b>uncertain</b> claims escalate to the full ensemble — cost scales with difficulty.</p></div>
+      <div class="diagram"><h3>Data process<span class="t">Draft → governed message + ledger</span></h3><div class="target" id="m2-flow"></div>
+        <p class="cap">Green = cite · amber = repair / disclaimer · red = block. Legal sets the rules <b>once</b>; every message is checked in seconds.</p></div>
+    </div>
+  </section>
+
+  <section class="module" id="m3">
+    <div class="modhead"><span class="badge">3</span><h2 class="action">The Optimizer — it optimizes conversion, but only inside the truth</h2><span class="pillar">Decisioning · most novel</span></div>
+    <p class="role">A contextual bandit (Thompson / LinUCB) over a constrained action space of verified + cleared variants only. Hierarchical priors for cold-start; doubly-robust off-policy eval. The truth boundary is the guardrail on the RL loop.</p>
+    <div class="pair">
+      <div class="diagram"><h3>Architecture<span class="t">Bandit over verified arms only</span></h3><div class="target" id="m3-arch"></div>
+        <p class="cap">An unverified / blocked variant <b>never enters the action pool</b> — the anti-Goodhart boundary.</p></div>
+      <div class="diagram"><h3>Data process<span class="t">Toward per-segment convergence</span></h3><div class="target" id="m3-flow"></div>
+        <p class="cap">Each micro-segment auto-converges to its best <b>verified</b> message — continuous lift, zero added liability.</p></div>
+    </div>
+  </section>
+
+  <section class="module" id="m4">
+    <div class="modhead"><span class="badge">4</span><h2 class="action">Drift Monitor — when a source changes, only the affected claims re-verify</h2><span class="pillar">Temporal</span></div>
+    <p class="role">A claim-dependency graph + change-data-capture propagates invalidation to exactly the affected claims, re-runs only those through the Gate, and auto-pauses a now-false claim or unblocks a now-allowed one. Incremental cache-invalidation, for truth.</p>
+    <div class="pair">
+      <div class="diagram"><h3>Architecture<span class="t">Dependency graph + re-verification</span></h3><div class="target" id="m4-arch"></div>
+        <p class="cap">Re-verification <b>reuses the Gate</b> on the affected subset only — not the whole corpus.</p></div>
+      <div class="diagram"><h3>Data process<span class="t">Flow on a source change</span></h3><div class="target" id="m4-flow"></div>
+        <p class="cap">Now-false → <b>paused</b> before it sends; now-permitted → <b>unblocked everywhere</b> instantly.</p></div>
+    </div>
+  </section>
+
+  <section class="module" id="m5">
+    <div class="modhead"><span class="badge proof">5</span><h2 class="action">Assurance Lab — attack your own checker, then publish the number</h2><span class="pillar">Proof · eval</span></div>
+    <p class="role">Synthetic adversarial traps (number-drift, unsupported superlative, false equivalence, true-but-unsayable) run through the Gate; decomposed reliability — catch-rate at fixed false-reject, paraphrase robustness, ECE, severity buckets — vs. a single-LLM-judge baseline. A wind tunnel for the checker.</p>
+    <div class="pair">
+      <div class="diagram"><h3>Architecture<span class="t">Adversarial self-test harness</span></h3><div class="target" id="m5-arch"></div>
+        <p class="cap">The harness <b>exercises the real Gate</b> and compares it against the baseline judge on the same traps.</p></div>
+      <div class="diagram"><h3>Data process<span class="t">Claims → audited metric</span></h3><div class="target" id="m5-flow"></div>
+        <p class="cap">Turns trust into a <b>number</b> a risk committee can act on — assurance itself shortens enterprise sales cycles.</p></div>
+    </div>
+    <p class="src">Sources of record: <a href="../../decks/PROVENANCE-CAPSTONE.html">PROVENANCE-CAPSTONE</a> · <a href="../../decks/COHORT-DEMO-PROJECT-PLAN.md">COHORT-DEMO-PROJECT-PLAN §3</a> · <a href="../../decks/WHY-TECHNICALLY-CHALLENGING.html">WHY-TECHNICALLY-CHALLENGING</a> · <a href="../../decks/SOLUTION-DEEP-DIVE.html">SOLUTION-DEEP-DIVE</a></p>
+  </section>
+</main>
+
+<footer>
+  Provenance · Gauntlet Capstone · architecture diagrams rendered with Mermaid. Editable source lives alongside this file in <code>diagrams/*.md</code>. · Jun 2026
+</footer>
+
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+mermaid.initialize({
+  startOnLoad:false, securityLevel:'loose', theme:'base',
+  flowchart:{htmlLabels:true, curve:'basis', useMaxWidth:true, nodeSpacing:42, rankSpacing:46},
+  sequence:{useMaxWidth:true, mirrorActors:false, wrap:true},
+  themeVariables:{
+    fontFamily:'-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif',
+    fontSize:'14px',
+    primaryColor:'#eaf1fa', primaryBorderColor:'#1f4e79', primaryTextColor:'#0a1f44',
+    secondaryColor:'#dce9f7', tertiaryColor:'#f4f8fd',
+    lineColor:'#5b9bd5', textColor:'#1d2b45',
+    clusterBkg:'#ffffff', clusterBorder:'#9dc3e6',
+    actorBkg:'#1f4e79', actorBorder:'#0a1f44', actorTextColor:'#ffffff',
+    signalColor:'#0a1f44', signalTextColor:'#1d2b45',
+    labelBoxBkgColor:'#eaf1fa', labelBoxBorderColor:'#1f4e79', labelTextColor:'#0a1f44',
+    noteBkgColor:'#fff4cc', noteBorderColor:'#d8b14a', noteTextColor:'#3a2f10',
+    altSectionBkgColor:'#f4f8fd'
+  }
+});
+
+const diagrams = {
+'ov-arch':`flowchart TB
+  IN["Prospect + segment context"]
+  GEN["Grounded generation<br/>per-prospect draft"]
+  L["1 · Claims Library<br/>claim–evidence graph"]
+  G["2 · The Gate<br/>verify + clear"]
+  O["3 · The Optimizer<br/>truth-bounded bandit"]
+  D["4 · Drift Monitor<br/>temporal re-grounding"]
+  A["5 · Assurance Lab<br/>adversarial self-test"]
+  LED[("Claim ledger + audit trail")]
+  OUT["Sent message<br/>cited or killed"]
+  L --> GEN
+  IN --> GEN --> G
+  L --> G
+  G --> LED
+  G -->|cleared variants| O --> OUT
+  OUT --> LED
+  L -. source versions .-> D
+  D -. re-verify trigger .-> G
+  A -. audits + traps .-> G
+  LED --> D`,
+'ov-flow':`flowchart LR
+  A["Claim authored<br/>+ MLR approved"] --> B["Draft generated<br/>per prospect"]
+  B --> C["Gate: decompose →<br/>bind → verify → clear"]
+  C -->|cited| D["Optimizer selects<br/>best verified variant"]
+  C -->|unsupported| X["Repaired or blocked<br/>before send"]
+  D --> E["Send + log reward<br/>reply / convert / unsub"]
+  E --> F["Drift Monitor<br/>watches sources"]
+  F -->|source changed| C
+  C --> L[("Ledger + audit")]
+  C -. sampled traps .- AL["Assurance Lab<br/>catch-rate vs false-reject"]`,
+'m1-arch':`flowchart TB
+  subgraph SRC["Source registry — system-of-record inputs"]
+    S1["Approved studies<br/>+ data sheets"]
+    S2["Permits +<br/>regulatory filings"]
+    S3["Brand / Drew<br/>email corpus"]
+    S4["Product +<br/>pricing facts"]
+  end
+  EX["Atomic-claim extractor<br/>LLM + spaCy repair"]
+  BIND["Evidence binder<br/>retrieval: claim → source span"]
+  NORM["Normalizer + dedupe<br/>canonical form · puffery class"]
+  MLR["Approval / MLR workflow<br/>human sign-off · retire"]
+  GRAPH[("Claim–evidence graph<br/>versioned · provenance")]
+  API["Query API<br/>in-date claims only"]
+  SRC --> EX --> BIND --> NORM --> MLR --> GRAPH --> API
+  API --> OUT1["→ Generation service"]
+  API --> OUT2["→ The Gate · evidence retrieval"]
+  API --> OUT3["→ Drift Monitor · source versions"]`,
+'m1-flow':`flowchart LR
+  A["Raw source doc<br/>study · permit · sheet"] --> B["Structure-aware parse<br/>locate-then-read"]
+  B --> C["Extract atomic claims<br/>+ char spans"]
+  C --> D["Bind each claim<br/>to its source span"]
+  D --> E["Normalize · dedupe<br/>classify puffery vs fact"]
+  E --> F{"MLR / human<br/>approve?"}
+  F -->|approved| G["Versioned claim node<br/>status: in-date"]
+  F -->|rejected| H["Quarantine<br/>not selectable"]
+  G --> I["Output: queryable,<br/>in-date claim set"]`,
+'m2-arch':`flowchart TB
+  DRAFT["Draft copy<br/>per-prospect"]
+  DEC["Claim decomposer<br/>LLM + spaCy repair"]
+  RET["Evidence retriever<br/>BM25 + embeddings → Claims Library"]
+  NLI["NLI entailment<br/>DeBERTa-v3-MNLI"]
+  ENS["Diverse judge ensemble<br/>multi-family LLMs"]
+  CAL["Calibrator<br/>isotonic · ECE"]
+  RULES["Compliance rules engine<br/>MLR holds · FTC · channel · jurisdiction"]
+  CAS["Router-referee cascade<br/>cheap-first · escalate uncertain"]
+  PROBE["Hidden-state probe<br/>optional · pre-flag"]
+  LED[("Claim ledger + API<br/>green · amber · red")]
+  DRAFT --> DEC --> RET --> NLI --> CAL
+  NLI --> ENS --> CAL
+  CAL --> RULES --> CAS --> LED
+  PROBE -. activations .-> CAS
+  RET -. evidence .-> NLI`,
+'m2-flow':`sequenceDiagram
+  participant Draft
+  participant Dec as Decomposer
+  participant Ret as Retriever
+  participant NLI as NLI + Ensemble
+  participant Cal as Calibrator
+  participant Rules as Compliance Rules
+  participant Cas as Router-Referee
+  participant Led as Claim Ledger
+  Draft->>Dec: raw copy
+  Dec->>Ret: atomic claims + spans
+  Ret->>NLI: claim + retrieved evidence
+  NLI->>Cal: entailment + ensemble scores
+  Cal->>Rules: calibrated entailment confidence
+  Rules->>Cas: permit · block · needs-disclaimer
+  Cas->>Cas: cheap checks first; escalate uncertain
+  Cas->>Led: verdict per claim
+  Led-->>Draft: green cite · amber repair · red block`,
+'m3-arch':`flowchart TB
+  POOL["Verified-variant pool<br/>Gate-cleared arms ONLY"]
+  CTX["Context featurizer<br/>segment · timing · ICP fit"]
+  POL["Bandit policy<br/>Thompson / LinUCB"]
+  PRIOR["Hierarchical priors<br/>cold-start segments"]
+  SEND["Send + outcome logger"]
+  RWD["Reward model<br/>reply/convert + · unsub −"]
+  OPE["Off-policy evaluator<br/>doubly-robust · conf. sequences"]
+  SIM["Persona simulator<br/>LLM personas for demo"]
+  POOL --> POL
+  CTX --> POL
+  PRIOR --> POL
+  POL --> SEND --> RWD --> POL
+  SEND -. logged data .-> OPE -. corrected estimates .-> POL
+  SIM -. synthetic rewards .-> RWD`,
+'m3-flow':`flowchart LR
+  A["Gate clears<br/>N variants"] --> B["Enter verified<br/>action pool"]
+  B --> C["Per recipient:<br/>featurize context"]
+  C --> D["Bandit selects<br/>verified arm"]
+  D --> E["Send"]
+  E --> F["Observe reward<br/>reply / convert / unsub"]
+  F --> G["Update posterior<br/>+ off-policy eval"]
+  G --> C
+  G --> H["Output: per-segment<br/>best VERIFIED variant"]
+  X["Unverified /<br/>blocked variant"] -. never enters .-x B`,
+'m4-arch':`flowchart TB
+  CDC["Source change-data-capture<br/>watch source registry"]
+  DEP[("Claim-dependency graph<br/>claim → source-version")]
+  PROP["Invalidation propagator<br/>diff → affected claims"]
+  REV["Targeted re-verification<br/>calls The Gate on affected only"]
+  CTRL["Send-state controller<br/>auto-pause · auto-unblock"]
+  AUD["Audit log<br/>what changed · when · why"]
+  CDC -->|source diff| PROP
+  DEP --> PROP
+  PROP -->|affected claim_ids| REV
+  REV -->|new verdicts| CTRL
+  REV --> DEP
+  CTRL --> AUD
+  CTRL --> LIVE["Live sends<br/>paused / unblocked"]`,
+'m4-flow':`sequenceDiagram
+  participant Src as Source registry
+  participant CDC as Change-data-capture
+  participant Dep as Dependency graph
+  participant Gate as The Gate
+  participant Ctrl as Send-state controller
+  participant Led as Ledger + sends
+  Src->>CDC: source edited / hold flipped
+  CDC->>Dep: which claims depend on this source-version?
+  Dep->>Gate: re-verify only the affected claims
+  Gate->>Ctrl: new verdict per claim
+  alt now unsupported
+    Ctrl->>Led: pause live sends · mark stale
+  else now permitted
+    Ctrl->>Led: unblock everywhere · mark cleared
+  end`,
+'m5-arch':`flowchart TB
+  SEED["Verified claims<br/>from Claims Library"]
+  MUT["Adversarial-trap generator<br/>number-drift · superlative · false-equiv · unsayable"]
+  SET[("Held-out trap set<br/>labeled true/false + severity")]
+  HARN["Eval harness<br/>runs traps THROUGH the Gate"]
+  BASE["Baseline comparator<br/>single LLM-judge"]
+  METR["Metrics engine<br/>catch-rate · false-reject · ECE · severity"]
+  DASH["Assurance dashboard<br/>headline numbers + reliability diagram"]
+  GATE["The Gate"]
+  SEED --> MUT --> SET --> HARN
+  HARN -->|Gate verdicts| METR
+  BASE -->|baseline verdicts| METR
+  METR --> DASH
+  HARN -. exercises .-> GATE`,
+'m5-flow':`flowchart LR
+  A["Verified claims"] --> B["Mutate into labeled traps<br/>+ severity"]
+  B --> C["Mix with clean<br/>held-out claims"]
+  C --> D["Feed through<br/>The Gate"]
+  C --> E["Feed through<br/>baseline LLM-judge"]
+  D --> F["Collect verdicts"]
+  E --> F
+  F --> G["Decomposed reliability:<br/>catch-rate · false-reject · ECE · severity"]
+  G --> H["Output: audited metric<br/>98.7% catch · 2.1% FR · ±3% calibrated"]`
+};
+
+for (const [id, def] of Object.entries(diagrams)){
+  const el = document.getElementById(id);
+  if(!el) continue;
+  try{
+    const { svg } = await mermaid.render('mx-'+id, def);
+    el.innerHTML = svg;
+  }catch(e){
+    el.innerHTML = '<div class="loaderr">Diagram failed to render: '+(e&&e.message?e.message:e)+'</div>';
+    console.error(id, e);
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Full Funnel — Big-Tech Personalization vs. Our Two Differentiators</title>
+<style>
+  :root{
+    --navy:#0a2540;--navy-2:#102a43;--slate:#334e68;--slate-2:#486581;--muted:#627d98;
+    --line:#d9e2ec;--line-soft:#eef2f6;
+    --blue-1:#eff6ff;--blue-2:#dbeafe;--blue-3:#93c5fd;--blue-4:#3b82f6;--blue-5:#1d4ed8;--blue-6:#1e40af;
+    --paper:#f7f9fc;
+    --green:#15803d;--green-bg:#dcfce7;--red:#b91c1c;--red-bg:#fee2e2;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--navy-2);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 28px 96px;}
+  a{color:var(--blue-5);}
+
+  header.mast{background:var(--navy);color:#fff;padding:52px 0 40px;border-bottom:4px solid var(--blue-4);}
+  header.mast .wrap{padding-bottom:0;}
+  .kicker{text-transform:uppercase;letter-spacing:.18em;font-size:12px;font-weight:600;color:var(--blue-3);margin:0 0 14px;}
+  h1.title{font-size:36px;line-height:1.1;margin:0 0 12px;font-weight:700;letter-spacing:-.01em;}
+  .tagline{font-size:17px;color:#c9d8e8;margin:0;max-width:760px;}
+  .tagline b{color:#fff;}
+
+  h2.sec{font-size:13px;text-transform:uppercase;letter-spacing:.16em;color:var(--blue-6);
+    border-bottom:2px solid var(--navy);padding-bottom:9px;margin:50px 0 6px;}
+  .lead{font-size:21px;font-weight:700;color:var(--navy);margin:10px 0 6px;letter-spacing:-.01em;line-height:1.3;}
+  p{font-size:15px;color:var(--slate);}
+  strong{color:var(--navy-2);}
+
+  /* FUNNEL */
+  .funnel{margin-top:16px;}
+  .stages{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+  .stage{border:1px solid var(--line);border-radius:8px;background:#fff;overflow:hidden;}
+  .stage .sh{padding:9px 12px;color:#fff;font-size:13px;font-weight:700;letter-spacing:.02em;text-align:center;}
+  .stage:nth-child(1) .sh{background:#1e3a5f;}
+  .stage:nth-child(2) .sh{background:#234a78;}
+  .stage:nth-child(3) .sh{background:#285c92;}
+  .stage:nth-child(4) .sh{background:#1d4ed8;}
+  .stage:nth-child(5) .sh{background:#2563eb;}
+  .stage .sb{padding:10px 12px;}
+  .stage .row{font-size:11.5px;margin:0 0 7px;line-height:1.4;}
+  .stage .row .tag{display:block;font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:1px;}
+  .stage .row.us .tag{color:var(--blue-6);}
+  .stage .row.us{color:var(--navy-2);font-weight:600;}
+  .bands{display:grid;grid-template-columns:3fr 2fr;gap:8px;margin-top:8px;}
+  .band{border-radius:7px;padding:8px 12px;font-size:12px;font-weight:700;text-align:center;letter-spacing:.03em;}
+  .band.bt{background:var(--line-soft);color:var(--slate-2);border:1px dashed var(--slate-2);}
+  .band.ours{background:var(--blue-1);color:var(--blue-6);border:1px solid var(--blue-3);}
+
+  /* LANDSCAPE GRID */
+  .land{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+  .lc{border:1px solid var(--line);border-radius:9px;background:#fff;padding:14px 16px;}
+  .lc .nm{font-size:15px;font-weight:700;color:var(--navy);}
+  .lc .does{font-size:13.5px;color:var(--slate);margin:5px 0 8px;}
+  .lc .gap{font-size:12.5px;color:var(--red);background:var(--red-bg);border-radius:5px;padding:6px 10px;}
+  .lc .gap b{color:#7f1d1d;}
+
+  .takeaway{background:var(--navy);color:#fff;border-radius:10px;padding:20px 24px;margin-top:16px;}
+  .takeaway .tt{font-size:17px;font-weight:700;margin:0 0 10px;color:#fff;}
+  .takeaway ul{margin:0;padding-left:0;list-style:none;}
+  .takeaway li{position:relative;padding-left:24px;margin:8px 0;font-size:14.5px;color:#dbe5f0;}
+  .takeaway li::before{content:"\2715";position:absolute;left:2px;color:#fca5a5;font-weight:700;}
+  .takeaway li b{color:#fff;}
+
+  /* DIFFERENTIATORS */
+  .diffs{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px;}
+  .diff{border:1px solid var(--blue-2);border-top:4px solid var(--blue-5);border-radius:10px;background:#fff;padding:18px 20px;}
+  .diff .dn{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--blue-6);}
+  .diff .dt{font-size:19px;font-weight:700;color:var(--navy);margin:4px 0 8px;letter-spacing:-.01em;}
+  .diff p{margin:0 0 8px;font-size:14px;color:var(--slate);}
+  .diff p:last-child{margin-bottom:0;}
+  .diff .vs{font-size:12.5px;color:var(--navy-2);background:var(--blue-1);border-radius:6px;padding:7px 11px;}
+  .diff .vs b{color:var(--blue-6);}
+  .prac{margin-top:8px;}
+  .prac .ph{font-size:14.5px;font-weight:700;color:var(--blue-6);margin:18px 0 8px;}
+  .pgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .pcard{border:1px solid var(--line);border-radius:8px;background:#fff;padding:11px 14px;}
+  .pcard .pv{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:7px;}
+  .pcard .pbad{font-size:13px;color:#b91c1c;}
+  .pcard .pgood{font-size:13px;color:var(--navy-2);}
+  .pcard .lbl{font-weight:700;font-size:9.5px;letter-spacing:.05em;padding:1px 5px;border-radius:3px;margin-right:5px;}
+  .pcard .pbad .lbl{background:var(--red-bg);color:#b91c1c;}
+  .pcard .pgood .lbl{background:var(--green-bg);color:var(--green);}
+  .pcard .parrow{color:var(--muted);font-size:12px;margin:4px 0;}
+  .pcard .pgood .src{display:block;font-size:11.5px;color:var(--green);font-style:italic;margin-top:2px;}
+  .pcard .tline{font-size:13px;color:var(--slate);line-height:1.45;}
+  .pcard .tline b{color:var(--navy-2);}
+  .pcard .lline{font-size:13px;color:var(--blue-6);font-weight:600;margin-top:5px;}
+
+  /* MATRIX */
+  table{border-collapse:collapse;width:100%;margin:14px 0 0;font-size:14px;}
+  th{text-align:left;background:var(--navy);color:#fff;font-weight:600;padding:10px 14px;font-size:12px;letter-spacing:.03em;text-transform:uppercase;}
+  th.c{text-align:center;}
+  td{padding:10px 14px;border-bottom:1px solid var(--line);color:var(--slate);}
+  td.cap{font-weight:600;color:var(--navy-2);}
+  td.c{text-align:center;font-size:16px;font-weight:700;}
+  .yes{color:var(--green);}
+  .no{color:var(--red);}
+  tr:nth-child(even) td{background:var(--blue-1);}
+  td .sm{font-size:11.5px;font-weight:400;color:var(--muted);display:block;}
+
+  .receipt{border:1px solid var(--line);border-left:4px solid var(--red);border-radius:8px;background:#fff;padding:14px 18px;margin:12px 0;}
+  .receipt .rh{font-size:16px;font-weight:700;color:var(--navy);margin:0 0 8px;display:flex;align-items:center;gap:8px;}
+  .receipt .rh .x{color:var(--red);font-size:18px;}
+  .receipt ul{margin:0;padding-left:0;list-style:none;}
+  .receipt li{position:relative;padding-left:20px;margin:9px 0;font-size:14px;color:var(--slate);line-height:1.5;}
+  .receipt li::before{content:"";position:absolute;left:3px;top:8px;width:6px;height:6px;border-radius:50%;background:var(--red);}
+  .receipt li b{color:var(--navy-2);}
+  .receipt li .s{color:var(--muted);font-style:italic;}
+  .recsrc{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.7;}
+  .recsrc a{color:var(--slate-2);}
+  footer{margin-top:48px;padding-top:20px;border-top:2px solid var(--navy);font-size:12.5px;color:var(--muted);line-height:1.7;}
+  footer b{color:var(--navy-2);}
+  footer a{color:var(--slate-2);}
+  @media (max-width:760px){.stages{grid-template-columns:1fr 1fr;}.land,.diffs{grid-template-columns:1fr;}.bands{grid-template-columns:1fr;}h1.title{font-size:28px;}}
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <p class="kicker">The Provable Funnel · Competitive View</p>
+    <h1 class="title">The full funnel, what big tech already does, and where we win</h1>
+    <p class="tagline">AI personalization and auto-optimization are <b>already commoditized</b> by Meta, Google, Salesforce, Adobe, and Netflix. Our edge isn't doing them — it's the <b>two things none of them do: prove every claim, and bound the optimizer to the truth.</b></p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- 1. THE FULL FUNNEL -->
+  <h2 class="sec">1 · The full marketing funnel</h2>
+  <p class="lead">Five stages, end to end — and where AI lives at each.</p>
+  <p>Big tech dominates the <b>paid-acquisition top</b> (impressions, clicks, recommendations inside their own platforms). Our system plays in the <b>owned-channel, claim-heavy middle-to-bottom</b> — personalized outreach to named prospects, where the message makes specific factual promises and being wrong has a price.</p>
+  <div class="funnel">
+    <div class="stages">
+      <div class="stage">
+        <div class="sh">Awareness</div>
+        <div class="sb">
+          <div class="row"><span class="tag">Big tech</span>Advantage+ / PMax reach, lookalikes</div>
+          <div class="row us"><span class="tag">Us</span>—</div>
+        </div>
+      </div>
+      <div class="stage">
+        <div class="sh">Consideration</div>
+        <div class="sb">
+          <div class="row"><span class="tag">Big tech</span>Dynamic creative, retargeting</div>
+          <div class="row us"><span class="tag">Us</span>Provable content, awareness/nurture</div>
+        </div>
+      </div>
+      <div class="stage">
+        <div class="sh">Intent</div>
+        <div class="sb">
+          <div class="row"><span class="tag">Big tech</span>Predictive lead scoring</div>
+          <div class="row us"><span class="tag">Us</span>Enrich + score + segment</div>
+        </div>
+      </div>
+      <div class="stage">
+        <div class="sh">Conversion</div>
+        <div class="sb">
+          <div class="row"><span class="tag">Big tech</span>Send-time, auto-bidding, journeys</div>
+          <div class="row us"><span class="tag">Us</span>Personalized + <b>verified</b> outreach</div>
+        </div>
+      </div>
+      <div class="stage">
+        <div class="sh">Retention</div>
+        <div class="sb">
+          <div class="row"><span class="tag">Big tech</span>Churn predict, next-best-action</div>
+          <div class="row us"><span class="tag">Us</span>Provable lifecycle messaging</div>
+        </div>
+      </div>
+    </div>
+    <div class="bands">
+      <div class="band bt">◀ Big tech owns the paid / walled-garden funnel ▶</div>
+      <div class="band ours">◀ We own the verifiable-outreach funnel ▶</div>
+    </div>
+  </div>
+
+  <!-- 2. WHAT BIG TECH DOES -->
+  <h2 class="sec">2 · What big tech already does in personalization</h2>
+  <p class="lead">Personalization + auto-optimization is solved — and impressive. We don't pretend otherwise.</p>
+  <div class="land">
+    <div class="lc">
+      <div class="nm">Meta — Advantage+</div>
+      <div class="does">Give it a URL + budget; AI generates the creative, picks the audience, places it, and bids. Auto-generates creative variations and personalizes backgrounds per audience. 65% of advertisers scaling on it (Apr 2026).</div>
+      <div class="gap"><b>Gap:</b> engagement-optimized B2C ads; creative is unverified and needs human review; walled garden.</div>
+    </div>
+    <div class="lc">
+      <div class="nm">Google — Performance Max / AI Max</div>
+      <div class="does">Keyword-free campaigns across all six Google properties; Gemini generates assets; ML bidding captures search intent automatically.</div>
+      <div class="gap"><b>Gap:</b> optimizes for clicks/conversions, not claim accuracy; no source-grounding of generated copy.</div>
+    </div>
+    <div class="lc">
+      <div class="nm">Salesforce — Agentforce (Einstein)</div>
+      <div class="does">Autonomous marketing agents that optimize campaigns, generate content, and adapt journeys in real time; predictive scoring that learns from engagement, conversion, and revenue.</div>
+      <div class="gap"><b>Gap:</b> generated content isn't claim-verified; the agent optimizes outcomes, with truth left to human review.</div>
+    </div>
+    <div class="lc">
+      <div class="nm">Adobe — Journey Optimizer + Sensei</div>
+      <div class="does">Real-time CDP, AI-native journey orchestration, predictive everything, Firefly content generation — the heavy stack for global B2C.</div>
+      <div class="gap"><b>Gap:</b> built for scale and engagement, not regulated claim substantiation.</div>
+    </div>
+    <div class="lc">
+      <div class="nm">Netflix / Lyft / Yahoo — contextual bandits</div>
+      <div class="does">The auto-A/B technique itself: contextual bandits personalize artwork, offers, and recommendations, beating classic A/B by adapting to each user in real time. Mature, well-understood.</div>
+      <div class="gap"><b>Gap:</b> optimizes engagement only — no concept of a true vs. false variant; structurally Goodhart-prone.</div>
+    </div>
+    <div class="lc">
+      <div class="nm">The pattern across all of them</div>
+      <div class="does">Generate creative, target, bid, optimize, orchestrate journeys — increasingly with autonomous agents and bandits. The capabilities we'd "invent" already exist at scale.</div>
+      <div class="gap"><b>Gap:</b> all optimize for <b>engagement</b>; none guarantee <b>truth</b>.</div>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    <p class="tt">So what's actually missing? The same three holes, everywhere:</p>
+    <ul>
+      <li><b>No claim verification.</b> Generated copy is engagement-tuned and can hallucinate; every vendor tells you to review it. None bind a claim to a source.</li>
+      <li><b>No guardrail on the optimizer.</b> Bandits chase CTR/conversion. Nothing stops them learning that an exaggerated claim "performs."</li>
+      <li><b>Wrong surface for trust.</b> It's B2C ads and recommendations in walled gardens — not regulated, claims-heavy, named-prospect outbound where being wrong is a fine or a lawsuit.</li>
+    </ul>
+  </div>
+
+  <!-- 3. OUR TWO DIFFERENTIATORS -->
+  <h2 class="sec">3 · Our two differentiators</h2>
+  <p class="lead">We match them on the commoditized parts — and win on the two that govern trust.</p>
+  <div class="diffs">
+    <div class="diff">
+      <div class="dn">Differentiator 1</div>
+      <div class="dt">Provable generation</div>
+      <p>Every message is broken into atomic claims; each must bind to a real source and pass an independent entailment check, or it's rewritten or killed. A second gate blocks claims that are true but not legally sayable.</p>
+      <div class="vs"><b>vs. big tech:</b> they generate fast and tell you to review it. We generate and <b>guarantee every claim is sourced</b> — the layer none of them have.</div>
+    </div>
+    <div class="diff">
+      <div class="dt" style="margin-top:0;"></div>
+      <div class="dn">Differentiator 2</div>
+      <div class="dt">Constrained self-optimization</div>
+      <p>Same contextual-bandit auto-A/B that Netflix and Meta use — but a variant only enters the arena <i>after</i> it passes verification. The optimizer can chase conversion all it wants; it can't discover a winning lie, because lies never compete.</p>
+      <div class="vs"><b>vs. big tech:</b> they optimize for engagement with no truth constraint. We take their proven technique and <b>bound it to the truth</b> — the safety guarantee they have no incentive to build.</div>
+    </div>
+  </div>
+
+  <div class="prac">
+    <p class="ph">Differentiator 1 in practice — what the AI <i>wants</i> to say &rarr; what actually ships</p>
+    <div class="pgrid">
+      <div class="pcard">
+        <div class="pv">Medical device</div>
+        <div class="pbad"><span class="lbl">DRAFT</span> "Cuts recovery time 40%."</div>
+        <div class="parrow">&darr; no source for "40%"</div>
+        <div class="pgood"><span class="lbl">SHIPS</span> "In a 200-patient trial, patients resumed activity ~9 days sooner (p&lt;0.05)."<span class="src">cited to the published trial</span></div>
+      </div>
+      <div class="pcard">
+        <div class="pv">Fintech / wealth</div>
+        <div class="pbad"><span class="lbl">DRAFT</span> "Guaranteed 8% returns."</div>
+        <div class="parrow">&darr; unsupported + non-compliant</div>
+        <div class="pgood"><span class="lbl">SHIPS</span> "Averaged 6.2%/yr (2019–2024). Past performance isn't indicative of future results."<span class="src">cited to the fund fact sheet</span></div>
+      </div>
+      <div class="pcard">
+        <div class="pv">B2B SaaS</div>
+        <div class="pbad"><span class="lbl">DRAFT</span> "Cuts onboarding in half for companies like yours."</div>
+        <div class="parrow">&darr; "in half" not sourced</div>
+        <div class="pgood"><span class="lbl">SHIPS</span> "ACME, a 500-seat customer, went from 6 weeks to 4."<span class="src">cited to the ACME case study</span></div>
+      </div>
+      <div class="pcard">
+        <div class="pv">Ag / biotech (our live domain)</div>
+        <div class="pbad"><span class="lbl">DRAFT</span> "Cuts feed 13% — and you're 4,000 head."</div>
+        <div class="parrow">&darr; "13%" true but under legal hold</div>
+        <div class="pgood"><span class="lbl">SHIPS</span> "…at your 4,000 head…" — feed figure blocked, herd size kept.<span class="src">4,000 head verified vs. the EPA permit</span></div>
+      </div>
+    </div>
+
+    <p class="ph">Differentiator 2 in practice — it A/B-tests only <i>true</i> framings, and learns per segment</p>
+    <div class="pgrid">
+      <div class="pcard">
+        <div class="pv">Feedlot managers</div>
+        <div class="tline"><b>Tests (all verified):</b> cost-per-head ROI · compliance/permit angle · peer-yard reference.</div>
+        <div class="lline">&rarr; Learns the cost-per-head opener pulls ~2&times; the replies — and adopts it for that segment.</div>
+      </div>
+      <div class="pcard">
+        <div class="pv">Hospital procurement</div>
+        <div class="tline"><b>Same product, different buyer.</b> It learns the peer-hospital reference + published-study citation win; the price-led opener underperforms.</div>
+        <div class="lline">&rarr; Auto-discovered — and every variant was already true.</div>
+      </div>
+      <div class="pcard">
+        <div class="pv">What it can never do</div>
+        <div class="tline">It can't "discover" that <i>"boosts profit 50%!"</i> wins — that line fails verification and <b>never enters the test.</b></div>
+        <div class="lline">&rarr; The entire search space is true variants only.</div>
+      </div>
+      <div class="pcard">
+        <div class="pv">Cold-start + tone</div>
+        <div class="tline">A brand-new "dairy co-op" segment <b>borrows the feedlot winner,</b> then refines. If an aggressive (but true) framing drives unsubscribes, the loop backs off.</div>
+        <div class="lline">&rarr; Optimizes for truth <i>and</i> tone — not just clicks.</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="lead" style="margin-top:28px;">Side by side</p>
+  <table>
+    <thead><tr><th>Capability</th><th class="c">Big tech<span class="sm" style="color:#bcd0e6;">Meta · Google · SF · Adobe</span></th><th class="c">The Provable Funnel</th></tr></thead>
+    <tbody>
+      <tr><td class="cap">Personalize at scale</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+      <tr><td class="cap">Auto-optimize (bandit / RL)</td><td class="c yes">✓</td><td class="c yes">✓</td></tr>
+      <tr><td class="cap">Verify every claim to a source</td><td class="c no">✗</td><td class="c yes">✓</td></tr>
+      <tr><td class="cap">Optimizer bounded by truth</td><td class="c no">✗</td><td class="c yes">✓</td></tr>
+      <tr><td class="cap">Built for regulated, claims-heavy B2B</td><td class="c no">✗<span class="sm">B2C ads</span></td><td class="c yes">✓</td></tr>
+      <tr><td class="cap">Core incentive</td><td class="c" style="font-size:13px;font-weight:600;color:var(--slate);">engagement</td><td class="c" style="font-size:13px;font-weight:700;color:var(--blue-6);">accuracy + conversion</td></tr>
+    </tbody>
+  </table>
+
+  <!-- RECEIPTS -->
+  <h2 class="sec">The receipts — why each ✗ holds</h2>
+  <p class="lead">Specific, current evidence behind the three gaps — so the matrix survives a skeptic.</p>
+
+  <div class="receipt">
+    <p class="rh"><span class="x">✗</span> "Verify every claim to a source"</p>
+    <ul>
+      <li><b>Google's own Super Bowl ad (Feb 2025).</b> Gemini generated a cheesemonger's product copy claiming Gouda is "50–60% of global cheese consumption" — a confident fabrication. Google quietly edited the spot after backlash. <span class="s">If it ships a false claim in its own flagship ad, it isn't checking yours.</span></li>
+      <li><b>Salesforce's "Einstein Trust Layer"</b> — the industry's flagship trust feature — does toxicity/bias filtering, data masking, and zero-retention privacy, and "reduces hallucination" via <i>prompt instructions</i>. None of that checks a claim against a source. <span class="s">The closest thing to "trust" in enterprise marketing AI still doesn't verify facts.</span></li>
+      <li><b>Every vendor's actual guidance is "disclose + review."</b> Salesforce: label AI content with disclaimers/watermarks. Google's docs: "Gemini can hallucinate… plausible-sounding but factually incorrect." <span class="s">Disclosure and human review ≠ verification.</span></li>
+    </ul>
+  </div>
+
+  <div class="receipt">
+    <p class="rh"><span class="x">✗</span> "Optimizer bounded by truth"</p>
+    <ul>
+      <li><b>The objective functions are engagement, full stop.</b> Advantage+ optimizes ROAS; Performance Max optimizes conversions; contextual bandits (Netflix artwork) optimize plays/clicks. <span class="s">There is no truthfulness term in any of them — a claim that lifts CTR is, to the optimizer, a "better" claim, even if it's an exaggeration.</span></li>
+      <li><b>You can watch it happen.</b> In the Gemini ad, the system produced the more <i>compelling</i> number, not the true one. Optimizing for "compelling" with no truth constraint is exactly how you drift to false-but-clicky.</li>
+      <li><b>The law assumes a constraint the tools don't have.</b> The FTC's "Operation AI Comply" (2024–25) penalized unsubstantiated claims — Workado's "98% accurate" detector, IntelliVision's facial recognition. <span class="s">The optimizers have no concept of the substantiation the FTC requires.</span></li>
+    </ul>
+  </div>
+
+  <div class="receipt">
+    <p class="rh"><span class="x">✗</span> "Built for regulated, claims-heavy B2B"</p>
+    <ul>
+      <li><b>For regulated verticals they restrict, not serve.</b> Meta's 2025 "Sensitive / Financial Products & Services" categories strip health, wellness, and finance advertisers of lower-funnel conversion signals — a <i>degraded</i> algorithm, not a better one. <span class="s">The regulated advertiser gets less, not more.</span></li>
+      <li><b>Substantiation is entirely your problem.</b> Pharma can't even name a prescription drug on Google or Meta without LegitScript / NABP certification; the platform polices what you may <i>say</i> and <i>target</i> — never whether a claim is <i>true</i>.</li>
+      <li><b>And the liability is yours.</b> The FTC: "there is no AI exemption from the laws on the books." The Air Canada tribunal held the airline liable for its chatbot's false bereavement-fare claim. <span class="s">"The AI wrote it" is not a defense — the exact risk these tools leave uncovered.</span></li>
+      <li><b>It's not even their surface.</b> B2B outbound to named prospects (cold email) is owned-channel, governed by CAN-SPAM / GDPR — not the ad platforms where this AI lives.</li>
+    </ul>
+  </div>
+  <p class="recsrc">Sources: <a href="https://www.aol.com/finance/google-ai-generated-super-bowl-193046373.html">Google's Gemini Super Bowl ad error</a> · <a href="https://trailhead.salesforce.com/content/learn/modules/the-einstein-trust-layer/meet-the-einstein-trust-layer">Salesforce Einstein Trust Layer (what it actually does)</a> · <a href="https://docs.cloud.google.com/gemini/docs/discover/responsible-ai">Google — "Gemini can hallucinate"</a> · <a href="https://www.ftc.gov/news-events/news/press-releases/2024/09/ftc-announces-crackdown-deceptive-ai-claims-schemes">FTC Operation AI Comply</a> · <a href="https://www.envive.ai/post/case-study-of-air-canadas-chatbot">Air Canada chatbot liability</a> · <a href="https://www.tracklution.com/learn/navigating-meta-sensitive-ad-categories-2025/">Meta sensitive/financial ad categories (2025)</a> · <a href="https://www.perfectsearchmedia.com/blog/overcome-healthcare-ad-restrictions-google-meta">Google/Meta healthcare ad restrictions</a>.</p>
+
+  <footer>
+    <p><b>The one-line read:</b> big tech already personalizes and auto-optimizes better than any startup will — but their incentive is engagement, not accuracy. We bring big-tech-grade optimization with a verification guardrail, aimed at the regulated, trust-sensitive marketing their tools weren't built for.</p>
+    <p><b>Sources (Jun 2026):</b> <a href="https://www.facebook.com/business/ads/meta-advantage-plus/creative">Meta Advantage+ Creative</a> · <a href="https://www.marketingbrew.com/stories/2026/04/07/meta-ai-ad-creation">Meta AI ad creation (Marketing Brew)</a> · <a href="https://percuity.ai/compare/advantage-plus-vs-performance-max/">Advantage+ vs Performance Max</a> · <a href="https://www.salesforceben.com/how-salesforce-is-rebuilding-marketing-cloud-for-the-age-of-ai/">Salesforce Agentforce / Marketing Cloud</a> · <a href="https://www.geteppo.com/blog/netflix-lyft-yahoo-contextual-bandits">Netflix/Lyft/Yahoo contextual bandits (Eppo)</a> · <a href="https://netflixtechblog.com/ml-platform-meetup-infra-for-contextual-bandits-and-reinforcement-learning-4a90305948ef">Netflix TechBlog — bandits & RL infra</a>.</p>
+    <p>The Provable Funnel · competitive view · Jun 15 2026. Companion: <a href="THE-BIG-PICTURE.html">big picture</a> · <a href="SELF-OPTIMIZING-SLIDES.html">self-optimizing slides</a> · <a href="index.html">hub</a>.</p>
+  </footer>
+
+</div>
+</body>
+</html>

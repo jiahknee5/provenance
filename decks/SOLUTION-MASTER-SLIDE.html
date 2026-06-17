@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where it lives — funnel vs. claim pipeline</title>
+<style>
+  :root{
+    --navy:#0a2540;--navy-2:#102a43;--slate:#334e68;--slate-2:#486581;--muted:#627d98;
+    --line:#d9e2ec;--line-soft:#eef2f6;
+    --blue-1:#eff6ff;--blue-2:#dbeafe;--blue-3:#93c5fd;--blue-4:#3b82f6;--blue-5:#1d4ed8;--blue-6:#1e40af;--blue-7:#1e3a8a;
+    --paper:#eef2f6;
+    --green:#15803d;--green-bg:#dcfce7;--red:#b91c1c;--red-bg:#fee2e2;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--navy-2);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;padding:26px;}
+  .slide{max-width:1280px;margin:0 auto;background:#fff;border-radius:14px;border-top:5px solid var(--blue-5);
+    box-shadow:0 18px 50px rgba(10,37,64,.16);padding:30px 38px 34px;}
+
+  .eyebrow{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;font-weight:700;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--blue-6);margin-bottom:8px;}
+  .eyebrow .key{color:var(--muted);letter-spacing:.04em;}
+  h1{font-size:26px;line-height:1.18;font-weight:700;color:var(--navy);margin:0 0 4px;letter-spacing:-.01em;}
+  h1 .hl{color:var(--blue-5);}
+  .frame-q{font-size:14px;color:var(--slate);margin:0 0 16px;}
+  .frame-q b{color:var(--navy-2);}
+
+  .blocklabel{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:14px 0 7px;display:flex;align-items:center;gap:8px;}
+  .blocklabel .pin{background:var(--navy);color:#fff;border-radius:4px;padding:2px 7px;font-size:10px;letter-spacing:.04em;}
+
+  /* FUNNEL */
+  .funnel{display:flex;gap:6px;align-items:stretch;}
+  .fstage{flex:1;border:1px solid var(--line);border-radius:8px;padding:9px 11px;text-align:center;background:#fbfcfe;position:relative;}
+  .fstage .fn{font-size:13px;font-weight:700;color:var(--navy);}
+  .fstage .fd{font-size:10.5px;color:var(--muted);margin-top:2px;line-height:1.3;}
+  .fstage.zone{background:var(--blue-1);border:2px solid var(--blue-5);}
+  .fstage.zone .fd{color:var(--blue-6);}
+  .ftag{position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;letter-spacing:.04em;
+    text-transform:uppercase;padding:2px 7px;border-radius:4px;white-space:nowrap;}
+  .ftag.bt{background:var(--line-soft);color:var(--slate-2);border:1px solid var(--line);}
+  .ftag.ours{background:var(--blue-5);color:#fff;}
+  .zonebracket{text-align:center;font-size:11.5px;color:var(--blue-6);font-weight:600;margin-top:6px;}
+
+  .pivot{background:var(--navy);color:#fff;border-radius:8px;padding:10px 16px;margin:16px 0 4px;font-size:13.5px;}
+  .pivot b{color:var(--blue-3);}
+
+  /* PIPELINE */
+  .pipe{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-top:8px;}
+  .pbox{border:1px solid var(--line);border-radius:7px;padding:7px 11px;font-size:12.5px;font-weight:700;color:var(--navy);background:#fff;white-space:nowrap;}
+  .pbox.pill{color:#fff;border:none;}
+  .pbox.lib{background:var(--blue-7);}
+  .pbox.gate{background:var(--blue-5);}
+  .pbox.opt{background:var(--blue-4);}
+  .pbox.mon{background:var(--blue-6);}
+  .pbox.step{background:var(--paper);color:var(--slate-2);font-weight:600;}
+  .parrow{color:var(--blue-3);font-weight:700;font-size:14px;}
+  .ploop{font-size:11px;color:var(--muted);margin:5px 0 0 4px;font-style:italic;}
+  .assbar{margin-top:7px;border:1px dashed var(--blue-3);background:var(--blue-1);border-radius:7px;padding:7px 12px;
+    font-size:12px;color:var(--blue-6);font-weight:600;display:flex;align-items:center;gap:8px;}
+
+  /* PILLAR COLUMNS */
+  .cols{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-top:14px;}
+  .col{border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#fff;display:flex;flex-direction:column;}
+  .col .ch{padding:8px 11px;color:#fff;font-size:12.5px;font-weight:700;letter-spacing:.01em;}
+  .col.lib .ch{background:var(--blue-7);}
+  .col.gate .ch{background:var(--blue-5);}
+  .col.opt .ch{background:var(--blue-4);}
+  .col.mon .ch{background:var(--blue-6);}
+  .col.ass .ch{background:#0b3a8c;}
+  .col .cb{padding:9px 11px;flex:1;display:flex;flex-direction:column;gap:6px;}
+  .col .f{font-size:11.5px;color:var(--slate);line-height:1.4;}
+  .col .f .t{font-weight:700;color:var(--navy-2);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;display:block;color:var(--muted);margin-bottom:1px;}
+  .col .ex{font-size:11px;background:var(--paper);border-radius:5px;padding:6px 8px;color:var(--navy-2);line-height:1.4;}
+  .col .ex .ok{color:var(--green);font-weight:700;}
+  .col .ex .no{color:var(--red);font-weight:700;}
+  .col .dual{border-top:1px solid var(--line-soft);padding-top:6px;display:flex;flex-direction:column;gap:5px;}
+  .col .da{font-size:11px;line-height:1.35;}
+  .col .da .ic{font-weight:700;}
+  .col .da.biz .ic{color:var(--blue-6);}
+  .col .da.tech .ic{color:var(--slate-2);}
+  .col .da b{color:var(--navy-2);}
+
+  .foot{margin-top:16px;border-top:1px solid var(--line);padding-top:10px;font-size:12px;color:var(--muted);}
+  .foot b{color:var(--navy-2);}
+  .navhint{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(10,37,64,.85);color:#fff;
+    font-size:11px;padding:5px 13px;border-radius:999px;letter-spacing:.04em;}
+  @media print{.navhint{display:none;}body{background:#fff;padding:0;}.slide{box-shadow:none;}}
+  @media (max-width:1000px){.cols{grid-template-columns:1fr 1fr;}.funnel{flex-wrap:wrap;}.fstage{min-width:30%;}}
+</style>
+</head>
+<body>
+
+<div class="slide">
+  <div class="eyebrow"><span>Where it lives &amp; how it works</span><span class="key">🔵 business reading · ⚙ technical reading</span></div>
+  <h1>The funnel shows <span class="hl">where we plug in</span>. The claim pipeline shows <span class="hl">how we work</span>. You need both.</h1>
+  <p class="frame-q"><b>Is the funnel the right diagram?</b> Only for placement. Every pillar concentrates at one point — the moment a claim is made — so they'd pile up on the funnel. They line up cleanly on the <b>claim pipeline</b> instead. So: two views.</p>
+
+  <!-- FUNNEL: WHERE -->
+  <div class="blocklabel"><span class="pin">WHERE</span> The marketing funnel — we own the message moment, not the whole funnel</div>
+  <div class="funnel">
+    <div class="fstage"><span class="ftag bt">big tech (acquisition)</span><div class="fn">Awareness</div><div class="fd">ads, reach</div></div>
+    <div class="fstage zone"><span class="ftag ours">our zone ▶</span><div class="fn">Consideration</div><div class="fd">personalized, provable outreach</div></div>
+    <div class="fstage zone"><div class="fn">Intent</div><div class="fd">claims that must be exact</div></div>
+    <div class="fstage zone"><div class="fn">Conversion</div><div class="fd">the message that closes</div></div>
+    <div class="fstage"><div class="fn">Retention</div><div class="fd">provable re-touch</div></div>
+  </div>
+  <div class="zonebracket">▲ Every pillar fires here, at the outbound message — which is exactly why the funnel can't show how they relate.</div>
+
+  <div class="pivot">So flip the lens: a claim isn't a funnel stage, it's an object with a life. <b>The pillars are stations on its assembly line.</b></div>
+
+  <!-- PIPELINE: HOW -->
+  <div class="blocklabel"><span class="pin">HOW</span> The claim pipeline — where each pillar lives</div>
+  <div class="pipe">
+    <span class="pbox pill lib">Claims Library</span><span class="parrow">→</span>
+    <span class="pbox step">Draft</span><span class="parrow">→</span>
+    <span class="pbox pill gate">The Gate · verify + clear</span><span class="parrow">→</span>
+    <span class="pbox pill opt">The Optimizer</span><span class="parrow">→</span>
+    <span class="pbox step">Send</span><span class="parrow">→</span>
+    <span class="pbox pill mon">Drift Monitor</span>
+  </div>
+  <div class="ploop">↩ Drift Monitor feeds changes back into the Claims Library — the loop that keeps it true.</div>
+  <div class="assbar">🧪 The Assurance Lab — continuously audits The Gate with adversarial traps (proof the checker actually works)</div>
+
+  <!-- PILLAR DETAIL: what / how / example / dual audience -->
+  <div class="cols">
+    <div class="col lib">
+      <div class="ch">Claims Library</div>
+      <div class="cb">
+        <div class="f"><span class="t">Uses</span>A claim store + source registry (a database of claim rows).</div>
+        <div class="f"><span class="t">How</span>Every claim is a row bound to its source — your single source of truth for what you may say.</div>
+        <div class="ex">"saves ~$10/head" ↦ Economics Sheet v3 <span class="ok">✓</span></div>
+        <div class="dual">
+          <div class="da biz"><span class="ic">🔵</span> Your approved-claims source of truth.</div>
+          <div class="da tech"><span class="ic">⚙</span> Claim store + source registry; the corpus the verifier checks against.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col gate">
+      <div class="ch">The Gate · verify + clear</div>
+      <div class="cb">
+        <div class="f"><span class="t">Uses</span>NLI entailment + LLM-judge ensemble + a compliance rules engine; cheap-first cascade.</div>
+        <div class="f"><span class="t">How</span>Decompose → bind to source → entail (cheap check first, escalate the uncertain) → "sayable?" rule.</div>
+        <div class="ex">"same enzyme" → no source → <span class="no">rewritten</span> · "cuts feed 13%" → legal hold → <span class="no">blocked</span></div>
+        <div class="dual">
+          <div class="da biz"><span class="ic">🔵</span> A fact-checker + compliance reviewer on every line.</div>
+          <div class="da tech"><span class="ic">⚙</span> Decompose→retrieve-bind→NLI+ensemble (calibrated)→rule engine; router+referee for cost.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col opt">
+      <div class="ch">The Optimizer</div>
+      <div class="cb">
+        <div class="f"><span class="t">Uses</span>A contextual bandit (auto-A/B) per segment.</div>
+        <div class="f"><span class="t">How</span>Tests only verified + cleared variants; reply/convert = reward, unsubscribe = penalty.</div>
+        <div class="ex">Feedlot segment learns the "$/head" opener wins <span class="ok">~2:1</span></div>
+        <div class="dual">
+          <div class="da biz"><span class="ic">🔵</span> Auto-A/B that can't learn to lie.</div>
+          <div class="da tech"><span class="ic">⚙</span> Contextual bandit over a verified action space (constrained optimization).</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col mon">
+      <div class="ch">Drift Monitor</div>
+      <div class="cb">
+        <div class="f"><span class="t">Uses</span>A source-change watcher + re-verification trigger.</div>
+        <div class="f"><span class="t">How</span>When a source changes or expires, re-verify dependent claims; pause or unblock sends.</div>
+        <div class="ex">permit 4,000→2,000 → <span class="no">pause</span> "4,000 head" · UTK hold lifts → <span class="ok">unblock</span> "13%"</div>
+        <div class="dual">
+          <div class="da biz"><span class="ic">🔵</span> Keeps every claim true over time, automatically.</div>
+          <div class="da tech"><span class="ic">⚙</span> Source-version diff → claim dependency graph → targeted re-verification.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col ass">
+      <div class="ch">🧪 Assurance Lab</div>
+      <div class="cb">
+        <div class="f"><span class="t">Uses</span>An adversarial trap generator + a reliability-profile evaluator.</div>
+        <div class="f"><span class="t">How</span>Mutate true claims into subtle lies, run continuously, score catch-rate / false-reject / calibration / severity.</div>
+        <div class="ex"><span class="ok">98.7%</span> trap catch-rate · 2.1% false-reject · ±3% calibrated</div>
+        <div class="dual">
+          <div class="da biz"><span class="ic">🔵</span> Proof the checker works — audit-ready, board-ready.</div>
+          <div class="da tech"><span class="ic">⚙</span> Synthetic adversarial eval + reliability profiling (pass@k, paraphrase robustness, ECE, severity).</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot"><b>Read it in one line:</b> the funnel says we live at the message moment; the pipeline says a claim is <i>drafted → verified &amp; cleared (The Gate) → optimized → sent → monitored for drift</i>, with the Assurance Lab proving the Gate works. Five pillars, one claim, two audiences. <span style="float:right;">Provenance · master view · Jun 2026</span></div>
+</div>
+
+<div class="navhint">⌘P to export as PDF (landscape)</div>
+
+</body>
+</html>

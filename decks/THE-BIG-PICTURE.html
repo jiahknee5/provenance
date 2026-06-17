@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Provenance — Marketing You Can Prove</title>
+<style>
+  :root{
+    --navy:#0a2540;--navy-2:#102a43;--slate:#334e68;--slate-2:#486581;--muted:#627d98;
+    --line:#d9e2ec;--line-soft:#eef2f6;
+    --blue-1:#eff6ff;--blue-2:#dbeafe;--blue-3:#93c5fd;--blue-4:#3b82f6;--blue-5:#1d4ed8;--blue-6:#1e40af;
+    --paper:#f7f9fc;
+    --green:#15803d;--green-bg:#dcfce7;--red:#b91c1c;--red-bg:#fee2e2;--amber2:#a16207;--amber-bg:#fef9c3;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--navy-2);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:900px;margin:0 auto;padding:0 28px 96px;}
+
+  /* HERO — agency big idea */
+  header.hero{background:var(--navy);color:#fff;padding:84px 0 64px;border-bottom:4px solid var(--blue-4);}
+  header.hero .wrap{padding-bottom:0;}
+  .brand{display:flex;align-items:center;gap:10px;margin:0 0 30px;}
+  .brand .dot{width:11px;height:11px;border-radius:50%;background:var(--blue-4);}
+  .brand .nm{font-size:14px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#fff;}
+  .brand .wn{font-size:11px;color:var(--blue-3);letter-spacing:.08em;}
+  .bigidea{font-size:46px;line-height:1.08;margin:0 0 22px;font-weight:700;letter-spacing:-.02em;max-width:780px;}
+  .bigidea em{color:var(--blue-3);font-style:normal;}
+  .hero .promise{font-size:20px;color:#cdddec;margin:0;max-width:640px;font-weight:500;}
+
+  /* positioning statement */
+  .pos{background:#fff;border:1px solid var(--line);border-top:4px solid var(--blue-5);border-radius:8px;
+    padding:24px 26px;margin:34px 0 0;box-shadow:0 1px 2px rgba(10,37,64,.05);}
+  .pos .lab{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--slate-2);margin-bottom:10px;}
+  .pos p{margin:0;font-size:18px;line-height:1.55;color:var(--navy-2);}
+  .pos b{color:var(--blue-6);}
+
+  h2.sec{font-size:13px;text-transform:uppercase;letter-spacing:.16em;color:var(--blue-6);
+    border-bottom:2px solid var(--navy);padding-bottom:9px;margin:52px 0 6px;}
+  .lead{font-size:22px;font-weight:700;color:var(--navy);margin:10px 0 4px;letter-spacing:-.01em;line-height:1.3;}
+  p{font-size:15.5px;color:var(--slate);}
+  strong{color:var(--navy-2);}
+  ul{padding-left:0;list-style:none;margin:12px 0;}
+  ul li{position:relative;padding-left:24px;margin:10px 0;font-size:15.5px;color:var(--slate);}
+  ul li::before{content:"";position:absolute;left:4px;top:10px;width:8px;height:8px;border-radius:50%;background:var(--blue-4);}
+  li b{color:var(--navy-2);}
+
+  /* pillars */
+  .pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:12px;}
+  .pillar{background:#fff;border:1px solid var(--line);border-radius:10px;padding:18px 18px;}
+  .pillar .pn{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--blue-6);margin-bottom:6px;}
+  .pillar .pt{font-size:17px;font-weight:700;color:var(--navy);margin:0 0 6px;}
+  .pillar p{margin:0;font-size:14px;color:var(--slate);}
+
+  /* verticals */
+  .verts{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px;}
+  .vert{background:#fff;border:1px solid var(--line);border-radius:8px;padding:13px 16px;}
+  .vert .vt{font-size:15px;font-weight:700;color:var(--navy);}
+  .vert .vd{font-size:13.5px;color:var(--slate);margin-top:2px;}
+
+  /* business model two-col */
+  .models{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px;}
+  .model{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;}
+  .model .h{padding:13px 18px;color:#fff;font-weight:700;font-size:15px;letter-spacing:.02em;}
+  .model.platform .h{background:var(--slate-2);}
+  .model.agency .h{background:var(--blue-5);}
+  .model .b{padding:14px 18px;}
+  .model .b p{margin:0 0 8px;font-size:14.5px;}
+  .model .b p:last-child{margin-bottom:0;}
+  .model .b b{color:var(--navy-2);}
+
+  /* problem / solution split */
+  .ps{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:14px;}
+  .ps .side{padding:0;}
+  .ps .h{padding:13px 20px;font-size:14px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#fff;}
+  .ps .prob .h{background:#7f1d1d;}
+  .ps .sol .h{background:var(--blue-5);}
+  .ps .body{padding:8px 20px 16px;}
+  .ps .prob .body{background:#fffafa;}
+  .ps ul li{font-size:14.5px;margin:11px 0;}
+  .ps .prob ul li::before{background:#dc2626;border-radius:2px;}
+  .ps .sol ul li::before{background:var(--blue-5);}
+
+  /* claim ledger */
+  .ledger{margin:14px 0;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  .ledger .lh{background:var(--navy);color:#fff;font-size:13px;padding:11px 16px;line-height:1.5;}
+  .ledger .lh b{color:#fff;}
+  .claim{display:flex;gap:12px;align-items:flex-start;padding:11px 16px;border-top:1px solid var(--line-soft);font-size:14px;}
+  .claim .badge{flex:0 0 auto;font-size:10.5px;font-weight:700;letter-spacing:.03em;padding:3px 9px;border-radius:4px;white-space:nowrap;margin-top:1px;}
+  .b-green{background:var(--green-bg);color:var(--green);}
+  .b-amber{background:var(--amber-bg);color:var(--amber2);}
+  .b-red{background:var(--red-bg);color:var(--red);}
+  .claim .ctext{color:var(--navy-2);font-weight:600;}
+  .claim .csrc{color:var(--muted);font-size:13px;display:block;margin-top:1px;}
+
+  /* moat band */
+  .moat{background:var(--blue-1);border:1px solid var(--blue-2);border-radius:10px;padding:20px 24px;margin-top:14px;}
+  .moat .mt{font-size:18px;font-weight:700;color:var(--navy);margin:0 0 8px;}
+  .moat p{margin:0;font-size:15px;color:var(--navy-2);}
+
+  /* cta */
+  .cta{background:var(--navy);color:#fff;border-radius:10px;padding:24px 26px;margin-top:14px;}
+  .cta .ct{font-size:19px;font-weight:700;margin:0 0 8px;}
+  .cta p{margin:0;font-size:15px;color:#cdddec;}
+  .cta p b{color:#fff;}
+
+  footer{margin-top:48px;padding-top:20px;border-top:2px solid var(--navy);font-size:13px;color:var(--muted);}
+  footer b{color:var(--navy-2);}
+  footer a{color:var(--slate-2);}
+  @media (max-width:680px){
+    .pillars,.verts,.models,.ps{grid-template-columns:1fr;}
+    .bigidea{font-size:32px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="brand"><span class="dot"></span><span class="nm">Provenance</span><span class="wn">working name</span></div>
+    <h1 class="bigidea">Every brand is racing to market with AI. The winners will be the ones who can <em>prove what they said.</em></h1>
+    <p class="promise">Provenance is marketing you can prove — AI that writes a personal message to every prospect, and can't make a claim it can't back up.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="pos">
+    <div class="lab">The positioning, in one breath</div>
+    <p>For businesses whose claims carry risk — <b>regulated, technical, or reputation-sensitive</b> — Provenance is the AI marketing engine that <b>personalizes outreach at scale while guaranteeing every claim is sourced and compliant</b>. Unlike generic AI tools that write fast and hope, Provenance <b>can't say anything it can't prove.</b></p>
+  </div>
+
+  <!-- BIGGER PICTURE -->
+  <h2 class="sec">The bigger picture — why now</h2>
+  <p class="lead">AI made marketing content infinite and free. That broke trust as fast as it broke cost.</p>
+  <ul>
+    <li><b>The scarce thing is no longer copy — it's copy you can stand behind.</b> Anyone can generate a thousand emails an hour. Almost no one can guarantee they're true.</li>
+    <li><b>The real gatekeepers are legal, compliance, and brand</b> — not the creative team. They're where "AI at scale" quietly dies, because someone still has to read every word.</li>
+    <li><b>Regulators are moving.</b> The FTC and sector watchdogs are actively policing AI-generated and unsubstantiated claims. "The AI wrote it" is not a defense.</li>
+    <li><b>So trust becomes the differentiator</b> — and, done right, the moat. The brand that can <i>prove</i> its claims moves faster and sleeps better than the one that hopes.</li>
+  </ul>
+
+  <!-- WHO IT'S FOR -->
+  <h2 class="sec">Who it's for</h2>
+  <p>Any business that does outbound and where a wrong claim costs real money:</p>
+  <div class="verts">
+    <div class="vert"><div class="vt">Regulated industries</div><div class="vd">Pharma, financial services, insurance, food &amp; supplements, healthcare — every claim is a compliance event.</div></div>
+    <div class="vert"><div class="vt">Technical &amp; B2B</div><div class="vd">Industrial, biotech, deep-tech, SaaS — outreach lives or dies on specific performance numbers that must be exact.</div></div>
+    <div class="vert"><div class="vt">Reputation-sensitive brands</div><div class="vd">Enterprises and public companies where one bad claim is a headline, not a typo.</div></div>
+    <div class="vert"><div class="vt">High-consideration sales</div><div class="vd">Big-ticket, expert buyers who instantly spot a claim that isn't backed — credibility is the whole game.</div></div>
+  </div>
+
+  <!-- THE OFFER -->
+  <h2 class="sec">The offer — two ways to buy it</h2>
+  <div class="models">
+    <div class="model platform">
+      <div class="h">The Platform</div>
+      <div class="b">
+        <p><b>Software.</b> Wrap your existing outreach in the verification layer. Your team writes (or the AI does); nothing sends without a receipt for every claim.</p>
+        <p>For teams that want to run it themselves and keep marketing in-house.</p>
+      </div>
+    </div>
+    <div class="model agency">
+      <div class="h">The Agency (done-for-you)</div>
+      <div class="b">
+        <p><b>Service.</b> We run provable campaigns end-to-end — find prospects, personalize, verify, send — and hand you the audit trail.</p>
+        <p>An agency where <b>the work is provable and the proof compounds</b>: every verified claim and source makes the next campaign — and the next client — smarter.</p>
+      </div>
+    </div>
+  </div>
+
+  <p class="lead" style="margin-top:26px;">The promise, in three pillars</p>
+  <div class="pillars">
+    <div class="pillar"><div class="pn">Pillar 1</div><div class="pt">Personal at scale</div><p>A tailored message to every prospect, drawn from real facts about them — not a blast.</p></div>
+    <div class="pillar"><div class="pn">Pillar 2</div><div class="pt">Provable by default</div><p>Every claim is cited to a real source — or it's killed. Nothing ships on a hunch.</p></div>
+    <div class="pillar"><div class="pn">Pillar 3</div><div class="pt">Compliant before send</div><p>Your legal and brand rules are built in up front, not reviewed after the fact.</p></div>
+  </div>
+
+  <!-- THE PROBLEM -->
+  <h2 class="sec">The problem</h2>
+  <p class="lead">AI marketing today is fast, fluent — and unaccountable.</p>
+  <div class="ps">
+    <div class="side prob">
+      <div class="h">What businesses face today</div>
+      <div class="body">
+        <ul>
+          <li><b>The AI makes things up.</b> It will state "clinically proven" or "cuts costs 30%" with nothing behind it, in flawless prose.</li>
+          <li><b>One bad claim is real exposure.</b> An FTC complaint, a lawsuit, a regulatory fine, a brand crisis — not a rounding error.</li>
+          <li><b>So humans review everything.</b> The compliance queue is the bottleneck; personalization-at-scale dies waiting for sign-off.</li>
+          <li><b>No paper trail.</b> When it goes wrong, you can't show what was claimed, or why it was allowed.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="side sol">
+      <div class="h">What Provenance changes</div>
+      <div class="body">
+        <ul>
+          <li><b>It can only say what it can prove.</b> Verification is built into the writing, not bolted on after.</li>
+          <li><b>Every claim carries its receipt.</b> Click any line, see the source that backs it.</li>
+          <li><b>Compliance scales with you.</b> The rules run on every message automatically — no queue.</li>
+          <li><b>Full audit trail by default.</b> Every claim, source, and decision is logged. Defensible to legal, regulators, and the board.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- THE SOLUTION -->
+  <h2 class="sec">The solution — how it works</h2>
+  <p>The AI writes a draft, then a verification engine puts every claim on trial before it can send: <b>break it into individual claims → match each to a real source → confirm the source actually backs it (with independent checks, not one AI's opinion) → rewrite or kill anything unproven → block anything you're not legally allowed to say.</b> Only a fully-backed message reaches a human for the final OK.</p>
+  <div class="ledger">
+    <div class="lh"><b>Draft:</b> "At your 4,000 head, our product cuts feed 13% — $10/head in, $30 out — and it's the same enzyme as the egg version, allergen-free."</div>
+    <div class="claim"><span class="badge b-green">PROVEN ✓</span><div><span class="ctext">"4,000 head"</span><span class="csrc">Matches the prospect's public record — exact.</span></div></div>
+    <div class="claim"><span class="badge b-green">PROVEN ✓</span><div><span class="ctext">"$10/head in, $30 out"</span><span class="csrc">Backed by the approved economics sheet.</span></div></div>
+    <div class="claim"><span class="badge b-red">BLOCKED ⃠</span><div><span class="ctext">"cuts feed 13%"</span><span class="csrc">True — but that data is under legal hold, so it's not sayable. Removed.</span></div></div>
+    <div class="claim"><span class="badge b-amber">REWRITTEN ↻</span><div><span class="ctext">"same enzyme as the egg version"</span><span class="csrc">No source proves "same," so softened to what's backed: "rice-grown, egg-allergen-free."</span></div></div>
+  </div>
+  <p>The artifact every business gets: a <b>claim ledger</b> — green (proven &amp; cited), amber (rewritten to what's true), red (blocked). Proof you can show anyone.</p>
+
+  <!-- SELF-OPTIMIZE -->
+  <h2 class="sec">And it improves itself — safely</h2>
+  <p class="lead">The funnel A/B-tests itself across every segment — and can only ever discover winners that are true.</p>
+  <p>Once a message is verified, the engine keeps experimenting: it learns which angle, which proven claim to lead with, which channel, and which timing converts best for each kind of buyer — automatically shifting toward what works, the way Netflix learns which artwork you'll click. The difference is the guardrail: <b>a variant only enters the test after it passes verification.</b> So the system can chase conversion as hard as it likes and still never learn to win by exaggerating — because an unprovable claim never gets to compete.</p>
+  <div class="moat" style="background:var(--blue-1);">
+    <p class="mt">Two halves of one idea.</p>
+    <p>The verifier makes self-optimization <b>safe</b> to turn on; the optimizer makes verified copy <b>win</b>. Most AI marketing optimizes for engagement and quietly drifts toward hype. This optimizes for engagement <i>inside the boundary of what's true</i> — the one thing big-tech ad AI structurally won't do.</p>
+  </div>
+
+  <!-- MOAT -->
+  <h2 class="sec">Why it wins</h2>
+  <div class="moat">
+    <p class="mt">Proof compounds.</p>
+    <p>Every campaign and every client adds verified claims and trusted sources to the engine — so it gets faster and safer over time, and a competitor starting from zero can't catch up. <b>Trust is a moat you can't fake and can't buy.</b> It's defensible in front of the people who actually decide: legal, regulators, and the board.</p>
+  </div>
+
+  <!-- CTA -->
+  <h2 class="sec">Where it starts</h2>
+  <div class="cta">
+    <p class="ct">Prove it on one vertical, then expand.</p>
+    <p>We already have a live proving ground — a real B2B pipeline (ag/biotech) with real prospects, real sources, and a real legal hold to enforce. <b>Step one:</b> show the catch-rate — how many false or off-limits claims we stop before send. <b>Step two:</b> point the same engine at the next industry. Same protection, no rebuild.</p>
+  </div>
+
+  <footer>
+    <p><b>This is the big-picture / agency view.</b> The technical build, scope, and demo live in the companion docs — <a href="SELF-COMPILING-FUNNEL-PROPOSAL.html">the proposal (for judges)</a>, <a href="PROVABLE-FUNNEL-FOR-MARKETERS.html">the plain-English version</a>, and <a href="index.html">the hub</a>. "Provenance" is a working name.</p>
+    <p>Jun 15 2026.</p>
+  </footer>
+
+</div>
+</body>
+</html>

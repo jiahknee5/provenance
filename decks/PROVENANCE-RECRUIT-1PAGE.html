@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Provenance — Join the Project</title>
+<style>
+  :root{
+    --navy:#0a2540;--navy-2:#102a43;--slate:#334e68;--slate-2:#486581;--muted:#627d98;
+    --line:#d9e2ec;--line-soft:#eef2f6;
+    --blue-1:#eff6ff;--blue-2:#dbeafe;--blue-3:#93c5fd;--blue-4:#3b82f6;--blue-5:#1d4ed8;--blue-6:#1e40af;
+    --paper:#f7f9fc;--green:#15803d;--green-bg:#dcfce7;
+    --amber:#b45309;--amber-bg:#fffbeb;--amber-line:#fde68a;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--navy-2);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:820px;margin:0 auto;padding:0 28px 72px;}
+  a{color:var(--blue-5);}
+
+  header.mast{background:var(--navy);color:#fff;padding:48px 0 36px;border-bottom:4px solid var(--blue-4);}
+  header.mast .wrap{padding-bottom:0;}
+  .kicker{text-transform:uppercase;letter-spacing:.18em;font-size:12px;font-weight:600;color:var(--blue-3);margin:0 0 12px;}
+  h1.title{font-size:34px;line-height:1.12;margin:0 0 10px;font-weight:700;letter-spacing:-.01em;}
+  .oneliner{font-size:17px;color:#cfdcea;margin:0 0 16px;max-width:680px;}
+  .oneliner b{color:#fff;}
+  .hook{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:8px;padding:12px 16px;font-size:15px;color:#dbeafe;max-width:680px;}
+  .hook b{color:#fff;}
+
+  h2.sec{font-size:13px;text-transform:uppercase;letter-spacing:.16em;color:var(--blue-6);
+    border-bottom:2px solid var(--navy);padding-bottom:8px;margin:36px 0 8px;}
+  p{font-size:15px;color:var(--slate);margin:0 0 10px;}
+  p b, li b, td b{color:var(--navy-2);}
+  ul{padding-left:0;list-style:none;margin:8px 0;}
+  ul li{position:relative;padding-left:22px;margin:7px 0;font-size:15px;color:var(--slate);}
+  ul li::before{content:"";position:absolute;left:4px;top:10px;width:7px;height:7px;border-radius:2px;background:var(--blue-4);}
+
+  .fork{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+  .fork .box{border:1px solid var(--line);border-radius:8px;background:#fff;padding:14px 16px;}
+  .fork .box .lbl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+  .fork .box .txt{font-size:14.5px;color:var(--slate);}
+  .fork .box .txt b{color:var(--navy-2);}
+
+  .analogy{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0;}
+  .analogy .cell{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 14px;text-align:center;}
+  .analogy .cell .sys{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:2px;}
+  .analogy .cell .tracks{font-size:12.5px;color:var(--slate);}
+  .analogy .cell.core{border:2px solid var(--blue-5);background:var(--blue-1);}
+  .analogy .cell.core .sys{color:var(--blue-6);}
+
+  .pipeline{margin:12px 0;border-left:2px solid var(--blue-3);}
+  .step{position:relative;padding:0 0 16px 28px;margin-left:8px;}
+  .step::before{content:"";position:absolute;left:-7px;top:4px;width:12px;height:12px;border-radius:50%;
+    background:var(--blue-5);border:2px solid #fff;box-shadow:0 0 0 2px var(--blue-3);}
+  .step .sn{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--blue-6);}
+  .step .st{font-size:16px;font-weight:700;color:var(--navy);margin:1px 0 3px;}
+  .step .sd{font-size:14px;color:var(--slate);margin:0;}
+
+  .why{background:var(--blue-1);border:1px solid var(--blue-2);border-radius:9px;padding:16px 20px;margin:12px 0;}
+  .why p{margin:0 0 8px;font-size:14.5px;color:var(--navy-2);}
+  .why p:last-child{margin-bottom:0;}
+  .why b{color:var(--blue-6);}
+
+  table{border-collapse:collapse;width:100%;margin:10px 0;font-size:13.5px;}
+  th{text-align:left;background:var(--navy);color:#fff;font-weight:600;padding:8px 12px;font-size:11px;letter-spacing:.03em;text-transform:uppercase;}
+  td{padding:8px 12px;border-bottom:1px solid var(--line);color:var(--slate);vertical-align:top;}
+  tr:nth-child(even) td{background:var(--blue-1);}
+
+  .roles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0;}
+  .role{border:1px solid var(--line);border-radius:8px;background:#fff;padding:12px 14px;}
+  .role .rn{font-size:14px;font-weight:700;color:var(--navy);}
+  .role .rt{font-size:10.5px;font-weight:700;color:var(--blue-6);letter-spacing:.04em;text-transform:uppercase;margin:2px 0 4px;}
+  .role .rd{font-size:13px;color:var(--slate);}
+
+  .cta{background:var(--navy);color:#fff;border-radius:10px;padding:20px 24px;margin-top:28px;text-align:center;}
+  .cta .line{font-size:20px;font-weight:700;margin:0 0 8px;letter-spacing:-.01em;}
+  .cta .meta{font-size:13px;color:var(--blue-3);margin:0;}
+
+  footer{margin-top:32px;padding-top:16px;border-top:2px solid var(--navy);font-size:12.5px;color:var(--muted);}
+  footer a{color:var(--slate-2);}
+
+  @media print{
+    body{background:#fff;font-size:11pt;}
+    header.mast{padding:24px 0 20px;}
+    h2.sec{margin-top:22px;}
+    .cta{background:var(--navy);-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  }
+  @media (max-width:680px){
+    .fork,.analogy,.roles{grid-template-columns:1fr;}
+    h1.title{font-size:26px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <p class="kicker">Provenance · Recruit · 1-pager</p>
+    <h1 class="title">Join the Project</h1>
+    <p class="oneliner">We're building the AI that writes personalized sales emails — but <b>can't say anything it can't prove.</b></p>
+    <div class="hook"><b>One line:</b> "We built the outbound AI that can't lie — and it optimizes itself inside the truth."</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <h2 class="sec">The problem (plain English)</h2>
+  <p>Companies want to reach people with touchpoints tailored to each one — email, landing pages, ads — <i>"For your 847-bed system, cut reporting cycle 40%."</i></p>
+  <p>AI can write those messages today. The hard part isn't writing — it's <b>checking</b>. If even one email says something wrong, the company can get fined, sued, or lose trust. In pharma, fintech, insurance, and food/ag, <b>every specific statement is a legal claim.</b></p>
+  <p>Legal teams can't read 100,000 unique emails before they go out. So companies are stuck:</p>
+  <div class="fork">
+    <div class="box"><div class="lbl">Option A</div><div class="txt">One safe, generic email to everyone → <b>boring, low response rates</b></div></div>
+    <div class="box"><div class="lbl">Option B</div><div class="txt">Personalized AI emails → <b>fast, but risky</b> if anything is wrong</div></div>
+  </div>
+  <p><b>Provenance removes that tradeoff.</b></p>
+
+  <h2 class="sec">What it is</h2>
+  <div class="analogy">
+    <div class="cell"><div class="sys">General ledger</div><div class="tracks">keeps track of money</div></div>
+    <div class="cell"><div class="sys">CRM</div><div class="tracks">keeps track of customers</div></div>
+    <div class="cell core"><div class="sys">Provenance</div><div class="tracks">keeps track of <b>claims</b></div></div>
+  </div>
+  <p>A <b>claim</b> is any specific fact in a message: <i>"saves $10/head,"</i> <i>"egg-allergen-free,"</i> <i>"your operation has 4,000 head."</i> Provenance tracks each claim from the moment it's written to the moment it goes stale — with proof attached.</p>
+
+  <h2 class="sec">What it does</h2>
+  <p>Every outbound message goes through a pipeline before it sends:</p>
+  <div class="pipeline">
+    <div class="step"><div class="sn">1</div><div class="st">Draft</div><p class="sd">AI writes a personalized message, pulling from approved sources (product specs, pricing sheets, public records about the prospect).</p></div>
+    <div class="step"><div class="sn">2</div><div class="st">Verify</div><p class="sd">The message is split into individual claims. Each is checked against its source: <i>Does the document actually say this?</i></p></div>
+    <div class="step"><div class="sn">3</div><div class="st">Clear</div><p class="sd">Even true claims can be blocked (legal hold, wrong jurisdiction). Legal sets rules once; every message is checked automatically.</p></div>
+    <div class="step"><div class="sn">4</div><div class="st">Optimize</div><p class="sd">The system A/B tests which <b>verified</b> message works best — and <b>can't cheat by exaggerating</b>, because only cleared claims compete.</p></div>
+    <div class="step"><div class="sn">5</div><div class="st">Send</div><p class="sd">Approved message goes out with a full audit trail: what was said, what source backed it, who cleared it.</p></div>
+    <div class="step"><div class="sn">6</div><div class="st">Monitor</div><p class="sd">When a source changes, affected claims are re-checked. Stale claims get paused before they send.</p></div>
+    <div class="step"><div class="sn">7</div><div class="st">Prove</div><p class="sd">The system tests itself with adversarial traps and reports real numbers: catch rate, false-reject rate, calibration.</p></div>
+  </div>
+  <p><b>The shift:</b> Legal stops reviewing every email. They approve the <b>rules and claims library once.</b> Every generated message is checked instantly, at any volume.</p>
+
+  <h2 class="sec">Why it's interesting</h2>
+  <div class="why">
+    <p><b>It's the hottest unsolved problem in AI, made tangible.</b> AI can generate text at scale. Verification at scale is the bottleneck — and nobody has solved it well.</p>
+    <p><b>Our novel bet:</b> constrained optimization as a fix for reward-hacking. An optimizer told to maximize replies will learn to exaggerate. We structurally prevent that — false claims never enter the reward loop.</p>
+    <p><b>It demos like a magic trick:</b> claims light up green/amber/red; you try to make it lie and it blocks you; flip a legal hold and a true claim turns red.</p>
+    <p><b>Live data from day one</b> — real prospects, real sources, real legal holds — not a toy demo.</p>
+  </div>
+
+  <h2 class="sec">The technology</h2>
+  <table>
+    <thead><tr><th>Piece</th><th>What it is</th><th>Why it's hard</th></tr></thead>
+    <tbody>
+      <tr><td><b>Claims Library</b></td><td>Extract atomic claims from docs; bind each to an exact source span</td><td>Splitting fluent prose into checkable facts is unsolved</td></tr>
+      <tr><td><b>The Gate</b></td><td>NLI entailment + calibrated judge ensemble + compliance rules</td><td>Calibrated verification with no ground truth; LLM-as-judge is gameable</td></tr>
+      <tr><td><b>The Optimizer</b></td><td>Contextual bandit over <i>verified-only</i> message variants</td><td>Sparse feedback + reward-hacking; our constraint is the structural fix</td></tr>
+      <tr><td><b>Drift Monitor</b></td><td>Claim-dependency graph; re-verify when sources change</td><td>Truth is temporal — staleness is an open problem</td></tr>
+      <tr><td><b>Assurance Lab</b></td><td>Adversarial trap generation + reliability profiling</td><td>Proving the checker works, not just promising it</td></tr>
+    </tbody>
+  </table>
+  <p><b>Stack:</b> LLM for generation + trained ML for verification and optimization. Delete the ML and you have generic AI slop. Delete the LLM and you have a logger.</p>
+  <p><b>Live domain:</b> Ag/biotech B2B outreach — but the architecture works for pharma, fintech, insurance, any claims-heavy outbound.</p>
+
+  <h2 class="sec">Who we're looking for (team of 3–4)</h2>
+  <div class="roles">
+    <div class="role"><div class="rn">Verifier ML</div><div class="rt">Owner 1</div><div class="rd">The Gate — claim decomposition, NLI + ensemble, calibration</div></div>
+    <div class="role"><div class="rn">RL + Eval</div><div class="rt">Owner 2</div><div class="rd">The Optimizer + Assurance Lab — bandits, adversarial traps, reliability metrics</div></div>
+    <div class="role"><div class="rn">Data / Infra</div><div class="rt">Owner 3</div><div class="rd">Claims Library + Drift Monitor — claim-evidence graph, source registry, live spine</div></div>
+    <div class="role"><div class="rn">Systems / Product</div><div class="rt">Owner 4</div><div class="rd">Generation + demo — per-prospect drafts, claim-ledger UI, showcase</div></div>
+  </div>
+
+  <div class="cta">
+    <p class="line">"We built the marketing AI that can't lie — email, web, and every channel — and it optimizes itself inside the truth."</p>
+    <p class="meta">Gauntlet capstone · 2-week build · Showcase Mon Jun 29 · Plan due Wed Jun 17</p>
+  </div>
+
+  <footer>
+    <p>Provenance · recruit 1-pager · Jun 2026 · <a href="index.html">document hub</a> · <a href="PROVENANCE-CAPSTONE.html">full capstone</a> · <a href="PROVENANCE-SOLUTION.html">solution detail</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

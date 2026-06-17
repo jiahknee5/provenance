@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project Plan — Gauntlet Cohort Demo</title>
+<style>
+  :root{--navy:#0a2540;--slate:#334e68;--muted:#627d98;--line:#d9e2ec;--paper:#fff;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;font-size:10px;line-height:1.4;color:var(--slate);background:#f0f4f8;}
+  a{color:#1d4ed8;}
+  code{font:9.5px/1.3 ui-monospace,monospace;background:#eef2f6;padding:0 3px;border-radius:2px;}
+
+  .page{max-width:8.5in;margin:12px auto;background:var(--paper);box-shadow:0 1px 8px rgba(0,0,0,.08);}
+  .sheet{padding:0.4in 0.46in;}
+
+  .hdr{border-bottom:2px solid var(--navy);padding-bottom:7px;margin-bottom:8px;}
+  .hdr-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+  .kicker{font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-bottom:3px;}
+  h1{font-size:16px;font-weight:800;color:var(--navy);letter-spacing:-.02em;line-height:1.2;}
+  .northstar{background:linear-gradient(135deg,#eff6ff 0%,#f8fafc 100%);border:1px solid #bfdbfe;border-left:3px solid var(--navy);border-radius:4px;padding:8px 10px;margin-top:7px;}
+  .north-label{font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--navy);margin-bottom:4px;}
+  .northstar p{font-size:10px;color:var(--slate);margin:0 0 5px;line-height:1.45;}
+  .northstar p:last-child{margin-bottom:0;}
+  .northstar b,.northstar strong{color:var(--navy);}
+  .walk{width:100%;border-collapse:collapse;font-size:8px;margin-top:6px;}
+  .walk th{background:#1e3a5f;color:#fff;padding:2px 5px;font-size:7px;text-transform:uppercase;letter-spacing:.04em;text-align:left;}
+  .walk td{padding:2px 5px;border-bottom:1px solid #dbeafe;vertical-align:top;line-height:1.35;}
+  .walk tr.act td{background:#dbeafe;font-size:7px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--navy);padding:3px 5px;border-bottom:1px solid #93c5fd;}
+  .walk td.happens{line-height:1.5;color:#243b53;}
+  .walk .slide{font-weight:700;color:var(--navy);white-space:nowrap;width:28px;}
+  .walk td.time{white-space:nowrap;width:32px;color:var(--muted);font-size:7.5px;}
+  .tag-deck{color:#1e40af;font-size:7px;font-weight:700;}
+  .tag-live{color:#15803d;font-size:7px;font-weight:700;}
+  .tag-facil{color:#b45309;font-size:7px;font-weight:700;}
+  .tag-panel{color:#6d28d9;font-size:7px;font-weight:700;}
+  .north{font-size:9.5px;color:var(--slate);margin-top:5px;max-width:6.2in;}
+  .meta{font-size:8px;color:var(--muted);text-align:right;line-height:1.55;white-space:nowrap;}
+  .meta b{color:var(--navy);}
+
+  .sec{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--navy);border-bottom:1px solid var(--line);padding-bottom:2px;margin:8px 0 4px;}
+  .sec.w2{color:#6d28d9;border-color:#ddd6fe;}
+
+  .lead{font-size:9.5px;margin-bottom:5px;}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;}
+  .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 10px;}
+
+  table{width:100%;border-collapse:collapse;font-size:9px;margin-bottom:3px;}
+  th{background:var(--navy);color:#fff;padding:2px 6px;text-align:left;font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+  td{padding:2px 6px;border-bottom:1px solid var(--line);vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  td b{color:#102a43;}
+  .tight td,.tight th{padding:1px 5px;}
+
+  .chk{font-size:8.5px;padding-left:0;list-style:none;}
+  .chk li{padding-left:12px;position:relative;margin:1px 0;}
+  .chk li::before{content:"☐";position:absolute;left:0;font-size:8px;color:var(--muted);}
+
+  .live{color:#15803d;font-weight:700;font-size:7.5px;}
+  .deck-flow{font:8px/1.35 ui-monospace,monospace;color:var(--muted);margin:2px 0 4px;}
+  .pipe{font:8.5px/1.3 ui-monospace,monospace;background:var(--navy);color:#bfdbfe;padding:3px 7px;border-radius:3px;margin:3px 0 5px;}
+  .note{font-size:8px;color:var(--muted);}
+  .foot{margin-top:7px;padding-top:5px;border-top:1px solid var(--line);font-size:7.5px;color:var(--muted);display:flex;justify-content:space-between;}
+  .foot a{font-weight:600;margin-right:8px;}
+
+  @media print{
+    body{background:#fff;}
+    .page{max-width:none;margin:0;box-shadow:none;}
+    .sheet{padding:0.34in 0.38in;}
+    @page{size:letter;margin:0.34in;}
+  }
+  @media screen{
+    .pb{border-top:2px dashed var(--line);margin:14px 0 10px;padding-top:6px;}
+    .pb::before{content:"— page 2 —";display:block;text-align:center;font-size:8px;color:var(--muted);margin-bottom:6px;}
+  }
+</style>
+</head>
+<body>
+<div class="page"><div class="sheet">
+
+<!-- PAGE 1 -->
+<header class="hdr">
+  <div class="hdr-top">
+    <div>
+      <p class="kicker">Two-week project plan · Provenance capstone</p>
+      <h1>Gauntlet cohort demo — build &amp; ship plan</h1>
+    </div>
+    <div class="meta">
+      <b>Audience</b> Gauntlet cohort · D7 show<br>
+      <b>Sprint</b> 14 days (W1 ship · W2 codify)<br>
+      <b>Owner</b> Provenance capstone team<br>
+      <b>v1.7</b> · Jun 2026
+    </div>
+  </div>
+  <div class="northstar">
+    <p class="north-label">North star — full demo walkthrough · <code>GAUNTLET-DAY-DECK.html</code></p>
+    <p style="font-size:9px;margin-bottom:6px;">This is the show. Presenter runs one HTML deck (←/→); the story builds on slides until the room’s phones become the prop. Below: beat-by-beat what the audience <em>sees, hears, and feels</em> — deck frames, live sites, facilitator moments, and Provenance panels woven into one narrative.</p>
+
+    <table class="walk">
+      <thead><tr><th>Time</th><th>§</th><th>What happens in the room</th><th></th></tr></thead>
+      <tbody>
+        <tr class="act"><td colspan="4">Act I · Frame the gap (§L) — presenter at laptop, cohort in seats, no phones yet</td></tr>
+        <tr><td class="time">0:00</td><td class="slide">L1</td><td class="happens">Presenter opens cold: “Every tool in this room can put your name in a headline. None of them can prove the sentence is true.” Slide is one thesis line. Cohort nods — they’ve all seen creepy ad copy. Sets up: today you’ll feel personalization, then you’ll feel why it breaks.</td><td><span class="tag-deck">Deck</span></td></tr>
+        <tr><td class="time">0:20</td><td class="slide">L2</td><td class="happens">Logos appear — Meta Advantage+, Google PMax, Salesforce Agentforce, Adobe Journey. Presenter names what each optimizes: reach, bids, journeys, content velocity. “They’re incredible at getting the right message to the right person.” No product pitch yet — just landscape everyone recognizes.</td><td><span class="tag-deck">Deck</span></td></tr>
+        <tr><td class="time">0:40</td><td class="slide">L3</td><td class="happens">Split screen: left column “what they maximize” (CTR, ROAS, engagement); right column “what they don’t verify” (claim truth, regulatory fit, source freshness). Presenter: “The ad platform knows you clicked. It doesn’t know if ‘top 3% of cohort’ is true.”</td><td><span class="tag-deck">Deck</span></td></tr>
+        <tr><td class="time">1:00</td><td class="slide">L4</td><td class="happens">Clay, Insider, Iterable, Braze, 6sense — the enrichment and journey layer. “They merge 50 attributes and generate copy in seconds.” Audience sees themselves: this is the stack they’d use to ship 1:1 at scale.</td><td><span class="tag-deck">Deck</span></td></tr>
+        <tr><td class="time">1:20</td><td class="slide">L5</td><td class="happens">“Personalization AI” category slide — generate fast, legal/compliance reviews manually. Presenter lands the bottleneck: “Volume exploded. Review didn’t.” Someone in the room mutters about MLR backlogs.</td><td><span class="tag-deck">Deck</span></td></tr>
+        <tr><td class="time">1:40</td><td class="slide">L6</td><td class="happens">Competitive matrix on screen — rows are vendors, columns are: verify claims? constrain optimizer? owned B2B channel? Most cells empty. Pause. “That’s the white space.”</td><td><span class="tag-deck">Deck</span></td></tr>
+        <tr><td class="time">1:50</td><td class="slide">L7</td><td class="happens">Three holes called out visually: no system of record for claims, nothing stops the optimizer from rewarding a lie, no one detects when source data goes stale. Each hole gets one concrete Gauntlet-flavored example (program stat changes, guarantee language, Drew email stat outdated).</td><td><span class="tag-deck">Deck</span></td></tr>
+        <tr><td class="time">2:00</td><td class="slide">L8</td><td class="happens">Close the frame: “We’re not rebuilding Meta. We’re adding the trust layer on email, web, and sales touchpoints you control.” Transition line: “Let me show you the funnel we’re about to run you through — literally.”</td><td><span class="tag-deck">Deck</span></td></tr>
+
+        <tr class="act"><td colspan="4">Act II · Map the funnel (§F) — same persona path the live demo will use</td></tr>
+        <tr><td class="time">2:10</td><td class="slide">F1</td><td class="happens">Classic five-stage funnel animates. Presenter traces a finger: “You’re somewhere on this curve. So is everyone next to you — but not the same place.” Seeds why two people get different copy later.</td><td><span class="tag-deck">Deck</span></td></tr>
+        <tr><td class="time">2:25</td><td class="slide">F2</td><td class="happens">Diagram: paid social/search at top (Meta/Google own verification of delivery, not claims); owned middle/bottom (landing, email, web) where Provenance sits. “That’s where false claims become your liability.”</td><td><span class="tag-deck">Deck</span></td></tr>
+        <tr><td class="time">2:40</td><td class="slide">F3</td><td class="happens">Touchpoint map lights up in order: X/IG ad → landing page → form → Drew email → night school attendance → retargeting → personalized web. Presenter: “Each step adds attributes. By the end the model knows a lot — the question is what it’s allowed to say.”</td><td><span class="tag-deck">Deck</span></td></tr>
+        <tr><td class="time">2:55</td><td class="slide">F4</td><td class="happens">Claims Library icon on funnel — program facts, cohort stats, approved Drew excerpts, Gauntlet rules. “One place legal and marketing agree on what’s true.” Not built yet in their heads — named before they see it work.</td><td><span class="tag-deck">Deck</span></td></tr>
+        <tr><td class="time">3:05</td><td class="slide">F5</td><td class="happens">Gate sits before render/send. Animation: copy flows in, sentences decompose, each claim gets green/amber/red. “Nothing ships red. Amber gets a disclaimer or human review.”</td><td><span class="tag-deck">Deck</span></td></tr>
+        <tr><td class="time">3:15</td><td class="slide">F6</td><td class="happens">Optimizer branch — three CTA variants, metrics rising on the winner. A fourth variant labeled “guaranteed placement” is grayed out with a lock icon. “The bandit only picks from verified arms.”</td><td><span class="tag-deck">Deck</span></td></tr>
+        <tr><td class="time">3:25</td><td class="slide">F7</td><td class="happens">Drift example: admissions rule changes from 3→5 years experience; old hero lines on 200 pages flip to stale badges. “One YAML edit, batch re-Gate — not 200 manual reviews.”</td><td><span class="tag-deck">Deck</span></td></tr>
+
+        <tr class="act"><td colspan="4">Act III · Attribution story (§W · W1–W7) — “Meet Alex” before Alex becomes them</td></tr>
+        <tr><td class="time">3:35</td><td class="slide">W1</td><td class="happens">Persona card: Alex — signed up via Gauntlet online form, director at a fintech, attended night school “Agents” session June 5, opened last Drew email. Feels like a CRM record. Presenter: “This is the Recipient Profile Graph. Your row looks like this.”</td><td><span class="tag-deck">Deck</span></td></tr>
+        <tr><td class="time">4:00</td><td class="slide">W2</td><td class="happens">Mock X/IG ad on slide — hero image, emotional hook (“Stop shipping AI without guardrails”), UTM parameters visible in small type. “Alex clicks. We don’t know Alex yet — only the click.”</td><td><span class="tag-deck">Deck</span></td></tr>
+        <tr><td class="time">4:20</td><td class="slide">W3</td><td class="happens">Landing page wireframe + attribution debugger panel beside it. Simulated events append: PageView, Lead — fake <code>_fbp</code>, GA4 client id, UTM campaign. Events are labeled SIMULATED. Room sees how pixels attach identity fragments, not full people.</td><td><span class="tag-deck">Deck</span></td></tr>
+        <tr><td class="time">4:40</td><td class="slide">W4</td><td class="happens">Form fields animate into Alex’s profile: name, role, goals, night school interest. Presenter: “Submit stops anonymity — cookie set, CRM row created. We know who. We still haven’t verified what we’ll say to them.” Identity vs verification called out explicitly.</td><td><span class="tag-deck">Deck</span></td></tr>
+        <tr><td class="time">5:00</td><td class="slide">W5</td><td class="happens">Drew email mock — subject line Alex would recognize. Open event fires on timeline: “opened in 90 seconds.” Profile gains a warm behavioral signal. Someone laughs: “That’s literally me with Drew’s emails.”</td><td><span class="tag-deck">Deck</span></td></tr>
+        <tr><td class="time">5:15</td><td class="slide">W6</td><td class="happens">Night school attendance row drops in — session date, topic. Copy preview updates on slide: “Great seeing you at Agents night…” Presenter: “Real Gauntlet data. This is what Track A and Track B will both use.”</td><td><span class="tag-deck">Deck</span></td></tr>
+        <tr><td class="time">5:30</td><td class="slide">W7</td><td class="happens">Batch enrichment output — Meta interest categories, LinkedIn seniority, a few T4 social signals with orange SIMULATED badges. “Ran 48 hours ago, not live on your phone right now.” Sets expectation: some signals on the live site are representative, not scraped live.</td><td><span class="tag-deck">Deck</span></td></tr>
+
+        <tr class="act"><td colspan="4">Act IV · The gut punch (§W live · Track A) — phones come out, energy shifts</td></tr>
+        <tr><td class="time">5:45</td><td class="slide">W8</td><td class="happens">QR code fills the slide. Presenter: “Scan it. This is your page, not Alex’s.” Rustle of phones — cohort opens magic links. Track A loads: personalized hero with their real name, night school reference, signup source; sidebar “data we used” may show Meta interests or “opened Drew email quickly”; SANDBOX watermark visible. Audible reactions — “whoa,” “that’s my session.” Load target &lt;2s on venue WiFi.</td><td><span class="tag-live">Live · Track A</span></td></tr>
+        <tr><td class="time">6:30</td><td>—</td><td class="happens">Presenter lets the room breathe. People turn screens to neighbors: different headlines, different CTAs, different “proof” blocks. “Why does yours mention fintech and mine mentions health?” Micro-segmentation becomes visceral — not a diagram, a pocket experience. Presenter asks: “How did it know that?” — lets answers spill (form data, email, attendance, simulated signals).</td><td><span class="tag-live">Live · room</span></td></tr>
+        <tr><td class="time">7:00</td><td>—</td><td class="happens">Facilitator (second laptop) projects Edge-A — planted profile “Jordan.” Track A hero implies guaranteed capstone placement / income outcome. Presenter reads the line aloud. Room gets quiet. “Could Gauntlet send this email?” Head shakes. FTC / educational advertising mentioned. Same data richness, wrong claim — nobody wants this at scale.</td><td><span class="tag-facil">Edge-A</span></td></tr>
+        <tr><td class="time">7:30</td><td>—</td><td class="happens">Edge-B on screen — health-adjacent language tied to a fabricated personal detail (e.g. dietary inference from signup). Reactions shift from “illegal” to “creepy.” Presenter: “Track A didn’t invent your allergy — we planted this on a sandbox profile to show where enrichment + LLM drift.” Badge on simulated fields where applicable.</td><td><span class="tag-facil">Edge-B</span></td></tr>
+        <tr><td class="time">8:00</td><td>—</td><td class="happens">Edge-C — “#1 rated cohort experience,” false urgency countdown, competitor shade without source. Feels like normal growth marketing — that’s the point. “You’ve all written something this aggressive. Now imagine 200 variants by Friday with no review.”</td><td><span class="tag-facil">Edge-C</span></td></tr>
+        <tr><td class="time">8:30</td><td>—</td><td class="happens">Presenter steps back from slides, addresses room: “That felt amazing. Why can’t we ship Track A to the whole cohort tomorrow?” Brief discussion — legal, brand, manual review, “one bad claim.” Land: true ≠ allowed; verification doesn’t scale by hand. Bridge: “Same person. Same data. Watch what Provenance does.”</td><td><span class="tag-live">Discuss</span></td></tr>
+
+        <tr class="act"><td colspan="4">Act V · The fix (§W live + panels) — same token, different world</td></tr>
+        <tr><td class="time">9:00</td><td class="slide">W9</td><td class="happens">Presenter: “Pull up the same link — toggle to governed.” Cohort flips to Track B (or facilitator demos on projector with a known token). Hero still personal — name, session, role — but copy is tighter; exaggerated stats gone. Tap “Inspect claims”: ledger overlays hero — green with source links, amber with disclaimers. Audience clicks a green claim, sees Drew email stat or program doc excerpt. Zero red in hero.</td><td><span class="tag-live">Live · Track B</span></td></tr>
+        <tr><td class="time">9:45</td><td class="slide">H4</td><td class="happens">On projector, facilitator walks Edge-A’s page on Track B: the guarantee line appears struck-through in inspect mode; ledger shows RED with rule_id “no-income-guarantee.” Presenter reads the rule. “Track A would have sent it. Track B structurally cannot render it in the hero.” Same RPG, different pipeline outcome.</td><td><span class="tag-live">Live · Gate</span></td></tr>
+        <tr><td class="time">10:15</td><td class="slide">H8</td><td class="happens">Assurance Lab panel on screen — table of 20+ adversarial traps (false stats, subtle guarantees, hallucinated cohort rankings). Metrics: catch-rate ~90%+, false-reject &lt;5%. Side-by-side with “LLM judge only” baseline underperforming. “This audits the Gate — not your marketing team at 2am.”</td><td><span class="tag-panel">Assurance</span></td></tr>
+        <tr><td class="time">10:45</td><td class="slide">H6</td><td class="happens">Optimizer panel: leaderboard for Alex’s micro-segment — three CTA variants, reply rate climbing on the winner over simulated weeks. Fourth row “Guaranteed placement” grayed, locked out of consideration. Presenter: “The model wants to pick it — structure prevents it. You can’t win by lying.”</td><td><span class="tag-panel">Optimizer</span></td></tr>
+        <tr><td class="time">11:15</td><td class="slide">H7</td><td class="happens">Drift demo live: facilitator opens tenant YAML on laptop, changes one admissions rule (3→5 years experience), runs re-Gate on Alex’s profile. Within 60s, Alex’s page shows a stale badge on the old claim, then refreshed ledger after re-run. Room sees policy change propagate without rewriting copy by hand.</td><td><span class="tag-panel">Drift</span></td></tr>
+
+        <tr class="act"><td colspan="4">Act VI · Close (§P · W10) — name the primitive, invite the build</td></tr>
+        <tr><td class="time">11:45</td><td class="slide">P4</td><td class="happens">Full stack diagram returns — Library → Gate → Optimizer → Render → Drift, Assurance auditing Gate. Presenter ties each box to something the room just saw (ledger, grayed variant, stale badge, traps table). “This isn’t a feature list. You watched it.”</td><td><span class="tag-deck">Deck</span></td></tr>
+        <tr><td class="time">12:00</td><td class="slide">P2–3</td><td class="happens">Two differentiators on screen: provable generation (every sentence has provenance) and constrained self-optimization (performance without reward-hacking). Quick, no jargon — callbacks to phone moment and grayed CTA.</td><td><span class="tag-deck">Deck</span></td></tr>
+        <tr><td class="time">12:15</td><td class="slide">P6</td><td class="happens">Gauntlet pilot slide — Prime/Catalyst/hiring partner routing as second tenant story. Optional: show GAUNTLET-PILOT-DECK QR for people who want the GTM thread. “You’re the pilot customer — you felt the problem first.”</td><td><span class="tag-deck">Deck</span></td></tr>
+        <tr><td class="time">12:30</td><td class="slide">W10</td><td class="happens">Single line on screen: “You felt the problem on your phone. This is the fix.” Presenter quiet for a beat. Cohort puts phones down — energy reflective, not sold-to.</td><td><span class="tag-deck">Deck</span></td></tr>
+        <tr><td class="time">12:45</td><td>—</td><td class="happens">Ask: join the capstone build, Jun 29 showcase, follow the repo. Q&amp;A — likely questions on latency, NLI vs rules, real Meta integration. Facilitator keeps Edge profiles and staging URL ready for side demos.</td><td><span class="tag-live">Live</span></td></tr>
+
+        <tr class="act"><td colspan="4">Appendix · rehearsal assets (not required on stage)</td></tr>
+        <tr><td class="time">—</td><td class="slide">E1–6</td><td class="happens">Examples gallery for dry run: same Alex persona as email mock, IG ad card, and web screenshot — Track A vs Track B side by side. Tier legend T1–T4 on screen so presenters never confuse simulated signals with verified facts during prep.</td><td><span class="tag-deck">§E</span></td></tr>
+        <tr><td class="time">—</td><td class="slide">H1–3</td><td class="happens">Deep-dive backup: RPG schema diagram, ingest paths, labeled-attribute generation vs mail-merge. Used if a judge or engineer asks “how does it actually work?” after the show — not part of the 15-minute emotional arc.</td><td><span class="tag-deck">§H</span></td></tr>
+        <tr><td class="time">—</td><td class="slide">P1,P5</td><td class="happens">Spare slides: system of record definition, rules DSL (“true ≠ allowed” with Gauntlet examples). Insurance for technical Q&amp;A without breaking narrative flow on stage.</td><td><span class="tag-deck">§P</span></td></tr>
+      </tbody>
+    </table>
+    <p class="deck-flow" style="margin-top:5px;">Emotional arc: curiosity (L) → understanding the path (F) → “that could be me” (W1–7) → delight + unease (Track A) → relief + trust (Track B + stack) → invitation (P/W10)</p>
+  </div>
+</header>
+
+<div class="pb"></div>
+
+<div class="sec">Executive summary — what we ship</div>
+<table>
+  <thead><tr><th>#</th><th>Deliverable</th><th>Done when</th><th>Owner</th></tr></thead>
+  <tbody>
+    <tr><td><b>1</b></td><td><b>Edgy demo site</b> (Track A) — magic link per member; creepy/false/borderline claims; 3 planted shock profiles</td><td>≥90% roster loads &lt;3s · SANDBOX watermark · pre-cached copy</td><td>Web + data</td></tr>
+    <tr><td><b>2</b></td><td><b>Governed demo site</b> (Track B) — same person, Gate-cleared copy, claim ledger inspect</td><td>Toggle A↔B · zero RED in hero · ≥1 cited claim</td><td>Gate + web</td></tr>
+    <tr><td><b>3–8</b></td><td><b>Presenter deck</b> — full walkthrough above (<code>GAUNTLET-DAY-DECK.html</code>)</td><td>Acts I–VI on D7 · W8–W9 + panels live</td><td>PM + content</td></tr>
+    <tr><td><b>PR</b></td><td><b>Full Provenance stack</b> — Library · Gate · Optimizer · Drift · Assurance · web channel (all Week 1, not slide-only)</td><td>All six demoed on D7 — see build plan below</td><td>Gate workstream</td></tr>
+  </tbody>
+</table>
+
+<div class="g2">
+  <div>
+    <div class="sec">Approach</div>
+    <p class="lead"><b>One web app, two tracks</b> — <code>/w/{token}</code> with <code>?track=ungoverned|provenance</code>, not two codebases. <b>Batch everything</b> 48h before show; no live LLM on stage. <b>Pre-provision identity</b> from Tom’s export via magic link/QR; optional form sets cookie for return visits. <b>Simulate</b> pixels and Tier 3–4 data with visible badges.</p>
+    <div class="sec">Out of scope (pushback)</div>
+    <table class="tight">
+      <tr><td>Phone data harvest on first load</td><td>→ magic link + pre-provision</td></tr>
+      <tr><td>Live agent enrichment at page load</td><td>→ batch job + cache timestamp</td></tr>
+      <tr><td>Real Meta/Google pixels · T4 scrape</td><td>→ simulated debugger UI</td></tr>
+      <tr><td>Edgy copy via real email</td><td>→ sandbox render only</td></tr>
+      <tr><td>Six separate deck files</td><td>→ one hub deck</td></tr>
+      <tr><td>Defer Provenance components to Week 2</td><td>→ all pillars ship Week 1</td></tr>
+    </table>
+  </div>
+  <div>
+    <div class="sec">Stakeholders</div>
+    <table class="tight">
+      <tr><td><b>Cohort member</b></td><td>Opens QR · sees self referenced · compares with neighbor</td></tr>
+      <tr><td><b>Presenter</b></td><td>Runs 15-min show · planted profiles · hotspot fallback</td></tr>
+      <tr><td><b>Facilitator</b></td><td>Admin: Edge-A/B/C · track toggle · attrib debugger</td></tr>
+      <tr><td><b>Tom / Gauntlet ops</b></td><td>Cohort export · PII policy · consent for names on screen</td></tr>
+      <tr><td><b>Capstone judges</b></td><td>Jun 29 — see hardened pipeline after Week 2</td></tr>
+    </table>
+    <div class="sec">Team split</div>
+    <table class="tight">
+      <tr><td><b>Gate workstream</b></td><td>Library · Gate batch · Optimizer · Drift · Assurance · traps</td></tr>
+      <tr><td><b>Web + data</b></td><td>App · RPG import · Track A/B pages · magic links · batch gen</td></tr>
+      <tr><td><b>Content + PM</b></td><td>Deck · copy · rehearsal · runbook · facilitator script</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="sec">Provenance build plan — all components Week 1</div>
+<div class="pipe">Claims Library → Draft → The Gate → Optimizer → Render → Drift Monitor · ↳ Assurance Lab</div>
+<table>
+  <thead><tr><th>Component</th><th>What we build</th><th>Demo moment (D7)</th><th>Week 2 hardens</th></tr></thead>
+  <tbody>
+    <tr><td><b>Claims Library</b></td><td>Gauntlet tenant YAML — ≥10 approved facts, program rules, Drew refs</td><td>GREEN claims link to source in ledger</td><td>JSON Schema · loader · tests</td></tr>
+    <tr><td><b>The Gate</b></td><td>Batch pipeline + Track B ledger UI (decompose → bind → rules)</td><td>Planted profiles show RED blocked on Track B</td><td><code>gate.py</code> module · NLI</td></tr>
+    <tr><td><b>Optimizer</b></td><td>Variant leaderboard panel; illegal CTA grayed out</td><td>“Can’t win by lying” beat — false claim excluded</td><td>Deeper sim · emotional A/B</td></tr>
+    <tr><td><b>Drift Monitor</b></td><td>Rule-change script + stale badge on one profile</td><td>Change YAML rule → re-Gate live in &lt;60s</td><td>Batch re-Gate full cohort</td></tr>
+    <tr><td><b>Assurance Lab</b></td><td>≥20 adversarial traps + eval script</td><td>Catch-rate &amp; false-reject on panel</td><td>CI on every Gate change</td></tr>
+    <tr><td><b>Web channel</b></td><td>Track A + B pages; deck §E email/ad examples (A vs B)</td><td>Same persona across web + deck slides</td><td>Live email/ad HTML gen</td></tr>
+  </tbody>
+</table>
+
+<div class="g2">
+  <div>
+    <div class="sec">Week 1 — day-by-day plan</div>
+    <table>
+      <thead><tr><th>Day</th><th>Milestone</th><th>Exit criteria</th></tr></thead>
+      <tr><td><b>D1</b></td><td>Lock scope · RPG schema · deck shell · Tom data spec · competitive slides</td><td>Schema frozen · 5 test profiles · GAUNTLET-DAY-DECK.html exists</td></tr>
+      <tr><td><b>D2</b></td><td>Import roster · Claims Library v1 · Assurance trap draft (≥20)</td><td>100% cohort has RPG row · traps ready</td></tr>
+      <tr><td><b>D3</b></td><td>Web app live · Track A batch · Assurance eval runs</td><td>10 tokens &lt;2s on mobile</td></tr>
+      <tr><td><b>D4</b></td><td>Gate batch · Track B + ledger · Optimizer panel</td><td>Same token both tracks · grayed illegal variant visible</td></tr>
+      <tr><td><b>D5</b></td><td>Drift demo · Assurance panel wired · decks L–H drafted</td><td>Rule-change demo &lt;60s · sections 3–6 runnable</td></tr>
+      <tr><td><b>D6</b></td><td>Decks E+W · batch full cohort · full 15-min rehearsal · runbook</td><td>End-to-end incl. Assurance + Opt + Drift · hotspot tested</td></tr>
+      <tr><td><b>D7</b></td><td><b>Gauntlet day show</b> · capture WEEK-1-RETRO.md within 24h</td><td>Success criteria below — all checked</td></tr>
+    </table>
+    <p class="note">Critical path: Tom export (D2) · cohort consent · staging HTTPS · Gate/Opt/Assurance owners D2–D5</p>
+  </div>
+  <div>
+    <div class="sec">Demo web — quality bar</div>
+    <table class="tight">
+      <tr><td>Load</td><td>p95 &lt;2s mobile · 200 concurrent</td></tr>
+      <tr><td>Data</td><td>T1–2 real (Gauntlet forms) · T3–4 simulated + badge</td></tr>
+      <tr><td>Identity</td><td>Cookie/token = who · Gate = what we may say · no cold phone harvest</td></tr>
+      <tr><td>Fallback</td><td>Hotspot + static export if venue WiFi fails</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="pb"></div>
+
+<!-- PAGE 2 -->
+<div class="sec w2">Week 2 — codify the demo, then extend UX</div>
+<p class="lead"><b>Week 2 assumes the full Provenance stack already shipped on D7.</b> Days 1–2: document and modularize what we built. Days 3–7: UX reach features that polish the demo for Jun 29 — not first delivery of core Provenance components.</p>
+
+<div class="g2">
+  <div>
+    <div class="sec">Week 2 milestones</div>
+    <table class="tight">
+      <thead><tr><th>Day</th><th>Focus</th><th>Done when</th></tr></thead>
+      <tr><td>W2-D1</td><td>Retro · handoff checklist · JSON Schemas</td><td>Schemas validate roster</td></tr>
+      <tr><td>W2-D2</td><td>Extract <code>gate.py</code> · <code>regen_all.sh</code> · GATE-SPEC.md</td><td>One rule change → full cohort regen</td></tr>
+      <tr><td>W2-D3</td><td>Compare mode · segmentation in copy · attribution v2 timeline</td><td>Two tokens side-by-side with diff</td></tr>
+      <tr><td>W2-D4</td><td>Live email/ad generation · Assurance CI · app README</td><td>New engineer clones → runs in &lt;30 min</td></tr>
+      <tr><td>W2-D5–7</td><td>Deck hub merge · self-declare form · QA · Jun 29 scope doc</td><td>Week 2 success criteria pass</td></tr>
+    </table>
+    <div class="sec">Codify artifacts</div>
+    <p class="lead" style="font-size:8.5px;"><code>demo/schemas/</code> (RPG + ledger) · <code>demo/tenants/gauntlet/</code> · <code>demo/pipeline/gate.py</code> · <code>demo/scripts/regen_all.sh</code> · <code>docs/ARCHITECTURE.md</code> · <code>GATE-SPEC.md</code> · <code>GAUNTLET-DAY-RUNBOOK.md</code> · merged <code>PROVENANCE-DECK-HUB.html</code></p>
+  </div>
+  <div>
+    <div class="sec">Week 2 reach backlog</div>
+    <table class="tight">
+      <thead><tr><th>Priority</th><th>Feature</th><th>Why Week 2</th></tr></thead>
+      <tr><td><b>P0</b></td><td>Compare mode (<code>/compare</code>)</td><td>Post-show “look at my neighbor’s page”</td></tr>
+      <tr><td><b>P0</b></td><td>Segmentation live in copy</td><td>Emotional trigger variants in RPG</td></tr>
+      <tr><td><b>P0</b></td><td>Attribution debugger v2</td><td>Structured timeline vs W1 stub</td></tr>
+      <tr><td><b>P0</b></td><td>Live email/ad HTML from Gate path</td><td>Deck §E becomes live artifact</td></tr>
+      <tr><td><b>P0</b></td><td>Self-declare form on load</td><td>Live “confirm your session” moment</td></tr>
+      <tr><td><b>P1</b></td><td>Assurance CI · Drew corpus · batch Drift · Optimizer depth</td><td>Hardening only — W1 delivered MVP</td></tr>
+      <tr><td><b>P2</b></td><td>Real pixels · scrape · email send · second tenant</td><td>Jun 29 stretch</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="g2">
+  <div>
+    <div class="sec">Definition of done — Week 1 (Gauntlet day)</div>
+    <ul class="chk">
+      <li>Cohort opens magic link on phone — name + ≥2 real Gauntlet-specific references</li>
+      <li>Track A: ≥1 creepy/simulated signal with badge</li>
+      <li>Track B: ledger ≥3 claims · ≥1 green with source · zero RED in hero</li>
+      <li>Edge-A/B/C: violation on A · blocked on B for each</li>
+      <li>Full Provenance stack demoed live: Library · Gate · Optimizer · Drift · Assurance</li>
+      <li>Presenter completes 15-min run without live LLM dependency</li>
+      <li>Deck covers landscape + Provenance + walkthrough + examples</li>
+      <li>No ungoverned copy sent via real email</li>
+    </ul>
+  </div>
+  <div>
+    <div class="sec">Definition of done — Week 2</div>
+    <ul class="chk">
+      <li>New engineer: clone → env → regen → serve in &lt;30 min (README)</li>
+      <li><code>regen_all.sh</code> regenerates full cohort after rule change</li>
+      <li>Compare mode + attribution v2 timeline shipped</li>
+      <li>GATE-SPEC.md + ARCHITECTURE.md published</li>
+      <li>Assurance CI runs on Gate module changes</li>
+    </ul>
+    <div class="sec">Risks &amp; open questions</div>
+    <table class="tight">
+      <tr><td><b>Tom data late</b></td><td>Synthetic roster; swap D6</td></tr>
+      <tr><td><b>Gate not ready D4</b></td><td>Rules-only ledger; cut scope honestly</td></tr>
+      <tr><td><b>WiFi failure</b></td><td>Hotspot · pre-cached static export</td></tr>
+      <tr><td><b>PII backlash</b></td><td>Opt-out · pseudo emails · sandbox watermark</td></tr>
+      <tr><td><b>OQ: Gauntlet date · Tom fields · consent · staging domain · NLI vs rules-only</b></td><td>Resolve D1–D2</td></tr>
+    </table>
+  </div>
+</div>
+
+<footer class="foot">
+  <span>
+    <a href="index.html">Hub</a>
+    <a href="ONE-WEEK-GAUNTLET-PLAN.md">Week 1 detail</a>
+    <a href="WEEK-2-CODIFY-AND-REACH.md">Week 2 detail</a>
+    <a href="COHORT-DEMO-PROJECT-PLAN.md">Technical deep-dive</a>
+  </span>
+  <span>Project plan v1.7 · north star = descriptive demo walkthrough</span>
+</footer>
+
+</div></div>
+</body>
+</html>

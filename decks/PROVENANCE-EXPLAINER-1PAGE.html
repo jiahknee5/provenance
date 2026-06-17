@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Provenance — the AI that can't lie (1-pager)</title>
+<style>
+  :root{
+    --navy:#0a2540;--navy-2:#102a43;--slate:#334e68;--slate-2:#486581;--muted:#627d98;
+    --line:#d9e2ec;--line-soft:#eef2f6;
+    --blue-1:#eff6ff;--blue-2:#dbeafe;--blue-5:#1d4ed8;--blue-6:#1e40af;
+    --paper:#e9edf2;--amber:#b45309;--amber-bg:#fffbeb;--amber-line:#fde68a;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--navy-2);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.46;-webkit-font-smoothing:antialiased;font-size:13px;}
+  .bar{text-align:center;font-size:11.5px;color:var(--slate-2);padding:12px;}
+  .bar b{color:var(--navy-2);}
+  .sheet{max-width:860px;margin:0 auto 22px;background:#fff;border:1px solid var(--line);
+    box-shadow:0 8px 30px rgba(10,37,64,.12);padding:30px 40px 34px;}
+
+  .hd{border-bottom:2px solid var(--navy);padding-bottom:11px;margin-bottom:14px;}
+  .hd .k{font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--blue-6);}
+  .hd h1{font-size:28px;font-weight:800;letter-spacing:-.02em;margin:5px 0 3px;color:var(--navy);}
+  .hd .one{font-size:14.5px;color:var(--slate);margin:0;}
+  .hd .one b{color:var(--navy-2);}
+
+  .tldr{background:var(--blue-1);border:1px solid var(--blue-2);border-left:4px solid var(--blue-5);
+    border-radius:8px;padding:12px 16px;margin:0 0 16px;font-size:13.5px;color:var(--navy-2);}
+  .tldr b{color:var(--blue-6);}
+
+  h2.s{font-size:14px;font-weight:800;color:var(--navy);margin:16px 0 5px;letter-spacing:-.01em;}
+  h2.s .n{color:var(--blue-5);font-weight:800;}
+  p{margin:0 0 7px;font-size:13px;color:var(--slate);}
+  p b, li b{color:var(--navy-2);}
+  ul{margin:3px 0 7px;padding-left:18px;}
+  li{margin:0 0 5px;font-size:13px;color:var(--slate);}
+
+  .pull{color:var(--navy-2);font-style:italic;border-left:3px solid var(--line);padding-left:12px;margin:7px 0;}
+
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+
+  .tech li{margin-bottom:6px;}
+  .tag{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;
+    color:var(--blue-6);background:var(--blue-1);border:1px solid var(--blue-2);
+    border-radius:5px;padding:1px 6px;margin-right:4px;white-space:nowrap;}
+
+  .join{background:var(--amber-bg);border:1px solid var(--amber-line);border-radius:8px;
+    padding:13px 16px;margin-top:16px;}
+  .join h2.s{margin-top:0;color:var(--amber);}
+  .join li{color:var(--navy-2);}
+
+  @media print{ body{background:#fff;} .bar{display:none;} .sheet{box-shadow:none;border:none;margin:0;} }
+  @page{ size:Letter; margin:0.5in; }
+</style>
+</head>
+<body>
+
+<div class="bar">One-pager · plain English · no marketing knowledge needed · <b>⌘P → Save as PDF</b></div>
+
+<div class="sheet">
+
+  <div class="hd">
+    <div class="k">Capstone project · looking for teammates</div>
+    <h1>Provenance — the outbound AI that can't lie</h1>
+    <p class="one">An AI that writes a personal message to every customer — and is <b>physically unable to say anything it can't prove</b> from a trusted source.</p>
+  </div>
+
+  <div class="tldr">
+    Picture an AI writer with a <b>fact-checker bolted to its mouth</b>. Before any sentence leaves the building, a second system checks it against the source documents and blocks it if the proof isn't there. That second system is Provenance.
+  </div>
+
+  <h2 class="s"><span class="n">1.</span> The problem (you don't need to know marketing)</h2>
+  <p>Companies send outreach messages — sales emails, ads, follow-ups. AI can now write a <b>unique</b> message for every single person: millions of them, all different. Great… except <b>someone has to make sure each message is true and legal.</b></p>
+  <ul>
+    <li>A human can check 100 messages. <b>Nobody can read 1,000,000.</b></li>
+    <li>Get a fact wrong in medicine, finance, or food and you get <b>sued or fined.</b></li>
+    <li>So today everyone picks a bad option: send <b>boring identical</b> messages (safe but ignored), or send <b>personal but unchecked</b> messages (effective but risky).</li>
+  </ul>
+  <p class="pull">"Verification is the new bottleneck." The hard part of AI is no longer <b>writing</b> — it's <b>checking</b>. That's the gap we attack.</p>
+
+  <h2 class="s"><span class="n">2.</span> What it is &amp; what it does</h2>
+  <p>Provenance is a <b>system of record for claims</b> — the way a bank ledger is the record for money, this is the record for every factual statement your company makes.</p>
+  <ul>
+    <li>Every fact (<i>"saves about $10 per animal"</i>) becomes a tracked <b>claim</b> with a receipt: where it came from, whether it was verified, whether it's allowed, and how it performed.</li>
+    <li>Before anything sends, the message is chopped into individual claims and each one must pass the check — <b>cited or killed.</b></li>
+    <li>It also <b>learns to write more persuasive messages over time</b> — but it's only ever allowed to pick from statements that already passed. So it gets better <b>without ever lying.</b></li>
+  </ul>
+
+  <div class="two">
+    <div>
+      <h2 class="s"><span class="n">3.</span> Why it's interesting</h2>
+      <ul>
+        <li>It takes on the <b>hottest open problem in AI</b> — verification at scale — end to end, not as a toy.</li>
+        <li><b>One genuinely novel bet:</b> tell an AI "get more replies" and it learns to <b>exaggerate</b> (called <i>reward-hacking</i>). Our fix is structural — it can only choose among <b>already-verified</b> statements, so it <b>literally cannot win by lying.</b></li>
+        <li>You build a <b>real, live thing</b> with real data. The demo is a magic trick: we hand the audience the controls, <b>try to make it lie — and watch it refuse.</b></li>
+      </ul>
+    </div>
+    <div>
+      <h2 class="s"><span class="n">4.</span> The technology</h2>
+      <ul class="tech">
+        <li><span class="tag">LLM</span> writes the messages and splits them into atomic claims.</li>
+        <li><span class="tag">NLI + judge ensemble</span> calibrated, answers one question: <i>does the source actually support this claim?</i> A single AI judge is biased &amp; gameable; an ensemble isn't.</li>
+        <li><span class="tag">router + referee</span> cheap check first, expensive check only on close calls.</li>
+        <li><span class="tag">contextual bandit</span> a reinforcement-learning method that picks the winning message — constrained to verified options only.</li>
+        <li><span class="tag">drift monitor</span> a claim-dependency graph: change a source doc and every claim that leaned on it is re-checked.</li>
+        <li><span class="tag">Assurance Lab</span> adversarial traps that try to fool the checker — so we can <i>prove</i> it works.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="join">
+    <h2 class="s">Want in?</h2>
+    <ul>
+      <li><b>Team of 3–4 · 2-week build · live showcase Mon Jun 29.</b></li>
+      <li>Looking for people who like any of: <b>ML / NLP, evaluation &amp; verification, reinforcement learning,</b> or building clean systems.</li>
+      <li><b>Zero marketing knowledge required.</b> Making the messages is the easy part; making the AI <i>trustworthy</i> is the interesting part — that's your job.</li>
+      <li>If <b>"an AI that's structurally incapable of lying"</b> sounds fun to build, you're exactly who we want.</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>

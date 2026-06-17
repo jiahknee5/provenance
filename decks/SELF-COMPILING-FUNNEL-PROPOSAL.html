@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Provable Funnel — Capstone Proposal</title>
+<style>
+  :root{
+    --navy:#0a2540;--navy-2:#102a43;--slate:#334e68;--slate-2:#486581;--muted:#627d98;
+    --line:#d9e2ec;--line-soft:#eef2f6;
+    --blue-1:#eff6ff;--blue-2:#dbeafe;--blue-3:#93c5fd;--blue-4:#3b82f6;--blue-5:#1d4ed8;--blue-6:#1e40af;
+    --bg:#ffffff;--paper:#f7f9fc;--amber:#b45309;
+    --green:#15803d;--green-bg:#dcfce7;--red:#b91c1c;--red-bg:#fee2e2;--amber2:#a16207;--amber-bg:#fef9c3;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--navy-2);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:900px;margin:0 auto;padding:0 28px 96px;}
+  a{color:var(--blue-5);}
+
+  header.mast{background:var(--navy);color:#fff;padding:56px 0 44px;border-bottom:4px solid var(--blue-4);}
+  header.mast .wrap{padding-bottom:0;}
+  .kicker{text-transform:uppercase;letter-spacing:.18em;font-size:12px;font-weight:600;color:var(--blue-3);margin:0 0 14px;}
+  h1.title{font-size:40px;line-height:1.1;margin:0 0 12px;font-weight:700;letter-spacing:-.01em;}
+  .tagline{font-size:18px;color:#c9d8e8;margin:0 0 22px;max-width:720px;}
+  .tagline em{color:#fff;font-style:italic;}
+  .thesis{font-size:15px;color:#e6eef7;background:rgba(255,255,255,.06);border-left:3px solid var(--blue-4);
+    padding:14px 18px;border-radius:0 6px 6px 0;max-width:800px;}
+  .thesis b{color:#fff;}
+  .meta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px;}
+  .chip{font-size:12px;font-weight:600;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);
+    color:#dbeafe;padding:6px 12px;border-radius:999px;}
+
+  .reframe{background:#fff;border:1px solid var(--line);border-top:4px solid var(--blue-5);border-radius:8px;
+    padding:22px 24px;margin:32px 0 8px;box-shadow:0 1px 2px rgba(10,37,64,.04);}
+  .reframe h3{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--slate-2);}
+  .reframe .big{font-size:19px;font-weight:700;color:var(--navy);margin:0 0 8px;letter-spacing:-.01em;}
+  .reframe p{margin:0;font-size:14.5px;color:var(--slate);}
+  .reframe .ratio{background:var(--blue-1);border:1px solid var(--blue-2);border-radius:6px;padding:10px 14px;margin-top:12px;font-size:14px;color:var(--navy-2);}
+  .reframe .ratio b{color:var(--blue-6);}
+
+  section{margin-top:44px;}
+  .sec-head{display:flex;align-items:baseline;gap:14px;border-bottom:2px solid var(--navy);padding-bottom:10px;margin-bottom:6px;}
+  .sec-num{flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:var(--blue-5);color:#fff;
+    font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;transform:translateY(2px);}
+  .sec-title{font-size:22px;font-weight:700;color:var(--navy);margin:0;letter-spacing:-.01em;}
+  .action-title{font-size:16px;color:var(--blue-6);font-weight:600;margin:14px 0 4px;}
+  p{font-size:15px;color:var(--slate);}
+  strong{color:var(--navy-2);}
+  ul{padding-left:0;list-style:none;margin:10px 0;}
+  ul li{position:relative;padding-left:22px;margin:9px 0;font-size:15px;color:var(--slate);}
+  ul li::before{content:"";position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:2px;background:var(--blue-4);}
+  li b, li strong{color:var(--navy-2);}
+  code{background:var(--line-soft);padding:1px 5px;border-radius:4px;font-size:13px;color:var(--navy-2);}
+
+  /* claim ledger demo strip */
+  .ledger{margin:16px 0;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  .ledger .lh{background:var(--navy);color:#fff;font-size:12px;font-weight:600;letter-spacing:.04em;padding:8px 14px;}
+  .claim{display:flex;gap:12px;align-items:flex-start;padding:10px 14px;border-top:1px solid var(--line-soft);font-size:13.5px;}
+  .claim .badge{flex:0 0 auto;font-size:10px;font-weight:700;letter-spacing:.04em;padding:3px 8px;border-radius:4px;white-space:nowrap;margin-top:2px;}
+  .b-green{background:var(--green-bg);color:var(--green);}
+  .b-amber{background:var(--amber-bg);color:var(--amber2);}
+  .b-red{background:var(--red-bg);color:var(--red);}
+  .claim .ctext{color:var(--navy-2);}
+  .claim .csrc{color:var(--muted);font-size:12px;}
+
+  .diagram{background:var(--navy);color:#dbeafe;border-radius:8px;padding:22px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.5;
+    overflow-x:auto;white-space:pre;margin:16px 0;border:1px solid #1c3a5e;}
+  .diagram .hl{color:#fff;font-weight:700;}
+  .diagram .dim{color:#7da2c4;}
+  .diagram .ok{color:#86efac;}
+  .diagram .warn{color:#fcd34d;}
+  .diagram .bad{color:#fca5a5;}
+
+  .reco{background:var(--blue-1);border:1px solid var(--blue-2);border-radius:8px;padding:18px 22px;margin:14px 0;}
+  .reco .badge{display:inline-block;background:var(--blue-5);color:#fff;font-size:11px;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:5px;margin-bottom:10px;}
+  .reco p{margin:0;color:var(--navy-2);}
+
+  .scope{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:10px;}
+  .scope .card{border:1px solid var(--line);border-radius:8px;background:#fff;overflow:hidden;}
+  .scope .card .cap{padding:10px 16px;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#fff;}
+  .scope .mvp .cap{background:var(--slate-2);}
+  .scope .amb .cap{background:var(--blue-5);}
+  .scope .card .body{padding:6px 16px 14px;}
+  .scope ul li{font-size:14px;}
+
+  table{border-collapse:collapse;width:100%;margin:12px 0;font-size:14px;}
+  th{text-align:left;background:var(--navy);color:#fff;font-weight:600;padding:10px 14px;font-size:12.5px;letter-spacing:.03em;text-transform:uppercase;}
+  td{padding:11px 14px;border-bottom:1px solid var(--line);color:var(--slate);vertical-align:top;}
+  tr:nth-child(even) td{background:var(--blue-1);}
+  td b{color:var(--navy-2);}
+  .risk-tag{color:var(--blue-6);font-weight:700;}
+
+  .surfaces{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px;}
+  .surf{border:1px solid var(--line);border-radius:8px;background:#fff;padding:12px 15px;}
+  .surf .sn{font-size:12px;font-weight:700;color:var(--blue-6);letter-spacing:.04em;}
+  .surf .sd{font-size:14px;color:var(--slate);margin-top:3px;}
+  .surf .sd b{color:var(--navy-2);}
+
+  .timeline{margin-top:14px;border-left:2px solid var(--blue-3);}
+  .step{position:relative;padding:0 0 18px 30px;margin-left:8px;}
+  .step::before{content:"";position:absolute;left:-7px;top:3px;width:12px;height:12px;border-radius:50%;
+    background:var(--blue-5);border:2px solid #fff;box-shadow:0 0 0 2px var(--blue-3);}
+  .step .t{font-size:12px;font-weight:700;color:var(--blue-6);letter-spacing:.04em;}
+  .step .d{font-size:15px;color:var(--slate);margin-top:2px;}
+  .step .d b{color:var(--navy-2);}
+
+  footer{margin-top:54px;padding-top:22px;border-top:2px solid var(--navy);font-size:13px;color:var(--muted);}
+  footer b{color:var(--navy-2);}
+  footer a{color:var(--slate-2);}
+  @media (max-width:680px){.scope,.surfaces{grid-template-columns:1fr;}h1.title{font-size:30px;}}
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <p class="kicker">Gauntlet Capstone &middot; Proposal &middot; Showcase Jun 29</p>
+    <h1 class="title">The Provable Funnel</h1>
+    <p class="tagline">AI outbound that <em>can't say anything it can't prove</em> — every claim decomposed, cited, verified, or killed before it sends.</p>
+    <p class="thesis">
+      <b>Thesis.</b> Generation is solved; <b>verification is the bottleneck</b> (Karpathy). Every AI marketing tool sprays unverifiable slop — and in <b>regulated outbound</b> (ag, food, health, finance) a single false claim is legal liability, not a typo. We build a generation engine with a hard <b>verification gate</b>: each message is split into atomic claims, every claim must bind to a real source and pass an entailment check, and anything unsupported — or <i>true but not legally sayable</i> — is repaired or blocked. Built on a live lead-gen spine, generalizing to any company.
+    </p>
+    <div class="meta-row">
+      <span class="chip">Direction A · ML + LLM</span>
+      <span class="chip">Verification is the primitive</span>
+      <span class="chip">Live spine (LysoReach)</span>
+      <span class="chip">Scored on ambition</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="reframe">
+    <h3>The reframe (the spiky POV)</h3>
+    <p class="big">The model can't say what it can't prove. Cited, or killed.</p>
+    <p>Everyone is racing to make AI write <i>more</i> outbound. The frontier problem is the opposite: making it write only what's <b>true, sourced, and legally sayable</b>. LLMs embellish — that's exactly what makes marketing copy persuasive and dangerous. We invert the burden of proof: a sentence doesn't ship because it sounds good; it ships because <b>every atomic claim in it passed verification against a real source</b>. This is the trust/verification gap — applied to <i>generation</i>, in a domain where being wrong has a price.</p>
+    <div class="ratio"><b>The unit of progress:</b> hallucination catch-rate at a fixed false-reject rate and cost — how many false/unsayable claims we stop before send, without nuking the good copy.</div>
+  </div>
+
+  <p class="action-title">What it looks like — the claim ledger (live demo artifact)</p>
+  <div class="ledger">
+    <div class="lh">DRAFT → "At your 4,000 head, LysoSure cuts feed 13% — $10/head in, $30 out — and it's the same enzyme as the egg version, allergen-free."</div>
+    <div class="claim"><span class="badge b-green">VERIFIED ✓</span><div><span class="ctext">"4,000 head"</span> <span class="csrc">↦ EPA ECHO CAFO permit #IA-0421 (entails: exact)</span></div></div>
+    <div class="claim"><span class="badge b-green">VERIFIED ✓</span><div><span class="ctext">"$10/head in, $30 out"</span> <span class="csrc">↦ approved proof set / UTK economics (entails)</span></div></div>
+    <div class="claim"><span class="badge b-red">BLOCKED ⃠</span><div><span class="ctext">"cuts feed 13%"</span> <span class="csrc">true, but UTK data under legal hold → not sayable → dropped &amp; rephrased</span></div></div>
+    <div class="claim"><span class="badge b-amber">REPAIRED ↻</span><div><span class="ctext">"same enzyme as the egg version, allergen-free"</span> <span class="csrc">no source for "same enzyme" → softened to sourced claim ("rice-expressed, egg-allergen-free")</span></div></div>
+  </div>
+
+  <!-- 1 -->
+  <section id="problem">
+    <div class="sec-head"><span class="sec-num">1</span><h2 class="sec-title">The problem — and why it's technically hard</h2></div>
+    <p>"Only say what you can prove" sounds like a content rule. As an AI system it's a stack of hard, currently-open problems:</p>
+    <ul>
+      <li><b>Claim decomposition from fluent text.</b> Persuasive copy hides multiple claims in one sentence, mixes checkable assertions with puffery ("the best"), and implies things it doesn't state. Splitting generated prose into <i>atomic, checkable claims</i> — and knowing which are factual vs. opinion — is itself unsolved.</li>
+      <li><b>Verification when the judge is unreliable.</b> The obvious verifier — "ask an LLM if the claim is supported" — fails &gt;50% of bias tests and is gameable. You need a <b>calibrated</b> entailment check (NLI model + judge ensemble), not a single LLM yes/no, because false-confidence here ships a lie.</li>
+      <li><b>Repair without killing the copy.</b> Stripping an unsupported claim usually breaks fluency and persuasion. Constrained regeneration that preserves the message while only asserting verified facts is a hard generation problem — and the adversary is the generator's own drive to embellish (the RLVR reward-hacking analogue).</li>
+      <li><b>True ≠ sayable.</b> Some claims are factually true but legally blocked (the UTK feed-efficiency numbers, under hold). Claimability is <i>orthogonal</i> to truth — a second gate, encoded as a per-domain regulatory ontology, not a fact check.</li>
+      <li><b>Cheap enough to run on every sentence, per lead, at scale.</b> You can't run a five-model ensemble on every claim of every message. You need a cheap first-pass that escalates only uncertain claims — a verification cascade with a cost budget.</li>
+    </ul>
+    <p>Crucially, this is <b>measurable</b>: build messages with known-supported and known-false claims and you can score the verifier's precision/recall, catch-rate, and false-reject directly — the ground truth marketing usually lacks.</p>
+  </section>
+
+  <!-- 2 -->
+  <section id="direction">
+    <div class="sec-head"><span class="sec-num">2</span><h2 class="sec-title">Project direction</h2></div>
+    <div class="reco">
+      <span class="badge">Primary fit · Direction A</span>
+      <p><b>Combine ML with LLM applications.</b> An LLM generates persuasive copy; a trained verification stack (NLI entailment model + a calibrated judge ensemble + a claimability classifier) decides, claim-by-claim, what is allowed to survive. The LLM does what ML can't (write); the ML stack does what the LLM can't (reliably know what it's allowed to assert). Remove the verifier and you have generic AI slop — the verifier is the product.</p>
+    </div>
+    <p class="action-title">It also touches B and C — but lead with A</p>
+    <ul>
+      <li><b>One problem, many ways (C):</b> we benchmark verification approaches head-to-head (single-judge vs. NLI vs. ensemble vs. self-consistency) and report what actually catches hallucinations cheapest — a real comparative spine, but secondary to building the gate.</li>
+      <li><b>Agent design (B):</b> the funnel still <i>compiles</i> per-lead and a learned policy still routes channel/timing — but those are the ambition thread, not the headline. The headline is provable generation.</li>
+    </ul>
+  </section>
+
+  <!-- 3 -->
+  <section id="approach">
+    <div class="sec-head"><span class="sec-num">3</span><h2 class="sec-title">AI is the primitive, not a bolt-on</h2></div>
+    <p>The tell: <b>nothing ships unverified</b>. The generator is a candidate-writer; the verification gate is the authority. Delete it and the system is a worse mail-merge. The human sets the source set and the regulatory rules; the models do the rest.</p>
+    <div class="diagram"> lead facts &#9472;&#9658; <span class="hl">GENERATOR</span> (LLM, per-lead) &#9472;&#9658; draft message
+                                          <span class="dim">&#9474;</span>
+   <span class="dim">&#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472; VERIFICATION GATE &#8212; the primitive &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9510;</span>
+   <span class="dim">&#9474;</span>  <span class="hl">DECOMPOSE</span>  draft &#8594; atomic claims                          <span class="dim">&#9474;</span>
+   <span class="dim">&#9474;</span>       <span class="dim">&#9660;</span>                                                     <span class="dim">&#9474;</span>
+   <span class="dim">&#9474;</span>  <span class="hl">BIND</span>       each claim &#8614; source row (citation ledger)        <span class="dim">&#9474;</span>
+   <span class="dim">&#9474;</span>       <span class="dim">&#9660;</span>                                                     <span class="dim">&#9474;</span>
+   <span class="dim">&#9474;</span>  <span class="hl">VERIFY</span>     NLI entailment + judge ensemble (calibrated)        <span class="dim">&#9474;</span>
+   <span class="dim">&#9474;</span>   <span class="ok">&#9500;&#9472; supported + sayable &#9472;&#9472;&#9658; KEEP   (green, cited)</span>            <span class="dim">&#9474;</span>
+   <span class="dim">&#9474;</span>   <span class="warn">&#9500;&#9472; unsupported &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9658; REPAIR / DROP (amber)</span>             <span class="dim">&#9474;</span>
+   <span class="dim">&#9474;</span>   <span class="bad">&#9492;&#9472; true but not sayable &#9658; BLOCK (red, regulatory gate)</span>      <span class="dim">&#9474;</span>
+   <span class="dim">&#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9510;</span>
+                                          <span class="dim">&#9660;</span>
+              provable message &#9472;&#9658; <span class="hl">HITL</span> approve &#9472;&#9658; send
+   <span class="dim">cost control: cheap NLI first-pass &#8594; escalate only uncertain claims to the ensemble (cascade)</span></div>
+    <ul>
+      <li><b>Decompose.</b> An LLM + rules split the draft into atomic claims, tagging each factual / puffery / implied. Coverage is measured (no claim escapes the ledger).</li>
+      <li><b>Bind.</b> Each factual claim is matched to a candidate source row from the lead's grounded facts (the existing citation-ledger idea, hardened).</li>
+      <li><b>Verify.</b> A calibrated stack — NLI entailment model first, judge ensemble on the uncertain tail — decides supported / unsupported, with a reliability diagram so the gate's confidence is trustworthy (not a single LLM's say-so).</li>
+      <li><b>Gate &amp; repair.</b> Supported+sayable survives; unsupported is repaired or dropped via constrained regeneration; true-but-unsayable is blocked by the regulatory ontology. The output is a message where every surviving sentence is cited.</li>
+    </ul>
+    <p class="action-title">The loop that wraps it — constrained self-optimization</p>
+    <p>A contextual-bandit policy proposes message variants per segment (angle, which proven claim to lead with, channel, timing); <b>every variant passes the same verification gate before it can be sent</b>; outcomes (reply / convert, with unsubscribe as a hard negative) update the policy. The optimizer maximizes conversion <i>only within the space of verified messages</i> — so it structurally cannot reward-hack into exaggeration. The verifier is the guardrail on the RL loop; the loop is what makes verified copy win. This is the same auto-A/B technique Netflix/Meta use, plus the truth constraint they lack.</p>
+  </section>
+
+  <!-- 4 -->
+  <section id="scope">
+    <div class="sec-head"><span class="sec-num">4</span><h2 class="sec-title">Scope — what "working" means in two weeks</h2></div>
+    <p>Anchor on tenant&nbsp;#1 (lysozyme/LysoReach) — real leads, real sources, a real regulatory hold (UTK) — so verification has genuine, checkable ground truth.</p>
+    <div class="scope">
+      <div class="card mvp">
+        <div class="cap">Minimum shippable — must hit</div>
+        <div class="body">
+          <ul>
+            <li><b>End-to-end on tenant #1:</b> generate a per-lead message → decompose → bind → verify → repair → the live <b>claim ledger</b> (green/amber/red).</li>
+            <li>Verifier = NLI entailment + a calibrated check; report <b>catch-rate, false-reject, precision/recall</b> on a built test set of true/false claims.</li>
+            <li>The <b>regulatory gate</b>: block the UTK numbers on demand (true-but-held).</li>
+            <li>The <b>adversarial demo</b>: try to make it lie / embellish → the gate catches it. (Killer moment.)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card amb">
+        <div class="cap">Ambitious — scored on ambition</div>
+        <div class="body">
+          <ul>
+            <li><b>Verifier bake-off</b> — single-judge vs. NLI vs. ensemble vs. self-consistency on catch-rate <i>per dollar</i>; pick the cost-optimal cascade.</li>
+            <li><b>Any-company generality</b> — point it at a second tenant's sources + rules; show the gate transfers (the GTM-engine ambition).</li>
+            <li><b>Constrained self-optimization</b> — a contextual-bandit auto-A/B over variants (angle / claim / channel / timing) that only ever tests <i>verified</i> messages, bootstrapped on the persona simulator. Optimizes conversion; can't win by lying.</li>
+            <li><b>Adversarial robustness</b> — measure whether a generator pushed to embellish can slip claims past the gate (the reward-hacking test).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section id="compelling">
+    <div class="sec-head"><span class="sec-num">5</span><h2 class="sec-title">Why it's compelling — the recruit hook</h2></div>
+    <ul>
+      <li><b>It's the trust gap, made tangible.</b> "We built the AI that can't lie in your outbound — every claim cited or killed" is a one-line pitch judges and recruits remember, and it sits on the hottest theme in AI right now.</li>
+      <li><b>Real stakes, real ground truth.</b> Regulated outbound (ag/food/health/finance) makes verification a <i>requirement</i>, not a demo — and gives the project measurable precision/recall instead of vibes.</li>
+      <li><b>Head start no one else has.</b> A live data spine, real sources, and a real legal hold already exist — day-one momentum while the team builds the frontier verifier.</li>
+      <li><b>The claim ledger demos like a magic trick</b> — watch claims light up green/amber/red, try to make it lie, watch it refuse.</li>
+    </ul>
+    <p class="action-title">The 4 bets are the 4 owners</p>
+    <div class="surfaces">
+      <div class="surf"><div class="sn">&#9312; Decompose + bind</div><div class="sd">Claim extraction from fluent copy, source-binding, the citation ledger. <b>(NLP + data.)</b></div></div>
+      <div class="surf"><div class="sn">&#9313; The verifier</div><div class="sd">NLI entailment + judge ensemble + calibration (ECE), the cost cascade. <b>(The ML core / the trust.)</b></div></div>
+      <div class="surf"><div class="sn">&#9314; Repair + regulatory gate</div><div class="sd">Constrained regeneration, the claimability ontology, adversarial robustness. <b>(Generation + policy.)</b></div></div>
+      <div class="surf"><div class="sn">&#9315; Funnel spine + demo</div><div class="sd">Per-lead generator, policy, dashboard, the live ledger + eval harness. <b>(Systems + product.)</b></div></div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section id="risks">
+    <div class="sec-head"><span class="sec-num">6</span><h2 class="sec-title">Hard parts / risks — the bet and where it breaks</h2></div>
+    <p><b>The bet:</b> a calibrated verification gate can catch false / unsayable claims at high recall without destroying the copy — cheaply enough to run on every message — beating "trust the LLM."</p>
+    <table>
+      <thead><tr><th style="width:32%">Risk</th><th>Where it breaks &middot; mitigation</th></tr></thead>
+      <tbody>
+        <tr><td><span class="risk-tag">Verifier reliability</span><br>(top risk)</td><td>A single LLM judge is gameable and fails bias tests. <b>Mitigation:</b> NLI entailment + diverse-family ensemble + calibration (ECE, reliability diagram); report catch-rate vs. false-reject, never a bare yes/no.</td></tr>
+        <tr><td><span class="risk-tag">Claim decomposition errors</span></td><td>Compound claims, implicature, and puffery evade extraction — a missed claim is an unverified claim. <b>Mitigation:</b> measure decomposition coverage explicitly; start with factual-assertion extraction, handle puffery as a separate class.</td></tr>
+        <tr><td><span class="risk-tag">Repair breaks the copy</span></td><td>Dropping a claim can wreck fluency/persuasion. <b>Mitigation:</b> constrained regeneration from the verified skeleton; show human-readable diffs; keep a fluency check in the loop.</td></tr>
+        <tr><td><span class="risk-tag">Adversarial generator</span></td><td>Embellishment is what makes copy good, so the generator pressures the gate (reward-hacking analogue). <b>Mitigation:</b> adversarial eval as a deliverable; report slip-through rate, don't claim it's zero.</td></tr>
+        <tr><td><span class="risk-tag">Optimizer reward-hacking</span></td><td>A self-optimizing loop maximizing replies normally drifts toward exaggeration (Goodhart). <b>Mitigation:</b> the verifier bounds the search space — only verified variants compete — plus brand/tone guards and unsubscribe as a hard negative reward.</td></tr>
+        <tr><td><span class="risk-tag">Sparse reward / cold-start</span></td><td>Replies are rare and slow, new segments have no data, and exploration burns real leads. <b>Mitigation:</b> bootstrap on the LLM-persona simulator; cheap proxies (opens) shape the slow signal; a hierarchical bandit shares across similar segments; learn off-policy from logs.</td></tr>
+        <tr><td><span class="risk-tag">Cost at scale</span></td><td>Ensembling every claim is too expensive per lead. <b>Mitigation:</b> cheap NLI first-pass, escalate only uncertain claims (cascade) — and measure catch-rate per dollar.</td></tr>
+        <tr><td><span class="risk-tag">Regulatory ontology is manual</span></td><td>"True but unsayable" rules must be authored per domain. <b>Mitigation:</b> encode as data, human-confirmed; start with tenant #1's known holds (UTK), generalize later.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 7 -->
+  <section id="demo">
+    <div class="sec-head"><span class="sec-num">7</span><h2 class="sec-title">The live 10-minute showcase (Jun 29)</h2></div>
+    <div class="timeline">
+      <div class="step"><div class="t">0:00 — 1 min · The reframe</div><div class="d">"Everyone's racing to make AI write more outbound. We made one that can't say anything it can't prove." One slide, one claim ledger.</div></div>
+      <div class="step"><div class="t">1:00 — 2 min · The ledger, live</div><div class="d">Pick a real lead → generate → watch the message decompose into claims, each lighting up <b>green (cited) / amber (repaired) / red (blocked)</b>. Click a green one → see the source row it entails.</div></div>
+      <div class="step"><div class="t">3:00 — 2 min · Try to make it lie</div><div class="d">Push the generator to embellish ("say it cures everything") → the gate catches and strips it. Flip the UTK legal hold on → the 13% claim turns red.</div></div>
+      <div class="step"><div class="t">5:00 — 2 min · The metric</div><div class="d">Catch-rate vs. false-reject on our built test set — our calibrated gate vs. single-LLM-judge vs. self-consistency, with cost. Reliability diagram so calibration is undeniable.</div></div>
+      <div class="step"><div class="t">7:00 — 2 min · Any company</div><div class="d">Point the gate at a second tenant's sources + rules; the same verification transfers — provable outbound as an engine, not a one-off.</div></div>
+      <div class="step"><div class="t">9:00 — 1 min · The ask</div><div class="d">Four surfaces, four owners — come build the outbound AI that can't lie.</div></div>
+    </div>
+  </section>
+
+  <footer>
+    <p><b>Anchored to current discourse (June 2026):</b> verification-as-bottleneck (Karpathy, Sequoia Ascent 2026); LLM-judge unreliability (<a href="https://arxiv.org/html/2604.16790v1">arXiv 2604.16790</a>); RLVR reward-hacking / verifiers get gamed (<a href="https://arxiv.org/abs/2604.15149">2604.15149</a>, <a href="https://rdi.berkeley.edu/blog/trustworthy-benchmarks-cont/">Berkeley RDI</a>); cost-aware cascades (<a href="https://arxiv.org/pdf/2410.10347">2410.10347</a>). Built on the live LysoReach spine (<code>personalize.py</code> grounding + segment/source data).</p>
+    <p>Gauntlet Capstone &middot; proposal draft &middot; Jun 15 2026 (repositioned from the GTM-engine framing around the verification core). Companion docs: <code>OVERSIGHT-LAYER-PROPOSAL.html</code> (#1) &middot; <code>QUALITY-ORACLE-PROPOSAL.html</code> (#2) &middot; <code>CAPSTONE-IDEA-MENU.html</code>.</p>
+  </footer>
+
+</div>
+</body>
+</html>

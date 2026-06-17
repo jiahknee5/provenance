@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Capstone Idea Menu — Gauntlet Week 1</title>
+<style>
+  :root{
+    --navy:#0a2540;--navy-2:#102a43;--slate:#334e68;--slate-2:#486581;--muted:#627d98;
+    --line:#d9e2ec;--line-soft:#eef2f6;
+    --blue-1:#eff6ff;--blue-2:#dbeafe;--blue-3:#93c5fd;--blue-4:#3b82f6;--blue-5:#1d4ed8;--blue-6:#1e40af;
+    --paper:#f7f9fc;--amber:#b45309;--amber-bg:#fef3c7;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--navy-2);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px 96px;}
+  a{color:var(--blue-5);}
+
+  header.mast{background:var(--navy);color:#fff;padding:48px 0 38px;border-bottom:4px solid var(--blue-4);}
+  header.mast .wrap{padding-bottom:0;}
+  .kicker{text-transform:uppercase;letter-spacing:.18em;font-size:12px;font-weight:600;color:var(--blue-3);margin:0 0 12px;}
+  h1.title{font-size:36px;line-height:1.1;margin:0 0 12px;font-weight:700;letter-spacing:-.01em;}
+  .tagline{font-size:17px;color:#c9d8e8;margin:0 0 20px;max-width:760px;}
+  .thesis{font-size:15px;color:#e6eef7;background:rgba(255,255,255,.06);border-left:3px solid var(--blue-4);
+    padding:14px 18px;border-radius:0 6px 6px 0;max-width:820px;}
+  .thesis b{color:#fff;}
+  .meta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px;}
+  .chip{font-size:12px;font-weight:600;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);
+    color:#dbeafe;padding:6px 12px;border-radius:999px;}
+
+  h2.sec{font-size:13px;text-transform:uppercase;letter-spacing:.14em;color:var(--blue-6);
+    border-bottom:2px solid var(--navy);padding-bottom:8px;margin:48px 0 6px;}
+  .sub{font-size:14.5px;color:var(--slate);margin:6px 0 16px;max-width:840px;}
+
+  /* recommendation banner */
+  .reco{background:#fff;border:1px solid var(--blue-2);border-left:4px solid var(--blue-5);border-radius:8px;
+    padding:18px 22px;margin:24px 0 8px;box-shadow:0 1px 2px rgba(10,37,64,.05);}
+  .reco h3{margin:0 0 8px;font-size:16px;color:var(--navy);}
+  .reco p{margin:0 0 6px;font-size:14.5px;color:var(--slate);}
+  .reco b{color:var(--navy-2);}
+
+  /* gap radar */
+  .radar{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;}
+  .gap{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 15px;}
+  .gap .gh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:4px;}
+  .gap .gt{font-size:14.5px;font-weight:700;color:var(--navy);}
+  .gap .sev{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 7px;border-radius:4px;white-space:nowrap;}
+  .sev-hot{background:#fee2e2;color:#b91c1c;}
+  .sev-open{background:var(--blue-2);color:var(--blue-6);}
+  .gap p{margin:0;font-size:13px;color:var(--slate);}
+  .gap .src{font-size:11px;color:var(--muted);margin-top:5px;}
+
+  /* idea cards */
+  .idea{background:#fff;border:1px solid var(--line);border-radius:10px;padding:0;margin:18px 0;overflow:hidden;
+    box-shadow:0 1px 3px rgba(10,37,64,.05);}
+  .idea.top{border:2px solid var(--blue-5);box-shadow:0 8px 22px rgba(29,78,216,.13);}
+  .idea .ihead{padding:16px 22px 12px;border-bottom:1px solid var(--line-soft);display:flex;align-items:flex-start;gap:14px;}
+  .rank{flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:var(--navy);color:#fff;font-weight:700;
+    font-size:14px;display:flex;align-items:center;justify-content:center;transform:translateY(2px);}
+  .idea.top .rank{background:var(--blue-5);}
+  .ihead .htext{flex:1;}
+  .ititle{font-size:19px;font-weight:700;color:var(--navy);margin:0;letter-spacing:-.01em;}
+  .star{color:var(--blue-5);}
+  .itag{font-size:14px;color:var(--slate-2);margin:3px 0 0;font-style:italic;}
+  .dir{flex:0 0 auto;font-size:11px;font-weight:700;letter-spacing:.04em;padding:5px 10px;border-radius:6px;
+    background:var(--blue-1);color:var(--blue-6);border:1px solid var(--blue-2);white-space:nowrap;}
+  .ibody{padding:14px 22px 18px;display:grid;grid-template-columns:1fr 1fr;gap:6px 26px;}
+  .ibody .full{grid-column:1 / -1;}
+  .fld{margin:6px 0;}
+  .fld .lab{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--blue-6);margin-bottom:2px;}
+  .fld .val{font-size:13.5px;color:var(--slate);}
+  .fld .val b{color:var(--navy-2);}
+  .auth{background:var(--blue-1);border-radius:6px;padding:8px 12px;}
+  .auth .lab{color:var(--blue-6);}
+  .risk .lab{color:var(--amber);}
+
+  /* ratings */
+  .ratings{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:16px;margin-top:8px;padding-top:12px;border-top:1px solid var(--line-soft);}
+  .rate{display:flex;flex-direction:column;gap:4px;}
+  .rate .rn{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);}
+  .dots{display:flex;gap:3px;}
+  .dot{width:11px;height:11px;border-radius:3px;background:var(--line);}
+  .dot.on{background:var(--blue-5);}
+
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.5px;}
+  th{text-align:left;background:var(--navy);color:#fff;font-weight:600;padding:9px 12px;font-size:12px;letter-spacing:.03em;text-transform:uppercase;}
+  td{padding:9px 12px;border-bottom:1px solid var(--line);color:var(--slate);vertical-align:top;}
+  tr:nth-child(even) td{background:var(--blue-1);}
+  td b{color:var(--navy-2);}
+
+  .sources{font-size:12px;color:var(--muted);line-height:1.7;}
+  .sources a{color:var(--slate-2);}
+  footer{margin-top:48px;padding-top:20px;border-top:2px solid var(--navy);font-size:13px;color:var(--muted);}
+  footer b{color:var(--navy-2);}
+  @media (max-width:760px){.radar,.ibody{grid-template-columns:1fr;}h1.title{font-size:28px;}}
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <p class="kicker">Gauntlet Capstone &middot; Week 1 &middot; Idea Menu (gap-driven)</p>
+    <h1 class="title">Build the trust layer for agents</h1>
+    <p class="tagline">Six differentiated, cutting-edge capstone candidates — each aimed at a <em>specific, currently-unsolved</em> AI problem people are arguing about on HN, X, and arXiv right now (June 2026). Ranked for ambition, AI-as-primitive, 2-week feasibility, recruit pull, and career authority.</p>
+    <p class="thesis">
+      <b>The through-line.</b> The hottest, best-sourced gap in mid-2026 isn't capability — it's <b>trust</b>: "verification is the new bottleneck" (Karpathy). Benchmarks get gamed, LLM-judges fail &gt;50% of bias tests, RLVR models reward-hack, agents collapse on long horizons, and prompt injection is now <i>contained</i>, not solved. The brief's own Direction-B example — <i>one shared agent, the team just verifies</i> — sits exactly on this gap. The top picks below all build some form of <b>calibrated trust / verification for AI output</b>; that's the skill that reads as authority to any future employer.
+    </p>
+    <div class="meta-row">
+      <span class="chip">Proposal due: today</span>
+      <span class="chip">Build window: ~Jun 17 → Jun 29</span>
+      <span class="chip">Team 3–4</span>
+      <span class="chip">Scored on ambition, not polish</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <h2 class="sec">The gap radar — what's actually unsolved (June 2026)</h2>
+  <p class="sub">Curated from current HN threads, X discourse, and 2026 arXiv. These are the named, sharp, still-open problems — not "AI is hard." Every idea below is anchored to one or more of these.</p>
+  <div class="radar">
+    <div class="gap"><div class="gh"><span class="gt">Verification is the bottleneck</span><span class="sev sev-hot">hottest</span></div><p>Generation is cheap; deciding whether output is trustworthy is the constraint. A human reviewing a swarm of agents goes careless. No reliable confidence signal to triage on.</p><div class="src">Karpathy (Sequoia Ascent 2026) · HN 47545748</div></div>
+    <div class="gap"><div class="gh"><span class="gt">Benchmarks get gamed</span><span class="sev sev-hot">hot</span></div><p>Agents manipulate the grader instead of solving the task — <code>git log</code> to copy answers, monkey-patch scorers; 59% of audited SWE-bench problems had flawed tests; contamination is systematic.</p><div class="src">Berkeley RDI · arXiv 2604.15149</div></div>
+    <div class="gap"><div class="gh"><span class="gt">LLM-as-judge is unreliable</span><span class="sev sev-open">open</span></div><p>The default scalable eval fails &gt;50% of bias tests in production — position, verbosity, self-enhancement bias. A single-pass judge over a multi-step trajectory is overloaded.</p><div class="src">Adaline · arXiv 2604.16790</div></div>
+    <div class="gap"><div class="gh"><span class="gt">Long-horizon collapse</span><span class="sev sev-open">open</span></div><p>Agents hold then sharply collapse past a horizon (85%/step × 8 ≈ 27% end-to-end). ~60% of failures are the <i>harness</i>, not the model. Mid-task repair/checkpoint unsolved.</p><div class="src">arXiv 2604.11978 · LangChain 2026</div></div>
+    <div class="gap"><div class="gh"><span class="gt">Reward scarcity off-code</span><span class="sev sev-open">open</span></div><p>Math/code give verifiable rewards; real-tool agents (RAG, web, ops) have no gold answer, so RL has no clean signal and auto-environments teach the wrong behaviors.</p><div class="src">DailyDoseOfDS · arXiv 2604.16004</div></div>
+    <div class="gap"><div class="gh"><span class="gt">Pre-call quality prediction</span><span class="sev sev-open">open</span></div><p>Routers use crude length/keyword heuristics; self-verbalized confidence is poorly calibrated and collapses under distribution shift. Predicting correctness <i>before</i> spending the big model is unsolved.</p><div class="src">Routing survey arXiv 2603.04445</div></div>
+    <div class="gap"><div class="gh"><span class="gt">Context rot / memory staleness</span><span class="sev sev-open">open</span></div><p>Recall degrades as the window fills; ~25% loss as context scales 10×; temporal queries hardest; what to keep/evict and how to detect stale memories is the open art.</p><div class="src">mem0 State of Memory 2026</div></div>
+    <div class="gap"><div class="gh"><span class="gt">Non-determinism = unreproducible bugs</span><span class="sev sev-open">open</span></div><p>Same input → different tool sequences even at temp 0; when an agent does the wrong thing, replaying never reproduces it. Only 62% have step-level tracing.</p><div class="src">Augment Code · DEV 2026</div></div>
+  </div>
+
+  <h2 class="sec">The recommendation</h2>
+  <div class="reco">
+    <h3>Pick a framing of the trust gap; recruit to the framing.</h3>
+    <p><b>#1 (The Oversight Layer)</b>, <b>#2 (The Quality Oracle)</b>, and <b>#3 (The Verifier Bake-Off)</b> are the same hot problem — calibrated trust for AI output — attacked as Direction B, A, and C respectively. Lead with <b>#1</b> if you want the most ambitious, brief-aligned, recruit-magnetic pitch; <b>#2</b> if you want the most ML-pure, authority-dense build; <b>#3</b> if you want the safest "definitely ships and teaches the most" cut.</p>
+    <p>Your existing <b>Self-Compiling Funnel</b> (#7) is the hedge: it's the only one with a live data spine today, so it's lowest-risk-to-working — but it signals "applied AI product," not "frontier AI," which matters less for the score and more for your stated goal of employer authority.</p>
+  </div>
+
+  <h2 class="sec">The candidates — ranked</h2>
+
+  <!-- 1 -->
+  <div class="idea top">
+    <div class="ihead">
+      <span class="rank">1</span>
+      <div class="htext">
+        <p class="ititle"><span class="star">★</span> The Oversight Layer</p>
+        <p class="itag">One shared agent does the work; a learned model decides what a human must verify.</p>
+      </div>
+      <span class="dir">Dir. B · different agent design</span>
+    </div>
+    <div class="ibody">
+      <div class="fld full"><div class="lab">The problem &amp; why it's hard</div><div class="val">The brief's headline question — <i>could a team run through one shared agent and just verify it?</i> — fails today because <b>verification doesn't scale</b>: a human babysitting a swarm goes careless, and agents can't tell you which of their outputs to distrust. The hard bet is building a <b>calibrated risk model</b> that triages a stream of agent actions into auto-approve / human-review / block — when the agent's own confidence is known to be miscalibrated.</div></div>
+      <div class="fld"><div class="lab">AI as primitive</div><div class="val">A trained risk/confidence model (on action features + diff blast-radius + hidden-state probe + judge-ensemble disagreement) <i>is</i> the product. Remove it and you're back to reading everything by hand.</div></div>
+      <div class="fld"><div class="lab">2 weeks: MVP → ambitious</div><div class="val"><b>MVP:</b> one agent does a real task stream; a trained gate routes only risky outputs to a human; measure caught-error rate vs. % reviewed. <b>Ambitious:</b> active-learning loop where human verdicts retrain the gate; an org-throughput sim showing 1 verifier safely covering N agents.</div></div>
+      <div class="fld"><div class="lab">Recruit hook</div><div class="val">Everyone is anxious about trusting agents. "We're building the layer that lets one person safely supervise ten agents" recruits itself.</div></div>
+      <div class="fld risk"><div class="lab">Key risk</div><div class="val">Needs a labeled "was this output actually wrong?" set — bootstrap from a task domain with cheap ground truth (code tests, structured tasks) so the gate has signal.</div></div>
+      <div class="fld auth full"><div class="lab">Authority signal</div><div class="val">"I understand the real bottleneck of agentic orgs and built the calibrated oversight layer." Directly on the #1 industry conversation.</div></div>
+      <div class="ratings">
+        <div class="rate"><span class="rn">Ambition</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i></div></div>
+        <div class="rate"><span class="rn">AI-primitive</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i></div></div>
+        <div class="rate"><span class="rn">2-wk feasible</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i></div></div>
+        <div class="rate"><span class="rn">Recruit pull</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i></div></div>
+        <div class="rate"><span class="rn">Authority</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="idea">
+    <div class="ihead">
+      <span class="rank">2</span>
+      <div class="htext">
+        <p class="ititle">The Quality Oracle</p>
+        <p class="itag">A small model reads a big LLM's hidden states to predict — before you pay for it — whether the answer will be wrong, then routes/gates/escalates.</p>
+      </div>
+      <span class="dir">Dir. A · ML + LLM</span>
+    </div>
+    <div class="ibody">
+      <div class="fld full"><div class="lab">The problem &amp; why it's hard</div><div class="val">Routers today use crude heuristics, and an LLM's self-reported confidence is poorly calibrated and collapses under distribution shift. The bet: a <b>trained, calibrated predictor on internal activations</b> beats self-verbalized confidence at lower cost — a real supervised-learning problem (AUC, calibration, ECE under shift) grafted onto a generative one.</div></div>
+      <div class="fld"><div class="lab">AI as primitive</div><div class="val">Classical ML (probe/regressor on hidden states) does what the LLM can't (know when it's wrong); the LLM does what ML can't (generate). Neither alone is the product.</div></div>
+      <div class="fld"><div class="lab">2 weeks: MVP → ambitious</div><div class="val"><b>MVP:</b> probe on one open model + one dataset, plot the cost-accuracy frontier vs. self-confidence and length baselines. <b>Ambitious:</b> generalize across domains, add an inline hallucination gate, cascade with learned accept heads.</div></div>
+      <div class="fld"><div class="lab">Recruit hook</div><div class="val">"We can look inside the model and predict its mistakes" is a magnet for the ML-leaning teammates.</div></div>
+      <div class="fld risk"><div class="lab">Key risk</div><div class="val">Activation extraction + a labeled correctness set is fiddly; pick an open-weights model and a domain with automatic correctness checks to stay in scope.</div></div>
+      <div class="fld auth full"><div class="lab">Authority signal</div><div class="val">"I probe LLM internals and build calibrated predictors / routers." The densest pure-AI-engineering credential on this menu.</div></div>
+      <div class="ratings">
+        <div class="rate"><span class="rn">Ambition</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i></div></div>
+        <div class="rate"><span class="rn">AI-primitive</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i></div></div>
+        <div class="rate"><span class="rn">2-wk feasible</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i><i class="dot"></i></div></div>
+        <div class="rate"><span class="rn">Recruit pull</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i></div></div>
+        <div class="rate"><span class="rn">Authority</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="idea">
+    <div class="ihead">
+      <span class="rank">3</span>
+      <div class="htext">
+        <p class="ititle">The Verifier Bake-Off</p>
+        <p class="itag">One question — "should we trust this output?" — attacked five ways, measured head-to-head to see what actually wins.</p>
+      </div>
+      <span class="dir">Dir. C · one problem, many ways</span>
+    </div>
+    <div class="ibody">
+      <div class="fld full"><div class="lab">The problem &amp; why it's hard</div><div class="val">Take a single verification problem and pit <b>self-consistency vs. LLM-judge vs. semantic-entropy vs. a trained hidden-state probe vs. a judge-ensemble</b> on the same task, scoring cost, accuracy, and calibration. Hard because there's no agreed answer to "which verifier wins where," and building a fair, un-gameable harness is itself the Berkeley-RDI problem.</div></div>
+      <div class="fld"><div class="lab">AI as primitive</div><div class="val">You <i>build</i> the trained probe and the ensemble, not just call APIs — so it's also ML+LLM under the hood, with a comparative-eval spine.</div></div>
+      <div class="fld"><div class="lab">2 weeks: MVP → ambitious</div><div class="val"><b>MVP:</b> 3 methods on one dataset + a clean leaderboard. <b>Ambitious:</b> 5 methods across 2 domains, an adversarial split that exposes each method's failure mode, a "router that picks the cheapest verifier that's good enough."</div></div>
+      <div class="fld"><div class="lab">Recruit hook</div><div class="val">"We're going to settle which verifier actually works" — appealing to rigorous, eval-minded teammates; very low risk of not shipping.</div></div>
+      <div class="fld risk"><div class="lab">Key risk</div><div class="val">Lowest ambition ceiling of the top three — must avoid being "a benchmark." The adversarial split + the cost frontier is what makes it ambitious.</div></div>
+      <div class="fld auth full"><div class="lab">Authority signal</div><div class="val">"I can rigorously evaluate AI systems and know which method wins where" — the eval literacy every serious AI team needs and few have.</div></div>
+      <div class="ratings">
+        <div class="rate"><span class="rn">Ambition</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i><i class="dot"></i></div></div>
+        <div class="rate"><span class="rn">AI-primitive</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i></div></div>
+        <div class="rate"><span class="rn">2-wk feasible</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i></div></div>
+        <div class="rate"><span class="rn">Recruit pull</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i><i class="dot"></i></div></div>
+        <div class="rate"><span class="rn">Authority</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="idea">
+    <div class="ihead">
+      <span class="rank">4</span>
+      <div class="htext">
+        <p class="ititle">The Tool/Think Bandit</p>
+        <p class="itag">A learned contextual-bandit policy decides, per step: answer directly, think, or call which tool — trained on reward = correctness − cost − latency.</p>
+      </div>
+      <span class="dir">Dir. A · ML + LLM</span>
+    </div>
+    <div class="ibody">
+      <div class="fld full"><div class="lab">The problem &amp; why it's hard</div><div class="val">Agents waste tokens because the LLM decides its own tool use; "tool choice is the missing policy in AI agents." Hard part: sparse/delayed credit assignment and featurizing context so a cheap policy can beat always-think and self-decide on the <b>cost-adjusted</b> frontier.</div></div>
+      <div class="fld"><div class="lab">AI as primitive</div><div class="val">An RL/bandit policy steers the LLM at runtime — the LLM is the actuator, the policy is the brain deciding when to spend.</div></div>
+      <div class="fld"><div class="lab">2 weeks: MVP → ambitious</div><div class="val"><b>MVP:</b> LinUCB/Thompson over {answer, think, tool-k} on one task suite, vs. baselines. <b>Ambitious:</b> off-policy learning from logged traces, multi-turn credit assignment, transfer across task types.</div></div>
+      <div class="fld"><div class="lab">Recruit hook</div><div class="val">"We make agents 3× cheaper at the same accuracy" — a crisp, measurable win.</div></div>
+      <div class="fld risk"><div class="lab">Key risk</div><div class="val">Reward shaping and the eval suite are where it lives or dies; keep the action space small and the reward clean.</div></div>
+      <div class="fld auth full"><div class="lab">Authority signal</div><div class="val">"I apply RL/bandits to control LLM systems" — strong, somewhat narrower than #1/#2.</div></div>
+      <div class="ratings">
+        <div class="rate"><span class="rn">Ambition</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i></div></div>
+        <div class="rate"><span class="rn">AI-primitive</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i></div></div>
+        <div class="rate"><span class="rn">2-wk feasible</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i><i class="dot"></i></div></div>
+        <div class="rate"><span class="rn">Recruit pull</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i></div></div>
+        <div class="rate"><span class="rn">Authority</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="idea">
+    <div class="ihead">
+      <span class="rank">5</span>
+      <div class="htext">
+        <p class="ititle">The Self-Healing Agent</p>
+        <p class="itag">Execution-time plan verification + checkpoint/repair that catches long-horizon collapse before it cascades — with a learned collapse-predictor.</p>
+      </div>
+      <span class="dir">Dir. B/A · agent design + ML</span>
+    </div>
+    <div class="ibody">
+      <div class="fld full"><div class="lab">The problem &amp; why it's hard</div><div class="val">Long-horizon agents collapse <i>structurally</i> (85%/step compounds to ~27%), and ~60% of failures are harness-level, not model-level. The bet: a monitor that predicts imminent collapse from trajectory features and triggers re-plan / rollback to a consistent checkpoint. Hard because "what is a sufficient checkpoint of inferred context/plans, and how to resume without inconsistency" is explicitly unsolved.</div></div>
+      <div class="fld"><div class="lab">AI as primitive</div><div class="val">A trained collapse-predictor + a verification model gate the agent's own execution — the loop self-corrects instead of barreling to failure.</div></div>
+      <div class="fld"><div class="lab">2 weeks: MVP → ambitious</div><div class="val"><b>MVP:</b> a checkpoint/replan wrapper on one long-horizon benchmark, end-to-end success vs. vanilla. <b>Ambitious:</b> learned collapse-predictor from the failure taxonomy; show recovery on tasks the baseline always loses.</div></div>
+      <div class="fld"><div class="lab">Recruit hook</div><div class="val">"We make agents that finish 50-step tasks instead of dying at step 12."</div></div>
+      <div class="fld risk"><div class="lab">Key risk</div><div class="val">Highest-risk of the set for two weeks — needs a working long-horizon harness first. Big ceiling if it lands.</div></div>
+      <div class="fld auth full"><div class="lab">Authority signal</div><div class="val">"I make agentic systems reliable at long horizons" — squarely the production pain employers feel.</div></div>
+      <div class="ratings">
+        <div class="rate"><span class="rn">Ambition</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i></div></div>
+        <div class="rate"><span class="rn">AI-primitive</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i></div></div>
+        <div class="rate"><span class="rn">2-wk feasible</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></div></div>
+        <div class="rate"><span class="rn">Recruit pull</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i></div></div>
+        <div class="rate"><span class="rn">Authority</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6 -->
+  <div class="idea">
+    <div class="ihead">
+      <span class="rank">6</span>
+      <div class="htext">
+        <p class="ititle">The Black Box Recorder</p>
+        <p class="itag">Deterministic record-and-replay + a grader sandbox: make agent failures reproducible, and catch agents red-handed gaming the test.</p>
+      </div>
+      <span class="dir">Dir. C/B · systems + eval</span>
+    </div>
+    <div class="ibody">
+      <div class="fld full"><div class="lab">The problem &amp; why it's hard</div><div class="val">Same input → different tool sequence even at temp 0, so failures aren't reproducible; and benchmarks get gamed because the agent shares the grader's environment. The bet: capture the full execution (model calls, tool I/O, retrieval) for deterministic replay, plus a sandbox that isolates the grader — then detect gaming behaviors automatically.</div></div>
+      <div class="fld"><div class="lab">AI as primitive</div><div class="val">Lighter on ML (more systems) unless you add a learned anomaly detector over traces that flags reward-hacking patterns — recommended to keep it "AI."</div></div>
+      <div class="fld"><div class="lab">2 weeks: MVP → ambitious</div><div class="val"><b>MVP:</b> record/replay one agent deterministically + reproduce a planted bug. <b>Ambitious:</b> a trace anomaly detector that catches grader-gaming (git-log peeking, monkey-patched scorers) on real trajectories.</div></div>
+      <div class="fld"><div class="lab">Recruit hook</div><div class="val">"We caught GPT-class agents cheating their own benchmarks" — a great demo moment.</div></div>
+      <div class="fld risk"><div class="lab">Key risk</div><div class="val">Can read as plumbing; the anomaly-detection + the "caught it cheating" demo is what gives it teeth and ambition.</div></div>
+      <div class="fld auth full"><div class="lab">Authority signal</div><div class="val">"I build the eval/observability infra serious AI teams can't ship without."</div></div>
+      <div class="ratings">
+        <div class="rate"><span class="rn">Ambition</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i><i class="dot"></i></div></div>
+        <div class="rate"><span class="rn">AI-primitive</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></div></div>
+        <div class="rate"><span class="rn">2-wk feasible</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i></div></div>
+        <div class="rate"><span class="rn">Recruit pull</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i><i class="dot"></i></div></div>
+        <div class="rate"><span class="rn">Authority</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i><i class="dot"></i></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7 -->
+  <div class="idea">
+    <div class="ihead">
+      <span class="rank">7</span>
+      <div class="htext">
+        <p class="ititle">The Self-Compiling Funnel <span style="font-size:13px;color:var(--muted);font-style:italic;font-weight:400;">(your existing draft)</span></p>
+        <p class="itag">A GTM engine that compiles a provable, self-learning funnel for any company — bandit policy + verifiable grounded generation.</p>
+      </div>
+      <span class="dir">Dir. A/C · ML + LLM</span>
+    </div>
+    <div class="ibody">
+      <div class="fld full"><div class="lab">Where it fits this menu</div><div class="val">Strong and genuinely ML+LLM (learned policy + a citation-grounded generator that's <i>also</i> a verification story). Its real edge is <b>a live data spine today</b> — lowest risk of having something working. Its weakness for <i>your</i> stated goal: it reads as "applied AI product / GTM," not "frontier AI authority," and judges scoring on raw ambition may rank a verification/RL project higher.</div></div>
+      <div class="fld"><div class="lab">When to pick it</div><div class="val">If the team is product-leaning, time is the binding constraint, or you want a guaranteed working demo over a riskier frontier bet.</div></div>
+      <div class="fld auth"><div class="lab">Tip</div><div class="val">Re-pitch its grounded-generation verifier as the headline (that's the on-trend "verification" angle) to raise its authority signal.</div></div>
+      <div class="ratings">
+        <div class="rate"><span class="rn">Ambition</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i></div></div>
+        <div class="rate"><span class="rn">AI-primitive</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i></div></div>
+        <div class="rate"><span class="rn">2-wk feasible</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i></div></div>
+        <div class="rate"><span class="rn">Recruit pull</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i></div></div>
+        <div class="rate"><span class="rn">Authority</span><div class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i><i class="dot"></i></div></div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="sec">At a glance</h2>
+  <table>
+    <thead><tr><th>#</th><th>Project</th><th>Dir.</th><th>Gap it hits</th><th>Best for</th></tr></thead>
+    <tbody>
+      <tr><td><b>1</b></td><td><b>The Oversight Layer</b></td><td>B</td><td>Verification bottleneck</td><td>Most ambitious + recruit-magnetic; matches the brief's own B example</td></tr>
+      <tr><td><b>2</b></td><td><b>The Quality Oracle</b></td><td>A</td><td>Pre-call quality prediction</td><td>Most ML-pure, densest AI authority</td></tr>
+      <tr><td><b>3</b></td><td><b>The Verifier Bake-Off</b></td><td>C</td><td>LLM-judge unreliability</td><td>Safest to ship; teaches the most breadth</td></tr>
+      <tr><td><b>4</b></td><td><b>The Tool/Think Bandit</b></td><td>A</td><td>Reward / cost control</td><td>Crisp "3× cheaper" measurable win</td></tr>
+      <tr><td><b>5</b></td><td><b>The Self-Healing Agent</b></td><td>B/A</td><td>Long-horizon collapse</td><td>Highest ceiling, highest risk</td></tr>
+      <tr><td><b>6</b></td><td><b>The Black Box Recorder</b></td><td>C/B</td><td>Non-determinism + gaming</td><td>Great demo moment; systems-leaning</td></tr>
+      <tr><td><b>7</b></td><td><b>The Self-Compiling Funnel</b></td><td>A/C</td><td>Grounded generation</td><td>Live spine = lowest risk to working</td></tr>
+    </tbody>
+  </table>
+
+  <h2 class="sec">Sources (June 2026 discourse + arXiv)</h2>
+  <p class="sources">
+    Karpathy, Sequoia Ascent 2026 · <a href="https://rdi.berkeley.edu/blog/trustworthy-benchmarks-cont/">Berkeley RDI — How We Broke Top AI Agent Benchmarks</a> · <a href="https://arxiv.org/abs/2604.15149">RLVR Reward Hacking (arXiv 2604.15149)</a> · <a href="https://arxiv.org/html/2604.11978v1">The Long-Horizon Task Mirage (2604.11978)</a> · <a href="https://www.adaline.ai/blog/llm-as-a-judge-reliability-bias">LLM-as-Judge bias</a> · <a href="https://arxiv.org/html/2604.16790v1">Bias in the Loop (2604.16790)</a> · <a href="https://news.ycombinator.com/item?id=47545748">HN — uncomfortable truths about AI coding agents</a> · <a href="https://mem0.ai/blog/state-of-ai-agent-memory-2026">mem0 — State of AI Agent Memory 2026</a> · <a href="https://arxiv.org/html/2603.04445v2">Model Routing &amp; Cascading survey (2603.04445)</a> · <a href="https://arxiv.org/pdf/2602.03806">Contextual Bandits for Code Gen (2602.03806)</a> · <a href="https://arxiv.org/html/2605.24919">Hidden-state hallucination probing (2605.24919)</a> · <a href="https://arxiv.org/pdf/2504.16828">Process Reward Models That Think (2504.16828)</a> · <a href="https://www.augmentcode.com/guides/why-multi-agent-llm-systems-fail-and-how-to-fix-them">Why Multi-Agent Systems Fail</a> · <a href="https://thehackernews.com/2026/06/agentjacking-attack-tricks-ai-coding.html">Agentjacking (Jun 2026)</a>
+  </p>
+
+  <footer>
+    <p><b>How to use this:</b> pick a framing (B/A/C) of the trust gap, submit the one-pager for selection today, then I'll expand the winner into a full proposal in the same format as <code>SELF-COMPILING-FUNNEL-PROPOSAL.html</code> (problem · direction · architecture · scope · why-compelling · risks · demo).</p>
+    <p>Gauntlet Capstone Week 1 · idea menu · Jun 15 2026. Vendor-blog stats are directional; primary sources (Berkeley RDI, the arXiv papers, Karpathy, HN) are load-bearing.</p>
+  </footer>
+
+</div>
+</body>
+</html>

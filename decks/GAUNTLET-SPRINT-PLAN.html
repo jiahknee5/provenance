@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Provenance — Two-Week Gauntlet Sprint Plan</title>
+<style>
+  :root{
+    --navy:#0a2540;--navy-2:#102a43;--slate:#334e68;--slate-2:#486581;--muted:#627d98;
+    --line:#d9e2ec;--line-soft:#eef2f6;
+    --blue-1:#eff6ff;--blue-2:#dbeafe;--blue-3:#93c5fd;--blue-4:#3b82f6;--blue-5:#1d4ed8;--blue-6:#1e40af;
+    --paper:#f7f9fc;--green:#15803d;--green-bg:#dcfce7;
+    --amber:#b45309;--amber-bg:#fef3c7;--purple:#6d28d9;--purple-bg:#f5f3ff;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--navy-2);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+    line-height:1.55;-webkit-font-smoothing:antialiased;}
+  a{color:var(--blue-5);}
+
+  header.mast{background:var(--navy);color:#fff;padding:48px 0 36px;border-bottom:4px solid var(--blue-4);}
+  .wrap{max-width:980px;margin:0 auto;padding:0 28px 80px;}
+  header.mast .wrap{padding-bottom:0;}
+  .kicker{text-transform:uppercase;letter-spacing:.16em;font-size:11px;font-weight:600;color:var(--blue-3);margin:0 0 12px;}
+  h1.title{font-size:36px;line-height:1.1;margin:0 0 10px;font-weight:700;letter-spacing:-.02em;}
+  .tagline{font-size:16px;color:#cfdcea;margin:0 0 20px;max-width:720px;}
+  .tagline b{color:#fff;}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{font-size:11px;font-weight:600;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
+    color:#dbeafe;padding:5px 12px;border-radius:999px;}
+
+  nav.sticky{position:sticky;top:0;z-index:50;background:rgba(247,249,252,.95);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);padding:10px 0;margin:0 -28px;padding-left:28px;padding-right:28px;}
+  nav.sticky .inner{max-width:980px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px;}
+  nav.sticky a{font-size:12px;font-weight:600;padding:6px 12px;border-radius:999px;border:1px solid var(--line);
+    background:#fff;color:var(--slate-2);text-decoration:none;}
+  nav.sticky a:hover{border-color:var(--blue-4);color:var(--blue-6);}
+  nav.sticky a.w1{border-color:var(--blue-5);background:var(--blue-1);color:var(--blue-6);}
+  nav.sticky a.w2{border-color:var(--purple);background:var(--purple-bg);color:var(--purple);}
+
+  h2.sec{font-size:12px;text-transform:uppercase;letter-spacing:.14em;color:var(--blue-6);
+    border-bottom:2px solid var(--navy);padding-bottom:8px;margin:44px 0 12px;}
+  h2.sec.w2{color:var(--purple);border-color:var(--purple);}
+  h3.sub{font-size:18px;font-weight:700;color:var(--navy);margin:20px 0 8px;}
+  p,li{font-size:14.5px;color:var(--slate);}
+  p b,li b{color:var(--navy-2);}
+
+  .banner{border-radius:10px;padding:16px 20px;margin:16px 0;font-size:14px;}
+  .banner.blue{background:var(--blue-1);border:1px solid var(--blue-3);color:var(--slate);}
+  .banner.purple{background:var(--purple-bg);border:1px solid #ddd6fe;color:var(--slate);}
+  .banner.amber{background:var(--amber-bg);border:1px solid #fcd34d;color:var(--slate);}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px 18px;}
+  .card .cl{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+  .card .ct{font-size:17px;font-weight:700;color:var(--navy);margin-bottom:6px;}
+  .card .cd{font-size:13px;color:var(--slate);line-height:1.45;}
+  .card.w1{border-top:4px solid var(--blue-5);}
+  .card.w2a{border-top:4px solid var(--purple);}
+  .card.w2b{border-top:4px solid var(--green);}
+
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;}
+  th{text-align:left;background:var(--navy);color:#fff;padding:9px 12px;font-size:10px;letter-spacing:.04em;text-transform:uppercase;}
+  td{padding:9px 12px;border-bottom:1px solid var(--line);color:var(--slate);vertical-align:top;}
+  td b{color:var(--navy-2);}
+  tr:nth-child(even) td{background:var(--blue-1);}
+  .p0{color:var(--green);font-weight:700;font-size:11px;}
+  .p1{color:var(--blue-6);font-weight:700;font-size:11px;}
+  .p2{color:var(--muted);font-weight:700;font-size:11px;}
+
+  .timeline{margin:16px 0;}
+  .day{display:grid;grid-template-columns:72px 1fr;gap:12px;margin-bottom:10px;align-items:start;}
+  .day .dn{font-size:12px;font-weight:800;color:var(--blue-6);padding-top:10px;text-align:right;}
+  .day.w2 .dn{color:var(--purple);}
+  .day .db{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 14px;border-left:4px solid var(--blue-5);}
+  .day.w2 .db{border-left-color:var(--purple);}
+  .day .db .dt{font-weight:700;color:var(--navy);font-size:14px;margin-bottom:4px;}
+  .day .db .dd{font-size:13px;color:var(--slate);line-height:1.45;}
+  .day .db .ex{font-size:11px;color:var(--green);font-weight:600;margin-top:6px;}
+
+  .pipe{font-family:ui-monospace,monospace;font-size:12px;background:var(--navy);color:#dbeafe;
+    padding:14px 18px;border-radius:8px;line-height:1.6;margin:12px 0;overflow-x:auto;}
+
+  .checks{list-style:none;padding:0;margin:12px 0;}
+  .checks li{position:relative;padding:6px 0 6px 28px;font-size:14px;color:var(--slate);border-bottom:1px solid var(--line-soft);}
+  .checks li::before{content:"";position:absolute;left:4px;top:11px;width:14px;height:14px;border:2px solid var(--line);border-radius:3px;}
+
+  .flow{background:#fff;border:1px solid var(--line);border-radius:10px;padding:20px;margin:16px 0;text-align:center;}
+  .flow svg{max-width:100%;height:auto;}
+
+  .links{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0;}
+  .links a{font-size:13px;font-weight:600;padding:8px 14px;background:#fff;border:1px solid var(--line);border-radius:8px;text-decoration:none;color:var(--blue-6);}
+  .links a:hover{border-color:var(--blue-4);}
+
+  .slide-frame{background:#fff;border:1px solid var(--line);border-radius:12px;border-top:5px solid var(--blue-5);
+    box-shadow:0 12px 32px rgba(10,37,64,.1);padding:28px 32px;margin:20px 0;}
+  .slide-frame .sl-ey{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--blue-6);margin-bottom:8px;}
+  .slide-frame .sl-title{font-size:24px;font-weight:700;color:var(--navy);line-height:1.2;margin:0 0 10px;letter-spacing:-.02em;}
+  .slide-frame .sl-title em{color:var(--blue-5);font-style:normal;}
+  .slide-frame .sl-sub{font-size:14px;color:var(--slate);margin:0 0 16px;max-width:640px;}
+
+  .spec{background:var(--navy);color:#cbd5e1;border-radius:8px;padding:16px 18px;margin:14px 0;
+    font-family:ui-monospace,monospace;font-size:11.5px;line-height:1.55;overflow-x:auto;}
+  .spec .sk{color:var(--blue-3);font-weight:600;}
+  .spec .cm{color:#64748b;}
+
+  .yes{color:var(--green);font-weight:700;}
+  .no{color:var(--red,#b91c1c);font-weight:700;}
+  .warn{color:var(--amber);font-weight:700;}
+
+  footer{margin-top:48px;padding-top:18px;border-top:2px solid var(--navy);font-size:12px;color:var(--muted);}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr;}h1.title{font-size:28px;}.day{grid-template-columns:1fr;}.day .dn{text-align:left;padding-top:0;}}
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <p class="kicker">Provenance · Gauntlet sprint · summary</p>
+    <h1 class="title">Two-week plan</h1>
+    <p class="tagline"><b>Build from the <a href="GAUNTLET-SPRINT-PRD.html" style="color:#93c5fd;">full PRD (v1.1)</a></b> — condensed view. Week 1 = <b>full Provenance stack</b> + demo · Week 2 = codify + UX reach.</p>
+    <div class="chips">
+      <span class="chip">Week 1 · demo + decks</span>
+      <span class="chip">Week 2 · codify + reach</span>
+      <span class="chip">Jun 29 showcase</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<nav class="sticky">
+  <div class="inner">
+    <a class="w1" href="#w1">Week 1</a>
+    <a class="w1" href="#w1-deliverables">Deliverables</a>
+    <a class="w1" href="#w1-schedule">W1 schedule</a>
+    <a class="w1" href="#pushback">Pushback</a>
+    <a class="w1" href="#identity">Form → next visit</a>
+    <a class="w2" href="#w2">Week 2</a>
+    <a class="w2" href="#w2-codify">Codify</a>
+    <a class="w2" href="#w2-reach">Reach goals</a>
+    <a class="w2" href="#w2-schedule">W2 schedule</a>
+    <a href="#success">Success criteria</a>
+    <a href="index.html">Hub</a>
+  </div>
+</nav>
+
+<!-- WEEK 1 -->
+<h2 class="sec" id="w1">Week 1 — Gauntlet day demo + deck suite</h2>
+
+<div class="banner blue">
+  <b>North star:</b> Two live personalized websites (ungoverned vs governed) + one presenter deck hub + full attribution story (ad → pixel → form → email → night school → page).
+</div>
+
+<div class="grid2">
+  <div class="card w1">
+    <div class="cl">Deliverable 1</div>
+    <div class="ct">Edgy demo site</div>
+    <div class="cd">Track A — creepy, false, borderline-illegal claims. Magic link per cohort member. 3 planted shock profiles. Sandbox only — no email send.</div>
+  </div>
+  <div class="card w1">
+    <div class="cl">Deliverable 2</div>
+    <div class="ct">Governed demo site</div>
+    <div class="cd">Track B — same data, Gate-cleared copy, claim ledger inspect. Real claims only; less creepy.</div>
+  </div>
+</div>
+
+<h3 class="sub" id="w1-deliverables">All 8 deliverables</h3>
+<table>
+  <thead><tr><th>#</th><th>Deliverable</th><th>MVP</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td><b>Edgy website</b></td><td>Magic links · planted profiles · pre-cached copy</td></tr>
+    <tr><td>2</td><td><b>Governed website</b></td><td>Gate batch · ledger overlay · A/B toggle</td></tr>
+    <tr><td>3</td><td><b>Deck: Marketing landscape</b></td><td>Meta · Google · Clay · Insider · personalization AI</td></tr>
+    <tr><td>4</td><td><b>Deck: Provenance enables this</b></td><td>Two differentiators · component stack</td></tr>
+    <tr><td>5</td><td><b>Deck: Full funnel</b></td><td>5 stages · where each pillar sits</td></tr>
+    <tr><td>6</td><td><b>Deck: How it works</b></td><td>RPG · Gate pipeline · adapters</td></tr>
+    <tr><td>7</td><td><b>Deck: Examples</b></td><td>Email · ad · web — Track A vs B</td></tr>
+    <tr><td>8</td><td><b>Deck: Gauntlet walkthrough</b></td><td>X/IG ad → pixel → form → email → night school → live QR</td></tr>
+  </tbody>
+</table>
+
+<div class="pipe">Claims Library → Draft → <b>The Gate</b> → Optimizer → Render → Drift Monitor<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ Assurance Lab — <b>all Week 1</b></div>
+
+<table>
+  <thead><tr><th>Component</th><th>Week 1 must</th></tr></thead>
+  <tbody>
+    <tr><td>Claims Library</td><td>≥10 facts · Gauntlet tenant YAML</td></tr>
+    <tr><td>The Gate</td><td>Batch pipeline · ledger UI on Track B</td></tr>
+    <tr><td>Optimizer</td><td>Leaderboard · grayed illegal variant · live beat</td></tr>
+    <tr><td>Drift Monitor</td><td>Rule change → re-Gate → stale badge (&lt;60s)</td></tr>
+    <tr><td>Assurance Lab</td><td>≥20 traps · catch-rate + false-reject panel</td></tr>
+    <tr><td>Web adapter</td><td>Track A + B · deck §E email/ad examples</td></tr>
+  </tbody>
+</table>
+
+<h3 class="sub" id="w1-schedule">Week 1 schedule</h3>
+<div class="timeline">
+  <div class="day"><div class="dn">Day 1</div><div class="db"><div class="dt">Lock scope + data + deck shell</div><div class="dd">Tom export spec · RPG schema · GAUNTLET-DAY-DECK shell · competitive bullets</div><div class="ex">Exit: 5 test profiles</div></div></div>
+  <div class="day"><div class="dn">Day 2</div><div class="db"><div class="dt">Data + Library + Assurance traps</div><div class="dd">Full roster · gauntlet_tenant.yaml · ≥20 traps draft</div><div class="ex">Exit: Library + traps ready</div></div></div>
+  <div class="day"><div class="dn">Day 3</div><div class="db"><div class="dt">Ungoverned site + Assurance eval</div><div class="dd">Next.js · Track A batch · trap metrics script</div><div class="ex">Exit: edgy pages &lt; 2s</div></div></div>
+  <div class="day"><div class="dn">Day 4</div><div class="db"><div class="dt">Gate + Optimizer</div><div class="dd">Track B · ledger · Optimizer panel · grayed lie</div><div class="ex">Exit: both tracks + Optimizer</div></div></div>
+  <div class="day"><div class="dn">Day 5</div><div class="db"><div class="dt">Drift + Decks 3–6</div><div class="dd">Rule-change demo · Assurance panel · landscape → how it works</div><div class="ex">Exit: full stack on screen</div></div></div>
+  <div class="day"><div class="dn">Day 6</div><div class="db"><div class="dt">Decks 7–8 + full rehearsal</div><div class="dd">Examples · walkthrough · Assurance + Opt + Drift in 15-min run</div><div class="ex">Exit: all PR components demoed</div></div></div>
+  <div class="day"><div class="dn">Day 7</div><div class="db"><div class="dt">Gauntlet day</div><div class="dd">QR → edgy → governed → Assurance → Optimizer → Drift · post → Week 2 retro</div></div></div>
+</div>
+
+<h3 class="sub" id="pushback">Pushback — don’t promise in Week 1</h3>
+<table>
+  <thead><tr><th>Ask</th><th>Instead</th></tr></thead>
+  <tbody>
+    <tr><td>Capture data from phones on first load</td><td><b>Pre-provision</b> from Tom · magic link · optional self-declare</td></tr>
+    <tr><td>Live agent enrichment at page load</td><td><b>Batch enrich</b> 48h before · show cache timestamp</td></tr>
+    <tr><td>Real Meta/Google pixels</td><td><b>Simulated</b> attribution debugger UI</td></tr>
+    <tr><td>Send illegal copy via email</td><td><b>Sandbox render only</b> · planted profiles · watermark</td></tr>
+    <tr><td>Six separate decks</td><td><b>One hub deck</b> ~25–35 slides</td></tr>
+    <tr><td>Tier 4 social scraping live</td><td><b>T1–2 real</b> · T3–4 simulated + badge</td></tr>
+  </tbody>
+</table>
+
+<!-- IDENTITY: FORM → NEXT VISIT -->
+<h2 class="sec" id="identity">Form → next visit · identity &amp; personalization</h2>
+
+<div class="banner amber">
+  <b>Deck walkthrough (Deliverable 8):</b> Use this slide after “form submit” in the attribution story. Answers: “How does the website know them next time?” — <b>not</b> from reading their phone; from <b>identity we set at submit</b> (cookie + token + email merge).
+</div>
+
+<div class="slide-frame">
+  <p class="sl-ey">Walkthrough slide · identity</p>
+  <h3 class="sl-title">Form submit = <em>stop being anonymous</em></h3>
+  <p class="sl-sub">Cold first visit: browser + IP + UTM only. After the form: we save a profile row and bind the browser (or link) to that person on every return visit.</p>
+
+  <div class="flow">
+    <svg viewBox="0 0 820 100" xmlns="http://www.w3.org/2000/svg" style="max-width:780px;">
+      <rect x="0" y="25" width="90" height="36" rx="6" fill="#eff6ff" stroke="#93c5fd"/>
+      <text x="45" y="47" text-anchor="middle" fill="#1e40af" font-size="9" font-weight="600">Ad / landing</text>
+      <path d="M90 43 H115" stroke="#93c5fd" stroke-width="2" marker-end="url(#idarr)"/>
+      <rect x="115" y="25" width="80" height="36" rx="6" fill="#eff6ff" stroke="#93c5fd"/>
+      <text x="155" y="47" text-anchor="middle" fill="#1e40af" font-size="9" font-weight="600">Form submit</text>
+      <path d="M195 43 H220" stroke="#93c5fd" stroke-width="2"/>
+      <rect x="220" y="15" width="110" height="56" rx="6" fill="#0a2540"/>
+      <text x="275" y="38" text-anchor="middle" fill="#fff" font-size="9" font-weight="700">Save RPG row</text>
+      <text x="275" y="52" text-anchor="middle" fill="#93c5fd" font-size="8">email · fields · utm</text>
+      <path d="M330 43 H355" stroke="#15803d" stroke-width="2"/>
+      <rect x="355" y="25" width="100" height="36" rx="6" fill="#dcfce7" stroke="#86efac"/>
+      <text x="405" y="47" text-anchor="middle" fill="#15803d" font-size="9" font-weight="700">Set cookie</text>
+      <path d="M455 43 H480" stroke="#15803d" stroke-width="2"/>
+      <rect x="480" y="25" width="95" height="36" rx="6" fill="#dcfce7" stroke="#86efac"/>
+      <text x="527" y="47" text-anchor="middle" fill="#15803d" font-size="9" font-weight="700">Lead pixel</text>
+      <path d="M575 43 H600" stroke="#3b82f6" stroke-width="2"/>
+      <rect x="600" y="25" width="100" height="36" rx="6" fill="#dbeafe" stroke="#3b82f6"/>
+      <text x="650" y="47" text-anchor="middle" fill="#1e40af" font-size="9" font-weight="600">Return visit</text>
+      <path d="M700 43 H725" stroke="#3b82f6" stroke-width="2"/>
+      <rect x="725" y="25" width="95" height="36" rx="6" fill="#1d4ed8"/>
+      <text x="772" y="47" text-anchor="middle" fill="#fff" font-size="9" font-weight="700">Personalized</text>
+      <defs><marker id="idarr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L5,3 L0,6 Z" fill="#93c5fd"/></marker></defs>
+    </svg>
+  </div>
+</div>
+
+<h3 class="sub">How we recognize them on the next visit</h3>
+<table>
+  <thead><tr><th>Method</th><th>When it works</th><th>Demo / build</th></tr></thead>
+  <tbody>
+    <tr><td><b>First-party cookie</b> <code>gauntlet_vid</code></td><td>Same browser, cookies not cleared</td><td>Set on form POST · read on every page load</td></tr>
+    <tr><td><b>Signed URL token</b></td><td>Email, QR, SMS — any device</td><td><code>/w/{token}</code> · Gauntlet day primary path</td></tr>
+    <tr><td><b>Email merge</b></td><td>Drew drip, night school row same email</td><td>Upsert into same <code>recipient_id</code></td></tr>
+    <tr><td><b>Meta / Google IDs</b></td><td>Supplement only; same browser + prior pixel</td><td>Attribution debugger (simulated Week 1)</td></tr>
+    <tr><td><b>Login / OAuth</b></td><td>Explicit consent</td><td>Stretch · Week 2+</td></tr>
+  </tbody>
+</table>
+
+<h3 class="sub">Implementation spec (cohort web app)</h3>
+<div class="spec">
+<span class="cm">// On form POST (server)</span><br>
+<span class="sk">const</span> visitorId = crypto.randomUUID();<br>
+<span class="sk">await</span> db.recipients.upsert({ recipient_id: visitorId, email, ...fields, utm, submitted_at });<br>
+setCookie(<span class="sk">'gauntlet_vid'</span>, visitorId, { maxAge: 365*24*3600, secure: true, sameSite: <span class="sk">'Lax'</span> });<br>
+firePixelEvents({ meta: <span class="sk">'Lead'</span>, ga4: <span class="sk">'generate_lead'</span> }); <span class="cm">// simulated in demo</span><br>
+redirect(<span class="sk">`/welcome?token=${sign(visitorId)}`</span>); <span class="cm">// optional: cookie + token once</span><br>
+<br>
+<span class="cm">// On every page load (server)</span><br>
+<span class="sk">const</span> id = cookies.get(<span class="sk">'gauntlet_vid'</span>) ?? verifyToken(searchParams.token);<br>
+<span class="sk">const</span> profile = <span class="sk">await</span> db.recipients.get(id); <span class="cm">// RPG row</span><br>
+<span class="sk">return</span> renderPersonalizedPage(profile, track); <span class="cm">// ungoverned | provenance</span>
+</div>
+
+<h3 class="sub">What we store at form submit (RPG row)</h3>
+<table>
+  <thead><tr><th>Field</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>recipient_id</code></td><td>Stable internal key (cookie + token)</td></tr>
+    <tr><td><code>email</code></td><td>Merge Drew email · night school · future clicks</td></tr>
+    <tr><td>Form attributes</td><td>Role, company, location, goals → personalization + Gate</td></tr>
+    <tr><td><code>utm_*</code>, <code>referrer</code></td><td>Attribution debugger timeline</td></tr>
+    <tr><td><code>meta_fbp</code>, <code>ga_client_id</code></td><td>Optional · simulated pixel correlation</td></tr>
+  </tbody>
+</table>
+
+<h3 class="sub">Gauntlet day vs live form</h3>
+<div class="grid2">
+  <div class="card w1">
+    <div class="cl">Cohort already in Tom export</div>
+    <div class="cd">Form happened <b>before</b> demo · skip live form · pre-provision RPG rows · QR/magic link = same token mechanism</div>
+  </div>
+  <div class="card w1">
+    <div class="cl">Live form on staging (optional)</div>
+    <div class="cd">Submit once in room → set cookie → reload → “it remembered me” · merge with batch personalization overnight</div>
+  </div>
+</div>
+
+<h3 class="sub">Honest limits (presenter crib)</h3>
+<table>
+  <thead><tr><th>Scenario</th><th>Personalized return visit?</th></tr></thead>
+  <tbody>
+    <tr><td>Same phone, same browser, cookie set at submit</td><td><span class="yes">Yes</span></td></tr>
+    <tr><td>New phone, no email/QR link</td><td><span class="no">No</span> — anonymous again</td></tr>
+    <tr><td>Cleared cookies, no token in URL</td><td><span class="no">No</span></td></tr>
+    <tr><td>Email or QR with signed token</td><td><span class="yes">Yes</span> — best cross-device</td></tr>
+    <tr><td>“Read data from their phone” on first load</td><td><span class="no">No</span> — not how the web works</td></tr>
+  </tbody>
+</table>
+
+<p style="font-size:14px;color:var(--slate);"><b>Provenance angle:</b> Identity resolution is separate from claim verification. Cookie/token tells us <em>who</em> — Gate tells us <em>what we’re allowed to say</em> to them.</p>
+
+<!-- WEEK 2 -->
+<h2 class="sec w2" id="w2">Week 2 — Codify + reach goals</h2>
+
+<div class="banner purple">
+  <b>Rule:</b> Codify before reach — otherwise Week 2 becomes another scramble. No reach work until handoff checklist ≥80% (Days 1–2).
+</div>
+
+<div class="grid2">
+  <div class="card w2a">
+    <div class="cl">Track A</div>
+    <div class="ct">Codify</div>
+    <div class="cd">Schemas · tenant layout · Gate pipeline module · regen_all.sh · ARCHITECTURE.md · GATE-SPEC.md · deck hub merge · runbook</div>
+  </div>
+  <div class="card w2b">
+    <div class="cl">Track B</div>
+    <div class="ct">Reach</div>
+    <div class="cd">Compare mode · segmentation live · attribution v2 · live email/ad gen · Provenance hardening (Assurance CI · batch Drift · Optimizer depth)</div>
+  </div>
+</div>
+
+<h3 class="sub" id="w2-codify">Track A — Codify</h3>
+<table>
+  <thead><tr><th>Area</th><th>Deliverable</th></tr></thead>
+  <tbody>
+    <tr><td><b>A1 Tenant model</b></td><td>RPG schema · ledger schema · demo/tenants/gauntlet/ · TENANT-MODEL.md</td></tr>
+    <tr><td><b>A2 Pipeline</b></td><td>gate.py · generate_pages.py · regen_all.sh · Assurance trap format · Drift re-run script</td></tr>
+    <tr><td><b>A3 App hardening</b></td><td>README · error states · simulated badges · offline fallback · QA-COHORT-WEB.md</td></tr>
+    <tr><td><b>A4 Deck merge</b></td><td>PROVENANCE-DECK-HUB.html · capstone alignment</td></tr>
+    <tr><td><b>A5 Grader docs</b></td><td>ARCHITECTURE.md · WORKFLOW-DEMO.md · GATE-SPEC.md · WEEK-1-RETRO.md</td></tr>
+  </tbody>
+</table>
+
+<div class="flow">
+  <svg viewBox="0 0 720 120" xmlns="http://www.w3.org/2000/svg" style="max-width:680px;">
+    <rect x="10" y="40" width="100" height="40" rx="6" fill="#eff6ff" stroke="#93c5fd"/>
+    <text x="60" y="65" text-anchor="middle" fill="#1e40af" font-size="10" font-weight="600">Week 1 demo</text>
+    <path d="M110 60 H150" stroke="#93c5fd" stroke-width="2" marker-end="url(#a)"/>
+    <rect x="150" y="40" width="110" height="40" rx="6" fill="#f5f3ff" stroke="#c4b5fd"/>
+    <text x="205" y="58" text-anchor="middle" fill="#6d28d9" font-size="10" font-weight="600">Schemas + tenant</text>
+    <path d="M260 60 H300" stroke="#c4b5fd" stroke-width="2"/>
+    <rect x="300" y="40" width="110" height="40" rx="6" fill="#f5f3ff" stroke="#c4b5fd"/>
+    <text x="355" y="58" text-anchor="middle" fill="#6d28d9" font-size="10" font-weight="600">Gate module</text>
+    <path d="M410 60 H450" stroke="#c4b5fd" stroke-width="2"/>
+    <rect x="450" y="40" width="100" height="40" rx="6" fill="#dcfce7" stroke="#86efac"/>
+    <text x="500" y="58" text-anchor="middle" fill="#15803d" font-size="10" font-weight="600">regen_all</text>
+    <path d="M550 60 H590" stroke="#86efac" stroke-width="2"/>
+    <rect x="590" y="30" width="120" height="60" rx="6" fill="#0a2540"/>
+    <text x="650" y="52" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">Reach P0</text>
+    <text x="650" y="68" text-anchor="middle" fill="#93c5fd" font-size="9">compare · attribution v2</text>
+    <defs><marker id="a" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L5,3 L0,6 Z" fill="#93c5fd"/></marker></defs>
+  </svg>
+</div>
+
+<h3 class="sub" id="w2-reach">Track B — UX reach (Provenance already W1)</h3>
+<table>
+  <thead><tr><th>Pri</th><th>Goal</th><th>Deliverable</th></tr></thead>
+  <tbody>
+    <tr><td><span class="p0">P0</span></td><td><b>R1 Compare mode</b></td><td>/compare — side-by-side two tokens</td></tr>
+    <tr><td><span class="p0">P0</span></td><td><b>R2 Segmentation live</b></td><td>Adoption curve · Maslow · emotional trigger in copy</td></tr>
+    <tr><td><span class="p0">P0</span></td><td><b>R4 Attribution v2</b></td><td>Timeline: Meta · GA4 · UTM · email · night school</td></tr>
+    <tr><td><span class="p0">P0</span></td><td><b>R5 Email + ad (live gen)</b></td><td>Gate-generated HTML email + IG ad in app</td></tr>
+    <tr><td><span class="p0">P0</span></td><td><b>R6 Self-declare form</b></td><td>Confirm session / role on load</td></tr>
+    <tr><td><span class="p1">P1</span></td><td><b>R3 Assurance hardening</b></td><td>CI eval on Gate changes (W1: ≥20 traps + panel)</td></tr>
+    <tr><td><span class="p1">P1</span></td><td>R7 Emotional A/B</td><td>3 hero variants · deeper Optimizer sim</td></tr>
+    <tr><td><span class="p1">P1</span></td><td>R8 Drew corpus</td><td>Few-shot tone · Claims Library</td></tr>
+    <tr><td><span class="p1">P1</span></td><td>R9 Drift batch re-Gate</td><td>Full cohort on rule change (W1: single profile)</td></tr>
+    <tr><td><span class="p1">P1</span></td><td>R10 Optimizer depth</td><td>Richer sim (W1: leaderboard + grayed lie)</td></tr>
+    <tr><td><span class="p2">P2</span></td><td>R13–R20</td><td>Real pixels · live scrape · email send · second tenant · Jun 29</td></tr>
+  </tbody>
+</table>
+
+<h3 class="sub" id="w2-schedule">Week 2 schedule</h3>
+<div class="timeline">
+  <div class="day w2"><div class="dn">Day 1</div><div class="db"><div class="dt">Retro + schemas</div><div class="dd">WEEK-1-RETRO.md · handoff checklist · JSON Schema · tag week-1-demo</div><div class="ex">Exit: schemas validate roster</div></div></div>
+  <div class="day w2"><div class="dn">Day 2</div><div class="db"><div class="dt">Pipeline codify</div><div class="dd">Gate module · tenants/gauntlet/ · regen_all.sh · GATE-SPEC draft</div><div class="ex">Exit: one rule change → ledger diff</div></div></div>
+  <div class="day w2"><div class="dn">Day 3</div><div class="db"><div class="dt">Reach P0 start</div><div class="dd">R4 attribution timeline · R2 segmentation · R1 compare mode</div><div class="ex">Exit: compare works</div></div></div>
+  <div class="day w2"><div class="dn">Day 4</div><div class="db"><div class="dt">Email/ad gen + hardening</div><div class="dd">R5 live gen · R3 Assurance CI · app README + errors</div><div class="ex">Exit: email in app; CI green</div></div></div>
+  <div class="day w2"><div class="dn">Day 5</div><div class="db"><div class="dt">Provenance hardening + deck</div><div class="dd">R9 batch Drift · R10 Optimizer depth · PROVENANCE-DECK-HUB · R8 Drew</div></div></div>
+  <div class="day w2"><div class="dn">Day 6</div><div class="db"><div class="dt">Integration + QA</div><div class="dd">Full regen · mobile regression · R6 · capstone doc update</div></div></div>
+  <div class="day w2"><div class="dn">Day 7</div><div class="db"><div class="dt">Buffer + Jun 29 prep</div><div class="dd">P1 if ahead · 5-min backup video · Week 3 scope written</div></div></div>
+</div>
+
+<!-- SUCCESS -->
+<h2 class="sec" id="success">Success criteria</h2>
+
+<div class="grid2">
+  <div class="card w1">
+    <div class="cl">Week 1 · must ship</div>
+    <ul class="checks">
+      <li>Edgy site on phone — “how did they know that?”</li>
+      <li>Governed site — ledger + cited claims</li>
+      <li>Deck: landscape + walkthrough + Provenance</li>
+      <li>Attribution story end-to-end</li>
+      <li>Full Provenance stack live — Gate · Optimizer · Drift · Assurance</li>
+    </ul>
+  </div>
+  <div class="card w2a">
+    <div class="cl">Week 2 · must ship</div>
+    <ul class="checks">
+      <li>New teammate runs demo in &lt; 30 min</li>
+      <li>One-command regen_all.sh</li>
+      <li>ARCHITECTURE.md + GATE-SPEC.md</li>
+      <li>Compare mode + attribution v2 + live email/ad</li>
+      <li>Email/ad examples through Gate</li>
+    </ul>
+  </div>
+</div>
+
+<h3 class="sub">Related docs</h3>
+<div class="links">
+  <a href="ONE-WEEK-GAUNTLET-PLAN.md">Week 1 (markdown)</a>
+  <a href="WEEK-2-CODIFY-AND-REACH.md">Week 2 (markdown)</a>
+  <a href="COHORT-DEMO-PROJECT-PLAN.md">Technical plan</a>
+  <a href="MEETING-NOTES-SEGMENTATION-AND-DEMO.md">Meeting notes</a>
+  <a href="GAUNTLET-PILOT-DECK.html">Pilot deck</a>
+  <a href="FULL-FUNNEL-VIEW.html">Funnel view</a>
+  <a href="SHOWCASE-DEMO.html">Showcase demo</a>
+  <a href="index.html">Document hub</a>
+</div>
+
+<footer>
+  <p><b>Provenance · two-week Gauntlet sprint</b> · Week 1 = full Provenance stack + demo · Week 2 = codify + UX reach · Jun 29 showcase alignment.</p>
+  <p>Markdown sources: <a href="ONE-WEEK-GAUNTLET-PLAN.md">ONE-WEEK-GAUNTLET-PLAN.md</a> · <a href="WEEK-2-CODIFY-AND-REACH.md">WEEK-2-CODIFY-AND-REACH.md</a></p>
+</footer>
+
+</div>
+</body>
+</html>

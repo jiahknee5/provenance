@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Provenance — Live Showcase Demo</title>
+<style>
+  :root{
+    --navy:#0a2540;--navy-2:#102a43;--slate:#334e68;--muted:#627d98;
+    --line:#d9e2ec;--blue-1:#eff6ff;--blue-3:#93c5fd;--blue-4:#3b82f6;--blue-5:#1d4ed8;--blue-6:#1e40af;
+    --green:#15803d;--green-bg:#dcfce7;--green-glow:rgba(21,128,61,.35);
+    --red:#b91c1c;--red-bg:#fee2e2;--red-glow:rgba(185,28,28,.35);
+    --amber:#b45309;--amber-bg:#fef3c7;--amber-glow:rgba(180,83,9,.3);
+    --bg:#060e18;--panel:#0d1f33;--panel2:#122840;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+    background:var(--bg);color:#e2eaf4;-webkit-font-smoothing:antialiased;}
+
+  /* presenter chrome */
+  .chrome{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(6,14,24,.92);backdrop-filter:blur(12px);
+    border-bottom:1px solid rgba(255,255,255,.08);padding:10px 20px;display:flex;align-items:center;gap:16px;}
+  .chrome .logo{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue-3);}
+  .beats{display:flex;gap:6px;flex:1;justify-content:center;flex-wrap:wrap;}
+  .beat{font-size:11px;font-weight:600;padding:6px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.12);
+    background:transparent;color:#94a3b8;cursor:pointer;transition:all .2s;}
+  .beat:hover{border-color:var(--blue-4);color:#fff;}
+  .beat.on{background:var(--blue-5);border-color:var(--blue-5);color:#fff;box-shadow:0 0 20px rgba(59,130,246,.4);}
+  .beat .tm{display:block;font-size:9px;opacity:.75;font-weight:500;}
+  .timer{font-family:ui-monospace,monospace;font-size:13px;color:var(--blue-3);min-width:48px;text-align:right;}
+  .hint{font-size:10px;color:#64748b;} .hint kbd{background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px;}
+
+  /* stage */
+  .stage{position:fixed;inset:0;top:52px;display:flex;align-items:center;justify-content:center;padding:24px;
+    opacity:0;pointer-events:none;transform:scale(.98);transition:opacity .35s,transform .35s;}
+  .stage.active{opacity:1;pointer-events:auto;transform:scale(1);}
+  .inner{max-width:1100px;width:100%;}
+
+  /* beat 0 — reframe */
+  .hero{text-align:center;}
+  .hero .eyebrow{font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--blue-3);margin-bottom:20px;}
+  .hero h1{font-size:clamp(32px,5vw,52px);font-weight:800;line-height:1.08;margin:0 0 20px;letter-spacing:-.03em;
+    background:linear-gradient(135deg,#fff 0%,#93c5fd 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .hero .sub{font-size:clamp(16px,2.5vw,22px);color:#94a3b8;max-width:640px;margin:0 auto 32px;line-height:1.45;}
+  .hero .sub b{color:#fff;}
+  .hero-pill{display:inline-flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+  .pill{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.35);border-radius:8px;padding:10px 18px;font-size:13px;color:#dbeafe;}
+  .pill b{color:#fff;}
+
+  /* beat 1 — gate + ledger */
+  .gate-layout{display:grid;grid-template-columns:1fr 1.05fr;gap:20px;align-items:start;}
+  @media(max-width:900px){.gate-layout{grid-template-columns:1fr;}}
+  .panel{background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:12px;overflow:hidden;}
+  .panel-hd{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px;}
+  .panel-hd .title{font-size:13px;font-weight:700;color:#fff;}
+  .panel-hd .tag{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:4px;
+    background:rgba(59,130,246,.2);color:var(--blue-3);}
+  .prospect-bar{padding:14px 16px;background:var(--panel2);display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .prospect-bar .av{width:40px;height:40px;border-radius:50%;background:var(--blue-5);display:grid;place-items:center;font-weight:700;font-size:14px;}
+  .prospect-bar .meta .name{font-weight:700;font-size:15px;color:#fff;}
+  .prospect-bar .meta .detail{font-size:12px;color:#94a3b8;margin-top:2px;}
+  .btn{font-size:12px;font-weight:700;padding:8px 16px;border-radius:7px;border:none;cursor:pointer;transition:all .15s;}
+  .btn-primary{background:var(--blue-5);color:#fff;margin-left:auto;}
+  .btn-primary:hover{background:var(--blue-6);box-shadow:0 0 24px rgba(59,130,246,.45);}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed;box-shadow:none;}
+  .btn-danger{background:rgba(185,28,28,.2);border:1px solid rgba(185,28,28,.5);color:#fca5a5;}
+  .btn-danger:hover{background:rgba(185,28,28,.35);}
+  .btn-ghost{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#cbd5e1;}
+  .email-draft{padding:16px;font-size:14px;line-height:1.65;color:#cbd5e1;min-height:120px;font-family:Georgia,serif;}
+  .email-draft .hl{color:var(--blue-3);font-weight:600;}
+  .email-draft.empty{color:#64748b;font-style:italic;font-family:inherit;}
+
+  .ledger{padding:12px;}
+  .ledger-empty{text-align:center;padding:40px 20px;color:#64748b;font-size:13px;}
+  .claim-row{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;margin-bottom:8px;border-radius:9px;
+    background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);cursor:pointer;
+    opacity:0;transform:translateX(-12px);transition:opacity .4s,transform .4s,box-shadow .2s,border-color .2s;}
+  .claim-row.show{opacity:1;transform:none;}
+  .claim-row:hover{border-color:rgba(255,255,255,.15);}
+  .claim-row.selected{box-shadow:0 0 0 2px var(--blue-4);}
+  .claim-row.status-green{border-left:3px solid var(--green);}
+  .claim-row.status-amber{border-left:3px solid var(--amber);}
+  .claim-row.status-red{border-left:3px solid var(--red);}
+  .badge{flex:0 0 auto;font-size:10px;font-weight:800;letter-spacing:.04em;padding:4px 8px;border-radius:5px;min-width:72px;text-align:center;}
+  .badge.green{background:var(--green-bg);color:var(--green);}
+  .badge.amber{background:var(--amber-bg);color:var(--amber);}
+  .badge.red{background:var(--red-bg);color:var(--red);}
+  .claim-body{flex:1;min-width:0;}
+  .claim-text{font-size:13px;font-weight:600;color:#f1f5f9;}
+  .claim-src{font-size:11px;color:#64748b;margin-top:3px;}
+  .claim-src.visible{color:var(--blue-3);}
+
+  .source-drawer{margin-top:12px;padding:14px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25);border-radius:8px;
+    display:none;font-size:12px;line-height:1.5;color:#cbd5e1;}
+  .source-drawer.open{display:block;animation:fadeUp .3s;}
+  .source-drawer .sl{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--blue-3);margin-bottom:6px;}
+  .source-drawer code{display:block;margin-top:8px;padding:10px;background:rgba(0,0,0,.3);border-radius:6px;font-size:11px;color:#93c5fd;}
+
+  .sabotage{margin-top:12px;padding:14px;background:rgba(185,28,28,.06);border:1px dashed rgba(185,28,28,.35);border-radius:8px;}
+  .sabotage .sl{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fca5a5;margin-bottom:8px;}
+  .sabotage textarea{width:100%;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#f1f5f9;
+    font-size:12px;padding:10px;resize:vertical;min-height:56px;font-family:inherit;}
+  .sabotage .row{display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap;}
+  .sabotage-result{font-size:12px;color:#fca5a5;font-weight:600;display:none;}
+  .sabotage-result.show{display:block;animation:shake .4s;}
+
+  .legal-toggle{display:flex;align-items:center;gap:12px;margin-top:12px;padding:12px 14px;background:var(--panel2);border-radius:8px;}
+  .legal-toggle .lbl{font-size:12px;color:#94a3b8;flex:1;}
+  .legal-toggle .lbl b{color:#fff;display:block;font-size:13px;margin-bottom:2px;}
+  .switch{position:relative;width:44px;height:24px;flex:0 0 auto;}
+  .switch input{opacity:0;width:0;height:0;}
+  .switch .slider{position:absolute;inset:0;background:#334155;border-radius:999px;cursor:pointer;transition:.2s;}
+  .switch .slider::before{content:"";position:absolute;width:18px;height:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s;}
+  .switch input:checked+.slider{background:var(--red);}
+  .switch input:checked+.slider::before{transform:translateX(20px);}
+
+  /* beat 2 — assurance lab */
+  .lab-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  @media(max-width:800px){.lab-grid{grid-template-columns:1fr;}}
+  .metric-big{text-align:center;padding:28px 20px;}
+  .metric-big .num{font-size:56px;font-weight:800;letter-spacing:-.03em;line-height:1;
+    background:linear-gradient(180deg,#fff,#93c5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .metric-big .lbl{font-size:13px;color:#94a3b8;margin-top:8px;}
+  .metric-big .vs{font-size:12px;color:var(--green);margin-top:6px;font-weight:600;}
+  .bar-chart{padding:20px;}
+  .bar-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+  .bar-row .label{font-size:12px;color:#94a3b8;width:100px;flex:0 0 auto;text-align:right;}
+  .bar-track{flex:1;height:28px;background:rgba(255,255,255,.05);border-radius:6px;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:6px;width:0;transition:width 1.2s cubic-bezier(.22,1,.36,1);}
+  .bar-fill.prov{background:linear-gradient(90deg,var(--blue-6),var(--blue-4));box-shadow:0 0 16px var(--blue-4);}
+  .bar-fill.judge{background:#475569;}
+  .bar-row .pct{font-size:13px;font-weight:700;width:44px;color:#fff;}
+  .calib{padding:20px;}
+  .calib svg{width:100%;height:160px;}
+  .calib-line{fill:none;stroke:var(--blue-4);stroke-width:2.5;stroke-dasharray:400;stroke-dashoffset:400;}
+  .calib-line.animate{animation:drawLine 1.5s forwards;}
+  .calib-diag{stroke:rgba(255,255,255,.2);stroke-width:1;stroke-dasharray:4 4;}
+
+  /* beat 3 — optimizer */
+  .opt-layout{display:grid;grid-template-columns:1.2fr 1fr;gap:20px;align-items:start;}
+  @media(max-width:900px){.opt-layout{grid-template-columns:1fr;}}
+  .chart-wrap{padding:20px;height:220px;position:relative;}
+  .chart-wrap canvas{width:100%!important;height:100%!important;}
+  .leaderboard{padding:12px;}
+  .lb-row{display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:6px;border-radius:8px;
+    background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);font-size:12px;}
+  .lb-row.winner{border-color:var(--green);background:rgba(21,128,61,.12);}
+  .lb-row.blocked{opacity:.35;text-decoration:line-through;}
+  .lb-row .rank{font-weight:800;color:var(--blue-3);width:24px;}
+  .lb-row .variant{flex:1;color:#e2eaf4;}
+  .lb-row .rate{font-weight:700;color:var(--green);}
+  .lb-row.blocked .rate{color:#64748b;}
+  .blocked-note{margin-top:12px;padding:12px;background:rgba(185,28,28,.08);border:1px solid rgba(185,28,28,.25);
+    border-radius:8px;font-size:12px;color:#fca5a5;}
+  .blocked-note b{color:#fff;}
+
+  /* beat 4 — ask */
+  .ask{text-align:center;}
+  .ask h2{font-size:clamp(28px,4vw,40px);font-weight:800;margin:0 0 24px;letter-spacing:-.02em;color:#fff;}
+  .surfaces{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:24px 0;}
+  @media(max-width:700px){.surfaces{grid-template-columns:1fr 1fr;}}
+  .surf{background:var(--panel);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:16px;text-align:left;}
+  .surf .sn{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--blue-3);}
+  .surf .st{font-size:15px;font-weight:700;color:#fff;margin:6px 0 4px;}
+  .surf .sd{font-size:12px;color:#94a3b8;line-height:1.4;}
+  .ask-cta{font-size:18px;color:var(--blue-3);font-weight:600;margin-top:20px;}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+  @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+  @keyframes drawLine{to{stroke-dashoffset:0;}}
+  .channel-tabs{display:flex;gap:6px;padding:10px 16px;background:var(--panel2);border-bottom:1px solid rgba(255,255,255,.06);}
+  .ch-tab{font-size:11px;font-weight:700;padding:6px 14px;border-radius:6px;border:1px solid rgba(255,255,255,.1);
+    background:transparent;color:#94a3b8;cursor:pointer;}
+  .ch-tab.on{background:var(--blue-5);border-color:var(--blue-5);color:#fff;}
+  .web-preview{display:none;padding:16px;background:linear-gradient(180deg,#0f172a,#1e293b);min-height:140px;}
+  .web-preview.show{display:block;}
+  .web-preview .url{font-size:10px;color:#64748b;font-family:ui-monospace,monospace;margin-bottom:10px;}
+  .web-preview .hero-w{font-size:20px;font-weight:800;color:#fff;line-height:1.25;margin-bottom:8px;}
+  .web-preview .sub-w{font-size:13px;color:#94a3b8;line-height:1.5;margin-bottom:14px;}
+  .web-preview .cta-w{display:inline-block;background:var(--blue-5);color:#fff;font-size:12px;font-weight:700;padding:10px 18px;border-radius:7px;}
+  .email-draft.hidden{display:none;}
+</style>
+</head>
+<body>
+
+<nav class="chrome">
+  <span class="logo">Provenance · Showcase</span>
+  <div class="beats" id="beats">
+    <button class="beat on" data-beat="0"><span class="tm">0:00</span>Reframe</button>
+    <button class="beat" data-beat="1"><span class="tm">1:00</span>The Gate · Claim ledger</button>
+    <button class="beat" data-beat="2"><span class="tm">4:00</span>Assurance Lab</button>
+    <button class="beat" data-beat="3"><span class="tm">7:00</span>Truth-bounded Optimizer</button>
+    <button class="beat" data-beat="4"><span class="tm">9:00</span>The ask</button>
+  </div>
+  <span class="timer" id="timer">0:00</span>
+</nav>
+<p class="hint" style="position:fixed;bottom:8px;right:16px;z-index:101;margin:0;"><kbd>←</kbd> <kbd>→</kbd> beats · aligns with capstone §8</p>
+
+<!-- BEAT 0: REFRAME -->
+<section class="stage active" id="beat-0">
+  <div class="inner hero">
+    <p class="eyebrow">Gauntlet Capstone · Jun 29 · 10-minute live</p>
+    <h1>The marketing AI that can't lie.</h1>
+    <p class="sub">Every channel — email, <b>website</b>, ads, sales — personalized to the individual. We built the layer that <b>proves every claim</b> before it ships, and optimizes <b>inside the truth</b>.</p>
+    <div class="hero-pill">
+      <span class="pill"><b>Email · Web · Ads</b> one engine</span>
+      <span class="pill"><b>Seconds</b> not weeks of legal review</span>
+      <span class="pill"><b>Zero</b> unsubstantiated claims shipped</span>
+    </div>
+  </div>
+</section>
+
+<!-- BEAT 1: GATE + LEDGER -->
+<section class="stage" id="beat-1">
+  <div class="inner gate-layout">
+    <div class="panel">
+      <div class="panel-hd"><span class="title">Draft · ultra-personalized touchpoint</span><span class="tag">Demo tenant · Helix Analytics</span></div>
+      <div class="channel-tabs">
+        <button class="ch-tab on" data-ch="email">✉ Email</button>
+        <button class="ch-tab" data-ch="web">🌐 Website</button>
+      </div>
+      <div class="prospect-bar">
+        <div class="av">MC</div>
+        <div class="meta">
+          <div class="name">Maya Chen · VP Operations, Northwind Health</div>
+          <div class="detail">847-bed system · Midwest · health-system segment · known visitor</div>
+        </div>
+        <button class="btn btn-primary" id="btn-generate">Generate &amp; verify →</button>
+      </div>
+      <div class="email-draft empty" id="email-draft">Click Generate — same Gate runs for email <b>or</b> a personalized landing page…</div>
+      <div class="web-preview" id="web-preview">
+        <div class="url">helix-analytics.com/w/northwind-mc</div>
+        <div class="hero-w" id="web-hero">—</div>
+        <div class="sub-w" id="web-sub">—</div>
+        <span class="cta-w">Book a 15-min walkthrough →</span>
+      </div>
+      <div class="sabotage" id="sabotage-box" hidden>
+        <div class="sl">⚡ Demo moment · Try to make it lie</div>
+        <textarea id="sabotage-input" placeholder='Add a false claim… e.g. "FDA-approved" or "guaranteed 60% cost cut"'></textarea>
+        <div class="row">
+          <button class="btn btn-danger" id="btn-sabotage">Inject &amp; re-verify</button>
+          <span class="sabotage-result" id="sabotage-result">⛔ BLOCKED — no source supports this claim. Cited or killed.</span>
+        </div>
+      </div>
+      <div class="legal-toggle">
+        <div class="lbl"><b>Benchmark study · MLR hold</b>Flip OFF to unblock "47% TCO reduction" everywhere</div>
+        <label class="switch"><input type="checkbox" id="legal-hold" checked><span class="slider"></span></label>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-hd"><span class="title">Claim ledger</span><span class="tag">The Gate · verify + clear</span></div>
+      <div class="ledger" id="ledger">
+        <div class="ledger-empty" id="ledger-empty">Claims appear here as The Gate runs — green · amber · red</div>
+      </div>
+      <div class="source-drawer" id="source-drawer">
+        <div class="sl">Source citation · click any green claim</div>
+        <div id="source-content"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BEAT 2: ASSURANCE LAB -->
+<section class="stage" id="beat-2">
+  <div class="inner">
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="panel-hd"><span class="title">Assurance Lab</span><span class="tag">MVP deliverable · proof the checker works</span></div>
+      <div class="lab-grid">
+        <div class="metric-big">
+          <div class="num" id="catch-num">0%</div>
+          <div class="lbl">Catch-rate on adversarial traps<br><span style="font-size:11px;color:#64748b">at 2.1% false-reject (fixed threshold)</span></div>
+          <div class="vs" id="catch-vs">↑ vs 71% single LLM-judge baseline</div>
+        </div>
+        <div class="bar-chart" id="bar-chart">
+          <div class="bar-row"><span class="label">Provenance ensemble</span><div class="bar-track"><div class="bar-fill prov" data-w="98.7"></div></div><span class="pct">98.7%</span></div>
+          <div class="bar-row"><span class="label">LLM-judge only</span><div class="bar-track"><div class="bar-fill judge" data-w="71"></div></div><span class="pct">71%</span></div>
+          <div class="bar-row"><span class="label">NLI only</span><div class="bar-track"><div class="bar-fill judge" data-w="84"></div></div><span class="pct">84%</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-hd"><span class="title">Calibration · reliability diagram</span><span class="tag">ECE ±3%</span></div>
+      <div class="calib">
+        <svg viewBox="0 0 400 160" preserveAspectRatio="none">
+          <line class="calib-diag" x1="40" y1="130" x2="360" y2="20"/>
+          <polyline class="calib-line" id="calib-line" points="40,128 120,108 200,78 280,48 360,28"/>
+          <text x="200" y="155" fill="#64748b" font-size="11" text-anchor="middle">Predicted confidence →</text>
+          <text x="14" y="80" fill="#64748b" font-size="11" text-anchor="middle" transform="rotate(-90 14 80)">Actual accuracy →</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BEAT 3: OPTIMIZER -->
+<section class="stage" id="beat-3">
+  <div class="inner opt-layout">
+    <div class="panel">
+      <div class="panel-hd"><span class="title">Truth-bounded Optimizer</span><span class="tag">Contextual bandit · health-system segment</span></div>
+      <div class="chart-wrap"><canvas id="opt-chart"></canvas></div>
+      <p style="padding:0 20px 16px;font-size:12px;color:#94a3b8;margin:0;">Reply rate over simulated sends — only <b style="color:#fff">verified+cleared</b> variants compete. The "win by lying" path never enters the reward loop.</p>
+    </div>
+    <div class="panel">
+      <div class="panel-hd"><span class="title">Variant leaderboard</span><span class="tag">Auto A/B · per micro-segment</span></div>
+      <div class="leaderboard" id="leaderboard"></div>
+      <div class="blocked-note"><b>Structurally blocked:</b> "Guaranteed 50% savings" — false, never in action space. Optimizer cannot reward-hack its way to higher conversion via exaggeration.</div>
+    </div>
+  </div>
+</section>
+
+<!-- BEAT 4: ASK -->
+<section class="stage" id="beat-4">
+  <div class="inner ask">
+    <h2>Come build the marketing AI that can't lie.</h2>
+    <div class="surfaces">
+      <div class="surf"><div class="sn">Owner 1</div><div class="st">The Gate</div><div class="sd">Verifier ML — decomposition, NLI + ensemble, calibration, cascade</div></div>
+      <div class="surf"><div class="sn">Owner 2</div><div class="st">Optimizer + Assurance</div><div class="sd">Bandit, off-policy eval, adversarial traps, reliability profiling</div></div>
+      <div class="surf"><div class="sn">Owner 3</div><div class="st">Library + Drift</div><div class="sd">Claim–evidence graph, demo tenant config, source re-verification</div></div>
+      <div class="surf"><div class="sn">Owner 4</div><div class="st">Generation + Demo</div><div class="sd">Per-prospect gen, channel adapters, this showcase UI</div></div>
+    </div>
+    <p class="ask-cta">Team of 3–4 · 2-week build · Standalone demo tenant · Email MVP · Website ambitious</p>
+  </div>
+</section>
+
+<script>
+const BEAT_TIMES = ['0:00','1:00','4:00','7:00','9:00'];
+let currentBeat = 0;
+
+const CLAIMS = [
+  { id:'beds', text:'"847-bed health system"', status:'green', src:'Public CMS provider data · exact match',
+    citation:'CMS Provider Data · Northwind Health System: "Licensed beds: 847."' },
+  { id:'cycle', text:'"cut reporting cycle 40%"', status:'green', src:'Approved Case Study CS-2026-04 · entailed (NLI 0.93)',
+    citation:'Case Study CS-2026-04: "Median reporting cycle reduced from 5.2 to 3.1 weeks (~40%)."' },
+  { id:'hipaa', text:'"HIPAA-ready deployment"', status:'green', src:'Product spec · entailed',
+    citation:'Helix Analytics Platform Spec §4.1: "HIPAA-aligned controls; BAA available."' },
+  { id:'tco', text:'"47% TCO reduction"', status:'red', src:'Benchmark study — TRUE but under MLR hold · BLOCKED',
+    citation:'Rule BENCH-MLR-HOLD: "47% TCO claim blocked pending MLR clearance."' },
+  { id:'leading', text:'"industry-leading platform"', status:'amber', src:'Puffery · REWRITTEN to "deployed at 12 health systems"',
+    citation:'Rewritten to sourced claim per puffery policy.' }
+];
+
+const EMAIL = `Hi Maya,
+
+For a <span class="hl">847-bed system</span> like Northwind, teams on Helix Analytics typically <span class="hl">cut reporting cycle ~40%</span> — with a <span class="hl">HIPAA-ready</span> deployment path your compliance team can review upfront.
+
+Worth a 15-minute walkthrough next week?
+
+— Alex, Helix Analytics`;
+
+const WEB_HERO = 'Northwind Health: cut reporting cycle <span class="hl">~40%</span>';
+const WEB_SUB = 'Built for <span class="hl">847-bed</span> operations. <span class="hl">HIPAA-ready</span> deployment. Every line verified before render.';
+
+const VARIANTS = [
+  { name:'Lead with cycle-time ROI (web + email)', rate:6.8, winner:true },
+  { name:'Lead with HIPAA / compliance angle', rate:4.9, winner:false },
+  { name:'Peer health-system reference', rate:5.4, winner:false },
+  { name:'"Guaranteed 60% savings"', rate:null, blocked:true }
+];
+
+let channel = 'email';
+
+function goBeat(n) {
+  n = Math.max(0, Math.min(4, n));
+  currentBeat = n;
+  document.querySelectorAll('.stage').forEach((s,i) => s.classList.toggle('active', i === n));
+  document.querySelectorAll('.beat').forEach((b,i) => b.classList.toggle('on', i === n));
+  document.getElementById('timer').textContent = BEAT_TIMES[n];
+  if (n === 2) animateLab();
+  if (n === 3) animateOptimizer();
+}
+
+document.getElementById('beats').addEventListener('click', e => {
+  const btn = e.target.closest('.beat');
+  if (btn) goBeat(+btn.dataset.beat);
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') goBeat(currentBeat + 1);
+  if (e.key === 'ArrowLeft') goBeat(currentBeat - 1);
+});
+
+/* --- Beat 1: Generate & ledger --- */
+let generated = false;
+const ledgerEl = document.getElementById('ledger');
+const ledgerEmpty = document.getElementById('ledger-empty');
+const emailDraft = document.getElementById('email-draft');
+const sourceDrawer = document.getElementById('source-drawer');
+const sourceContent = document.getElementById('source-content');
+const legalHold = document.getElementById('legal-hold');
+const sabotageBox = document.getElementById('sabotage-box');
+
+function renderClaims(holdOn) {
+  ledgerEmpty?.remove();
+  ledgerEl.querySelectorAll('.claim-row').forEach(r => r.remove());
+  CLAIMS.forEach((c, i) => {
+    let status = c.status, src = c.src;
+    if (c.id === 'tco') {
+      status = holdOn ? 'red' : 'green';
+      src = holdOn ? c.src : 'Benchmark study · MLR hold LIFTED · cleared by Legal';
+    }
+    const row = document.createElement('div');
+    row.className = `claim-row status-${status}`;
+    row.dataset.id = c.id;
+    row.innerHTML = `<span class="badge ${status}">${status==='green'?'PROVEN ✓':status==='amber'?'REWRITE ↻':'BLOCKED ⛔'}</span>
+      <div class="claim-body"><div class="claim-text">${c.text}</div><div class="claim-src">${src}</div></div>`;
+    row.addEventListener('click', () => showSource(c, holdOn, row));
+    ledgerEl.appendChild(row);
+    setTimeout(() => row.classList.add('show'), 180 * i);
+  });
+}
+
+function showSource(c, holdOn, row) {
+  document.querySelectorAll('.claim-row').forEach(r => r.classList.remove('selected'));
+  row.classList.add('selected');
+  let cit = c.citation;
+  if (c.id === 'tco' && !holdOn) cit = 'Benchmark Study (Jun 2026): "Median TCO reduction 47% vs. legacy stack (n=18 health systems)." MLR hold lifted.';
+  sourceContent.innerHTML = `<strong>${c.text}</strong><code>${cit}</code>`;
+  sourceDrawer.classList.add('open');
+}
+
+document.querySelectorAll('.ch-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    channel = tab.dataset.ch;
+    document.querySelectorAll('.ch-tab').forEach(t => t.classList.toggle('on', t.dataset.ch === channel));
+    const ed = document.getElementById('email-draft');
+    const wp = document.getElementById('web-preview');
+    if (channel === 'web') {
+      ed.classList.add('hidden');
+      wp.classList.add('show');
+      if (generated) { document.getElementById('web-hero').innerHTML = WEB_HERO; document.getElementById('web-sub').innerHTML = WEB_SUB; }
+    } else {
+      ed.classList.remove('hidden');
+      wp.classList.remove('show');
+    }
+  });
+});
+
+document.getElementById('btn-generate').addEventListener('click', function() {
+  if (generated) return;
+  generated = true;
+  this.disabled = true;
+  this.textContent = 'Verifying…';
+  emailDraft.classList.remove('empty');
+  emailDraft.innerHTML = '';
+  let i = 0;
+  const type = setInterval(() => {
+    emailDraft.innerHTML = EMAIL.slice(0, i);
+    i += 8;
+    if (i >= EMAIL.length) {
+      clearInterval(type);
+      this.textContent = 'Verified ✓';
+      document.getElementById('web-hero').innerHTML = WEB_HERO;
+      document.getElementById('web-sub').innerHTML = WEB_SUB;
+      if (channel === 'web') { emailDraft.classList.add('hidden'); document.getElementById('web-preview').classList.add('show'); }
+      renderClaims(legalHold.checked);
+      sabotageBox.hidden = false;
+    }
+  }, 25);
+});
+
+legalHold.addEventListener('change', () => {
+  if (!generated) return;
+  renderClaims(legalHold.checked);
+});
+
+document.getElementById('btn-sabotage').addEventListener('click', () => {
+  const t = document.getElementById('sabotage-input').value.trim();
+  if (!t) return;
+  const row = document.createElement('div');
+  row.className = 'claim-row status-red show';
+  row.innerHTML = `<span class="badge red">BLOCKED ⛔</span><div class="claim-body"><div class="claim-text">"${t.replace(/"/g,'')}"</div><div class="claim-src">No source · adversarial injection caught by The Gate</div></div>`;
+  ledgerEl.appendChild(row);
+  const res = document.getElementById('sabotage-result');
+  res.classList.add('show');
+  setTimeout(() => res.classList.remove('show'), 2000);
+});
+
+/* --- Beat 2: Assurance Lab --- */
+let labAnimated = false;
+function animateLab() {
+  if (labAnimated) return;
+  labAnimated = true;
+  const target = 98.7;
+  const el = document.getElementById('catch-num');
+  let v = 0;
+  const tick = setInterval(() => {
+    v += 2.5;
+    if (v >= target) { v = target; clearInterval(tick); }
+    el.textContent = v.toFixed(1) + '%';
+  }, 30);
+  document.querySelectorAll('.bar-fill').forEach((b, i) => {
+    setTimeout(() => { b.style.width = b.dataset.w + '%'; }, 200 + i * 150);
+  });
+  setTimeout(() => document.getElementById('calib-line').classList.add('animate'), 400);
+}
+
+/* --- Beat 3: Optimizer chart --- */
+let optAnimated = false;
+function animateOptimizer() {
+  if (optAnimated) return;
+  optAnimated = true;
+  const lb = document.getElementById('leaderboard');
+  VARIANTS.forEach((v, i) => {
+    const row = document.createElement('div');
+    row.className = 'lb-row' + (v.winner ? ' winner' : '') + (v.blocked ? ' blocked' : '');
+    row.innerHTML = `<span class="rank">${v.blocked ? '—' : '#' + (i+1)}</span><span class="variant">${v.name}</span><span class="rate">${v.blocked ? 'N/A' : v.rate + '% reply'}</span>`;
+    lb.appendChild(row);
+  });
+  const canvas = document.getElementById('opt-chart');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+  const W = rect.width, H = rect.height;
+  const pts = [2.1,2.4,2.8,3.5,4.2,5.1,6.0,6.8,7.2];
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle = 'rgba(255,255,255,.08)';
+    for (let y = 0; y < 5; y++) {
+      const yy = 20 + (H-40) * y / 4;
+      ctx.beginPath(); ctx.moveTo(40, yy); ctx.lineTo(W-10, yy); ctx.stroke();
+    }
+    ctx.strokeStyle = '#3b82f6';
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = '#3b82f6';
+    ctx.shadowBlur = 12;
+    ctx.beginPath();
+    pts.forEach((p, i) => {
+      const x = 40 + (W-50) * i / (pts.length - 1);
+      const y = H - 20 - (p / 8) * (H - 40);
+      if (i === 0) ctx.moveTo(x, y); else if (i <= frame) ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    if (frame < pts.length - 1) { frame++; requestAnimationFrame(draw); }
+  }
+  draw();
+}
+</script>
+</body>
+</html>

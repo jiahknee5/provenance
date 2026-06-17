@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Provenance — The System of Record for Claims</title>
+<style>
+  :root{
+    --navy:#0a2540;--navy-2:#102a43;--slate:#334e68;--slate-2:#486581;--muted:#627d98;
+    --line:#d9e2ec;--line-soft:#eef2f6;
+    --blue-1:#eff6ff;--blue-2:#dbeafe;--blue-3:#93c5fd;--blue-4:#3b82f6;--blue-5:#1d4ed8;--blue-6:#1e40af;
+    --paper:#f7f9fc;
+    --green:#15803d;--green-bg:#dcfce7;--red:#b91c1c;--red-bg:#fee2e2;--amber2:#a16207;--amber-bg:#fef9c3;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--navy-2);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:940px;margin:0 auto;padding:0 28px 96px;}
+  a{color:var(--blue-5);}
+
+  header.mast{background:var(--navy);color:#fff;padding:54px 0 42px;border-bottom:4px solid var(--blue-4);}
+  header.mast .wrap{padding-bottom:0;}
+  .kicker{text-transform:uppercase;letter-spacing:.18em;font-size:12px;font-weight:600;color:var(--blue-3);margin:0 0 14px;}
+  h1.title{font-size:38px;line-height:1.1;margin:0 0 12px;font-weight:700;letter-spacing:-.01em;}
+  .tagline{font-size:18px;color:#cfdcea;margin:0 0 18px;max-width:740px;}
+  .tagline b{color:#fff;}
+  .analogy-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;}
+  .ar{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:9px 14px;font-size:13px;color:#dbeafe;}
+  .ar b{color:#fff;}
+
+  h2.sec{font-size:13px;text-transform:uppercase;letter-spacing:.16em;color:var(--blue-6);
+    border-bottom:2px solid var(--navy);padding-bottom:9px;margin:50px 0 6px;}
+  .lead{font-size:21px;font-weight:700;color:var(--navy);margin:10px 0 6px;letter-spacing:-.01em;line-height:1.3;}
+  p{font-size:15px;color:var(--slate);}
+  strong{color:var(--navy-2);}
+  ul{padding-left:0;list-style:none;margin:10px 0;}
+  ul li{position:relative;padding-left:22px;margin:8px 0;font-size:15px;color:var(--slate);}
+  ul li::before{content:"";position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:2px;background:var(--blue-4);}
+  li b{color:var(--navy-2);}
+  code{background:var(--line-soft);padding:1px 5px;border-radius:4px;font-size:12.5px;color:var(--navy-2);}
+
+  /* STACK */
+  .stack{margin-top:14px;}
+  .tier{border:1px solid var(--line);border-radius:9px;background:#fff;padding:12px 16px;margin:0;}
+  .tier .tl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+  .tier .chips{display:flex;flex-wrap:wrap;gap:7px;}
+  .tier .chip{font-size:12.5px;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:5px 10px;color:var(--slate);}
+  .tier.core{border:2px solid var(--blue-5);background:var(--blue-1);}
+  .tier.core .tl{color:var(--blue-6);}
+  .tier.core .tt{font-size:17px;font-weight:700;color:var(--navy);margin:0 0 4px;}
+  .tier.core .tdesc{font-size:13.5px;color:var(--slate);margin:0 0 9px;}
+  .tier.core .chip{background:#fff;border-color:var(--blue-3);color:var(--navy-2);font-weight:600;}
+  .conn{text-align:center;color:var(--blue-4);font-size:15px;margin:5px 0;font-weight:700;letter-spacing:.04em;}
+  .conn small{color:var(--muted);font-weight:400;font-size:11.5px;}
+
+  /* CLAIM RECORD card */
+  .record{display:grid;grid-template-columns:1.1fr 1fr;gap:16px;align-items:start;margin-top:12px;}
+  .reccard{border:1px solid var(--line);border-radius:9px;background:#fff;overflow:hidden;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+  .reccard .rh{background:var(--navy);color:#fff;font-size:12px;font-weight:700;padding:9px 14px;letter-spacing:.03em;}
+  .reccard .rl{display:flex;padding:7px 14px;border-top:1px solid var(--line-soft);font-size:12px;}
+  .reccard .k{color:var(--muted);width:108px;flex:0 0 auto;}
+  .reccard .v{color:var(--navy-2);}
+  .reccard .v .ok{color:var(--green);font-weight:700;}
+  .record .explain p{margin:0 0 10px;font-size:14.5px;color:var(--slate);}
+  .record .explain b{color:var(--navy-2);}
+
+  /* LIFECYCLE */
+  .life{margin-top:14px;border-left:2px solid var(--blue-3);}
+  .ls{position:relative;padding:0 0 22px 30px;margin-left:10px;}
+  .ls::before{content:"";position:absolute;left:-8px;top:3px;width:14px;height:14px;border-radius:50%;
+    background:var(--blue-5);border:2px solid #fff;box-shadow:0 0 0 2px var(--blue-3);}
+  .ls .sn{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--blue-6);}
+  .ls .st{font-size:18px;font-weight:700;color:var(--navy);margin:1px 0 6px;letter-spacing:-.01em;}
+  .ls .does{font-size:14.5px;color:var(--slate);margin:0 0 8px;}
+  .ls .does b{color:var(--navy-2);}
+  .ls .ex{background:var(--blue-1);border:1px solid var(--blue-2);border-radius:7px;padding:9px 13px;font-size:13.5px;color:var(--navy-2);}
+  .ls .ex b{color:var(--blue-6);}
+  .ls .ex .lbl{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--blue-6);display:block;margin-bottom:3px;}
+  .ls .who{font-size:12.5px;color:var(--muted);margin-top:6px;}
+  .ls .who b{color:var(--slate-2);}
+
+  /* BEFORE/AFTER */
+  .ba{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:9px;overflow:hidden;margin-top:12px;}
+  .ba .h{padding:12px 18px;font-size:14px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#fff;}
+  .ba .old .h{background:var(--slate-2);}
+  .ba .new .h{background:var(--blue-5);}
+  .ba .row{padding:11px 18px;font-size:14px;border-top:1px solid var(--line-soft);}
+  .ba .old .row{color:var(--slate);background:#fbfcfe;}
+  .ba .new .row{color:var(--navy-2);}
+  .ba .new .row b{color:var(--blue-6);}
+
+  /* ROLES */
+  .roles{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px;}
+  .role{border:1px solid var(--line);border-radius:8px;background:#fff;padding:13px 16px;}
+  .role .rn{font-size:15px;font-weight:700;color:var(--navy);}
+  .role .rd{font-size:13.5px;color:var(--slate);margin-top:3px;}
+  .role .rd b{color:var(--navy-2);}
+
+  footer{margin-top:48px;padding-top:20px;border-top:2px solid var(--navy);font-size:13px;color:var(--muted);}
+  footer b{color:var(--navy-2);}
+  footer a{color:var(--slate-2);}
+  @media (max-width:720px){.record,.ba,.roles{grid-template-columns:1fr;}h1.title{font-size:29px;}}
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <p class="kicker">Provenance · The packaged solution</p>
+    <h1 class="title">The system of record for every claim your marketing makes</h1>
+    <p class="tagline">One object ties the whole thing together — the <b>claim</b>. Provenance tracks every claim from the moment it's written to the moment it expires, and can prove it at any point. Generation, verification, optimization, compliance, and monitoring stop being separate features; they're <b>stages in a claim's life.</b></p>
+    <div class="analogy-row">
+      <span class="ar">General ledger = system of record for <b>money</b></span>
+      <span class="ar">CRM = system of record for <b>customers</b></span>
+      <span class="ar">Provenance = system of record for <b>claims</b></span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- LARGER PICTURE / STACK -->
+  <h2 class="sec">Where it sits in the marketing stack</h2>
+  <p class="lead">It doesn't replace your tools — it sits in front of "send" as the claim firewall.</p>
+  <p>Marketing already has tools to write, target, and send. What it lacks is a layer that decides <b>what you're allowed to say, to whom, with proof.</b> Provenance ingests your truth (and your prospects), governs every claim, and only then lets the message flow to the channels you already use.</p>
+  <div class="stack">
+    <div class="tier">
+      <div class="tl">Ingests — your sources of truth + your prospects</div>
+      <div class="chips">
+        <span class="chip">Product &amp; spec docs</span><span class="chip">Clinical / trial data</span><span class="chip">Case studies</span><span class="chip">Pricing sheets</span><span class="chip">Approved-claims &amp; legal holds</span><span class="chip">CRM / CDP (prospect facts)</span>
+      </div>
+    </div>
+    <div class="conn">&#9660; <small>feeds</small></div>
+    <div class="tier core">
+      <div class="tl">The system of record</div>
+      <p class="tt">Provenance — the Claims Library + the 7-stage engine</p>
+      <p class="tdesc">A living database of every claim, its source, its status, and its performance — plus the engine that drafts, verifies, clears, optimizes, sends, monitors, and proves.</p>
+      <div class="chips">
+        <span class="chip">Draft</span><span class="chip">Verify</span><span class="chip">Clear</span><span class="chip">Optimize</span><span class="chip">Send</span><span class="chip">Monitor</span><span class="chip">Prove</span>
+      </div>
+    </div>
+    <div class="conn">&#9660; <small>governs every outbound message</small></div>
+    <div class="tier">
+      <div class="tl">Flows to — the channels you already run</div>
+      <div class="chips">
+        <span class="chip">Email / ESP (HubSpot, Marketo, Klaviyo)</span><span class="chip">Sales engagement (Outreach, Salesloft)</span><span class="chip">Ads</span><span class="chip">CMS / web</span><span class="chip">Social</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- THE CORE OBJECT -->
+  <h2 class="sec">The core object — a claim record</h2>
+  <p class="lead">"System of record" is literal: every claim is a row you can query, audit, and trust.</p>
+  <div class="record">
+    <div class="reccard">
+      <div class="rh">CLAIM #4471</div>
+      <div class="rl"><span class="k">text</span><span class="v">"saves ~$10 per head"</span></div>
+      <div class="rl"><span class="k">source</span><span class="v">Approved Economics Sheet v3 (Apr 2026)</span></div>
+      <div class="rl"><span class="k">verified</span><span class="v"><span class="ok">✓</span> entailed · NLI 0.94 + semantic ✓</span></div>
+      <div class="rl"><span class="k">sayable</span><span class="v"><span class="ok">✓</span> cleared · rule "ROI-claims-OK"</span></div>
+      <div class="rl"><span class="k">owner</span><span class="v">Product Marketing</span></div>
+      <div class="rl"><span class="k">expires</span><span class="v">on source change · review Oct 2026</span></div>
+      <div class="rl"><span class="k">used in</span><span class="v">1,240 sends · 7.2% reply (feedlot)</span></div>
+    </div>
+    <div class="explain">
+      <p><b>This row is the unit of everything.</b> It's what gets verified, what the optimizer chooses between, what gets re-checked when a source changes, and what an auditor pulls when a regulator asks "why did you say that?"</p>
+      <p>The <b>Claims Library</b> is the collection of these rows — the company's single source of truth for <i>what it is allowed to say.</i> It's the asset that compounds: every campaign and client adds verified rows, and a competitor starting from zero can't catch up.</p>
+    </div>
+  </div>
+
+  <!-- THE LIFECYCLE -->
+  <h2 class="sec">A claim's life — seven stages, concretely</h2>
+  <p class="lead">Born → papers checked → cleared to travel → competes to win → ships with a receipt → re-checked when the world changes → the whole border audited.</p>
+  <p>Running example: outreach to <b>Iowa feedlot managers, 1,000+ head</b>, for a rice-expressed lysozyme feed product (our live domain). The same lifecycle runs for a pharma rep email, a fintech nurture sequence, or a SaaS cold campaign.</p>
+
+  <div class="life">
+    <div class="ls">
+      <div class="sn">Stage 1</div>
+      <div class="st">Drafted</div>
+      <p class="does">A marketer launches a campaign to a segment in their normal tool, or the engine proposes variants. Provenance pulls the prospect's facts from the CRM/CDP and drafts a personalized message, drawing only from the Claims Library. It then <b>splits the draft into atomic claims.</b></p>
+      <div class="ex"><span class="lbl">Example</span>Draft: "At your 4,000 head, LysoSure saves ~$10/head and is egg-allergen-free." → claims: <b>[4,000 head]</b> · <b>[saves ~$10/head]</b> · <b>[egg-allergen-free]</b>.</div>
+      <div class="who"><b>Who:</b> Marketer (one click) · <b>Sees:</b> a draft with claims itemized beneath it.</div>
+    </div>
+
+    <div class="ls">
+      <div class="sn">Stage 2</div>
+      <div class="st">Sourced &amp; verified</div>
+      <p class="does">Each claim is bound to a source record and confirmed by <b>two independent checks</b> — a literal "does the document say this?" check, then a meaning check — with a cheap pass first and only the uncertain claims escalated to the heavier ensemble (keeps it affordable per message).</p>
+      <div class="ex"><span class="lbl">Example</span>"4,000 head" ↦ EPA permit #IA-0421 (exact). "saves ~$10/head" ↦ economics sheet (entailed). "egg-allergen-free" ↦ product spec (entailed). All <b>green</b>, each with a clickable citation.</div>
+      <div class="who"><b>Who:</b> automatic · <b>Sees:</b> green checks; click any to see the exact source line.</div>
+    </div>
+
+    <div class="ls">
+      <div class="sn">Stage 3</div>
+      <div class="st">Cleared (compliance / "sayable")</div>
+      <p class="does">Verified ≠ allowed. Each claim runs against the <b>claimability rules</b> Legal authored once. A claim can be perfectly true and still blocked — legal hold, jurisdiction, channel, or required disclaimer.</p>
+      <div class="ex"><span class="lbl">Example</span>A "<b>cuts feed 13%</b>" claim is true and sourced — but a rule says "UTK trial data under legal hold." It turns <b>red</b>, with the reason. The marketer can't override it; only Legal can lift the rule.</div>
+      <div class="who"><b>Who:</b> rules set by Legal/Compliance once · <b>Sees:</b> red + plain-English reason.</div>
+    </div>
+
+    <div class="ls">
+      <div class="sn">Stage 4</div>
+      <div class="st">Optimized</div>
+      <p class="does">For each segment, the engine auto-A/B-tests <b>verified, cleared</b> variants — which claim to lead with, the framing, channel, and send time — and shifts toward what converts. Because only cleared claims compete, <b>it can't learn to win by exaggerating.</b></p>
+      <div class="ex"><span class="lbl">Example</span>For feedlot managers, "lead with $/head ROI" beats "lead with allergen-free" ~2:1 → adopted automatically. For nutritionists (influencers), the peer/mechanism angle wins instead.</div>
+      <div class="who"><b>Who:</b> automatic · <b>Sees:</b> a live per-segment leaderboard — no test setup required.</div>
+    </div>
+
+    <div class="ls">
+      <div class="sn">Stage 5</div>
+      <div class="st">Sent (with a receipt)</div>
+      <p class="does">The approved message is pushed to the channel you already use, bundled with its citations, and an <b>immutable audit record</b> is written: what was claimed, sourced to what, cleared by which rule, optimized how, and when.</p>
+      <div class="ex"><span class="lbl">Example</span>Email goes out via Outreach. If a regulator or a prospect ever asks "where did you get that?", the answer is one click — proof, not vibes.</div>
+      <div class="who"><b>Who:</b> automatic · <b>Sees:</b> Sales/Marketing send as normal; the audit trail accrues silently.</div>
+    </div>
+
+    <div class="ls">
+      <div class="sn">Stage 6</div>
+      <div class="st">Monitored (claims go stale)</div>
+      <p class="does">A verified claim is only true until its source changes. Provenance watches the sources and <b>re-verifies dependent claims</b> when something shifts — pausing or unblocking sends automatically.</p>
+      <div class="ex"><span class="lbl">Examples</span>Legal lifts the UTK hold → "13% feed" <b>auto-unblocks everywhere.</b> A permit drops 4,000 → 2,000 head → every email still saying "4,000" is <b>paused for re-check.</b> A reference customer churns → "trusted by ACME" is <b>pulled.</b></div>
+      <div class="who"><b>Who:</b> automatic · <b>Sees:</b> drift alerts; the library stays true with no manual re-audit.</div>
+    </div>
+
+    <div class="ls">
+      <div class="sn">Stage 7</div>
+      <div class="st">Proven (continuous assurance)</div>
+      <p class="does">The checker itself is held to account. Provenance continuously runs <b>adversarial traps</b> (true claims mutated into subtle lies) and reports a reliability profile — not one number — so trust is something you can show a board or an auditor.</p>
+      <div class="ex"><span class="lbl">Example</span>"This quarter the gate caught <b>98.7%</b> of planted false claims at a <b>2.1%</b> false-reject rate, calibrated within ±3%." A trust dashboard, not a promise.</div>
+      <div class="who"><b>Who:</b> automatic · <b>Sees:</b> CMO / Legal / board get an audit-ready assurance report.</div>
+    </div>
+  </div>
+
+  <!-- THE WORKFLOW SHIFT -->
+  <h2 class="sec">The shift it creates in how marketing works</h2>
+  <p class="lead">Review moves from per-asset to per-rule — the bottleneck disappears.</p>
+  <p>Today, in any claims-heavy business, legal/compliance reviews <i>every asset</i> — a serial queue that kills personalization at scale. Provenance flips it: Legal approves the <b>claims library and the rules once</b>, and every generated message is checked against them <b>continuously and instantly.</b></p>
+  <div class="ba">
+    <div class="old">
+      <div class="h">Today — per-asset review</div>
+      <div class="row">Every email / ad / variant queues for legal.</div>
+      <div class="row">Days-to-weeks of lag; review repeated for each variant.</div>
+      <div class="row">Personalization dies — you ship one safe generic version.</div>
+      <div class="row">When it goes wrong, no record of why it was allowed.</div>
+    </div>
+    <div class="new">
+      <div class="h">With Provenance — per-rule governance</div>
+      <div class="row">Legal approves the <b>claims library + rules once.</b></div>
+      <div class="row">Every message auto-checked <b>instantly,</b> at any volume.</div>
+      <div class="row"><b>1:1 personalization at scale</b> — every variant is pre-cleared.</div>
+      <div class="row">Full <b>audit trail</b> by default — defensible to regulators.</div>
+    </div>
+  </div>
+
+  <!-- ROLES -->
+  <h2 class="sec">Who touches it, and what changes for them</h2>
+  <div class="roles">
+    <div class="role"><div class="rn">Marketer</div><div class="rd">Launches campaigns and sees green / amber / red per claim. <b>Never waits in a review queue;</b> ships personalized outreach in minutes.</div></div>
+    <div class="role"><div class="rn">Legal / Compliance (MLR)</div><div class="rd">Authors the claims library + rules <b>once,</b> then monitors the assurance dashboard. <b>Stops reviewing every asset</b> — governs the system, not each email.</div></div>
+    <div class="role"><div class="rn">RevOps / Marketing Ops</div><div class="rd">Owns segments, the integrations into ESP/CRM, and the optimization settings. Gets a single source of truth for what's claimable.</div></div>
+    <div class="role"><div class="rn">Sales</div><div class="rd">Sends verified, personalized outreach knowing every line is backed — and can show the source if a prospect pushes back.</div></div>
+  </div>
+
+  <footer>
+    <p><b>The one solution:</b> a system of record for claims. Every claim is a tracked row with a chain of custody — drafted, verified, cleared, optimized, sent, monitored, and proven. Generation and truth-bounded optimization are just the front and back halves of that lifecycle; verification rigor, source-drift, and the cost cascade are how each stage is made trustworthy.</p>
+    <p>Provenance · solution detail · Jun 15 2026. Companion: <a href="BEYOND-MARKETING.html">beyond marketing</a> · <a href="THE-BIG-PICTURE.html">big picture</a> · <a href="FULL-FUNNEL-VIEW.html">funnel + big tech</a> · <a href="index.html">hub</a>.</p>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project Planning Document — Provenance (Gauntlet Capstone)</title>
+<style>
+  :root{
+    --navy:#0a2540;--navy-2:#102a43;--slate:#334e68;--slate-2:#486581;--muted:#627d98;
+    --line:#d9e2ec;--line-soft:#eef2f6;
+    --blue-1:#eff6ff;--blue-2:#dbeafe;--blue-3:#93c5fd;--blue-4:#3b82f6;--blue-5:#1d4ed8;--blue-6:#1e40af;
+    --paper:#f7f9fc;--green:#15803d;--green-bg:#dcfce7;--amber:#b45309;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--navy-2);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:900px;margin:0 auto;padding:0 30px 96px;}
+  a{color:var(--blue-5);}
+
+  header.mast{background:var(--navy);color:#fff;padding:50px 0 38px;border-bottom:4px solid var(--blue-4);}
+  header.mast .wrap{padding-bottom:0;}
+  .kicker{text-transform:uppercase;letter-spacing:.18em;font-size:12px;font-weight:600;color:var(--blue-3);margin:0 0 14px;}
+  h1.title{font-size:34px;line-height:1.12;margin:0 0 8px;font-weight:700;letter-spacing:-.01em;}
+  .subt{font-size:18px;color:#cfdcea;margin:0 0 6px;font-style:italic;}
+  .meta{font-size:13px;color:var(--blue-3);margin:6px 0 0;}
+  .pager{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 0;}
+  .pager .pg{font-size:12px;font-weight:600;padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--slate-2);text-decoration:none;}
+  .pager .pg.cur{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .pager .pg:hover{border-color:var(--blue-4);}
+
+  section{margin-top:34px;}
+  .sec-head{display:flex;align-items:baseline;gap:13px;border-bottom:2px solid var(--navy);padding-bottom:9px;margin-bottom:8px;}
+  .sec-num{flex:0 0 auto;width:28px;height:28px;border-radius:50%;background:var(--blue-5);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;transform:translateY(2px);}
+  .sec-title{font-size:20px;font-weight:700;color:var(--navy);margin:0;letter-spacing:-.01em;}
+  p{font-size:15px;color:var(--slate);}
+  strong{color:var(--navy-2);}
+  ul{padding-left:0;list-style:none;margin:10px 0;}
+  ul li{position:relative;padding-left:22px;margin:8px 0;font-size:14.5px;color:var(--slate);}
+  ul li::before{content:"";position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:2px;background:var(--blue-4);}
+  li b{color:var(--navy-2);}
+  code{background:var(--line-soft);padding:1px 5px;border-radius:4px;font-size:12.5px;color:var(--navy-2);}
+
+  .reco{background:var(--blue-1);border:1px solid var(--blue-2);border-radius:8px;padding:14px 18px;margin:10px 0;}
+  .reco b{color:var(--blue-6);}
+  .reco p{margin:0;color:var(--navy-2);font-size:14.5px;}
+
+  .pipe{background:var(--navy);color:#dbeafe;border-radius:8px;padding:16px 18px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.6;overflow-x:auto;white-space:pre;margin:12px 0;border:1px solid #1c3a5e;}
+  .pipe .hl{color:#fff;font-weight:700;}
+  .pipe .dim{color:#7da2c4;}
+
+  .scope{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px;}
+  .scope .card{border:1px solid var(--line);border-radius:8px;background:#fff;overflow:hidden;}
+  .scope .cap{padding:9px 15px;font-size:12.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#fff;}
+  .scope .mvp .cap{background:var(--slate-2);}
+  .scope .amb .cap{background:var(--blue-5);}
+  .scope .b{padding:4px 15px 12px;}
+  .scope ul li{font-size:13.5px;}
+
+  table{border-collapse:collapse;width:100%;margin:10px 0;font-size:13.5px;}
+  th{text-align:left;background:var(--navy);color:#fff;font-weight:600;padding:9px 13px;font-size:12px;letter-spacing:.03em;text-transform:uppercase;}
+  td{padding:9px 13px;border-bottom:1px solid var(--line);color:var(--slate);vertical-align:top;}
+  td b{color:var(--navy-2);}
+  tr:nth-child(even) td{background:var(--blue-1);}
+  .risk-tag{color:var(--blue-6);font-weight:700;}
+
+  .owners{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px;}
+  .own{border:1px solid var(--line);border-radius:8px;background:#fff;padding:12px 15px;}
+  .own .oh{font-size:14px;font-weight:700;color:var(--navy);}
+  .own .ow{font-size:11.5px;font-weight:700;color:var(--blue-6);margin:2px 0 5px;}
+  .own .od{font-size:13px;color:var(--slate);}
+
+  .timeline{margin-top:10px;border-left:2px solid var(--blue-3);}
+  .step{position:relative;padding:0 0 14px 26px;margin-left:7px;}
+  .step::before{content:"";position:absolute;left:-7px;top:3px;width:12px;height:12px;border-radius:50%;background:var(--blue-5);border:2px solid #fff;box-shadow:0 0 0 2px var(--blue-3);}
+  .step .t{font-size:11.5px;font-weight:700;color:var(--blue-6);letter-spacing:.04em;}
+  .step .d{font-size:14px;color:var(--slate);margin-top:1px;}
+  .step .d b{color:var(--navy-2);}
+
+  footer{margin-top:42px;padding-top:18px;border-top:2px solid var(--navy);font-size:12.5px;color:var(--muted);line-height:1.7;}
+  footer b{color:var(--navy-2);}
+  footer a{color:var(--slate-2);}
+  @media (max-width:760px){.scope,.owners{grid-template-columns:1fr;}h1.title{font-size:27px;}}
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <p class="kicker">Gauntlet Capstone · Deliverable 01 · Project Planning Document</p>
+    <h1 class="title">Provenance</h1>
+    <p class="subt">Provable ultra-personalization — outreach that can't say anything it can't prove, and optimizes itself inside the truth.</p>
+    <p class="meta">Plan due Wed Jun 17 · 11:59 PM &nbsp;·&nbsp; Showcase Mon Jun 29 (10-min live) &nbsp;·&nbsp; Team of 3–4 &nbsp;·&nbsp; Page 5 of 5</p>
+    <div class="pager">
+      <a class="pg" href="BUSINESS-VISION.html">1 · Marketing promise</a>
+      <a class="pg" href="BEFORE-AFTER-VALUE.html">2 · Before → After → Value</a>
+      <a class="pg" href="SOLUTION-DEEP-DIVE.html">3 · Solution deep dive</a>
+      <a class="pg" href="WHY-TECHNICALLY-CHALLENGING.html">4 · Why it's hard</a>
+      <a class="pg cur">5 · Capstone submission</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- 1 PROBLEM -->
+  <section>
+    <div class="sec-head"><span class="sec-num">1</span><h2 class="sec-title">The problem — and why it's technically hard</h2></div>
+    <p>Ultra-personalization (a unique, on-target message for every prospect) is the new standard — but it <b>breaks human review</b>. You cannot legally read 100,000 unique messages, so in any claims-heavy domain (pharma, fintech, insurance, food/ag) you're forced to choose: ship one <i>generic-but-reviewed</i> message, or send <i>personal-but-unverified</i> claims and risk an FTC action or lawsuit. The bottleneck isn't generation — it's <b>verification at scale</b>.</p>
+    <p>That is hard for reasons no current tool solves: deciding "is this claim entailed by its source?" with <b>calibrated confidence and no ground truth at inference</b>; the default verifier (LLM-as-judge) fails &gt;50% of bias tests and is gameable; an optimizer told to maximize replies <b>learns to exaggerate</b> (reward-hacking); and a verified claim goes stale the moment its source changes. "Verification is the new bottleneck" (Karpathy) — and we attack it end-to-end. <i>(Business case on <a href="BUSINESS-VISION.html">page 1</a>; solution detail on <a href="SOLUTION-DEEP-DIVE.html">page 3</a>; hardness + research on <a href="WHY-TECHNICALLY-CHALLENGING.html">page 4</a>.)</i></p>
+  </section>
+
+  <!-- 2 DIRECTION -->
+  <section>
+    <div class="sec-head"><span class="sec-num">2</span><h2 class="sec-title">Project direction</h2></div>
+    <div class="reco"><p><b>A — Combine ML with LLM.</b> A trained <b>verifier ensemble</b> (NLI + diverse LLM judges, calibrated) and a <b>constrained contextual-bandit</b> policy do what the LLM can't — know what's true and decide what to send — while the LLM does generation. The coupling is load-bearing: delete the ML and you have generic AI slop.</p></div>
+    <ul>
+      <li>Also exercises <b>C (one problem, many ways)</b>: we benchmark verification methods head-to-head (single-judge vs. NLI vs. ensemble vs. self-consistency vs. hidden-state probe).</li>
+      <li>Carries a <b>B-flavored thesis</b>: the marketing org runs through one verified pipeline — humans author the rules and approve sends, they don't write copy.</li>
+    </ul>
+  </section>
+
+  <!-- 3 TECHNICAL APPROACH -->
+  <section>
+    <div class="sec-head"><span class="sec-num">3</span><h2 class="sec-title">Technical approach — AI as the primitive</h2></div>
+    <p>The product is a <b>system of record for claims</b>: every claim has a tracked life, and AI is the primitive at each stage. Delete the models and there's no product — only a logger.</p>
+    <div class="pipe"> <span class="hl">Claims Library</span> &#9472;&#9658; <span class="dim">Draft</span> &#9472;&#9658; <span class="hl">The Gate</span> (verify + clear) &#9472;&#9658; <span class="hl">The Optimizer</span> &#9472;&#9658; <span class="dim">Send</span> &#9472;&#9658; <span class="hl">Drift Monitor</span>
+ claim&#8211;evidence    grounded    decompose &#8594; NLI+ensemble    contextual bandit         audit      source-diff &#8594;
+ graph + sources    gen          (calibrated) &#8594; rules;        over <i>verified</i> variants    trail      re-verify
+                                 router-referee cascade        (can't reward-hack)
+   <span class="dim">&#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472; Assurance Lab &#8212; adversarial traps + reliability profiling audit The Gate &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;</span></div>
+    <ul>
+      <li><b>The Gate (the core):</b> atomic-claim decomposition → retrieval evidence-binding → NLI entailment + a calibrated diverse-judge ensemble → compliance rules; cheap-first <b>router-and-referee cascade</b>; optional hidden-state probe. <i>Cited or killed.</i></li>
+      <li><b>The Optimizer:</b> a contextual bandit over a <b>constrained action space</b> = verified+cleared variants; reward = reply/convert, unsubscribe = hard negative; hierarchical priors for cold-start; off-policy eval. <b>Pruning to verified outputs is a structural fix for reward-hacking.</b></li>
+      <li><b>Drift Monitor &amp; Assurance Lab:</b> a claim-dependency graph re-verifies on source change; synthetic adversarial traps + reliability profiling (catch-rate, false-reject, ECE, severity) prove the verifier works.</li>
+    </ul>
+  </section>
+
+  <!-- 4 SCOPE -->
+  <section>
+    <div class="sec-head"><span class="sec-num">4</span><h2 class="sec-title">Scope — two weeks</h2></div>
+    <p>Anchored on a <b>bundled demo tenant</b> (fictional regulated B2B — e.g. enterprise SaaS / health-tech) with realistic prospects, source docs, and an MLR hold, so verification has checkable ground truth. Standalone capstone — not tied to any single customer product.</p>
+    <div class="scope">
+      <div class="card mvp">
+        <div class="cap">Minimum shippable — must hit</div>
+        <div class="b"><ul>
+          <li><b>The Gate end-to-end</b> on one channel (email): decompose → bind → NLI + small ensemble → rules → the live <b>claim ledger</b> (cited / repaired / blocked).</li>
+          <li><b>The Assurance Lab MVP</b>: a synthetic-trap set + the headline metric — catch-rate vs. false-reject + a calibration (reliability) diagram.</li>
+          <li>The regulatory gate (block the legal-hold claim on demand) + the adversarial "try to make it lie" demo.</li>
+          <li>Funnel program expressed <b>as data</b>, so a second tenant is config, not a rebuild.</li>
+        </ul></div>
+      </div>
+      <div class="card amb">
+        <div class="cap">Ambitious — scored on ambition</div>
+        <div class="b"><ul>
+          <li><b>The truth-bounded Optimizer</b> on an LLM-persona simulator — show conversion climbing and that it <b>can't win by lying.</b></li>
+          <li><b>Hidden-state probe</b> added to the Gate; verifier <b>bake-off</b> (judge vs. NLI vs. ensemble) on catch-rate per dollar.</li>
+          <li><b>Drift Monitor</b> live (flip the legal hold → claims auto-unblock; change a permit → sends auto-pause).</li>
+          <li>Second-tenant transfer; <b>website channel adapter</b> (personalized landing page via same Gate); optional live voice.</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 WHY COMPELLING -->
+  <section>
+    <div class="sec-head"><span class="sec-num">5</span><h2 class="sec-title">Why it's compelling — the recruit hook</h2></div>
+    <ul>
+      <li><b>It's the hottest problem in AI, made tangible:</b> "we built the AI that can't lie in your outbound — and it optimizes itself inside the truth." Sits on the verification/reliability frontier judges are watching.</li>
+      <li><b>One genuinely novel bet:</b> <i>constrained optimization as a structural fix for reward-hacking</i> — a fresh answer to the problem the whole field is stuck on, not just an application.</li>
+      <li><b>A bundled demo tenant, not a blank repo</b> — realistic prospects, sources, and an MLR hold to enforce on day one.</li>
+      <li><b>It demos like a magic trick</b> — a claim ledger lighting up green/amber/red, a "try to make it lie" moment, and a learning curve that proves the optimizer can't cheat.</li>
+    </ul>
+  </section>
+
+  <!-- 6 HARD PARTS -->
+  <section>
+    <div class="sec-head"><span class="sec-num">6</span><h2 class="sec-title">Hard parts / risks — the bet and where it breaks</h2></div>
+    <p><b>The bet:</b> a calibrated ensemble verifier catches false/unsayable claims at high recall without killing good copy, cheaply enough to run on every message — and a bandit bounded to verified outputs lifts conversion without ever learning to lie.</p>
+    <table>
+      <thead><tr><th style="width:32%">Risk</th><th>Where it breaks · mitigation</th></tr></thead>
+      <tbody>
+        <tr><td><span class="risk-tag">Verifier reliability</span> (top)</td><td>A single LLM-judge is gameable and biased. <b>Mitigation:</b> NLI + diverse ensemble + calibration (ECE); prove it in the Assurance Lab, never a bare yes/no.</td></tr>
+        <tr><td><span class="risk-tag">Transfer / calibration</span></td><td>Calibration may decay off the ground-truth domain. <b>Mitigation:</b> make the transfer test a first-class deliverable; recalibrate on a small target sample; report honestly.</td></tr>
+        <tr><td><span class="risk-tag">Sparse reward / cold-start</span></td><td>Replies are rare/slow; new segments have no data. <b>Mitigation:</b> persona simulator + cheap proxies + hierarchical bandit + off-policy eval.</td></tr>
+        <tr><td><span class="risk-tag">Claim decomposition</span></td><td>A missed claim is unverified. <b>Mitigation:</b> measure decomposition coverage; puffery as its own class.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 7 WHO OWNS WHAT -->
+  <section>
+    <div class="sec-head"><span class="sec-num">7</span><h2 class="sec-title">Who owns what — team of 3–4</h2></div>
+    <div class="owners">
+      <div class="own"><div class="oh">Owner 1 — The Gate</div><div class="ow">verifier ML core</div><div class="od">Claim decomposition, evidence-binding, NLI + ensemble, calibration, the router-referee cascade.</div></div>
+      <div class="own"><div class="oh">Owner 2 — Optimizer + Assurance</div><div class="ow">RL + eval core</div><div class="od">Contextual bandit, off-policy eval, the simulator; adversarial-trap generation + reliability profiling.</div></div>
+      <div class="own"><div class="oh">Owner 3 — Library + Drift + data</div><div class="ow">data / infra</div><div class="od">Claim–evidence graph, source registry, the live spine, the drift dependency-graph re-verification.</div></div>
+      <div class="own"><div class="oh">Owner 4 — Generation + demo</div><div class="ow">systems / product</div><div class="od">Per-prospect generation, channel adapters, the claim-ledger UI, and the showcase.</div></div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-top:8px;">For a team of 3, Owner 4 folds into Owner 1/3 and the demo is shared.</p>
+  </section>
+
+  <!-- 8 DEMO -->
+  <section>
+    <div class="sec-head"><span class="sec-num">8</span><h2 class="sec-title">The 10-minute showcase (Jun 29)</h2></div>
+    <p><b>Interactive demo artifact:</b> <a href="SHOWCASE-DEMO.html">SHOWCASE-DEMO.html</a> — presenter mode with ←/→ beats, live claim ledger, "try to make it lie," legal-hold flip, Assurance Lab, and Optimizer chart. <b>This is what we show on stage.</b></p>
+    <div class="timeline">
+      <div class="step"><div class="t">0:00 · 1 min</div><div class="d"><b>Reframe.</b> "Ultra-personalization breaks review on every channel — email, web, ads. We automate it. The AI can't say what it can't prove."</div></div>
+      <div class="step"><div class="t">1:00 · 3 min</div><div class="d"><b>The Gate + claim ledger (MVP core).</b> Demo tenant <b>Helix Analytics</b> → prospect Maya Chen / Northwind Health → Generate &amp; verify → toggle <b>Email | Website</b> (same claims, same ledger) → green/amber/red → click source → <b>Try to make it lie</b> → flip <b>MLR hold</b> on "47% TCO." <i>Maps to: Gate · ledger · regulatory gate · adversarial demo · website adapter (showcase).</i></div></div>
+      <div class="step"><div class="t">4:00 · 3 min</div><div class="d"><b>Assurance Lab (MVP deliverable).</b> Catch-rate <b>98.7%</b> vs LLM-judge <b>71%</b> vs NLI-only <b>84%</b> on adversarial traps; false-reject <b>2.1%</b>; calibration diagram (ECE ±3%). Proof, not a promise. <i>Maps to: Assurance Lab MVP + verifier bake-off.</i></div></div>
+      <div class="step"><div class="t">7:00 · 2 min</div><div class="d"><b>Truth-bounded Optimizer (ambitious).</b> Simulator: reply rate climbs per feedyard segment; leaderboard shows "$/head ROI" winning; <b>"Guaranteed 50% savings"</b> grayed out — structurally blocked, can't win by lying. <i>Maps to: constrained bandit + anti-reward-hacking story.</i></div></div>
+      <div class="step"><div class="t">9:00 · 1 min</div><div class="d"><b>The ask.</b> Four owner surfaces (Gate · Optimizer+Assurance · Library+Drift · Generation+Demo). Team of 3–4. Live spine from day one.</div></div>
+    </div>
+    <div class="reco" style="margin-top:14px;"><p><b>MVP ↔ demo alignment:</b> Every minimum-shippable bullet from §4 appears on stage — Gate on email, live claim ledger, Assurance Lab headline metrics, regulatory hold + sabotage moment. Optimizer beat covers the ambitious tier; if sim isn't ready, show the blocked-variant leaderboard as the structural "can't lie" proof.</p></div>
+  </section>
+
+  <footer>
+    <p><b>Companion detail:</b> <a href="SHOWCASE-DEMO.html">★ showcase demo (Jun 29)</a> · <a href="BUSINESS-VISION.html">page 1 — marketing promise</a> · <a href="BEYOND-MARKETING.html">beyond marketing — other applications</a> · <a href="BEFORE-AFTER-VALUE.html">page 2 — before → after → value</a> · <a href="SOLUTION-DEEP-DIVE.html">page 3 — solution deep dive</a> · <a href="WHY-TECHNICALLY-CHALLENGING.html">page 4 — why each is technically hard</a> · <a href="index.html">hub</a>.</p>
+    <p>Gauntlet Capstone · Provenance · Project Planning Document · Jun 2026. Illustrative figures are labeled as such; sources on page 2.</p>
+  </footer>
+
+</div>
+</body>
+</html>

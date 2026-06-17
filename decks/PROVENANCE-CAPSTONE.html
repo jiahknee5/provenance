@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Provenance — Capstone Project (with Appendices)</title>
+<style>
+  :root{
+    --navy:#0a2540;--navy-2:#102a43;--slate:#334e68;--slate-2:#486581;--muted:#627d98;
+    --line:#d9e2ec;--line-soft:#eef2f6;
+    --blue-1:#eff6ff;--blue-2:#dbeafe;--blue-3:#93c5fd;--blue-4:#3b82f6;--blue-5:#1d4ed8;--blue-6:#1e40af;--blue-7:#1e3a8a;
+    --paper:#f7f9fc;
+    --green:#15803d;--green-bg:#dcfce7;--green-line:#bbf7d0;
+    --red:#b91c1c;--red-bg:#fef2f2;--red-line:#fecaca;
+    --amber:#b45309;--amber-bg:#fffbeb;--amber-line:#fde68a;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--navy-2);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:960px;margin:0 auto;padding:0 30px;}
+  .wrap.body{padding-bottom:40px;}
+  a{color:var(--blue-5);}
+  p{font-size:15px;color:var(--slate);}
+  strong{color:var(--navy-2);}
+  ul{padding-left:0;list-style:none;margin:10px 0;}
+  ul li{position:relative;padding-left:22px;margin:8px 0;font-size:14.5px;color:var(--slate);}
+  ul li::before{content:"";position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:2px;background:var(--blue-4);}
+  li b{color:var(--navy-2);}
+  code{background:var(--line-soft);padding:1px 5px;border-radius:4px;font-size:12.5px;color:var(--navy-2);}
+
+  /* sticky topnav */
+  .topnav{position:sticky;top:0;z-index:50;background:var(--navy-2);color:#fff;display:flex;justify-content:space-between;align-items:center;
+    padding:9px 30px;font-size:12.5px;border-bottom:1px solid #1c3a5e;}
+  .topnav .bn{font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--blue-3);}
+  .topnav .lk a{color:#dbeafe;text-decoration:none;font-weight:600;margin-left:14px;}
+  .topnav .lk a:hover{color:#fff;}
+  #capstone,#appendix-a,#appendix-b{scroll-margin-top:54px;}
+
+  /* mastheads / appendix bands */
+  header.mast{background:var(--navy);color:#fff;padding:46px 0 36px;border-bottom:4px solid var(--blue-4);}
+  .kicker{text-transform:uppercase;letter-spacing:.18em;font-size:12px;font-weight:600;color:var(--blue-3);margin:0 0 12px;}
+  h1.title{font-size:34px;line-height:1.12;margin:0 0 8px;font-weight:700;letter-spacing:-.01em;}
+  .subt{font-size:18px;color:#cfdcea;margin:0 0 6px;font-style:italic;}
+  .meta{font-size:13px;color:var(--blue-3);margin:6px 0 0;}
+  .appendix-head{background:var(--navy);color:#fff;padding:38px 0 30px;margin-top:30px;border-top:4px solid var(--blue-4);}
+  .ax-kick{text-transform:uppercase;letter-spacing:.2em;font-size:12px;font-weight:700;color:var(--blue-3);margin:0 0 8px;}
+  .ax-title{font-size:28px;font-weight:700;margin:0 0 6px;letter-spacing:-.01em;}
+  .ax-sub{font-size:15px;color:#cfdcea;margin:0;max-width:760px;}
+  .ax-back{font-size:12px;color:var(--blue-3);text-decoration:none;display:inline-block;margin-top:10px;}
+
+  /* sections (capstone) */
+  section{margin-top:32px;}
+  .sec-head{display:flex;align-items:baseline;gap:13px;border-bottom:2px solid var(--navy);padding-bottom:9px;margin-bottom:8px;}
+  .sec-num{flex:0 0 auto;width:28px;height:28px;border-radius:50%;background:var(--blue-5);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;transform:translateY(2px);}
+  .sec-title{font-size:20px;font-weight:700;color:var(--navy);margin:0;letter-spacing:-.01em;}
+  .reco{background:var(--blue-1);border:1px solid var(--blue-2);border-radius:8px;padding:14px 18px;margin:10px 0;}
+  .reco b{color:var(--blue-6);}
+  .reco p{margin:0;color:var(--navy-2);font-size:14.5px;}
+  .pipe{background:var(--navy);color:#dbeafe;border-radius:8px;padding:16px 18px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.6;overflow-x:auto;white-space:pre;margin:12px 0;border:1px solid #1c3a5e;}
+  .pipe .hl{color:#fff;font-weight:700;}
+  .pipe .dim{color:#7da2c4;}
+  .scope{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px;}
+  .scope .card{border:1px solid var(--line);border-radius:8px;background:#fff;overflow:hidden;}
+  .scope .cap{padding:9px 15px;font-size:12.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#fff;}
+  .scope .mvp .cap{background:var(--slate-2);}
+  .scope .amb .cap{background:var(--blue-5);}
+  .scope .b{padding:4px 15px 12px;}
+  .scope ul li{font-size:13.5px;}
+  table{border-collapse:collapse;width:100%;margin:10px 0;font-size:13.5px;}
+  th{text-align:left;background:var(--navy);color:#fff;font-weight:600;padding:9px 13px;font-size:12px;letter-spacing:.03em;text-transform:uppercase;}
+  td{padding:9px 13px;border-bottom:1px solid var(--line);color:var(--slate);vertical-align:top;}
+  td b{color:var(--navy-2);}
+  tr:nth-child(even) td{background:var(--blue-1);}
+  .risk-tag{color:var(--blue-6);font-weight:700;}
+  .owners{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px;}
+  .own{border:1px solid var(--line);border-radius:8px;background:#fff;padding:12px 15px;}
+  .own .oh{font-size:14px;font-weight:700;color:var(--navy);}
+  .own .ow{font-size:11.5px;font-weight:700;color:var(--blue-6);margin:2px 0 5px;}
+  .own .od{font-size:13px;color:var(--slate);}
+  .timeline{margin-top:10px;border-left:2px solid var(--blue-3);}
+  .step{position:relative;padding:0 0 14px 26px;margin-left:7px;}
+  .step::before{content:"";position:absolute;left:-7px;top:3px;width:12px;height:12px;border-radius:50%;background:var(--blue-5);border:2px solid #fff;box-shadow:0 0 0 2px var(--blue-3);}
+  .step .t{font-size:11.5px;font-weight:700;color:var(--blue-6);letter-spacing:.04em;}
+  .step .d{font-size:14px;color:var(--slate);margin-top:1px;}
+  .step .d b{color:var(--navy-2);}
+
+  /* Appendix A — before/solution/after/value */
+  .scenario{background:#fff;border:1px solid var(--line);border-left:4px solid var(--blue-5);border-radius:8px;padding:14px 18px;margin:22px 0 4px;font-size:14.5px;color:var(--slate);}
+  .scenario b{color:var(--navy-2);}
+  .heads{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-top:18px;}
+  .head{padding:11px 12px;border-radius:8px 8px 0 0;font-size:12.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;text-align:center;}
+  .head.b{background:var(--red);color:#fff;}
+  .head.s{background:var(--blue-5);color:#fff;}
+  .head.a{background:var(--green);color:#fff;}
+  .head.v{background:var(--navy);color:#fff;}
+  .caprow{margin-top:10px;}
+  .caplabel{background:var(--blue-6);color:#fff;font-size:14px;font-weight:700;padding:8px 16px;border-radius:8px 8px 0 0;letter-spacing:.01em;display:flex;align-items:center;gap:10px;}
+  .caplabel .tag{font-size:10px;font-weight:600;background:rgba(255,255,255,.16);padding:2px 8px;border-radius:4px;letter-spacing:.03em;}
+  .caprow.overview .caplabel{background:var(--navy);}
+  .cells{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;border:1px solid var(--line);border-top:none;border-radius:0 0 8px 8px;padding:10px;background:#fbfcfe;}
+  .caprow.overview .cells{border-color:var(--blue-3);}
+  .cell{border-radius:7px;padding:13px 14px;font-size:13px;line-height:1.5;}
+  .cell .ic{font-weight:700;font-size:11px;letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:6px;}
+  .cell.before{background:var(--red-bg);border:1px solid var(--red-line);color:var(--slate);}
+  .cell.before .ic{color:var(--red);}
+  .cell.before b{color:#7f1d1d;}
+  .cell.solution{background:var(--blue-1);border:1px solid var(--blue-2);color:var(--navy-2);font-size:12px;}
+  .cell.solution .ic{color:var(--blue-6);}
+  .cell.solution b{color:var(--blue-6);}
+  .cell.solution .bk{display:block;margin-top:8px;padding-top:7px;border-top:1px dashed var(--blue-3);font-size:11px;color:var(--navy-2);line-height:1.45;}
+  .cell.solution .bk b{color:var(--blue-6);}
+  .cell.after{background:var(--green-bg);border:1px solid var(--green-line);color:var(--navy-2);}
+  .cell.after .ic{color:var(--green);}
+  .cell.value{background:var(--navy);color:#eaf1fb;}
+  .cell.value .ic{color:var(--blue-3);}
+  .cell.value b{color:#fff;}
+  .cell b{color:var(--navy-2);}
+  .bottom{background:var(--blue-1);border:1px solid var(--blue-2);border-radius:9px;padding:18px 22px;margin-top:24px;}
+  .bottom .bt{font-size:18px;font-weight:700;color:var(--navy);margin:0 0 6px;}
+  .bottom p{margin:0;font-size:15px;color:var(--navy-2);}
+
+  /* Appendix B — why technically hard */
+  h2.sec{font-size:13px;text-transform:uppercase;letter-spacing:.16em;color:var(--blue-6);border-bottom:2px solid var(--navy);padding-bottom:9px;margin:38px 0 14px;}
+  .gbar{background:#fff;border:1px solid var(--line);border-top:4px solid var(--blue-5);border-radius:9px;padding:16px 20px;margin:22px 0 0;}
+  .gbar h3{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--slate-2);}
+  .gbar p{margin:0 0 8px;font-size:14px;color:var(--slate);}
+  .gbar p:last-child{margin-bottom:0;}
+  .gbar b{color:var(--navy-2);}
+  .gbar .dir{background:var(--blue-1);border-radius:6px;padding:8px 12px;font-size:13.5px;color:var(--navy-2);}
+  .gbar .dir b{color:var(--blue-6);}
+  .pillar{border:1px solid var(--line);border-radius:11px;background:#fff;overflow:hidden;margin:14px 0;box-shadow:0 1px 2px rgba(10,37,64,.04);}
+  .pillar .ph{background:var(--navy);color:#fff;padding:11px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .pillar .pn{font-size:11px;font-weight:700;letter-spacing:.07em;color:var(--blue-3);}
+  .pillar .pname{font-size:17px;font-weight:700;letter-spacing:-.01em;}
+  .pillar .amb{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 9px;border-radius:5px;}
+  .amb.frontier{background:#0b3a8c;color:#dbeafe;}
+  .amb.emerging{background:rgba(255,255,255,.14);color:#dbeafe;}
+  .pillar .body{padding:6px 18px 16px;}
+  .blk{margin-top:12px;}
+  .blk .t{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;}
+  .blk.crux .t{color:var(--slate-2);}
+  .blk.fit .t{color:var(--blue-6);}
+  .blk.sig .t{color:var(--blue-6);}
+  .blk p{margin:0;font-size:13.5px;color:var(--slate);line-height:1.5;}
+  .blk p b{color:var(--navy-2);}
+  .scodes{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  .sc{font-size:11px;font-weight:700;background:var(--blue-1);border:1px solid var(--blue-2);color:var(--blue-6);padding:2px 8px;border-radius:5px;}
+  .blk.bet{background:var(--amber-bg);border:1px solid var(--amber-line);border-radius:7px;padding:9px 12px;margin-top:12px;}
+  .blk.bet .t{color:var(--amber);}
+  .blk.bet p{color:#78350f;}
+  .blk.bet p b{color:#78350f;}
+  .refmini{font-size:12px;color:var(--muted);margin-top:5px;}
+  .refmini a{color:var(--slate-2);}
+  .legend{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+  .lg{border:1px solid var(--line);border-radius:7px;background:#fff;padding:9px 12px;font-size:12.5px;color:var(--slate);}
+  .lg b{color:var(--navy-2);}
+  .lg .code{font-weight:700;color:var(--blue-6);}
+  .closing{background:var(--navy);color:#fff;border-radius:10px;padding:20px 24px;margin-top:16px;}
+  .closing .ct{font-size:18px;font-weight:700;margin:0 0 8px;}
+  .closing p{margin:0;font-size:14.5px;color:#cfdcea;}
+  .closing b{color:var(--blue-3);}
+
+  footer{margin-top:40px;padding-top:18px;border-top:2px solid var(--navy);font-size:12.5px;color:var(--muted);line-height:1.7;}
+  footer b{color:var(--navy-2);}
+  footer a{color:var(--slate-2);}
+  .disc{font-style:italic;}
+  @media (max-width:760px){.scope,.owners,.legend{grid-template-columns:1fr;}.heads{display:none;}.cells{grid-template-columns:1fr;}h1.title{font-size:27px;}.pillar .amb{margin-left:0;}}
+</style>
+</head>
+<body>
+
+<!-- STICKY NAV -->
+<nav class="topnav">
+  <span class="bn">Provenance</span>
+  <span class="lk"><a href="#capstone">Capstone Project</a><a href="#appendix-a">Appendix A · Before→After</a><a href="#appendix-b">Appendix B · Why it's hard</a></span>
+</nav>
+
+<!-- ===================== CAPSTONE PROJECT ===================== -->
+<header class="mast" id="capstone">
+  <div class="wrap">
+    <p class="kicker">Gauntlet Capstone · Deliverable 01 · Project Planning Document</p>
+    <h1 class="title">Provenance</h1>
+    <p class="subt">Provable ultra-personalization — outreach that can't say anything it can't prove, and optimizes itself inside the truth.</p>
+    <p class="meta">Plan due Wed Jun 17 · 11:59 PM &nbsp;·&nbsp; Showcase Mon Jun 29 (10-min live) &nbsp;·&nbsp; Team of 3–4 &nbsp;·&nbsp; Appendices: <a href="#appendix-a" style="color:#dbeafe;">A — before/after</a> · <a href="#appendix-b" style="color:#dbeafe;">B — why it's hard</a></p>
+  </div>
+</header>
+
+<div class="wrap body">
+
+  <section>
+    <div class="sec-head"><span class="sec-num">1</span><h2 class="sec-title">The problem — and why it's technically hard</h2></div>
+    <p>Ultra-personalization (a unique, on-target message for every prospect) is the new standard — but it <b>breaks human review</b>. You cannot legally read 100,000 unique messages, so in any claims-heavy domain (pharma, fintech, insurance, food/ag) you're forced to choose: ship one <i>generic-but-reviewed</i> message, or send <i>personal-but-unverified</i> claims and risk an FTC action or lawsuit. The bottleneck isn't generation — it's <b>verification at scale</b>.</p>
+    <p>That is hard for reasons no current tool solves: deciding "is this claim entailed by its source?" with <b>calibrated confidence and no ground truth at inference</b>; the default verifier (LLM-as-judge) fails &gt;50% of bias tests and is gameable; an optimizer told to maximize replies <b>learns to exaggerate</b> (reward-hacking); and a verified claim goes stale the moment its source changes. "Verification is the new bottleneck" (Karpathy) — and we attack it end-to-end. <i>(Full per-capability hardness + research in <a href="#appendix-b">Appendix B</a>.)</i></p>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-num">2</span><h2 class="sec-title">Project direction</h2></div>
+    <div class="reco"><p><b>A — Combine ML with LLM.</b> A trained <b>verifier ensemble</b> (NLI + diverse LLM judges, calibrated) and a <b>constrained contextual-bandit</b> policy do what the LLM can't — know what's true and decide what to send — while the LLM does generation. The coupling is load-bearing: delete the ML and you have generic AI slop.</p></div>
+    <ul>
+      <li>Also exercises <b>C (one problem, many ways)</b>: we benchmark verification methods head-to-head (single-judge vs. NLI vs. ensemble vs. self-consistency vs. hidden-state probe).</li>
+      <li>Carries a <b>B-flavored thesis</b>: the marketing org runs through one verified pipeline — humans author the rules and approve sends, they don't write copy.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-num">3</span><h2 class="sec-title">Technical approach — AI as the primitive</h2></div>
+    <p>The product is a <b>system of record for claims</b>: every claim has a tracked life, and AI is the primitive at each stage. Delete the models and there's no product — only a logger.</p>
+    <div class="pipe"> <span class="hl">Claims Library</span> &#9472;&#9658; <span class="dim">Draft</span> &#9472;&#9658; <span class="hl">The Gate</span> (verify + clear) &#9472;&#9658; <span class="hl">The Optimizer</span> &#9472;&#9658; <span class="dim">Send</span> &#9472;&#9658; <span class="hl">Drift Monitor</span>
+ claim&#8211;evidence    grounded    decompose &#8594; NLI+ensemble    contextual bandit         audit      source-diff &#8594;
+ graph + sources    gen          (calibrated) &#8594; rules;        over <i>verified</i> variants    trail      re-verify
+                                 router-referee cascade        (can't reward-hack)
+   <span class="dim">&#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472; Assurance Lab &#8212; adversarial traps + reliability profiling audit The Gate &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;</span></div>
+    <ul>
+      <li><b>The Gate (the core):</b> atomic-claim decomposition → retrieval evidence-binding → NLI entailment + a calibrated diverse-judge ensemble → compliance rules; cheap-first <b>router-and-referee cascade</b>; optional hidden-state probe. <i>Cited or killed.</i></li>
+      <li><b>The Optimizer:</b> a contextual bandit over a <b>constrained action space</b> = verified+cleared variants; reward = reply/convert, unsubscribe = hard negative; hierarchical priors for cold-start; off-policy eval. <b>Pruning to verified outputs is a structural fix for reward-hacking.</b></li>
+      <li><b>Drift Monitor &amp; Assurance Lab:</b> a claim-dependency graph re-verifies on source change; synthetic adversarial traps + reliability profiling (catch-rate, false-reject, ECE, severity) prove the verifier works.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-num">4</span><h2 class="sec-title">Scope — two weeks</h2></div>
+    <p>Anchored on a live data spine (a real ag/biotech B2B pipeline with real prospects, real sources, and a real legal hold) so verification has genuine, checkable ground truth.</p>
+    <div class="scope">
+      <div class="card mvp">
+        <div class="cap">Minimum shippable — must hit</div>
+        <div class="b"><ul>
+          <li><b>The Gate end-to-end</b> on one channel (email): decompose → bind → NLI + small ensemble → rules → the live <b>claim ledger</b> (cited / repaired / blocked).</li>
+          <li><b>The Assurance Lab MVP</b>: a synthetic-trap set + the headline metric — catch-rate vs. false-reject + a calibration (reliability) diagram.</li>
+          <li>The regulatory gate (block the legal-hold claim on demand) + the adversarial "try to make it lie" demo.</li>
+          <li>Funnel program expressed <b>as data</b>, so a second tenant is config, not a rebuild.</li>
+        </ul></div>
+      </div>
+      <div class="card amb">
+        <div class="cap">Ambitious — scored on ambition</div>
+        <div class="b"><ul>
+          <li><b>The truth-bounded Optimizer</b> on an LLM-persona simulator — show conversion climbing and that it <b>can't win by lying.</b></li>
+          <li><b>Hidden-state probe</b> added to the Gate; verifier <b>bake-off</b> (judge vs. NLI vs. ensemble) on catch-rate per dollar.</li>
+          <li><b>Drift Monitor</b> live (flip the legal hold → claims auto-unblock; change a permit → sends auto-pause).</li>
+          <li>Second-tenant transfer; optional multi-channel / live voice.</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-num">5</span><h2 class="sec-title">Why it's compelling — the recruit hook</h2></div>
+    <ul>
+      <li><b>It's the hottest problem in AI, made tangible:</b> "we built the AI that can't lie in your outbound — and it optimizes itself inside the truth." Sits on the verification/reliability frontier judges are watching.</li>
+      <li><b>One genuinely novel bet:</b> <i>constrained optimization as a structural fix for reward-hacking</i> — a fresh answer to the problem the whole field is stuck on, not just an application.</li>
+      <li><b>A live spine, not a blank repo</b> — real data, real sources, a real legal hold to enforce on day one.</li>
+      <li><b>It demos like a magic trick</b> — a claim ledger lighting up green/amber/red, a "try to make it lie" moment, and a learning curve that proves the optimizer can't cheat.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-num">6</span><h2 class="sec-title">Hard parts / risks — the bet and where it breaks</h2></div>
+    <p><b>The bet:</b> a calibrated ensemble verifier catches false/unsayable claims at high recall without killing good copy, cheaply enough to run on every message — and a bandit bounded to verified outputs lifts conversion without ever learning to lie.</p>
+    <table>
+      <thead><tr><th style="width:32%">Risk</th><th>Where it breaks · mitigation</th></tr></thead>
+      <tbody>
+        <tr><td><span class="risk-tag">Verifier reliability</span> (top)</td><td>A single LLM-judge is gameable and biased. <b>Mitigation:</b> NLI + diverse ensemble + calibration (ECE); prove it in the Assurance Lab, never a bare yes/no.</td></tr>
+        <tr><td><span class="risk-tag">Transfer / calibration</span></td><td>Calibration may decay off the ground-truth domain. <b>Mitigation:</b> make the transfer test a first-class deliverable; recalibrate on a small target sample; report honestly.</td></tr>
+        <tr><td><span class="risk-tag">Sparse reward / cold-start</span></td><td>Replies are rare/slow; new segments have no data. <b>Mitigation:</b> persona simulator + cheap proxies + hierarchical bandit + off-policy eval.</td></tr>
+        <tr><td><span class="risk-tag">Claim decomposition</span></td><td>A missed claim is unverified. <b>Mitigation:</b> measure decomposition coverage; puffery as its own class.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-num">7</span><h2 class="sec-title">Who owns what — team of 3–4</h2></div>
+    <div class="owners">
+      <div class="own"><div class="oh">Owner 1 — The Gate</div><div class="ow">verifier ML core</div><div class="od">Claim decomposition, evidence-binding, NLI + ensemble, calibration, the router-referee cascade.</div></div>
+      <div class="own"><div class="oh">Owner 2 — Optimizer + Assurance</div><div class="ow">RL + eval core</div><div class="od">Contextual bandit, off-policy eval, the simulator; adversarial-trap generation + reliability profiling.</div></div>
+      <div class="own"><div class="oh">Owner 3 — Library + Drift + data</div><div class="ow">data / infra</div><div class="od">Claim–evidence graph, source registry, the live spine, the drift dependency-graph re-verification.</div></div>
+      <div class="own"><div class="oh">Owner 4 — Generation + demo</div><div class="ow">systems / product</div><div class="od">Per-prospect generation, channel adapters, the claim-ledger UI, and the showcase.</div></div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-top:8px;">For a team of 3, Owner 4 folds into Owner 1/3 and the demo is shared.</p>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-num">8</span><h2 class="sec-title">The 10-minute showcase (Jun 29)</h2></div>
+    <div class="timeline">
+      <div class="step"><div class="t">0:00 · 1 min</div><div class="d">The reframe — "ultra-personalization breaks review; we automate it. The AI can't say what it can't prove."</div></div>
+      <div class="step"><div class="t">1:00 · 3 min</div><div class="d">The claim ledger, live — generate a per-prospect message; claims light up <b>green/amber/red</b>; click a green one for its source; <b>try to make it lie</b> → blocked; flip the legal hold → a true claim turns red.</div></div>
+      <div class="step"><div class="t">4:00 · 3 min</div><div class="d">The Assurance Lab — catch-rate vs. false-reject vs. a single LLM-judge baseline; the reliability/calibration diagram. Proof, not a promise.</div></div>
+      <div class="step"><div class="t">7:00 · 2 min</div><div class="d">The truth-bounded Optimizer on the simulator — conversion climbs per segment, and the "win by lying" path is structurally closed.</div></div>
+      <div class="step"><div class="t">9:00 · 1 min</div><div class="d">The ask — four surfaces, come build the outbound AI that can't lie.</div></div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ===================== APPENDIX A ===================== -->
+<div class="appendix-head" id="appendix-a">
+  <div class="wrap">
+    <p class="ax-kick">Appendix A</p>
+    <h2 class="ax-title">Before → Solution → After → Value</h2>
+    <p class="ax-sub">Per capability: what happens without it, exactly what the solution is (deep tech + ⚡ breakthrough), what happens with it, and the value added.</p>
+    <a class="ax-back" href="#capstone">↑ back to the capstone project</a>
+  </div>
+</div>
+
+<div class="wrap body">
+  <div class="scenario"><b>Running scenario:</b> a regulated business (fintech, pharma, supplements, insurance, or our live ag/biotech domain) runs an outbound campaign to ~10,000–100,000 prospects, where every message makes specific factual claims and a wrong one is a fine, not a typo.</div>
+
+  <div class="heads">
+    <div class="head b">✕ Before — without it</div>
+    <div class="head s">🛠 The solution</div>
+    <div class="head a">✓ After — with it</div>
+    <div class="head v">＄ Value added</div>
+  </div>
+
+  <div class="caprow overview">
+    <div class="caplabel">The campaign overall <span class="tag">the big picture</span></div>
+    <div class="cells">
+      <div class="cell before"><span class="ic">Before</span>Weeks to launch through legal review; you ship <b>one generic compliant email</b>; constant fear of a bad claim; no audit trail if challenged.</div>
+      <div class="cell solution"><span class="ic">The solution</span>The <b>Provenance engine</b>: a claim <i>system of record</i> wrapping a closed loop — a calibrated <b>learned verifier</b> gates a <b>constrained optimizer</b>, with continuous re-grounding.<span class="bk">⚡ <b>Breakthrough:</b> couples grounded generation + calibrated verification + constrained RL in one loop — it optimizes for conversion <i>inside</i> a hard truth boundary.</span></div>
+      <div class="cell after"><span class="ic">After</span>Launch <b>same day</b>; ship <b>100,000 personalized, pre-verified</b> messages; the funnel self-optimizes; a full audit trail accrues automatically.</div>
+      <div class="cell value"><span class="ic">Value added</span><b>Faster, bigger, and safer at once</b> — the old trade-off between "personalized" and "compliant" disappears.</div>
+    </div>
+  </div>
+
+  <div class="caprow">
+    <div class="caplabel">1 · Claims Library <span class="tag">system of record</span></div>
+    <div class="cells">
+      <div class="cell before"><span class="ic">Before</span>"What are we allowed to say?" lives in scattered decks and a rep's memory. A rep reuses a claim you <b>retired six months ago</b> in a live email — now inaccurate, now a compliance incident.</div>
+      <div class="cell solution"><span class="ic">The solution</span><b>Atomic-claim extraction</b> + normalization into a <b>claim–evidence graph</b>: each claim node bound to a source span via retrieval, versioned with provenance; generation and reps draw <b>only</b> from it.<span class="bk">⚡ <b>Breakthrough:</b> a structured, queryable claim/evidence substrate instead of flat RAG chunks — structure-aware reading over messy docs, where decomposing fluent text into checkable claims is itself an open problem.</span></div>
+      <div class="cell after"><span class="ic">After</span>One approved, current library. The retired claim <b>isn't selectable</b>. Every rep and every AI draft pulls from the same verified, in-date set.</div>
+      <div class="cell value"><span class="ic">Value added</span>A single source of truth → fewer incidents and <b>approve-once-reuse-everywhere</b> (kills duplicate review). The library becomes a compounding asset.</div>
+    </div>
+  </div>
+
+  <div class="caprow">
+    <div class="caplabel">2 · The Gate — verify + clear <span class="tag">the bottleneck remover</span></div>
+    <div class="cells">
+      <div class="cell before"><span class="ic">Before</span>Legal/MLR reads <b>every asset</b> — 2–4 weeks per campaign. Under deadline, a team ships <b>"clinically proven"</b> with no study behind it → FTC complaint, takedown, brand hit.</div>
+      <div class="cell solution"><span class="ic">The solution</span>Decompose draft → retrieval <b>evidence-binding</b> → <b>NLI entailment</b> + a diverse-family <b>judge ensemble</b>, calibrated (isotonic; report <b>ECE</b>) → compliance-rule engine; <b>router-and-referee cascade</b> (cheap NLI first, escalate the uncertain); optional <b>hidden-state probe</b> on intermediate activations to pre-flag likely-wrong generations.<span class="bk">⚡ <b>Breakthrough:</b> replaces the unreliable single LLM-judge (&gt;50% bias-test failure) with calibrated-ensemble <b>selective prediction</b> — verification that holds under adversarial, reward-hacking pressure. "Verification is the bottleneck."</span></div>
+      <div class="cell after"><span class="ic">After</span>Every message auto-checked in <b>seconds</b>. "Clinically proven" with no source is <b>blocked or rewritten before send</b>; each surviving claim carries its citation. Legal set the rules <b>once</b>.</div>
+      <div class="cell value"><span class="ic">Value added</span>Review <b>weeks → seconds</b>; <b>~0 unsubstantiated claims</b> shipped; 1:1 personalization at scale becomes legally possible at all.</div>
+    </div>
+  </div>
+
+  <div class="caprow">
+    <div class="caplabel">3 · The Optimizer — truth-bounded A/B <span class="tag">revenue engine</span></div>
+    <div class="cells">
+      <div class="cell before"><span class="ic">Before</span>One generic email to the whole list — or a manual A/B that takes weeks to reach significance and tests one thing at a time. Conversion stays flat.</div>
+      <div class="cell solution"><span class="ic">The solution</span><b>Contextual bandit</b> (Thompson / LinUCB) over a <b>constrained action space</b> = verified + cleared variants; reward = reply/convert, unsubscribe = hard negative; <b>hierarchical priors</b> for cold-start segments; <b>off-policy evaluation</b> (doubly-robust) on logged sends; <b>anytime-valid confidence sequences</b> for adaptive tests.<span class="bk">⚡ <b>Breakthrough:</b> pruning the action space to verified outputs is a <b>structural fix for reward-hacking</b> — the policy <i>cannot</i> converge to a higher-reward falsehood, because falsehoods never enter the reward loop. Constrained optimization as anti-Goodhart.</span></div>
+      <div class="cell after"><span class="ic">After</span>Each micro-segment <b>auto-converges to its best verified message</b> — "$/head ROI" wins for feedlots, "peer-hospital reference" for procurement — and only true variants ever compete.</div>
+      <div class="cell value"><span class="ic">Value added</span><b>Continuous conversion lift</b> per segment, with <b>zero added liability</b> — the upside of aggressive optimization without the downside.</div>
+    </div>
+  </div>
+
+  <div class="caprow">
+    <div class="caplabel">4 · Drift Monitor <span class="tag">keeps claims true over time</span></div>
+    <div class="cells">
+      <div class="cell before"><span class="ic">Before</span>A legal hold lifts but nobody re-checks 100k live messages → a now-<b>allowed</b> claim sits unused for months (lost revenue). Or a permit changes and you keep sending a now-<b>false</b> claim (liability).</div>
+      <div class="cell solution"><span class="ic">The solution</span>A <b>claim-dependency graph</b> (claim → source-version) + change-data-capture on sources; a source diff <b>propagates invalidation</b> along the graph and triggers <b>targeted re-verification</b> of only the affected claims, then auto-pauses / unblocks live sends.<span class="bk">⚡ <b>Breakthrough:</b> treats truth as a <i>temporal</i> property — continuous re-grounding / state-drift detection (the under-measured "memory goes stale" problem). Incremental cache-invalidation, for truth.</span></div>
+      <div class="cell after"><span class="ic">After</span>Claims <b>auto-re-verify</b> when a source changes: the cleared claim <b>unblocks everywhere instantly</b>; the stale one is <b>paused</b> before it sends.</div>
+      <div class="cell value"><span class="ic">Value added</span><b>Capitalize cleared claims immediately</b> (revenue) <b>+ avoid stale-claim liability</b> (risk) — with no manual re-audit of the corpus.</div>
+    </div>
+  </div>
+
+  <div class="caprow">
+    <div class="caplabel">5 · Assurance Lab <span class="tag">proof the checker works</span></div>
+    <div class="cells">
+      <div class="cell before"><span class="ic">Before</span>"Trust us, the AI checks the claims" — but <b>no proof</b>. A risk committee or enterprise buyer stalls the deal for months waiting for evidence that never comes.</div>
+      <div class="cell solution"><span class="ic">The solution</span>A <b>synthetic adversarial-trap generator</b> (mutates verified claims: number-drift, unsupported superlatives, false equivalence, true-but-unsayable) → a held-out adversarial set; <b>reliability profiling</b>: catch-rate at fixed false-reject, <b>paraphrase robustness</b>, calibration (<b>ECE</b> / reliability diagrams), severity-weighted error buckets.<span class="bk">⚡ <b>Breakthrough:</b> decomposed reliability (not one pass-rate) + <b>adversarially testing your own verifier</b> — the direct answer to benchmark-gaming and "average success hides failures." A wind tunnel for the checker.</span></div>
+      <div class="cell after"><span class="ic">After</span>An audited dashboard — <b>"98.7% catch-rate, 2.1% false-reject, calibrated ±3%"</b> — from continuously running adversarial traps. You put a number in front of legal, the board, and procurement.</div>
+      <div class="cell value"><span class="ic">Value added</span>Turns trust into a <b>metric</b> → clears risk committees and <b>shortens enterprise sales cycles</b> (assurance is itself a revenue lever).</div>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <p class="bt">The bottom line, in four columns</p>
+    <p><b>Before:</b> slow, generic, anxious — personalization traded for safety. &nbsp;<b>The solution:</b> a claim system-of-record + a verify → optimize → monitor → assure pipeline in front of every send. &nbsp;<b>After:</b> instant, 1:1, provable. &nbsp;<b>Value added:</b> risk down, personalization unlocked, revenue up — the three numbers every stakeholder is paid to move.</p>
+  </div>
+</div>
+
+<!-- ===================== APPENDIX B ===================== -->
+<div class="appendix-head" id="appendix-b">
+  <div class="wrap">
+    <p class="ax-kick">Appendix B</p>
+    <h2 class="ax-title">Why each capability is technically hard</h2>
+    <p class="ax-sub">Against the Gauntlet bar and current research — the technical crux, the Gauntlet fit, the S1–S10 research signals, and the bet / where it breaks.</p>
+    <a class="ax-back" href="#capstone">↑ back to the capstone project</a>
+  </div>
+</div>
+
+<div class="wrap body">
+
+  <div class="gbar">
+    <h3>How Gauntlet scores — and our read</h3>
+    <p>The brief's six criteria: <b>the problem</b> (and why it's technically hard — <i>ambition is the criterion</i>), <b>project direction</b>, <b>technical approach</b> (AI as a primitive, not a bolt-on), <b>scope</b> (ambitious vs. minimum shippable in two weeks), <b>why it's compelling</b>, and <b>hard parts / risks</b>.</p>
+    <p class="dir"><b>Our direction: A — Combine ML with LLM.</b> A trained verifier ensemble + a constrained contextual-bandit policy do what the LLM can't (know what's true, decide what to send); the LLM does generation. It also exercises <b>C</b> (we compare verification methods head-to-head) and carries a <b>B</b>-flavored thesis (the org runs through one verified pipeline; humans set rules, not write copy).</p>
+  </div>
+
+  <h2 class="sec">Capability by capability</h2>
+
+  <div class="pillar">
+    <div class="ph"><span class="pn">CAPABILITY 1</span><span class="pname">Claims Library — claim–evidence extraction</span><span class="amb emerging">emerging</span></div>
+    <div class="body">
+      <div class="blk crux"><div class="t">The technical crux</div><p>Extracting <b>atomic, checkable claims</b> from fluent marketing prose (compound claims, implicature, puffery vs. fact) and binding each to the exact source span is unsolved at fidelity — and flat RAG chunking destroys the document structure you need to do it.</p></div>
+      <div class="blk fit"><div class="t">Gauntlet fit</div><p>Technical ambition in knowledge extraction; <b>AI-as-primitive</b> — the claim/evidence substrate is model-extracted, not hand-built. (Direction A.)</p></div>
+      <div class="blk sig"><div class="t">Research says it's open</div><p>Retrieval and generation interact in ways no one has closed; structure-aware reading beats flat chunks, and GraphRAG often underperforms vanilla RAG.</p>
+        <div class="scodes"><span class="sc">S5 · RAG still fails</span><span class="sc">S3 · long context</span></div>
+        <div class="refmini">DeepRead (structure-aware "locate-then-read") · Anthropic Contextual Retrieval · EMNLP 2025 "Context Length Alone Hurts… Despite Perfect Retrieval."</div>
+      </div>
+      <div class="blk bet"><div class="t">The bet · where it breaks</div><p>A missed or mis-split claim is an <b>unverified</b> claim. Mitigation: measure decomposition coverage explicitly; handle puffery as its own class. Breaks if implicature evades extraction.</p></div>
+    </div>
+  </div>
+
+  <div class="pillar">
+    <div class="ph"><span class="pn">CAPABILITY 2</span><span class="pname">The Gate — calibrated ensemble verification</span><span class="amb frontier">frontier</span></div>
+    <div class="body">
+      <div class="blk crux"><div class="t">The technical crux</div><p>Decide "is this claim entailed by its source?" with <b>calibrated confidence and no ground truth at inference</b>. The obvious tool — LLM-as-judge — fails &gt;50% of bias tests and is gameable; calibration decays under distribution shift; and the generator is an adversary that wants to embellish. This is the single hottest problem in applied AI: <i>"verification is the bottleneck."</i></p></div>
+      <div class="blk fit"><div class="t">Gauntlet fit</div><p>Highest technical ambition; the purest <b>AI-as-primitive</b> (delete the verifier and there is no product); Direction A, with a C-style method comparison built in.</p></div>
+      <div class="blk sig"><div class="t">Research says it's open</div><p>Quality/reliability is the #1 production blocker; evals lag observability; benchmarks get gamed; the default scalable verifier (LLM-judge) is unreliable.</p>
+        <div class="scodes"><span class="sc">S1 · reliability bottleneck</span><span class="sc">S2 · benchmarks gamed</span><span class="sc">S10 · feedback / judge messy</span></div>
+        <div class="refmini">Karpathy (Sequoia Ascent 2026) · LLM-judge bias <a href="https://arxiv.org/html/2604.16790v1">2604.16790</a> · RLVR reward-hacking <a href="https://arxiv.org/abs/2604.15149">2604.15149</a> · calibration-under-shift <a href="https://arxiv.org/html/2603.04445v2">2603.04445</a> · hidden-state probes <a href="https://arxiv.org/html/2605.24919">2605.24919</a>.</div>
+      </div>
+      <div class="blk bet"><div class="t">The bet · where it breaks</div><p>The verifier is load-bearing: false-negatives ship lies, false-positives kill good copy. Mitigation: NLI + diverse ensemble + calibration, proven by the Assurance Lab. Breaks if calibration won't transfer off the ground-truth domain.</p></div>
+    </div>
+  </div>
+
+  <div class="pillar">
+    <div class="ph"><span class="pn">CAPABILITY 3</span><span class="pname">The Optimizer — truth-bounded contextual bandit</span><span class="amb frontier">frontier · most novel</span></div>
+    <div class="body">
+      <div class="blk crux"><div class="t">The technical crux</div><p>Sequential decisions under <b>sparse, delayed, expensive, irreversible</b> feedback (replies are rare, slow, and each send costs a lead); off-policy learning on tiny logged data; per-micro-segment cold-start; <b>and</b> the optimizer is intrinsically prone to reward-hacking — optimizing engagement teaches it to exaggerate.</p></div>
+      <div class="blk fit"><div class="t">Gauntlet fit</div><p>Deep technical ambition (RL/bandits under constraints); <b>AI-as-primitive</b> (a learned policy steers the LLM at runtime); Direction A. <b>The original contribution:</b> bounding the action space to <i>verified</i> outputs is a structural fix for reward-hacking.</p></div>
+      <div class="blk sig"><div class="t">Research says it's open</div><p>Learned routing/policies are becoming standard but tool/sequence choice is "the missing policy"; reward-hacking is an active, unsolved failure mode.</p>
+        <div class="scodes"><span class="sc">S9 · multi-model routing</span><span class="sc">S2 · reward hacking</span><span class="sc">S1 · reliability</span></div>
+        <div class="refmini">Contextual bandits for multi-turn <a href="https://arxiv.org/pdf/2602.03806">2602.03806</a> · RouteLLM · process reward models <a href="https://arxiv.org/pdf/2504.16828">2504.16828</a> · RLVR reward-hacking <a href="https://arxiv.org/abs/2604.15149">2604.15149</a>.</div>
+      </div>
+      <div class="blk bet"><div class="t">The bet · where it breaks</div><p>Sparse/delayed reward + cold-start. Mitigation: persona simulator + hierarchical bandit + off-policy eval. Breaks on sim-to-real gap or negative transfer — but the <b>constrained-optimization-can't-lie</b> claim holds regardless, and is the boldest, most defensible novelty.</p></div>
+    </div>
+  </div>
+
+  <div class="pillar">
+    <div class="ph"><span class="pn">CAPABILITY 4</span><span class="pname">Drift Monitor — temporal re-grounding</span><span class="amb frontier">frontier</span></div>
+    <div class="body">
+      <div class="blk crux"><div class="t">The technical crux</div><p>A verified claim is only true <i>until its source changes</i>. Detecting which of N live claims a source change invalidates — and re-verifying only those — is a state/dependency problem. Most "memory" work tests retrieval, not whether state stays <b>correct</b> over time; staleness is the named hard problem.</p></div>
+      <div class="blk fit"><div class="t">Gauntlet fit</div><p>Technical ambition in <b>state management</b> — explicitly where the brief's research says teams get stuck; AI-as-primitive (re-verification is model-driven). Direction A, governance-flavored (B).</p></div>
+      <div class="blk sig"><div class="t">Research says it's open</div><p>Memory and state are under-measured and under-governed; long-running agents need artifacts and re-grounding, not bigger windows; enterprises flag visibility/audit gaps.</p>
+        <div class="scodes"><span class="sc">S4 · memory/state</span><span class="sc">S8 · enterprise governance</span></div>
+        <div class="refmini">Anthropic long-running agents · mem0 <i>State of AI Agent Memory 2026</i> · STATE-Bench <span class="disc">(named in the cohort research doc — directional)</span>.</div>
+      </div>
+      <div class="blk bet"><div class="t">The bet · where it breaks</div><p>Dependency-graph completeness: miss a dependency and a stale claim ships. Mitigation: conservative invalidation. Breaks toward over-invalidation (too many re-checks) or under (staleness slips through).</p></div>
+    </div>
+  </div>
+
+  <div class="pillar">
+    <div class="ph"><span class="pn">CAPABILITY 5</span><span class="pname">Assurance Lab — adversarial self-test + reliability profiling</span><span class="amb frontier">frontier</span></div>
+    <div class="body">
+      <div class="blk crux"><div class="t">The technical crux</div><p>Proving a verifier works requires <b>adversarially attacking your own checker</b> and reporting <b>decomposed reliability</b> — catch-rate at fixed false-reject, paraphrase robustness, calibration (ECE), severity buckets — because a single pass-rate hides failures and can be gamed.</p></div>
+      <div class="blk fit"><div class="t">Gauntlet fit</div><p>The research calls evaluation infrastructure the most timely capstone area; high ambition + the strongest <b>evaluation story</b>; AI-as-primitive (synthetic adversarial generation + profiling). Direction C + A.</p></div>
+      <div class="blk sig"><div class="t">Research says it's open</div><p>Reliability must be decomposed beyond average success; benchmarks are gamed so you must adversarially test; synthetic-data verification is what prevents collapse.</p>
+        <div class="scodes"><span class="sc">S1 · decompose reliability</span><span class="sc">S2 · benchmark integrity</span><span class="sc">S10 · synthetic verification</span></div>
+        <div class="refmini">Berkeley RDI (broke 8 top agent benchmarks) · agent-reliability research line · "Mixture of LLMs in the loop" weak supervision.</div>
+      </div>
+      <div class="blk bet"><div class="t">The bet · where it breaks</div><p>Synthetic traps may not represent real failures (sim-to-real for the eval itself). Mitigation: diverse mutation operators + a real held-out slice. Breaks if a verifier passes traps but misses real lies.</p></div>
+    </div>
+  </div>
+
+  <h2 class="sec">The research signals (S1–S10), decoded</h2>
+  <p style="font-size:13.5px;color:var(--slate);margin:0 0 8px;">From the deep-research brief — the current ecosystem signals each capability is anchored to.</p>
+  <div class="legend">
+    <div class="lg"><span class="code">S1</span> — <b>Reliability is the production bottleneck.</b> Quality is the top blocker; observability is universal, evals lag.</div>
+    <div class="lg"><span class="code">S2</span> — <b>Benchmarks are distrusted / gameable.</b> Top agent benchmarks exploited; RLVR reward-hacking.</div>
+    <div class="lg"><span class="code">S3</span> — <b>Long context isn't solved.</b> Degrades even with perfect retrieval.</div>
+    <div class="lg"><span class="code">S4</span> — <b>Memory &amp; state under-measured/governed.</b> Staleness is the open problem.</div>
+    <div class="lg"><span class="code">S5</span> — <b>RAG still fails.</b> Flat chunks lose structure; GraphRAG often underperforms.</div>
+    <div class="lg"><span class="code">S8</span> — <b>Enterprise = fleet/governance problem.</b> Audit, identity, oversight gaps.</div>
+    <div class="lg"><span class="code">S9</span> — <b>Multi-model routing is standard.</b> Learned routing/cascades (RouteLLM).</div>
+    <div class="lg"><span class="code">S10</span> — <b>Feedback / labels / synthetic verification are messy.</b> Naive LLM labeling is noisy; external verification prevents collapse.</div>
+  </div>
+
+  <div class="closing">
+    <p class="ct">Where the ambition concentrates</p>
+    <p>The frontier weight sits in <b>The Gate (verification), The Optimizer (truth-bounded RL), and the Assurance Lab (reliability proof)</b> — the hottest current cluster. The single most original bet is <b>constrained optimization as a structural fix for reward-hacking</b>: the policy can't converge to a higher-reward falsehood because falsehoods never enter the reward loop. That's the line that scores on ambition.</p>
+  </div>
+
+  <footer>
+    <p class="disc">Citation discipline: arXiv IDs were surfaced in June-2026 research; "STATE-Bench"/"ReliabilityBench" and the S1–S10 codes come from the cohort's deep-research brief rather than independent verification, and are used as that brief's framework. Illustrative figures (catch-rates, timeframes) are labeled as such. Fittingly, we don't present an unsourced claim as a sourced one.</p>
+    <p>Provenance · Gauntlet Capstone · Project Planning Document + Appendices A &amp; B · Jun 2026 · <a href="index.html">hub</a></p>
+  </footer>
+
+</div>
+
+</body>
+</html>

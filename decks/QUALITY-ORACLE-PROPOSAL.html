@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Quality Oracle — Capstone Proposal</title>
+<style>
+  :root{
+    --navy:#0a2540;--navy-2:#102a43;--slate:#334e68;--slate-2:#486581;--muted:#627d98;
+    --line:#d9e2ec;--line-soft:#eef2f6;
+    --blue-1:#eff6ff;--blue-2:#dbeafe;--blue-3:#93c5fd;--blue-4:#3b82f6;--blue-5:#1d4ed8;--blue-6:#1e40af;
+    --bg:#ffffff;--paper:#f7f9fc;--amber:#b45309;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--navy-2);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:900px;margin:0 auto;padding:0 28px 96px;}
+  a{color:var(--blue-5);}
+
+  header.mast{background:var(--navy);color:#fff;padding:56px 0 44px;border-bottom:4px solid var(--blue-4);}
+  header.mast .wrap{padding-bottom:0;}
+  .kicker{text-transform:uppercase;letter-spacing:.18em;font-size:12px;font-weight:600;color:var(--blue-3);margin:0 0 14px;}
+  h1.title{font-size:40px;line-height:1.1;margin:0 0 12px;font-weight:700;letter-spacing:-.01em;}
+  .tagline{font-size:18px;color:#c9d8e8;margin:0 0 22px;max-width:700px;}
+  .tagline em{color:#fff;font-style:italic;}
+  .thesis{font-size:15px;color:#e6eef7;background:rgba(255,255,255,.06);border-left:3px solid var(--blue-4);
+    padding:14px 18px;border-radius:0 6px 6px 0;max-width:780px;}
+  .thesis b{color:#fff;}
+  .meta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px;}
+  .chip{font-size:12px;font-weight:600;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);
+    color:#dbeafe;padding:6px 12px;border-radius:999px;}
+
+  .reframe{background:#fff;border:1px solid var(--line);border-top:4px solid var(--blue-5);border-radius:8px;
+    padding:22px 24px;margin:32px 0 8px;box-shadow:0 1px 2px rgba(10,37,64,.04);}
+  .reframe h3{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--slate-2);}
+  .reframe .big{font-size:19px;font-weight:700;color:var(--navy);margin:0 0 8px;letter-spacing:-.01em;}
+  .reframe p{margin:0;font-size:14.5px;color:var(--slate);}
+  .reframe .ratio{background:var(--blue-1);border:1px solid var(--blue-2);border-radius:6px;padding:10px 14px;margin-top:12px;font-size:14px;color:var(--navy-2);}
+  .reframe .ratio b{color:var(--blue-6);}
+
+  section{margin-top:44px;}
+  .sec-head{display:flex;align-items:baseline;gap:14px;border-bottom:2px solid var(--navy);padding-bottom:10px;margin-bottom:6px;}
+  .sec-num{flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:var(--blue-5);color:#fff;
+    font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;transform:translateY(2px);}
+  .sec-title{font-size:22px;font-weight:700;color:var(--navy);margin:0;letter-spacing:-.01em;}
+  .action-title{font-size:16px;color:var(--blue-6);font-weight:600;margin:14px 0 4px;}
+  p{font-size:15px;color:var(--slate);}
+  strong{color:var(--navy-2);}
+  ul{padding-left:0;list-style:none;margin:10px 0;}
+  ul li{position:relative;padding-left:22px;margin:9px 0;font-size:15px;color:var(--slate);}
+  ul li::before{content:"";position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:2px;background:var(--blue-4);}
+  li b, li strong{color:var(--navy-2);}
+  code{background:var(--line-soft);padding:1px 5px;border-radius:4px;font-size:13px;color:var(--navy-2);}
+
+  .diagram{background:var(--navy);color:#dbeafe;border-radius:8px;padding:22px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.5;
+    overflow-x:auto;white-space:pre;margin:16px 0;border:1px solid #1c3a5e;}
+  .diagram .hl{color:#fff;font-weight:700;}
+  .diagram .dim{color:#7da2c4;}
+  .diagram .ok{color:#86efac;}
+  .diagram .warn{color:#fcd34d;}
+  .diagram .bad{color:#fca5a5;}
+
+  .reco{background:var(--blue-1);border:1px solid var(--blue-2);border-radius:8px;padding:18px 22px;margin:14px 0;}
+  .reco .badge{display:inline-block;background:var(--blue-5);color:#fff;font-size:11px;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:5px;margin-bottom:10px;}
+  .reco p{margin:0;color:var(--navy-2);}
+
+  .scope{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:10px;}
+  .scope .card{border:1px solid var(--line);border-radius:8px;background:#fff;overflow:hidden;}
+  .scope .card .cap{padding:10px 16px;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#fff;}
+  .scope .mvp .cap{background:var(--slate-2);}
+  .scope .amb .cap{background:var(--blue-5);}
+  .scope .card .body{padding:6px 16px 14px;}
+  .scope ul li{font-size:14px;}
+
+  table{border-collapse:collapse;width:100%;margin:12px 0;font-size:14px;}
+  th{text-align:left;background:var(--navy);color:#fff;font-weight:600;padding:10px 14px;font-size:12.5px;letter-spacing:.03em;text-transform:uppercase;}
+  td{padding:11px 14px;border-bottom:1px solid var(--line);color:var(--slate);vertical-align:top;}
+  tr:nth-child(even) td{background:var(--blue-1);}
+  td b{color:var(--navy-2);}
+  .risk-tag{color:var(--blue-6);font-weight:700;}
+
+  .surfaces{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px;}
+  .surf{border:1px solid var(--line);border-radius:8px;background:#fff;padding:12px 15px;}
+  .surf .sn{font-size:12px;font-weight:700;color:var(--blue-6);letter-spacing:.04em;}
+  .surf .sd{font-size:14px;color:var(--slate);margin-top:3px;}
+  .surf .sd b{color:var(--navy-2);}
+
+  .timeline{margin-top:14px;border-left:2px solid var(--blue-3);}
+  .step{position:relative;padding:0 0 18px 30px;margin-left:8px;}
+  .step::before{content:"";position:absolute;left:-7px;top:3px;width:12px;height:12px;border-radius:50%;
+    background:var(--blue-5);border:2px solid #fff;box-shadow:0 0 0 2px var(--blue-3);}
+  .step .t{font-size:12px;font-weight:700;color:var(--blue-6);letter-spacing:.04em;}
+  .step .d{font-size:15px;color:var(--slate);margin-top:2px;}
+  .step .d b{color:var(--navy-2);}
+
+  footer{margin-top:54px;padding-top:22px;border-top:2px solid var(--navy);font-size:13px;color:var(--muted);}
+  footer b{color:var(--navy-2);}
+  footer a{color:var(--slate-2);}
+  @media (max-width:680px){.scope,.surfaces{grid-template-columns:1fr;}h1.title{font-size:30px;}}
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <p class="kicker">Gauntlet Capstone &middot; Proposal &middot; Showcase Jun 29</p>
+    <h1 class="title">The Quality Oracle</h1>
+    <p class="tagline">A small model reads a big model's <em>mind</em> — and tells you, before you pay, whether to trust the answer.</p>
+    <p class="thesis">
+      <b>Thesis.</b> LLMs often encode that they're about to be wrong in their intermediate activations — then discard that signal at the output layer. We train a small probe to read those hidden states and predict correctness <i>during</i> generation: a <b>calibrated quality oracle</b> that routes cheap-vs-expensive, gates hallucinations, and cascades models. Neither the LLM (it can't reliably self-judge) nor classical ML (it can't generate) does this alone.
+    </p>
+    <div class="meta-row">
+      <span class="chip">Direction A · ML + LLM</span>
+      <span class="chip">Reads model internals</span>
+      <span class="chip">4 ownable surfaces</span>
+      <span class="chip">Scored on ambition</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="reframe">
+    <h3>The reframe (the spiky POV)</h3>
+    <p class="big">The model already knows it's wrong. We just stopped listening.</p>
+    <p>Everyone asks the LLM <i>"are you sure?"</i> — and trusts the words it generates back. But self-verbalized confidence is poorly calibrated and falls apart under distribution shift. Meanwhile the <b>uncertainty signal lives in the intermediate layers</b> and gets thrown away by the final token projection. Production routers ignore all of it and fall back to length/keyword heuristics. We stop asking the model to grade itself and instead <b>read the activations directly</b>.</p>
+    <div class="ratio"><b>The unit of progress:</b> accuracy at a fixed dollar cost. A calibrated oracle lets you spend the expensive model only on the queries that need it — and abstain on the ones nobody should trust.</div>
+  </div>
+
+  <!-- 1 -->
+  <section id="problem">
+    <div class="sec-head"><span class="sec-num">1</span><h2 class="sec-title">The problem — and why it's technically hard</h2></div>
+    <p>"Predict whether an answer is correct before you commit to it" sounds simple and is genuinely unsolved. The hard parts:</p>
+    <ul>
+      <li><b>Calibration under distribution shift — the named open problem.</b> The 2026 routing survey flags that quality estimators "struggle with distribution shift" and that self-reported uncertainty is poorly aligned with actual correctness. A probe that's calibrated on one task can decalibrate badly on another; closing that is the research edge.</li>
+      <li><b>The signal is in the middle, not the output.</b> Final-layer logits collapse the model's uncertainty into a token distribution. Evidence of "about to hallucinate" sits in <i>intermediate</i> hidden states — so you must find <b>which layers and token positions</b> carry it (a feature-selection problem over a high-dimensional activation tensor).</li>
+      <li><b>You need correctness labels to train.</b> A probe is supervised — it needs a labeled "this generation was right/wrong" set, which only exists cleanly in checkable domains. Bootstrapping there and generalizing out is the whole game.</li>
+      <li><b>It has to be cheaper than the alternatives it beats.</b> Self-consistency (sample N, vote) and judge ensembles already estimate confidence — but cost N× forward passes. A probe is <i>one</i> forward pass on activations you already computed. The bet only matters if the probe matches or beats those at a fraction of the cost.</li>
+      <li><b>Cascades compound the difficulty.</b> One-stage routing is studied; <b>multi-stage cascades with a learned accept/reject head per stage</b> (small → mid → big), jointly optimized for cost-at-fixed-quality, are explicitly under-explored.</li>
+    </ul>
+    <p>Ambition lives in turning model introspection into a calibrated, transferable, cheaper-than-sampling controller — and proving it on the cost-accuracy frontier.</p>
+  </section>
+
+  <!-- 2 -->
+  <section id="direction">
+    <div class="sec-head"><span class="sec-num">2</span><h2 class="sec-title">Project direction</h2></div>
+    <div class="reco">
+      <span class="badge">Primary fit · Direction A</span>
+      <p><b>Combine ML with LLM applications.</b> A trained probe/regressor (classical ML) does the one thing the LLM cannot — <i>reliably know when it is wrong</i> — and the LLM does the generation. The probe controls the LLM at runtime (accept / escalate / abstain). This is the textbook "each does what it's best at," with the coupling being load-bearing: remove the probe and you're back to crude heuristics or paying the big model every time.</p>
+    </div>
+    <p class="action-title">Why not the other framings</p>
+    <ul>
+      <li><b>One problem, many ways (C)</b> — we <i>will</i> benchmark the probe against self-consistency, semantic entropy, and LLM-judge confidence, but the project's spine is building the trained internals-probe + cascade, not a method survey. Lead with A.</li>
+      <li><b>Agent design (B)</b> — the oracle is a component an agent could use (when to think / escalate), but our deliverable is the predictor and its frontier, not an agent architecture.</li>
+    </ul>
+  </section>
+
+  <!-- 3 -->
+  <section id="approach">
+    <div class="sec-head"><span class="sec-num">3</span><h2 class="sec-title">AI is the primitive, not a bolt-on</h2></div>
+    <p>The tell: <b>the product is a trained model that reads another model's internals.</b> There is no version of this that's "an LLM with a prompt" — the core artifact is a probe fit to hidden-state features and a calibrated routing/cascade policy on top of it.</p>
+    <div class="diagram"> query &#9472;&#9658; <span class="hl">OPEN MODEL</span> (generate draft + expose hidden states)
+                  <span class="dim">&#9474;</span>  activations h&#8343; at selected layers / token positions
+                  <span class="dim">&#9660;</span>
+            <span class="hl">QUALITY ORACLE</span>  (trained probe)  &#9472;&#9658;  p(correct), calibrated &#8594; low ECE
+                  <span class="dim">&#9474;</span>
+                  <span class="dim">&#9660;</span>
+            <span class="hl">ROUTER / CASCADE</span>  (risk-coverage policy)
+                  <span class="ok">&#9500;&#9472; predicted-correct &#9472;&#9472;&#9658; accept the cheap answer        (most queries, ~$)</span>
+                  <span class="warn">&#9500;&#9472; uncertain &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9658; escalate to BIG / next stage   ($$)</span>
+                  <span class="bad">&#9492;&#9472; predicted-wrong &#9472;&#9472;&#9472;&#9658; regenerate / abstain / flag</span>
+                  <span class="dim">&#9474;</span>
+   labeled correctness set &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;  (ground-truth domain &#8594; train + calibrate + measure)</div>
+    <ul>
+      <li><b>Activation extraction.</b> Run an open-weights model; capture intermediate hidden states. Sweep layers/token positions to find where the correctness signal concentrates (probing literature: middle layers retain uncertainty the output discards).</li>
+      <li><b>The probe.</b> A lightweight head (logistic → small MLP) maps selected activations to <code>p(correct)</code>, then temperature/isotonic calibration. We report <b>AUC, ECE, and reliability diagrams</b> — calibration is a first-class metric, not an afterthought.</li>
+      <li><b>Router / cascade.</b> Walk the risk-coverage curve: accept the confident tail, escalate the uncertain middle to a bigger model (or next cascade stage with its own learned accept head), abstain on predicted-wrong. Optimize <b>accuracy at fixed cost</b>.</li>
+      <li><b>Honest baselines.</b> Every claim is measured against self-verbalized confidence, a length/perplexity heuristic, self-consistency (N-sample voting), and semantic entropy — with cost accounted for, because the probe's edge is being a single forward pass.</li>
+    </ul>
+  </section>
+
+  <!-- 4 -->
+  <section id="scope">
+    <div class="sec-head"><span class="sec-num">4</span><h2 class="sec-title">Scope — what "working" means in two weeks</h2></div>
+    <p>Anchor in a domain with <b>automatic correctness</b> (math with checkable answers, code with hidden tests, or QA with a gold set) so the probe has clean labels and the frontier is honestly measurable.</p>
+    <div class="scope">
+      <div class="card mvp">
+        <div class="cap">Minimum shippable — must hit</div>
+        <div class="body">
+          <ul>
+            <li>One open-weights model + one ground-truth dataset; activation extraction pipeline working.</li>
+            <li>A <b>trained probe</b> on a single good layer predicting correctness, with calibration (ECE + reliability diagram).</li>
+            <li>A <b>router</b> that escalates predicted-failures to a big model.</li>
+            <li><b>The headline chart</b> — cost-accuracy frontier: Oracle-routed vs. self-confidence vs. length heuristic vs. always-small / always-big. "Big-model accuracy at a fraction of the cost."</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card amb">
+        <div class="cap">Ambitious — scored on ambition</div>
+        <div class="body">
+          <ul>
+            <li><b>Layer/token sweep + multi-layer fusion</b> — locate and combine the signal across the network.</li>
+            <li><b>Distribution-shift test</b> — train on domain A, test calibration on B. This is the open problem, stated and measured.</li>
+            <li><b>Inline hallucination gate</b> — abstain/flag mid-generation, not just post-hoc routing.</li>
+            <li><b>Multi-stage cascade</b> with learned per-stage accept heads (small → mid → big), beating single-stage routing on cost-at-quality.</li>
+            <li><b>Probe vs. sampling, head-to-head</b> — show internals match/beat self-consistency &amp; semantic entropy at a fraction of the compute.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section id="compelling">
+    <div class="sec-head"><span class="sec-num">5</span><h2 class="sec-title">Why it's compelling — the recruit hook</h2></div>
+    <ul>
+      <li><b>It's an x-ray of the model.</b> "We can look inside an LLM and predict its mistakes before it finishes the sentence" is a magnet for the ML-leaning, internals-curious teammates you want.</li>
+      <li><b>The win is crisp and measurable:</b> a single cost-accuracy curve where your line dominates — <i>"same accuracy, ~40% of the cost"</i> or <i>"catch 90% of hallucinations for one extra forward pass."</i></li>
+      <li><b>Densest AI-engineering credential on the menu.</b> Probing internals, calibration/ECE, selective prediction, routing &amp; cascades — exactly the skills that read as authority to any serious AI team.</li>
+    </ul>
+    <p class="action-title">The 4 bets are the 4 owners</p>
+    <div class="surfaces">
+      <div class="surf"><div class="sn">&#9312; Activations + probe</div><div class="sd">Extraction pipeline, layer/token selection, probe architecture. <b>(Model internals.)</b></div></div>
+      <div class="surf"><div class="sn">&#9313; Calibration + shift</div><div class="sd">ECE/isotonic, reliability diagrams, distribution-shift robustness. <b>(The ML core.)</b></div></div>
+      <div class="surf"><div class="sn">&#9314; Router + cascade</div><div class="sd">Risk-coverage policy, multi-stage accept heads, cost-accuracy optimization. <b>(Decision theory.)</b></div></div>
+      <div class="surf"><div class="sn">&#9315; Datasets + eval + demo</div><div class="sd">Ground-truth tasks, baselines, the frontier chart, the live x-ray UI. <b>(Systems + eval.)</b></div></div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section id="risks">
+    <div class="sec-head"><span class="sec-num">6</span><h2 class="sec-title">Hard parts / risks — the bet and where it breaks</h2></div>
+    <p><b>The bet:</b> a probe on hidden states predicts correctness better-calibrated and far cheaper than asking the model or sampling it — and that calibration transfers across tasks.</p>
+    <table>
+      <thead><tr><th style="width:32%">Risk</th><th>Where it breaks &middot; mitigation</th></tr></thead>
+      <tbody>
+        <tr><td><span class="risk-tag">Transfer / decalibration</span><br>(top risk)</td><td>The probe may decalibrate badly off its training distribution — the named open problem. <b>Mitigation:</b> make the shift experiment a headline deliverable; multi-layer fusion + recalibration on a small target sample; report honestly where it degrades rather than hide it.</td></tr>
+        <tr><td><span class="risk-tag">Must beat sampling at lower cost</span></td><td>If a probe only ties self-consistency, the cost argument is the whole point — so it must be argued with real compute accounting. <b>Mitigation:</b> always plot accuracy <i>per dollar/FLOP</i>, not just accuracy; the probe's one-forward-pass edge is the thesis.</td></tr>
+        <tr><td><span class="risk-tag">Signal may be absent on hard tasks</span></td><td>"Jagged intelligence" — the model may be confidently wrong with no internal tell. <b>Mitigation:</b> choose tasks with headroom; characterize where the probe works vs. fails as a finding, not a failure.</td></tr>
+        <tr><td><span class="risk-tag">Label scarcity</span></td><td>Probe is supervised; needs correctness labels. <b>Mitigation:</b> auto-checkable domains (math/code/QA-with-gold) give cheap labels; semi-supervised extension if time allows.</td></tr>
+        <tr><td><span class="risk-tag">Open-weights dependency</span></td><td>Reading activations needs open models. <b>Mitigation:</b> that's the project's home turf; a closed-model fallback (logits + entropy only) is weaker and noted as such, not relied on.</td></tr>
+        <tr><td><span class="risk-tag">Overfitting the probe</span></td><td>Tiny head can memorize a dataset's quirks. <b>Mitigation:</b> held-out + cross-domain eval, reliability diagrams, and a length/perplexity baseline to prove the probe adds real signal.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 7 -->
+  <section id="demo">
+    <div class="sec-head"><span class="sec-num">7</span><h2 class="sec-title">The live 10-minute showcase (Jun 29)</h2></div>
+    <div class="timeline">
+      <div class="step"><div class="t">0:00 — 1 min · The reframe</div><div class="d">"An LLM often knows it's about to be wrong — in its hidden layers — and then throws that signal away. We read it." One slide, one claim.</div></div>
+      <div class="step"><div class="t">1:00 — 2 min · The x-ray</div><div class="d">A query, the small model's answer, and the Oracle's <code>p(correct)</code> lighting up live. Show the killer case: the model <i>sounds</i> confident, the Oracle flags it — and it's wrong.</div></div>
+      <div class="step"><div class="t">3:00 — 3 min · The frontier</div><div class="d">The cost-accuracy curve — Oracle-routed vs. self-confidence vs. length heuristic vs. always-big. "We reach big-model accuracy at ~40% of the cost." Plus the reliability diagram so calibration is undeniable.</div></div>
+      <div class="step"><div class="t">6:00 — 2 min · Under shift</div><div class="d">Train on domain A, test on B; show calibration holds — or honestly where it degrades. This is the open problem, faced on stage.</div></div>
+      <div class="step"><div class="t">8:00 — 1 min · The cascade</div><div class="d">Small → mid → big with learned accept heads beats single-stage routing on cost-at-quality.</div></div>
+      <div class="step"><div class="t">9:00 — 1 min · The ask</div><div class="d">Four surfaces, four owners — come read the model's mind with us.</div></div>
+    </div>
+  </section>
+
+  <footer>
+    <p><b>Anchored to current discourse (June 2026):</b> pre-call quality prediction &amp; calibration-under-shift as the open routing problem (<a href="https://arxiv.org/html/2603.04445v2">survey 2603.04445</a>); hidden-state hallucination probing (<a href="https://arxiv.org/html/2605.24919">MultiHaluDet 2605.24919</a>, <a href="https://arxiv.org/html/2507.16488">ICR Probe 2507.16488</a>); unified routing &amp; cascading (<a href="https://arxiv.org/pdf/2410.10347">2410.10347</a>); LLM self-confidence is miscalibrated (LLM-as-judge bias, <a href="https://arxiv.org/html/2604.16790v1">2604.16790</a>).</p>
+    <p>Gauntlet Capstone &middot; proposal draft &middot; Jun 15 2026. Companion docs: <code>OVERSIGHT-LAYER-PROPOSAL.html</code> (#1) &middot; <code>CAPSTONE-IDEA-MENU.html</code> (full candidate set).</p>
+  </footer>
+
+</div>
+</body>
+</html>

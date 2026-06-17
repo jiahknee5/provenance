@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Oversight Layer — Capstone Proposal</title>
+<style>
+  :root{
+    --navy:#0a2540;--navy-2:#102a43;--slate:#334e68;--slate-2:#486581;--muted:#627d98;
+    --line:#d9e2ec;--line-soft:#eef2f6;
+    --blue-1:#eff6ff;--blue-2:#dbeafe;--blue-3:#93c5fd;--blue-4:#3b82f6;--blue-5:#1d4ed8;--blue-6:#1e40af;
+    --bg:#ffffff;--paper:#f7f9fc;--amber:#b45309;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--navy-2);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:900px;margin:0 auto;padding:0 28px 96px;}
+  a{color:var(--blue-5);}
+
+  header.mast{background:var(--navy);color:#fff;padding:56px 0 44px;border-bottom:4px solid var(--blue-4);}
+  header.mast .wrap{padding-bottom:0;}
+  .kicker{text-transform:uppercase;letter-spacing:.18em;font-size:12px;font-weight:600;color:var(--blue-3);margin:0 0 14px;}
+  h1.title{font-size:40px;line-height:1.1;margin:0 0 12px;font-weight:700;letter-spacing:-.01em;}
+  .tagline{font-size:18px;color:#c9d8e8;margin:0 0 22px;max-width:700px;}
+  .tagline em{color:#fff;font-style:italic;}
+  .thesis{font-size:15px;color:#e6eef7;background:rgba(255,255,255,.06);border-left:3px solid var(--blue-4);
+    padding:14px 18px;border-radius:0 6px 6px 0;max-width:780px;}
+  .thesis b{color:#fff;}
+  .meta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px;}
+  .chip{font-size:12px;font-weight:600;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);
+    color:#dbeafe;padding:6px 12px;border-radius:999px;}
+
+  /* reframe / spiky POV */
+  .reframe{background:#fff;border:1px solid var(--line);border-top:4px solid var(--blue-5);border-radius:8px;
+    padding:22px 24px;margin:32px 0 8px;box-shadow:0 1px 2px rgba(10,37,64,.04);}
+  .reframe h3{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--slate-2);}
+  .reframe .big{font-size:19px;font-weight:700;color:var(--navy);margin:0 0 8px;letter-spacing:-.01em;}
+  .reframe p{margin:0;font-size:14.5px;color:var(--slate);}
+  .reframe .ratio{background:var(--blue-1);border:1px solid var(--blue-2);border-radius:6px;padding:10px 14px;margin-top:12px;font-size:14px;color:var(--navy-2);}
+  .reframe .ratio b{color:var(--blue-6);}
+
+  section{margin-top:44px;}
+  .sec-head{display:flex;align-items:baseline;gap:14px;border-bottom:2px solid var(--navy);padding-bottom:10px;margin-bottom:6px;}
+  .sec-num{flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:var(--blue-5);color:#fff;
+    font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;transform:translateY(2px);}
+  .sec-title{font-size:22px;font-weight:700;color:var(--navy);margin:0;letter-spacing:-.01em;}
+  .action-title{font-size:16px;color:var(--blue-6);font-weight:600;margin:14px 0 4px;}
+  p{font-size:15px;color:var(--slate);}
+  strong{color:var(--navy-2);}
+  ul{padding-left:0;list-style:none;margin:10px 0;}
+  ul li{position:relative;padding-left:22px;margin:9px 0;font-size:15px;color:var(--slate);}
+  ul li::before{content:"";position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:2px;background:var(--blue-4);}
+  li b, li strong{color:var(--navy-2);}
+  code{background:var(--line-soft);padding:1px 5px;border-radius:4px;font-size:13px;color:var(--navy-2);}
+
+  .diagram{background:var(--navy);color:#dbeafe;border-radius:8px;padding:22px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.5;
+    overflow-x:auto;white-space:pre;margin:16px 0;border:1px solid #1c3a5e;}
+  .diagram .hl{color:#fff;font-weight:700;}
+  .diagram .dim{color:#7da2c4;}
+  .diagram .ok{color:#86efac;}
+  .diagram .warn{color:#fcd34d;}
+  .diagram .bad{color:#fca5a5;}
+
+  .reco{background:var(--blue-1);border:1px solid var(--blue-2);border-radius:8px;padding:18px 22px;margin:14px 0;}
+  .reco .badge{display:inline-block;background:var(--blue-5);color:#fff;font-size:11px;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:5px;margin-bottom:10px;}
+  .reco p{margin:0;color:var(--navy-2);}
+
+  .scope{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:10px;}
+  .scope .card{border:1px solid var(--line);border-radius:8px;background:#fff;overflow:hidden;}
+  .scope .card .cap{padding:10px 16px;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#fff;}
+  .scope .mvp .cap{background:var(--slate-2);}
+  .scope .amb .cap{background:var(--blue-5);}
+  .scope .card .body{padding:6px 16px 14px;}
+  .scope ul li{font-size:14px;}
+
+  table{border-collapse:collapse;width:100%;margin:12px 0;font-size:14px;}
+  th{text-align:left;background:var(--navy);color:#fff;font-weight:600;padding:10px 14px;font-size:12.5px;letter-spacing:.03em;text-transform:uppercase;}
+  td{padding:11px 14px;border-bottom:1px solid var(--line);color:var(--slate);vertical-align:top;}
+  tr:nth-child(even) td{background:var(--blue-1);}
+  td b{color:var(--navy-2);}
+  .risk-tag{color:var(--blue-6);font-weight:700;}
+
+  .surfaces{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px;}
+  .surf{border:1px solid var(--line);border-radius:8px;background:#fff;padding:12px 15px;}
+  .surf .sn{font-size:12px;font-weight:700;color:var(--blue-6);letter-spacing:.04em;}
+  .surf .sd{font-size:14px;color:var(--slate);margin-top:3px;}
+  .surf .sd b{color:var(--navy-2);}
+
+  .timeline{margin-top:14px;border-left:2px solid var(--blue-3);}
+  .step{position:relative;padding:0 0 18px 30px;margin-left:8px;}
+  .step::before{content:"";position:absolute;left:-7px;top:3px;width:12px;height:12px;border-radius:50%;
+    background:var(--blue-5);border:2px solid #fff;box-shadow:0 0 0 2px var(--blue-3);}
+  .step .t{font-size:12px;font-weight:700;color:var(--blue-6);letter-spacing:.04em;}
+  .step .d{font-size:15px;color:var(--slate);margin-top:2px;}
+  .step .d b{color:var(--navy-2);}
+
+  footer{margin-top:54px;padding-top:22px;border-top:2px solid var(--navy);font-size:13px;color:var(--muted);}
+  footer b{color:var(--navy-2);}
+  footer a{color:var(--slate-2);}
+  @media (max-width:680px){.scope,.surfaces{grid-template-columns:1fr;}h1.title{font-size:30px;}}
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <p class="kicker">Gauntlet Capstone &middot; Proposal &middot; Showcase Jun 29</p>
+    <h1 class="title">The Oversight Layer</h1>
+    <p class="tagline">One shared agent does the work. The team only <em>verifies</em>. We build the model that makes "only verify" actually scale.</p>
+    <p class="thesis">
+      <b>Thesis.</b> An agentic org's ceiling isn't how smart the agent is — it's how much of its output one human can safely <i>trust</i>. "Verification is the new bottleneck" (Karpathy). We train a <b>calibrated risk model</b> that triages every agent action into <b>auto-approve / human-review / block</b>, so one verifier can safely cover many agents. The unit of progress isn't model IQ — it's the <b>oversight ratio</b>.
+    </p>
+    <div class="meta-row">
+      <span class="chip">Direction B · rethink agents</span>
+      <span class="chip">ML + LLM under the hood</span>
+      <span class="chip">4 ownable surfaces</span>
+      <span class="chip">Scored on ambition</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="reframe">
+    <h3>The reframe (the spiky POV)</h3>
+    <p class="big">We're measuring agents wrong.</p>
+    <p>Every benchmark scores <i>capability</i> — can the agent do the task? But the brief's own question is the real one: <b>could a company run through one shared agent, with the team just verifying it?</b> That fails today not because agents are dumb, but because <b>verification doesn't scale</b> — a human babysitting a swarm goes careless, and the agent can't tell you which of its outputs to distrust (its self-reported confidence is miscalibrated). Capability is commoditizing. <b>Trusted throughput is the bottleneck.</b></p>
+    <div class="ratio"><b>The oversight ratio</b> — how many agents one verifier can safely cover at a fixed error budget &epsilon; — is the metric we optimize, and the thing nobody is building a model for.</div>
+  </div>
+
+  <!-- 1 -->
+  <section id="problem">
+    <div class="sec-head"><span class="sec-num">1</span><h2 class="sec-title">The problem — and why it's technically hard</h2></div>
+    <p>"Let one agent do the work and have humans verify" only works if verification is cheap and reliable. It is neither. Making it both is a stack of genuinely hard problems:</p>
+    <ul>
+      <li><b>Calibration under distribution shift.</b> The gate must output <i>calibrated</i> probabilities (low ECE), not just rank-order — a 0.8 must mean 0.8 — and stay calibrated as tasks drift. LLM self-verbalized confidence is documented to be poorly calibrated and to collapse under shift, so we can't just ask the agent.</li>
+      <li><b>No ground truth at decision time.</b> We're predicting "is this output wrong?" <i>before</i> we know the answer. That's selective prediction (classification with a reject option), and its whole value is in the regime where you <b>can't</b> check — so the calibration learned where you can check has to transfer to where you can't.</li>
+      <li><b>The human is in the loop and degrades.</b> Reviewer accuracy drops with volume (automation complacency). The triage must respect a human attention budget and route to maximize caught-errors at that budget — an oversight-economics optimization, not a plain classifier.</li>
+      <li><b>Cost-sensitive, not symmetric.</b> A wrong typo and a wrong <code>rm -rf</code> are not the same error. The gate must weight predicted-error by <b>blast radius</b> (reversibility, money, prod, external comms) — the agent equivalent of the "lethal trifecta."</li>
+      <li><b>Scarce, expensive labels.</b> Every human verdict is a costly label. To improve, the system must ask for labels where they're most informative (active learning) and retrain online without destabilizing calibration.</li>
+    </ul>
+    <p>Ambition lives in turning "humans verify the agent" from a slogan into a measurable, calibrated control system — and reporting the oversight ratio it buys.</p>
+  </section>
+
+  <!-- 2 -->
+  <section id="direction">
+    <div class="sec-head"><span class="sec-num">2</span><h2 class="sec-title">Project direction</h2></div>
+    <div class="reco">
+      <span class="badge">Primary fit · Direction B</span>
+      <p><b>A philosophically different take on agents.</b> We don't add another agent or a better prompt — we invert the org: the agent is the worker, the humans are a <i>verification function</i>, and the AI primitive is the model that allocates scarce human attention across a stream of agent work. It is the literal build-out of the brief's own example, made rigorous.</p>
+    </div>
+    <p class="action-title">…with a real ML + LLM core (it qualifies for A too)</p>
+    <ul>
+      <li>The gate is a <b>trained, calibrated risk model</b> that fuses classical-ML signals (a probe on the LLM's hidden states, OOD/novelty scores, a structured blast-radius model) with LLM-derived signals (judge-ensemble disagreement, semantic entropy). Classical ML does what the LLM can't — <i>know when it's wrong</i> — and the LLM does the work. Neither alone is the product.</li>
+      <li><b>Why not "one problem, many ways" (C)?</b> We do compare signal sources, but the project's spine is the inverted org + the calibrated control loop, not a method bake-off. Lead with B.</li>
+    </ul>
+  </section>
+
+  <!-- 3 -->
+  <section id="approach">
+    <div class="sec-head"><span class="sec-num">3</span><h2 class="sec-title">AI is the primitive, not a bolt-on</h2></div>
+    <p>The tell: <b>delete the risk model and the whole premise collapses</b> — "verify everything by hand" is just slower than doing the work yourself. The model that decides <i>what a human must look at</i> is the entire product. The human sets the error budget; the model spends their attention optimally.</p>
+    <div class="diagram">                  <span class="dim">&#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472; active-learning loop &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9484;</span>
+                  <span class="dim">&#9474;</span>                                                       <span class="dim">&#9474;</span>
+ agent output &#9472;&#9658; <span class="hl">SIGNAL EXTRACTORS</span> &#9472;&#9658; <span class="hl">CALIBRATED RISK MODEL</span> &#9472;&#9658; <span class="hl">TRIAGE POLICY</span> &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9510;
+ stream          &#8226; hidden-state probe   p(correct), low ECE     (risk-coverage         <span class="ok">&#9658; AUTO-APPROVE</span> &#9658; ship
+ (1 shared       &#8226; judge-ensemble var.  + E[cost &times; blast-radius]  + attention budget)   <span class="warn">&#9658; HUMAN REVIEW</span> &#9658; verdict &#9472;&#9510;
+  agent,         &#8226; semantic entropy                                                  <span class="bad">&#9658; BLOCK / REPAIR</span> &#9658; agent  <span class="dim">&#9474;</span>
+  N tasks)       &#8226; blast-radius score                                                                          <span class="dim">&#9474;</span>
+                 &#8226; OOD / novelty            scarce human verdicts &#9472;&#9472;&#9472; retrain (uncertainty sampling) &#9668;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;</div>
+    <ul>
+      <li><b>Signal extractors.</b> Per agent output, compute a feature vector: a probe on intermediate hidden states (open model), variance across a diverse-family LLM-judge ensemble, semantic entropy from N samples, an OOD/novelty score vs. the training distribution, and a structured <b>blast-radius</b> score (reversible? touches prod/money/external comms?).</li>
+      <li><b>Calibrated risk model.</b> A small supervised model maps those features to a calibrated <code>p(correct)</code> (temperature/isotonic calibration; we report ECE + reliability diagrams, not just AUC) and an expected <b>cost of error</b> = (1 − p) × blast-radius.</li>
+      <li><b>Triage policy.</b> Given the human's remaining attention budget, choose the lane that maximizes caught-error value — formally walking the <b>risk-coverage curve</b>: auto-approve the safe high-confidence tail, escalate the uncertain/high-blast-radius middle, block the predicted-dangerous.</li>
+      <li><b>Active-learning loop.</b> Human verdicts are the labels. We request them where the model is most uncertain, retrain, and watch calibration improve as the team works — the gate gets sharper the more it's used.</li>
+    </ul>
+  </section>
+
+  <!-- 4 -->
+  <section id="scope">
+    <div class="sec-head"><span class="sec-num">4</span><h2 class="sec-title">Scope — what "working" means in two weeks</h2></div>
+    <p>We anchor in one domain with <b>automatically checkable ground truth</b> (e.g., code-fix tasks with hidden tests, or structured extraction against a gold set) so we can train and <i>honestly measure</i> calibration — then probe whether it transfers to where you can't check.</p>
+    <div class="scope">
+      <div class="card mvp">
+        <div class="cap">Minimum shippable — must hit</div>
+        <div class="body">
+          <ul>
+            <li>One shared agent runs a <b>real task stream</b> in the ground-truth domain.</li>
+            <li>Risk model fusing <b>2–3 signals</b> (judge-ensemble disagreement + semantic entropy + blast-radius) into a calibrated <code>p(correct)</code>.</li>
+            <li>A <b>triage UI</b>: outputs sorted into auto-approve / review / block; the human reviews only what's flagged.</li>
+            <li><b>The headline chart</b> — caught-error rate vs. % human-reviewed — beating self-confidence and random baselines, plus a reliability diagram (calibration).</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card amb">
+        <div class="cap">Ambitious — scored on ambition</div>
+        <div class="body">
+          <ul>
+            <li><b>Hidden-state probe</b> added (open-weights model) — the internals signal self-confidence throws away.</li>
+            <li><b>Active learning, live</b> — human verdicts retrain the gate; ECE visibly drops over the session.</li>
+            <li><b>The oversight-ratio curve</b> — "1 verifier safely covers N agents at error budget &epsilon;," the money chart.</li>
+            <li><b>Transfer probe</b> — train where truth is checkable, test calibration in a domain where it isn't. This is the whole bet, stated honestly.</li>
+            <li><b>Cost-sensitive triage</b> — blast-radius-weighted "block the irreversible" lane.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section id="compelling">
+    <div class="sec-head"><span class="sec-num">5</span><h2 class="sec-title">Why it's compelling — the recruit hook</h2></div>
+    <ul>
+      <li><b>It's the conversation everyone is having.</b> Nobody trusts a swarm of agents. "We're building the layer that lets one person safely supervise ten agents" recruits itself — and it's the brief's own headline question, answered.</li>
+      <li><b>Spiky, defensible POV:</b> <i>"Capability is commoditizing; trusted throughput is the bottleneck. We don't measure model IQ — we measure the oversight ratio, and we move it."</i> Memorable to judges and recruits alike.</li>
+      <li><b>It demos like a control room</b> — watch a stream of agent work flow through the gate, watch the dangerous one get blocked with a <i>reason</i>, watch the review queue shrink as the gate learns. People want to be on stage for that.</li>
+    </ul>
+    <p class="action-title">The 4 bets are the 4 owners</p>
+    <div class="surfaces">
+      <div class="surf"><div class="sn">&#9312; Signal extractors</div><div class="sd">Hidden-state probe + judge ensemble + semantic entropy + blast-radius scorer. <b>(ML + LLM internals.)</b></div></div>
+      <div class="surf"><div class="sn">&#9313; Risk model + active learning</div><div class="sd">Calibration (ECE/isotonic), selective prediction, the retrain loop. <b>(The ML core.)</b></div></div>
+      <div class="surf"><div class="sn">&#9314; Triage policy + oversight economics</div><div class="sd">Risk-coverage curve, attention-budget model, the oversight-ratio sim. <b>(Decision theory.)</b></div></div>
+      <div class="surf"><div class="sn">&#9315; Agent harness + UI + eval</div><div class="sd">The shared agent, the triage control room, the demo + benchmark plumbing. <b>(Systems + product.)</b></div></div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section id="risks">
+    <div class="sec-head"><span class="sec-num">6</span><h2 class="sec-title">Hard parts / risks — the bet and where it breaks</h2></div>
+    <p><b>The bet:</b> a trained, calibrated risk model lets one human safely vouch for far more agent output than reading it all — and the calibration learned where truth is checkable transfers to where it isn't.</p>
+    <table>
+      <thead><tr><th style="width:32%">Risk</th><th>Where it breaks &middot; mitigation</th></tr></thead>
+      <tbody>
+        <tr><td><span class="risk-tag">Calibration is the whole game</span><br>(top risk)</td><td>If <code>p(correct)</code> isn't calibrated, the triage is arbitrary. <b>Mitigation:</b> temperature/isotonic calibration; report ECE + reliability diagrams, not just AUC; anchor in a ground-truth domain so calibration is measurable, not assumed.</td></tr>
+        <tr><td><span class="risk-tag">Does it transfer off-ground-truth?</span></td><td>The value is triaging where you can't check; if calibration doesn't transfer from the checkable domain, the claim weakens. <b>Mitigation:</b> make the transfer experiment a first-class deliverable; report transfer lift vs. nothing; be honest about the gap rather than hide it.</td></tr>
+        <tr><td><span class="risk-tag">The human-degradation model</span></td><td>The oversight-ratio curve depends on how reviewer accuracy decays with load — a modeling assumption judges will poke. <b>Mitigation:</b> ground it in automation-complacency literature + a small real human-in-the-loop trial; present as a sensitivity range, not a point.</td></tr>
+        <tr><td><span class="risk-tag">The agent games the gate</span></td><td>If the agent learns the gate's signals, it can reward-hack them (the RLVR failure mode). <b>Mitigation:</b> keep some signals hidden from the agent; flag adversarial robustness as scoped future work, not a solved claim.</td></tr>
+        <tr><td><span class="risk-tag">Label scarcity / cold-start</span></td><td>Little labeled "was this wrong?" data at the start. <b>Mitigation:</b> bootstrap from the auto-checkable domain; uncertainty-sampling active learning for the rest.</td></tr>
+        <tr><td><span class="risk-tag">Hidden-state access</span></td><td>Probing internals needs open weights. <b>Mitigation:</b> MVP runs entirely on closed models via judge/entropy/blast-radius; the probe is an ambitious-tier add, not a dependency.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 7 -->
+  <section id="demo">
+    <div class="sec-head"><span class="sec-num">7</span><h2 class="sec-title">The live 10-minute showcase (Jun 29)</h2></div>
+    <div class="timeline">
+      <div class="step"><div class="t">0:00 — 1 min · The reframe</div><div class="d">"We measure agents wrong. The bottleneck isn't capability — it's how much output one human can safely trust. Meet the oversight ratio." One sentence, one slide.</div></div>
+      <div class="step"><div class="t">1:00 — 2 min · The control room</div><div class="d">A live stream of agent outputs flows through the gate into auto-approve / review / block. Click the blocked one &rarr; see <b>why</b>: low <code>p(correct)</code>, high blast-radius, judges disagree.</div></div>
+      <div class="step"><div class="t">3:00 — 3 min · The headline metric</div><div class="d">Caught-error rate vs. % reviewed — our gate vs. self-confidence vs. random. "We catch ~90% of errors while sending ~20% to a human." Show the reliability diagram so calibration is undeniable.</div></div>
+      <div class="step"><div class="t">6:00 — 2 min · It learns</div><div class="d">Feed human verdicts back; watch ECE drop and the review queue shrink over the session — active learning, live.</div></div>
+      <div class="step"><div class="t">8:00 — 1 min · The money chart</div><div class="d">The oversight-ratio curve: "1 verifier safely covers N agents at error budget &epsilon;" — and the transfer result, stated honestly.</div></div>
+      <div class="step"><div class="t">9:00 — 1 min · The ask</div><div class="d">Four surfaces, four owners — come build the trust layer for agents. The spiky line lands again.</div></div>
+    </div>
+  </section>
+
+  <footer>
+    <p><b>Anchored to current discourse (June 2026):</b> verification-as-bottleneck (Karpathy, Sequoia Ascent 2026); benchmark-gaming (<a href="https://rdi.berkeley.edu/blog/trustworthy-benchmarks-cont/">Berkeley RDI</a>); LLM-judge unreliability (<a href="https://arxiv.org/html/2604.16790v1">arXiv 2604.16790</a>); hidden-state hallucination probing (<a href="https://arxiv.org/html/2605.24919">2605.24919</a>); pre-call quality prediction &amp; calibration (<a href="https://arxiv.org/html/2603.04445v2">routing survey 2603.04445</a>); RLVR reward-hacking (<a href="https://arxiv.org/abs/2604.15149">2604.15149</a>).</p>
+    <p>Gauntlet Capstone &middot; proposal draft &middot; Jun 15 2026. Companion docs: <code>CAPSTONE-IDEA-MENU.html</code> (the full candidate set) &middot; <code>SELF-COMPILING-FUNNEL-PROPOSAL.html</code> (the hedge).</p>
+  </footer>
+
+</div>
+</body>
+</html>
