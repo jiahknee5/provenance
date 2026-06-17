@@ -19,6 +19,7 @@ Best initial sources:
 2. YouTube for public creator/teaching signals if the person supplies a channel.
 3. Personal websites, blogs, portfolios, resumes, and package registries when supplied by the participant.
 4. LinkedIn as self-attested/OIDC identity and a user-provided URL, not as open enrichment.
+5. Clay as a workflow/orchestration layer for enrichment experiments, not as the authoritative record.
 
 Avoid for candidate matching:
 
@@ -40,6 +41,86 @@ Avoid for candidate matching:
 | Instagram | Business Discovery can provide basic metadata/metrics about other Instagram professional accounts. Instagram APIs focus on businesses/creators managing their own presence. | Instagram professional account, Facebook/Instagram login, permissions, app review. | Usually not relevant unless a candidate is explicitly applying as a creator/community builder and supplies a professional account. | Not a general personal-profile enrichment source. Instagram Basic Display API has been deprecated. Avoid for MVP. |
 | Personal site / blog / portfolio | Public pages, projects, resume, case studies, writing, contact links. | User-provided URL; fetch with normal HTTP and respect robots/terms. | High-signal evidence when cited: artifacts, technical writing, project depth. | Requires identity resolution and freshness checks. Do not collect hidden or non-public pages. |
 | Package registries / technical communities | Public packages, maintainership, project metadata, docs, releases, public profile pages. | Public APIs/pages, ideally user-supplied handles. | Evidence of shipping/maintaining software. | Needs source-specific policy checks before production. Treat as phase 2. |
+| Clay | Enrichment workflows, waterfall enrichment across providers, AI web research, table webhooks, HTTP API calls, and exports back to downstream tools. | Clay account plus any connected enrichment-provider accounts/credits. | Fast prototyping of candidate research tables, source discovery, enrichment QA, and manual review workflows. | Clay outputs still need source URLs, consent basis, provider attribution, and human review before becoming Provenance claims. Do not treat Clay's compiled person data as automatically verified or permissible. |
+
+## Trend Vector Approach
+
+The useful signal is not a one-off fact like "has X followers." The useful signal is a cited trend vector: how a candidate's public/provided work appears to be moving over time.
+
+Program-relevant trend dimensions:
+
+- Topic momentum: repeated or increasing public work around AI agents, evals, product, growth, security, infrastructure, design, or another program-relevant theme.
+- Artifact velocity: recent public shipping cadence across repos, demos, essays, videos, packages, prototypes, talks, or portfolios.
+- Depth trajectory: signs that work is becoming more technical, more productized, more user-facing, or more rigorous.
+- Collaboration pattern: solo builder, open-source contributor, maintainer, teammate, community teacher, operator, or founder-like pattern.
+- Communication style: long-form writing, technical documentation, demos, tutorials, concise social updates, public learning logs.
+- Evidence diversity: whether the same claim is supported across GitHub, personal site, LinkedIn, YouTube, and first-party Gauntlet data.
+- Recency and consistency: whether activity is current, stale, seasonal, or newly accelerating.
+
+Do not encode trend dimensions that are sensitive or proxy-sensitive:
+
+- Protected-class traits or likely proxies.
+- Politics, religion, health, disability, family status, immigration status, age, sexuality, race, gender, national origin, financial distress, or mental health.
+- Personality labels like "unstable," "low conscientiousness," "desperate," or "not culture fit."
+- Private-life judgments from social media tone, photos, likes, follows, or friend networks.
+
+Represent the vector as derived claims with linked evidence:
+
+```json
+{
+  "candidate_id": "uuid",
+  "trend_vector_version": "2026-06-17",
+  "dimensions": [
+    {
+      "name": "topic_momentum",
+      "value": "agentic_ai_increasing",
+      "confidence": "medium",
+      "evidence_claim_ids": ["claim_123", "claim_456"],
+      "explanation": "Three public artifacts in the last 90 days reference agent workflows or evals."
+    },
+    {
+      "name": "artifact_velocity",
+      "value": "recent_builder_activity",
+      "confidence": "high",
+      "evidence_claim_ids": ["claim_789"],
+      "explanation": "Public repo and portfolio activity show recent shipped work."
+    }
+  ],
+  "excluded_dimensions": [
+    "protected_traits",
+    "health",
+    "politics",
+    "family_status",
+    "financial_distress"
+  ],
+  "decision_use": "assistive_only"
+}
+```
+
+The Gate should evaluate both the raw evidence claims and the derived trend-vector claims. A trend is only usable if a reviewer can inspect the sources and understand why the label exists.
+
+## Clay Fit
+
+Clay is worth testing because it can accelerate the intake/enrichment bench without forcing us to build every connector first.
+
+Potential Clay workflow:
+
+1. Seed a Clay table from Tom export plus participant-submitted URLs.
+2. Use Clay waterfalls to find or verify professional profile URLs, company data, public social links, GitHub URLs, and other non-sensitive identifiers.
+3. Use Claygent/AI research only against approved public URLs or user-submitted handles.
+4. Export structured rows back to Provenance through webhooks, HTTP API calls, CSV, or a reviewed import.
+5. Convert Clay outputs into Provenance claims with `source`, `provider`, `evidence_url`, `observed_at`, `consent_basis`, and `review_status`.
+
+Clay should not own:
+
+- Candidate consent.
+- Claim truth.
+- Source permissibility.
+- Selection decisions.
+- Sensitive-trait filtering.
+- The final system of record.
+
+Clay is best treated as the research workbench. Provenance remains the ledger, Gate, audit trail, and human-review surface.
 
 ## Data Contract Shape
 
@@ -58,12 +139,13 @@ Every imported signal should become an evidence-backed claim:
   "observed_at": "2026-06-17T00:00:00Z",
   "collection_method": "official_api",
   "consent_basis": "participant_supplied_handle",
+  "provider": null,
   "confidence": "high",
   "decision_use": "assistive_only"
 }
 ```
 
-Keep raw third-party data minimal. Prefer normalized claims plus source URLs, timestamps, and the original field values needed to re-check the claim.
+Keep raw third-party data minimal. Prefer normalized claims plus source URLs, timestamps, provider attribution, and the original field values needed to re-check the claim.
 
 ## Intake Implications
 
@@ -75,6 +157,7 @@ Ask participants to provide:
 - Personal website, portfolio, resume, blog, package registry handles.
 - YouTube channel only if relevant to their application.
 - Explicit consent checkbox for fetching public data from submitted handles.
+- Optional permission to run submitted links through Clay or equivalent enrichment tooling, with a clear correction path.
 
 Do not ask for Facebook, Instagram, or X as required fields. If included, make them optional free-form links and do not use them for eligibility ranking in the MVP.
 
@@ -86,6 +169,7 @@ Use collected data to:
 - Surface candidate strengths with citations.
 - Suggest program tracks or mentor matches.
 - Let humans inspect the evidence behind a recommendation.
+- Build transparent trend vectors that summarize cited behavior over time.
 
 Do not use collected data to:
 
@@ -93,6 +177,7 @@ Do not use collected data to:
 - Infer protected or sensitive traits.
 - Score personality, mental health, family status, political/religious views, disability, age, race, sex, national origin, or similar attributes.
 - Produce unreviewed background reports for employment-style decisions.
+- Use Clay or any enrichment provider to bypass consent, source policy, or human review.
 
 ## Compliance Notes
 
@@ -129,6 +214,11 @@ For Provenance, that means:
 - Instagram Business Discovery: https://developers.facebook.com/docs/instagram-platform/instagram-api-with-facebook-login/business-discovery/
 - Instagram Platform changelog: https://developers.facebook.com/docs/instagram-platform/changelog/
 - Meta Developer Policies: https://developers.facebook.com/devpolicy/
+- Clay waterfalls: https://university.clay.com/docs/building-a-data-waterfall
+- Claygent builder: https://university.clay.com/docs/claygent-builder
+- Clay webhooks: https://university.clay.com/docs/webhook-integration-guide
+- Clay HTTP API: https://university.clay.com/docs/http-api-integration-overview
+- Clay actions and data credits: https://university.clay.com/docs/actions-data-credits
 - FTC on FCRA and social media: https://www.ftc.gov/business-guidance/blog/2011/06/fair-credit-reporting-act-social-media-what-businesses-should-know
 - FTC on employment background screeners and FCRA: https://www.ftc.gov/business-guidance/resources/what-employment-background-screening-companies-need-know-about-fair-credit-reporting-act
 - CFPB Circular 2024-06 on background dossiers and algorithmic scores: https://www.consumerfinance.gov/compliance/circulars/consumer-financial-protection-circular-2024-06-background-dossiers-and-algorithmic-scores-for-hiring-promotion-and-other-employment-decisions/
