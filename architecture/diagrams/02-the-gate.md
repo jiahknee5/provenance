@@ -62,7 +62,7 @@ sequenceDiagram
   NLI->>Cal: entailment + ensemble scores
   Cal->>Rules: calibrated entailment confidence
   Rules->>Cas: permit · block · needs-disclaimer
-  Cas->>Cas: cheap checks first; escalate uncertain
+  Cas->>Cas: cheap checks first, escalate uncertain
   Cas->>Led: verdict per claim
   Led-->>Draft: green cite · amber repair · red block
 ```
