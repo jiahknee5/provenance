@@ -47,13 +47,11 @@ How it maps to Provenance:
 6. Route uncertain or high-impact claims to human review.
 7. Let Gate/Assurance decide what can be used in personalization or recommendations.
 
-## Architecture Implications
+## Architecture Ideas
 
-- Keep front-end intake and the candidate profile ledger in our scope.
-- Treat Gate, Optimizer, Drift, and Assurance as bounded services/contracts, not UI-owned internals.
-- Design the intake schema so it can later run on the VPS as separate jobs or services.
-- Do not block the demo on deployment, but avoid choices that make deployment hard later.
-- Preserve raw-source references and timestamps so Drift can re-check stale claims.
+Architecture patterns worth borrowing are split into a separate partner-review document:
+
+- [architecture-ideas-from-prior-projects.md](./architecture-ideas-from-prior-projects.md)
 
 ## Candidate Research Implications
 
