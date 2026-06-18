@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mikhail Research: What We Can Use for Provenance</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --ink: #17202a;
+      --muted: #5f6b7a;
+      --line: #d9dee7;
+      --accent: #275edb;
+      --green: #0f7a4f;
+      --amber: #a66300;
+      --red: #a43131;
+      --blue-soft: #e9efff;
+      --green-soft: #e8f5ef;
+      --amber-soft: #fff4df;
+      --red-soft: #fdecec;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 18px;
+      line-height: 1.45;
+    }
+
+    header {
+      padding: 32px 44px 24px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(34px, 3.2vw, 56px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 0;
+      max-width: 1100px;
+      color: var(--muted);
+      font-size: clamp(18px, 1.4vw, 24px);
+    }
+
+    main {
+      padding: 28px 44px 56px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px 20px;
+    }
+
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 19px;
+      color: var(--accent);
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(20, 30, 45, 0.06);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1280px;
+    }
+
+    th, td {
+      padding: 16px 18px;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid var(--line);
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #eef2f7;
+      color: #283241;
+      font-size: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    td:first-child {
+      width: 20%;
+      font-weight: 700;
+    }
+
+    td:nth-child(2) { width: 25%; }
+    td:nth-child(3) { width: 35%; }
+    td:nth-child(4) { width: 20%; }
+
+    .tag {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .now { color: var(--green); background: var(--green-soft); }
+    .optional { color: var(--amber); background: var(--amber-soft); }
+    .later { color: var(--accent); background: var(--blue-soft); }
+    .avoid { color: var(--red); background: var(--red-soft); }
+
+    .section-title {
+      margin: 34px 0 14px;
+      font-size: clamp(26px, 2vw, 34px);
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    @media (max-width: 900px) {
+      header, main { padding-left: 20px; padding-right: 20px; }
+      .summary { grid-template-columns: 1fr; }
+      body { font-size: 16px; }
+    }
+
+    @media print {
+      body { background: white; }
+      header, main { padding: 18px; }
+      .table-wrap { box-shadow: none; }
+      th { position: static; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>What Mikhail's Research Can Usefully Add to Provenance</h1>
+    <p class="subtitle">
+      PM-aligned readout: keep our work focused on front-end intake, the claim ledger,
+      evidence review, and safe initial data collection. Enrichment is useful only after it
+      becomes a cited Provenance claim.
+    </p>
+  </header>
+
+  <main>
+    <section class="summary" aria-label="Summary">
+      <div class="card">
+        <h2>Core framing</h2>
+        <p>We are not building a dossier engine. We are building the front end and intake layer for a provenance ledger.</p>
+      </div>
+      <div class="card">
+        <h2>Reusable primitive</h2>
+        <p>Every external signal becomes a cited, reviewable claim before it influences copy, recommendations, or scoring.</p>
+      </div>
+      <div class="card">
+        <h2>Near-term lane</h2>
+        <p>Claim ledger UI, evidence inspection, review queue, email preview, and optional import review.</p>
+      </div>
+    </section>
+
+    <h2 class="section-title">Research Use Table</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Research item</th>
+            <th>Use for this project</th>
+            <th>How we use it</th>
+            <th>Priority</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Claim ledger as first-class model</td>
+            <td>Core product surface</td>
+            <td>Show every generated, repaired, blocked, or enriched claim with source, evidence, status, and decision reason. This maps directly to the PRD.</td>
+            <td><span class="tag now">Use now</span></td>
+          </tr>
+          <tr>
+            <td>Evidence-backed import contract</td>
+            <td>Initial data collection</td>
+            <td>Any Linkt, Clay, GitHub, GitLab, or manual import becomes a normalized claim with source, evidence URL, observed timestamp, provider, review status, and decision use.</td>
+            <td><span class="tag now">Use now</span></td>
+          </tr>
+          <tr>
+            <td>Review-state lifecycle</td>
+            <td>Front-end workflow</td>
+            <td>Use states like draft, needs_review, approved, rejected, stale, and superseded for claims and enriched facts. Better than a single valid boolean.</td>
+            <td><span class="tag now">Use now</span></td>
+          </tr>
+          <tr>
+            <td>Machine suggestion plus human review</td>
+            <td>Operator UX</td>
+            <td>Let enrichment suggest claims or trend labels, but high-impact or ambiguous claims require human review before influencing generated copy.</td>
+            <td><span class="tag now">Use now</span></td>
+          </tr>
+          <tr>
+            <td>Cost/certainty ordered pipeline</td>
+            <td>Data collection architecture</td>
+            <td>Do identity, consent, and source checks first; official APIs second; Clay, Linkt, and AI research last. Cheap and reliable before expensive and fuzzy.</td>
+            <td><span class="tag now">Use now</span></td>
+          </tr>
+          <tr>
+            <td>Mailpit/test email server</td>
+            <td>Email MVP support</td>
+            <td>Capture demo emails, magic links, and claim-ledger email events without sending real mail. Useful for our front-end demo lane.</td>
+            <td><span class="tag now">Use now</span></td>
+          </tr>
+          <tr>
+            <td>Legal-hold/operator controls</td>
+            <td>Demo interaction</td>
+            <td>Build UI that makes a legal hold visible: claim flips, ledger updates, and email or website copy blocks the claim.</td>
+            <td><span class="tag now">Use now</span></td>
+          </tr>
+          <tr>
+            <td>Linkt</td>
+            <td>B2B demo enrichment</td>
+            <td>Best for Helix-style company/prospect enrichment, account signals, CSV ingest, and webhooks. Treat Linkt as a provider, not source of truth.</td>
+            <td><span class="tag optional">Optional, strong fit</span></td>
+          </tr>
+          <tr>
+            <td>Clay</td>
+            <td>Research workbench</td>
+            <td>Best for flexible enrichment experiments, especially if candidate or cohort intake returns. Export to Provenance as cited claims only.</td>
+            <td><span class="tag optional">Optional</span></td>
+          </tr>
+          <tr>
+            <td>GitHub, GitLab, personal sites, YouTube</td>
+            <td>Candidate extension</td>
+            <td>Consent-first candidate evidence: public projects, artifacts, technical writing, demos, and teaching signals. Use only supplied or confirmed handles.</td>
+            <td><span class="tag later">Later extension</span></td>
+          </tr>
+          <tr>
+            <td>Trend vectors</td>
+            <td>Candidate/cohort matching</td>
+            <td>Summarize cited evidence over time: topic momentum, artifact velocity, collaboration pattern, communication style. The trend itself is a derived claim.</td>
+            <td><span class="tag later">Later extension</span></td>
+          </tr>
+          <tr>
+            <td>OCR artifact extraction</td>
+            <td>Candidate-submitted evidence</td>
+            <td>Use for portfolio screenshots, project images, slides, certificates, and product screenshots. Convert OCR text into reviewable claims.</td>
+            <td><span class="tag later">Later</span></td>
+          </tr>
+          <tr>
+            <td>VPS-ready service shape</td>
+            <td>Future deployment</td>
+            <td>Design workers, API, and web as separable services that can later run with Docker Compose, Traefik/Dokploy, Postgres, queue, and Mailpit.</td>
+            <td><span class="tag later">Keep in mind</span></td>
+          </tr>
+          <tr>
+            <td>Provider-backed production email</td>
+            <td>Future real delivery</td>
+            <td>Use Resend, Postmark, SES, or the Gauntlet sender later. Do not self-host outbound SMTP on the VPS.</td>
+            <td><span class="tag later">Later</span></td>
+          </tr>
+          <tr>
+            <td>Facebook, Instagram, X enrichment</td>
+            <td>Candidate data</td>
+            <td>Avoid as required sources. They are noisy, sensitive, and policy-heavy. X can be optional only if the user supplies a handle and we do not score personality.</td>
+            <td><span class="tag avoid">Avoid for MVP</span></td>
+          </tr>
+          <tr>
+            <td>Social image red flags</td>
+            <td>Candidate screening</td>
+            <td>Do not do broad social-media image scoring. Too much protected or sensitive trait exposure, and too hard to audit fairly.</td>
+            <td><span class="tag avoid">Avoid</span></td>
+          </tr>
+          <tr>
+            <td>Automated accept/reject scoring</td>
+            <td>Matching</td>
+            <td>Keep recommendations assistive and reviewable. Do not auto-rank or reject using third-party enrichment.</td>
+            <td><span class="tag avoid">Avoid</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="section-title">Best Near-Term Front-End Slice</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Surface</th>
+            <th>Purpose</th>
+            <th>Notes</th>
+            <th>Priority</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Intake/source form</td>
+            <td>Collect first-party fields, consent, and optional source URLs or handles.</td>
+            <td>Keep handles optional. Capture consent basis with the submitted source.</td>
+            <td><span class="tag now">Use now</span></td>
+          </tr>
+          <tr>
+            <td>Claim ledger UI</td>
+            <td>Show cited, repaired, and blocked claims with Gate reasons.</td>
+            <td>This is the strongest match to the PM plan and official PRD.</td>
+            <td><span class="tag now">Use now</span></td>
+          </tr>
+          <tr>
+            <td>Evidence inspection panel</td>
+            <td>Let reviewers inspect source excerpts and provider metadata.</td>
+            <td>Make provenance a product surface, not hidden logs.</td>
+            <td><span class="tag now">Use now</span></td>
+          </tr>
+          <tr>
+            <td>Review queue</td>
+            <td>Approve, reject, stale, or supersede imported and generated claims.</td>
+            <td>Useful for both Helix B2B demo data and later candidate/cohort claims.</td>
+            <td><span class="tag now">Use now</span></td>
+          </tr>
+          <tr>
+            <td>Email preview/test-mail view</td>
+            <td>Show what claims made it into copy and what was blocked.</td>
+            <td>Pair with Mailpit for safe demo email capture.</td>
+            <td><span class="tag now">Use now</span></td>
+          </tr>
+          <tr>
+            <td>Optional import review</td>
+            <td>Accept Linkt, Clay, GitHub, or manual rows only after converting them into claims.</td>
+            <td>Good extension if PM wants enrichment in the showcase.</td>
+            <td><span class="tag optional">Optional</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="footer-note">
+      Working rule: external enrichment should never bypass Provenance. It enters as evidence,
+      becomes a cited claim, passes review/Gate policy, and only then can it affect generated
+      copy or recommendations.
+    </p>
+  </main>
+</body>
+</html>

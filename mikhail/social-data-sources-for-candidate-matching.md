@@ -4,9 +4,11 @@ Last checked: 2026-06-17
 
 Scope: data that Provenance could collect from public or user-authorized services to enrich Gauntlet candidate profiles and match people to program requirements. This is product research, not legal advice. For anything that affects admission, hiring, scholarships, employment, or other eligibility decisions, review with counsel before launch.
 
+Current PRD alignment: this is an extension note, not the core MVP. The latest PM plan centers the capstone on an email-channel Gate, live claim ledger, Assurance Lab, regulatory hold, and adversarial demo for a controlled B2B tenant. Candidate/cohort enrichment should reuse the same claim-ledger architecture if it comes back into scope.
+
 ## Executive Recommendation
 
-Use a consent-first hybrid:
+For the candidate/cohort extension, use a consent-first hybrid:
 
 - Tom export seeds the profile with first-party Gauntlet fields.
 - Participant self-intake confirms identity, goals, role, constraints, and links.
@@ -20,6 +22,13 @@ Best initial sources:
 3. Personal websites, blogs, portfolios, resumes, and package registries when supplied by the participant.
 4. LinkedIn as self-attested/OIDC identity and a user-provided URL, not as open enrichment.
 5. Clay as a workflow/orchestration layer for enrichment experiments, not as the authoritative record.
+
+For the official Helix-style B2B demo tenant, the same pattern applies to prospects and accounts:
+
+- use controlled seed data and source docs first;
+- optionally use Linkt or Clay to enrich realistic company/prospect context;
+- convert every enrichment output into cited claims before the Gate or generator can use it;
+- keep demo data synthetic/controlled if provider access or compliance is uncertain.
 
 Avoid for candidate matching:
 
@@ -42,6 +51,17 @@ Avoid for candidate matching:
 | Personal site / blog / portfolio | Public pages, projects, resume, case studies, writing, contact links. | User-provided URL; fetch with normal HTTP and respect robots/terms. | High-signal evidence when cited: artifacts, technical writing, project depth. | Requires identity resolution and freshness checks. Do not collect hidden or non-public pages. |
 | Package registries / technical communities | Public packages, maintainership, project metadata, docs, releases, public profile pages. | Public APIs/pages, ideally user-supplied handles. | Evidence of shipping/maintaining software. | Needs source-specific policy checks before production. Treat as phase 2. |
 | Clay | Enrichment workflows, waterfall enrichment across providers, AI web research, table webhooks, HTTP API calls, and exports back to downstream tools. | Clay account plus any connected enrichment-provider accounts/credits. | Fast prototyping of candidate research tables, source discovery, enrichment QA, and manual review workflows. | Clay outputs still need source URLs, consent basis, provider attribution, and human review before becoming Provenance claims. Do not treat Clay's compiled person data as automatically verified or permissible. |
+| Linkt | ICPs, Sheets, Tasks, Signals, CSV ingest, contact discovery, and webhooks for GTM research workflows. | Linkt API key, server-side only. | Better fit for B2B demo tenant/company/prospect enrichment than personal candidate scoring. | Treat as an enrichment provider, not a truth source. Contact discovery and emails require consent/compliance review before real use. |
+
+## MVP Relationship
+
+This candidate-source research should feed three possible surfaces, in order of safety:
+
+1. **Demo tenant source claims:** B2B account/prospect facts that support or block generated outreach claims.
+2. **Cohort personalization:** opt-in participant links and first-party Gauntlet data for the personalized website extension.
+3. **Candidate matching:** assistive, human-reviewed trend vectors only after consent, correction, and policy review.
+
+It should not become a parallel scoring system. The reusable primitive is still the claim ledger.
 
 ## Trend Vector Approach
 
@@ -219,6 +239,12 @@ For Provenance, that means:
 - Clay webhooks: https://university.clay.com/docs/webhook-integration-guide
 - Clay HTTP API: https://university.clay.com/docs/http-api-integration-overview
 - Clay actions and data credits: https://university.clay.com/docs/actions-data-credits
+- Linkt docs: https://docs.linkt.ai/
+- Linkt authentication: https://docs.linkt.ai/docs/getting-started/authentication
+- Linkt CSV import: https://docs.linkt.ai/docs/guides/ingest/csv-import
+- Linkt contact discovery: https://docs.linkt.ai/docs/guides/search/contact-discovery
+- Linkt signals: https://docs.linkt.ai/docs/core-concepts/data-models/signals
+- Linkt webhooks: https://docs.linkt.ai/docs/core-concepts/workflows/webhooks
 - FTC on FCRA and social media: https://www.ftc.gov/business-guidance/blog/2011/06/fair-credit-reporting-act-social-media-what-businesses-should-know
 - FTC on employment background screeners and FCRA: https://www.ftc.gov/business-guidance/resources/what-employment-background-screening-companies-need-know-about-fair-credit-reporting-act
 - CFPB Circular 2024-06 on background dossiers and algorithmic scores: https://www.consumerfinance.gov/compliance/circulars/consumer-financial-protection-circular-2024-06-background-dossiers-and-algorithmic-scores-for-hiring-promotion-and-other-employment-decisions/

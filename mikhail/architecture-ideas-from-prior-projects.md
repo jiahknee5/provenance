@@ -4,6 +4,8 @@ Last updated: 2026-06-17
 
 This is a partner-review menu: borrowable architecture patterns from prior projects that may be useful for Provenance. These are not decisions already made for the team. Partners can accept, reject, or defer each idea.
 
+Current PRD alignment: prioritize the email-channel Gate, claim ledger, Assurance Lab, regulatory hold, and adversarial demo. Treat cohort/candidate enrichment, Linkt/Clay imports, OCR, pixels, and website personalization as optional extensions unless the PM pulls them into the official MVP.
+
 ## Borrowable Patterns
 
 | Idea | Borrowed from | How Provenance could use it | Adopt now? |
@@ -25,11 +27,25 @@ This is a partner-review menu: borrowable architecture patterns from prior proje
 
 ## Near-Term Recommendation
 
-1. Build the front-end intake and candidate profile ledger first.
-2. Model all enrichment as evidence-backed claims.
-3. Model trend vectors as derived claims that cite underlying evidence.
-4. Keep Clay as an optional enrichment workbench, not the system of record.
-5. Keep Gate, Optimizer, Drift, and Assurance behind contracts until their owners are ready.
+1. Build the claim-ledger UI and evidence inspection path first.
+2. Support the email-channel MVP with a test-mail server and email event ledger.
+3. Model all source docs, provider imports, demo facts, and enrichment results as evidence-backed claims.
+4. Keep candidate/cohort trend vectors as derived claims for later extension work.
+5. Keep Linkt/Clay as optional enrichment workbenches, not the system of record.
+6. Keep Gate, Optimizer, Drift, and Assurance behind contracts until their owners are ready.
+
+## PRD-Aligned Implementation Slices
+
+| Slice | Why it matters | Notes |
+| --- | --- | --- |
+| Claim ledger UI | Required demo surface | Show cited / repaired / blocked claims, source links, review state, and legal-hold impact. |
+| Email channel support | Required MVP channel | Use Mailpit for local/demo capture and an event ledger for sent/captured/delivered/bounced states. |
+| Gate contract | Required core integration | Accept draft copy + candidate/prospect context + source claims; return claim decisions and repair/block reasons. |
+| Assurance Lab display | Required proof layer | Surface trap-set metrics, catch-rate, false-reject rate, and calibration/reliability chart. |
+| Regulatory hold control | Required adversarial beat | Flip a source/rule and show claims blocked or unblocked through the ledger. |
+| B2B demo tenant data | Required stage realism | Keep Helix-style sources and prospects controlled; provider enrichment is optional. |
+| Website adapter | Ambitious extension | Reuse the same claim ledger; do not create a separate personalization truth path. |
+| Candidate/cohort intake | Optional extension | Use consented self-intake and evidence-backed claims only. |
 
 ## VPS Utilization
 
@@ -51,12 +67,12 @@ Possible service layout:
 | --- | --- | --- |
 | `provenance-web` | Front-end intake, candidate review, partner/admin UI | Yes, behind Traefik |
 | `provenance-api` | Intake API, profile ledger API, claim import endpoints | Yes, behind Traefik |
-| `profile-worker` | Tom export imports, Clay imports, source fetches, trend-vector jobs | No |
+| `claim-worker` | Source imports, Linkt/Clay imports, Gate jobs, Drift checks, trend-vector jobs | No |
 | `mailpit` | Captured test email for local/VPS demo environments | UI only behind Traefik auth; SMTP internal only |
 | `postgres` | Candidate profiles, claims, reviews, email events | No |
 | `redis` or queue | Background jobs and retries if the stack needs it | No |
 
-Near-term design implication: the intake schema should not assume everything is synchronous. Candidate enrichment, Clay imports, email sends, Gate calls, and Drift re-checks should be modeled as jobs with status and retry state.
+Near-term design implication: the ledger schema should not assume everything is synchronous. Email sends, Gate calls, Assurance runs, provider imports, enrichment jobs, and Drift re-checks should be modeled as jobs with status and retry state.
 
 Do not self-host production outbound SMTP on this VPS unless the team deliberately chooses to own mail deliverability. Sending directly from a VPS creates reputation, reverse-DNS, abuse handling, bounce, complaint, and blocklist work that is not core to the capstone.
 
@@ -68,6 +84,8 @@ Minimum viable email architecture:
 2. Route all local and demo emails to Mailpit unless explicitly configured otherwise.
 3. Use a transactional provider for real email delivery when needed.
 4. Store email events in the Provenance ledger so outreach and intake communications are auditable.
+
+This is now near-term because the PM plan names email as the minimum channel. Mailpit is not only a convenience; it lets the team test magic links, draft sends, ledger updates, and failure states without real outbound mail.
 
 ### Test Mail Server
 
