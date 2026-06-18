@@ -21,11 +21,16 @@ RUNS_DIR = DATA_DIR / "runs"
 CACHE_DIR = DATA_DIR / "cache"
 OBSERVE_DIR = DATA_DIR / "observe"      # the observability ledger (one JSONL per role lane)
 RULES_DIR = PROJECT_ROOT / "rules"
-DB_PATH = DATA_DIR / "provenance.sqlite"
-PROFILES_DB_PATH = DATA_DIR / "profiles.sqlite"   # enrichment: synthesized profiles + fact receipts
+# DB paths are env-overridable so a deploy can put the writable SQLite on a persistent
+# volume (form submissions survive redeploys) while the baked, read-only demo artifacts
+# (runs/observe/claims) stay in the image. Defaults keep everything local under data/demo.
+DB_PATH = Path(os.environ.get("PROVENANCE_DB_PATH", str(DATA_DIR / "provenance.sqlite")))
+PROFILES_DB_PATH = Path(os.environ.get("PROVENANCE_PROFILES_DB_PATH",
+                                       str(DATA_DIR / "profiles.sqlite")))  # profiles + fact receipts
 USERS_PATH = DATA_DIR / "users.jsonl"
 
-for _d in (DATA_DIR, SOURCES_DIR, CLAIMS_DIR, LEDGERS_DIR, RUNS_DIR, CACHE_DIR, OBSERVE_DIR, RULES_DIR):
+for _d in (DATA_DIR, SOURCES_DIR, CLAIMS_DIR, LEDGERS_DIR, RUNS_DIR, CACHE_DIR, OBSERVE_DIR, RULES_DIR,
+           DB_PATH.parent, PROFILES_DB_PATH.parent):
     _d.mkdir(parents=True, exist_ok=True)
 
 # ---- global seed -----------------------------------------------------------

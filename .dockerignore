@@ -1,0 +1,17 @@
+.git
+.venv
+**/__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.playwright-mcp
+data/
+*.png
+.DS_Store
+.env
+# not served by the app — keep the image lean
+decks/
+architecture/
+team/
+mikhail/
+docs/
