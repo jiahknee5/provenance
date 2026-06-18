@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Provenance — Assurance & evals</title>
+<style>
+  :root{--bg:#0b1018;--panel:#121a27;--panel2:#0f1622;--line:#1f2c3e;--ink:#dbe6f2;--mut:#7e8ea3;
+        --accent:#4cc4d4;--green:#2bb673;--amber:#d98a16;--red:#e0524a;--blue:#6b7cff}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  a{color:var(--accent);text-decoration:none}
+  header.top{display:flex;align-items:center;gap:16px;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--panel2);position:sticky;top:0;z-index:5}
+  header .brand{font-weight:700}.brand .dot{color:var(--accent)}
+  header nav{margin-left:auto;display:flex;gap:15px;font-size:13px}
+  .wrap{padding:18px 20px;max-width:1300px;margin:0 auto}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--mut);margin:24px 0 10px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+  .chip{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-size:12px;color:var(--mut)}
+  .chip b{color:var(--ink)} .chip.ok b{color:var(--green)} .chip.bad b{color:var(--red)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:6px}
+  .two{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;align-items:start}
+  @media(max-width:900px){.two{grid-template-columns:1fr}}
+  .callout{background:#0f1d18;border:1px solid #1f5e44;border-radius:8px;padding:9px 12px;font-size:13px}
+  table.evt{width:100%;border-collapse:collapse;font-size:12px}
+  table.evt th{text-align:left;color:var(--mut);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;padding:7px 8px;border-bottom:1px solid var(--line)}
+  table.evt > tbody > tr > td{padding:8px;border-bottom:1px solid #16202e;vertical-align:top}
+  td.case{font-weight:600;max-width:200px}
+  pre{margin:0;white-space:pre-wrap;word-break:break-word;font:11px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;color:#bcd;max-width:260px}
+  details summary{cursor:pointer;color:var(--accent);font-size:12px}
+  table.sub{width:100%;border-collapse:collapse;margin-top:6px;background:var(--panel2);border:1px solid var(--line);border-radius:6px}
+  table.sub th{font-size:9.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;text-align:left;padding:5px 7px;border-bottom:1px solid var(--line)}
+  table.sub td{padding:5px 7px;border-bottom:1px solid #16202e;vertical-align:top;font-size:11px}
+  table.sub td.n{color:var(--accent);font-weight:600;white-space:nowrap} table.sub td.t{color:var(--mut);white-space:nowrap}
+  .pass{font-weight:700} .pass.y{color:var(--green)} .pass.n{color:var(--red)}
+  .steptally{color:var(--mut);font-weight:400;font-size:12px;text-transform:none;letter-spacing:0}
+  .check{display:flex;gap:8px;padding:4px 0;font-size:13px}
+  .check .m{font-weight:700}.check .m.y{color:var(--green)}.check .m.n{color:var(--red)}
+  .empty{max-width:600px;margin:80px auto;text-align:center;color:var(--mut)}
+  .empty code{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:3px 8px;color:var(--accent)}
+  .hint{color:var(--mut);font-size:12px}
+  /* plain-English helpers */
+  .lead p{margin:6px 0}
+  .lead b{color:var(--ink)}
+  .lights{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  .lt{font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid var(--line)}
+  .lt.g{color:var(--green);border-color:#1f5e44}.lt.a{color:var(--amber);border-color:#5a4520}.lt.r{color:var(--red);border-color:#5a2a2a}
+  .plain{font-size:13px;color:#c2d0e0;margin:6px 0}
+  .measures{display:inline-block;background:#15324a;border:1px solid var(--accent);color:#eaf6ff;border-radius:6px;padding:1px 8px;font-size:11px;font-weight:600;margin-right:8px}
+  .reading{font-size:13.5px;color:var(--ink);margin:10px 0 0;padding:9px 12px;background:var(--panel2);border:1px solid var(--line);border-radius:8px}
+  .traps{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;font-size:12.5px;color:#aeb9c7}
+  .traps b{color:var(--ink)}
+  @media(max-width:700px){.traps{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top">
+  <span class="brand"><span class="dot">◈</span> Assurance &amp; evals</span>
+  <span class="hint">every step, golden-tested · metrics over time</span>
+  <nav><a href="/">Form</a><a href="/inspector">Inspector</a><a href="/observatory">Observatory</a><a href="/assurance">Assurance</a></nav>
+</header>
+
+{% if empty %}
+<div class="empty"><h2 style="color:var(--ink)">No evals yet</h2>
+  <p>Run the trace to produce the golden evals + assurance metrics, then reload:</p>
+  <p><code>.venv/bin/python -m scripts.trace</code></p></div>
+{% else %}
+{% set step_plain = {
+  'library':'Builds the library of approved facts — each one pinned to the exact sentence in an approved source.',
+  'gate':'The checkpoint that reads every product claim and decides: ship it, add a disclaimer, or block it.',
+  'enrich_gate':'The checkpoint for personal data — a fact can only be used if it comes from an allowed source and has permission on file.',
+  'optimizer':'Learns which verified message performs best — and is built so it can never pick an unverified one.',
+  'drift':'When the truth changes (a legal hold, an updated source) it re-checks only the claims affected — nothing more, nothing less.',
+  'assurance':'The quality lab itself, re-run as a tracked test.',
+  'website':'The website shows only verified claims — the same verdicts the email used.'
+} %}
+{% set step_measures = {
+  'library':'Source of truth','gate':'The Gate','enrich_gate':'Enrichment Gate',
+  'optimizer':'The Optimizer','drift':'Drift Monitor','assurance':'Assurance Lab','website':'Website channel'
+} %}
+<div class="wrap">
+
+  <div class="chips">
+    <span class="chip {{ 'ok' if golden.summary.passed == golden.summary.total else 'bad' }}">golden <b>{{ golden.summary.passed }}/{{ golden.summary.total }}</b></span>
+    <span class="chip {{ 'ok' if lifecycle.pass else 'bad' }}">lifecycle <b>{{ '✓' if lifecycle.pass else '✗' }}</b></span>
+    {% if meta.properties %}<span class="chip {{ 'ok' if meta.properties_pass == meta.properties_total else 'bad' }}">P1–P5 <b>{{ meta.properties_pass }}/{{ meta.properties_total }}</b></span>{% endif %}
+    {% if assurance %}<span class="chip ok">Gate catch <b>{{ (assurance.gate.catch_rate*100)|round(0) }}%</b></span>
+    <span class="chip">single-judge <b>{{ (assurance.baseline.catch_rate*100)|round(0) }}%</b></span>
+    <span class="chip">false-reject <b>{{ (assurance.gate.false_reject*100)|round(1) }}%</b></span>
+    <span class="chip">ECE <b>{{ assurance.ece }}</b></span>{% endif %}
+    <span class="chip">runs logged <b>{{ history|length }}</b></span>
+  </div>
+
+  <!-- objectives scorecard — the headline answer -->
+  {% set part_of = {'P1':'Optimizer','P2':'The Gate','P3':'Drift Monitor','P4':'Website channel','P5':'Assurance Lab','E1':'Enrichment Gate'} %}
+  <h2>Is each part of Provenance working — and what proves it?</h2>
+  <div class="card">
+    <p class="plain">Provenance's one promise: <b>nothing reaches a customer that we can't prove</b> — and the system optimizes itself inside that boundary. Each row is a promise we made, the part of the pipeline that keeps it, whether it's holding <i>right now</i>, and the test that proves it.</p>
+    <table class="evt"><thead><tr><th>Objective (the promise)</th><th>Which part keeps it</th><th>Working?</th><th>What proves it</th></tr></thead><tbody>
+      <tr style="background:#0f1d18">
+        <td><b>Nothing ships that can't be proven — and it self-optimizes inside the truth boundary.</b></td>
+        <td>The whole pipeline</td>
+        <td class="pass {{ 'y' if (lifecycle.pass and meta.properties_pass == meta.properties_total) else 'n' }}">{{ '✓' if (lifecycle.pass and meta.properties_pass == meta.properties_total) else '✗' }}</td>
+        <td>End-to-end test {{ '✓' if lifecycle.pass else '✗' }} · golden {{ golden.summary.passed }}/{{ golden.summary.total }} · headline properties {{ meta.properties_pass }}/{{ meta.properties_total }}</td>
+      </tr>
+      {% for p in ['P1','P2','P3','P4','P5','E1'] %}{% set pv = meta.properties.get(p) %}{% if pv %}
+      <tr>
+        <td><b>{{ p }}.</b> {{ (topology.properties.get(p) or {}).get('claim','') }}</td>
+        <td>{{ part_of.get(p, '') }}</td>
+        <td class="pass {{ 'y' if pv.pass else 'n' }}">{{ '✓' if pv.pass else '✗' }}</td>
+        <td>{{ pv.detail }}<br><span class="hint">proof: {{ (topology.properties.get(p) or {}).get('test','') }}</span></td>
+      </tr>
+      {% endif %}{% endfor %}
+    </tbody></table>
+    <p class="hint">"Working?" is read from <b>this run's own artifacts</b> (a check that can go red), and each promise is independently locked by the named test — run <code>pytest</code> to re-prove from scratch. The colours track the live ledger; the proof is the eval, not an assertion.</p>
+  </div>
+
+  <!-- 0 · how to read this page -->
+  <div class="card lead">
+    <p><b>This is the quality-control lab for the whole pipeline.</b> Provenance's promise is simple: nothing goes out to a customer unless it's been verified. This page grades how well each step keeps that promise — and proves the safety numbers are real, not just claimed.</p>
+    <p class="lights">
+      <span class="lt g">GREEN = verified &amp; allowed → shown</span>
+      <span class="lt a">AMBER = true, but needs a disclaimer</span>
+      <span class="lt r">RED = unproven or not allowed → blocked, never shown</span>
+    </p>
+  </div>
+
+  <h2>⓪ What each number means — and which step it grades</h2>
+  <div class="card">
+    <p class="plain">Two readings of every metric: the <b>business</b> meaning (what it tells you about safety) and the <b>engineering</b> definition (exactly how it's computed).</p>
+    <table class="evt"><thead><tr><th>Metric</th><th>For the business reader</th><th>For the AI/ML engineer</th><th>Step graded</th></tr></thead><tbody>
+      <tr><td>Gate catch-rate</td><td>Of the deliberately false / non-compliant claims we tried to sneak through, how many did it block? Higher = safer.</td><td><pre>TP/(TP+FN) over label=1 adversarial traps (4 mutation ops on verified claims); "caught" ≡ verdict==RED.</pre></td><td><b>The Gate</b></td></tr>
+      <tr><td>vs. a basic AI checker</td><td>What a simple one-shot AI checker would have caught instead. The gap is the extra safety our system buys.</td><td><pre>Baseline = single number-blind coverage judge (token-overlap), "caught" if similarity &lt; 0.5. No numeric/rule lens.</pre></td><td>The Gate vs. naive baseline</td></tr>
+      <tr><td>False-reject</td><td>How often it wrongly blocked a TRUE, allowed claim. Lower = it isn't over-censoring.</td><td><pre>FP/(FP+TN) over label=0 clean claims; verdict==RED on a clean claim is a false reject.</pre></td><td>The Gate</td></tr>
+      <tr><td>Calibration (ECE)</td><td>When it says it's "90% sure," is it right about 90% of the time? Lower = its confidence can be trusted.</td><td><pre>Expected Calibration Error of isotonic-PAV-calibrated P(sayable) vs. empirical accuracy, 5 equal-width bins.</pre></td><td>The Gate's confidence head</td></tr>
+      <tr><td>Golden tests</td><td>Example cases with a known right answer — did each step produce exactly what it should?</td><td><pre>Curated (input→expected) per node, run through the REAL node with an isolated verdict cache so each computes its full trace.</pre></td><td>Every step</td></tr>
+      <tr><td>End-to-end test</td><td>One real person's journey start to finish — does the whole assembly line work together?</td><td><pre>Maria through enrich→Gate→personalize; asserts all claims cleared, every inlined fact carries a basis, 0 blocked facts in copy.</pre></td><td>The whole pipeline</td></tr>
+      <tr><td>Metrics over time</td><td>Are the scores staying good on every run, or did something slip?</td><td><pre>Per-run append to eval_history.jsonl; deterministic run ⇒ flat line, so any move is a real regression signal.</pre></td><td>Whole system (regression)</td></tr>
+    </tbody></table>
+  </div>
+
+  <!-- 1 · metrics over time -->
+  <h2>① Are the scores holding up, run after run?</h2>
+  <div class="card"><div id="chart"></div>
+    <p class="hint">Each dot is one run. You want the good scores (the top lines — Gate catch, golden pass-rate) to stay high, and the bad ones (the bottom lines — false-reject, ECE) to stay low. A sudden dip or spike means something broke and needs a look.</p>
+  </div>
+
+  <!-- 2 · the assurance lab -->
+  {% if assurance %}
+  <h2>② The Assurance Lab — does the Gate catch what it should?</h2>
+  <div class="card">
+    <p class="plain"><span class="measures">Measures: The Gate</span> The Gate is the checkpoint that verifies every product claim before it ships. To grade it, we deliberately write bad claims ("traps"), push them through the <b>real</b> Gate, and check it blocks them — then compare against what a basic one-shot AI checker would have caught.</p>
+    <p class="reading">This run: the Gate blocked <b>{{ (assurance.gate.catch_rate*100)|round(0) }}%</b> of the bad claims; a basic AI checker blocked only <b>{{ (assurance.baseline.catch_rate*100)|round(0) }}%</b> — and the Gate wrongly blocked <b>{{ (assurance.gate.false_reject*100)|round(0) }}%</b> of the good ones.</p>
+    <div class="traps">
+      <div><b>Number drift</b> — a real stat with the number quietly changed (47%→57%); looks almost identical.<br><span class="hint">engine: numeric veto lens — <code>numbers_supported()</code> fails → RED.</span></div>
+      <div><b>Unsupported superlative</b> — bragging no source backs ("#1", "best-in-class").<br><span class="hint">engine: superlative veto + <code>unsubstantiated_superlative</code> block rule.</span></div>
+      <div><b>False equivalence</b> — an unproven swipe at a competitor.<br><span class="hint">engine: <code>competitor_disparagement</code> block rule.</span></div>
+      <div><b>True but unsayable</b> — a true fact wrapped in a promise we can't make ("guaranteed").<br><span class="hint">engine: <code>no_guaranteed_outcomes</code> block (entailed but impermissible).</span></div>
+    </div>
+  </div>
+  <div class="card two">
+    <div><p class="hint"><b>How many of each trap type did each catch?</b> Taller teal = the Gate; orange = the basic checker. The basic checker misses number-drift entirely — that's the whole point.</p>{{ bars_svg|safe }}</div>
+    <div><p class="hint"><b>Calibration:</b> when it says "90% sure," is it right ~90% of the time? Dots hugging the diagonal = trustworthy confidence. ECE {{ assurance.ece }} (lower is better).</p>{{ cal_svg|safe }}
+      <table class="evt" style="margin-top:8px"><thead><tr><th>channel</th><th>traps</th><th>Gate catch</th><th>basic checker</th></tr></thead><tbody>
+      {% for ch, m in assurance.channels.items() %}<tr><td>{{ ch }}</td><td>{{ m.n_traps }}</td>
+        <td>{{ (m.gate_catch_rate*100)|round(0) }}%</td><td>{{ (m.baseline_catch_rate*100)|round(0) }}%</td></tr>{% endfor %}
+      </tbody></table>
+      <p class="hint">Same Gate, results sliced per channel (email vs website) — proof it's one checkpoint, not two.</p>
+    </div>
+  </div>
+  <div class="card"><details><summary style="color:var(--accent);cursor:pointer;font-size:13px">▸ Methodology (for the AI/ML engineer)</summary>
+    <div class="plain" style="margin-top:10px">
+      <p><b>Trap set:</b> {{ assurance.n_traps }} adversarial + {{ assurance.n_clean }} clean, from 4 mutation operators over the verified claims (number_drift · unsupported_superlative · false_equivalence · true_but_unsayable).</p>
+      <p><b>Gate decision:</b> rules (veto — can only restrict) → retrieve (BM25) → NLI entailment → diverse ensemble. <code>entail_raw = min(mean(support lenses), min(veto lenses))</code> — numeric &amp; superlative are veto lenses, coverage + NLI are support; GREEN ≥ 0.60, AMBER ≥ 0.30, else RED; <code>final = most_severe(entailment, rule)</code>.</p>
+      <p><b>Baseline:</b> a single number-blind coverage judge (token overlap), caught iff similarity &lt; 0.5 — the deliberately-gameable single-LLM-judge stand-in.</p>
+      <p><b>Calibration:</b> isotonic regression (pool-adjacent-violators) fit on (raw confidence, is-sayable); ECE over 5 bins of the calibrated probabilities.</p>
+      <p>All deterministic + offline. The full per-claim trace (BM25 scores, NLI prob, ensemble votes, calibrated confidence) is in the golden tables below and the Observatory ledger.</p>
+    </div>
+  </details></div>
+  {% endif %}
+
+  <!-- 3 · golden evals per step -->
+  <h2>③ Golden tests — every step, checked against a known right answer</h2>
+  <div class="card"><p class="plain">For each step we feed in a known example and confirm it produces the result it should — green / amber / red for claims, usable / blocked for facts. The <b>graph log</b> is the receipt: the step-by-step trail (node → tool → input → output) of exactly how the decision was made — so an engineer can audit the reasoning and a reviewer can follow it. Open "trace" on any row.</p></div>
+  {% for step in golden.steps %}
+  {% set passed = step.cases | selectattr('pass') | list | length %}
+  <div class="card">
+    <h2 style="margin-top:2px">{{ step.label }} <span class="steptally">— {{ passed }}/{{ step.cases|length }} pass</span></h2>
+    <p class="plain"><span class="measures">Measures: {{ step_measures.get(step.step, step.step) }}</span>{{ step_plain.get(step.step, '') }}</p>
+    <table class="evt"><thead><tr><th>Case</th><th>Inputs</th><th>Graph log (node · tool · input · output)</th><th>Output</th><th>Expected</th><th></th></tr></thead>
+    <tbody>
+    {% for c in step.cases %}
+      <tr>
+        <td class="case">{{ c.name }}</td>
+        <td><pre>{{ c.input|tojson }}</pre></td>
+        <td>
+          <details><summary>{{ c.graph_log|length }} steps — trace</summary>
+            <table class="sub"><tr><th>node</th><th>tool</th><th>input</th><th>decision / output</th></tr>
+            {% for g in c.graph_log %}
+              <tr><td class="n">{{ g.node }}</td><td class="t">{{ g.tool }}</td>
+                  <td><pre>{{ g.get('input')|tojson }}</pre></td>
+                  <td><pre>{{ (g.get('decision') if g.get('decision') is not none else g.get('output'))|tojson }}</pre></td></tr>
+            {% endfor %}
+            </table>
+          </details>
+        </td>
+        <td><pre>{{ c.output|tojson }}</pre></td>
+        <td><pre>{{ c.expected|tojson }}</pre></td>
+        <td class="pass {{ 'y' if c['pass'] else 'n' }}">{{ '✓' if c['pass'] else '✗' }}</td>
+      </tr>
+    {% endfor %}
+    </tbody></table>
+  </div>
+  {% endfor %}
+
+  <!-- 4 · overarching lifecycle eval -->
+  <h2>④ The end-to-end test — does the whole pipeline work together?</h2>
+  <div class="card">
+    <p class="plain"><span class="measures">Measures: the whole pipeline</span> One real person (Maria) carried from form submission to finished personalized message — proving the steps work <i>together</i>, not just in isolation. The graph log below is the full agent/node trail across every step.</p>
+    <table class="evt"><thead><tr><th>Inputs</th><th>Graph log (whole lifecycle)</th><th>Output</th><th></th></tr></thead>
+    <tbody><tr>
+      <td><pre>{{ lifecycle.input|tojson }}</pre></td>
+      <td><details open><summary>{{ lifecycle.graph_log|length }} steps — full agent/node trace</summary>
+        <table class="sub"><tr><th>node</th><th>tool</th><th>input</th><th>decision / output</th></tr>
+        {% for g in lifecycle.graph_log %}
+          <tr><td class="n">{{ g.node }}</td><td class="t">{{ g.tool }}</td>
+              <td><pre>{{ g.input|tojson }}</pre></td>
+              <td><pre>{{ (g.decision if g.decision is not none else g.output)|tojson }}</pre></td></tr>
+        {% endfor %}
+        </table></details></td>
+      <td><pre>{{ lifecycle.output|tojson }}</pre></td>
+      <td class="pass {{ 'y' if lifecycle.pass else 'n' }}">{{ '✓' if lifecycle.pass else '✗' }}</td>
+    </tr></tbody></table>
+    <div style="margin-top:10px">
+      {% for ch in lifecycle.checks %}
+      <div class="check"><span class="m {{ 'y' if ch.pass else 'n' }}">{{ '✓' if ch.pass else '✗' }}</span>{{ ch.name }}</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script id="hist" type="application/json">{{ history|tojson }}</script>
+<script>
+const HIST = JSON.parse(document.getElementById('hist').textContent);
+function chart(hist){
+  if(!hist.length) return '<p class="hint">no run history yet — run the trace again to build the trend</p>';
+  hist.forEach(h => h.golden = h.golden_total ? h.golden_passed/h.golden_total : 0);
+  const W=860,H=250,pad=40,n=hist.length,maxy=1.0;
+  const series=[
+    {k:'gate_catch',label:'Gate catch',color:'#2bb673'},
+    {k:'baseline_catch',label:'single-judge catch',color:'#d98a16'},
+    {k:'false_reject',label:'false-reject',color:'#e0524a'},
+    {k:'ece',label:'ECE',color:'#6b7cff'},
+    {k:'golden',label:'golden pass-rate',color:'#4cc4d4'},
+  ];
+  const x=i=> pad + (n<=1?0:(i/(n-1))*(W-2*pad));
+  const y=v=> (H-pad) - (Math.max(0,Math.min(1,v||0)))*(H-2*pad);
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px">`;
+  s+=`<line x1="${pad}" y1="${H-pad}" x2="${W-pad}" y2="${H-pad}" stroke="#33445c"/>`;
+  s+=`<line x1="${pad}" y1="${pad}" x2="${pad}" y2="${H-pad}" stroke="#33445c"/>`;
+  [0,0.5,1].forEach(t=>{ s+=`<text x="${pad-6}" y="${y(t)+3}" font-size="9" fill="#7e8ea3" text-anchor="end">${t}</text>`; });
+  series.forEach((se,si)=>{
+    if(n===1){ s+=`<circle cx="${x(0)}" cy="${y(hist[0][se.k])}" r="4" fill="${se.color}"/>`; }
+    else { s+=`<polyline fill="none" stroke="${se.color}" stroke-width="2" points="${hist.map((h,i)=>x(i)+','+y(h[se.k])).join(' ')}"/>`; }
+    s+=`<rect x="${W-170}" y="${14+si*17-9}" width="10" height="10" fill="${se.color}"/><text x="${W-155}" y="${14+si*17}" font-size="11" fill="#aeb9c7">${se.label}</text>`;
+  });
+  s+=`<text x="${pad}" y="${H-8}" font-size="10" fill="#7e8ea3">run 1 → ${n}</text></svg>`;
+  return s;
+}
+document.getElementById('chart').innerHTML = chart(HIST);
+</script>
+{% endif %}
+</body>
+</html>

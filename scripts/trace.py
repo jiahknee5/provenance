@@ -20,11 +20,17 @@ from __future__ import annotations
 import json
 from collections import defaultdict
 
+from datetime import datetime, timezone
+
 from pipeline.common import observe, topology
-from pipeline.common.config import OBSERVE_DIR, RUNS_DIR, INFERENCE_PROFILE, SEED, ENRICH_MODE
+from pipeline.common.config import (OBSERVE_DIR, RUNS_DIR, DATA_DIR, INFERENCE_PROFILE,
+                                    SEED, ENRICH_MODE)
 from pipeline.common.schemas import Recipient
+from pipeline.evals.golden import run_golden
 from pipeline.library.library import ClaimsLibrary
 from scripts.pipeline import run_all
+
+EVAL_HISTORY = DATA_DIR / "eval_history.jsonl"
 
 
 def _load(name: str, default=None):
@@ -208,15 +214,44 @@ def derive_artifacts(summary: dict, enrich_demo: dict | None = None) -> dict:
     return meta
 
 
+def _append_history(meta: dict, golden: dict) -> None:
+    """Append this run's assurance metrics to the over-time history (a regression detector).
+    Lives outside observe/ so it never breaks the byte-identical ledger hash; wall-clock ts
+    is fine here (it IS the time axis)."""
+    a = _load("assurance.json", {})
+    entry = {
+        "ts": datetime.now(timezone.utc).isoformat(),
+        "golden_passed": golden["summary"]["passed"], "golden_total": golden["summary"]["total"],
+        "lifecycle_pass": golden["lifecycle"]["pass"],
+        "gate_catch": a.get("gate", {}).get("catch_rate"),
+        "baseline_catch": a.get("baseline", {}).get("catch_rate"),
+        "false_reject": a.get("gate", {}).get("false_reject"),
+        "ece": a.get("ece"),
+        "e1_catch": (meta.get("enrichment") or {}).get("fact_audit", {}).get("catch_rate"),
+        "props_pass": meta["properties_pass"], "props_total": meta["properties_total"],
+    }
+    with open(EVAL_HISTORY, "a", encoding="utf-8") as fh:
+        fh.write(json.dumps(entry, default=str) + "\n")
+
+
 def main() -> dict:
     observe.start_run("provenance-demo", topology.PHASES)
     summary = run_all()
     enrich_demo = run_enrichment_demo()
     observe.end_run(summary)
+
+    # golden evals (node-level fresh captures + workflow-level scored from the ledger)
+    golden = run_golden(_read_ledger())
+    (OBSERVE_DIR / "golden_evals.json").write_text(json.dumps(golden, indent=2, default=str))
+
     meta = derive_artifacts(summary, enrich_demo)
+    _append_history(meta, golden)
+
     print(f"traced {meta['total_events']} events across {len(meta['lanes'])} lanes · "
           f"P1-P5 {meta['properties_pass']}/{meta['properties_total']} pass · "
-          f"enrich={meta['enrich_mode']} · profile={meta['profile']} · $0 offline")
+          f"golden {golden['summary']['passed']}/{golden['summary']['total']} · "
+          f"lifecycle {'✓' if golden['lifecycle']['pass'] else '✗'} · "
+          f"enrich={meta['enrich_mode']} · $0 offline")
     for k, v in meta["properties"].items():
         if not k.startswith("_"):
             print(f"  {'✓' if v['pass'] else '✗'} {k}: {v['detail']}")

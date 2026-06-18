@@ -54,7 +54,8 @@ def submit(request: Request,
     })
 
 
-# attach the website + inspector + observatory routes
+# attach the website + inspector + observatory + assurance routes
 from app import site as _site  # noqa: E402,F401
 from app import inspector as _inspector  # noqa: E402,F401
 from app import observatory as _observatory  # noqa: E402,F401
+from app import assurance as _assurance  # noqa: E402,F401

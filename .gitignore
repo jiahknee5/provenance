@@ -9,6 +9,8 @@ __pycache__/
 data/demo/cache/
 data/demo/runs/
 data/demo/observe/
+data/demo/eval_history.jsonl
+data/demo/users.jsonl
 data/demo/*.sqlite
 data/demo/*.sqlite-*
 data/demo/ledgers/
@@ -21,3 +23,5 @@ data/demo/ledgers/
 /observatory-enrichment.png
 /site-personalized.png
 /enrichment-catalog.png
+/assurance-*.png
+/ideas-board.png
