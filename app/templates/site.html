@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Your Helix Analytics ROI page — {{ r.company }}{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>{{ r.name.split()[0] }}, here's what Helix Analytics means for {{ r.company }}.</h1>
+  <p class="sub">Tailored for a <strong>{{ r.role.replace('_',' ') }}</strong> leader at a
+     <strong>{{ r.company_size }}</strong> organization looking to {{ use_case }}.
+     <span class="muted">(segment <code>{{ r.segment }}</code> · variant
+     <code>{{ variant.arm_label }}</code>, the A/B winner for your segment)</span></p>
+</section>
+
+<section class="card">
+  <h2>{{ variant.headline }}</h2>
+  <p class="muted">Every statement below was verified by the Provenance Gate the moment this
+     page loaded. We show only what we can prove.</p>
+  <ul class="claimlist">
+    {% for c in shown %}
+    <li>
+      <span class="claim {{ c.verdict }}">Helix Analytics {{ c.text }}</span>
+      <span class="pill {{ c.verdict }}">{{ c.verdict }}</span>
+      <details class="src"><summary>source</summary>
+        <strong>{{ c.source_title }}</strong><br>
+        <span class="muted">“{{ c.evidence }}”</span>
+        · confidence {{ '%.2f'|format(c.confidence) }}
+        {% if c.rule_flags %}· {{ c.rule_flags|join(', ') }}{% endif %}
+      </details>
+    </li>
+    {% endfor %}
+  </ul>
+  {% if blocked %}
+  <p class="fineprint">⛔ {{ blocked|length }} claim(s) were withheld from this page because
+     they could not be verified under current rules — the Gate blocked them before render.</p>
+  {% endif %}
+  <p><a class="cta" href="/site/{{ r.token }}/cta">Start your ROI assessment →</a></p>
+</section>
+
+{% if personalization %}
+<section class="card">
+  <h2>Personalized for {{ r.company }} — and here's where each fact came from</h2>
+  <p class="muted">We enriched your profile from outside sources. Every personal fact below
+     passed the Enrichment Gate (allow-listed source + lawful basis + fresh) before it could
+     appear here. We show the receipt, not just the fact.</p>
+  <ul class="claimlist">
+    {% for p in personalization %}
+    <li>
+      <span class="claim {{ 'amber' if p.verdict == 'disclaimer' else 'green' }}">{{ p.text }}</span>
+      <span class="pill {{ 'amber' if p.verdict == 'disclaimer' else 'green' }}">{{ p.verdict }}</span>
+      <details class="src"><summary>source</summary>
+        <strong>{{ p.source }}</strong> ({{ p.source_kind }})<br>
+        <span class="muted">lawful basis: {{ p.basis }}</span>
+      </details>
+    </li>
+    {% endfor %}
+  </ul>
+  {% if facts_withheld %}
+  <p class="fineprint">⛔ {{ facts_withheld }} enriched fact(s) were withheld — no lawful basis,
+     stale, or PHI — so they never reached this page.</p>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

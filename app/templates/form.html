@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Request the Clinical-Ops ROI Report — Helix Analytics{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>See what Helix Analytics would save your system.</h1>
+  <p class="sub">Tell us about your organization and we'll send a personalized clinical-ops
+     ROI report — and follow up with a few tailored examples.</p>
+</section>
+
+<form class="card" method="post" action="/submit">
+  <div class="row">
+    <label>Full name<input name="name" required placeholder="Maya Chen"></label>
+    <label>Work email<input name="email" type="email" required placeholder="maya.chen@northwind.org"></label>
+  </div>
+  <label>Organization<input name="company" required placeholder="Northwind Health"></label>
+  <div class="row">
+    <label>Your role
+      <select name="role" required>
+        {% for key, title in roles.items() %}<option value="{{ key }}">{{ title }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Organization size
+      <select name="company_size" required>
+        {% for s in sizes %}<option value="{{ s }}">{{ s|capitalize }}{% if s=='idn' %} / IDN{% endif %}</option>{% endfor %}
+      </select>
+    </label>
+  </div>
+  <div class="row">
+    <label>Region
+      <select name="region">{% for r in regions %}<option>{{ r }}</option>{% endfor %}</select>
+    </label>
+    <label>Timeline
+      <select name="urgency"><option value="low">Exploring</option>
+        <option value="medium" selected>This year</option>
+        <option value="high">This quarter</option></select>
+    </label>
+  </div>
+  <label>How did you hear about us?
+    <select name="heard_via">{% for h in heard %}<option>{{ h }}</option>{% endfor %}</select>
+  </label>
+  <label class="check"><input type="checkbox" name="consent" value="true" checked>
+    I agree to receive a personalized report and follow-up from Helix Analytics.</label>
+  <button type="submit">Send me the report →</button>
+  <p class="fineprint">Synthetic demo. No real email is sent; your submission is stored locally
+    to drive the Provenance pipeline.</p>
+</form>
+{% endblock %}

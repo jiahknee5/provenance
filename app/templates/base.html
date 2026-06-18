@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Helix Analytics{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="logo">◈</span> Helix Analytics</div>
+    <nav>
+      <a href="/">Request the ROI report</a>
+      <a href="/inspector">Provenance inspector</a>
+      <a href="/observatory">Observatory</a>
+      <a href="/enrichment-catalog">Enrichment catalog</a>
+    </nav>
+  </header>
+  <main>{% block content %}{% endblock %}</main>
+  <footer class="foot">
+    Helix Analytics · clinical-ops ROI analytics ·
+    <span class="muted">Provenance demo — every claim shown was verified before it shipped.</span>
+  </footer>
+</body>
+</html>

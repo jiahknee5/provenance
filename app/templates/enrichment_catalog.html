@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enrichment catalog — Provenance</title>
+<style>
+  :root{--bg:#0b1018;--panel:#121a27;--panel2:#0f1622;--line:#1f2c3e;--ink:#dbe6f2;
+        --mut:#7e8ea3;--accent:#4cc4d4;--green:#2bb673;--amber:#d98a16;--red:#e0524a;--bronze:#e0764a}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  a{color:var(--accent);text-decoration:none}
+  header.top{display:flex;align-items:center;gap:18px;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--panel2);position:sticky;top:0;z-index:5}
+  header.top .brand{font-weight:700}.brand .dot{color:var(--bronze)}
+  header.top nav{margin-left:auto;display:flex;gap:16px;font-size:13px}
+  .wrap{padding:20px;max-width:1180px;margin:0 auto}
+  h1{font-size:22px;margin:6px 0}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--mut);margin:26px 0 10px}
+  p.lead{color:#c2d0e0;max-width:820px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px 14px 12px}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th{text-align:left;color:var(--mut);font-weight:600;padding:8px 8px;border-bottom:1px solid var(--line);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+  td{padding:8px 8px;border-bottom:1px solid #16202e;vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  .badge{font-size:10px;padding:2px 7px;border-radius:999px;border:1px solid var(--line);color:var(--mut);white-space:nowrap}
+  .badge.demo{color:var(--green);border-color:#1f5e44}
+  .badge.live{color:var(--bronze);border-color:#5a3a28}
+  .badge.free{color:var(--green)} .badge.paid{color:var(--amber)} .badge.engagement{color:var(--accent)}
+  .cost{font-variant-numeric:tabular-nums}
+  .verdict{font-weight:700} .verdict.usable{color:var(--green)} .verdict.disclaimer{color:var(--amber)} .verdict.blocked{color:var(--red)}
+  code{background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:#bcd;font-size:12px}
+  .note{color:var(--mut);font-size:12px;margin-top:6px}
+  .pillrow{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+</style>
+</head>
+<body>
+<header class="top">
+  <span class="brand"><span class="dot">◈</span> Enrichment catalog</span>
+  <span style="color:var(--mut);font-size:12px">every source we could enrich with — paid or free</span>
+  <nav><a href="/">Form</a><a href="/inspector">Inspector</a><a href="/observatory">Observatory</a><a href="/enrichment-catalog">Catalog</a></nav>
+</header>
+
+<div class="wrap">
+  <h1>What we can enrich a lead with — and the receipt each fact must carry</h1>
+  <p class="lead">Between the form and a personalized email or return visit, we can learn a lot
+  about a lead from outside sources. In Provenance, <b>every enriched fact is gated like a claim</b>:
+  it must come from a human-allow-listed source, carry a lawful <b>basis</b>, be fresh, and pass the
+  Enrichment Gate before it can appear in a message. This page catalogs the sources honestly —
+  what they give, what they cost, and the basis question. In the demo, sources are
+  <span class="badge demo">used (simulated)</span> unless marked <span class="badge live">live</span>;
+  nothing here calls a paid API.</p>
+
+  {% for stage, label in [('free','Free / low-cost — between form → email'), ('paid','Paid — between form → email, and return-visit refresh'), ('engagement','Engagement — email sent → click → website')] %}
+  <h2>{{ label }}</h2>
+  <div class="card"><table>
+    <tr><th>Source</th><th>Gives us</th><th>Cost</th><th>Lawful basis / caution</th><th>Freshness</th><th>In demo</th></tr>
+    {% for s in grouped[stage] %}
+    <tr>
+      <td><b>{{ s.name }}</b></td>
+      <td>{{ s.gives }}</td>
+      <td class="cost">{{ s.cost }}</td>
+      <td>{{ s.basis }}</td>
+      <td>{{ s.freshness }}</td>
+      <td>{% if s.used_in_demo %}<span class="badge demo">used</span>{% endif %}
+          {% if s.live %}<span class="badge live">live</span>{% endif %}
+          {% if not s.used_in_demo %}<span class="badge">cataloged</span>{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table></div>
+  {% endfor %}
+
+  <h2>Where the data lives</h2>
+  <div class="card"><table>
+    <tr><th>Store</th><th>Path</th><th>Holds</th></tr>
+    {% for d in db_locations %}
+    <tr><td><b>{{ d.name }}</b></td><td><code>{{ d.path }}</code></td><td>{{ d.holds }}</td></tr>
+    {% endfor %}
+  </table></div>
+  <p class="note">All local, synthetic, and gitignored — the demo's $0 / offline / no-PII guarantee holds.</p>
+
+  {% if enrichment %}
+  <h2>Live example — the profile synthesized for {{ enrichment.recipient.company }} ({{ enrichment.mode }} mode)</h2>
+  <div class="card"><table>
+    <tr><th>Verdict</th><th>Fact</th><th>Value</th><th>Source</th><th>Basis</th></tr>
+    {% for f in enrichment.facts %}
+    <tr>
+      <td><span class="verdict {{ f.verdict }}">{{ f.verdict }}</span></td>
+      <td>{{ f.key }}</td><td>{{ f.value }}</td><td><code>{{ f.source }}</code></td><td>{{ f.basis or '—' }}</td>
+    </tr>
+    {% endfor %}
+  </table></div>
+  <p class="note">{{ enrichment.usable }} usable · {{ enrichment.blocked }} blocked ·
+  fact-audit caught {{ (enrichment.fact_audit.catch_rate*100)|round(0) }}% of un-shippable traps at
+  {{ (enrichment.fact_audit.false_block*100)|round(0) }}% false-block. These facts are readable on the
+  <a href="/observatory">Observatory</a> and via <code>/api/observe/profiles</code>.</p>
+  {% endif %}
+</div>
+</body>
+</html>

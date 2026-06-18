@@ -1,0 +1,87 @@
+# Helix Analytics — tenant compliance rules (versioned).
+# The rules_version is the hash of the ACTIVE rule set; flipping a hold changes the
+# version, which changes the verdict-cache key and forces a re-Gate (the legal-hold demo).
+# A second tenant is a different file — "tenant = config," not a rebuild.
+
+tenant: helix_analytics
+
+# MLR / legal holds — flip `active: true` to enforce. Keyed by claim_id.
+holds:
+  - id: mlr_hold_tco
+    claim_id: c_tco
+    active: false
+    verdict: red
+    reason: "MLR legal hold pending substantiation review of the 47% TCO claim"
+
+# Hard blocks — pattern match against claim text (case-insensitive substring/regex).
+blocks:
+  - id: no_guaranteed_outcomes
+    pattern: "guarantee"
+    verdict: red
+    reason: "FTC: no guaranteed financial or clinical outcomes"
+  - id: unsubstantiated_superlative
+    pattern: "(#1|best-in-class|number one|the best|world.?s best)"
+    verdict: red
+    reason: "Unsubstantiated superlative without a cited source"
+  - id: competitor_disparagement
+    pattern: "(beats |worse than|inferior to|better than (epic|cerner|athena))"
+    verdict: red
+    reason: "Competitor disparagement without substantiation"
+  - id: phi_personalization
+    pattern: "(your patient|diagnosed with|based on your condition)"
+    verdict: red
+    reason: "No health claims tied to personal/patient attributes"
+
+# Disclaimers — claims carrying these rule_tags require a disclaimer (amber, not blocked).
+disclaimers:
+  - id: roi_outcome_disclaimer
+    rule_tag: roi_outcome
+    verdict: amber
+    reason: "ROI/outcome claims require an 'individual results may vary' disclaimer"
+  - id: clinical_outcome_disclaimer
+    rule_tag: clinical_outcome
+    verdict: amber
+    reason: "Clinical-outcome claims require a disclaimer"
+
+# ---------------------------------------------------------------------------
+# Enrichment-source policy (HITL gate #2 — see docs/04-workflow/ENRICHMENT-TOUCHPOINTS.md).
+# A profile fact may only be USED if its source is allow-listed here, the recipient
+# consented (when consent_required), and the fact is fresher than the source TTL.
+# `basis` is the recorded lawful basis (the receipt). A fact that fails any check is
+# BLOCKED and never reaches a message. `verdict: disclaimer` => usable but flagged.
+# Adding a vendor = adding a row here (a human decision), not a code change.
+# ---------------------------------------------------------------------------
+enrichment:
+  consent_required: true            # facts about a non-consenting recipient are blocked
+  default_ttl_seconds: 2592000      # 30 days; per-source TTL overrides below
+  allowed_sources:
+    - id: email_domain              # parse the email domain (user-provided)
+      kind: free
+      basis: legitimate_interest_b2b
+      ttl_seconds: 31536000
+      verdict: usable
+    - id: dns_mx                    # DNS/MX on the domain (no PII leaves the machine)
+      kind: free
+      basis: public_record
+      ttl_seconds: 604800
+      verdict: usable
+    - id: company_news_rss          # public news RSS keyed on the company (LIVE connector)
+      kind: free
+      basis: public_record
+      ttl_seconds: 86400            # news is stale fast — 1 day
+      verdict: usable
+    - id: firmographic_sim          # simulated firmographics (Clearbit/ZoomInfo class)
+      kind: paid
+      basis: contract_vendor_dpa
+      ttl_seconds: 2592000
+      verdict: usable
+    - id: intent_sim                # simulated account-level intent (6sense/Bombora class)
+      kind: paid
+      basis: contract_vendor_dpa
+      ttl_seconds: 604800
+      verdict: disclaimer           # account-level signal -> usable but flag as inferred
+  # sources NOT listed here are blocked by default (e.g. scraped LinkedIn, purchased lists)
+  blocked_keys:                     # fact keys that may never be inlined, even if usable
+    - patient_condition
+    - diagnosis
+    - phi

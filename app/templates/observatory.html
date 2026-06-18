@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Provenance Observatory</title>
+<style>
+  :root{
+    --bg:#0b1018; --panel:#121a27; --panel2:#0f1622; --line:#1f2c3e; --ink:#dbe6f2;
+    --mut:#7e8ea3; --accent:#4cc4d4; --green:#2bb673; --amber:#d98a16; --red:#e0524a;
+    --library:#6b7cff; --gate:#0e9bab; --optimizer:#a07cf6; --drift:#d98a16;
+    --website:#2bb673; --assurance:#e0524a; --run:#5b6b7c;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  a{color:var(--accent);text-decoration:none}
+  header.top{display:flex;align-items:center;gap:18px;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--panel2);position:sticky;top:0;z-index:5}
+  header.top .brand{font-weight:700;letter-spacing:.3px}
+  header.top .brand .dot{color:var(--accent)}
+  header.top nav{margin-left:auto;display:flex;gap:16px;font-size:13px}
+  .wrap{padding:18px 20px;max-width:1500px;margin:0 auto}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  .chip{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-size:12px;color:var(--mut)}
+  .chip b{color:var(--ink)}
+  .chip.ok b{color:var(--green)} .chip.bad b{color:var(--red)}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--mut);margin:22px 0 10px;font-weight:600}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  /* phase ribbon */
+  .ribbon{display:flex;gap:6px;flex-wrap:wrap}
+  .ph{flex:1;min-width:90px;padding:7px 9px;border-radius:7px;background:var(--panel2);border:1px solid var(--line);font-size:11px;color:var(--mut);text-align:center;transition:.2s}
+  .ph.done{color:var(--ink);border-color:#2a3a52}
+  .ph.active{background:#15324a;border-color:var(--accent);color:#eaf6ff;box-shadow:0 0 0 1px var(--accent) inset}
+  /* graph */
+  .graphwrap{overflow-x:auto}
+  svg .nodebox{cursor:pointer}
+  svg .nodebox rect.body{fill:var(--panel2);stroke:var(--line);stroke-width:1.4}
+  svg .nodebox:hover rect.body{stroke:var(--accent)}
+  svg .nodebox.sel rect.body{stroke:var(--accent);stroke-width:2.4}
+  svg .nodebox.active rect.body{filter:drop-shadow(0 0 6px var(--accent))}
+  svg .nlabel{fill:var(--ink);font-size:12.5px;font-weight:600}
+  svg .nsub{fill:var(--mut);font-size:10px}
+  svg .pbadge{fill:#1b2940;stroke:#2a3a52}
+  svg .pbadge text{fill:var(--accent)}
+  svg path.edge{stroke:#33445c;stroke-width:1.4;fill:none}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--mut)}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  /* two-column main */
+  .grid{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;align-items:start}
+  @media(max-width:1000px){.grid{grid-template-columns:1fr}}
+  /* timeline */
+  .controls{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .btn{background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:7px;padding:5px 11px;cursor:pointer;font-size:13px}
+  .btn:hover{border-color:var(--accent)}
+  .controls input[type=range]{flex:1}
+  .controls label{font-size:12px;color:var(--mut);display:flex;align-items:center;gap:5px;cursor:pointer}
+  .tl{max-height:520px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+  .ev{display:grid;grid-template-columns:42px 92px 90px 1fr;gap:8px;padding:6px 10px;border-bottom:1px solid #16202e;font-size:12px;cursor:pointer;align-items:baseline}
+  .ev:hover{background:#0f1925}
+  .ev.cur{background:#15324a}
+  .ev.future{opacity:.32}
+  .ev .seq{color:var(--mut);font-variant-numeric:tabular-nums}
+  .ev .lane{font-weight:600}
+  .ev .etype{color:var(--mut);font-size:10.5px;letter-spacing:.04em}
+  .ev .det{color:var(--ink)}
+  .tag{font-size:9.5px;padding:1px 5px;border-radius:4px;background:#1b2940;color:var(--mut)}
+  /* node panel */
+  .np h3{margin:0 0 2px;font-size:16px}
+  .np .lanetag{font-size:11px;padding:2px 8px;border-radius:5px;color:#08121b;font-weight:700}
+  .np .row{margin:9px 0}
+  .np .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);margin-bottom:2px}
+  .np .v{color:var(--ink)}
+  .toollist{display:flex;flex-wrap:wrap;gap:6px;margin-top:3px}
+  .toollist span{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:3px 8px;font-size:11.5px;color:#bcd}
+  .io{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+  .io > div{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:8px}
+  .io .k{margin-bottom:4px}
+  pre{margin:0;white-space:pre-wrap;word-break:break-word;font:11px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;color:#cfe;max-height:170px;overflow:auto}
+  .verdict{font-weight:700} .verdict.green{color:var(--green)} .verdict.amber{color:var(--amber)} .verdict.red{color:var(--red)}
+  .prop{display:flex;gap:9px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #16202e}
+  .prop .pp{font-weight:700;font-size:12px;min-width:26px}
+  .prop .pp.ok{color:var(--green)} .prop .pp.no{color:var(--red)}
+  .prop .pd{font-size:12px}
+  .prop .pd b{color:var(--ink)} .prop .pd .mut{color:var(--mut)}
+  .empty{max-width:620px;margin:80px auto;text-align:center;color:var(--mut)}
+  .empty code{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:3px 8px;color:var(--accent)}
+  .hint{color:var(--mut);font-size:12px;margin:6px 0 0}
+</style>
+</head>
+<body>
+<header class="top">
+  <span class="brand"><span class="dot">◈</span> Provenance Observatory</span>
+  <span style="color:var(--mut);font-size:12px">every node's input · decision · output, watchable</span>
+  <nav>
+    <a href="/">Form</a><a href="/inspector">Inspector</a><a href="/observatory">Observatory</a>
+  </nav>
+</header>
+
+{% if empty %}
+<div class="empty">
+  <h2 style="color:var(--ink)">No traced run yet</h2>
+  <p>The Observatory replays a recorded pipeline run (decision R5: <i>live = deterministic seeded replay</i>).
+     Produce one — it's byte-identical every time — then reload:</p>
+  <p><code>.venv/bin/python -m scripts.trace</code></p>
+  <p class="hint">This degrades honestly: no run, no green board.</p>
+</div>
+{% else %}
+
+<div class="wrap">
+  <!-- health chips -->
+  <div class="chips" id="chips"></div>
+
+  <!-- phase ribbon -->
+  <div class="ribbon" id="ribbon"></div>
+
+  <!-- node graph / architecture -->
+  <h2>Node graph &amp; architecture — each box is a pipeline node; click for its tooling &amp; I/O</h2>
+  <div class="card">
+    <div class="graphwrap"><svg id="graph" width="100%" preserveAspectRatio="xMinYMin meet"></svg></div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="grid" style="margin-top:18px">
+    <!-- timeline -->
+    <div>
+      <h2 style="margin-top:0">Event ledger — append-only, monotonic seq (poll-since-seq)</h2>
+      <div class="controls">
+        <button class="btn" id="play">▶ Play</button>
+        <button class="btn" id="step">Step ▸</button>
+        <input type="range" id="scrub" min="0" value="0">
+        <label><input type="checkbox" id="showcache"> cache hits</label>
+      </div>
+      <div class="tl" id="tl"></div>
+      <p class="hint" id="tlhint"></p>
+    </div>
+
+    <!-- node detail + properties -->
+    <div>
+      <h2 style="margin-top:0">Node inspector</h2>
+      <div class="card np" id="np"><p class="hint">Click a node in the graph (or an event) to see its tools and its input → decision → output.</p></div>
+
+      <h2>Headline properties (P1–P5) + E1 — derived from this run's artifacts</h2>
+      <div class="card" id="props"></div>
+
+      <h2>Enrichment — data-provenance (profile DB + gated facts)</h2>
+      <div class="card" id="enrich"></div>
+    </div>
+  </div>
+</div>
+
+<script id="d-topo" type="application/json">{{ topology|tojson }}</script>
+<script id="d-evals" type="application/json">{{ evals|tojson }}</script>
+<script id="d-meta" type="application/json">{{ meta|tojson }}</script>
+<script>
+const TOPO = JSON.parse(document.getElementById('d-topo').textContent);
+const EVALS = JSON.parse(document.getElementById('d-evals').textContent);
+const META = JSON.parse(document.getElementById('d-meta').textContent);
+const LANE = TOPO.lanes;
+const NODE_BY_ID = {}; TOPO.nodes.forEach(n => NODE_BY_ID[n.id] = n);
+const EVAL_BY_ID = {}; (EVALS.nodes||[]).forEach(n => EVAL_BY_ID[n.id] = n);
+const laneColor = k => (LANE[k] && LANE[k].color) || 'var(--run)';
+
+let events = [];      // full loaded ledger
+let cursor = 0;       // replay pointer (index into visibleEvents)
+let selected = null;  // selected node id
+let playing = false, timer = null, lastSeq = 0;
+
+/* ---------- health chips ---------- */
+function renderChips(){
+  const p = META.properties_pass, t = META.properties_total;
+  const c = [
+    `<span class="chip ${p===t?'ok':'bad'}">P1–P5 <b>${p}/${t} pass</b></span>`,
+    `<span class="chip">profile <b>${META.profile}</b></span>`,
+    `<span class="chip ok">cost <b>$${(META.cost_usd||0).toFixed(0)} · offline</b></span>`,
+    `<span class="chip">seed <b>${META.seed}</b></span>`,
+    `<span class="chip">nodes <b>${META.node_count}</b></span>`,
+    `<span class="chip">events <b id="evcount">${META.total_events}</b></span>`,
+    `<span class="chip" title="${META.determinism}">replay <b>deterministic</b></span>`,
+  ];
+  document.getElementById('chips').innerHTML = c.join('');
+}
+
+/* ---------- phase ribbon ---------- */
+function renderRibbon(activePhase){
+  const done = new Set();
+  // phases up to and including active are 'done'/'active'
+  let hit = false;
+  document.getElementById('ribbon').innerHTML = META.phases.map(ph => {
+    let cls = 'ph';
+    if (ph === activePhase){ cls += ' active'; hit = true; }
+    else if (!hit) cls += ' done';
+    return `<div class="${cls}">${ph}</div>`;
+  }).join('');
+}
+
+/* ---------- node graph ---------- */
+const NW=152, NH=64, DX=170, DY=104, OX=22, OY=20;
+function nx(c){return OX + c*DX;} function ny(r){return OY + r*DY;}
+function renderGraph(){
+  const maxc = Math.max(...TOPO.nodes.map(n=>n.col));
+  const maxr = Math.max(...TOPO.nodes.map(n=>n.row));
+  const W = OX*2 + maxc*DX + NW, H = OY*2 + maxr*DY + NH;
+  const svg = document.getElementById('graph');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.style.minWidth = (W*0.62)+'px';
+  let s = `<defs><marker id="arw" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+    <path d="M0,1 L7,4 L0,7" fill="#33445c"/></marker></defs>`;
+  // edges
+  TOPO.edges.forEach(([a,b])=>{
+    const A=NODE_BY_ID[a], B=NODE_BY_ID[b]; if(!A||!B) return;
+    const ax=nx(A.col)+NW/2, ay=ny(A.row)+NH/2, bx=nx(B.col)+NW/2, by=ny(B.row)+NH/2;
+    s += `<path class="edge" marker-end="url(#arw)" d="M${ax},${ay} C${(ax+bx)/2},${ay} ${(ax+bx)/2},${by} ${bx},${by}"/>`;
+  });
+  // nodes
+  TOPO.nodes.forEach(n=>{
+    const x=nx(n.col), y=ny(n.row), col=laneColor(n.lane);
+    s += `<g class="nodebox" data-id="${n.id}" transform="translate(${x},${y})">
+      <rect class="body" width="${NW}" height="${NH}" rx="9"></rect>
+      <rect width="5" height="${NH}" rx="2" fill="${col}"></rect>
+      <text class="nlabel" x="14" y="22">${n.label}</text>
+      <text class="nsub" x="14" y="40">${LANE[n.lane]?LANE[n.lane].label:n.lane}</text>
+      <text class="nsub" x="14" y="54">${n.tools.length} tools</text>
+      ${n.property?`<g class="pbadge" transform="translate(${NW-40},10)"><rect width="32" height="16" rx="4"></rect><text x="16" y="12" text-anchor="middle" font-size="9">${n.property}</text></g>`:''}
+    </g>`;
+  });
+  svg.innerHTML = s;
+  svg.querySelectorAll('.nodebox').forEach(g=>g.addEventListener('click',()=>selectNode(g.dataset.id)));
+  // legend
+  document.getElementById('legend').innerHTML = Object.entries(LANE)
+    .map(([k,v])=>`<span><i style="background:${v.color}"></i>${v.label}</span>`).join('')
+    + `<span style="margin-left:auto;color:var(--mut)">arrows = data flow · P# = backs that property</span>`;
+}
+function highlightActiveNode(id){
+  document.querySelectorAll('.nodebox').forEach(g=>g.classList.toggle('active', g.dataset.id===id));
+}
+
+/* ---------- node inspector ---------- */
+function fmt(v){ return v==null ? '<span class="mut">—</span>' : '<pre>'+JSON.stringify(v,null,1)+'</pre>'; }
+function selectNode(id){
+  selected = id;
+  document.querySelectorAll('.nodebox').forEach(g=>g.classList.toggle('sel', g.dataset.id===id));
+  const n = NODE_BY_ID[id], e = EVAL_BY_ID[id] || {};
+  const ex = e.exemplar;
+  const prop = n.property ? n.property.split(',').map(p=>{
+    const pv = META.properties[p]; return `<span class="tag" style="color:${pv&&pv.pass?'var(--green)':'var(--red)'}">${p} ${pv&&pv.pass?'✓':'✗'}</span>`;
+  }).join(' ') : '';
+  document.getElementById('np').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px">
+      <h3>${n.label}</h3>
+      <span class="lanetag" style="background:${laneColor(n.lane)}">${LANE[n.lane].label}</span>
+      ${prop}
+    </div>
+    <div class="hint">${n.code} · computed ${e.n_computed||0}× · served from cache ${e.served_from_cache||0}×</div>
+    <div class="row"><div class="k">Tools</div><div class="toollist">${n.tools.map(t=>`<span>${t}</span>`).join('')}</div></div>
+    <div class="row"><div class="k">I/O contract</div>
+      <div class="io">
+        <div><div class="k">input</div><div class="v">${n.input}</div></div>
+        <div><div class="k">decision</div><div class="v">${n.decision}</div></div>
+        <div><div class="k">output</div><div class="v">${n.output}</div></div>
+      </div>
+    </div>
+    ${ex?`<div class="row"><div class="k">Representative event · seq ${ex.seq} · ${ex.event}</div>
+      <div class="hint" style="margin:2px 0 6px">${ex.detail||''}</div>
+      <div class="io">
+        <div><div class="k">input</div>${fmt(ex.input)}</div>
+        <div><div class="k">decision</div>${fmt(ex.decision)}</div>
+        <div><div class="k">output</div>${fmt(ex.output)}</div>
+      </div></div>`:'<div class="hint">No events recorded for this node in the run.</div>'}
+  `;
+}
+
+/* ---------- properties panel ---------- */
+function renderProps(){
+  const order = ['P1','P2','P3','P4','P5','E1'];
+  document.getElementById('props').innerHTML = order.map(p=>{
+    const v = META.properties[p]; if(!v) return '';
+    const claim = (TOPO.properties[p]||{}).claim || '';
+    const test = (TOPO.properties[p]||{}).test || '';
+    return `<div class="prop">
+      <div class="pp ${v.pass?'ok':'no'}">${p}${v.pass?' ✓':' ✗'}</div>
+      <div class="pd"><b>${claim}</b><br><span class="mut">${v.detail}</span>
+      <br><span class="mut" style="font-size:11px">↳ ${test} · node «${v.node}»</span></div>
+    </div>`;
+  }).join('');
+}
+
+function renderEnrichment(){
+  const e = META.enrichment;
+  const el = document.getElementById('enrich');
+  if(!e){ el.innerHTML = '<p class="hint">No enrichment run recorded.</p>'; return; }
+  const fa = e.fact_audit || {};
+  const facts = (e.facts||[]).map(f=>{
+    const c = f.verdict==='usable'?'var(--green)':(f.verdict==='disclaimer'?'var(--amber)':'var(--red)');
+    return `<div class="ev" style="grid-template-columns:84px 130px 1fr;cursor:default">
+      <span style="color:${c};font-weight:700">${f.verdict}</span>
+      <span>${f.key}</span>
+      <span class="det">${(f.value||'').replace(/</g,'&lt;')} <span class="mut">· ${f.source} · ${f.basis||'—'}</span></span></div>`;
+  }).join('');
+  const inlined = (e.personalization||[]).map(p=>`<li>${p.text.replace(/</g,'&lt;')} <span class="mut">«${p.source} · ${p.basis}»</span></li>`).join('');
+  el.innerHTML = `
+    <div class="hint">recipient <b>${e.recipient.company}</b> · mode <b>${e.mode}</b> ·
+      profile DB <code style="font-size:11px">${(e.profiles_db||{}).db_path||'profiles.sqlite'}</code></div>
+    <div class="pillrow" style="margin:8px 0">
+      <span class="tag" style="color:var(--green)">${e.usable} usable</span>
+      <span class="tag" style="color:var(--red)">${e.blocked} blocked / withheld</span>
+      <span class="tag">fact-audit catch ${Math.round((fa.catch_rate||0)*100)}% · false-block ${Math.round((fa.false_block||0)*100)}%</span>
+    </div>
+    <div class="k" style="font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);margin:6px 0 3px">gated facts (verdict · source · basis)</div>
+    ${facts}
+    <div class="k" style="font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);margin:10px 0 3px">inlined in copy (each with its receipt)</div>
+    <ul style="margin:0;padding-left:18px;font-size:12.5px">${inlined||'<li class="mut">none</li>'}</ul>
+    <p class="hint" style="margin-top:8px">Full catalog of paid/free sources + DB locations →
+      <a href="/enrichment-catalog">/enrichment-catalog</a> · readable via <code>/api/observe/profiles</code></p>`;
+}
+
+/* ---------- timeline / replay ---------- */
+function visible(){
+  const showCache = document.getElementById('showcache').checked;
+  return events.filter(e=> showCache || e.event!=='CACHE_HIT');
+}
+function renderTimeline(){
+  const vis = visible();
+  const scrub = document.getElementById('scrub');
+  scrub.max = Math.max(0, vis.length-1);
+  if(cursor>vis.length-1) cursor = vis.length-1;
+  scrub.value = cursor;
+  const rows = vis.map((e,i)=>{
+    const col = laneColor(e.lane);
+    const cls = i===cursor?'ev cur':(i>cursor?'ev future':'ev');
+    return `<div class="${cls}" data-i="${i}" data-node="${e.node}">
+      <span class="seq">${e.seq}</span>
+      <span class="lane" style="color:${col}">${e.lane}</span>
+      <span class="etype">${e.event}</span>
+      <span class="det">${(e.detail||'').replace(/</g,'&lt;')}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('tl').innerHTML = rows;
+  document.getElementById('tl').querySelectorAll('.ev').forEach(r=>{
+    r.addEventListener('click',()=>{ cursor=+r.dataset.i; onCursor(); selectNode(r.dataset.node); });
+  });
+  const cur = vis[cursor];
+  document.getElementById('tlhint').textContent =
+    `${vis.length} events shown · at seq ${cur?cur.seq:0} of ${events.length} total`;
+  syncCursorView();
+}
+function onCursor(){ const s=document.getElementById('scrub'); s.value=cursor; syncCursorView(); markCur(); }
+function markCur(){
+  const tl=document.getElementById('tl');
+  tl.querySelectorAll('.ev').forEach((r,i)=>{
+    r.classList.toggle('cur', i===cursor); r.classList.toggle('future', i>cursor);
+  });
+  const cur = tl.querySelector('.ev.cur'); if(cur) cur.scrollIntoView({block:'nearest'});
+}
+function syncCursorView(){
+  const vis = visible(); const cur = vis[cursor]; if(!cur) return;
+  highlightActiveNode(cur.node);
+  // active phase = most recent PHASE event at/under the cursor seq
+  let ph = META.phases[0];
+  for(const e of events){ if(e.seq>cur.seq) break; if(e.event==='PHASE') ph=e.detail; if(e.event==='RUN_START'&&e.output&&e.output.phases) {} }
+  renderRibbon(ph);
+}
+function play(){
+  if(playing){ playing=false; clearInterval(timer); document.getElementById('play').textContent='▶ Play'; return; }
+  playing=true; document.getElementById('play').textContent='❚❚ Pause';
+  timer=setInterval(()=>{
+    const vis=visible();
+    if(cursor>=vis.length-1){ playing=false; clearInterval(timer); document.getElementById('play').textContent='▶ Replay'; return; }
+    cursor++; onCursor();
+  }, 60);
+}
+
+/* ---------- poll-since-seq (tails a live trace; loads the recorded run) ---------- */
+async function poll(){
+  try{
+    const r = await fetch('/api/observe/events?since='+lastSeq);
+    const d = await r.json();
+    if(d.events && d.events.length){
+      events = events.concat(d.events); lastSeq = d.last_seq;
+      const ec=document.getElementById('evcount'); if(ec) ec.textContent=events.length;
+      renderTimeline();
+    }
+  }catch(e){ /* honest: if the server is gone, the board just stops advancing */ }
+}
+
+/* ---------- boot ---------- */
+renderChips(); renderRibbon(META.phases[0]); renderGraph(); renderProps(); renderEnrichment();
+document.getElementById('play').addEventListener('click',play);
+document.getElementById('step').addEventListener('click',()=>{const v=visible();if(cursor<v.length-1){cursor++;onCursor();}});
+document.getElementById('scrub').addEventListener('input',e=>{cursor=+e.target.value;onCursor();});
+document.getElementById('showcache').addEventListener('change',()=>{cursor=0;renderTimeline();});
+poll().then(()=>{ if(events.length){ cursor=0; renderTimeline(); } setInterval(poll, 2000); });
+</script>
+{% endif %}
+</body>
+</html>

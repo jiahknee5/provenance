@@ -1,1 +1,23 @@
 .DS_Store
+.venv/
+.env
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+# generated demo artifacts (reproducible from scripts + seed)
+data/demo/cache/
+data/demo/runs/
+data/demo/observe/
+data/demo/*.sqlite
+data/demo/*.sqlite-*
+data/demo/ledgers/
+# verification artifacts
+.playwright-mcp/
+/form.png
+/site.png
+/inspector.png
+/observatory-full.png
+/observatory-enrichment.png
+/site-personalized.png
+/enrichment-catalog.png

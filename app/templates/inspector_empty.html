@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Provenance inspector{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>Nothing to inspect yet.</h1>
+  <p class="sub">Run the demo pipeline first, then refresh:</p>
+  <pre class="code-block">.venv/bin/python -m scripts.pipeline</pre>
+  <p class="fineprint">It generates 1000 recipients, runs both campaigns, fires the drift
+     event, and computes the Assurance metrics — all deterministically.</p>
+</section>
+{% endblock %}

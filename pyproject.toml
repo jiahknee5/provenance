@@ -1,0 +1,15 @@
+[project]
+name = "provenance-demo"
+version = "0.1.0"
+description = "Provenance — end-to-end demo of the 5-module claim-verification system across email + website"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+# tests + scripts run from the provenance/ root; conftest.py puts root on sys.path
+pythonpath = ["."]
+
+[tool.provenance]
+# the global seed governs synthetic data, segment assignment, bandit RNG, and the oracle
+seed = 1729

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Thanks — Helix Analytics{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>Thanks, {{ r.name.split()[0] }}.</h1>
+  <p class="sub">Your personalized clinical-ops ROI report for <strong>{{ r.company }}</strong>
+     is ready. We've placed you in the <code>{{ r.segment }}</code> segment.</p>
+  {% if enrich %}
+  <p class="sub">We also enriched your profile from outside sources —
+     <strong>{{ enrich.usable }}</strong> fact(s) cleared the Enrichment Gate
+     {% if enrich.blocked %}and <strong>{{ enrich.blocked }}</strong> were withheld (no lawful basis){% endif %}.
+     Each was bound to its source + a recorded basis before we'd use it.</p>
+  {% endif %}
+  <p>Open your personalized page — every claim on it was verified by the Provenance Gate
+     before it rendered, and every personal fact carries its source:</p>
+  <p><a class="cta" href="/site/{{ r.token }}">View your personalized page →</a></p>
+  <p class="fineprint">recipient_id <code>{{ r.recipient_id }}</code> ·
+     token <code>{{ r.token }}</code> (opaque — no PII in the URL)</p>
+</section>
+{% endblock %}
