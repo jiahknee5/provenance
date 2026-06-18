@@ -1,0 +1,15 @@
+# Provenance demo — OPTIONAL real-model upgrades.
+# The demo runs end-to-end without any of these (deterministic offline defaults +
+# local Ollama judges). Install these only to upgrade verifier quality.
+
+# Real NLI entailment (replaces the lexical/numeric default scorer).
+# One-time ~1.6GB HuggingFace download of microsoft/deberta-v3-large-mnli on first use.
+transformers
+torch
+sentencepiece
+
+# Dense retrieval (augments the BM25 default).
+sentence-transformers
+
+# Claude API judge / generation (auto-enabled only if ANTHROPIC_API_KEY is set).
+anthropic

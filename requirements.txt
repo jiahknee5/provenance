@@ -1,0 +1,11 @@
+# Provenance demo — required (lightweight, runs fully offline on Python 3.11)
+fastapi
+uvicorn[standard]
+jinja2
+python-multipart
+pydantic
+numpy
+pyyaml
+httpx
+rank-bm25
+pytest

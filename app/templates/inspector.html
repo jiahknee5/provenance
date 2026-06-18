@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Provenance inspector{% endblock %}
+{% block content %}
+<h1>Provenance inspector</h1>
+<p class="sub">The five modules on one screen — verified outreach that can't say what it
+   can't prove, optimizing itself inside the truth.</p>
+
+<div class="stats">
+  <div class="stat"><b>{{ s.recipients }}</b><span>recipients · {{ s.segments }} segments</span></div>
+  <div class="stat good"><b>{{ s.assurance.gate_catch*100 }}%</b><span>Gate catch-rate<br>vs {{ s.assurance.baseline_catch*100 }}% single judge</span></div>
+  <div class="stat good"><b>{{ s.campaign1.lie_selections }}</b><span>lie selections<br>(constrained, {{ s.recipients }} sends)</span></div>
+  <div class="stat bad"><b>{{ s.twin_unconstrained.lie_selections }}</b><span>lie selections<br>(unconstrained twin)</span></div>
+</div>
+
+<!-- 1 · claim ledger -->
+<section class="card">
+  <h2>① The claim ledger — cited or killed</h2>
+  {% if spotlight %}
+  <div class="spotlight">
+    <p class="muted">{{ spotlight.note }}</p>
+    <div class="ledgerbox">
+      <strong>{{ spotlight.email.headline }}</strong>
+      <ul class="claimlist">
+        {% for c in spotlight.email.claims %}
+        <li><span class="claim {{ c.verdict }}">{{ c.text }}</span>
+            <span class="pill {{ c.verdict }}">{{ c.verdict }}</span>
+            <span class="muted small">— {{ c.source }}{% if c.flags %} · {{ c.flags|join(', ') }}{% endif %}</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  {% endif %}
+  <details><summary>all segments — email &amp; website (same claims, same ledger)</summary>
+    <div class="seggrid">
+      {% for seg, L in ledgers.items() if seg != '_spotlight' %}
+      <div class="segcard">
+        <div class="seghdr">{{ seg }} · {{ L.recipient }} @ {{ L.company }}</div>
+        {% for ch in ['email','website'] %}
+        <div class="chrow"><span class="chlabel">{{ ch }}</span>
+          {% for c in L[ch].claims %}<span class="pill {{ c.verdict }}" title="{{ c.text }}">{{ c.claim_id }}</span>{% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+  </details>
+</section>
+
+<!-- 2 · optimizer -->
+<section class="card">
+  <h2>② The optimizer — can't win by lying</h2>
+  <p class="muted">Same recipients, same oracle. The only difference is the truth boundary:
+     the constrained bandit may pull only Gate-cleared arms; the twin may pull the lie.</p>
+  {{ regret_svg|safe }}
+  <p class="callout">The planted lie has the <b>highest</b> latent click-rate. The
+     constrained bandit selected it <b>{{ s.campaign1.lie_selections }}</b> times across
+     {{ s.recipients }} sends. The identical unconstrained bandit selected it
+     <b>{{ s.twin_unconstrained.lie_selections }}</b> times and it won
+     <b>{{ s.twin_unconstrained.segments_won_by_lie }}/{{ s.segments }}</b> segments.
+     Falsehood never entered the reward loop.</p>
+  <table>
+    <tr><th>segment</th><th>constrained winner (honest)</th><th>est. CTR</th><th>unconstrained twin</th></tr>
+    {% for row in seg_contrast %}
+    <tr><td>{{ row.segment }}</td><td>variant {{ row.honest_arm }}</td>
+        <td>{{ '%.0f'|format(row.honest_ctr*100) }}%</td>
+        <td>{% if row.twin_winner=='LIE' %}<span class="pill red">LIE wins</span>{% else %}honest{% endif %}</td></tr>
+    {% endfor %}
+  </table>
+</section>
+
+<!-- 3 · drift -->
+<section class="card">
+  <h2>③ Drift monitor — truth is temporal</h2>
+  <p class="muted">{{ drift.change }} — re-verified only the affected claim(s), paused only
+     the variants that assert them.</p>
+  <table>
+    <tr><th>affected claim</th><th>before</th><th>after</th><th>recomputed</th><th>variants paused</th></tr>
+    <tr><td>{{ drift.affected_claims|join(', ') }}</td>
+        <td><span class="pill {{ drift.before['c_tco'] }}">{{ drift.before['c_tco'] }}</span></td>
+        <td><span class="pill {{ drift.after['c_tco'] }}">{{ drift.after['c_tco'] }}</span></td>
+        <td>{{ drift.recomputed_ids|join(', ') }}</td>
+        <td>{{ drift.paused_variants|join(', ') }}</td></tr>
+  </table>
+  <p class="fineprint">Campaign 2 then warm-started from Campaign 1 and adapted: regret fell
+     from {{ s.campaign1.final_regret }} to {{ s.campaign2.final_regret }} on the post-drift
+     truth boundary.</p>
+</section>
+
+<!-- 4 · assurance -->
+<section class="card">
+  <h2>④ Assurance Lab — proof, not a promise</h2>
+  <div class="assrow">
+    <div>
+      <p class="muted">Catch-rate by trap type — the Gate vs a single number-blind judge.</p>
+      {{ bars_svg|safe }}
+    </div>
+    <div>
+      <p class="muted">Calibration (reliability)</p>
+      {{ cal_svg|safe }}
+      <p class="fineprint">ECE {{ assurance.ece }} · n={{ assurance.n_traps + assurance.n_clean }} · illustrative</p>
+    </div>
+  </div>
+  <p class="callout">Gate catch-rate <b>{{ (assurance.gate.catch_rate*100)|round(1) }}%</b> vs
+     single-judge <b>{{ (assurance.baseline.catch_rate*100)|round(1) }}%</b> at
+     <b>{{ (assurance.gate.false_reject*100)|round(1) }}%</b> false-reject. The single judge
+     catches <b>{{ (assurance.baseline.by_type.number_drift*100)|round(0) }}%</b> of
+     number-drift traps — the material ones — the Gate catches
+     <b>{{ (assurance.gate.by_type.number_drift*100)|round(0) }}%</b>.</p>
+  <table>
+    <tr><th>channel</th><th>traps</th><th>Gate catch</th><th>single-judge catch</th><th>false-reject</th></tr>
+    {% for ch, m in assurance.channels.items() %}
+    <tr><td>{{ ch }}</td><td>{{ m.n_traps }}</td><td>{{ (m.gate_catch_rate*100)|round(1) }}%</td>
+        <td>{{ (m.baseline_catch_rate*100)|round(1) }}%</td><td>{{ (m.gate_false_reject*100)|round(1) }}%</td></tr>
+    {% endfor %}
+  </table>
+</section>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Assessment booked — Helix Analytics{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>You're booked, {{ r.name.split()[0] }}.</h1>
+  <p class="sub">A Helix Analytics specialist will reach out about your {{ r.company }}
+     ROI assessment.</p>
+  <p class="fineprint">Your click was logged as a website CTA for segment
+     <code>{{ r.segment }}</code> — it feeds the same bandit that optimizes the campaign,
+     inside the truth boundary.</p>
+  <p><a href="/inspector">See it in the Provenance inspector →</a></p>
+</section>
+{% endblock %}

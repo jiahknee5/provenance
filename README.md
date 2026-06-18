@@ -8,6 +8,27 @@ This is the self-contained home for the Provenance capstone, carved out of the L
 
 ---
 
+## ▶ The working demo is built
+
+A runnable, deterministic end-to-end demo of all five modules across **email + website**
+now lives here (`pipeline/`, `app/`, `scripts/`, `tests/`). It runs **fully offline, no API
+key**. See **[RUNBOOK.md](./RUNBOOK.md)** and the locked **[PRD](./docs/01-intake/PRD.md)**.
+
+```bash
+.venv/bin/python -m pytest -q                       # 25 tests: the 5 headline properties + per-module
+.venv/bin/python -m scripts.pipeline                # full pipeline, byte-identical each run
+PYTHONPATH=. .venv/bin/python -m uvicorn app.main:app --port 8099   # form · /site/<token> · /inspector
+```
+
+What it proves (in `tests/`): the truth-bounded bandit **can't pick the planted lie**
+(0 selections vs the unconstrained twin's ~734); the legal-hold flip blocks the held claim;
+drift re-verifies **only** the affected claims; the website renders **only** Gate-passed
+claims; the Assurance Lab beats a single judge (**100% vs 24%** catch at 0% false-reject).
+Build decisions: **[docs/05-build/DECISIONS.md](./docs/05-build/DECISIONS.md)** ·
+deck reconciliation: **[docs/RECONCILIATION.md](./docs/RECONCILIATION.md)**.
+
+---
+
 ## Start here
 
 | You are… | Go to |
