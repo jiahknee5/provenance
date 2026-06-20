@@ -52,13 +52,11 @@
   .traps b{color:var(--ink)}
   @media(max-width:700px){.traps{grid-template-columns:1fr}}
 </style>
+<link rel="stylesheet" href="/static/atlas.css">
 </head>
 <body>
-<header class="top">
-  <span class="brand"><span class="dot">◈</span> Assurance &amp; evals</span>
-  <span class="hint">every step, golden-tested · metrics over time</span>
-  <nav><a href="/">Form</a><a href="/inspector">Inspector</a><a href="/observatory">Observatory</a><a href="/assurance">Assurance</a></nav>
-</header>
+{% set subtitle = "Assurance &amp; evals" %}
+{% include "_nav.html" %}
 
 {% if empty %}
 <div class="empty"><h2 style="color:var(--ink)">No evals yet</h2>

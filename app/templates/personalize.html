@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Super-personalization — where does the data come from?{% endblock %}
+{% block content %}
+
+{% macro dots(n) %}<span class="creep-dots">{% for i in range(5) %}{% if i < n %}●{% else %}<span class="off">●</span>{% endif %}{% endfor %}</span>{% endmacro %}
+
+<div class="hero">
+  <span class="synthtag">100% synthetic persona — no real PII</span>
+  <h1>How personalized can a website get — and where does each fact come from?</h1>
+  <p class="sub">One visitor, <b>{{ persona.name }}</b>. Climb the tiers to see how much a site can
+  know — from an anonymous landing page, to a Google sign-in, to a purchased data append.
+  Every fact is tagged with its <b>provenance</b>: collected by us, declared, granted via Google,
+  or bought. Then flip <b>tasteful → creepy</b> to see the difference a surface policy makes.</p>
+</div>
+
+<!-- tier rail: the escalation -->
+<div class="tierrail">
+  {% for t in tiers %}
+  <a class="tierbtn {{ 'on' if t.id == tier }}" href="/personalize?tier={{ t.id }}&mode={{ mode }}">
+    <span class="lk">{{ loop.index0 }} · {{ t.login }}</span>
+    <b>{{ t.label }}</b>
+  </a>
+  {% endfor %}
+</div>
+<p class="tierblurb">{{ tiers[tier_order].blurb }}</p>
+
+<!-- mode toggle: same data, policy on vs off -->
+<div style="margin-top:10px">
+  <span class="modetoggle">
+    <a class="{{ 'on' if mode == 'tasteful' }}" href="/personalize?tier={{ tier }}&mode=tasteful">Tasteful</a>
+    <a class="{{ 'on cr' if mode == 'creepy' }}" href="/personalize?tier={{ tier }}&mode=creepy">Creepy 👁</a>
+  </span>
+  <span class="muted small" style="margin-left:10px">
+    {% if mode == 'tasteful' %}honours each fact's surface policy (say / allude / hold){% else %}
+    surface policy switched OFF — every available fact, printed, tagged with where it came from{% endif %}
+  </span>
+</div>
+
+<!-- counts strip -->
+<div class="stats">
+  <div class="stat"><b>{{ counts.available }}</b><span>of {{ counts.total }} facts knowable at this tier</span></div>
+  {% if mode == 'tasteful' %}
+  <div class="stat good"><b>{{ counts.said }}</b><span>stated (say)</span></div>
+  <div class="stat"><b>{{ counts.steer }}</b><span>used to steer (allude)</span></div>
+  <div class="stat"><b>{{ counts.withheld }}</b><span>known but withheld (hold)</span></div>
+  {% else %}
+  <div class="stat bad"><b>{{ counts.shown }}</b><span>printed on the page</span></div>
+  <div class="stat"><b>{{ counts.withheld if False else (counts.shown - counts.said - counts.steer) }}</b><span>that a policy would have hidden</span></div>
+  {% endif %}
+  <div class="stat"><b>{{ counts.paid }}</b><span>bought from third parties</span></div>
+</div>
+
+<!-- THE RENDERED PAGE -->
+{% if mode == 'tasteful' %}
+<div class="preview">
+  <h2>{{ page.headline }}</h2>
+  {% for l in page.lines %}
+    {% if l.policy == 'cta' %}
+      <a class="pcta" href="#">{{ l.text }}</a>
+    {% else %}
+      <p>{{ l.text }}{% if l.policy not in ('—','say') %}<span class="pol">{{ l.policy }}</span>{% endif %}</p>
+    {% endif %}
+  {% endfor %}
+  <div class="steernote">🛟 <b>What the visitor never sees:</b> {{ page.steer_note }}</div>
+</div>
+{% else %}
+<div class="preview creep">
+  <h2>{{ page.headline }}</h2>
+  {% for blk in page.blocks %}
+    <div class="creeptier">▼ {{ blk.tier_label }}</div>
+    {% for ln in blk.lines %}
+      <div class="cline">
+        <span class="txt">{% if ln.would_hold %}<span class="held">⚠</span>{% endif %}{{ ln.text }}</span>
+        <span class="prov"><b>{{ ln.source_label }}</b><br>{{ ln.vendor }} · {{ ln.cost }}</span>
+      </div>
+    {% endfor %}
+  {% endfor %}
+  <div class="steernote" style="background:#2a0f18;border-color:#3a1622;color:#f0d9e0">
+    😬 Every line above is real data with a real way to obtain it. The only thing separating
+    this from the tasteful page is the <b>surface policy</b> — none of this is *new* collection.
+  </div>
+</div>
+{% endif %}
+
+<!-- WHERE THE DATA COMES FROM -->
+<div class="card">
+  <h3 style="margin-top:0">Where the data comes from</h3>
+  <p class="muted small">Six provenance classes. The count is how many facts each one yields
+  <b>at this tier</b>. See the full paid/free source list on the
+  <a href="/enrichment-catalog">enrichment catalog</a>.</p>
+  <div class="srcgrid">
+    {% for s in by_source %}
+    <div class="srccard {{ '' if s.any else 'zero' }}">
+      <div class="srchdr">{{ s.label }} <span class="srccount">{{ s.count }}</span></div>
+      <div class="muted" style="margin-top:4px">{{ s.where }}</div>
+      <div class="cost">💵 {{ s.cost }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% if unlocked_here %}
+<div class="card">
+  <h3 style="margin-top:0">Unlocked by reaching “{{ tier_label }}”</h3>
+  <ul class="claimlist">
+    {% for u in unlocked_here %}
+    <li><span class="srcbadge">{{ u.source_label }}</span> <b>{{ u.label }}:</b>
+        <span class="muted">{{ u.value }}</span> &nbsp;{{ dots(u.creepiness) }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<!-- THE PROVENANCE LEDGER -->
+<div class="card">
+  <h3 style="margin-top:0">The provenance ledger — every fact, where it's from, what we did with it</h3>
+  <p class="muted small">
+    <span class="disp said">said</span> stated literally ·
+    <span class="disp steer">steer</span> shapes selection, not stated ·
+    <span class="disp withheld">withheld</span> known, held back ·
+    <span class="disp shown">shown</span> printed (creepy) ·
+    <span class="disp locked">locked</span> needs a higher tier
+  </p>
+  <div class="ledwrap">
+    <table class="led">
+      <tr><th>Data point</th><th>Value (synthetic)</th><th>Where from</th><th>Cost</th>
+          <th>Creepy</th><th>Policy</th><th>Here</th></tr>
+      {% for r in ledger %}
+      <tr style="{{ 'opacity:.45' if r.disposition == 'locked' }}">
+        <td>{{ r.label }}<div class="muted small">{{ r.how }}</div></td>
+        <td class="val">{{ r.value }}</td>
+        <td><span class="srcbadge">{{ r.source_label }}</span><div class="muted small">{{ r.vendor }}</div></td>
+        <td class="small">{{ r.cost }}</td>
+        <td>{{ dots(r.creepiness) }}</td>
+        <td class="small">{{ r.surface }}</td>
+        <td><span class="disp {{ r.disposition }}">{{ r.disposition }}</span></td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+
+<p class="fineprint">Text only, for now — the same signals would drive the <i>layout</i> next:
+reorder sections, swap hero imagery, change the offer. The provenance ledger is the point —
+nothing reaches the page without a receipt for where it came from.</p>
+
+{% endblock %}

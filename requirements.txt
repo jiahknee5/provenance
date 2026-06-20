@@ -8,4 +8,5 @@ numpy
 pyyaml
 httpx
 rank-bm25
+segno
 pytest

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin — {{ d.name }}</title>
+<style>
+  :root{--bg:#0b1018;--panel:#121a27;--panel2:#0f1622;--line:#1f2c3e;--ink:#dbe6f2;--mut:#7e8ea3;--accent:#4cc4d4;
+        --acc: {{ d.archetype.accent }}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:13.5px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  a{color:var(--accent);text-decoration:none}
+  header.top{display:flex;align-items:center;gap:14px;padding:11px 18px;border-bottom:1px solid var(--line);background:var(--panel2);flex-wrap:wrap}
+  header .brand{font-weight:700}.brand .dot{color:var(--acc)}
+  header .who{color:var(--mut)}
+  header select,header .tier a{background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:7px;padding:4px 8px;font-size:12px}
+  header .tier{margin-left:auto;display:flex;gap:5px;align-items:center;color:var(--mut)}
+  header .tier a.on{background:var(--acc);color:#08121b;border-color:var(--acc);font-weight:700}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:0;height:calc(100vh - 50px)}
+  @media(max-width:900px){.grid{grid-template-columns:1fr;height:auto}}
+  .left{border-right:1px solid var(--line)}
+  iframe{width:100%;height:100%;min-height:560px;border:none;background:#fff}
+  .right{padding:16px 18px;overflow:auto}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:13px 15px;margin-bottom:13px}
+  h2{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);margin:0 0 9px}
+  .email .subj{font-weight:700;margin-bottom:6px}
+  .email .ln{color:#c2d0e0;padding:2px 0}
+  .email .cta{display:inline-block;margin-top:8px;background:var(--acc);color:#08121b;border-radius:7px;padding:5px 11px;font-weight:700}
+  .arch{font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;color:#08121b;background:var(--acc)}
+  .dp{display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #16202e;font-size:12.5px}
+  .dp:last-child{border:none}.dp .k{color:var(--mut);min-width:120px}
+  .src{font-size:9px;text-transform:uppercase;letter-spacing:.04em;border-radius:4px;padding:1px 5px;font-weight:700}
+  .src.vector{background:#10243f;color:#6b9eff}.src.hubspot{background:#13313f;color:#4cc4d4}
+  .src.clay{background:#231a0a;color:#d98a16}
+  .fam{margin:8px 0;border-left:2px solid var(--line);padding-left:10px}
+  .fam .fl{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
+  .seg{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:2px 7px;margin:3px 4px 0 0;font-size:11.5px}
+  .seg .ev{color:var(--mut);font-size:10px}
+  .lever{font-size:12px;color:#c2d0e0;padding:2px 0}
+  .tiernote{color:var(--mut);font-size:11.5px;margin-top:6px}
+</style>
+<link rel="stylesheet" href="/static/atlas.css">
+</head>
+<body>
+<header class="top">
+  <span class="brand"><span class="dot">◈</span> {{ d.name }}</span>
+  <span class="who">{{ d.email }}</span>
+  <span class="arch">{{ d.archetype.label }}</span>
+  <a href="/admin/landings">← all 10</a>
+  <select onchange="location.href='/admin/landing/'+this.value+'?tier={{ d.tier }}'">
+    {% for u in users %}<option value="{{ u.id }}" {{ 'selected' if u.id==d.id else '' }}>{{ u.name }}</option>{% endfor %}
+  </select>
+  <span class="tier">tier {% for t in [1,2,3,4] %}<a class="{{ 'on' if t==d.tier else '' }}" href="/admin/landing/{{ d.id }}?tier={{ t }}">{{ t }}</a>{% endfor %}</span>
+</header>
+<div class="grid">
+  <div class="left"><iframe src="/lp?email={{ d.email }}&tier={{ d.tier }}" title="landing"></iframe></div>
+  <div class="right">
+    <div class="card email">
+      <h2>Personalized email</h2>
+      <div class="subj">{{ d.email_preview.subject }}</div>
+      {% for ln in d.email_preview.body %}<div class="ln">{{ ln }}</div>{% endfor %}
+      <span class="cta">{{ d.email_preview.cta }}</span>
+      {% if magic_link %}<div class="tiernote" style="margin-top:10px">magic link (no login, no typing) → <a href="{{ magic_link }}">{{ magic_link }}</a></div>{% endif %}
+      {% if magic_qr %}<div class="qrrow" style="margin-top:8px;display:flex;align-items:center;gap:12px">
+        <div class="qrbox" style="background:#fff;padding:6px;border-radius:8px;line-height:0">{{ magic_qr|safe }}</div>
+        <div class="tiernote">…or this per-person QR — scan it and their personalized site loads instantly. No login, no form. (This is the "just a QR" path for your 40.)</div>
+      </div>
+      <style>.qrbox svg{width:120px;height:120px;display:block}</style>{% endif %}
+    </div>
+
+    <div class="card">
+      <h2>How this page was built</h2>
+      <div style="margin-bottom:10px"><b>Archetype:</b> <span class="arch">{{ d.archetype.label }}</span>
+        <span class="tiernote">chosen because: {{ d.archetype.reason }} · for {{ d.archetype['for'] }}</span></div>
+
+      <h2 style="margin-top:6px">1 · Data we matched on</h2>
+      {% for dp in d.explanation.data_points %}
+      <div class="dp"><span class="k">{{ dp.label }}</span><span>{{ dp.value }}</span><span class="src {{ dp.source }}">{{ dp.source }}</span></div>
+      {% endfor %}
+
+      <h2 style="margin-top:12px">2 · Segments (with evidence)</h2>
+      {% for fam_id, fam in d.explanation.segments.items() %}
+      <div class="fam"><div class="fl">{{ fam.label }} <span style="opacity:.6">· {{ fam.source }}</span></div>
+        {% for s in fam.segments %}<span class="seg">{{ s.label }} <span class="ev">({{ s.evidence|join(', ') }})</span></span>{% endfor %}
+      </div>
+      {% endfor %}
+
+      <h2 style="margin-top:12px">3 · Design inferred from their data</h2>
+      {% for e in d.design.evidence %}<div class="lever">• <b>{{ e.dim }}</b>: {{ e.value }} <span class="tiernote">← {{ e.why }}</span></div>{% endfor %}
+      <div class="lever" style="margin-top:6px;color:var(--mut)">section order: {{ d.archetype.sections|join(' → ') }} · density {{ d.archetype.density }}</div>
+
+      <h2 style="margin-top:12px">4 · Context tier {{ d.tier }} ({{ d.tier_meta.label }})</h2>
+      <div class="tiernote">{{ d.tier_meta.uses }} · surface policy: {{ d.tier_meta.policy }}.
+        Higher tiers reveal more personal lines on the page (left) — flip the tier above.</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

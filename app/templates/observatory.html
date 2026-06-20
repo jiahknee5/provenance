@@ -85,15 +85,11 @@
   .empty code{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:3px 8px;color:var(--accent)}
   .hint{color:var(--mut);font-size:12px;margin:6px 0 0}
 </style>
+<link rel="stylesheet" href="/static/atlas.css">
 </head>
 <body>
-<header class="top">
-  <span class="brand"><span class="dot">◈</span> Provenance Observatory</span>
-  <span style="color:var(--mut);font-size:12px">every node's input · decision · output, watchable</span>
-  <nav>
-    <a href="/">Form</a><a href="/inspector">Inspector</a><a href="/observatory">Observatory</a>
-  </nav>
-</header>
+{% set subtitle = "Observatory" %}
+{% include "_nav.html" %}
 
 {% if empty %}
 <div class="empty">

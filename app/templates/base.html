@@ -3,20 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Helix Analytics{% endblock %}</title>
+  <title>{% block title %}Provenance{% endblock %}</title>
+  <link rel="stylesheet" href="/static/atlas.css">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand"><span class="logo">◈</span> Helix Analytics</div>
-    <nav>
-      <a href="/">Request the ROI report</a>
-      <a href="/inspector">Provenance inspector</a>
-      <a href="/observatory">Observatory</a>
-      <a href="/assurance">Assurance</a>
-      <a href="/enrichment-catalog">Enrichment catalog</a>
-    </nav>
-  </header>
+  {% include "_nav.html" %}
   <main>{% block content %}{% endblock %}</main>
   <footer class="foot">
     Helix Analytics · clinical-ops ROI analytics ·

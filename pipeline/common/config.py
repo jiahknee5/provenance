@@ -27,10 +27,12 @@ RULES_DIR = PROJECT_ROOT / "rules"
 DB_PATH = Path(os.environ.get("PROVENANCE_DB_PATH", str(DATA_DIR / "provenance.sqlite")))
 PROFILES_DB_PATH = Path(os.environ.get("PROVENANCE_PROFILES_DB_PATH",
                                        str(DATA_DIR / "profiles.sqlite")))  # profiles + fact receipts
+CUSTOMERS_DB_PATH = Path(os.environ.get("PROVENANCE_CUSTOMERS_DB_PATH",
+                                        str(DATA_DIR / "customers.sqlite")))  # funnel timeline + facts
 USERS_PATH = DATA_DIR / "users.jsonl"
 
 for _d in (DATA_DIR, SOURCES_DIR, CLAIMS_DIR, LEDGERS_DIR, RUNS_DIR, CACHE_DIR, OBSERVE_DIR, RULES_DIR,
-           DB_PATH.parent, PROFILES_DB_PATH.parent):
+           DB_PATH.parent, PROFILES_DB_PATH.parent, CUSTOMERS_DB_PATH.parent):
     _d.mkdir(parents=True, exist_ok=True)
 
 # ---- global seed -----------------------------------------------------------
@@ -76,3 +78,15 @@ ENRICH_MODE = os.environ.get("PROVENANCE_ENRICH", "synthetic").lower()
 
 def enrich_live() -> bool:
     return ENRICH_MODE == "live"
+
+
+# ---- Google OAuth (the /google demo) ---------------------------------------
+# When both are set (a Google Cloud OAuth client + redirect to <base>/google/callback),
+# the page does a REAL "Sign in with Google" and fills the top tier with the actual profile.
+# Otherwise it runs in demo mode (synthetic, clearly labeled) — offline + safe.
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
+
+
+def google_oauth_ready() -> bool:
+    return bool(GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET)

@@ -244,6 +244,10 @@ def main() -> dict:
     golden = run_golden(_read_ledger())
     (OBSERVE_DIR / "golden_evals.json").write_text(json.dumps(golden, indent=2, default=str))
 
+    # funnel scenarios (customer journeys + surface-policy views) for the funnel dashboard
+    from pipeline.customer.scenarios import report as funnel_report
+    (OBSERVE_DIR / "funnel.json").write_text(json.dumps(funnel_report(), indent=2, default=str))
+
     meta = derive_artifacts(summary, enrich_demo)
     _append_history(meta, golden)
 

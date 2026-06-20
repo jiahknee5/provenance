@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin — cohort landings</title>
+<style>
+  :root{--bg:#0b1018;--panel:#121a27;--panel2:#0f1622;--line:#1f2c3e;--ink:#dbe6f2;--mut:#7e8ea3;--accent:#4cc4d4}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  header.top{display:flex;align-items:center;gap:16px;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--panel2)}
+  header .brand{font-weight:700}.brand .dot{color:var(--accent)}
+  header nav{margin-left:auto;display:flex;gap:15px;font-size:13px}a{color:var(--accent);text-decoration:none}
+  .wrap{padding:20px;max-width:1200px;margin:0 auto}
+  .sources{font-size:12px;color:var(--mut);margin-bottom:14px}
+  .sources .on{color:#2bb673;border:1px solid #1f5e44;border-radius:6px;padding:2px 8px;margin-right:6px}
+  .sources .off{color:#54627a;border:1px solid var(--line);border-radius:6px;padding:2px 8px;margin-right:6px;text-decoration:line-through}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+  .u{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:14px;text-decoration:none;color:var(--ink);display:block;border-top:3px solid var(--acc)}
+  .u:hover{border-color:var(--accent)}
+  .u .nm{font-weight:700;font-size:15px}
+  .u .ti{color:var(--mut);font-size:12.5px;margin:2px 0 10px}
+  .u .arch{font-size:11px;font-weight:700;border-radius:999px;padding:3px 9px;display:inline-block;color:#08121b}
+  .u .why{color:var(--mut);font-size:11.5px;margin-top:8px}
+  h1{font-size:19px}
+</style>
+<link rel="stylesheet" href="/static/atlas.css">
+</head>
+<body>
+{% set subtitle = "Cohort landings" %}
+{% include "_nav.html" %}
+<div class="wrap">
+  <h1>10 cohort users — each gets a different landing page</h1>
+  <p class="sources">Core data sources:
+    {% for s in core %}<span class="on">{{ s }}</span>{% endfor %}
+    <span class="off">broker</span><span class="off">identity graph</span><span class="off">deep OAuth</span>
+    <span style="color:var(--mut)">— greyed sources are catalogued but not used here.</span></p>
+  <div class="grid">
+    {% for r in rows %}
+    <a class="u" href="/admin/landing/{{ r.id }}" style="--acc: {{ r.archetype.accent }}">
+      <div class="nm">{{ r.name }}</div>
+      <div class="ti">{{ r.title }} · {{ r.company }}</div>
+      <span class="arch" style="background: {{ r.archetype.accent }}">{{ r.archetype.label }}</span>
+      <div class="why">chosen because: {{ r.archetype.reason }}</div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+</body>
+</html>

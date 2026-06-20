@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ d.name.split()[0] }} — your AI path</title>
+<style>
+  :root{
+    --accent: {{ d.design.accent }}; --accent2: {{ d.design.accent2 }};
+    --bg: {{ d.design.bg }}; --surface: {{ d.design.surface }}; --ink: {{ d.design.ink }};
+    --mut: {{ d.design.mut }}; --line: {{ d.design.line }};
+    --weight: {{ d.design.weight }}; --tracking: {{ d.design.tracking }};
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:16px/1.62 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  body.voice-refined h1,body.voice-refined .eyebrow{font-family:Georgia,"Times New Roman",serif}
+  a{color:inherit}
+  /* top bar */
+  .bar{display:flex;align-items:center;gap:10px;padding:9px 20px;background:var(--surface);
+       border-bottom:1px solid var(--line);font-size:12px;color:var(--mut);flex-wrap:wrap}
+  .bar .badge{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-radius:999px;padding:3px 11px;font-weight:800;font-size:11px}
+  .bar b{color:var(--ink)} .bar .tiers{margin-left:auto;display:flex;gap:5px;align-items:center}
+  .bar .tiers a{font-size:11px;border:1px solid var(--line);border-radius:6px;padding:3px 8px;text-decoration:none;color:var(--mut)}
+  .bar .tiers a.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  /* hero */
+  .hero{position:relative;overflow:hidden;padding:76px 22px 130px;color:#fff;
+        background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%)}
+  .hero::before{content:"";position:absolute;inset:-30%;opacity:.5;background-size:cover;pointer-events:none}
+  .motif-orbs .hero::before{background:radial-gradient(40% 40% at 20% 20%,#ffffff55,transparent),radial-gradient(45% 45% at 85% 30%,#00000044,transparent),radial-gradient(50% 50% at 60% 90%,#ffffff33,transparent)}
+  .motif-mesh .hero::before{background:radial-gradient(35% 35% at 15% 30%,#ffffff44,transparent),radial-gradient(40% 40% at 80% 60%,#ffffff33,transparent),radial-gradient(40% 40% at 50% 10%,#00000033,transparent)}
+  .motif-rays .hero::before{background:repeating-conic-gradient(from 0deg at 80% 10%,#ffffff14 0deg 8deg,transparent 8deg 16deg)}
+  .motif-grid .hero::before{background-image:linear-gradient(#ffffff1c 1px,transparent 1px),linear-gradient(90deg,#ffffff1c 1px,transparent 1px);background-size:34px 34px;inset:0;opacity:.4}
+  .motif-dots .hero::before{background-image:radial-gradient(#ffffff3a 1.5px,transparent 1.6px);background-size:22px 22px;inset:0;opacity:.5}
+  .hwrap{position:relative;max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1.3fr .9fr;gap:30px;align-items:center}
+  @media(max-width:760px){.hwrap{grid-template-columns:1fr}}
+  .eyebrow{display:inline-block;font-size:12px;{% if d.design.eyebrow_caps %}text-transform:uppercase;letter-spacing:.18em;{% endif %}opacity:.92;background:#ffffff22;border:1px solid #ffffff33;border-radius:999px;padding:4px 11px}
+  h1.display{font-size:clamp(34px,6vw,62px);font-weight:var(--weight);letter-spacing:var(--tracking);line-height:1.04;margin:14px 0 12px}
+  .hero p.sub{font-size:18px;opacity:.94;margin:0 0 24px;max-width:30ch}
+  .cta{display:inline-block;background:#fff;color:#10141b;font-weight:800;border-radius:12px;padding:14px 22px;text-decoration:none;box-shadow:0 10px 30px #0003;transition:transform .15s, box-shadow .15s}
+  .cta:hover{transform:translateY(-2px);box-shadow:0 16px 40px #0004}
+  .statcard{background:#ffffff1f;border:1px solid #ffffff33;border-radius:20px;padding:26px;text-align:center;backdrop-filter:blur(6px)}
+  .statcard .big{font-size:clamp(46px,8vw,84px);font-weight:900;line-height:.95;letter-spacing:-.03em}
+  .statcard .lab{opacity:.92;margin-top:8px;font-size:14px}
+  .logos{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .logos span{background:#ffffff22;border:1px solid #ffffff33;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700}
+  .prog{height:8px;background:#ffffff2e;border-radius:999px;margin-top:16px;overflow:hidden}
+  .prog i{display:block;height:100%;width:62%;background:#fff;border-radius:999px}
+  /* body */
+  main{max-width:1000px;margin:0 auto;padding:0 22px 60px}
+  .personal{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);
+            border-radius:16px;padding:16px 18px;margin:-78px 0 30px;position:relative;
+            box-shadow:0 18px 50px #0000001f}
+  .personal h3{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--mut)}
+  .pl{display:flex;gap:10px;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--line)}
+  .pl:last-child{border:none}
+  .pl .s{font-size:9px;text-transform:uppercase;letter-spacing:.05em;font-weight:800;border-radius:5px;padding:2px 7px;white-space:nowrap}
+  .s.say{background:#1f9d5722;color:#1f9d57}.s.allude{background:#c47f1222;color:#c47f12}
+  .s.inferred{background:#3b5bdb22;color:#5b8def}.s.creepy{background:#d23b3b22;color:#e0524a}
+  .pl .txt{flex:1}.pl .frm{font-size:11px;color:var(--mut);opacity:.8;white-space:nowrap}
+  .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+  .sec{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;transition:transform .18s,border-color .18s}
+  .sec:hover{transform:translateY(-3px);border-color:var(--accent)}
+  .sec h2{margin:0 0 6px;font-size:18px;font-weight:var(--weight)}.sec p{margin:0;color:var(--mut)}
+  .proof{margin:30px 0 0}
+  .stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:640px){.stats3{grid-template-columns:1fr}}
+  .st{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;text-align:center}
+  .st .n{font-size:34px;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .st .l{color:var(--mut);font-size:13px;margin-top:4px}
+  .quote{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:16px;padding:22px 24px;font-size:19px}
+  .quote .who{color:var(--mut);font-size:13px;margin-top:8px}
+  .foot{max-width:1000px;margin:0 auto;padding:0 22px 50px;color:var(--mut);font-size:12px}
+  /* motion (off for reduced-motion users) */
+  @media (prefers-reduced-motion: no-preference){
+    @keyframes pan{0%{transform:translate3d(0,0,0) rotate(0)}50%{transform:translate3d(2%,-2%,0) rotate(2deg)}100%{transform:translate3d(0,0,0) rotate(0)}}
+    @keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+    body.motion-subtle .hero::before{animation:pan 22s ease-in-out infinite}
+    body.motion-lively .hero::before{animation:pan 12s ease-in-out infinite}
+    body:not(.motion-still) .reveal{animation:up .6s both}
+    .reveal:nth-child(2){animation-delay:.07s}.reveal:nth-child(3){animation-delay:.14s}.reveal:nth-child(4){animation-delay:.2s}
+  }
+</style>
+</head>
+<body class="mode-{{ d.design.mode }} motion-{{ d.design.motion }} voice-{{ d.design.voice }} motif-{{ d.design.motif }}">
+<div class="bar">
+  <span class="badge">{{ d.archetype.label }}</span>
+  personalized for <b>{{ d.name }}</b> · tier {{ d.tier }} ({{ d.tier_meta.label }}) · {{ d.design.mode }} · {{ d.design.voice }}
+  <span class="tiers">tier:{% for t in [1,2,3,4] %}<a href="?email={{ d.email }}&tier={{ t }}" class="{{ 'on' if t==d.tier else '' }}">{{ t }}</a>{% endfor %}</span>
+</div>
+
+<section class="hero">
+  <div class="hwrap">
+    <div>
+      <span class="eyebrow">{{ d.design.seniority.replace('_',' ')|title }} · {{ d.design.industry }}</span>
+      <h1 class="display">{{ d.hero.headline }}</h1>
+      <p class="sub">{{ d.hero.sub }}</p>
+      {% if d.design.hero == 'continuity' %}<div class="prog"><i></i></div>{% endif %}
+      {% if d.design.hero == 'credibility' %}<div class="logos"><span>Top-lab instructors</span><span>40+ orgs</span><span>SOC2</span></div>{% endif %}
+      <p style="margin-top:22px"><a class="cta" href="#">{{ d.cta }}</a></p>
+    </div>
+    <div class="statcard reveal">
+      <div class="big">{{ d.design.stat_big }}</div>
+      <div class="lab">{{ d.design.stat_label }}</div>
+    </div>
+  </div>
+</section>
+
+<main>
+  <div class="personal">
+    <h3>Personalized for you{% if d.tier >= 4 %} — stitched from {{ d.layers|length }} data layers: {{ d.layers|join(' · ') }}{% endif %}</h3>
+    {% for l in d.personal_lines %}
+    <div class="pl"><span class="s {{ l.surface }}">{{ l.surface }}</span><span class="txt">{{ l.text }}</span><span class="frm">{{ l.from }}</span></div>
+    {% endfor %}
+  </div>
+
+  <div class="grid">
+    {% for s in d.sections %}<div class="sec reveal"><h2>{{ s.title }}</h2><p>{{ s.body }}</p></div>{% endfor %}
+  </div>
+
+  <div class="proof">
+    {% if d.design.proof == 'stats' %}
+    <div class="stats3">
+      <div class="st"><div class="n">600+</div><div class="l">graduates hired</div></div>
+      <div class="st"><div class="n">+$38K</div><div class="l">median salary lift</div></div>
+      <div class="st"><div class="n">92%</div><div class="l">finish the cohort</div></div>
+    </div>
+    {% else %}
+    <div class="quote">"I came in unsure I belonged — six months later I'm an AI engineer."
+      <div class="who">— a recent {{ d.archetype.label|lower }} graduate</div></div>
+    {% endif %}
+  </div>
+</main>
+<div class="foot">Demo · tier {{ d.tier }} = {{ d.tier_meta.uses }} · surface: {{ d.tier_meta.policy }}.
+  UI inferred from this person's data; synthetic where noted. Core sources: HubSpot (first-party) + LinkedIn (public).</div>
+</body>
+</html>

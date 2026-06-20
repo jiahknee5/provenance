@@ -32,13 +32,11 @@
   .note{color:var(--mut);font-size:12px;margin-top:6px}
   .pillrow{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
 </style>
+<link rel="stylesheet" href="/static/atlas.css">
 </head>
 <body>
-<header class="top">
-  <span class="brand"><span class="dot">◈</span> Enrichment catalog</span>
-  <span style="color:var(--mut);font-size:12px">every source we could enrich with — paid or free</span>
-  <nav><a href="/">Form</a><a href="/inspector">Inspector</a><a href="/observatory">Observatory</a><a href="/enrichment-catalog">Catalog</a></nav>
-</header>
+{% set subtitle = "Enrichment catalog" %}
+{% include "_nav.html" %}
 
 <div class="wrap">
   <h1>What we can enrich a lead with — and the receipt each fact must carry</h1>

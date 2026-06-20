@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in with Google — what it really exposes</title>
+<link rel="stylesheet" href="/static/atlas.css">
+<style>
+  .gwrap{max-width:1100px;margin:0 auto;padding:18px 20px 60px}
+  .login{max-width:440px;margin:60px auto;background:var(--panel);border:1px solid var(--line);
+         border-radius:16px;padding:30px;text-align:center}
+  .gbtn{display:inline-flex;align-items:center;gap:10px;background:#fff;color:#3c4043;font-weight:700;
+        border-radius:10px;padding:12px 18px;text-decoration:none;margin:14px 0}
+  .gbtn .g{font-weight:900;font-size:18px;background:conic-gradient(#ea4335,#4285f4,#34a853,#fbbc05,#ea4335);
+           -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .demos{margin-top:16px;border-top:1px solid var(--line);padding-top:14px;text-align:left}
+  .demos a{display:inline-block;font-size:12px;border:1px solid var(--line);border-radius:6px;padding:4px 8px;margin:0 4px 6px 0;color:var(--accent)}
+  .banner{background:var(--panel2);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:12px 15px;margin-bottom:12px}
+  .who{display:flex;align-items:center;gap:12px}
+  .who .pic{width:40px;height:40px;border-radius:50%;background:#2a3a52;display:flex;align-items:center;justify-content:center;font-weight:800;color:#cfe}
+  .matched{color:var(--green);font-weight:700}
+  .tier{border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:12px}
+  .tier.ok{border-left:4px solid var(--green)} .tier.warn{border-left:4px solid var(--amber)}
+  .tier.info{border-left:4px solid var(--blue)} .tier.bad{border-left:4px solid var(--hold);background:#170d12}
+  .tier .th{display:flex;align-items:baseline;gap:10px}
+  .tier .tn{font-size:10px;font-weight:800;color:#08121b;border-radius:5px;padding:1px 7px;background:var(--mut)}
+  .tier.ok .tn{background:var(--green)}.tier.warn .tn{background:var(--amber)}.tier.info .tn{background:var(--blue)}.tier.bad .tn{background:var(--hold)}
+  .tier h3{margin:0;font-size:16px}
+  .tier .bl{color:var(--mut);font-size:12.5px;margin:6px 0 4px}
+  .tier .how{color:var(--mut);font-size:11px;font-style:italic;margin-bottom:8px}
+  .it{display:grid;grid-template-columns:160px 1fr auto;gap:10px;padding:6px 0;border-bottom:1px solid #16202e;font-size:13px;align-items:baseline}
+  .it:last-child{border:none}
+  .it .lab{color:var(--mut)} .it .val{color:var(--ink)} .it .vh{color:var(--mut);font-size:11px;font-style:italic}
+  .dots{letter-spacing:1px;font-size:10px;color:var(--hold);white-space:nowrap}.dots .o{color:var(--line)}
+  .rb{font-size:9px;font-weight:800;border-radius:4px;padding:1px 6px;background:var(--line);color:var(--mut)}
+  .rb.real{background:var(--green);color:#08121b}
+  .payoff{background:#170d12;border:1px solid #5a2a2a;border-radius:10px;padding:12px 15px;margin:14px 0;font-size:13.5px}
+  .payoff b{color:#ff9bb0}
+  .siteframe{width:100%;height:560px;border:1px solid var(--line);border-radius:12px;background:#fff;margin-top:8px}
+  h2.sec2{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--mut);margin:22px 0 10px}
+</style>
+</head>
+<body>
+{% set subtitle = "Sign in with Google" %}
+{% include "_nav.html" %}
+
+{% if not signed_in %}
+<div class="login">
+  <h2 style="margin:0 0 6px">See what “Sign in with Google” really exposes</h2>
+  <p class="hint">{% if real %}A real Google login (profile + email scopes).{% else %}Demo mode — synthetic data, clearly labelled.{% endif %}</p>
+  {% if real %}<a class="gbtn" href="{{ auth_url }}"><span class="g">G</span> Sign in with Google</a>
+  {% else %}<a class="gbtn" href="/google?signed_in=1"><span class="g">G</span> Sign in with Google (demo)</a>{% endif %}
+  <div class="demos"><div class="hint" style="margin-bottom:6px">…or sign in as a cohort member (loads their record from our DB):</div>
+    {% for e in demo_emails %}<a href="/google?email={{ e }}">{{ e.split('@')[0] }}</a>{% endfor %}
+  </div>
+</div>
+{% else %}
+<div class="gwrap">
+  <div class="banner who">
+    <span class="pic">{{ (profile.name if profile else (matched.name if matched else data.persona.name)).split()[0][0] }}</span>
+    <div>
+      <div><b>{% if profile %}{{ profile.name }} · {{ profile.email }}{% elif matched %}{{ matched.name }} · {{ email }}{% else %}{{ data.persona.name }} · {{ data.persona.email }}{% endif %}</b>
+        {% if profile %}<span class="matched"> · real Google login</span>{% endif %}</div>
+      <div class="hint">{% if matched %}<span class="matched">✓ matched to our database</span> — your verified email loaded your record. {% endif %}{% if data.persona.real %}<span class="matched">Top tier is REAL</span> ({{ data.real_have }} fields fetched live). {% endif %}{{ data.persona.note }}</div>
+    </div>
+  </div>
+
+  <h2 class="sec2">What signing in actually exposed — in honest tiers</h2>
+  {% for t in data.tiers %}
+  <div class="tier {{ t.tone }}">
+    <div class="th"><span class="tn">Tier {{ t.n }}</span><h3>{{ t.label }}</h3></div>
+    <div class="bl">{{ t.blurb }}</div><div class="how">how: {{ t.how }}</div>
+    {% for it in data.items_by_tier[t.id] %}
+    <div class="it">
+      <span class="lab">{{ it.label }}</span>
+      <span class="val">{{ it.value }}
+        <span class="vh">— {{ it.how }}</span></span>
+      <span class="dots">{% if t.id=='granted' %}{% if it.real %}<span class="rb real">REAL</span>{% else %}<span class="rb">on sign-in</span>{% endif %}{% else %}{% for i in range(5) %}{% if i < it.creepiness %}●{% else %}<span class="o">●</span>{% endif %}{% endfor %}{% endif %}</span>
+    </div>
+    {% endfor %}
+    {% if t.id == 'not_api' %}
+    <div class="payoff">Your login returned <b>{{ data.granted }}</b> fields. The <b>{{ data.not_login }}</b> most personal facts are NOT from Google — they're inferred or <b>bought from a data broker, keyed to the email your login just verified.</b> That's the real value of the login: the verified key, not the data. ↓</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+
+  {% if data.real_extra %}
+  <div class="tier ok" style="border-left-color:var(--green);background:#0c1612">
+    <div class="th"><span class="tn" style="background:var(--green)">REAL</span><h3>Actually fetched for this email — live, just now</h3></div>
+    <div class="bl">Not illustrative and not synthetic. These rows were fetched from real sources keyed on the verified email{% if data.pdl_on %} (People Data Labs is connected){% endif %} — if a field isn't here, no real source returned it.</div>
+    {% for r in data.real_extra %}
+    <div class="it"><span class="lab">{{ r.label }}</span>
+      <span class="val">{{ r.value }} <span class="vh">— {{ r.source }}</span></span>
+      <span class="dots"><span class="rb real">REAL</span></span></div>
+    {% endfor %}
+  </div>
+  {% elif data.persona.real %}
+  <div class="tier info"><div class="bl">No real broker/person data came back for this email.
+    {% if not data.pdl_on %}Connect People Data Labs (set <code>PDL_API_KEY</code>) to fetch real name/title/company/LinkedIn.{% else %}People Data Labs is connected but had no match for this address — common for personal Gmail with no professional footprint.{% endif %}</div></div>
+  {% endif %}
+
+  {% if landing %}
+  <h2 class="sec2">…and your personalized website — loaded from our database on sign-in</h2>
+  <div class="banner">The verified email matched <b>{{ matched.name }}</b> in our database. We built this page from <i>their record</i> (Vector + HubSpot + Clay) — no typing, no form.</div>
+  <iframe class="siteframe" src="/lp?email={{ site_email }}&tier=2" title="personalized site"></iframe>
+  {% else %}
+  <p class="hint" style="margin-top:18px">This email isn't in our demo database — so no personalized page to load. Try a cohort member from the sign-in screen.</p>
+  {% endif %}
+</div>
+{% endif %}
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>See your personalized path</title>
+<style>
+  body{margin:0;background:#f7f9fc;color:#16202c;font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center}
+  .card{background:#fff;border:1px solid #e6ebf1;border-radius:16px;padding:30px;max-width:520px;width:92%;box-shadow:0 12px 40px rgba(20,30,50,.1);text-align:center}
+  h1{font-size:24px;margin:0 0 6px}
+  p.sub{color:#5b6b7c;margin:0 0 20px}
+  .qr{display:inline-block;background:#fff;border:1px solid #e6ebf1;border-radius:12px;padding:12px;margin:6px 0 16px}
+  .qr svg{width:180px;height:180px;display:block}
+  form{display:flex;gap:8px;margin:10px 0 4px}
+  input{flex:1;border:1px solid #cfd8e3;border-radius:10px;padding:11px 12px;font:inherit}
+  button{background:#3b5bdb;color:#fff;border:none;border-radius:10px;padding:11px 18px;font-weight:700;cursor:pointer}
+  .bad{color:#c0392b;font-size:13px;margin:6px 0}
+  .demo{margin-top:18px;border-top:1px solid #eef2f6;padding-top:14px;text-align:left}
+  .demo h3{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#9aa7b6;margin:0 0 8px}
+  .demo a{display:inline-block;font-size:12px;color:#3b5bdb;text-decoration:none;border:1px solid #e6ebf1;border-radius:6px;padding:4px 8px;margin:0 4px 6px 0}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>See your personalized page</h1>
+  <p class="sub">Gauntlet cohort — scan the code or enter your <b>@gauntletai.com</b> email. We'll match you to what we already know and build your page on the spot.</p>
+  {% if qr %}<div class="qr">{{ qr|safe }}</div>{% endif %}
+  <form method="get" action="/lp">
+    <input name="email" type="email" placeholder="you@gauntletai.com" autocomplete="off" autofocus>
+    <button type="submit">Go →</button>
+  </form>
+  {% if bad %}<p class="bad">That email isn't in our cohort database — try one of the demo addresses below.</p>{% endif %}
+  <div class="demo"><h3>Demo cohort (click any)</h3>
+    {% for e in emails %}<a href="/lp?email={{ e }}">{{ e.split('@')[0] }}</a>{% endfor %}
+  </div>
+</div>
+</body>
+</html>

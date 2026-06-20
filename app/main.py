@@ -4,6 +4,7 @@ website + inspector route modules.
   GET  /            — the real, working lead-capture form (Helix Analytics)
   POST /submit      — create a Recipient -> SQLite, return a thank-you + magic link
   GET  /site/{token}— the ultra-personalized website channel (app/site.py)
+  GET  /personalize — the provenance-tagged super-personalization demo (app/personalize.py)
   GET  /inspector   — the demo inspector UI (app/inspector.py)
 """
 from __future__ import annotations
@@ -59,3 +60,7 @@ from app import site as _site  # noqa: E402,F401
 from app import inspector as _inspector  # noqa: E402,F401
 from app import observatory as _observatory  # noqa: E402,F401
 from app import assurance as _assurance  # noqa: E402,F401
+from app import funnel as _funnel  # noqa: E402,F401
+from app import personalize as _personalize  # noqa: E402,F401
+from app import cohort as _cohort  # noqa: E402,F401
+from app import google_login as _google_login  # noqa: E402,F401

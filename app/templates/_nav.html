@@ -1,0 +1,17 @@
+{# Canonical header + nav — included by every navigable page so the tabs are identical
+   everywhere. Active tab is derived from request.url.path; optional `subtitle` per page. #}
+<header class="top">
+  <span class="brand"><span class="dot">◈</span> Provenance{% if subtitle is defined and subtitle %} <span class="navsub">· {{ subtitle }}</span>{% endif %}</span>
+  <nav>
+    {% set p = request.url.path %}
+    <a href="/" class="{{ 'on' if p == '/' else '' }}">Form</a>
+    <a href="/inspector" class="{{ 'on' if p == '/inspector' else '' }}">Inspector</a>
+    <a href="/observatory" class="{{ 'on' if p == '/observatory' else '' }}">Observatory</a>
+    <a href="/assurance" class="{{ 'on' if p == '/assurance' else '' }}">Assurance</a>
+    <a href="/funnel" class="{{ 'on' if p == '/funnel' else '' }}">Funnel</a>
+    <a href="/personalize" class="{{ 'on' if p == '/personalize' else '' }}">Personalize</a>
+    <a href="/admin/landings" class="{{ 'on' if p.startswith('/admin') or p == '/lp' else '' }}">Cohort</a>
+    <a href="/google" class="{{ 'on' if p.startswith('/google') else '' }}">Google</a>
+    <a href="/enrichment-catalog" class="{{ 'on' if p == '/enrichment-catalog' else '' }}">Catalog</a>
+  </nav>
+</header>
