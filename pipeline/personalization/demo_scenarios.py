@@ -1,0 +1,268 @@
+"""The /demo spec — 3 visitor scenarios, each with 3 GATED variants (bandit arms) plus one
+BLOCKED "ungated" variant, and a master-KPI tree.
+
+This is the single source of truth that ties **data → variant → KPI**, so the demo page,
+the cloner injection, the bandit simulation, and the monitor all read the same definitions
+and can never drift apart.
+
+Provenance is first-class: every gated variant lists exactly the signals it used, each with
+its source class and surface policy (`say` / `allude` / `hold`). The invariant the tests
+enforce: **no gated variant's copy uses a `hold` fact** — a hold fact may only *steer*
+(its role is "steers, not shown"). The BLOCKED variant per scenario is the "creepy / ungated"
+arm: it would win on engagement but is kept out of the action pool by the surface policy —
+mirroring the Optimizer's planted-lie arm, so the bandit provably cannot select it.
+
+All synthetic, deterministic. KPI movement is a *simulated* reinforcement-learning result
+(see demo_sim.py), never real traffic.
+"""
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+
+# Provenance source classes (mirror pipeline.personalization.signals)
+OBSERVED = "observed"
+FIRST_PARTY = "first_party"
+DECLARED = "declared"
+ENRICH = "enrich"            # vendor person/company enrichment (PDL etc.)
+BOUGHT = "bought"            # reverse-IP / broker append
+BROKER = "broker"
+
+SOURCE_LABEL = {
+    OBSERVED: "Observed at load",
+    FIRST_PARTY: "First-party (CRM / behaviour)",
+    DECLARED: "Declared by the visitor",
+    ENRICH: "Enrichment (PDL)",
+    BOUGHT: "Bought (reverse-IP)",
+    BROKER: "Broker append",
+}
+
+SAY, ALLUDE, HOLD = "say", "allude", "hold"
+
+
+@dataclass(frozen=True)
+class DataUse:
+    signal: str        # the concrete signal, e.g. "daypart 11:47pm"
+    source: str        # provenance class
+    policy: str        # say / allude / hold
+    role: str          # what it actually did on the page
+
+    @property
+    def source_label(self) -> str:
+        return SOURCE_LABEL.get(self.source, self.source)
+
+
+@dataclass(frozen=True)
+class Variant:
+    id: str            # "A1"
+    label: str         # short component name
+    headline: str
+    sub: str
+    cta: str
+    accent: str        # hex
+    kpi: str           # master-KPI key it targets
+    data_used: list[DataUse]
+    surface_note: str
+    dark: bool = False
+    blocked: bool = False   # the ungated "creepy" arm — kept OUT of the action pool
+
+    @property
+    def arm(self) -> str:
+        return self.id
+
+    @property
+    def uses_hold_in_copy(self) -> bool:
+        """True only if a hold fact is marked as said/shown (the thing tests forbid)."""
+        return any(d.policy == HOLD and "steer" not in d.role.lower()
+                   and "never" not in d.role.lower() for d in self.data_used)
+
+
+@dataclass(frozen=True)
+class Scenario:
+    id: str            # "A"
+    key: str           # the identity key held
+    label: str
+    blurb: str
+    available: list[str]          # data ribbon chips
+    variants: list[Variant]       # 3 gated + 1 blocked
+
+
+# --------------------------------------------------------------------------- #
+# Master business KPI tree — each leaf is a real funnel metric a variant moves.
+# --------------------------------------------------------------------------- #
+@dataclass(frozen=True)
+class Kpi:
+    key: str
+    label: str
+    group: str          # acquisition / activation / revenue
+    unit: str
+    direction: str      # "up" or "down" (down = lower is better, e.g. bounce)
+    baseline: float
+    target: float
+
+
+KPIS: dict[str, Kpi] = {
+    "bounce":        Kpi("bounce", "Bounce rate", "acquisition", "%", "down", 58.0, 42.0),
+    "ctr":           Kpi("ctr", "Hero CTR", "acquisition", "%", "up", 4.0, 9.0),
+    "lead_to_app":   Kpi("lead_to_app", "Lead → application", "acquisition", "%", "up", 12.0, 22.0),
+    "reactivation":  Kpi("reactivation", "Dormant reactivation", "activation", "%", "up", 6.0, 15.0),
+    "paid_conv":     Kpi("paid_conv", "Paid conversion", "revenue", "%", "up", 3.5, 7.0),
+    "b2b_demo":      Kpi("b2b_demo", "B2B demo requests", "revenue", "per 1k", "up", 2.0, 6.0),
+}
+
+KPI_GROUPS = ["acquisition", "activation", "revenue"]
+
+
+# --------------------------------------------------------------------------- #
+# THE SCENARIOS
+# --------------------------------------------------------------------------- #
+SCENARIOS: list[Scenario] = [
+    Scenario(
+        id="A", key="IP + browser signals (no identity)",
+        label="New anonymous viewer",
+        blurb="First hit. No login, no form, no cookie — just the HTTP request and a little JS.",
+        available=["geo / city", "daypart", "device", "referrer / UTM", "connection", "reverse-IP company (buy)"],
+        variants=[
+            Variant("A1", "Daypart adaptive theme",
+                    "Late nights are when the big moves start.",
+                    "A part-time AI cohort built around the hours you actually have.",
+                    "Watch a free class", "#4cc4d4", "bounce", dark=True,
+                    data_used=[
+                        DataUse("daypart 11:47pm", OBSERVED, ALLUDE, "themes the page dark + 'late nights' angle"),
+                        DataUse("IP → Austin", OBSERVED, ALLUDE, "local hello"),
+                        DataUse("device: mobile", OBSERVED, ALLUDE, "mobile-dense layout"),
+                        DataUse("UTM creative", OBSERVED, ALLUDE, "hero echoes the ad"),
+                    ],
+                    surface_note="observed · allude · no name"),
+            Variant("A2", "B2B peer-logo hero",
+                    "Engineers at firms like yours ship AI faster.",
+                    "Upskill your whole team on production AI — one cohort, measurable output.",
+                    "See the enterprise track", "#1d4ed8", "b2b_demo",
+                    data_used=[
+                        DataUse("reverse-IP → employer", BOUGHT, ALLUDE, "employer-level hero (~$0.01)"),
+                        DataUse("company industry", BOUGHT, ALLUDE, "tailors the proof"),
+                    ],
+                    surface_note="bought · allude · company, not person"),
+            Variant("A3", "Local-proof badge",
+                    "Austin is switching into AI.",
+                    "Join the next cohort — 100% online, on your schedule, with a local peer group.",
+                    "See local outcomes", "#2bb673", "ctr",
+                    data_used=[DataUse("IP → city (Austin)", OBSERVED, ALLUDE, "local-proof framing")],
+                    surface_note="observed · allude"),
+            Variant("Ax", "Recognize-return (ungated)",
+                    "Welcome back — third look this week?",
+                    "We recognised your device even with cookies cleared.",
+                    "Pick a start date", "#e0524a", "ctr", blocked=True,
+                    data_used=[DataUse("device fingerprint (cookies cleared)", OBSERVED, HOLD,
+                                        "would recite a recognised return — never shown")],
+                    surface_note="HOLD — blocked by surface policy; the bandit cannot pull it"),
+        ],
+    ),
+    Scenario(
+        id="B", key="Email + name + your CRM history",
+        label="Existing customer (email match)",
+        blurb="Matched to your CRM + an append — all eight segment families are live.",
+        available=["CRM lifecycle / LTV", "page & email behaviour", "declared goal",
+                   "PDL: title / history", "broker income (buy)"],
+        variants=[
+            Variant("B1", "Welcome-back resume",
+                    "Pick up where you left off, Maya.",
+                    "You finished Intro to Python in 2023 — the Advanced track continues that path.",
+                    "Continue", "#d98a16", "reactivation",
+                    data_used=[
+                        DataUse("CRM: finished Intro 2023", FIRST_PARTY, SAY, "referenced warmly"),
+                        DataUse("resume position", FIRST_PARTY, ALLUDE, "deep-links to module 1"),
+                        DataUse("lifecycle: customer", FIRST_PARTY, SAY, "'welcome back' framing"),
+                    ],
+                    surface_note="say + allude"),
+            Variant("B2", "Financing module",
+                    "You're closer than you think, Maya.",
+                    "Scholarships and monthly plans, matched to what matters to you.",
+                    "See payment options", "#2bb673", "paid_conv",
+                    data_used=[
+                        DataUse("declared name", DECLARED, SAY, "greeting"),
+                        DataUse("cost-page visits", FIRST_PARTY, ALLUDE, "leads with affordability"),
+                        DataUse("modeled income", BROKER, HOLD, "steers the angle — never shown in copy"),
+                    ],
+                    surface_note="say + allude; income HOLD (steers, never shown)"),
+            Variant("B3", "Prestige / peer hero",
+                    "Engineering leaders in banking trust this program.",
+                    "A cohort built for senior engineers moving teams to AI.",
+                    "Talk to admissions", "#7e8ea3", "lead_to_app",
+                    data_used=[
+                        DataUse("PDL seniority", ENRICH, ALLUDE, "prestige framing"),
+                        DataUse("PDL industry: banking", ENRICH, ALLUDE, "industry proof"),
+                    ],
+                    surface_note="enrich · allude"),
+            Variant("Bx", "Income-recite (ungated)",
+                    "On a $190K salary, you can easily afford this, Maya.",
+                    "We modeled your household income and net worth.",
+                    "Pay in full", "#e0524a", "paid_conv", blocked=True,
+                    data_used=[DataUse("modeled income / net worth", BROKER, HOLD,
+                                        "would recite purchased income — never shown")],
+                    surface_note="HOLD — blocked by surface policy; the bandit cannot pull it"),
+        ],
+    ),
+    Scenario(
+        id="C", key="Email + live click behaviour (magic-link)",
+        label="Emailed lead who clicked",
+        blurb="The click identifies them with no login and tells you exactly what they care about.",
+        available=["declared (opt-in)", "email opens", "which CTA clicked", "pages / dwell",
+                   "abandoned forms", "PDL: role", "cross-site (buy)"],
+        variants=[
+            Variant("C1", "Click-continuity outcomes",
+                    "The salary lift you clicked on — by your role, Darnell.",
+                    "The exact path for product managers moving into AI.",
+                    "See graduate outcomes", "#2bb673", "lead_to_app",
+                    data_used=[
+                        DataUse("click: 'outcomes'", FIRST_PARTY, ALLUDE, "page continues the click"),
+                        DataUse("declared goal", DECLARED, SAY, "quotes their stated goal"),
+                        DataUse("PDL role: PM", ENRICH, ALLUDE, "role-tailored proof"),
+                    ],
+                    surface_note="allude + say · magic-link, no login"),
+            Variant("C2", "Resume-application",
+                    "Finish your application — step 3 of 4.",
+                    "Two minutes to done — we saved your progress.",
+                    "Finish application", "#d98a16", "paid_conv",
+                    data_used=[DataUse("abandoned form: step 3/4", FIRST_PARTY, ALLUDE, "resumes the form")],
+                    surface_note="allude"),
+            Variant("C3", "Cohort urgency",
+                    "Your cohort starts in 9 days — save your seat.",
+                    "Early-bird closes Friday.",
+                    "Apply now", "#8a5cf6", "lead_to_app",
+                    data_used=[
+                        DataUse("lead score", FIRST_PARTY, ALLUDE, "raises CTA prominence"),
+                        DataUse("cohort start dates", FIRST_PARTY, ALLUDE, "countdown"),
+                    ],
+                    surface_note="allude"),
+            Variant("Cx", "Comparison-call-out (ungated)",
+                    "We saw you comparing us with two other bootcamps.",
+                    "Bought cross-site browsing says you're shopping around.",
+                    "Get the side-by-side", "#e0524a", "lead_to_app", blocked=True,
+                    data_used=[DataUse("cross-site browsing (DMP)", BROKER, HOLD,
+                                        "would recite competitor shopping — never shown")],
+                    surface_note="HOLD — blocked by surface policy; the bandit cannot pull it"),
+        ],
+    ),
+]
+
+BY_ID = {s.id: s for s in SCENARIOS}
+
+
+def scenario(sid: str) -> Scenario | None:
+    return BY_ID.get((sid or "").strip().upper())
+
+
+def gated_variants(s: Scenario) -> list[Variant]:
+    return [v for v in s.variants if not v.blocked]
+
+
+def blocked_variant(s: Scenario) -> Variant | None:
+    return next((v for v in s.variants if v.blocked), None)
+
+
+def find_variant(sid: str, vid: str) -> tuple[Scenario, Variant] | None:
+    s = scenario(sid)
+    if not s:
+        return None
+    v = next((x for x in s.variants if x.id == vid), None)
+    return (s, v) if v else None

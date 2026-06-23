@@ -248,6 +248,16 @@ def main() -> dict:
     from pipeline.customer.scenarios import report as funnel_report
     (OBSERVE_DIR / "funnel.json").write_text(json.dumps(funnel_report(), indent=2, default=str))
 
+    # /demo monitor — simulated RL toward KPIs + provenance/drift/hallucination health
+    from pipeline.personalization.demo_sim import build as demo_build
+    (OBSERVE_DIR / "demo_monitor.json").write_text(json.dumps(demo_build(), indent=2, default=str))
+    # pre-cache the default site clone so /demo works offline in the deployed image (best-effort)
+    try:
+        from pipeline.personalization.cloner import DEFAULT_URL, fetch_raw
+        fetch_raw(DEFAULT_URL)
+    except Exception as _e:  # network may be unavailable at bake; runtime falls back gracefully
+        print(f"  (demo clone pre-cache skipped: {_e})")
+
     meta = derive_artifacts(summary, enrich_demo)
     _append_history(meta, golden)
 

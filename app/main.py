@@ -64,3 +64,4 @@ from app import funnel as _funnel  # noqa: E402,F401
 from app import personalize as _personalize  # noqa: E402,F401
 from app import cohort as _cohort  # noqa: E402,F401
 from app import google_login as _google_login  # noqa: E402,F401
+from app import demo as _demo  # noqa: E402,F401

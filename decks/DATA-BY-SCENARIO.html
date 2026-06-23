@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What we can know — by visitor scenario</title>
+<style>
+  :root{
+    --navy:#0a2540;--navy-2:#102a43;--slate:#334e68;--slate-2:#486581;--muted:#627d98;
+    --line:#d9e2ec;--line-soft:#eef2f6;--paper:#eef2f6;
+    --blue-1:#eff6ff;--blue-3:#93c5fd;--blue-5:#1d4ed8;--blue-6:#1e40af;--blue-7:#1e3a8a;
+    --green:#15803d;--green-bg:#dcfce7;--green-line:#86efac;
+    --amber:#b45309;--amber-bg:#fef3c7;--amber-line:#fcd34d;
+    --red:#b91c1c;--red-bg:#fee2e2;--red-line:#fca5a5;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--navy-2);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;padding:26px;}
+  .slide{max-width:1320px;margin:0 auto;background:#fff;border-radius:14px;border-top:5px solid var(--blue-5);
+    box-shadow:0 18px 50px rgba(10,37,64,.16);padding:28px 34px 30px;}
+
+  .eyebrow{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;font-weight:700;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--blue-6);margin-bottom:8px;}
+  .eyebrow .key{color:var(--muted);letter-spacing:.04em;font-weight:600;}
+  .eyebrow .key b{font-weight:700;}
+  .eyebrow .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin:0 3px 0 10px;vertical-align:middle;}
+  h1{font-size:25px;line-height:1.2;font-weight:700;color:var(--navy);margin:0 0 5px;letter-spacing:-.01em;}
+  h1 .hl{color:var(--blue-5);}
+  .frame-q{font-size:13.5px;color:var(--slate);margin:0 0 14px;line-height:1.45;}
+  .frame-q b{color:var(--navy-2);}
+
+  /* provider legend */
+  .legend{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px;}
+  .prov{border:1px solid var(--line);border-radius:8px;padding:8px 11px;background:#fbfcfe;display:flex;gap:9px;align-items:flex-start;}
+  .prov .pn{font-size:12px;font-weight:800;color:var(--navy);white-space:nowrap;letter-spacing:.01em;}
+  .prov .pd{font-size:10.8px;color:var(--slate);line-height:1.35;}
+  .prov .rt{font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:2px 6px;border-radius:4px;white-space:nowrap;}
+  .rt.live{background:var(--green-bg);color:var(--green);}
+  .rt.batch{background:var(--red-bg);color:var(--red);}
+  .rt.fp{background:var(--blue-1);color:var(--blue-6);}
+
+  /* matrix */
+  .grid{display:grid;grid-template-columns:200px 1fr 1.15fr 1.25fr;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  .hcell{background:var(--navy);color:#fff;font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+    padding:8px 11px;display:flex;align-items:center;gap:6px;}
+  .hcell .cost{font-weight:600;color:var(--blue-3);letter-spacing:.02em;text-transform:none;font-size:10px;}
+  .row{display:contents;}
+  .cell{padding:10px 11px;border-top:1px solid var(--line);font-size:11px;line-height:1.4;color:var(--slate);}
+  .row .cell:not(:first-child){border-left:1px solid var(--line-soft);}
+
+  /* scenario rail (col 1) */
+  .rail{background:var(--blue-1);border-left:4px solid var(--blue-5)!important;}
+  .rail .sc{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--blue-6);}
+  .rail .nm{font-size:13px;font-weight:800;color:var(--navy);margin:1px 0 5px;line-height:1.15;}
+  .rail .keyl{font-size:8.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+  .rail .key{font-size:10.5px;color:var(--navy-2);font-weight:600;background:#fff;border:1px solid var(--line);border-radius:5px;padding:4px 7px;margin-top:2px;line-height:1.3;}
+
+  /* semantic fills */
+  .free{background:var(--green-bg);}
+  .free .t{color:var(--green);font-weight:800;}
+  .buy .t{color:var(--amber);font-weight:800;}
+  .buy.hot .t{color:var(--red);}
+  .t{font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:3px;}
+  .cell b{color:var(--navy-2);}
+  .chip{display:inline-block;font-size:8.5px;font-weight:800;letter-spacing:.02em;padding:1px 5px;border-radius:4px;
+    border:1px solid var(--line);background:#fff;color:var(--navy-2);margin-right:3px;}
+  .chip.no{background:var(--red-bg);color:var(--red);border-color:var(--red-line);}
+  .chip.na{background:var(--line-soft);color:var(--muted);}
+  .ptag{font-size:8px;font-weight:800;letter-spacing:.03em;color:var(--blue-6);}
+  .price{font-weight:800;color:var(--red);white-space:nowrap;}
+  .ceil{display:inline-block;margin-top:4px;font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
+    padding:2px 7px;border-radius:999px;}
+  .ceil.lo{background:var(--amber-bg);color:var(--amber);}
+  .ceil.hi{background:var(--red-bg);color:var(--red);}
+  ul.mini{margin:0;padding-left:14px;}
+  ul.mini li{margin:1px 0;}
+
+  .foot{margin-top:14px;border-top:1px solid var(--line);padding-top:9px;font-size:11.5px;color:var(--muted);line-height:1.5;}
+  .foot b{color:var(--navy-2);}
+  .foot .caveat{color:var(--red);font-weight:700;}
+  .foot .src{float:right;color:var(--muted);font-size:10.5px;}
+  /* ---- slide 2 : segments -> email + site ---- */
+  .slide + .slide{margin-top:26px;}
+  #s2 .cell{padding:7px 10px;}
+  #s2 .arch{margin-bottom:4px;}
+  #s2 .fams{margin-top:4px;}
+  #s2 .web .wbody{padding:7px 9px;}
+  #s2 .web .wbar{padding:4px 8px;}
+  #s2 .web .whero{font-size:11px;}
+  #s2 .web .wsub{margin:2px 0 5px;font-size:9px;}
+  #s2 .web .wnote{margin-top:4px;}
+  #s2 .web .wcta{padding:3px 9px;}
+  #s2 .mail .mb{padding:6px 8px;line-height:1.42;}
+  #s2 .mail .mh{padding:4px 8px;}
+  #s2 .mail.x{padding:9px 10px;}
+  #sl2 h1{font-size:23px;margin-bottom:4px;}
+  #sl2 .frame-q{margin-bottom:11px;}
+  #sl2 .foot{margin-top:11px;padding-top:8px;}
+  #s2 .fam{font-size:8px;padding:1px 4px;}
+  #s2 .rail .nm{font-size:12.5px;}
+
+  /* ---- slides 3-4 : UI patterns + copy examples ---- */
+  .avlegend{font-weight:600!important;}
+  .avlegend i{margin:0 2px 0 9px;}
+  .uigrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
+  .uicard{border:1px solid var(--line);border-radius:9px;background:#fff;padding:9px 10px;display:flex;flex-direction:column;border-top:3px solid var(--blue-5);}
+  .uicard .fn{font-size:11.5px;font-weight:800;color:var(--navy);line-height:1.15;}
+  .uicard .ds{font-size:8.8px;color:var(--muted);margin-top:2px;line-height:1.32;min-height:24px;}
+  .uicard .cl{font-size:9.6px;font-weight:700;color:var(--blue-6);margin-top:6px;line-height:1.25;}
+  .uicard .av{display:flex;gap:11px;margin-top:auto;padding-top:7px;}
+  .uicard .av span{font-size:8.5px;font-weight:800;letter-spacing:.03em;color:var(--muted);display:inline-flex;align-items:center;gap:3px;}
+  .dot2{width:8px;height:8px;border-radius:50%;display:inline-block;border:1px solid var(--line);}
+  .dot2.on{background:var(--green);border-color:var(--green);}
+  .dot2.half{background:linear-gradient(90deg,var(--amber) 50%,#fff 51%);border-color:var(--amber);}
+  .dot2.off{background:#fff;}
+  /* mini sketch canvas */
+  .sk{background:var(--line-soft);border:1px solid var(--line);border-radius:6px;height:40px;display:flex;align-items:center;justify-content:center;gap:5px;padding:0 8px;margin:7px 0 0;}
+  .sk .bar{height:7px;border-radius:4px;background:#cfdae6;width:74px;position:relative;overflow:hidden;}
+  .sk .bar i{position:absolute;left:0;top:0;bottom:0;width:58%;background:var(--blue-5);}
+  .sk .btn{font-size:8px;font-weight:800;color:#fff;background:var(--blue-5);border-radius:4px;padding:3px 7px;}
+  .sk .lg{width:22px;height:13px;border-radius:3px;background:#cfdae6;}
+  .sk .toggle{width:32px;height:15px;border-radius:999px;background:linear-gradient(90deg,#0f1622 50%,#fcd34d 50%);position:relative;}
+  .sk .toggle::after{content:'';position:absolute;top:2px;left:17px;width:11px;height:11px;border-radius:50%;background:#fff;}
+  .sk .pin{font-size:8px;font-weight:800;color:var(--slate-2);background:#fff;border:1px solid var(--line);border-radius:999px;padding:2px 7px;}
+  .sk .ured{font-size:8px;font-weight:800;color:#fff;background:var(--red);border-radius:4px;padding:2px 6px;}
+  .sk .knob{width:64px;height:3px;background:#cfdae6;border-radius:2px;position:relative;}
+  .sk .knob::after{content:'';position:absolute;top:-4px;left:40px;width:11px;height:11px;border-radius:50%;background:var(--green);}
+  .sk .dollar{font-size:13px;font-weight:800;color:var(--green);}
+  .sk .avatar{width:18px;height:18px;border-radius:50%;background:#cfdae6;flex:none;}
+  .sk .lns{display:flex;flex-direction:column;gap:3px;}
+  .sk .ln{height:5px;border-radius:3px;background:#cfdae6;}
+  .sk .step{width:11px;height:11px;border-radius:50%;background:#fff;border:2px solid var(--blue-5);}
+  .sk .stepln{width:13px;height:2px;background:var(--blue-3);}
+  .sk .sec{width:26px;height:8px;border-radius:2px;background:#cfdae6;}
+  .sk .sec.hot{background:var(--blue-5);}
+  .sk .barc{display:flex;align-items:flex-end;gap:3px;height:22px;}
+  .sk .barc i{width:7px;background:var(--blue-5);border-radius:2px 2px 0 0;}
+  .sk .stars{color:var(--amber);font-size:12px;letter-spacing:1px;}
+  .sk .vs{font-size:8px;font-weight:800;color:var(--muted);}
+  /* page 4 compaction */
+  #s4 .cell{padding:4px 9px;}
+  #s4 .web .wbody{padding:5px 8px;}
+  #s4 .web .wbar{display:none;}
+  #s4 .web .whero{font-size:10.5px;line-height:1.2;}
+  #s4 .web .wsub{font-size:9px;margin:2px 0 5px;}
+  #s4 .web .wcta{padding:3px 9px;}
+  #s4 .web .sk{height:16px!important;margin:3px 0!important;}
+  #sl4 h1{font-size:22.5px;margin-bottom:3px;}
+  #sl4 .frame-q{margin-bottom:9px;}
+  #s4 .fromcap{font-size:8px;color:var(--muted);margin-top:3px;line-height:1.32;}
+  #s4 .fromcap b{color:var(--navy-2);}
+  #s4 .alt{font-size:9px;color:var(--navy-2);line-height:1.28;margin-bottom:4px;}
+  #s4 .alt:last-child{margin-bottom:0;}
+  #s4 .alt .av{font-weight:800;color:#fff;background:var(--slate-2);border-radius:3px;padding:1px 4px;font-size:7.5px;margin-right:4px;}
+  #s4 .alt .tg{display:block;font-size:7px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);margin-top:1px;}
+  #s4 .alt .tg.hold{color:var(--red);}
+  #s4 .kpi{display:inline-block;font-size:10px;font-weight:800;border-radius:5px;padding:3px 9px;background:var(--green-bg);color:var(--green);}
+  #s4 .mech{font-size:8.8px;color:var(--slate);line-height:1.34;margin-top:4px;}
+  #s4 .mech b{color:var(--navy-2);}
+  #s4 .drv{font-size:9.5px;line-height:1.5;color:var(--slate);}
+  #s4 .drv b{color:var(--navy-2);}
+  #s4 .drv .d{display:block;margin-bottom:3px;}
+  #sl3 h1,#sl4 h1{font-size:23px;margin-bottom:4px;}
+  #sl3 .frame-q,#sl4 .frame-q{margin-bottom:13px;}
+
+  /* ---- slides 5-7 : per-scenario possibility galleries ---- */
+  #sl5 h1,#sl6 h1,#sl7 h1{font-size:23px;margin-bottom:4px;}
+  #sl5 .frame-q,#sl6 .frame-q,#sl7 .frame-q{margin-bottom:9px;}
+  .dribbon{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin:0 0 12px;}
+  .dribbon .dl{font-size:8.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-right:2px;}
+  .dribbon .dc{font-size:9px;font-weight:700;color:var(--slate);background:var(--blue-1);border:1px solid #cfe0fb;border-radius:999px;padding:2px 8px;}
+  .dribbon .dc.buy{background:var(--amber-bg);border-color:var(--amber-line);color:var(--amber);}
+  .gal{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .gcard{border:1px solid var(--line);border-radius:9px;background:#fff;padding:10px 11px;display:flex;flex-direction:column;border-left:4px solid var(--blue-5);}
+  .gcard .ang{font-size:8.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--blue-6);}
+  .gcard .comp{font-size:9px;color:var(--muted);font-weight:700;margin-bottom:6px;}
+  .gcard .cpy{font-size:12px;font-weight:800;color:var(--navy);line-height:1.3;}
+  .gcard .cta{align-self:flex-start;font-size:8.5px;font-weight:800;color:#fff;border-radius:5px;padding:3px 9px;margin-top:7px;}
+  .gcard .meta{font-size:8.5px;color:var(--muted);margin-top:auto;padding-top:8px;line-height:1.45;}
+  .gcard .meta b{color:var(--navy-2);}
+
+  /* ---- contents page + section decision-matrices ---- */
+  #sltoc h1,#secA h1,#secB h1,#secC h1{font-size:23px;margin-bottom:4px;}
+  #sltoc .frame-q,#secA .frame-q,#secB .frame-q,#secC .frame-q{margin-bottom:11px;}
+  .tocgrid{display:grid;grid-template-columns:0.82fr 1.18fr;gap:15px;}
+  .tocbox{border:1px solid var(--line);border-radius:10px;padding:13px 15px;background:#fbfcfe;}
+  .tocbox h3{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--blue-6);margin:0 0 10px;}
+  .toci{display:flex;gap:9px;margin-bottom:10px;}
+  .toci .n{font-size:11px;font-weight:800;color:#fff;background:var(--blue-5);border-radius:5px;min-width:21px;height:21px;display:flex;align-items:center;justify-content:center;flex:none;}
+  .toci .tt{font-size:11px;font-weight:700;color:var(--navy);line-height:1.25;}
+  .toci .tt small{display:block;font-weight:600;color:var(--muted);font-size:9px;margin-top:1px;}
+  .secblock{margin-bottom:11px;}
+  .secblock:last-child{margin-bottom:0;}
+  .secblock .sh{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+  .secblock .sn{font-size:10px;font-weight:800;color:#fff;border-radius:5px;padding:2px 9px;letter-spacing:.02em;}
+  .secblock .st{font-size:11px;font-weight:800;color:var(--navy);}
+  .secblock .pg{margin-left:auto;font-size:9px;font-weight:700;color:var(--muted);}
+  .secblock .dds{font-size:9.5px;color:var(--slate);line-height:1.55;padding-left:2px;}
+  .secblock .dds b{color:var(--navy-2);}
+  /* decision matrix */
+  .dmx{display:grid;grid-template-columns:152px 1fr 1fr 1fr;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  .dmx .h{background:var(--navy);color:#fff;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:7px 9px;}
+  .dmx .h.x{color:var(--blue-3);}
+  .dmx .dd{background:var(--blue-1);border-top:1px solid var(--line);border-left:4px solid var(--blue-5);padding:7px 9px;display:flex;flex-direction:column;justify-content:center;}
+  .dmx .dd .l{font-size:10px;font-weight:800;color:var(--navy);line-height:1.18;}
+  .dmx .dd .s{font-size:7.5px;font-weight:700;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.03em;}
+  .dmx .ex{border-top:1px solid var(--line);border-left:1px solid var(--line-soft);padding:7px 9px;font-size:9.5px;color:var(--navy-2);line-height:1.34;}
+  .dmx .ex .q{font-weight:700;}
+  .dmx .ex .tg{display:block;margin-top:3px;font-size:7.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--blue-6);}
+  .dmx .ex .tg.hold{color:var(--red);}
+
+  /* ---- visual example pages (rendered mockups) ---- */
+  #vA h1,#vB h1,#vC h1{font-size:23px;margin-bottom:4px;}
+  #vA .frame-q,#vB .frame-q,#vC .frame-q{margin-bottom:12px;}
+  .vrow{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;}
+  .vmock{border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#fff;box-shadow:0 3px 10px rgba(10,37,64,.07);display:flex;flex-direction:column;}
+  .vmock .chrome{display:flex;align-items:center;gap:4px;padding:5px 9px;background:var(--line-soft);}
+  .vmock .chrome .d{width:7px;height:7px;border-radius:50%;background:#cdd7e2;}
+  .vmock .chrome .u{font-size:8px;color:var(--muted);margin-left:5px;}
+  .vmock .nav{display:flex;align-items:center;gap:8px;padding:7px 11px;border-bottom:1px solid var(--line-soft);}
+  .vmock .nav .logo{font-size:9px;font-weight:800;color:var(--navy);}
+  .vmock .nav .nl{font-size:7.5px;color:var(--muted);}
+  .vmock .nav .nb{margin-left:auto;font-size:7.5px;font-weight:800;color:#fff;border-radius:4px;padding:3px 8px;}
+  .vmock .hero{padding:13px 13px 12px;}
+  .vmock .hero .eb{font-size:7.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--blue-6);}
+  .vmock .hero h4{font-size:14px;font-weight:800;line-height:1.16;margin:4px 0 5px;color:var(--navy);letter-spacing:-.01em;}
+  .vmock .hero p{font-size:9px;color:var(--slate);line-height:1.42;margin:0 0 10px;}
+  .vmock .hero .cta{display:inline-block;font-size:9px;font-weight:800;color:#fff;border-radius:6px;padding:6px 13px;}
+  .vmock .band{padding:10px 13px;border-top:1px solid var(--line-soft);background:#fbfcfe;flex:1;display:flex;flex-direction:column;justify-content:center;gap:7px;}
+  .vmock .stats{display:flex;gap:5px;flex-wrap:wrap;}
+  .vmock .stat{font-size:8px;font-weight:700;color:var(--slate);background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px 8px;}
+  .vmock .bandlbl{font-size:7.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
+  .vmock .logos{display:flex;gap:6px;}
+  .vmock .fin{display:flex;align-items:center;gap:8px;}
+  .vmock .cap{font-size:8px;color:var(--muted);padding:8px 11px;border-top:1px solid var(--line);background:#fff;line-height:1.42;}
+  .vmock .cap b{color:var(--navy-2);}
+  .vmock .cap .kpi{display:inline-block;font-size:8px;font-weight:800;color:var(--green);background:var(--green-bg);border-radius:4px;padding:1px 5px;}
+  .vmock .cap .du{font-size:7px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--blue-6);margin-right:3px;}
+  .vmock .cap .pc{display:inline-block;font-size:7.5px;font-weight:700;background:#fff;border:1px solid var(--line);border-radius:3px;padding:1px 5px;margin:0 2px 2px 0;color:var(--navy-2);}
+  .vmock.dark .cap .pc{background:#162234;border-color:#23344a;color:#cdd9e6;}
+  .vmock.dark{background:#0f1622;border-color:#1f2c3e;}
+  .vmock.dark .chrome{background:#1b2738;}
+  .vmock.dark .nav{border-color:#23344a;} .vmock.dark .nav .logo{color:#e7eef7;} .vmock.dark .nav .nl{color:#7e8ea3;}
+  .vmock.dark .hero .eb{color:#7fd6e0;} .vmock.dark .hero h4{color:#eaf1f8;} .vmock.dark .hero p{color:#9fb0c3;}
+  .vmock.dark .band{background:#0c1320;border-color:#23344a;}
+  .vmock.dark .stat{background:#162234;border-color:#23344a;color:#9fb0c3;}
+  .vmock.dark .cap{background:#0f1622;border-color:#23344a;color:#7e8ea3;}
+  .vmock .ehead{padding:9px 11px;border-bottom:1px solid var(--line-soft);}
+  .vmock .ehead .ef{font-size:8px;color:var(--muted);}
+  .vmock .ehead .es{font-size:11.5px;font-weight:800;color:var(--navy);margin-top:3px;line-height:1.2;}
+  .vmock .ebody{padding:12px 13px;font-size:9.5px;color:var(--slate);line-height:1.5;flex:1;}
+  .vmock .ebody .cta{display:inline-block;font-size:9px;font-weight:800;color:#fff;border-radius:6px;padding:6px 13px;margin-top:10px;}
+  .emailtag{display:inline-block;font-size:7.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#fff;background:var(--slate-2);border-radius:0 0 5px 5px;padding:2px 8px;position:absolute;top:0;left:13px;}
+  .fams{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px;}
+  .fam{font-size:8.5px;font-weight:700;padding:2px 5px;border-radius:4px;border:1px solid var(--line);background:#fff;color:var(--muted);}
+  .fam.on{background:var(--green-bg);color:var(--green);border-color:var(--green-line);}
+  .fam.partial{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-line);}
+  .fam.off{opacity:.5;text-decoration:line-through;}
+  .arch{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:2px 9px;border-radius:999px;color:#fff;margin-bottom:7px;}
+  .mail{border:1px solid var(--line);border-radius:7px;background:#fbfcfe;overflow:hidden;}
+  .mail .mh{font-size:9px;color:var(--muted);padding:5px 8px;border-bottom:1px solid var(--line-soft);background:#fff;}
+  .mail .mh b{color:var(--navy-2);}
+  .mail .mb{font-size:10.5px;color:var(--slate);padding:7px 8px;line-height:1.5;}
+  .mail.x{display:flex;align-items:center;gap:8px;padding:11px 10px;color:var(--muted);font-size:10.5px;line-height:1.45;}
+  .mail.x .xm{font-size:18px;font-weight:800;color:var(--red);}
+  .web{border:1px solid var(--line);border-radius:7px;overflow:hidden;background:#fff;}
+  .web .wbar{display:flex;align-items:center;gap:4px;padding:5px 8px;background:var(--line-soft);}
+  .web .dot{width:7px;height:7px;border-radius:50%;background:#cdd7e2;}
+  .web .wurl{font-size:8.5px;color:var(--muted);margin-left:5px;}
+  .web .wbody{padding:9px 10px;}
+  .web .whero{font-size:12px;font-weight:800;color:var(--navy);line-height:1.25;}
+  .web .wsub{font-size:9.5px;color:var(--slate);margin:3px 0 7px;line-height:1.35;}
+  .web .wcta{display:inline-block;font-size:9px;font-weight:800;color:#fff;padding:4px 10px;border-radius:5px;}
+  .web .wnote{font-size:8.5px;color:var(--muted);margin-top:6px;line-height:1.35;}
+  .web.dark{background:#0f1622;border-color:#1f2c3e;}
+  .web.dark .wbar{background:#1b2738;}
+  .web.dark .whero{color:#e7eef7;} .web.dark .wsub{color:#9fb0c3;} .web.dark .wnote{color:#6f8198;}
+  .sp{font-size:7.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;padding:1px 4px;border-radius:3px;vertical-align:middle;white-space:nowrap;}
+  .sp.say{background:var(--green-bg);color:var(--green);}
+  .sp.allude{background:var(--amber-bg);color:var(--amber);}
+  .sp.hold{background:var(--red-bg);color:var(--red);}
+
+  .navhint{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(10,37,64,.85);color:#fff;
+    font-size:11px;padding:5px 13px;border-radius:999px;letter-spacing:.04em;}
+  @media print{.navhint{display:none;}body{background:#fff;padding:0;}.slide{box-shadow:none;break-after:page;}.slide:last-of-type{break-after:auto;}}
+</style>
+</head>
+<body>
+
+<div class="slide">
+  <div class="eyebrow">
+    <span>Personalization data &middot; what we can know, by visitor</span>
+    <span class="key">cost / sensitivity:<span class="sw" style="background:var(--green-bg);border:1px solid var(--green-line)"></span><b>free / first-party</b><span class="sw" style="background:var(--amber-bg);border:1px solid var(--amber-line)"></span><b>purchased</b><span class="sw" style="background:var(--red-bg);border:1px solid var(--red-line)"></span><b>sensitive</b></span>
+  </div>
+  <h1>The <span class="hl">identity key</span> you hold — not the vendor — gates what you can know: one email turns an <span class="hl">anonymous IP into a full broker + identity-graph dossier</span>.</h1>
+  <p class="frame-q"><b>So what?</b> Don't pick a provider per scenario — PDL, Clay and HubSpot can't return what your identity key can't unlock. <b>No email &rarr; no person</b> (company-level at best). The instant a visitor is keyed to an email, the same three vendors plus the broker market open up. Spend the enrichment dollar at the moment the key arrives — the click or the match — not on the anonymous pageview.</p>
+
+  <!-- PROVIDER LEGEND -->
+  <div class="legend">
+    <div class="prov">
+      <span class="rt live">live</span>
+      <div><span class="pn">People Data Labs</span><div class="pd">Real-time <b>email&rarr;person</b> API (title, seniority, company, history, skills). Misses bare consumer Gmail <i>(verified)</i>.</div></div>
+    </div>
+    <div class="prov">
+      <span class="rt batch">batch</span>
+      <div><span class="pn">Clay</span><div class="pd">Async <b>waterfall + AI research</b> over 100+ vendors. <b>No sync API</b> — enrich offline / on-trigger, never on pageload.</div></div>
+    </div>
+    <div class="prov">
+      <span class="rt fp">1st-party</span>
+      <div><span class="pn">HubSpot</span><div class="pd">CRM + behavior + <b>Breeze</b> (ex-Clearbit) enrichment + reverse-IP. <b>Where segments live.</b></div></div>
+    </div>
+  </div>
+
+  <!-- MATRIX -->
+  <div class="grid">
+    <div class="row">
+      <div class="hcell">Scenario &amp; identity key</div>
+      <div class="hcell">Free / first-party <span class="cost">&nbsp;$0</span></div>
+      <div class="hcell">What the providers add</div>
+      <div class="hcell">Purchasable ceiling</div>
+    </div>
+
+    <!-- A -->
+    <div class="row">
+      <div class="cell rail">
+        <div class="sc">A &middot; escalation ▾</div>
+        <div class="nm">New anonymous viewer</div>
+        <div class="keyl">Identity key</div>
+        <div class="key">IP&nbsp;+&nbsp;browser signals only</div>
+      </div>
+      <div class="cell free">
+        <span class="t">Observed at page load</span>
+        Geo (IP&rarr;city), device &amp; OS, dark-mode / battery, referrer + UTM campaign, device fingerprint (survives cookie-clear).
+      </div>
+      <div class="cell">
+        <span class="chip">PDL</span> company-only, <b>B2B</b> via reverse-IP&nbsp;&rarr; Company Enrich. <span class="chip no">no person</span><br>
+        <span class="chip">HubSpot</span> Breeze reverse-IP = visitor's <b>employer</b>.<br>
+        <span class="chip na">Clay</span> n/a — not real-time.
+      </div>
+      <div class="cell buy">
+        <span class="t">You can buy</span>
+        Reverse-IP company <span class="price">~$0.01</span>; <b>person-level de-anon</b> (Vector / RB2B); cross-site DMP.
+        <span class="ceil lo">ceiling: the company — or buy the person</span>
+      </div>
+    </div>
+
+    <!-- B -->
+    <div class="row">
+      <div class="cell rail">
+        <div class="sc">B &middot; escalation ▾</div>
+        <div class="nm">Existing customer, email match</div>
+        <div class="keyl">Identity key</div>
+        <div class="key">Email + name + <b>your history</b></div>
+      </div>
+      <div class="cell free">
+        <span class="t">Your own CRM (HubSpot)</span>
+        Full record: declared fields, lifecycle, lead score, <b>every page &amp; email event</b>, deals, LTV, tickets, NPS, your computed scores (churn, price-sensitivity).
+      </div>
+      <div class="cell">
+        <span class="chip">PDL</span> email&rarr;person: title, seniority, company + firmographics, employment history, skills.<br>
+        <span class="chip">Clay</span> offline waterfall — phone, alt-emails, job-change, technographics.<br>
+        <span class="chip">HubSpot</span> the first-party truth + segments.
+      </div>
+      <div class="cell buy hot">
+        <span class="t">You can buy</span>
+        <b>Broker append</b> <span class="price">~$0.05&ndash;0.25/rec</span>: income, net worth, life-events, propensities, voter / health / ethnic. <b>+ Identity graph</b>: cross-device, household, offline retail, card panels, ACR TV.
+        <span class="ceil hi">ceiling: the full dossier</span>
+      </div>
+    </div>
+
+    <!-- C -->
+    <div class="row">
+      <div class="cell rail">
+        <div class="sc">C &middot; escalation ▾</div>
+        <div class="nm">Emailed lead who clicked through</div>
+        <div class="keyl">Identity key</div>
+        <div class="key">Email + <b>live click behavior</b></div>
+      </div>
+      <div class="cell free">
+        <span class="t">Engagement, realtime</span>
+        Email open (when / client), <b>click</b> (which CTA) &mdash; then pages, dwell, scroll, abandoned forms, all tied to the <b>known person</b> (the click de-anonymizes the session). Their HubSpot lead record.
+      </div>
+      <div class="cell">
+        <span class="chip">PDL</span> enrich <b>on the click</b> — the moment to spend the credit.<br>
+        <span class="chip">Clay</span> async webhook&rarr;enrich&rarr;write back to HubSpot in minutes.<br>
+        <span class="chip">HubSpot</span> lead record + live timeline.
+      </div>
+      <div class="cell buy hot">
+        <span class="t">You can buy</span>
+        Same <b>broker + identity-graph</b> append as B (you hold the email PII key) — <i>minus</i> your own purchase history.
+        <span class="ceil hi">ceiling: same as B</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <b>Read it in one line:</b> the gate is the <b>identity key</b> — anonymous buys you the <i>company</i> (or a person de-anon); an email opens the <i>broker + identity-graph</i> floodgates from the same three vendors. <br>
+    <span class="caveat">Can &ne; should</span> — every signal carries a <b>say / allude / hold</b> surface policy; <i>creepy mode is the same data with the policy off</i>, not more data.
+    <span class="src">Provenance &middot; data-source map &middot; grounded in <code>signals.py</code> &middot; <code>catalog.py</code> &middot; PDL verified live, Jun 2026 &middot; 1 of 11</span>
+  </div>
+</div>
+
+<!-- ============================ SLIDE 2 ============================ -->
+<div class="slide" id="sl2">
+  <div class="eyebrow">
+    <span>Personalization output &middot; segments &rarr; email + site</span>
+    <span class="key">surface policy travels with the copy:<span class="sw" style="background:var(--green-bg);border:1px solid var(--green-line)"></span><b>say</b><span class="sw" style="background:var(--amber-bg);border:1px solid var(--amber-line)"></span><b>allude</b><span class="sw" style="background:var(--red-bg);border:1px solid var(--red-line)"></span><b>hold</b></span>
+  </div>
+  <h1>One segment engine, <span class="hl">two render targets</span>: an anonymous viewer gets a personalized <span class="hl">page only</span> (no address to email); an identity unlocks <span class="hl">hyper-personalized email <i>and</i> site</span> together.</h1>
+  <p class="frame-q"><b>So what?</b> Segments are computed once &mdash; 8 families &rarr; one of 6 archetypes (layout, theme, section order, CTA, density) &rarr; a context tier 1&ndash;4 &mdash; then email and site are two renders of that <b>same decision</b>. The richer the identity key (slide 1), the more families light up; the surface policy rides along: <b>say</b> declared, <b>allude</b> to behavior, <b>never recite</b> a <b>hold</b> fact.</p>
+
+  <div class="grid" id="s2" style="grid-template-columns:218px 1fr 1.08fr;">
+    <div class="row">
+      <div class="hcell">Scenario &amp; usable segments</div>
+      <div class="hcell">Hyper-personalized email copy</div>
+      <div class="hcell">Hyper-personalized site &mdash; design + copy</div>
+    </div>
+
+    <!-- A -->
+    <div class="row">
+      <div class="cell rail">
+        <div class="sc">A</div>
+        <div class="nm">New anonymous viewer</div>
+        <div class="keyl">Usable segment families</div>
+        <div class="fams">
+          <span class="fam on">Channel</span><span class="fam partial">Intent (cold)</span>
+          <span class="fam partial">Behavioral</span><span class="fam partial">Prof (B2B)</span>
+          <span class="fam off">Preferential</span><span class="fam off">Lifestage</span>
+          <span class="fam off">Economic</span><span class="fam off">Psychographic</span>
+        </div>
+        <div class="rail-note" style="font-size:9px;color:var(--muted);margin-top:5px;">Context only &mdash; no declared/identity data.</div>
+      </div>
+      <div class="cell">
+        <div class="mail x"><span class="xm">&times;</span><div><b>No deliverable address.</b> You can't email an anonymous visitor &mdash; personalize the <i>page</i>, then capture an email or de-anon (slide 1) to unlock email.</div></div>
+      </div>
+      <div class="cell">
+        <span class="arch" style="background:#4cc4d4;">Explorer archetype</span>
+        <div class="web dark">
+          <div class="wbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="wurl">gauntletai.com</span></div>
+          <div class="wbody">
+            <div class="whero">Late nights are when the big career moves start.</div>
+            <div class="wsub">Austin &middot; on mobile &middot; picking up where your Instagram ad left off.</div>
+            <span class="wcta" style="background:#4cc4d4;">Watch a free class &rarr;</span>
+            <div class="wnote"><b>Observed signals only</b> &mdash; dark mode (11:47pm), mobile, hero = the ad creative, local proof. No name.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- B -->
+    <div class="row">
+      <div class="cell rail">
+        <div class="sc">B</div>
+        <div class="nm">Existing customer, email match</div>
+        <div class="keyl">Usable segment families</div>
+        <div class="fams">
+          <span class="fam on">Behavioral</span><span class="fam on">Preferential</span><span class="fam on">Lifestage</span>
+          <span class="fam on">Professional</span><span class="fam on">Intent</span><span class="fam on">Economic</span>
+          <span class="fam on">Channel</span><span class="fam on">Psychographic</span>
+        </div>
+        <div class="rail-note" style="font-size:9px;color:var(--green);font-weight:700;margin-top:5px;">All 8 families &mdash; your CRM + append.</div>
+      </div>
+      <div class="cell">
+        <div class="mail">
+          <div class="mh">Subject: <b>Pick up right where you left off, Maya</b></div>
+          <div class="mb">Good to have you back &mdash; you finished <i>Intro to Python</i> with us in 2023 <span class="sp say">say</span>. The Advanced track continues that exact path <span class="sp allude">allude &middot; behavior</span>, and scholarships are open this round <span class="sp allude">allude &middot; price-sensitive</span>.<br><span style="font-size:9px;color:var(--muted);">(Never recites the modeled income / churn score it used to choose this angle <span class="sp hold">hold</span>.)</span></div>
+        </div>
+      </div>
+      <div class="cell">
+        <span class="arch" style="background:#d98a16;">Welcome-back archetype</span>
+        <div class="web">
+          <div class="wbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="wurl">gauntletai.com/continue</span></div>
+          <div class="wbody">
+            <div class="whero" style="color:#8a5a0f;">Welcome back, Maya.</div>
+            <div class="wsub">Your next step is the Advanced track &mdash; and there's a scholarship round open.</div>
+            <span class="wcta" style="background:#d98a16;">Continue your path &rarr;</span>
+            <div class="wnote">Hero=welcome, sections <b>next-step &rarr; what's-new</b>, name <span class="sp say">say</span>. Tier 2.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C -->
+    <div class="row">
+      <div class="cell rail">
+        <div class="sc">C</div>
+        <div class="nm">Emailed lead who clicked through</div>
+        <div class="keyl">Usable segment families</div>
+        <div class="fams">
+          <span class="fam on">Behavioral</span><span class="fam on">Intent</span><span class="fam on">Preferential</span>
+          <span class="fam on">Professional</span><span class="fam on">Lifestage</span><span class="fam on">Channel</span>
+          <span class="fam on">Psychographic</span><span class="fam partial">Econ (broker)</span>
+        </div>
+        <div class="rail-note" style="font-size:9px;color:var(--muted);margin-top:5px;">Engagement-rich; the click is the segment.</div>
+      </div>
+      <div class="cell">
+        <div class="mail">
+          <div class="mh">Subject: <b>You looked at outcomes &mdash; here's the number, Darnell</b></div>
+          <div class="mb">You opened our note and clicked <i>graduate outcomes</i> <span class="sp allude">allude &middot; the click</span>. For product managers moving into AI <span class="sp say">say &middot; declared goal</span>, that's the headline &mdash; and your cohort starts in 9 days.<br><span style="font-size:9px;color:var(--muted);">One magic link, no login &mdash; the click already identified him.</span></div>
+        </div>
+      </div>
+      <div class="cell">
+        <span class="arch" style="background:#2bb673;">Outcomes-first archetype</span>
+        <div class="web">
+          <div class="wbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="wurl">gauntletai.com/outcomes</span></div>
+          <div class="wbody">
+            <div class="whero" style="color:#157a4b;">Outcomes for PMs who moved into AI.</div>
+            <div class="wsub">The exact path from your role, Darnell &mdash; the page matches the link you clicked.</div>
+            <span class="wcta" style="background:#2bb673;">See graduate outcomes &rarr;</span>
+            <div class="wnote">Hero matches the <b>clicked CTA</b> (email&rarr;page continuity), name via magic-link. Tier 2.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <b>Read it in one line:</b> compute the segments once (8 families &rarr; an archetype &rarr; a context tier), then render the <i>same</i> decision to <b>email</b> and <b>page</b> so they reinforce each other &mdash; with the <b>say / allude / hold</b> policy baked into every line. Anonymous keys the page; an identity keys both.
+    <span class="src">Provenance &middot; segments &rarr; copy &middot; <code>segments.py</code> (8 families &rarr; 6 archetypes &rarr; tier 1&ndash;4) &middot; 2 of 11</span>
+  </div>
+</div>
+
+<!-- ============================ SLIDE 3 ============================ -->
+<div class="slide" id="sl3">
+  <div class="eyebrow">
+    <span>Design system &middot; a UI component per segment</span>
+    <span class="key avlegend">availability:<i class="dot2 on"></i>have<i class="dot2 half"></i>partial / buy<i class="dot2 off"></i>none</span>
+  </div>
+  <h1>Each segment family maps to <span class="hl">one natural UI component</span> &mdash; and the scenario's available data decides <span class="hl">which you can actually render</span>.</h1>
+  <p class="frame-q"><b>So what?</b> Read the availability rail on each card by scenario (A anonymous &middot; B customer &middot; C clicked-lead). Anonymous can only power the <b>always-observable</b> patterns (theme, urgency, B2B hero); an identity unlocks the <b>resume, financing, pathway and testimonial</b> patterns. Same component library &mdash; the <b>data is the only constraint</b>.</p>
+
+  <div class="uigrid" id="s3">
+    <!-- 1 -->
+    <div class="uicard">
+      <div class="fn">Channel / context</div>
+      <div class="ds">Observed &mdash; device, daypart, UTM, geo</div>
+      <div class="sk"><span class="toggle"></span><span class="pin">&#9679; Austin</span></div>
+      <div class="cl">Adaptive theme &middot; density &middot; local badge</div>
+      <div class="av"><span>A <i class="dot2 on"></i></span><span>B <i class="dot2 on"></i></span><span>C <i class="dot2 on"></i></span></div>
+    </div>
+    <!-- 2 -->
+    <div class="uicard">
+      <div class="fn">Behavioral</div>
+      <div class="ds">First-party &mdash; visits, dwell, abandoned</div>
+      <div class="sk"><span class="bar"><i></i></span><span class="btn">Continue</span></div>
+      <div class="cl">Resume card &middot; recently-viewed strip</div>
+      <div class="av"><span>A <i class="dot2 half"></i></span><span>B <i class="dot2 on"></i></span><span>C <i class="dot2 on"></i></span></div>
+    </div>
+    <!-- 3 -->
+    <div class="uicard">
+      <div class="fn">Intent / readiness</div>
+      <div class="ds">HubSpot lead score &middot; the click</div>
+      <div class="sk"><span class="btn">Apply now</span><span class="ured">9d left</span></div>
+      <div class="cl">CTA prominence &middot; urgency / countdown</div>
+      <div class="av"><span>A <i class="dot2 half"></i></span><span>B <i class="dot2 on"></i></span><span>C <i class="dot2 on"></i></span></div>
+    </div>
+    <!-- 4 -->
+    <div class="uicard">
+      <div class="fn">Professional / firmographic</div>
+      <div class="ds">PDL / LinkedIn &middot; reverse-IP company</div>
+      <div class="sk"><span class="lg"></span><span class="lg"></span><span class="lg"></span></div>
+      <div class="cl">Industry hero &middot; peer logo wall</div>
+      <div class="av"><span>A <i class="dot2 half"></i></span><span>B <i class="dot2 on"></i></span><span>C <i class="dot2 on"></i></span></div>
+    </div>
+    <!-- 5 -->
+    <div class="uicard">
+      <div class="fn">Economic / value</div>
+      <div class="ds">HubSpot LTV &middot; broker income (buy)</div>
+      <div class="sk"><span class="dollar">$</span><span class="knob"></span></div>
+      <div class="cl">Financing calculator &middot; scholarship badge</div>
+      <div class="av"><span>A <i class="dot2 off"></i></span><span>B <i class="dot2 on"></i></span><span>C <i class="dot2 half"></i></span></div>
+    </div>
+    <!-- 6 -->
+    <div class="uicard">
+      <div class="fn">Lifestage</div>
+      <div class="ds">PDL history &mdash; switcher / grad / returner</div>
+      <div class="sk"><span class="avatar"></span><span class="lns"><span class="ln" style="width:46px"></span><span class="ln" style="width:32px"></span></span></div>
+      <div class="cl">Matched testimonial &middot; pathway diagram</div>
+      <div class="av"><span>A <i class="dot2 off"></i></span><span>B <i class="dot2 on"></i></span><span>C <i class="dot2 on"></i></span></div>
+    </div>
+    <!-- 7 -->
+    <div class="uicard">
+      <div class="fn">Preferential</div>
+      <div class="ds">Declared goal &middot; pages viewed</div>
+      <div class="sk"><span class="lns"><span class="sec hot"></span><span class="sec"></span><span class="sec"></span></span></div>
+      <div class="cl">Section reorder &middot; hero variant</div>
+      <div class="av"><span>A <i class="dot2 off"></i></span><span>B <i class="dot2 on"></i></span><span>C <i class="dot2 on"></i></span></div>
+    </div>
+    <!-- 8 -->
+    <div class="uicard">
+      <div class="fn">Psychographic</div>
+      <div class="ds">Inferred &mdash; ambitious vs steady</div>
+      <div class="sk"><span class="barc"><i style="height:9px"></i><i style="height:15px"></i><i style="height:22px"></i></span><span class="vs">vs</span><span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></div>
+      <div class="cl">Data-viz vs social-proof emphasis</div>
+      <div class="av"><span>A <i class="dot2 off"></i></span><span>B <i class="dot2 on"></i></span><span>C <i class="dot2 on"></i></span></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <b>Read it in one line:</b> the component library is fixed; the <b>scenario's data</b> turns each pattern on. Anonymous lights up 3&ndash;4 patterns from observed signals alone; an identified visitor lights up all eight. <span class="caveat">Can &ne; should</span> still governs the copy inside each.
+    <span class="src">Provenance &middot; UI &times; segment map &middot; <code>segments.py</code> (8 families) &times; <code>signals.py</code> &middot; 3 of 11</span>
+  </div>
+</div>
+
+<!-- ============================ SLIDE 4 ============================ -->
+<div class="slide" id="sl4">
+  <div class="eyebrow">
+    <span>Personalization output &middot; render options + the metric to optimize</span>
+    <span class="key">policy:<span class="sw" style="background:var(--green-bg);border:1px solid var(--green-line)"></span><b>say</b><span class="sw" style="background:var(--amber-bg);border:1px solid var(--amber-line)"></span><b>allude</b><span class="sw" style="background:var(--red-bg);border:1px solid var(--red-line)"></span><b>hold</b></span>
+  </div>
+  <h1>Each fill <span class="hl">renders several ways</span>; the contextual bandit A/B-tests the variants and keeps the winner by <span class="hl">the one metric that matters</span> for that moment.</h1>
+  <p class="frame-q"><b>So what?</b> The primary render is one option; columns 3&ndash;4 show the alternates the <b>Optimizer</b> tests and the KPI each is rewarded on. Only verified, policy-cleared variants enter the test space &mdash; so it <i>can&rsquo;t learn to lie</i>. Arrows are directional, not fabricated lifts.</p>
+
+  <div class="grid" id="s4" style="grid-template-columns:150px 0.96fr 1.04fr 0.92fr;">
+    <div class="row">
+      <div class="hcell">Example &middot; component</div>
+      <div class="hcell">Primary render</div>
+      <div class="hcell">Other render options (bandit arms)</div>
+      <div class="hcell">Optimize for &rarr; metric</div>
+    </div>
+
+    <!-- 1 -->
+    <div class="row">
+      <div class="cell rail"><div class="sc">1 &middot; Scenario A</div><div class="nm">Anonymous &middot; Channel</div><div class="cl" style="font-size:9.5px;font-weight:700;color:var(--blue-6);margin-top:4px;">Adaptive theme + local badge</div></div>
+      <div class="cell">
+        <div class="web dark">
+          <div class="wbody"><div class="whero">Late nights are when the big moves start.</div><div class="wsub">Austin &middot; on mobile &middot; from your Instagram ad.</div><span class="wcta" style="background:#4cc4d4;">Watch a free class &rarr;</span></div>
+        </div>
+        <div class="fromcap"><b>From:</b> daypart 11:47pm, IP&rarr;Austin, UTM <span class="sp allude">allude</span> &middot; no name</div>
+      </div>
+      <div class="cell">
+        <div class="alt"><span class="av">B</span>&ldquo;Your 10-minute morning AI brief.&rdquo;<span class="tg">light theme &middot; AM daypart</span></div>
+        <div class="alt"><span class="av">C</span>&ldquo;Low battery? Save your spot in 30 seconds.&rdquo;<span class="tg hold">battery-aware &middot; the edge</span></div>
+      </div>
+      <div class="cell">
+        <span class="kpi">&darr; bounce rate</span>
+        <div class="mech"><b>Why:</b> a page that matches time, device &amp; source earns the first scroll instead of a back-tap &mdash; lifts <b>engaged sessions</b>.</div>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="row">
+      <div class="cell rail"><div class="sc">2 &middot; Scenario A</div><div class="nm">Anonymous &middot; Professional (B2B)</div><div class="cl" style="font-size:9.5px;font-weight:700;color:var(--blue-6);margin-top:4px;">Peer-logo hero</div></div>
+      <div class="cell">
+        <div class="web">
+          <div class="wbody"><div class="whero" style="color:#1e3a8a;">Engineers at firms like yours ship AI faster.</div><div class="sk" style="margin:5px 0;height:26px;"><span class="lg"></span><span class="lg"></span><span class="lg"></span></div><span class="wcta" style="background:#1d4ed8;">See the enterprise track &rarr;</span></div>
+        </div>
+        <div class="fromcap"><b>From:</b> reverse-IP &rarr; employer <span class="sp allude">allude</span> &middot; company, not person</div>
+      </div>
+      <div class="cell">
+        <div class="alt"><span class="av">B</span>&ldquo;AI for fintech engineering teams.&rdquo;<span class="tg">industry-tailored</span></div>
+        <div class="alt"><span class="av">C</span>&ldquo;A track built for {Company}&rsquo;s stack.&rdquo;<span class="tg hold">named-account ABM &middot; the edge</span></div>
+      </div>
+      <div class="cell">
+        <span class="kpi">&uarr; B2B demo requests</span>
+        <div class="mech"><b>Why:</b> speaking to the employer converts an anonymous B2B hit into a <b>team-sales lead</b> (higher ACV than a single signup).</div>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="row">
+      <div class="cell rail"><div class="sc">3 &middot; Scenario B</div><div class="nm">Customer &middot; Economic</div><div class="cl" style="font-size:9.5px;font-weight:700;color:var(--blue-6);margin-top:4px;">Financing module</div></div>
+      <div class="cell">
+        <div class="web">
+          <div class="wbody"><div class="whero" style="color:#157a4b;">You're closer than you think, Maya.</div><div class="sk" style="margin:5px 0;height:26px;"><span class="dollar">$</span><span class="knob"></span></div><span class="wcta" style="background:#2bb673;">See payment &amp; scholarship options &rarr;</span></div>
+        </div>
+        <div class="fromcap"><b>From:</b> name <span class="sp say">say</span> + cost-pages <span class="sp allude">allude</span>; income <span class="sp hold">hold</span></div>
+      </div>
+      <div class="cell">
+        <div class="alt"><span class="av">B</span>&ldquo;Pay monthly, not all at once.&rdquo;<span class="tg">installment framing</span></div>
+        <div class="alt"><span class="av">C</span>&ldquo;Scholarship round closes Friday.&rdquo;<span class="tg">deadline urgency</span></div>
+      </div>
+      <div class="cell">
+        <span class="kpi">&uarr; paid conversion</span>
+        <div class="mech"><b>Why:</b> leading with affordability clears the top objection for price-sensitive learners before it&rsquo;s raised &mdash; lifts <b>checkout completion</b>.</div>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="row">
+      <div class="cell rail"><div class="sc">4 &middot; Scenario B</div><div class="nm">Customer &middot; Behavioral</div><div class="cl" style="font-size:9.5px;font-weight:700;color:var(--blue-6);margin-top:4px;">Resume card</div></div>
+      <div class="cell">
+        <div class="web">
+          <div class="wbody"><div class="whero" style="color:#8a5a0f;">Pick up where you left off, Maya.</div><div class="sk" style="margin:5px 0;height:26px;"><span class="bar"><i></i></span><span style="font-size:8.5px;color:var(--muted);font-weight:700;">Advanced &middot; module 1</span></div><span class="wcta" style="background:#d98a16;">Continue &rarr;</span></div>
+        </div>
+        <div class="fromcap"><b>From:</b> CRM history <span class="sp say">say</span> + page position <span class="sp allude">allude</span></div>
+      </div>
+      <div class="cell">
+        <div class="alt"><span class="av">B</span>&ldquo;You&rsquo;re 60% through &mdash; keep the streak.&rdquo;<span class="tg">progress / streak</span></div>
+        <div class="alt"><span class="av">C</span>&ldquo;Your next lesson is just 8 minutes.&rdquo;<span class="tg">bite-size next step</span></div>
+      </div>
+      <div class="cell">
+        <span class="kpi">&uarr; reactivation</span>
+        <div class="mech"><b>Why:</b> one tap back to the exact spot beats a generic &ldquo;welcome back&rdquo; &mdash; lifts <b>course completion</b> and cuts <b>churn</b>.</div>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="row">
+      <div class="cell rail"><div class="sc">5 &middot; Scenario C</div><div class="nm">Clicked lead &middot; Intent + Preferential</div><div class="cl" style="font-size:9.5px;font-weight:700;color:var(--blue-6);margin-top:4px;">Outcomes hero + countdown</div></div>
+      <div class="cell">
+        <div class="web">
+          <div class="wbody"><div class="whero" style="color:#157a4b;">The salary lift you clicked on &mdash; by your role, Darnell.</div><div class="sk" style="margin:5px 0;height:26px;justify-content:flex-start;"><span class="ured">cohort starts in 9 days</span></div><span class="wcta" style="background:#2bb673;">See graduate outcomes &rarr;</span></div>
+        </div>
+        <div class="fromcap"><b>From:</b> the click <span class="sp allude">allude</span> + declared goal <span class="sp say">say</span> &middot; magic-link</div>
+      </div>
+      <div class="cell">
+        <div class="alt"><span class="av">B</span>&ldquo;Early-bird pricing closes Friday.&rdquo;<span class="tg">deadline</span></div>
+        <div class="alt"><span class="av">C</span>&ldquo;PMs like you have already enrolled.&rdquo;<span class="tg">social proof</span></div>
+      </div>
+      <div class="cell">
+        <span class="kpi">&uarr; lead &rarr; application</span>
+        <div class="mech"><b>Why:</b> the page continues the click (no re-explaining) and a deadline compresses the decision &mdash; lifts <b>application starts</b>, cuts time-to-apply.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <b>Read it in one line:</b> one component, several renders &mdash; the bandit treats the alternates as arms and the KPI as its reward, so personalization is judged by <i>lift on a real metric</i>, not by how clever the copy reads. <span class="caveat">Verified-only test space</span> means it optimizes hard without learning to overclaim.
+    <span class="src">Provenance &middot; render options + metrics &middot; ties to the Optimizer (bandit) &middot; 4 of 11</span>
+  </div>
+</div>
+
+<!-- ============================ SLIDE 5 — CONTENTS ============================ -->
+<div class="slide" id="sltoc">
+  <div class="eyebrow">
+    <span>Contents</span>
+    <span class="key">read the titles top-to-bottom &mdash; the story lands without opening a slide</span>
+  </div>
+  <h1>The <span class="hl">framework</span> first (1&ndash;4), then a <span class="hl">playbook per scenario</span> (6&ndash;11) &mdash; each scenario&rsquo;s data decisions, multiple treatments per decision, plus a page of rendered mockups.</h1>
+  <p class="frame-q"><b>How to read it:</b> pages 1&ndash;4 establish <i>what data exists and how it becomes copy</i>; each section then has a <b>decision matrix</b> (every data decision, three treatments) followed by a <b>visuals page</b> (the actual rendered pages &amp; emails).</p>
+  <div class="tocgrid">
+    <div class="tocbox">
+      <h3>Part 1 &mdash; the framework</h3>
+      <div class="toci"><span class="n">1</span><span class="tt">The identity key gates what you can know<small>3 scenarios &times; PDL / Clay / HubSpot + what&rsquo;s purchasable</small></span></div>
+      <div class="toci"><span class="n">2</span><span class="tt">One segment engine, two render targets<small>segments &rarr; email + site, same decision</small></span></div>
+      <div class="toci"><span class="n">3</span><span class="tt">A UI component per segment family<small>8 families &rarr; 6 archetypes, availability by scenario</small></span></div>
+      <div class="toci"><span class="n">4</span><span class="tt">Same components, five worked fills<small>copy examples with say / allude / hold tags</small></span></div>
+    </div>
+    <div class="tocbox">
+      <h3>Part 2 &mdash; per-scenario playbooks</h3>
+      <div class="secblock">
+        <div class="sh"><span class="sn" style="background:#4cc4d4;">A</span><span class="st">Anonymous viewer</span><span class="pg">matrix p6 &middot; visuals p7</span></div>
+        <div class="dds">Decisions: <b>geo</b> &middot; <b>daypart</b> &middot; <b>device</b> &middot; <b>referrer / UTM</b> &middot; <b>connection</b> &middot; <b>reverse-IP</b> &mdash; 3 treatments each + rendered pages</div>
+      </div>
+      <div class="secblock">
+        <div class="sh"><span class="sn" style="background:#2bb673;">B</span><span class="st">Existing customer (email match)</span><span class="pg">matrix p8 &middot; visuals p9</span></div>
+        <div class="dds">Decisions: <b>purchase history</b> &middot; <b>behavior</b> &middot; <b>declared goal</b> &middot; <b>PDL profile</b> &middot; <b>economic</b> &middot; <b>advocacy</b> &mdash; 3 treatments each + page &amp; email</div>
+      </div>
+      <div class="secblock">
+        <div class="sh"><span class="sn" style="background:#8a5cf6;">C</span><span class="st">Emailed lead who clicked</span><span class="pg">matrix p10 &middot; visuals p11</span></div>
+        <div class="dds">Decisions: <b>which CTA clicked</b> &middot; <b>email opens</b> &middot; <b>abandoned action</b> &middot; <b>declared goal</b> &middot; <b>PDL role</b> &middot; <b>cohort timing</b> &mdash; 3 treatments each + page &amp; email</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <b>Read it in one line:</b> four framework pages, then three sections &mdash; 18 data decisions, each shown three ways, then rendered as real pages &amp; emails, with the surface policy on every line.
+    <span class="src">Provenance &middot; contents &middot; 5 of 11</span>
+  </div>
+</div>
+
+<!-- ============================ SLIDE 6 — SECTION A ============================ -->
+<div class="slide" id="secA">
+  <div class="eyebrow">
+    <span>Section A &middot; Anonymous viewer &mdash; data decision &times; treatments</span>
+    <span class="key">policy:<span class="sw" style="background:var(--green-bg);border:1px solid var(--green-line)"></span><b>say</b><span class="sw" style="background:var(--amber-bg);border:1px solid var(--amber-line)"></span><b>allude</b><span class="sw" style="background:var(--red-bg);border:1px solid var(--red-line)"></span><b>hold</b></span>
+  </div>
+  <h1>Scenario A &mdash; six <span class="hl">data decisions</span> from observed signals, <span class="hl">three treatments each</span>; the ceiling is context, never a name.</h1>
+  <p class="frame-q"><b>So what?</b> Each row is one thing the browser hands you at load (plus a B2B reverse-IP buy). The three cells are distinct copy/UI <i>treatments</i> of that decision &mdash; pick by goal, not by what&rsquo;s technically possible.</p>
+  <div class="dmx">
+    <div class="h">Data decision</div><div class="h x">Treatment 1</div><div class="h x">Treatment 2</div><div class="h x">Treatment 3</div>
+
+    <div class="dd"><span class="l">Geo / location</span><span class="s">observed &middot; IP&rarr;city</span></div>
+    <div class="ex"><span class="q">&ldquo;Austinites are switching into AI.&rdquo;</span><span class="tg">local proof</span></div>
+    <div class="ex"><span class="q">&ldquo;Live class at 7pm your time.&rdquo;</span><span class="tg">timezone-aware</span></div>
+    <div class="ex"><span class="q">&ldquo;Free AI meetup in Austin, Thursday.&rdquo;</span><span class="tg">local event</span></div>
+
+    <div class="dd"><span class="l">Daypart / time</span><span class="s">observed &middot; JS clock</span></div>
+    <div class="ex"><span class="q">&ldquo;Late nights are when big moves start.&rdquo;</span><span class="tg">dark + calm</span></div>
+    <div class="ex"><span class="q">&ldquo;15 minutes on your lunch? One lesson.&rdquo;</span><span class="tg">midday micro</span></div>
+    <div class="ex"><span class="q">&ldquo;Weekend learner? The part-time track fits.&rdquo;</span><span class="tg">weekend</span></div>
+
+    <div class="dd"><span class="l">Device &amp; economics</span><span class="s">observed &middot; UA + model</span></div>
+    <div class="ex"><span class="q">&ldquo;Built for your phone &mdash; tap to start.&rdquo;</span><span class="tg">mobile-first</span></div>
+    <div class="ex"><span class="q">&ldquo;Start free &mdash; no card.&rdquo;</span><span class="tg">budget device</span></div>
+    <div class="ex"><span class="q">&ldquo;Full IDE, right in your browser.&rdquo;</span><span class="tg">desktop / pro</span></div>
+
+    <div class="dd"><span class="l">Referrer / UTM</span><span class="s">observed &middot; link params</span></div>
+    <div class="ex"><span class="q">&ldquo;From the &lsquo;barista&rarr;AI&rsquo; ad? Here&rsquo;s the path.&rdquo;</span><span class="tg">creative match</span></div>
+    <div class="ex"><span class="q">&ldquo;An AI bootcamp with financing? Yes.&rdquo;</span><span class="tg">search intent</span></div>
+    <div class="ex"><span class="q">&ldquo;Saw us on Instagram &mdash; the full story.&rdquo;</span><span class="tg">platform</span></div>
+
+    <div class="dd"><span class="l">Connection / ISP</span><span class="s">observed &middot; ASN</span></div>
+    <div class="ex"><span class="q">&ldquo;Learn from home, on your schedule.&rdquo;</span><span class="tg">residential</span></div>
+    <div class="ex"><span class="q">&ldquo;Upskilling a team? Talk to us.&rdquo;</span><span class="tg">corporate</span></div>
+    <div class="ex"><span class="q">&ldquo;On the go? Lessons download offline.&rdquo;</span><span class="tg">mobile carrier</span></div>
+
+    <div class="dd"><span class="l">Reverse-IP company</span><span class="s">buy ~$0.01 &middot; B2B</span></div>
+    <div class="ex"><span class="q">&ldquo;Teams at firms like yours train here.&rdquo;</span><span class="tg">peer (allude)</span></div>
+    <div class="ex"><span class="q">&ldquo;AI for fintech engineers.&rdquo;</span><span class="tg">industry-tailored</span></div>
+    <div class="ex"><span class="q">&ldquo;A track built for {Company}&rsquo;s stack.&rdquo;</span><span class="tg hold">ABM &mdash; the edge</span></div>
+  </div>
+  <div class="foot">
+    <b>Read it in one line:</b> same six decisions, three ways each &mdash; most ship on free observed data; only the company row costs a cent, and naming the company by name is the line to weigh.
+    <span class="src">Provenance &middot; Section A &middot; <code>signals.py</code> anonymous tier &middot; 6 of 11</span>
+  </div>
+</div>
+
+<!-- ============================ Section A — VISUALS ============================ -->
+<div class="slide" id="vA">
+  <div class="eyebrow">
+    <span>Section A &middot; Anonymous viewer &mdash; rendered pages</span>
+    <span class="key">actual visual examples &middot; observed signals only, no login</span>
+  </div>
+  <h1>What the anonymous viewer <span class="hl">actually sees</span> &mdash; three real renders of one homepage, none using a name.</h1>
+  <p class="frame-q"><b>So what?</b> The same site, reshaped by what the browser reveals at load. No identity needed to make a page feel made-for-you &mdash; the caption on each notes the signal, the policy, and the metric it lifts.</p>
+  <div class="vrow">
+    <div class="vmock dark">
+      <div class="chrome"><span class="d"></span><span class="d"></span><span class="d"></span><span class="u">gauntletai.com</span></div>
+      <div class="nav"><span class="logo">GauntletAI</span><span class="nl">Curriculum</span><span class="nl">Outcomes</span><span class="nb" style="background:#4cc4d4;">Watch free</span></div>
+      <div class="hero"><div class="eb">11:47 PM &middot; Austin</div><h4>Late nights are when the big moves start.</h4><p>A part-time AI engineering cohort, built around the hours you actually have.</p><span class="cta" style="background:#4cc4d4;">Watch a free class &rarr;</span></div>
+      <div class="band"><div class="stats"><span class="stat">12-week part-time</span><span class="stat">nights &amp; weekends</span><span class="stat">no card to start</span></div></div>
+      <div class="cap"><span class="du">Data used:</span><span class="pc">daypart 11:47pm</span><span class="pc">IP&rarr;Austin</span><span class="pc">device: mobile</span><span class="pc">UTM creative</span> observed &middot; allude &middot; no name &middot; <span class="kpi">&darr; bounce</span></div>
+    </div>
+    <div class="vmock">
+      <div class="chrome"><span class="d"></span><span class="d"></span><span class="d"></span><span class="u">gauntletai.com/teams</span></div>
+      <div class="nav"><span class="logo">GauntletAI</span><span class="nl">For Teams</span><span class="nl">Outcomes</span><span class="nb" style="background:#1d4ed8;">Book a demo</span></div>
+      <div class="hero"><div class="eb" style="color:#1e40af;">For engineering teams</div><h4>Engineers at firms like yours ship AI faster.</h4><p>Upskill your whole team on production AI &mdash; one cohort, measurable output.</p><span class="cta" style="background:#1d4ed8;">See the enterprise track &rarr;</span></div>
+      <div class="band"><div class="bandlbl">Trusted by teams in your industry</div><div class="logos"><span class="lg"></span><span class="lg"></span><span class="lg"></span><span class="lg"></span></div></div>
+      <div class="cap"><span class="du">Data used:</span><span class="pc">reverse-IP &rarr; employer</span><span class="pc">industry</span> bought ~$0.01 &middot; allude &middot; company, not person &middot; <span class="kpi">&uarr; B2B demos</span></div>
+    </div>
+    <div class="vmock">
+      <div class="chrome"><span class="d"></span><span class="d"></span><span class="d"></span><span class="u">gauntletai.com</span></div>
+      <div class="nav"><span class="logo">GauntletAI</span><span class="nl">Curriculum</span><span class="nl">Outcomes</span><span class="nb" style="background:#2bb673;">Watch free</span></div>
+      <div class="hero"><div class="eb" style="color:#157a4b;">&#9679; Austin, TX</div><h4>Austin is switching into AI.</h4><p>Join the next cohort &mdash; 100% online, on your schedule, with a local peer group.</p><span class="cta" style="background:#2bb673;">See local outcomes &rarr;</span></div>
+      <div class="band"><div class="stats"><span class="stat">Austin peer group</span><span class="stat">100% online</span><span class="stat">starts soon</span></div></div>
+      <div class="cap"><span class="du">Data used:</span><span class="pc">IP &rarr; city (Austin)</span> observed &middot; allude &middot; <span class="kpi">&uarr; local CTR</span></div>
+    </div>
+  </div>
+  <div class="foot">
+    <b>Read it in one line:</b> three made-for-you homepages from observed signals alone &mdash; tuned by time, employer, and city &mdash; and not one needs a login.
+    <span class="src">Provenance &middot; Section A &middot; rendered examples &middot; 7 of 11</span>
+  </div>
+</div>
+
+<!-- ============================ SLIDE 7 — SECTION B ============================ -->
+<div class="slide" id="secB">
+  <div class="eyebrow">
+    <span>Section B &middot; Existing customer (email match) &mdash; data decision &times; treatments</span>
+    <span class="key">policy:<span class="sw" style="background:var(--green-bg);border:1px solid var(--green-line)"></span><b>say</b><span class="sw" style="background:var(--amber-bg);border:1px solid var(--amber-line)"></span><b>allude</b><span class="sw" style="background:var(--red-bg);border:1px solid var(--red-line)"></span><b>hold</b></span>
+  </div>
+  <h1>Scenario B &mdash; the email keys the <span class="hl">whole record</span>; six data decisions, <span class="hl">three treatments each</span>, income &amp; churn always held.</h1>
+  <p class="frame-q"><b>So what?</b> With the contact matched to your CRM + an append, every decision below is live. The discipline is restraint: <i>say</i> what they told you, <i>allude</i> to behavior, and let the <b>hold</b> facts steer the angle without ever surfacing.</p>
+  <div class="dmx">
+    <div class="h">Data decision</div><div class="h x">Treatment 1</div><div class="h x">Treatment 2</div><div class="h x">Treatment 3</div>
+
+    <div class="dd"><span class="l">Purchase history</span><span class="s">CRM &middot; say</span></div>
+    <div class="ex"><span class="q">&ldquo;Welcome back &mdash; you took Intro to Python.&rdquo;</span><span class="tg">welcome</span></div>
+    <div class="ex"><span class="q">&ldquo;Alumni save 30% on the Advanced track.&rdquo;</span><span class="tg">upsell</span></div>
+    <div class="ex"><span class="q">&ldquo;Your next step: the ML Engineering track.&rdquo;</span><span class="tg">next-logical</span></div>
+
+    <div class="dd"><span class="l">On-site behavior</span><span class="s">first-party &middot; allude</span></div>
+    <div class="ex"><span class="q">&ldquo;Pick up where you left off.&rdquo;</span><span class="tg">resume</span></div>
+    <div class="ex"><span class="q">&ldquo;Still weighing financing? Here&rsquo;s the math.&rdquo;</span><span class="tg">dwell-on-pricing</span></div>
+    <div class="ex"><span class="q">&ldquo;Finish the application you started.&rdquo;</span><span class="tg">abandoned</span></div>
+
+    <div class="dd"><span class="l">Declared goal</span><span class="s">declared &middot; say</span></div>
+    <div class="ex"><span class="q">&ldquo;Double your salary &mdash; here&rsquo;s how.&rdquo;</span><span class="tg">goal mirror</span></div>
+    <div class="ex"><span class="q">&ldquo;Switch into AI without going broke.&rdquo;</span><span class="tg">verbatim</span></div>
+    <div class="ex"><span class="q">&ldquo;Your goal, your timeline.&rdquo;</span><span class="tg">soft</span></div>
+
+    <div class="dd"><span class="l">PDL profile</span><span class="s">enrich &middot; allude</span></div>
+    <div class="ex"><span class="q">&ldquo;Built for senior engineers.&rdquo;</span><span class="tg">seniority</span></div>
+    <div class="ex"><span class="q">&ldquo;Leaders in banking trust this program.&rdquo;</span><span class="tg">prestige</span></div>
+    <div class="ex"><span class="q">&ldquo;From PM to AI lead.&rdquo;</span><span class="tg">lifestage</span></div>
+
+    <div class="dd"><span class="l">Economic / value</span><span class="s">LTV say &middot; income hold</span></div>
+    <div class="ex"><span class="q">&ldquo;A loyal-learner rate, just for you.&rdquo;</span><span class="tg">LTV (say)</span></div>
+    <div class="ex"><span class="q">&ldquo;Scholarship math, ready for you.&rdquo;</span><span class="tg">price-sensitive</span></div>
+    <div class="ex"><span class="q">&ldquo;Premium cohort &mdash; concierge onboarding.&rdquo;</span><span class="tg hold">income steers (hold)</span></div>
+
+    <div class="dd"><span class="l">Advocacy</span><span class="s">NPS / review &middot; say</span></div>
+    <div class="ex"><span class="q">&ldquo;Thanks for the 5&#9733; &mdash; refer &amp; earn.&rdquo;</span><span class="tg">referral</span></div>
+    <div class="ex"><span class="q">&ldquo;Share your story, inspire the next cohort.&rdquo;</span><span class="tg">testimonial ask</span></div>
+    <div class="ex"><span class="q">&ldquo;Your invite to the VIP alumni community.&rdquo;</span><span class="tg">loyalty</span></div>
+  </div>
+  <div class="foot">
+    <b>Read it in one line:</b> one person, eighteen ways &mdash; and the discipline shows in the economic row, where a <b>hold</b> fact (modeled income, churn) picks the treatment but never appears in a word of copy.
+    <span class="src">Provenance &middot; Section B &middot; <code>segments.py</code> all 8 families &middot; 8 of 11</span>
+  </div>
+</div>
+
+<!-- ============================ Section B — VISUALS ============================ -->
+<div class="slide" id="vB">
+  <div class="eyebrow">
+    <span>Section B &middot; Existing customer &mdash; rendered page &amp; email</span>
+    <span class="key">actual visual examples &middot; greeted by name, income held</span>
+  </div>
+  <h1>The customer is greeted by name across <span class="hl">page and email</span> &mdash; the same decision, two surfaces.</h1>
+  <p class="frame-q"><b>So what?</b> With the email keyed to your CRM, the render can <i>say</i> the relationship. The economic angle is chosen by a <b>hold</b> fact (modeled income) that never appears in a word of copy.</p>
+  <div class="vrow">
+    <div class="vmock">
+      <div class="chrome"><span class="d"></span><span class="d"></span><span class="d"></span><span class="u">gauntletai.com/continue</span></div>
+      <div class="nav"><span class="logo">GauntletAI</span><span class="nl">My courses</span><span class="nl">Catalog</span><span class="nb" style="background:#d98a16;">Continue</span></div>
+      <div class="hero"><div class="eb" style="color:#a8690f;">Welcome back</div><h4>Pick up where you left off, Maya.</h4><p>You finished Intro to Python in 2023 &mdash; the Advanced track continues that exact path.</p><span class="cta" style="background:#d98a16;">Continue &rarr;</span></div>
+      <div class="band"><div class="bandlbl">Advanced &middot; module 1 of 8</div><div class="bar" style="width:100%"><i style="width:60%"></i></div></div>
+      <div class="cap"><span class="du">Data used:</span><span class="pc">CRM: finished Intro 2023</span><span class="pc">resume position</span> say + allude &middot; <span class="kpi">&uarr; reactivation</span></div>
+    </div>
+    <div class="vmock">
+      <div class="chrome"><span class="d"></span><span class="d"></span><span class="d"></span><span class="u">gauntletai.com/financing</span></div>
+      <div class="nav"><span class="logo">GauntletAI</span><span class="nl">Pricing</span><span class="nl">Scholarships</span><span class="nb" style="background:#2bb673;">Apply</span></div>
+      <div class="hero"><div class="eb" style="color:#157a4b;">Made affordable</div><h4>You're closer than you think, Maya.</h4><p>Scholarships and monthly plans, matched to what you've told us matters.</p><span class="cta" style="background:#2bb673;">See payment options &rarr;</span></div>
+      <div class="band"><div class="fin"><span class="dollar">$</span><span class="knob" style="flex:1"></span></div><div class="stats"><span class="stat">Pay monthly</span><span class="stat">Scholarship eligible</span></div></div>
+      <div class="cap"><span class="du">Data used:</span><span class="pc">declared name</span><span class="pc">cost-page visits</span><span class="pc">modeled income</span> say + allude; income <b>hold</b> (steers, never shown) &middot; <span class="kpi">&uarr; paid conversion</span></div>
+    </div>
+    <div class="vmock" style="position:relative;">
+      <span class="emailtag" style="background:#d98a16;">Email</span>
+      <div class="ehead" style="padding-top:18px;"><div class="ef">From <b>GauntletAI</b> &middot; to maya.chen@&hellip;</div><div class="es">Pick up right where you left off, Maya</div></div>
+      <div class="ebody">Good to have you back &mdash; the Advanced track continues your Intro to Python path, and scholarships are open this round.<br><br>It takes about two minutes to pick up module 1.<span class="cta" style="background:#d98a16;">Continue &rarr;</span></div>
+      <div class="cap"><span class="du">Data used:</span><span class="pc">declared name</span><span class="pc">CRM history</span> say + allude &middot; email surface &middot; <span class="kpi">&uarr; email&rarr;site CTR</span></div>
+    </div>
+  </div>
+  <div class="foot">
+    <b>Read it in one line:</b> page and email render from one segment decision so they reinforce each other &mdash; and the affordability angle is steered by income the copy never speaks.
+    <span class="src">Provenance &middot; Section B &middot; rendered examples &middot; 9 of 11</span>
+  </div>
+</div>
+
+<!-- ============================ SLIDE 8 — SECTION C ============================ -->
+<div class="slide" id="secC">
+  <div class="eyebrow">
+    <span>Section C &middot; Emailed lead who clicked &mdash; data decision &times; treatments</span>
+    <span class="key">policy:<span class="sw" style="background:var(--green-bg);border:1px solid var(--green-line)"></span><b>say</b><span class="sw" style="background:var(--amber-bg);border:1px solid var(--amber-line)"></span><b>allude</b><span class="sw" style="background:var(--red-bg);border:1px solid var(--red-line)"></span><b>hold</b></span>
+  </div>
+  <h1>Scenario C &mdash; the <span class="hl">click is consent and a topic</span>; six data decisions, <span class="hl">three treatments each</span>, every page keeps the email&rsquo;s promise.</h1>
+  <p class="frame-q"><b>So what?</b> The click identifies them with no login (magic-link) and tells you exactly what they care about. Each decision below continues that thread &mdash; the only restraint is the one <b>hold</b> signal you bought but never mention.</p>
+  <div class="dmx">
+    <div class="h">Data decision</div><div class="h x">Treatment 1</div><div class="h x">Treatment 2</div><div class="h x">Treatment 3</div>
+
+    <div class="dd"><span class="l">Which CTA clicked</span><span class="s">engagement &middot; allude</span></div>
+    <div class="ex"><span class="q">&ldquo;The outcomes you clicked &mdash; by your role.&rdquo;</span><span class="tg">continuity: outcomes</span></div>
+    <div class="ex"><span class="q">&ldquo;More on financing, since you asked.&rdquo;</span><span class="tg">continuity: cost</span></div>
+    <div class="ex"><span class="q">&ldquo;Curriculum deep-dive, as requested.&rdquo;</span><span class="tg">continuity: curriculum</span></div>
+
+    <div class="dd"><span class="l">Email opens</span><span class="s">engagement &middot; allude</span></div>
+    <div class="ex"><span class="q">&ldquo;Glad you opened &mdash; here&rsquo;s the 2-min version.&rdquo;</span><span class="tg">opener</span></div>
+    <div class="ex"><span class="q">&ldquo;Opened twice? Let&rsquo;s talk.&rdquo;</span><span class="tg">high-engagement</span></div>
+    <div class="ex"><span class="q">&ldquo;Didn&rsquo;t click before? Maybe this is the bit.&rdquo;</span><span class="tg">re-engage</span></div>
+
+    <div class="dd"><span class="l">Abandoned action</span><span class="s">first-party &middot; allude</span></div>
+    <div class="ex"><span class="q">&ldquo;Finish &mdash; step 3 of 4.&rdquo;</span><span class="tg">resume-application</span></div>
+    <div class="ex"><span class="q">&ldquo;Your saved plan is still here.&rdquo;</span><span class="tg">saved-state</span></div>
+    <div class="ex"><span class="q">&ldquo;Two minutes to done.&rdquo;</span><span class="tg">urgency</span></div>
+
+    <div class="dd"><span class="l">Declared goal</span><span class="s">declared &middot; say</span></div>
+    <div class="ex"><span class="q">&ldquo;Lead AI products, not just manage them.&rdquo;</span><span class="tg">goal mirror</span></div>
+    <div class="ex"><span class="q">&ldquo;Your goal: your first AI job. The path.&rdquo;</span><span class="tg">verbatim</span></div>
+    <div class="ex"><span class="q">&ldquo;We remember why you signed up.&rdquo;</span><span class="tg">soft</span></div>
+
+    <div class="dd"><span class="l">PDL role</span><span class="s">enrich-on-click &middot; allude</span></div>
+    <div class="ex"><span class="q">&ldquo;For PMs moving into AI&hellip;&rdquo;</span><span class="tg">role proof</span></div>
+    <div class="ex"><span class="q">&ldquo;Peers from your company already enrolled.&rdquo;</span><span class="tg">social proof</span></div>
+    <div class="ex"><span class="q">&ldquo;A track that fits your background.&rdquo;</span><span class="tg">tailored</span></div>
+
+    <div class="dd"><span class="l">Cohort timing</span><span class="s">CRM + cross-site (buy)</span></div>
+    <div class="ex"><span class="q">&ldquo;Your cohort starts in 9 days.&rdquo;</span><span class="tg">urgency</span></div>
+    <div class="ex"><span class="q">&ldquo;Early-bird closes Friday.&rdquo;</span><span class="tg">deadline</span></div>
+    <div class="ex"><span class="q">&ldquo;Comparing bootcamps? An honest side-by-side.&rdquo;</span><span class="tg hold">cross-site (hold)</span></div>
+  </div>
+  <div class="foot">
+    <b>Read it in one line:</b> the click hands you a topic, so every decision continues the email &mdash; and the only line you hold back is that you can see them shopping the competition.
+    <span class="src">Provenance &middot; Section C &middot; engagement + PDL &middot; 10 of 11</span>
+  </div>
+</div>
+
+<!-- ============================ Section C — VISUALS ============================ -->
+<div class="slide" id="vC">
+  <div class="eyebrow">
+    <span>Section C &middot; Emailed lead who clicked &mdash; rendered page &amp; email</span>
+    <span class="key">actual visual examples &middot; the page keeps the email&rsquo;s promise</span>
+  </div>
+  <h1>Every render <span class="hl">continues the click</span> &mdash; the email&rsquo;s promise, kept on the landing page.</h1>
+  <p class="frame-q"><b>So what?</b> The click is consent and a topic, so the page picks up exactly where the email left off &mdash; no re-explaining, magic-link, no login. Continuity is the conversion lever.</p>
+  <div class="vrow">
+    <div class="vmock" style="position:relative;">
+      <span class="emailtag" style="background:#2bb673;">Email &mdash; the click</span>
+      <div class="ehead" style="padding-top:18px;"><div class="ef">From <b>GauntletAI</b> &middot; to darnell.brooks@&hellip;</div><div class="es">You looked at outcomes &mdash; here's the number, Darnell</div></div>
+      <div class="ebody">You opened our note and clicked <b>graduate outcomes</b>. For product managers moving into AI, that's the headline &mdash; and your cohort starts in 9 days.<span class="cta" style="background:#2bb673;">See graduate outcomes &rarr;</span></div>
+      <div class="cap"><span class="du">Data used:</span><span class="pc">declared goal</span><span class="pc">PDL role: PM</span> say + allude &middot; the email that earns the click &middot; <span class="kpi">&uarr; CTR</span></div>
+    </div>
+    <div class="vmock">
+      <div class="chrome"><span class="d"></span><span class="d"></span><span class="d"></span><span class="u">gauntletai.com/outcomes</span></div>
+      <div class="nav"><span class="logo">GauntletAI</span><span class="nl">Outcomes</span><span class="nl">Curriculum</span><span class="nb" style="background:#2bb673;">Apply</span></div>
+      <div class="hero"><div class="eb" style="color:#157a4b;">You clicked: outcomes</div><h4>The salary lift you clicked on &mdash; by your role, Darnell.</h4><p>The exact path for product managers moving into AI.</p><span class="cta" style="background:#2bb673;">See graduate outcomes &rarr;</span></div>
+      <div class="band"><div class="barc"><i style="height:9px"></i><i style="height:14px"></i><i style="height:20px"></i></div><div class="bandlbl">Median lift by prior role &middot; cohort starts in 9 days</div></div>
+      <div class="cap"><span class="du">Data used:</span><span class="pc">click: &lsquo;outcomes&rsquo;</span><span class="pc">declared goal</span><span class="pc">PDL role</span> allude + say &middot; magic-link &middot; <span class="kpi">&uarr; lead&rarr;application</span></div>
+    </div>
+    <div class="vmock">
+      <div class="chrome"><span class="d"></span><span class="d"></span><span class="d"></span><span class="u">gauntletai.com/apply</span></div>
+      <div class="nav"><span class="logo">GauntletAI</span><span class="nl">Apply</span><span class="nl">Dates</span><span class="nb" style="background:#d98a16;">Resume</span></div>
+      <div class="hero"><div class="eb" style="color:#a8690f;">Almost there</div><h4>Finish your application &mdash; step 3 of 4.</h4><p>Two minutes to done &mdash; we saved your progress.</p><span class="cta" style="background:#d98a16;">Finish application &rarr;</span></div>
+      <div class="band"><div class="fin"><span class="step" style="background:#d98a16;border-color:#d98a16;"></span><span class="stepln"></span><span class="step" style="background:#d98a16;border-color:#d98a16;"></span><span class="stepln"></span><span class="step" style="background:#d98a16;border-color:#d98a16;"></span><span class="stepln"></span><span class="step"></span></div><div class="bandlbl">Step 3 of 4 &middot; saved</div></div>
+      <div class="cap"><span class="du">Data used:</span><span class="pc">abandoned form: step 3/4</span> allude &middot; <span class="kpi">&uarr; completion</span></div>
+    </div>
+  </div>
+  <div class="foot">
+    <b>Read it in one line:</b> the email earns the click, the landing page continues it, and a half-finished application is one tap from done &mdash; continuity all the way down.
+    <span class="src">Provenance &middot; Section C &middot; rendered examples &middot; 11 of 11</span>
+  </div>
+</div>
+
+<div class="navhint">⌘P to export as PDF (landscape)</div>
+
+</body>
+</html>

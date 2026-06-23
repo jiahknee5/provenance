@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Provenance — personalization demo{% endblock %}
+{% block content %}
+<style>
+  .demo-wrap{max-width:1280px;margin:0 auto;padding:18px 20px 40px;}
+  .demo-head h1{font-size:22px;font-weight:800;color:var(--ink);margin:0 0 4px;letter-spacing:-.01em;}
+  .demo-head p{font-size:13px;color:var(--mut);margin:0 0 14px;line-height:1.5;}
+  .demo-head a.mon{color:var(--accent);font-weight:700;text-decoration:none;}
+  .urlbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);
+    border-radius:var(--radius);padding:10px 12px;margin-bottom:14px;}
+  .urlbar label{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mut);}
+  .urlbar input{flex:1;min-width:240px;background:var(--panel2);border:1px solid var(--line);border-radius:7px;
+    padding:8px 11px;color:var(--ink);font-size:13px;}
+  .urlbar button{background:var(--accent);color:#04222a;font-weight:800;border:none;border-radius:7px;
+    padding:8px 14px;font-size:12.5px;cursor:pointer;}
+  .tabs{display:flex;gap:7px;margin-bottom:16px;flex-wrap:wrap;}
+  .tab{font-size:12.5px;font-weight:700;color:var(--mut);background:var(--panel);border:1px solid var(--line);
+    border-radius:999px;padding:6px 13px;text-decoration:none;}
+  .tab.on{background:var(--accent);color:#04222a;border-color:var(--accent);}
+  .tab b{font-weight:800;}
+  .sc-meta{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:var(--radius);
+    padding:12px 15px;margin-bottom:16px;}
+  .sc-meta .k{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);}
+  .sc-meta .b{font-size:13px;color:var(--ink);margin:3px 0 7px;}
+  .sc-meta .avail{display:flex;flex-wrap:wrap;gap:5px;}
+  .sc-meta .chip{font-size:10px;font-weight:700;color:var(--mut);background:var(--panel2);border:1px solid var(--line);
+    border-radius:999px;padding:2px 8px;}
+  .vrow{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;}
+  .vcard{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;}
+  .vcard .vhead{padding:9px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;}
+  .vcard .vid{font-size:10px;font-weight:800;color:#04222a;border-radius:5px;padding:2px 7px;}
+  .vcard .vlabel{font-size:12px;font-weight:800;color:var(--ink);}
+  .vcard .kpi{margin-left:auto;font-size:9.5px;font-weight:800;color:var(--green);background:rgba(43,182,115,.14);
+    border:1px solid rgba(43,182,115,.4);border-radius:5px;padding:2px 7px;}
+  .vcard iframe{width:100%;height:430px;border:0;background:#fff;display:block;}
+  .vcard .prov{padding:10px 12px;border-top:1px solid var(--line);}
+  .prov .pl{font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:4px;}
+  .prov .du{display:inline-block;font-size:10px;font-weight:700;color:var(--ink);background:var(--panel2);
+    border:1px solid var(--line);border-radius:4px;padding:2px 6px;margin:0 3px 4px 0;}
+  .prov .du em{font-style:normal;color:var(--mut);font-weight:600;}
+  .pp{font-weight:800;}
+  .pp.say{color:var(--say);} .pp.allude{color:var(--allude);} .pp.hold{color:var(--hold);}
+  .prov .note{font-size:10px;color:var(--mut);margin-top:4px;}
+  .blocked{margin-top:14px;background:rgba(224,82,74,.06);border:1px dashed var(--hold);border-radius:var(--radius);padding:11px 14px;}
+  .blocked .bh{font-size:11px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--hold);}
+  .blocked .bt{font-size:12.5px;color:var(--ink);margin:3px 0;}
+  .blocked .bn{font-size:11px;color:var(--mut);}
+  @media (max-width:980px){.vrow{grid-template-columns:1fr;}}
+</style>
+
+<div class="demo-wrap">
+  <div class="demo-head">
+    <h1>Personalization demo — live-cloned site × 3 variants per scenario</h1>
+    <p>Enter any URL (or use the default), pick a visitor scenario, and see three mixed renderings injected onto the
+       <b>real, live-cloned page</b> — each tagged with the exact data it used. Then open the
+       <a class="mon" href="/demo/monitor">KPI control tower →</a> to watch the simulated A/B loop move toward target KPIs.</p>
+  </div>
+
+  <form class="urlbar" method="get" action="/demo">
+    <label for="url">Clone</label>
+    <input id="url" name="url" value="{{ url }}" placeholder="https://www.gauntletai.com" autocomplete="off">
+    <input type="hidden" name="scenario" value="{{ scenario.id }}">
+    <button type="submit">Clone &amp; personalize →</button>
+  </form>
+
+  <div class="tabs">
+    {% for s in scenarios %}
+    <a class="tab {{ 'on' if s.id == scenario.id else '' }}" href="/demo?url={{ url|urlencode }}&scenario={{ s.id }}">
+      <b>{{ s.id }}</b> · {{ s.label }}</a>
+    {% endfor %}
+  </div>
+
+  <div class="sc-meta">
+    <div class="k">Scenario {{ scenario.id }} · identity key: {{ scenario.key }}</div>
+    <div class="b">{{ scenario.blurb }}</div>
+    <div class="avail">
+      <span class="chip" style="color:var(--accent)">available data:</span>
+      {% for a in scenario.available %}<span class="chip">{{ a }}</span>{% endfor %}
+    </div>
+  </div>
+
+  <div class="vrow">
+    {% for v in gated %}
+    <div class="vcard">
+      <div class="vhead">
+        <span class="vid" style="background:{{ v.accent }}">{{ v.id }}</span>
+        <span class="vlabel">{{ v.label }}</span>
+        <span class="kpi">↑ {{ v.kpi }}</span>
+      </div>
+      <iframe src="/demo/variant?url={{ url|urlencode }}&scenario={{ scenario.id }}&v={{ v.id }}" loading="lazy" title="{{ v.label }}"></iframe>
+      <div class="prov">
+        <span class="pl">Data used</span>
+        {% for d in v.data_used %}
+          <span class="du">{{ d.signal }} <em>· {{ d.source_label }} ·</em> <span class="pp {{ d.policy }}">{{ d.policy }}</span></span>
+        {% endfor %}
+        <div class="note">{{ v.surface_note }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if blocked %}
+  <div class="blocked">
+    <div class="bh">Blocked variant · {{ blocked.id }} · {{ blocked.label }}</div>
+    <div class="bt">“{{ blocked.headline }}”</div>
+    <div class="bn">{{ blocked.surface_note }}. It would win on engagement, but it relies on a
+      <b style="color:var(--hold)">hold</b> fact, so it is kept out of the action pool — the optimizer can never select it.
+      (Shown on each cloned page greyed, for contrast.)</div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
