@@ -151,7 +151,7 @@
     {% if blocked %}
     <div class="blocked">
       <div class="bh">Blocked variant · {{ blocked.id }} · {{ blocked.label }}</div>
-      <div class="bt">“{{ blocked.headline }}”</div>
+      <div class="bt">“{{ blocked.headline.replace('{brand}', brand) }}”</div>
       <div class="bn">{{ blocked.surface_note }}. It would win on engagement, but it relies on a
         <b style="color:var(--hold)">hold</b> fact, so it is kept out of the action pool — the optimizer can never select it.
         (Open it from the left to see it rendered, greyed.)</div>

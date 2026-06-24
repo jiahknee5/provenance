@@ -110,4 +110,31 @@ def test_cloner_falls_back_when_fetch_fails(monkeypatch):
     out = cloner.clone("https://example.com", "B", v)
     assert out["cloned"] is False
     assert "prov-demo-overlay" in out["html"]  # still shows the personalization hero
-    assert v.headline in out["html"]
+    assert v.headline.replace("{brand}", "Example") in out["html"]  # brand-filled copy
+
+
+# --- copy adapts to the cloned site (the bug fix) -----------------------------
+def test_brand_from_url():
+    assert cloner.brand_from_url("https://www.nike.com") == "Nike"
+    assert cloner.brand_from_url("python.org") == "Python"
+    assert cloner.brand_from_url("https://www.gauntletai.com") == "Gauntlet AI"
+
+
+def test_injected_copy_is_brand_templated_not_hardcoded(monkeypatch):
+    """The injected copy must reference the CLONED site, not a hardcoded brand."""
+    monkeypatch.setattr(cloner, "fetch_raw",
+                        lambda url, cache=None: {"ok": True, "status": 200, "html": _FIXTURE, "error": ""})
+    s = DS.scenario("B")
+    v = next(x for x in DS.gated_variants(s) if "{brand}" in x.headline + x.sub)
+    out = cloner.clone("https://example.com", "B", v)
+    assert "{brand}" not in out["html"]   # placeholder fully substituted
+    assert "Example" in out["html"]        # filled from example.com, not gauntletai
+
+
+def test_no_gauntletai_specific_copy_in_spec():
+    """The variant copy must be brand-generic (no hardcoded gauntletai/AI-cohort terms)."""
+    blob = " ".join(
+        (v.headline + " " + v.sub + " " + v.cta).lower()
+        for sc in DS.SCENARIOS for v in sc.variants)
+    for term in ("gauntlet", "ai cohort", "intro to python", "scholarship", "graduate outcomes"):
+        assert term not in blob, f"copy still references '{term}'"

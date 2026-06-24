@@ -39,6 +39,30 @@ def origin_of(url: str) -> str:
     return f"{p.scheme}://{p.netloc}"
 
 
+_BRAND_NICE = {"gauntletai": "Gauntlet AI"}
+
+
+def brand_from_url(url: str) -> str:
+    """A display brand from the domain (nike.com → 'Nike'), no fetch needed."""
+    host = urlparse(normalize_url(url)).netloc.split(":")[0].lower()
+    if host.startswith("www."):
+        host = host[4:]
+    label = host.split(".")[0] if host else ""
+    if not label:
+        return "this site"
+    return _BRAND_NICE.get(label, label[:1].upper() + label[1:])
+
+
+def brand_of(html: str, url: str) -> str:
+    """Prefer the page's own og:site_name (nicer), else the domain label."""
+    for pat in (r'<meta[^>]+property=["\']og:site_name["\'][^>]+content=["\']([^"\']+)["\']',
+                r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:site_name["\']'):
+        m = re.search(pat, html, re.I)
+        if m and m.group(1).strip():
+            return m.group(1).strip()[:40]
+    return brand_from_url(url)
+
+
 def fetch_raw(url: str, cache: LLMCache | None = None) -> dict:
     """Fetch (cached). Returns {ok, status, html, error}. Never raises."""
     url = normalize_url(url)
@@ -79,8 +103,12 @@ def _inject_base(html: str, origin: str) -> str:
     return tag + html
 
 
-def _overlay(scenario_id: str, v: Variant, url: str) -> str:
-    """The injected personalization hero + DATA USED provenance strip (self-contained styles)."""
+def _overlay(scenario_id: str, v: Variant, url: str, brand: str = "this site") -> str:
+    """The injected personalization hero + DATA USED provenance strip (self-contained styles).
+    Copy is brand-templated: {brand} is filled from the cloned site, so the personalization
+    is about *that* site, not a hardcoded one."""
+    def fill(s: str) -> str:
+        return _html.escape(s.replace("{brand}", brand))
     chips = "".join(
         f'<span style="display:inline-block;font-size:11px;font-weight:700;background:#fff;'
         f'border:1px solid #d9e2ec;border-radius:4px;padding:2px 7px;margin:0 4px 4px 0;color:#102a43;">'
@@ -98,10 +126,10 @@ def _overlay(scenario_id: str, v: Variant, url: str) -> str:
   <div style="max-width:1100px;margin:0 auto;">
     <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:{bar_bd};">
       Provenance demo &middot; Scenario {scenario_id} &middot; variant {v.id} &middot; {_html.escape(v.label)}{' &middot; BLOCKED' if blocked else ''}</div>
-    <div style="font-size:26px;font-weight:800;line-height:1.15;margin:6px 0 4px;color:#0a2540;">{_html.escape(v.headline)}</div>
-    <div style="font-size:14px;color:#334e68;margin-bottom:10px;">{_html.escape(v.sub)}</div>
+    <div style="font-size:26px;font-weight:800;line-height:1.15;margin:6px 0 4px;color:#0a2540;">{fill(v.headline)}</div>
+    <div style="font-size:14px;color:#334e68;margin-bottom:10px;">{fill(v.sub)}</div>
     <a href="#" onclick="return false" style="display:inline-block;font-size:13px;font-weight:800;color:#fff;
-      background:{bar_bd};border-radius:7px;padding:9px 16px;text-decoration:none;">{_html.escape(v.cta)} &rarr;</a>
+      background:{bar_bd};border-radius:7px;padding:9px 16px;text-decoration:none;">{fill(v.cta)} &rarr;</a>
     <div style="margin-top:13px;border-top:1px solid #e3eaf2;padding-top:9px;">
       <span style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#1e40af;margin-right:6px;">Data used</span>
       {chips}
@@ -122,7 +150,7 @@ def _fallback_page(scenario_id: str, v: Variant, url: str, reason: str) -> str:
             f'<div style="margin-top:24px;font-size:13px;color:#627d98;">[ original page content would render here ]</div></div>')
     return ("<!DOCTYPE html><html><head><meta charset='utf-8'>"
             f"<title>Provenance demo — {scenario_id}/{v.id}</title></head>"
-            f"<body style='margin:0;background:#eef2f6;'>{_overlay(scenario_id, v, url)}{body}</body></html>")
+            f"<body style='margin:0;background:#eef2f6;'>{_overlay(scenario_id, v, url, brand_from_url(url))}{body}</body></html>")
 
 
 def clone(url: str, scenario_id: str, v: Variant, cache: LLMCache | None = None) -> dict:
@@ -134,7 +162,7 @@ def clone(url: str, scenario_id: str, v: Variant, cache: LLMCache | None = None)
                 "cloned": False, "source_url": url, "note": res["error"]}
     doc = _neutralize(res["html"])
     doc = _inject_base(doc, origin_of(url))
-    overlay = _overlay(scenario_id, v, url)
+    overlay = _overlay(scenario_id, v, url, brand_of(res["html"], url))
     if re.search(r"<body[^>]*>", doc, flags=re.I):
         doc = re.sub(r"(<body[^>]*>)", r"\1" + overlay, doc, count=1, flags=re.I)
     else:

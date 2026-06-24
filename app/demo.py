@@ -22,7 +22,7 @@ from app.server import app, templates
 from pipeline.common.config import OBSERVE_DIR
 from pipeline.personalization import demo_scenarios as DS
 from pipeline.personalization import demo_sim
-from pipeline.personalization.cloner import DEFAULT_URL, clone, normalize_url
+from pipeline.personalization.cloner import DEFAULT_URL, brand_from_url, clone, normalize_url
 
 
 def _monitor_data() -> dict:
@@ -63,6 +63,7 @@ def demo(request: Request, url: str = DEFAULT_URL, scenario: str = "A", v: str =
         "gated": DS.gated_variants(s),
         "blocked": DS.blocked_variant(s),
         "focus": focus,
+        "brand": brand_from_url(normalize_url(url)),
     })
 
 
