@@ -154,6 +154,14 @@ def test_scene_say_recites_allude_does_not():
     assert any(r["policy"] == "say" and "company" in r["signal"] for r in say["receipt"])
 
 
+def test_isp_is_classified_not_a_company():
+    """A consumer ISP/carrier behind the IP is the provider, not the visitor's company."""
+    from pipeline.personalization import scene as SC
+    assert SC._looks_like_isp("AT&T Services, Inc.") is True
+    assert SC._looks_like_isp("Comcast Cable Communications") is True
+    assert SC._looks_like_isp("Apple Inc") is False  # a real corporate org is not an ISP
+
+
 def test_resolve_ip_is_honest_offline():
     from pipeline.personalization import scene as SC
     d = SC.resolve_ip("10.0.0.1")   # private — no network, honest reason, no captured data

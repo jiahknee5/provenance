@@ -137,6 +137,21 @@ _IND_HINTS = {
 }
 
 
+# consumer ISPs / carriers — the org behind a residential or mobile IP is the *provider*,
+# not a company. ip-api's flags miss most of these, so we classify by name (high-precision).
+_ISP_HINTS = ("at&t", "att services", "comcast", "xfinity", "verizon", "spectrum", "charter",
+              "cox communications", "centurylink", "lumen", "t-mobile", "sprint", "frontier",
+              "windstream", "mediacom", "optimum", "altice", "suddenlink", "starlink", "viasat",
+              "hughesnet", "google fiber", "earthlink", "metronet", "wow!", "rcn", "ziply",
+              "telus", "rogers", "bell canada", "shaw", "vodafone", "deutsche telekom", "telefonica",
+              "broadband", "cable internet", "fios", "u-verse", "wireless", "cellular", "dsl")
+
+
+def _looks_like_isp(*names: str) -> bool:
+    s = " ".join(n.lower() for n in names if n)
+    return any(h in s for h in _ISP_HINTS)
+
+
 def _industry_to_bucket(industry: str | None) -> str | None:
     if not industry:
         return None
@@ -179,13 +194,14 @@ def reverse_ip(ip: str) -> dict:
         d = {}
     if not d:
         return {}
+    is_isp = _looks_like_isp(d.get("org"), d.get("isp"), d.get("asname"))
     return {"region": d.get("regionName"), "city": d.get("city"), "country": d.get("country"),
             "zip": d.get("zip"), "lat": d.get("lat"), "lon": d.get("lon"),
             "timezone": d.get("timezone"), "asn": d.get("as"),
             "company": (d.get("org") or d.get("asname") or "").strip(), "isp": d.get("isp"),
             "org": d.get("org"), "asname": d.get("asname"), "mobile": bool(d.get("mobile")),
-            "proxy": bool(d.get("proxy")), "hosting": bool(d.get("hosting")),
-            "is_corporate": not (d.get("mobile") or d.get("proxy") or d.get("hosting"))}
+            "proxy": bool(d.get("proxy")), "hosting": bool(d.get("hosting")), "is_isp": is_isp,
+            "is_corporate": not (d.get("mobile") or d.get("proxy") or d.get("hosting") or is_isp)}
 
 
 def _pdl_company_industry(name: str) -> str | None:
@@ -237,7 +253,7 @@ def resolve_ip(ip: str) -> dict:
     daypart = _daypart(rv.get("timezone"))
     nettype = ("corporate" if rv.get("is_corporate") else "mobile" if rv.get("mobile")
                else "VPN / proxy" if rv.get("proxy") else "hosting / cloud" if rv.get("hosting")
-               else "residential")
+               else "consumer ISP" if rv.get("is_isp") else "residential")
     reason = ""
     if not rv:
         reason = "local / private / unreachable IP — pick a location or try a public IP"
@@ -247,6 +263,8 @@ def resolve_ip(ip: str) -> dict:
         reason = "VPN / proxy detected — no company resolved"
     elif rv.get("hosting"):
         reason = f"hosting / cloud IP ({rv.get('isp')}) — not a corporate office"
+    elif rv.get("is_isp"):
+        reason = f"consumer ISP ({rv.get('isp') or rv.get('org')}) — that's the provider, not a company. Reverse-IP only IDs a business on a corporate office IP; try a company's IP or a de-anon vendor."
     elif not company:
         reason = f"residential ISP ({rv.get('isp')}) — no company resolved"
 
