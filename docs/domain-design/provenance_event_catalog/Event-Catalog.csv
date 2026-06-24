@@ -1,0 +1,52 @@
+,,,,,,
+,Provenance System — Unified Event Catalog,,,,,
+,All domain events across core MVP + emotional layer  |  Generated: 2026-06-24,,,,,
+,,,,,,
+,Event Name,Stream Type,Group / Phase,Purpose,Actor,Trigger / Caused By
+,GROUP: INGESTION — Signals entering the system,,,,,
+,visitor_identified,lead,Ingestion,Vector de-anonymizes a site visitor; first identity signal for a profile,system (Vector),site visit
+,form_submitted,lead,Ingestion,HubSpot or owned form submission received; carries explicit self-reported fields,user,form submit
+,enrichment_requested,lead,Ingestion,Clay or equivalent enrichment job kicked off for a profile or account,system (Clay),visitor_identified / form_submitted
+,enrichment_received,lead,Ingestion,Enrichment payload returned and attached to profile as raw evidence,system (Clay),enrichment_requested
+,identity_resolution_requested,lead,Ingestion,Canonical identity linking or merge evaluation started for raw visitor form or enrichment inputs,system,visitor_identified / form_submitted / enrichment_received
+,identity_resolved,lead,Ingestion,Identity candidates successfully linked to a canonical profile or account record,system,identity_resolution_requested
+,identity_conflicted,lead,Ingestion,Identity candidates could not be safely merged and require manual resolution or downgrade,system,identity_resolution_requested
+,GROUP: EVIDENCE — Source artifacts captured,,,,,
+,evidence_captured,lead,Evidence,"A source artifact (form field, transcript, enrichment blob) logged as an immutable evidence record",system,form_submitted / enrichment_received / visitor_identified
+,text_sentiment_scored,lead,Evidence,LIWC-style NLP pre-processing applied to free-text evidence; tags valence and arousal intensity,system (NLP),evidence_captured (free-text)
+,GROUP: CLAIM — Assertions extracted and verified,,,,,
+,claim_extracted,lead,Claim,Atomic business assertion derived from evidence by rule or model; enters proposed status,system / model,evidence_captured
+,claim_verified,lead,Claim,Gate confirms claim against policy and corroborating evidence; status → verified,Gate / human,claim_extracted
+,claim_contradicted,lead,Claim,Conflicting evidence found; claim flagged as contradicted and blocked from downstream use,Gate / human,evidence_captured / manual review
+,claim_marked_stale,lead,Claim,"Freshness TTL exceeded or source retracted; claim status → stale, triggers re-verification",system (cron),TTL expiry / drift monitor
+,claim_reverification_requested,lead,Claim,Reverification work item opened because a stale or disputed claim needs fresh evidence,system / Gate,claim_marked_stale / claim_contradicted
+,claim_superseded,lead,Claim,Newer claim version replaces an older one while preserving lineage via supersedes relationship,system / human,claim_verified / manual correction
+,GROUP: SEGMENTATION — Cohort assignment,,,,,
+,segment_evaluated,lead,Segmentation,SegmentDefinition rules evaluated for a profile or account whether or not membership changed,system,claim_verified / claim_contradicted / claim_marked_stale / claim_superseded
+,segment_assignment_updated,lead,Segmentation,Profile moved into or out of a SegmentDefinition based on current verified claims,system,segment_evaluated
+,emotional_signal_detected,lead,Segmentation,"Inferred emotional response (fear, ecstasis, relief, outrage) logged from behavioral evidence",system (NLP/ML),text_sentiment_scored / dwell/scroll event
+,emotional_segment_assignment_updated,lead,Segmentation,"Profile moved into/out of emotional cohort track (e.g., High_Neuroticism_Fear_PAS)",system,emotional_signal_detected
+,GROUP: ASSET — Content generation and tagging,,,,,
+,asset_draft_created,asset,Asset,"AI-generated or human-authored outbound asset (email, SMS, page) enters draft state",model / human,segment_assignment_updated
+,asset_emotional_vector_tagged,asset,Asset,"Emotional intent tag applied to asset variant (e.g., fear_PAS, ecstasis_future-pacing, relief_BAB)",human / system,asset_draft_created
+,asset_validated,asset,Asset,Asset passes structured validation for required claims bindings policy version and composition integrity,system,asset_draft_created / asset_emotional_vector_tagged
+,asset_approved,asset,Asset,Asset lifecycle status promoted to approved after required review or automated checks complete,system / human,review_approved / asset_validated
+,asset_publish_requested,asset,Asset,Approved asset handed off for send publish or renderer activation,system,asset_approved
+,GROUP: REVIEW — Human-on-the-loop checkpoints,,,,,
+,review_requested,review,Review,"Human or compliance review checkpoint created for a claim asset segment or decision",system,asset_draft_created / claim_extracted / policy_evaluated
+,review_approved,review,Review,Reviewer approves; unblocks downstream dispatch or claim promotion,human,review_requested
+,review_rejected,review,Review,Reviewer rejects; asset or claim returned to draft/proposed with reason codes,human,review_requested
+,review_escalated,review,Review,Reviewer escalates to another approver or policy owner due to risk ambiguity or exception handling,human / system,review_requested / review_rejected
+,GROUP: GATE & DISPATCH — Policy enforcement and delivery,,,,,
+,policy_evaluated,lead/asset,Gate,Applicable policy bundle evaluated against claims segment state and requested action,Gate (Policy),claim_verified / segment_assignment_updated / asset_publish_requested
+,emotional_mismatch_blocked,asset,Gate,Gate blocks dispatch when asset emotional vector conflicts with profile arousal state or escalation cap,Gate (Policy),policy_evaluated + emotional_segment_assignment_updated
+,emotional_reroute_applied,asset,Gate,"Gate substitutes a safer emotional vector (e.g., fear → relief) per Policy rule",Gate (Policy),emotional_mismatch_blocked
+,dispatch_suppressed,asset,Gate,Dispatch intentionally prevented due to policy frequency cap stale claims missing approval or channel restrictions,Gate / system,policy_evaluated / review_rejected / emotional_mismatch_blocked
+,asset_dispatched,asset,Gate,"Asset sent to outbound channel (email SMS ad or renderer); final delivery handoff event",system,asset_publish_requested / policy_evaluated
+,dispatch_failed,asset,Gate,Delivery attempt failed at provider or channel boundary and may require retry or fallback,system,asset_dispatched
+,GROUP: DECISION TRACE — Explainability,,,,,
+,asset_selection_recorded,asset,Decision Trace,Chosen asset or variant recorded before dispatch so selection can be audited even if nothing is sent,system,policy_evaluated / segment_assignment_updated
+,decision_overridden,lead/asset,Decision Trace,Human or policy exception overrides an automated route segment or asset choice,hybrid / human,review_escalated / manual exception
+,decision_trace_recorded,lead/asset,Decision Trace,"Immutable record of why a route segment or asset was chosen at time T with specific claim evidence and policy versions",system,asset_selection_recorded / asset_dispatched / segment_assignment_updated / decision_overridden
+,,,,,,
+,"Source: Provenance system architecture threads (Jun 2026) + emotional layer additions (Jun 20, 2026) + event completeness refinements (Jun 24, 2026)",,,,,
