@@ -87,7 +87,7 @@ STATES = ["Arizona", "California", "Texas", "New York", "Florida", "Illinois", "
           "Colorado", "Georgia", "Pennsylvania", "Ohio", "North Carolina", "Nevada", "Oregon",
           "Michigan", "Massachusetts", "Minnesota", "Louisiana", "Oklahoma", "Wyoming"]
 
-DEFAULT_INDUSTRY = "mining"
+DEFAULT_INDUSTRY = "technology"   # neutral fallback when no industry resolves (not "mining")
 GENERIC_REGION = "your region"
 
 # REAL reverse-IP provider (free, no key): geo + the org/company behind the IP + mobile/proxy/

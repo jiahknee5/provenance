@@ -99,7 +99,7 @@
     <div class="lv-row"><span class="k">IP</span><span class="v" id="b-ip">{{ det.ip or '—' }}</span><span class="src">current</span></div>
     <div class="lv-row"><span class="k">Company</span><span class="v" id="b-co">{{ det.company or '—' }}</span><span class="src">reverse-IP</span></div>
     <div class="lv-row"><span class="k">Location</span><span class="v" id="b-loc">{{ (det.city ~ ', ' if det.city else '') ~ (det.region or '—') }}</span><span class="src">geo-IP</span></div>
-    <div class="lv-row"><span class="k">Industry</span><span class="v" id="b-ind">{{ scene.industry_label }}</span><span class="src" id="b-ind-src">{{ 'PDL' if det.resolved_industry else 'select' }}</span></div>
+    <div class="lv-row"><span class="k">Industry</span><span class="v" id="b-ind">{{ scene.industry_label }}{{ ' · default' if (not det.resolved_industry and loc_detected) else '' }}</span><span class="src" id="b-ind-src">{{ 'PDL' if det.resolved_industry else ('manual' if not loc_detected else 'default') }}</span></div>
     <div class="lv-reason" id="reason" style="{{ '' if det.reason else 'display:none' }}">{{ det.reason }}</div>
     <div class="lv-ctrls">
       <div><label>Surface policy</label>
@@ -193,8 +193,9 @@
     document.getElementById('b-ip').textContent = S.ip||'—';
     document.getElementById('b-co').textContent = S.company||'—';
     document.getElementById('b-loc').textContent = (S.city?S.city+', ':'')+(S.region||'—');
-    document.getElementById('b-ind').textContent = ind.label;
-    document.getElementById('b-ind-src').textContent = S.indDetected?'PDL':'select';
+    var indDefault = !S.indDetected && S.mode!=='preview';
+    document.getElementById('b-ind').textContent = ind.label + (indDefault?' · default':'');
+    document.getElementById('b-ind-src').textContent = S.indDetected?'PDL':(S.mode==='preview'?'manual':'default');
     var rsn=document.getElementById('reason'); if(S.reason){rsn.style.display='block';rsn.textContent=S.reason;}else rsn.style.display='none';
     document.getElementById('reset').style.display = S.mode==='detected'?'none':'inline';
     [].forEach.call(document.querySelectorAll('#seg-policy button'),function(b){b.classList.toggle('on',b.getAttribute('data-p')===policy);});
