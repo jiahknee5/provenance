@@ -162,6 +162,29 @@ def test_isp_is_classified_not_a_company():
     assert SC._looks_like_isp("Apple Inc") is False  # a real corporate org is not an ISP
 
 
+def test_creative_agents_and_the_gate():
+    from pipeline.personalization import creative as CR
+    a = CR.angle_copy("mining", "peer", "Arizona")
+    assert a == CR.angle_copy("mining", "peer", "Arizona")          # deterministic angle
+    assert "mining" in a["headline"].lower()
+    # the Gate blocks the unprovable, clears the provable
+    assert CR.verify_copy(["The #1 platform for mining"], "industry=mining", None, "allude")[0]["ok"] is False
+    assert CR.verify_copy(["Acme Mining, welcome back"], "x", "Acme Mining", "allude")[0]["ok"] is False
+    assert CR.verify_copy(["Built for mining teams across Arizona"], "x", "Acme Mining", "allude")[0]["ok"] is True
+    d = CR.ai_copy(industry="mining", region="Arizona", company=None, city=None, angle="peer", policy="allude")
+    assert d["source"] == "template" and d["headline"] and d["blocked_example"]["ok"] is False  # falls back, Gate visible
+
+
+def test_demo_live_has_creative_controls():
+    t = c.get("/demo/live").text
+    assert 'id="sel-angle"' in t and 'id="img-pick"' in t and 'id="ai-go"' in t and "Creative agents" in t
+
+
+def test_api_aicopy_gate_verified():
+    d = c.get("/api/demo/aicopy?industry=energy&region=Texas&angle=peer").json()
+    assert d["headline"] and isinstance(d["checks"], list) and d["blocked_example"]["ok"] is False
+
+
 def test_resolve_ip_is_honest_offline():
     from pipeline.personalization import scene as SC
     d = SC.resolve_ip("10.0.0.1")   # private — no network, honest reason, no captured data

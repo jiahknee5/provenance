@@ -1,0 +1,146 @@
+{
+ "mining": [
+  {
+   "url": "https://live.staticflickr.com/8752/17015286671_80312700b5_b.jpg",
+   "creator": "docentjoyce",
+   "license": "CC BY",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "landing": "https://www.flickr.com/photos/99003655@N00/17015286671",
+   "id": "mining-01"
+  },
+  {
+   "url": "https://live.staticflickr.com/4122/4828169812_d44fc48af2_b.jpg",
+   "creator": "roy.luck",
+   "license": "CC BY",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "landing": "https://www.flickr.com/photos/21550937@N03/4828169812",
+   "id": "mining-02"
+  }
+ ],
+ "energy": [
+  {
+   "url": "https://live.staticflickr.com/2824/11346518126_8ed691da71_b.jpg",
+   "creator": "Dai Luo",
+   "license": "CC BY",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "landing": "https://www.flickr.com/photos/57669526@N04/11346518126",
+   "id": "energy-01"
+  },
+  {
+   "url": "https://live.staticflickr.com/187/479921171_a9e4ae7726_b.jpg",
+   "creator": "brewbooks",
+   "license": "CC BY-SA",
+   "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+   "landing": "https://www.flickr.com/photos/93452909@N00/479921171",
+   "id": "energy-02"
+  }
+ ],
+ "agriculture": [
+  {
+   "url": "https://live.staticflickr.com/197/460142568_8c71ae818b_b.jpg",
+   "creator": "futureatlas.com",
+   "license": "CC BY",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "landing": "https://www.flickr.com/photos/87913776@N00/460142568",
+   "id": "agriculture-01"
+  },
+  {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/b/b5/Tractor_harvesting_fields%2C_Blijham_%282020%29_02.jpg",
+   "creator": "Donald Trung Quoc Don",
+   "license": "CC BY-SA",
+   "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "landing": "https://commons.wikimedia.org/w/index.php?curid=90725212",
+   "id": "agriculture-02"
+  }
+ ],
+ "logistics": [
+  {
+   "url": "https://live.staticflickr.com/2643/3950741540_5856681dfa.jpg",
+   "creator": "roger4336",
+   "license": "CC BY-SA",
+   "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+   "landing": "https://www.flickr.com/photos/24736216@N07/3950741540",
+   "id": "logistics-01"
+  },
+  {
+   "url": "https://live.staticflickr.com/3193/2446384296_7e3c3623a0_b.jpg",
+   "creator": "Eridony",
+   "license": "CC BY",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "landing": "https://www.flickr.com/photos/33988281@N00/2446384296",
+   "id": "logistics-02"
+  }
+ ],
+ "healthcare": [
+  {
+   "url": "https://live.staticflickr.com/4125/5063239777_0daf0995d2_b.jpg",
+   "creator": "D-Stanley",
+   "license": "CC BY",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "landing": "https://www.flickr.com/photos/79721788@N00/5063239777",
+   "id": "healthcare-01"
+  },
+  {
+   "url": "https://live.staticflickr.com/7503/16197529546_23432f1466_b.jpg",
+   "creator": "Quentin Verwaerde",
+   "license": "CC BY-ND",
+   "license_url": "https://creativecommons.org/licenses/by-nd/2.0/",
+   "landing": "https://www.flickr.com/photos/63117127@N02/16197529546",
+   "id": "healthcare-02"
+  }
+ ],
+ "manufacturing": [
+  {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/2/29/001_Car_factory_assembly_line_-_Opel_factory_in_Gliwice%2C_Poland.jpg",
+   "creator": "Marek \u015alusarczyk",
+   "license": "CC BY",
+   "license_url": "https://creativecommons.org/licenses/by/3.0/",
+   "landing": "https://commons.wikimedia.org/w/index.php?curid=116381354",
+   "id": "manufacturing-01"
+  },
+  {
+   "url": "https://live.staticflickr.com/6174/6238941422_2eb956b64d.jpg",
+   "creator": "Siemens PLM Software",
+   "license": "CC BY-ND",
+   "license_url": "https://creativecommons.org/licenses/by-nd/2.0/",
+   "landing": "https://www.flickr.com/photos/31274959@N08/6238941422",
+   "id": "manufacturing-02"
+  }
+ ],
+ "technology": [
+  {
+   "url": "https://live.staticflickr.com/5512/11387262366_0e6dd08fb7_b.jpg",
+   "creator": "Cory M. Grenier",
+   "license": "CC BY-SA",
+   "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+   "landing": "https://www.flickr.com/photos/26087974@N05/11387262366",
+   "id": "technology-01"
+  },
+  {
+   "url": "https://live.staticflickr.com/3200/2465450062_d9f73de54d_b.jpg",
+   "creator": "Stefan Ledwina",
+   "license": "CC BY-SA",
+   "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+   "landing": "https://www.flickr.com/photos/95529805@N00/2465450062",
+   "id": "technology-02"
+  }
+ ],
+ "construction": [
+  {
+   "url": "https://live.staticflickr.com/6088/6130971504_75ac6f3d27_b.jpg",
+   "creator": "lucyrfisher",
+   "license": "CC BY",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "landing": "https://www.flickr.com/photos/37553027@N02/6130971504",
+   "id": "construction-01"
+  },
+  {
+   "url": "https://live.staticflickr.com/7035/6468383325_b33f39f878_b.jpg",
+   "creator": "ell brown",
+   "license": "CC BY",
+   "license_url": "https://creativecommons.org/licenses/by/2.0/",
+   "landing": "https://www.flickr.com/photos/39415781@N06/6468383325",
+   "id": "construction-02"
+  }
+ ]
+}

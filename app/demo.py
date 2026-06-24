@@ -22,6 +22,7 @@ from app.server import app, templates
 from pipeline.common.config import OBSERVE_DIR
 from pipeline.personalization import demo_scenarios as DS
 from pipeline.personalization import demo_sim
+from pipeline.personalization import creative as CR
 from pipeline.personalization import scene as SC
 from pipeline.personalization.cloner import DEFAULT_URL, brand_from_url, clone, normalize_url
 
@@ -102,11 +103,23 @@ def demo_live(request: Request):
     industry = det["industry"] or SC.DEFAULT_INDUSTRY
     sc = SC.build_scene(det["region"], industry, detected=bool(det["region"]),
                         company=det["company"], city=det["city"])
+    design = CR.design_select(industry=industry, region=det["region"], company=det["company"],
+                              daypart=det.get("daypart"))
     return templates.TemplateResponse(request, "demo_live.html", {
         "det": det, "scene": sc, "industries": SC.INDUSTRIES, "states": SC.STATES,
         "client_map": SC.client_map(), "default_industry": industry,
-        "loc_detected": bool(det["region"]),
+        "loc_detected": bool(det["region"]), "gallery": SC.GALLERY,
+        "angles": CR.ANGLES, "design": design,
     })
+
+
+@app.get("/api/demo/aicopy")
+def api_demo_aicopy(industry: str = "", region: str = "", company: str = "", city: str = "",
+                    angle: str = "default", policy: str = "allude"):
+    """The gated copy agent: LLM proposes (if keyed) → Gate verifies → angle falls back."""
+    return JSONResponse(CR.ai_copy(industry=industry or SC.DEFAULT_INDUSTRY, region=region or None,
+                                   company=company or None, city=city or None,
+                                   angle=angle, policy=policy))
 
 
 @app.get("/api/demo/resolve")

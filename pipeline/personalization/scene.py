@@ -17,7 +17,9 @@ the image source is `say` (we disclose exactly which licensed asset + its licens
 from __future__ import annotations
 
 import ipaddress
+import json
 import os
+import pathlib
 
 import httpx
 
@@ -25,40 +27,15 @@ from pipeline.common.cache import LLMCache
 
 # --- curated, license-tagged image library (real CC photos, verified loading) --------------
 # Baked from Openverse (commercial-use CC) on 2026-06-24; each carries creator + license.
-_IMG = {
-    "mining": {"url": "https://live.staticflickr.com/8752/17015286671_80312700b5_b.jpg",
-               "creator": "docentjoyce", "license": "CC BY 2.0",
-               "license_url": "https://creativecommons.org/licenses/by/2.0/",
-               "landing": "https://www.flickr.com/photos/99003655@N00/17015286671", "id": "mining-01"},
-    "energy": {"url": "https://live.staticflickr.com/2824/11346518126_8ed691da71_b.jpg",
-               "creator": "Dai Luo", "license": "CC BY 2.0",
-               "license_url": "https://creativecommons.org/licenses/by/2.0/",
-               "landing": "https://www.flickr.com/photos/57669526@N04/11346518126", "id": "energy-01"},
-    "agriculture": {"url": "https://live.staticflickr.com/197/460142568_8c71ae818b_b.jpg",
-               "creator": "futureatlas.com", "license": "CC BY 2.0",
-               "license_url": "https://creativecommons.org/licenses/by/2.0/",
-               "landing": "https://www.flickr.com/photos/87913776@N00/460142568", "id": "agri-01"},
-    "logistics": {"url": "https://live.staticflickr.com/2643/3950741540_5856681dfa.jpg",
-               "creator": "roger4336", "license": "CC BY-SA 2.0",
-               "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
-               "landing": "https://www.flickr.com/photos/24736216@N07/3950741540", "id": "logi-01"},
-    "healthcare": {"url": "https://live.staticflickr.com/4125/5063239777_0daf0995d2_b.jpg",
-               "creator": "D-Stanley", "license": "CC BY 2.0",
-               "license_url": "https://creativecommons.org/licenses/by/2.0/",
-               "landing": "https://www.flickr.com/photos/79721788@N00/5063239777", "id": "health-01"},
-    "manufacturing": {"url": "https://upload.wikimedia.org/wikipedia/commons/2/29/001_Car_factory_assembly_line_-_Opel_factory_in_Gliwice%2C_Poland.jpg",
-               "creator": "Marek Ślusarczyk (Tupungato)", "license": "CC BY 3.0",
-               "license_url": "https://creativecommons.org/licenses/by/3.0/",
-               "landing": "https://commons.wikimedia.org/w/index.php?curid=116381354", "id": "mfg-01"},
-    "technology": {"url": "https://live.staticflickr.com/5512/11387262366_0e6dd08fb7_b.jpg",
-               "creator": "Cory M. Grenier", "license": "CC BY-SA 2.0",
-               "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
-               "landing": "https://www.flickr.com/photos/26087974@N05/11387262366", "id": "tech-01"},
-    "construction": {"url": "https://live.staticflickr.com/6088/6130971504_75ac6f3d27_b.jpg",
-               "creator": "lucyrfisher", "license": "CC BY 2.0",
-               "license_url": "https://creativecommons.org/licenses/by/2.0/",
-               "landing": "https://www.flickr.com/photos/37553027@N02/6130971504", "id": "constr-01"},
-}
+# 2 real Creative-Commons photos per industry (Openverse-sourced, verified loading) — loaded
+# from scene_images.json so the picker + design agent have options. Each carries creator + license.
+GALLERY = json.loads((pathlib.Path(__file__).with_name("scene_images.json")).read_text())
+_IMG = {k: v[0] for k, v in GALLERY.items()}    # primary image per industry (back-compat)
+
+
+def image_for(industry_key: str, idx: int = 0) -> dict:
+    imgs = GALLERY.get(industry_key) or GALLERY.get(DEFAULT_INDUSTRY) or [next(iter(_IMG.values()))]
+    return imgs[idx % len(imgs)]
 
 # --- industries: NAICS sector + deterministic copy template ({region} filled at render) ----
 INDUSTRIES = [
@@ -291,8 +268,8 @@ def resolve_ip(ip: str) -> dict:
         add("Daypart", daypart, "tone / dark-mode (available)", "observed", "resolved")
     return {"ip": ip, "region": rv.get("region"), "city": rv.get("city"), "company": company,
             "industry": industry, "industry_raw": industry_raw, "isp": rv.get("isp"),
-            "resolved_company": bool(company), "resolved_industry": bool(industry),
-            "reason": reason, "captured": cap}
+            "daypart": daypart, "resolved_company": bool(company),
+            "resolved_industry": bool(industry), "reason": reason, "captured": cap}
 
 
 def detect(request) -> dict:

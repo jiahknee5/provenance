@@ -59,6 +59,18 @@
     .cap-tbl .sig{font-weight:600;color:var(--ink);white-space:nowrap} .cap-tbl .val{color:var(--slate);font-variant-numeric:tabular-nums;word-break:break-word}
     .cap-tbl .drv{color:var(--muted);font-size:12px}
     .cap-tbl tr.grp td{background:var(--fill2);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--label);padding:6px 14px}
+    .cre-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:900px}
+    .dr-row{display:flex;gap:8px;font-size:12.5px;padding:5px 0;border-bottom:1px dashed var(--hairline)} .dr-row:last-child{border:0}
+    .dr-row .f{color:var(--muted);min-width:150px;flex:none} .dr-row .c{color:var(--ink)}
+    .img-pick{display:flex;gap:8px;flex-wrap:wrap}
+    .img-pick .th{width:74px;height:48px;border-radius:8px;background-size:cover;background-position:center;border:2px solid transparent;cursor:pointer;box-shadow:var(--shadow-card)}
+    .img-pick .th.on{border-color:var(--signal)}
+    .ai-line{font-size:14px;color:var(--ink);margin:3px 0;font-weight:500}
+    .ai-v{display:flex;align-items:flex-start;gap:8px;font-size:12px;padding:6px 0;border-top:1px dashed var(--hairline)}
+    .ai-v .ic{flex:none;font-size:15px} .ai-v.ok .ic{color:var(--g)} .ai-v.no .ic{color:var(--r)}
+    .ai-v .t{color:var(--slate)} .ai-v .r{color:var(--muted);font-size:11px;display:block}
+    .ai-note{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.5}
+    @media(max-width:760px){.cre-grid{grid-template-columns:1fr}}
     @media(max-width:680px){.lv-badge{position:static;width:auto;margin:14px}.cap-tbl .drv{display:none}}
   </style>
 </head>
@@ -103,9 +115,29 @@
           {% for s in states %}<option value="{{ s }}" {{ 'selected' if s==det.region else '' }}>{{ s }}</option>{% endfor %}</select>
         <select id="sel-ind" style="margin-top:6px">
           {% for i in industries %}<option value="{{ i.key }}" {{ 'selected' if i.key==default_industry else '' }}>{{ i.label }}</option>{% endfor %}</select></div>
+      <div><label>Creative angle</label>
+        <select id="sel-angle">{% for a in angles %}<option value="{{ a.key }}">{{ a.label }}</option>{% endfor %}</select></div>
       <button class="resetbtn" id="reset"><i class="ph ph-arrow-counter-clockwise"></i> Reset to my IP</button>
     </div>
   </aside>
+
+  <section class="lv-rcpt" style="padding-bottom:10px">
+    <h2>Creative agents</h2>
+    <p class="lead">A <b>design agent</b> picks the backdrop, accent and tone from the firmographic; a <b>gated copy agent</b> drafts the copy where every line must clear the Gate. The agent proposes; the Gate disposes — nothing ships that can&rsquo;t be proven.</p>
+    <div class="cre-grid">
+      <div class="q-card">
+        <div class="q-label" style="margin-bottom:8px">Design agent · why these elements</div>
+        <div id="design-card"></div>
+        <div class="q-label" style="margin:15px 0 8px">Backdrop · pick one (all licensed)</div>
+        <div class="img-pick" id="img-pick"></div>
+      </div>
+      <div class="q-card">
+        <div class="q-label" style="margin-bottom:9px">Copy agent · proposes → the Gate verifies</div>
+        <button class="q-btn ink" id="ai-go"><i class="ph ph-sparkle"></i> Write with AI + Gate-check</button>
+        <div id="ai-out" style="margin-top:13px"><span class="q-muted" style="font-size:12.5px">Pick an angle, then run the agent. Every line it writes is checked against the sources + surface policy.</span></div>
+      </div>
+    </div>
+  </section>
 
   <section class="lv-rcpt">
     <h2>Everything captured from this IP</h2>
@@ -130,6 +162,15 @@
   var policy = 'allude';
   var REQ = DET.request_signals || [];
   var CAP = DET.captured || [];
+  var ANGLES = {{ angles|tojson }};
+  var GALLERY = {{ gallery|tojson }};
+  var ANGLEBY = {}; ANGLES.forEach(function(a){ ANGLEBY[a.key]=a; });
+  var angleKey = 'default'; var imgIdx = 0;
+  function angleCopy(ind, region){
+    var a = ANGLEBY[angleKey]; if(!a || a.key==='default' || !a.headline) return null;
+    function f(s){ return (s||'').replace(/\{industry\}/g, ind.label.toLowerCase()).replace(/\{region\}/g, region||'your region'); }
+    return {eyebrow:f(a.eyebrow), headline:f(a.headline), sub:f(a.sub)};
+  }
 
   function fA(s){ return (s||'').replace(/\{region\}/g, S.region||'your region'); }
   function fS(s){ var ind=BYKEY[S.industry]||IND[0];
@@ -137,12 +178,15 @@
 
   function render(){
     var ind = BYKEY[S.industry]||IND[0]; var say = policy==='say';
-    document.getElementById('bg').style.backgroundImage = "url('"+ind.image.url+"')";
-    document.getElementById('eye').textContent = say ? SAY.eyebrow : fA(ind.eyebrow);
-    document.getElementById('h1').textContent  = say ? fS(S.company?SAY.hco:SAY.hnoco) : fA(ind.headline);
-    document.getElementById('sub').textContent = say ? fS(SAY.sub) : fA(ind.sub);
+    var gal = GALLERY[S.industry] || [ind.image]; if(imgIdx>=gal.length) imgIdx=0; var img = gal[imgIdx]||ind.image;
+    var ac = say ? null : angleCopy(ind, S.region);
+    document.getElementById('bg').style.backgroundImage = "url('"+img.url+"')";
+    document.getElementById('eye').textContent = say ? SAY.eyebrow : (ac?ac.eyebrow:fA(ind.eyebrow));
+    document.getElementById('h1').textContent  = say ? fS(S.company?SAY.hco:SAY.hnoco) : (ac?ac.headline:fA(ind.headline));
+    document.getElementById('sub').textContent = say ? fS(SAY.sub) : (ac?ac.sub:fA(ind.sub));
     document.getElementById('cta').firstChild.textContent = ind.cta + ' ';
-    document.getElementById('attr').innerHTML = "image: "+ind.image.id+" · <a href='"+ind.image.landing+"' target='_blank' rel='noopener'>"+ind.image.creator+"</a> · "+ind.image.license;
+    document.getElementById('attr').innerHTML = "image: "+img.id+" · <a href='"+img.landing+"' target='_blank' rel='noopener'>"+img.creator+"</a> · "+img.license;
+    renderCreative(ind, gal);
     document.getElementById('blocked').style.display = say ? 'flex' : 'none';
     var m=document.getElementById('mode'); var lab = S.mode==='detected'?'Detected':(S.mode==='lookup'?'Looked up':'Preview');
     m.textContent=lab; m.className='mode '+(S.mode==='detected'?'det':'prev');
@@ -163,8 +207,8 @@
       return {label:r.label, value:v, drives:r.drives, policy:r.policy};
     });
     var produced = [
-      {label:'→ Copy', value:ind.key+' / '+policy, drives:'the headline + sub', policy:'say'},
-      {label:'→ Backdrop', value:ind.image.id+' · '+ind.image.license, drives:'the hero image', policy:'say'}
+      {label:'→ Copy', value:ind.key+'/'+angleKey+' · '+policy, drives:'the headline + sub', policy:'say'},
+      {label:'→ Backdrop', value:img.id+' · '+img.license, drives:'the hero image', policy:'say'}
     ];
     var groups=[['Your request (constant)',REQ],['Captured from the IP',capRows],['Produced — shown to the visitor',produced]];
     var html='';
@@ -190,6 +234,37 @@
   document.getElementById('sel-ind').addEventListener('change',function(e){S.industry=e.target.value;S.indDetected=false;if(S.mode==='detected')S.mode='preview';render();});
   [].forEach.call(document.querySelectorAll('#seg-policy button'),function(b){b.addEventListener('click',function(){policy=b.getAttribute('data-p');render();});});
   document.getElementById('reset').addEventListener('click',function(){S=fresh(DET,{{ 'true' if loc_detected else 'false' }}?'detected':'preview');document.getElementById('sel-loc').value=S.region||'';document.getElementById('sel-ind').value=S.industry;document.getElementById('ip-in').value='';render();});
+
+  // creative: the design agent's rationale + the backdrop picker
+  function renderCreative(ind, gal){
+    var dp=DET.daypart, tone=(dp==='evening'||dp==='late night')?'calm, low-light':'bright, high-energy', rows=[];
+    if(S.company) rows.push({f:'company resolved from IP', c:'firmographic-tailored — but allude (never recited)'});
+    rows.push({f:'industry = '+ind.label, c:'backdrop + '+ind.accent+' accent'});
+    rows.push({f:'region = '+(S.region||'—'), c:'region-first framing'});
+    rows.push({f:'daypart = '+(dp||'—'), c:tone+' tone'});
+    rows.push({f:'creative angle = '+((ANGLEBY[angleKey]||{label:'default'}).label), c:'the copy framing'});
+    document.getElementById('design-card').innerHTML = rows.map(function(r){return "<div class='dr-row'><span class='f'>"+r.f+"</span><span class='c'>"+r.c+"</span></div>";}).join('');
+    document.getElementById('img-pick').innerHTML = gal.map(function(im,i){return "<div class='th"+(i===imgIdx?' on':'')+"' data-i='"+i+"' title='"+im.creator+" · "+im.license+"' style=\"background-image:url('"+im.url+"')\"></div>";}).join('');
+    [].forEach.call(document.querySelectorAll('#img-pick .th'),function(t){ t.addEventListener('click',function(){ imgIdx=parseInt(t.getAttribute('data-i'),10); render(); }); });
+  }
+  // creative: the gated AI copy agent (proposes → the Gate verifies)
+  function runAI(){
+    document.getElementById('ai-out').innerHTML="<span class='q-muted' style='font-size:12.5px'>Agent writing… Gate verifying…</span>";
+    var q='industry='+encodeURIComponent(S.industry)+'&region='+encodeURIComponent(S.region||'')+'&company='+encodeURIComponent(S.company||'')+'&city='+encodeURIComponent(S.city||'')+'&angle='+encodeURIComponent(angleKey)+'&policy='+policy;
+    fetch('/api/demo/aicopy?'+q).then(function(r){return r.json();}).then(function(d){
+      function v(o,blk){return "<div class='ai-v "+(o.ok?'ok':'no')+"'><i class='ic ph "+(o.ok?'ph-check-circle':'ph-prohibit')+"'></i><span class='t'>“"+o.line+"”<span class='r'>"+(blk?'blocked — ':'')+o.reason+"</span></span></div>";}
+      var checks=(d.checks||[]).map(function(x){return v(x,false);}).join('');
+      document.getElementById('ai-out').innerHTML =
+        "<div class='ai-line'>"+d.headline+"</div><div class='q-muted' style='font-size:13px;line-height:1.5'>"+d.sub+"</div>"
+        +"<div class='q-label' style='margin:13px 0 3px'>Gate verdicts — what it wrote</div>"+checks
+        +"<div class='q-label' style='margin:13px 0 3px'>…and a line the Gate blocks</div>"+(d.blocked_example?v(d.blocked_example,true):'')
+        +"<div class='ai-note'>"+(d.source==='ai'?'✨ ':'')+d.note+"</div>"
+        +"<button class='q-btn outline' id='ai-apply' style='margin-top:11px'><i class='ph ph-arrow-up'></i> Use this copy</button>";
+      var ap=document.getElementById('ai-apply'); if(ap) ap.addEventListener('click',function(){document.getElementById('h1').textContent=d.headline;document.getElementById('sub').textContent=d.sub;});
+    }).catch(function(){document.getElementById('ai-out').innerHTML="<span class='q-muted'>agent unavailable</span>";});
+  }
+  document.getElementById('ai-go').addEventListener('click', runAI);
+  document.getElementById('sel-angle').addEventListener('change', function(e){ angleKey=e.target.value; render(); });
   render();
 </script>
 </body>
