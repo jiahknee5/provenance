@@ -121,16 +121,19 @@ _IP_FIELDS = ("status,country,countryCode,region,regionName,city,zip,lat,lon,tim
 # REAL company → industry: PDL company-enrich (inert without PDL_API_KEY).
 _PDL_COMPANY = "https://api.peopledatalabs.com/v5/company/enrich"
 
-# map a free-text industry (from PDL) → our nearest sector bucket
+# map a free-text industry (from PDL's taxonomy) → our nearest sector bucket
 _IND_HINTS = {
     "mining": ["mining", "metal", "mineral", "coal"],
-    "energy": ["energy", "oil", "gas", "utilit", "power", "petroleum", "renewable"],
-    "agriculture": ["farm", "agricultur", "ranch", "crop", "dairy"],
-    "logistics": ["logistic", "freight", "shipping", "transport", "supply chain", "trucking", "warehous"],
-    "healthcare": ["health", "hospital", "medical", "pharma", "biotech"],
-    "manufacturing": ["manufactur", "industrial", "machinery", "automotive", "factory"],
-    "technology": ["software", "information technology", "internet", "computer", "saas", "tech", "data"],
-    "construction": ["construct", "building", "contractor", "civil engineering"],
+    "energy": ["energy", "oil", "gas", "utilit", "power", "petroleum", "renewable", "solar", "nuclear"],
+    "agriculture": ["farm", "agricultur", "ranch", "crop", "dairy", "fishery"],
+    "logistics": ["logistic", "freight", "shipping", "transport", "supply chain", "trucking",
+                  "warehous", "maritime", "aviation", "airline", "railroad"],
+    "healthcare": ["health", "hospital", "medical", "pharma", "biotech", "wellness"],
+    "manufacturing": ["manufactur", "industrial", "machinery", "automotive", "factory",
+                      "electrical", "chemical", "plastics", "consumer goods", "textiles", "packaging"],
+    "technology": ["software", "information technology", "internet", "computer", "saas", "tech",
+                   "data", "electronics", "semiconductor", "telecommunic", "fintech", "information services"],
+    "construction": ["construct", "building", "contractor", "civil engineering", "architecture"],
 }
 
 
