@@ -1,0 +1,24 @@
+,,,,
+,Standard Event Envelope — All Events Share These Fields,,,
+,,,,
+,Field,Type,Required,Purpose
+,event_id,UUID,Yes,Global unique identifier; used for idempotency and audit
+,event_name,string,Yes,"Stable snake_case domain name (e.g., claim_verified)"
+,event_version,string,Yes,Payload contract version for this event type
+,occurred_at,timestamp,Yes,When the thing actually happened (business time)
+,recorded_at,timestamp,Yes,When the system persisted the event
+,stream_id,string,Yes,"Aggregate stream for ordered replay (e.g., lead_123)"
+,stream_type,enum,Yes,"Aggregate class: lead | account | asset | review | decision_trace"
+,stream_position,integer,Yes,Sequence number within the stream for deterministic reconstruction
+,subject_ref,object,Yes,"The business entity the event is about {type, id}"
+,actor,object,Yes,"Human or system that caused the event {type, id}"
+,correlation_id,UUID,Yes,Groups related events in one workflow / request chain
+,causation_id,UUID,No,Links this event to the prior triggering event
+,tenant_id,string,Yes,Org boundary for multi-tenancy
+,source,object,Yes,"Capture context: {channel, system} (e.g., form, webhook, UI)"
+,payload,object,Yes,Business-specific event body — unique per event_name
+,metadata,object,No,Flat technical metadata only; no business logic
+,policy_ref,object,No,"Applied policy context {version, rule_refs} when policy evaluation affects this event"
+,review_ref,object,No,"Associated review context {review_id, status} for approval escalation or rejection-related events"
+,trace_ref,object,No,"Linked decision trace context {decision_trace_id} when the event has a separate explainability record"
+,privacy_tier,string,No,"Identity or privacy classification in force when the event occurred (e.g., STRONG_IDENTIFIED, WEAK_CONTEXTUAL, ANONYMOUS)"

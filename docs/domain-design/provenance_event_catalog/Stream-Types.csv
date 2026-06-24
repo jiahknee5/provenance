@@ -1,0 +1,9 @@
+,,,,
+,Stream Types & Aggregate Ownership,,,
+,,,,
+,Stream Type,Aggregate Root,Events Owned,Notes
+,lead,Profile / Identity,"visitor_identified, form_submitted, enrichment_*, identity_resolution_*, evidence_captured, text_sentiment_scored, claim_*, segment_evaluated, segment_assignment_updated, emotional_signal_detected, emotional_segment_assignment_updated",Primary stream; one per person or account
+,asset,Asset,"asset_draft_created, asset_emotional_vector_tagged, asset_validated, asset_approved, asset_publish_requested, emotional_mismatch_blocked, emotional_reroute_applied, dispatch_suppressed, asset_dispatched, dispatch_failed, asset_selection_recorded",One stream per asset variant
+,review,Review,"review_requested, review_approved, review_rejected, review_escalated",One stream per review checkpoint
+,account,Account,"Mirrors lead stream at org level for B2B when the account is the primary subject",Shares most lead-side event families with account-specific stream ids
+,decision_trace,DecisionTrace,"decision_trace_recorded, decision_overridden",Append-only explainability stream; referenced by lead and asset streams
