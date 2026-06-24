@@ -1,0 +1,76 @@
+{% extends "shell.html" %}
+{% block title %}Provenance — Agent{% endblock %}
+{% block crumb %}<i class="ph ph-sparkle"></i> Agent{% endblock %}
+{% block content %}
+<style>
+  .ag-search{display:flex;gap:8px;margin-bottom:14px}
+  .ag-search .box{flex:1;display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:12px;padding:0 14px;background:#fff;transition:border-color var(--t) var(--ease)}
+  .ag-search .box:focus-within{border-color:var(--signal)}
+  .ag-search .box i{font-size:20px;color:var(--muted)}
+  .ag-search input{flex:1;border:0;outline:0;font:15px var(--font-ui);padding:13px 0;color:var(--ink);background:transparent}
+  .ag-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+  .ag-chip{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:500;color:var(--slate);border:1px solid var(--hairline);border-radius:999px;padding:7px 13px;background:#fff;transition:all var(--t) var(--ease)}
+  .ag-chip:hover{border-color:var(--border);background:var(--fill)} .ag-chip i{font-size:15px;color:var(--muted)}
+  .ag-result h2{margin-bottom:4px}
+  .ag-sum{font-size:16px;color:var(--slate);margin:0 0 18px}
+  .ag-stat .v.g{color:var(--g)} .ag-stat .v.a{color:var(--a)} .ag-stat .v.b{color:var(--signal)}
+  .ag-prov{margin-top:18px;border:1px solid var(--hairline);border-radius:var(--r-card);padding:14px 16px;background:var(--fill2)}
+  .ag-prov .lab{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--signal);margin-right:6px}
+  .ag-du{display:inline-block;font-size:11.5px;font-weight:500;color:var(--ink);background:#fff;border:1px solid var(--hairline);border-radius:5px;padding:3px 8px;margin:0 4px 5px 0}
+  .ag-du em{font-style:normal;color:var(--muted)}
+  .ag-note{font-size:13px;color:var(--muted);margin-top:16px;line-height:1.55;border-left:3px solid var(--hairline);padding-left:12px}
+  .ag-empty{text-align:center;color:var(--muted);padding:50px 0}
+  .ag-empty i{font-size:40px;color:var(--border)}
+</style>
+
+  <div class="q-pagehead"><div>
+    <h1>Agent</h1>
+    <p class="q-muted" style="margin:5px 0 0">Ask the optimizer, assurance, drift, or your records — every answer carries its provenance.</p>
+  </div></div>
+
+  <form class="ag-search" method="get" action="/agent">
+    <div class="box"><i class="ph ph-sparkle"></i>
+      <input name="q" value="{{ q }}" autocomplete="off" autofocus
+             placeholder="e.g. why did a variant win? · how are my KPIs? · can I trust it?"></div>
+    <button class="q-btn ink lg" type="submit"><i class="ph ph-arrow-right"></i> Ask</button>
+  </form>
+  <div class="ag-chips">
+    {% for s in suggestions %}<a class="ag-chip" href="/agent?q={{ s.q|urlencode }}"><i class="ph {{ s.icon }}"></i>{{ s.q }}</a>{% endfor %}
+  </div>
+
+  {% if result %}
+  <div class="ag-result">
+    <h2>{{ result.title }}</h2>
+    <p class="ag-sum">{{ result.summary_html|safe }}</p>
+
+    {% if result.cards %}
+    <div class="q-grid" style="grid-template-columns:repeat({{ result.cards|length }},1fr)">
+      {% for c in result.cards %}
+      <div class="q-stat ag-stat"><div class="k">{{ c.k }}</div><div class="v {{ c.tone }}">{{ c.v }}</div><div class="sub">{{ c.sub }}</div></div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if result.table %}
+    <div class="q-panel" style="margin-top:18px"><table class="q-table">
+      <thead><tr>{% for col in result.table.cols %}<th>{{ col }}</th>{% endfor %}</tr></thead>
+      <tbody>
+        {% for row in result.table.rows %}
+        <tr>{% for cell in row %}<td>{% if cell.pill %}<span class="q-pill {{ cell.pill }}"><span class="d"></span>{{ cell.v }}</span>{% else %}{{ cell.v }}{% endif %}</td>{% endfor %}</tr>
+        {% endfor %}
+      </tbody>
+    </table></div>
+    {% endif %}
+
+    {% if result.provenance %}
+    <div class="ag-prov"><span class="lab">Data used</span>
+      {% for d in result.provenance %}<span class="ag-du">{{ d.signal }} <em>· {{ d.source }} · {{ d.policy }}</em></span>{% endfor %}
+    </div>
+    {% endif %}
+
+    {% if result.note_html %}<div class="ag-note">{{ result.note_html|safe }}</div>{% endif %}
+  </div>
+  {% else %}
+  <div class="ag-empty"><i class="ph ph-sparkle"></i><p>Pick a question above, or type your own.</p></div>
+  {% endif %}
+{% endblock %}

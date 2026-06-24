@@ -14,9 +14,10 @@ import json
 from fastapi import Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
-from app.charts import calibration, grouped_bars
 from app.server import app, templates
 from pipeline.common.config import DATA_DIR, OBSERVE_DIR, RUNS_DIR
+from pipeline.personalization import demo_scenarios as DS
+from pipeline.personalization import demo_sim
 
 EVAL_HISTORY = DATA_DIR / "eval_history.jsonl"
 
@@ -36,24 +37,34 @@ def _history() -> list[dict]:
 
 @app.get("/assurance", response_class=HTMLResponse)
 def assurance(request: Request):
-    golden = _load("golden_evals.json")
-    if not golden:
-        return templates.TemplateResponse(request, "assurance.html", {"empty": True})
+    """Minimalist trust surface that monitors Drift (R26): one trust score + the live
+    drift watch + the hallucination/overclaim guard — quiet cards in the new shell."""
+    m = demo_sim.build()
+    h = m["health"]
+    golden = _load("golden_evals.json", {})
+    catch = h["hallucination"]["trap_catch_rate"]
+    if catch is None and golden.get("summary"):
+        s = golden["summary"]
+        catch = round(100 * s.get("passed", 0) / max(s.get("total", 1), 1), 1)
 
-    a = _load("assurance.json", {})
-    bars_svg = cal_svg = ""
-    if a:
-        types = list(a["gate"]["by_type"].keys())
-        bars_svg = grouped_bars([t.replace("_", " ") for t in types],
-                                [a["gate"]["by_type"][t] for t in types],
-                                [a["baseline"]["by_type"].get(t, 0.0) for t in types])
-        cal_svg = calibration(a["reliability_bins"])
+    # composite trust score: provenance coverage, no-hold-in-copy, ungated-never-selected, traps
+    parts = [h["provenance"]["coverage_pct"],
+             100 if not h["provenance"]["hold_in_copy"] else 0,
+             100 if h["hallucination"]["selected"] == 0 else 0,
+             catch if catch is not None else 100]
+    trust = round(sum(parts) / len(parts))
+
+    # drift watch — every TTL-governed (bought/enrich/broker) fact, its source + status
+    drift_rows = []
+    for s in DS.SCENARIOS:
+        for v in DS.gated_variants(s):
+            for d in v.data_used:
+                if d.source in (DS.BOUGHT, DS.ENRICH, DS.BROKER):
+                    drift_rows.append({"signal": d.signal, "source": d.source_label,
+                                       "variant": v.label, "status": "fresh"})
 
     return templates.TemplateResponse(request, "assurance.html", {
-        "empty": False, "golden": golden, "lifecycle": golden.get("lifecycle"),
-        "assurance": a, "bars_svg": bars_svg, "cal_svg": cal_svg,
-        "history": _history(), "meta": _load("meta.json", {}),
-        "topology": _load("topology.json", {}),
+        "trust": trust, "h": h, "catch": catch, "drift_rows": drift_rows,
     })
 
 

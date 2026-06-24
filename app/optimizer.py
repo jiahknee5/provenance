@@ -13,8 +13,11 @@ from fastapi import Request
 from fastapi.responses import HTMLResponse
 
 from app.server import app, templates
+from pipeline.personalization import demo_sim
 
 
 @app.get("/optimizer", response_class=HTMLResponse)
 def optimizer(request: Request):
-    return templates.TemplateResponse(request, "optimizer.html", {})
+    m = demo_sim.build()
+    return templates.TemplateResponse(request, "optimizer.html", {
+        "scenarios": m["scenarios"], "note": m["note"]})

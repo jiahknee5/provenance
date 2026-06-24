@@ -1,0 +1,40 @@
+{% extends "shell.html" %}
+{% block title %}Provenance — Records{% endblock %}
+{% block crumb %}<i class="ph ph-table"></i> Records{% endblock %}
+{% block content %}
+  <div class="q-pagehead">
+    <div><h1>Records</h1></div>
+    <div class="sp">
+      <a class="q-btn outline"><i class="ph ph-funnel"></i> Filter</a>
+      <a class="q-btn outline"><i class="ph ph-faders-horizontal"></i> Sort</a>
+      <a class="q-btn ink"><i class="ph ph-plus"></i> New record</a>
+    </div>
+  </div>
+
+  <div class="q-tabs" style="margin-bottom:16px">
+    <span class="q-tab on">All</span><span class="q-tab">Companies</span><span class="q-tab">People</span><span class="q-tab">Deals</span>
+  </div>
+
+  <div class="q-panel">
+    <div class="q-toolbar">
+      <span class="h">All records · {{ rows|length }}</span>
+      <span class="sp"><a class="q-btn ghost"><i class="ph ph-arrows-clockwise"></i> Refresh</a></span>
+    </div>
+    <table class="q-table">
+      <thead><tr><th>Record</th><th>Company</th><th>Title</th><th>Industry</th><th>Stage</th><th>Score</th><th>Source</th></tr></thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td><span class="q-rec"><span class="av" style="background:{{ r.avc }}">{{ r.av }}</span>{{ r.name }}</span></td>
+          <td>{{ r.company }}</td>
+          <td class="q-muted">{{ r.title }}</td>
+          <td class="q-muted">{{ r.industry }}</td>
+          <td><span class="q-pill {{ r.lifecycle_cls }}"><span class="d"></span>{{ r.lifecycle_lbl }}</span></td>
+          <td>{{ r.score }}</td>
+          <td class="q-muted">{{ r.source }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

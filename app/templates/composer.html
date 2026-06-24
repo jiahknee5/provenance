@@ -1,0 +1,48 @@
+{% extends "shell.html" %}
+{% block title %}Provenance — Composer{% endblock %}
+{% block crumb %}<i class="ph ph-pen-nib"></i> Composer{% endblock %}
+{% block content %}
+  <div class="q-pagehead"><div>
+    <h1>Composer</h1>
+    <p class="q-muted" style="margin:5px 0 0">Write outreach. The Gate checks every line before it can ship — you can hold a fact, but you can&rsquo;t recite it.</p>
+  </div></div>
+
+  <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start">
+    <form method="get" action="/composer">
+      <div class="q-label" style="margin-bottom:7px">Message to Maya Chen</div>
+      <textarea class="q-input" name="msg" rows="7" style="font-size:14px;line-height:1.55;resize:vertical">{{ msg }}</textarea>
+      <div style="margin-top:12px;display:flex;gap:9px;align-items:center">
+        <button class="q-btn ink" type="submit"><i class="ph ph-shield-check"></i> Check &amp; send</button>
+        {% if res %}
+          {% if res.blocked %}<span class="q-pill r"><span class="d"></span>Send blocked</span>
+          {% else %}<span class="q-pill g"><span class="d"></span>Cleared to send</span>{% endif %}
+        {% endif %}
+      </div>
+
+      {% if res %}
+        {% if res.blocked %}
+        <div class="q-card" style="margin-top:16px;border-color:var(--r);background:var(--rbg)">
+          <div style="font-weight:600;color:var(--r);display:flex;align-items:center;gap:8px"><i class="ph ph-prohibit"></i> Blocked — this message recites held facts</div>
+          <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+            {% for h in res.hits %}
+            <div style="font-size:13px;color:var(--slate)"><b style="color:var(--ink)">{{ h.label }}</b> <span class="q-muted">· {{ h.source }} · policy: hold</span></div>
+            {% endfor %}
+          </div>
+          <div class="q-muted" style="font-size:12.5px;margin-top:10px">Held facts may steer who you target and what you feature — but they can never appear in the copy. Remove them to send.</div>
+        </div>
+        {% else %}
+        <div class="q-card" style="margin-top:16px;border-color:var(--g);background:var(--gbg)">
+          <div style="font-weight:600;color:var(--g);display:flex;align-items:center;gap:8px"><i class="ph ph-check-circle"></i> Cleared — every claim is on-policy</div>
+          <div class="q-muted" style="font-size:12.5px;margin-top:8px">Uses only declared facts (say) and behavioural steer (allude). No held fact is recited. Ready to send.</div>
+        </div>
+        {% endif %}
+      {% endif %}
+    </form>
+
+    <div class="q-card">
+      <div class="q-label">Try it</div>
+      <p style="font-size:13px;color:var(--slate);margin:8px 0 0;line-height:1.55">Add a line like <i>&ldquo;we noticed you&rsquo;ve been comparing us with other bootcamps&rdquo;</i> or <i>&ldquo;on your income you can easily afford this&rdquo;</i> — watch the Gate block the send and name the held fact + its source.</p>
+      <p class="q-muted" style="font-size:12px;margin:12px 0 0">This is the creepiness invariant: a <code style="background:var(--fill);border-radius:4px;padding:1px 5px">hold</code> fact can never reach copy — enforced, not hoped.</p>
+    </div>
+  </div>
+{% endblock %}

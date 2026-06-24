@@ -1,0 +1,28 @@
+{% extends "shell.html" %}
+{% block title %}Provenance — Sources{% endblock %}
+{% block crumb %}<i class="ph ph-database"></i> Sources{% endblock %}
+{% block content %}
+  <div class="q-pagehead"><div>
+    <h1>Sources</h1>
+    <p class="q-muted" style="margin:5px 0 0">Every source we could enrich from — honest about cost, lawful basis, and freshness.</p>
+  </div></div>
+
+  {% for grp in groups %}
+  <div class="q-pagehead" style="margin:{{ '0' if loop.first else '26px' }} 0 12px"><div><h2>{{ grp.label }}</h2></div></div>
+  <div class="q-panel" style="margin-bottom:6px"><table class="q-table">
+    <thead><tr><th>Source</th><th>Gives</th><th>Cost</th><th>Lawful basis</th><th>Freshness</th><th></th></tr></thead>
+    <tbody>
+      {% for r in grp.rows %}
+      <tr>
+        <td style="font-weight:500;color:var(--ink)">{{ r.name }}</td>
+        <td class="q-muted">{{ r.gives }}</td>
+        <td>{{ r.cost }}</td>
+        <td class="q-muted">{{ r.basis }}</td>
+        <td class="q-muted">{{ r.freshness }}</td>
+        <td>{% if r.live %}<span class="q-pill g"><span class="d"></span>live</span>{% elif r.used_in_demo %}<span class="q-pill b"><span class="d"></span>wired</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table></div>
+  {% endfor %}
+{% endblock %}

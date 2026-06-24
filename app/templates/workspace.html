@@ -1,0 +1,48 @@
+{% extends "shell.html" %}
+{% block title %}Provenance — Home{% endblock %}
+{% block crumb %}<i class="ph ph-house"></i> Home{% endblock %}
+{% block content %}
+  <div class="q-pagehead">
+    <div>
+      <h1>Your revenue, provable.</h1>
+      <p class="q-muted" style="margin:5px 0 0">Every record, message, and metric traces back to a verified source.</p>
+    </div>
+    <div class="sp">
+      <a class="q-btn outline"><i class="ph ph-funnel"></i> Filter</a>
+      <a class="q-btn ink"><i class="ph ph-plus"></i> New record</a>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px">
+    <div class="q-stat"><div class="k">Records</div><div class="v">{{ stats.records }}</div><div class="sub">in pipeline</div></div>
+    <div class="q-stat"><div class="k">Qualified</div><div class="v">{{ stats.qualified }}</div><div class="sub">SQL + MQL</div></div>
+    <div class="q-stat"><div class="k">Customers</div><div class="v">{{ stats.customers }}</div><div class="sub">won</div></div>
+    <div class="q-stat"><div class="k">Provenance</div><div class="v" style="color:var(--g)">100%</div><div class="sub">facts with a source</div></div>
+  </div>
+
+  <div class="q-panel">
+    <div class="q-toolbar">
+      <span class="h">Pipeline</span>
+      <span class="sp">
+        <a class="q-btn ghost"><i class="ph ph-arrows-clockwise"></i> Refresh</a>
+        <a class="q-btn signal"><i class="ph ph-plus"></i> Add deal</a>
+      </span>
+    </div>
+    <table class="q-table">
+      <thead><tr><th>Record</th><th>Company</th><th>Title</th><th>Industry</th><th>Stage</th><th>Score</th><th>Source</th></tr></thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td><span class="q-rec"><span class="av" style="background:{{ r.avc }}">{{ r.av }}</span>{{ r.name }}</span></td>
+          <td>{{ r.company }}</td>
+          <td class="q-muted">{{ r.title }}</td>
+          <td class="q-muted">{{ r.industry }}</td>
+          <td><span class="q-pill {{ r.lifecycle_cls }}"><span class="d"></span>{{ r.lifecycle_lbl }}</span></td>
+          <td>{{ r.score }}</td>
+          <td class="q-muted">{{ r.source }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
