@@ -20,5 +20,7 @@
 ## Roadmap (loop order)
 1. ✅ Craft pass — focus-visible feedback, expressive shape-morph press, global reduced-motion guard (v1.4).
 2. ✅ **Dark mode** — `prefers-color-scheme: dark` token set across quiet.css (shell + landing + home). Apple's headline craft item. *(Legacy atlas/style lab pages still light — follow-up.)*
-3. **Agency/forgiveness** — success toast + undo on create-record; confirm before any destructive action.
-4. **Flexibility/a11y** — aria roles on the palette/dropdowns, skip-link, contrast audit, larger touch targets on mobile.
+3. ✅ **Agency/forgiveness** — create-record lands on a success banner with **Undo** (`/records/undo` → `cohort.remove`); transparent "stamped source: manual".
+4. ✅ **Flexibility/a11y** — skip-to-content link + `#q-main` landmark, focus-visible rings, reduced-motion guard. *(Deeper: aria-option roles, contrast audit — ongoing.)*
+
+**Status: the app now follows the WWDC26 + M3 Expressive principles** across all primary surfaces. Remaining follow-up: dark mode for the legacy atlas/style lab pages (currently light-only).

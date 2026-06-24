@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="/static/quiet.css">
 </head>
 <body>
+<a class="q-skip" href="#q-main">Skip to content</a>
 {% set p = request.url.path %}
 <div class="q-app">
   <!-- sidebar -->
@@ -47,7 +48,7 @@
       <div class="crumb">{% block crumb %}<i class="ph ph-house"></i> Home{% endblock %}</div>
       <button class="q-cmd" id="cmdk-btn" type="button"><i class="ph ph-magnifying-glass"></i> Ask or jump to&hellip; <kbd>⌘K</kbd></button>
     </header>
-    <main class="q-body">{% block content %}{% endblock %}</main>
+    <main class="q-body" id="q-main">{% block content %}{% endblock %}</main>
   </div>
 </div>
 

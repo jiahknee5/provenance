@@ -74,10 +74,12 @@ def workspace(request: Request, sort: str = "score", view: str = "all"):
 
 
 @app.get("/records", response_class=HTMLResponse)
-def records(request: Request, sort: str = "score", view: str = "all"):
+def records(request: Request, sort: str = "score", view: str = "all", created: str = ""):
+    rec = C.BY_ID.get(created) if created else None
     return templates.TemplateResponse(request, "records.html", {
         "rows": _rows(sort, view), "total": len(C.COHORT),
         "sort": sort, "view": view, "view_label": _view_label(view), "views": VIEWS, "sorts": SORTS,
+        "created_id": created if rec else "", "created_name": (rec["vector"]["name"] if rec else ""),
     })
 
 
@@ -92,6 +94,14 @@ def records_new_form(request: Request):
 def records_new(name: str = Form(...), email: str = Form(...), company: str = Form(""),
                 title: str = Form(""), industry: str = Form(""), lifecycle: str = Form("lead"),
                 lead_score: int = Form(0), source: str = Form("manual")):
-    C.add(name=name, email=email, company=company, title=title, industry=industry,
-          lifecycle=lifecycle, lead_score=lead_score, source=source)
+    rec = C.add(name=name, email=email, company=company, title=title, industry=industry,
+                lifecycle=lifecycle, lead_score=lead_score, source=source)
+    # Agency/forgiveness: land on Records with an undo affordance for what was just created.
+    return RedirectResponse(f"/records?sort=name&created={rec['id']}", status_code=303)
+
+
+@app.post("/records/undo")
+def records_undo(rid: str = Form(...)):
+    """Undo a just-created record (WWDC26 Agency: easy recovery from any action)."""
+    C.remove(rid)
     return RedirectResponse("/records?sort=name", status_code=303)

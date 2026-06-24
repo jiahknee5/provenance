@@ -217,6 +217,20 @@ def add(*, name: str, email: str, company: str = "", title: str = "", industry: 
     return rec
 
 
+def remove(rid: str) -> bool:
+    """Remove a manually-created record (the Undo for add()). In-memory; idempotent."""
+    rec = BY_ID.pop(rid, None)
+    if not rec:
+        return False
+    try:
+        COHORT.remove(rec)
+    except ValueError:
+        pass
+    BY_EMAIL.pop(rec["email"].lower(), None)
+    BY_TOKEN.pop(magic_token(rec), None)
+    return True
+
+
 def match(email: str) -> dict | None:
     """Identify by email (typed, or verified via Google) → the record we already hold."""
     return BY_EMAIL.get((email or "").strip().lower())

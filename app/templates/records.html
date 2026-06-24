@@ -19,6 +19,17 @@
     </div>
   </div>
 
+  {% if created_name %}
+  <div class="q-flash">
+    <i class="ph ph-check-circle"></i>
+    <span>Created <b>{{ created_name }}</b> &middot; stamped <code style="background:var(--surface);border:1px solid var(--hairline);border-radius:4px;padding:1px 5px">source: manual</code>.</span>
+    <form method="post" action="/records/undo" style="margin-left:auto;display:inline">
+      <input type="hidden" name="rid" value="{{ created_id }}">
+      <button class="q-btn ghost" type="submit"><i class="ph ph-arrow-counter-clockwise"></i> Undo</button>
+    </form>
+  </div>
+  {% endif %}
+
   <div class="q-tabs" style="margin-bottom:16px">
     {% for k,label,pred in views %}<a class="q-tab {{ 'on' if k==view else '' }}" href="/records?view={{ k }}&sort={{ sort }}">{{ label.split(' (')[0] }}</a>{% endfor %}
   </div>

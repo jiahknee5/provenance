@@ -112,6 +112,29 @@ def test_create_record_persists_and_appears():
     assert after.count('class="q-rec"') == before + 1
 
 
+def test_create_then_undo_removes_record():
+    """Agency/forgiveness (WWDC26): a just-created record can be undone."""
+    r = c.post("/records/new", data={"name": "Temp Undo", "email": "tu@x.io",
+               "lifecycle": "lead", "lead_score": "5"})
+    assert "Temp Undo" in c.get("/records?view=all").text
+    assert 'action="/records/undo"' in r.text and "Undo" in r.text  # the create banner offers undo
+    rid = re.search(r'name="rid" value="([^"]+)"', r.text).group(1)
+    c.post("/records/undo", data={"rid": rid})
+    assert "Temp Undo" not in c.get("/records?view=all").text
+
+
+def test_skip_link_and_main_landmark():
+    """Accessibility (WWDC26 Flexibility): keyboard users skip straight to content."""
+    html = c.get("/workspace").text
+    assert 'class="q-skip"' in html and 'href="#q-main"' in html and 'id="q-main"' in html
+
+
+def test_dark_mode_token_set_present():
+    """Craft: light/dark adaptation ships in the stylesheet."""
+    css = (pathlib.Path(__file__).resolve().parents[1] / "app" / "static" / "quiet.css").read_text()
+    assert "prefers-color-scheme: dark" in css and "--surface" in css and "--on-cta" in css
+
+
 def test_filter_view_narrows_records():
     alln = c.get("/records?view=all").text.count('class="q-rec"')
     cust = c.get("/records?view=customers").text.count('class="q-rec"')
