@@ -26,6 +26,15 @@
       <a class="q-ni {{ 'on' if p.startswith('/sources') else '' }}" href="/sources"><i class="ph ph-database"></i>Sources</a>
       <div class="q-sect q-label">Showcase</div>
       <a class="q-ni {{ 'on' if p.startswith('/demo') else '' }}" href="/demo"><i class="ph ph-monitor-play"></i>Live demo</a>
+      <div class="q-sect q-label">Lab</div>
+      <a class="q-ni {{ 'on' if p.startswith('/personalize') else '' }}" href="/personalize"><i class="ph ph-magic-wand"></i>Personalize</a>
+      <a class="q-ni {{ 'on' if p.startswith('/inspector') else '' }}" href="/inspector"><i class="ph ph-magnifying-glass-plus"></i>Inspector</a>
+      <a class="q-ni {{ 'on' if p.startswith('/observatory') else '' }}" href="/observatory"><i class="ph ph-graph"></i>Observatory</a>
+      <a class="q-ni {{ 'on' if p.startswith('/funnel') else '' }}" href="/funnel"><i class="ph ph-funnel"></i>Funnel</a>
+      <a class="q-ni {{ 'on' if p.startswith('/admin') or p == '/lp' else '' }}" href="/admin/landings"><i class="ph ph-users-three"></i>Cohort</a>
+      <a class="q-ni {{ 'on' if p.startswith('/google') else '' }}" href="/google"><i class="ph ph-google-logo"></i>Google sign-in</a>
+      <a class="q-ni {{ 'on' if p == '/enrichment-catalog' else '' }}" href="/enrichment-catalog"><i class="ph ph-stack"></i>Enrichment catalog</a>
+      <a class="q-ni {{ 'on' if p == '/' else '' }}" href="/"><i class="ph ph-textbox"></i>Lead form</a>
     </nav>
     <div class="q-side-foot">
       <a class="q-ni" href="/demo/monitor"><i class="ph ph-gauge"></i>KPI monitor</a>
@@ -36,10 +45,74 @@
   <div class="q-main">
     <header class="q-top">
       <div class="crumb">{% block crumb %}<i class="ph ph-house"></i> Home{% endblock %}</div>
-      <a class="q-cmd" href="/agent"><i class="ph ph-magnifying-glass"></i> Ask or jump to&hellip; <kbd>⌘K</kbd></a>
+      <button class="q-cmd" id="cmdk-btn" type="button"><i class="ph ph-magnifying-glass"></i> Ask or jump to&hellip; <kbd>⌘K</kbd></button>
     </header>
     <main class="q-body">{% block content %}{% endblock %}</main>
   </div>
 </div>
+
+<!-- ⌘K command palette · Z-50 floating, light (quiet.css .q-cmdk) -->
+<div class="q-cmdk-scrim" id="cmdk" role="dialog" aria-modal="true" aria-label="Command palette">
+  <div class="q-cmdk" role="listbox">
+    <div class="qf"><i class="ph ph-magnifying-glass"></i>
+      <input id="cmdk-input" type="text" placeholder="Search surfaces or ask the agent&hellip;" autocomplete="off" spellcheck="false" aria-label="Command">
+    </div>
+    <div class="qlist" id="cmdk-list">
+      <a class="qi ask" data-kind="ask" data-keep="1" href="/agent"><i class="ph ph-sparkle"></i><span class="lab">Ask the agent&hellip;</span><span class="hint">⏎</span></a>
+      <a class="qi" data-label="home workspace records pipeline" href="/workspace"><i class="ph ph-house"></i>Home<span class="hint">go</span></a>
+      <a class="qi" data-label="records people companies deals table" href="/records"><i class="ph ph-table"></i>Records<span class="hint">go</span></a>
+      <a class="qi" data-label="composer message copy outreach gate write" href="/composer"><i class="ph ph-pen-nib"></i>Composer<span class="hint">go</span></a>
+      <a class="qi" data-label="optimizer bandit experiment variant winner lift" href="/optimizer"><i class="ph ph-trend-up"></i>Optimizer<span class="hint">go</span></a>
+      <a class="qi" data-label="agent navigator ask deterministic" href="/agent"><i class="ph ph-sparkle"></i>Agent<span class="hint">go</span></a>
+      <a class="qi" data-label="assurance trust drift watch monitor traps" href="/assurance"><i class="ph ph-shield-check"></i>Assurance<span class="hint">go</span></a>
+      <a class="qi" data-label="sources data provenance connectors catalog" href="/sources"><i class="ph ph-database"></i>Sources<span class="hint">go</span></a>
+      <a class="qi" data-label="live demo personalization clone variant receipt" href="/demo"><i class="ph ph-monitor-play"></i>Live demo<span class="hint">go</span></a>
+      <a class="qi" data-label="kpi monitor control tower metrics rl" href="/demo/monitor"><i class="ph ph-gauge"></i>KPI monitor<span class="hint">go</span></a>
+      <a class="qi" data-label="lab personalize tiers creepy super-personalization" href="/personalize"><i class="ph ph-magic-wand"></i>Personalize<span class="hint">lab</span></a>
+      <a class="qi" data-label="lab inspector claim ledger regret" href="/inspector"><i class="ph ph-magnifying-glass-plus"></i>Inspector<span class="hint">lab</span></a>
+      <a class="qi" data-label="lab observatory pipeline run node graph" href="/observatory"><i class="ph ph-graph"></i>Observatory<span class="hint">lab</span></a>
+      <a class="qi" data-label="lab funnel customer journey paths" href="/funnel"><i class="ph ph-funnel"></i>Funnel<span class="hint">lab</span></a>
+      <a class="qi" data-label="lab cohort gallery seed users landings" href="/admin/landings"><i class="ph ph-users-three"></i>Cohort<span class="hint">lab</span></a>
+      <a class="qi" data-label="lab google sign-in oauth dossier" href="/google"><i class="ph ph-google-logo"></i>Google sign-in<span class="hint">lab</span></a>
+      <a class="qi" data-label="lab enrichment catalog sources cost basis" href="/enrichment-catalog"><i class="ph ph-stack"></i>Enrichment catalog<span class="hint">lab</span></a>
+      <a class="qi" data-label="lead capture form helix" href="/"><i class="ph ph-textbox"></i>Lead form<span class="hint">lab</span></a>
+    </div>
+    <div class="qfoot"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>⏎</kbd> open</span><span><kbd>esc</kbd> close</span></div>
+  </div>
+</div>
+<script>
+(function(){
+  var scrim=document.getElementById('cmdk'),input=document.getElementById('cmdk-input'),
+      list=document.getElementById('cmdk-list'),ask=list.querySelector('.qi.ask'),
+      items=[].slice.call(list.querySelectorAll('.qi'));
+  function vis(){return items.filter(function(el){return el.style.display!=='none';});}
+  function sel(el){items.forEach(function(i){i.classList.remove('sel');});if(el){el.classList.add('sel');el.scrollIntoView({block:'nearest'});}}
+  function filter(){
+    var q=input.value.trim(),ql=q.toLowerCase();
+    ask.querySelector('.lab').textContent=q?('Ask the agent: “'+q+'”'):'Ask the agent…';
+    ask.setAttribute('href',q?('/agent?q='+encodeURIComponent(q)):'/agent');
+    items.forEach(function(el){
+      if(el.getAttribute('data-keep')){el.style.display='';return;}
+      var hay=(el.getAttribute('data-label')||el.textContent).toLowerCase();
+      el.style.display=(!ql||hay.indexOf(ql)>-1)?'':'none';
+    });
+    sel(vis()[0]);
+  }
+  function open(){scrim.classList.add('open');input.value='';filter();setTimeout(function(){input.focus();},0);}
+  function close(){scrim.classList.remove('open');}
+  document.addEventListener('keydown',function(e){
+    if((e.metaKey||e.ctrlKey)&&(e.key==='k'||e.key==='K')){e.preventDefault();scrim.classList.contains('open')?close():open();return;}
+    if(!scrim.classList.contains('open'))return;
+    if(e.key==='Escape'){e.preventDefault();close();}
+    else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();var v=vis(),i=v.indexOf(list.querySelector('.qi.sel'));
+      i=e.key==='ArrowDown'?Math.min(i+1,v.length-1):Math.max(i-1,0);sel(v[i]);}
+    else if(e.key==='Enter'){var s=list.querySelector('.qi.sel');if(s){e.preventDefault();window.location.href=s.getAttribute('href');}}
+  });
+  input.addEventListener('input',filter);
+  scrim.addEventListener('click',function(e){if(e.target===scrim)close();});
+  items.forEach(function(el){el.addEventListener('mousemove',function(){sel(el);});});
+  var btn=document.getElementById('cmdk-btn');if(btn)btn.addEventListener('click',open);
+})();
+</script>
 </body>
 </html>

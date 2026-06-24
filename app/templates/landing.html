@@ -37,7 +37,7 @@
   .eyebrow{display:inline-block;font-size:12px;{% if d.design.eyebrow_caps %}text-transform:uppercase;letter-spacing:.18em;{% endif %}opacity:.92;background:#ffffff22;border:1px solid #ffffff33;border-radius:999px;padding:4px 11px}
   h1.display{font-size:clamp(34px,6vw,62px);font-weight:var(--weight);letter-spacing:var(--tracking);line-height:1.04;margin:14px 0 12px}
   .hero p.sub{font-size:18px;opacity:.94;margin:0 0 24px;max-width:30ch}
-  .cta{display:inline-block;background:#fff;color:#10141b;font-weight:800;border-radius:12px;padding:14px 22px;text-decoration:none;box-shadow:0 10px 30px #0003;transition:transform .15s, box-shadow .15s}
+  .cta{display:inline-block;background:#fff;color:#1a1c20;font-weight:800;border-radius:12px;padding:14px 22px;text-decoration:none;box-shadow:0 10px 30px #0003;transition:transform .15s, box-shadow .15s}
   .cta:hover{transform:translateY(-2px);box-shadow:0 16px 40px #0004}
   .statcard{background:#ffffff1f;border:1px solid #ffffff33;border-radius:20px;padding:26px;text-align:center;backdrop-filter:blur(6px)}
   .statcard .big{font-size:clamp(46px,8vw,84px);font-weight:900;line-height:.95;letter-spacing:-.03em}
@@ -56,7 +56,7 @@
   .pl:last-child{border:none}
   .pl .s{font-size:9px;text-transform:uppercase;letter-spacing:.05em;font-weight:800;border-radius:5px;padding:2px 7px;white-space:nowrap}
   .s.say{background:#1f9d5722;color:#1f9d57}.s.allude{background:#c47f1222;color:#c47f12}
-  .s.inferred{background:#3b5bdb22;color:#5b8def}.s.creepy{background:#d23b3b22;color:#e0524a}
+  .s.inferred{background:#3b5bdb22;color:#2e6ff5}.s.creepy{background:#d23b3b22;color:#e0524a}
   .pl .txt{flex:1}.pl .frm{font-size:11px;color:var(--mut);opacity:.8;white-space:nowrap}
   .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
   .sec{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;transition:transform .18s,border-color .18s}
@@ -97,7 +97,7 @@
       <p class="sub">{{ d.hero.sub }}</p>
       {% if d.design.hero == 'continuity' %}<div class="prog"><i></i></div>{% endif %}
       {% if d.design.hero == 'credibility' %}<div class="logos"><span>Top-lab instructors</span><span>40+ orgs</span><span>SOC2</span></div>{% endif %}
-      <p style="margin-top:22px"><a class="cta" href="#">{{ d.cta }}</a></p>
+      <p style="margin-top:22px"><a class="cta" href="/">{{ d.cta }}</a></p>
     </div>
     <div class="statcard reveal">
       <div class="big">{{ d.design.stat_big }}</div>

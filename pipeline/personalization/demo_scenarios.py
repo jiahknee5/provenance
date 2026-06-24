@@ -38,6 +38,15 @@ SOURCE_LABEL = {
 
 SAY, ALLUDE, HOLD = "say", "allude", "hold"
 
+# Where on the cloned site a variant maps — drives cloner injection + the demo receipt rail.
+# Each entry: (label, where-on-the-page, what-it-changes).
+PLACEMENT = {
+    "hero":   ("Hero", "top of the page, above the fold", "replaces the lead headline + CTA"),
+    "banner": ("Banner", "a slim strip below the site's own header", "adds a contextual line"),
+    "cta":    ("Offer / CTA", "next to the primary call-to-action", "reframes the offer + button"),
+    "theme":  ("Page theme", "the whole page", "restyles tone + leads with a matched angle"),
+}
+
 
 @dataclass(frozen=True)
 class DataUse:
@@ -64,10 +73,20 @@ class Variant:
     surface_note: str
     dark: bool = False
     blocked: bool = False   # the ungated "creepy" arm — kept OUT of the action pool
+    placement: str = "hero"  # where on the cloned site it maps (PLACEMENT key)
 
     @property
     def arm(self) -> str:
         return self.id
+
+    @property
+    def place(self) -> tuple[str, str, str]:
+        """(label, where-on-the-page, what-it-changes) for the receipt rail."""
+        return PLACEMENT.get(self.placement, PLACEMENT["hero"])
+
+    @property
+    def place_label(self) -> str:
+        return self.place[0]
 
     @property
     def uses_hold_in_copy(self) -> bool:
@@ -125,7 +144,7 @@ SCENARIOS: list[Scenario] = [
             Variant("A1", "Daypart adaptive theme",
                     "Late nights are when the big decisions get made.",
                     "{brand} — right here whenever you are, even at 11:47 PM.",
-                    "Take a look", "#4cc4d4", "bounce", dark=True,
+                    "Take a look", "#4cc4d4", "bounce", dark=True, placement="theme",
                     data_used=[
                         DataUse("daypart 11:47pm", OBSERVED, ALLUDE, "themes the page dark + 'late nights' angle"),
                         DataUse("IP → Austin", OBSERVED, ALLUDE, "local hello"),
@@ -136,7 +155,7 @@ SCENARIOS: list[Scenario] = [
             Variant("A2", "B2B peer-logo hero",
                     "Teams at firms like yours already use {brand}.",
                     "The version of {brand} built for whole teams, not just individuals.",
-                    "See it for teams", "#1d4ed8", "b2b_demo",
+                    "See it for teams", "#1d4ed8", "b2b_demo", placement="hero",
                     data_used=[
                         DataUse("reverse-IP → employer", BOUGHT, ALLUDE, "employer-level hero (~$0.01)"),
                         DataUse("company industry", BOUGHT, ALLUDE, "tailors the proof"),
@@ -145,13 +164,13 @@ SCENARIOS: list[Scenario] = [
             Variant("A3", "Local-proof badge",
                     "{brand} is catching on in Austin.",
                     "See what people near you are choosing.",
-                    "See local picks", "#2bb673", "ctr",
+                    "See local picks", "#2bb673", "ctr", placement="banner",
                     data_used=[DataUse("IP → city (Austin)", OBSERVED, ALLUDE, "local-proof framing")],
                     surface_note="observed · allude"),
             Variant("Ax", "Recognize-return (ungated)",
                     "Welcome back — third look this week?",
                     "We recognised your device even with cookies cleared.",
-                    "Pick up where you left off", "#e0524a", "ctr", blocked=True,
+                    "Pick up where you left off", "#e0524a", "ctr", blocked=True, placement="banner",
                     data_used=[DataUse("device fingerprint (cookies cleared)", OBSERVED, HOLD,
                                         "would recite a recognised return — never shown")],
                     surface_note="HOLD — blocked by surface policy; the bandit cannot pull it"),
@@ -167,7 +186,7 @@ SCENARIOS: list[Scenario] = [
             Variant("B1", "Welcome-back resume",
                     "Welcome back to {brand}, Maya.",
                     "Pick up right where you left off.",
-                    "Continue", "#d98a16", "reactivation",
+                    "Continue", "#d98a16", "reactivation", placement="hero",
                     data_used=[
                         DataUse("CRM: first bought in 2023", FIRST_PARTY, SAY, "referenced warmly"),
                         DataUse("last-viewed item", FIRST_PARTY, ALLUDE, "deep-links back to it"),
@@ -177,7 +196,7 @@ SCENARIOS: list[Scenario] = [
             Variant("B2", "Tailored-offer module",
                     "Maya, an offer on {brand} picked for you.",
                     "A few ways to make it fit your budget.",
-                    "See your offer", "#2bb673", "paid_conv",
+                    "See your offer", "#2bb673", "paid_conv", placement="cta",
                     data_used=[
                         DataUse("declared name", DECLARED, SAY, "greeting"),
                         DataUse("price-page visits", FIRST_PARTY, ALLUDE, "leads with value/affordability"),
@@ -187,7 +206,7 @@ SCENARIOS: list[Scenario] = [
             Variant("B3", "Prestige / peer hero",
                     "Leaders in your field choose {brand}.",
                     "Built for senior professionals like you.",
-                    "Learn more", "#7e8ea3", "lead_to_app",
+                    "Learn more", "#7e8ea3", "lead_to_app", placement="hero",
                     data_used=[
                         DataUse("PDL seniority", ENRICH, ALLUDE, "prestige framing"),
                         DataUse("PDL industry", ENRICH, ALLUDE, "industry proof"),
@@ -196,7 +215,7 @@ SCENARIOS: list[Scenario] = [
             Variant("Bx", "Income-recite (ungated)",
                     "On a $190K income, {brand} is an easy yes, Maya.",
                     "We modeled your household income and net worth.",
-                    "Pay in full", "#e0524a", "paid_conv", blocked=True,
+                    "Pay in full", "#e0524a", "paid_conv", blocked=True, placement="cta",
                     data_used=[DataUse("modeled income / net worth", BROKER, HOLD,
                                         "would recite purchased income — never shown")],
                     surface_note="HOLD — blocked by surface policy; the bandit cannot pull it"),
@@ -212,7 +231,7 @@ SCENARIOS: list[Scenario] = [
             Variant("C1", "Click-continuity",
                     "More of what you just clicked, Darnell.",
                     "Right where you left off on {brand}.",
-                    "Keep going", "#2bb673", "lead_to_app",
+                    "Keep going", "#2bb673", "lead_to_app", placement="hero",
                     data_used=[
                         DataUse("which link clicked", FIRST_PARTY, ALLUDE, "page continues the click"),
                         DataUse("declared interest", DECLARED, SAY, "quotes their stated interest"),
@@ -222,13 +241,13 @@ SCENARIOS: list[Scenario] = [
             Variant("C2", "Resume / abandoned",
                     "You left something on {brand} — finish in two minutes.",
                     "We saved your progress.",
-                    "Finish up", "#d98a16", "paid_conv",
+                    "Finish up", "#d98a16", "paid_conv", placement="banner",
                     data_used=[DataUse("abandoned step 3/4", FIRST_PARTY, ALLUDE, "resumes where they stopped")],
                     surface_note="allude"),
             Variant("C3", "Scarcity / urgency",
                     "Going fast on {brand} — save your spot.",
                     "Popular right now; the offer ends soon.",
-                    "Get it now", "#8a5cf6", "lead_to_app",
+                    "Get it now", "#8a5cf6", "lead_to_app", placement="cta",
                     data_used=[
                         DataUse("engagement score", FIRST_PARTY, ALLUDE, "raises CTA prominence"),
                         DataUse("low stock / end date", FIRST_PARTY, ALLUDE, "countdown"),
@@ -237,7 +256,7 @@ SCENARIOS: list[Scenario] = [
             Variant("Cx", "Comparison-call-out (ungated)",
                     "We saw you comparing {brand} with two other sites.",
                     "Bought cross-site browsing says you're shopping around.",
-                    "See the comparison", "#e0524a", "lead_to_app", blocked=True,
+                    "See the comparison", "#e0524a", "lead_to_app", blocked=True, placement="banner",
                     data_used=[DataUse("cross-site browsing (DMP)", BROKER, HOLD,
                                         "would recite competitor shopping — never shown")],
                     surface_note="HOLD — blocked by surface policy; the bandit cannot pull it"),

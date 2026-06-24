@@ -47,7 +47,7 @@ h1{font-size:30px;line-height:1.1} h2{font-size:20px} h3{font-size:16px}
 .q-top{height:var(--topbar-h);display:flex;align-items:center;gap:12px;padding:0 22px;border-bottom:1px solid var(--hairline);position:sticky;top:0;background:rgba(255,255,255,.9);backdrop-filter:saturate(180%) blur(10px);z-index:20}
 .q-top .crumb{font-weight:600;color:var(--ink);font-size:14px;display:flex;align-items:center;gap:8px}
 .q-top .crumb i{color:var(--muted)}
-.q-cmd{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);border:1px solid var(--border);border-radius:var(--r-btn);padding:6px 10px;cursor:pointer;transition:all var(--t) var(--ease);background:#fff}
+.q-cmd{margin-left:auto;display:flex;align-items:center;gap:8px;font-family:inherit;font-size:13px;color:var(--muted);border:1px solid var(--border);border-radius:var(--r-btn);padding:6px 10px;cursor:pointer;transition:all var(--t) var(--ease);background:#fff}
 .q-cmd:hover{background:var(--fill);border-color:var(--muted)}
 .q-cmd kbd{font:inherit;font-size:11px;background:var(--fill);border:1px solid var(--hairline);border-radius:5px;padding:1px 5px;color:var(--slate)}
 .q-body{padding:24px 28px 60px;max-width:1180px;width:100%}
@@ -113,3 +113,55 @@ h1{font-size:30px;line-height:1.1} h2{font-size:20px} h3{font-size:16px}
 .q-input:focus{outline:none;border-color:var(--signal)}
 
 @media(max-width:900px){.q-app{grid-template-columns:1fr}.q-side{display:none}.q-grid.c3,.q-grid.c2{grid-template-columns:1fr}}
+
+/* ============================================================
+   v1.1 — design-system-components audit (#1 tokens · #3 switch/menu · #4 mono · #5 motion map)
+   Kept light/calm per R24 (rejected the dark-hardware / glass / spring directives).
+   ============================================================ */
+:root{
+  --font-mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;  /* data-mono role (#4) */
+  --snap:cubic-bezier(.3,0,.1,1); --t-snap:.16s;                /* mechanical snap, no bounce (#5) */
+}
+/* data-mono: numeric arrays / metrics — tabular figures for layout stability (#4) */
+.q-mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums;letter-spacing:0}
+
+/* mechanical toggle (#3) — light track + rigid knob, calm snap */
+.q-switch{position:relative;display:inline-flex;align-items:center;cursor:pointer}
+.q-switch input{position:absolute;opacity:0;width:0;height:0}
+.q-switch .tr{width:34px;height:20px;border-radius:999px;background:var(--border);transition:background var(--t-snap) var(--snap)}
+.q-switch .kn{position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:var(--shadow-card);transition:transform var(--t-snap) var(--snap)}
+.q-switch input:checked + .tr{background:var(--signal)}
+.q-switch input:checked + .tr + .kn{transform:translateX(14px)}
+
+/* dropdown / contextual menu — Z-10 "the paper", opaque + soft shadow (#3) */
+.q-menu{position:absolute;z-index:10;min-width:190px;background:#fff;border:1px solid var(--hairline);border-radius:var(--r-input);box-shadow:var(--shadow-pop);padding:5px;display:flex;flex-direction:column;gap:1px}
+.q-menu a{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:7px;font-size:13px;color:var(--slate);transition:background var(--t) var(--ease)}
+.q-menu a:hover,.q-menu a.on{background:var(--fill);color:var(--ink)} .q-menu a i{font-size:16px;color:var(--muted)}
+
+/* command palette — Z-50 floating, LIGHT (soft shadow, not dark glass) (#2) */
+.q-cmdk-scrim{position:fixed;inset:0;z-index:60;background:rgba(16,24,40,.28);display:none;align-items:flex-start;justify-content:center;padding-top:13vh}
+.q-cmdk-scrim.open{display:flex}
+.q-cmdk{width:100%;max-width:560px;background:#fff;border:1px solid var(--hairline);border-radius:14px;box-shadow:0 1px 2px rgba(16,24,40,.06),0 32px 80px -24px rgba(16,24,40,.35);overflow:hidden}
+.q-cmdk .qf{display:flex;align-items:center;gap:11px;padding:14px 16px;border-bottom:1px solid var(--hairline)}
+.q-cmdk .qf i{font-size:19px;color:var(--muted)} .q-cmdk .qf input{flex:1;border:0;outline:0;font:15px var(--font-ui);color:var(--ink);background:transparent}
+.q-cmdk .qlist{max-height:340px;overflow-y:auto;padding:6px}
+.q-cmdk .qi{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;font-size:13.5px;color:var(--slate);cursor:pointer}
+.q-cmdk .qi i{font-size:17px;color:var(--muted)} .q-cmdk .qi .hint{margin-left:auto;font-size:11px;color:var(--label)}
+.q-cmdk .qi.sel,.q-cmdk .qi:hover{background:var(--fill);color:var(--ink)} .q-cmdk .qi.sel i,.q-cmdk .qi:hover i{color:var(--signal)}
+.q-cmdk .qfoot{display:flex;gap:14px;padding:9px 16px;border-top:1px solid var(--hairline);font-size:11px;color:var(--muted)}
+.q-cmdk .qfoot kbd{font:inherit;background:var(--fill);border:1px solid var(--hairline);border-radius:4px;padding:0 5px}
+.q-cmd{cursor:pointer}
+
+/* native <details> dropdown — zero-JS Filter/Sort menus (uses .q-menu for the panel) */
+.q-dd{position:relative;display:inline-block}
+.q-dd>summary{list-style:none;cursor:pointer;display:inline-flex}
+.q-dd>summary::-webkit-details-marker{display:none}
+.q-dd>summary::marker{content:""}
+.q-dd>.q-menu{right:0;left:auto;margin-top:6px}
+
+/* create-record form grid */
+.q-formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.q-field{display:flex;flex-direction:column;gap:6px}
+.q-field.full{grid-column:1/-1}
+.q-field label{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--label)}
+.q-field select.q-input{appearance:none;background:#fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M3 4.5L6 7.5L9 4.5' stroke='%236B7480' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>") no-repeat right 11px center}

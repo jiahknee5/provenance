@@ -19,8 +19,10 @@ from starlette.testclient import TestClient
 from app.main import app
 
 TPL = pathlib.Path(__file__).resolve().parents[1] / "app" / "templates"
-SHELL_PAGES = ["workspace", "records", "agent", "assurance", "optimizer", "sources", "composer"]
-ROUTES = ["/workspace", "/records", "/agent", "/assurance", "/optimizer", "/sources", "/composer"]
+SHELL_PAGES = ["workspace", "records", "records_new", "agent", "assurance", "optimizer",
+               "sources", "composer", "demo", "demo_monitor"]
+ROUTES = ["/workspace", "/records", "/records/new", "/agent", "/assurance", "/optimizer",
+          "/sources", "/composer", "/demo", "/demo/monitor"]
 _HEX = re.compile(r"#[0-9a-fA-F]{6}\b")
 
 
@@ -48,7 +50,7 @@ def main() -> int:
         for p in problems:
             print("  ✗", p)
         return 1
-    print(f"UI CONSISTENCY: PASS — {len(ROUTES)} surfaces on the shell, token-only colour.")
+    print(f"UI CONSISTENCY: PASS — {len(ROUTES)} shell surfaces extend the shell, token-only colour.")
     return 0
 
 

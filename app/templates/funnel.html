@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Provenance — Customer funnel</title>
 <style>
-  :root{--bg:#0b1018;--panel:#121a27;--panel2:#0f1622;--line:#1f2c3e;--ink:#dbe6f2;--mut:#7e8ea3;
-        --accent:#4cc4d4;--say:#2bb673;--allude:#d98a16;--hold:#e0524a}
+  :root{--bg:#ffffff;--panel:#ffffff;--panel2:#f1f3f5;--line:#e5e9ef;--ink:#1a1c20;--mut:#6b7480;
+        --accent:#2e6ff5;--say:#2bb673;--allude:#d98a16;--hold:#e0524a}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
   a{color:var(--accent);text-decoration:none}
@@ -19,7 +19,7 @@
   .chip{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-size:12px;color:var(--mut)}
   .chip b{color:var(--ink)}.chip.ok b{color:var(--say)}.chip.bad b{color:var(--hold)}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:10px}
-  .plain{font-size:13px;color:#c2d0e0;margin:4px 0}
+  .plain{font-size:13px;color:#2e353d;margin:4px 0}
   /* legend */
   .legend{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
   @media(max-width:800px){.legend{grid-template-columns:1fr}}
@@ -30,7 +30,7 @@
   /* paths */
   .path{border:1px solid var(--line);border-radius:9px;padding:11px 13px;margin-bottom:8px}
   .path .hd{display:flex;align-items:center;gap:9px}
-  .path .entry{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#08121b;background:var(--accent);border-radius:5px;padding:1px 7px;font-weight:700}
+  .path .entry{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#1a1c20;background:var(--accent);border-radius:5px;padding:1px 7px;font-weight:700}
   .path .nm{font-weight:600}
   .path .pass{margin-left:auto;font-weight:700}.pass.y{color:var(--say)}.pass.n{color:var(--hold)}
   .flow{margin:8px 0;font-size:12.5px;color:#bcd}.flow b{color:var(--accent)}
@@ -44,9 +44,9 @@
   .facts{margin-top:5px;display:flex;flex-wrap:wrap;gap:6px}
   .fact{font-size:11px;border:1px solid var(--line);border-radius:6px;padding:2px 7px}
   .fact .pol{font-size:9px;text-transform:uppercase;letter-spacing:.04em;margin-left:5px;font-weight:700}
-  .fact.say{border-color:#1f5e44}.fact.say .pol{color:var(--say)}
+  .fact.say{border-color:#eaf7ef}.fact.say .pol{color:var(--say)}
   .fact.allude{border-color:#5a4520}.fact.allude .pol{color:var(--allude)}
-  .fact.hold{border-color:#5a2a2a}.fact.hold .pol{color:var(--hold)}
+  .fact.hold{border-color:#fdebee}.fact.hold .pol{color:var(--hold)}
   /* two views */
   .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
   @media(max-width:850px){.two{grid-template-columns:1fr}}
@@ -57,7 +57,7 @@
   .row .opener{color:var(--allude);font-style:italic;margin-top:3px}
   .row .why{color:var(--hold);font-size:11px}
   .inv{border:1px solid;border-radius:9px;padding:11px 13px;font-size:13px}
-  .inv.y{border-color:#1f5e44;background:#0f1d18}.inv.n{border-color:#5a2a2a;background:#1d0f0f}
+  .inv.y{border-color:#eaf7ef;background:#eaf7ef}.inv.n{border-color:#fdebee;background:#1d0f0f}
   .empty{max-width:600px;margin:80px auto;text-align:center;color:var(--mut)}
   .empty code{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:3px 8px;color:var(--accent)}
   .hint{color:var(--mut);font-size:12px}
@@ -164,13 +164,13 @@
 <script id="fdata" type="application/json">{{ {"stage": r.journey.customer.stage, "timeline": r.journey.timeline}|tojson }}</script>
 <script>
 const FD = JSON.parse(document.getElementById('fdata').textContent);
-const C = {say:'#2bb673', allude:'#d98a16', hold:'#e0524a', accent:'#4cc4d4', line:'#33445c', mut:'#7e8ea3', ink:'#dbe6f2'};
+const C = {say:'#2bb673', allude:'#d98a16', hold:'#e0524a', accent:'#2e6ff5', line:'#6b7480', mut:'#6b7480', ink:'#1a1c20'};
 const DEFS = `<defs><marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0,1 L7,4 L0,7" fill="${C.line}"/></marker></defs>`;
 const svg = (w,h,i) => `<svg viewBox="0 0 ${w} ${h}" width="100%" style="max-width:${w}px">${DEFS}${i}</svg>`;
 const box = (x,y,w,h,f,st,rx=8) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="${f}" stroke="${st}"/>`;
 const T = (x,y,t,o={}) => `<text x="${x}" y="${y}" font-size="${o.s||12}" fill="${o.c||C.ink}" text-anchor="${o.a||'start'}" font-weight="${o.w||400}">${t}</text>`;
 const AR = (x1,y1,x2,y2,c=C.line) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="1.6" marker-end="url(#ar)"/>`;
-const DIA = (cx,cy,w,h,lbl) => `<polygon points="${cx},${cy-h/2} ${cx+w/2},${cy} ${cx},${cy+h/2} ${cx-w/2},${cy}" fill="#0f1622" stroke="${C.line}"/>` + T(cx,cy+4,lbl,{a:'middle',s:11});
+const DIA = (cx,cy,w,h,lbl) => `<polygon points="${cx},${cy-h/2} ${cx+w/2},${cy} ${cx},${cy+h/2} ${cx-w/2},${cy}" fill="#f1f3f5" stroke="${C.line}"/>` + T(cx,cy+4,lbl,{a:'middle',s:11});
 
 function funnelDiagram(){
   const stages=[['anonymous','Anonymous','ad click · anonymous visit'],['lead','Lead','“more info” form + consent'],
@@ -183,17 +183,17 @@ function funnelDiagram(){
   let s='';
   const ew=200, ex0=(W-entries.length*ew)/2;
   entries.forEach((e,i)=>{ const x=ex0+i*ew+12, w=ew-24, cx=x+w/2;
-    s+=box(x,14,w,28,'#0f1622',C.line,6)+T(cx,32,e,{a:'middle',s:11,c:C.mut})+AR(cx,42,W/2,oy-4); });
+    s+=box(x,14,w,28,'#f1f3f5',C.line,6)+T(cx,32,e,{a:'middle',s:11,c:C.mut})+AR(cx,42,W/2,oy-4); });
   stages.forEach((st,i)=>{ const w=topW-(topW-botW)*(i/(n-1)), x=(W-w)/2, y=oy+i*(h+gap), on=i<=reached;
-    s+=box(x,y,w,h,on?'#15324a':'#0e141d',on?C.accent:C.line,9);
-    s+=T(W/2,y+21,st[1],{a:'middle',s:13,w:700,c:on?'#eaf6ff':C.mut});
+    s+=box(x,y,w,h,on?'#eaf1fe':'#f1f3f5',on?C.accent:C.line,9);
+    s+=T(W/2,y+21,st[1],{a:'middle',s:13,w:700,c:on?'#1b4dd1':C.mut});
     s+=T(W/2,y+38,st[2],{a:'middle',s:10.5,c:C.mut}); });
   return svg(W, oy+n*(h+gap)+6, s);
 }
 
 function decisionDiagram(){
   const W=720,H=336; let s='';
-  s+=box(280,8,160,32,'#0f1622',C.accent)+T(360,29,'Fact captured',{a:'middle',w:700});
+  s+=box(280,8,160,32,'#f1f3f5',C.accent)+T(360,29,'Fact captured',{a:'middle',w:700});
   s+=AR(360,40,360,62);
   s+=DIA(360,88,164,46,'consent on file?');
   s+=box(548,70,150,36,'#1d0f0f',C.hold)+T(623,93,'HOLD',{a:'middle',w:700,c:C.hold});
@@ -204,8 +204,8 @@ function decisionDiagram(){
   s+=AR(442,164,548,164,C.hold)+T(495,158,'yes',{a:'middle',s:10,c:C.mut});
   s+=AR(360,187,360,214)+T(372,206,'no',{s:10,c:C.mut});
   s+=DIA(360,244,180,50,'source?');
-  s+=box(70,288,180,36,'#0f1d18',C.say)+T(160,311,'SAY · declared',{a:'middle',w:700,c:C.say});
-  s+=box(470,288,200,36,'#231a0a',C.allude)+T(570,311,'ALLUDE · behavioral',{a:'middle',w:700,c:C.allude});
+  s+=box(70,288,180,36,'#eaf7ef',C.say)+T(160,311,'SAY · declared',{a:'middle',w:700,c:C.say});
+  s+=box(470,288,200,36,'#fef4e8',C.allude)+T(570,311,'ALLUDE · behavioral',{a:'middle',w:700,c:C.allude});
   s+=AR(300,256,200,288,C.say)+T(214,270,'they told us',{a:'middle',s:10,c:C.mut});
   s+=AR(420,256,520,288,C.allude)+T(556,270,'voice / inferred / notes',{a:'middle',s:10,c:C.mut});
   return svg(W,H,s);
@@ -218,10 +218,10 @@ function routingDiagram(){
     ['hold',C.hold,'Never surface or allude','Withheld entirely']];
   s+=T(250,40,'1:1 Rep (Drew Rice)',{a:'middle',s:11,w:700})+T(660,40,'Automated (mass)',{a:'middle',s:11,w:700});
   rows.forEach((r,i)=>{ const y=54+i*50, hold=r[0]==='hold';
-    s+=box(10,y,90,38,'#0f1622',r[1])+T(55,y+24,r[0],{a:'middle',w:700,c:r[1]});
+    s+=box(10,y,90,38,'#f1f3f5',r[1])+T(55,y+24,r[0],{a:'middle',w:700,c:r[1]});
     s+=AR(100,y+19,150,y+19,r[1]);
-    s+=box(150,y,210,38,'#0f1622',r[1])+T(255,y+23,r[2],{a:'middle',s:11});
-    if(!hold){ s+=AR(360,y+19,470,y+19,r[1]); s+=box(470,y,300,38,'#0f1622',r[1])+T(620,y+23,r[3],{a:'middle',s:11}); }
+    s+=box(150,y,210,38,'#f1f3f5',r[1])+T(255,y+23,r[2],{a:'middle',s:11});
+    if(!hold){ s+=AR(360,y+19,470,y+19,r[1]); s+=box(470,y,300,38,'#f1f3f5',r[1])+T(620,y+23,r[3],{a:'middle',s:11}); }
     else { s+=box(470,y,300,38,'#1d0f0f',r[1])+T(620,y+23,r[3],{a:'middle',s:11,c:C.hold}); }
   });
   return svg(W,H,s);
@@ -232,8 +232,8 @@ function journeyStrip(){
   tl.forEach((e,i)=>{ const x=20+i*step, cx=x+46;
     const pols=(e.facts||[]).map(f=>f.surface_policy);
     const col = pols.includes('hold')?C.hold : pols.includes('say')?C.say : pols.includes('allude')?C.allude : C.line;
-    s+=box(x,30,92,40,'#0f1622',col,8)+T(cx,49,e.source.replace(/_/g,' '),{a:'middle',s:9.5,c:C.ink});
-    if((e.facts||[]).length){ s+=`<circle cx="${x+92}" cy="30" r="9" fill="${col}"/>`+T(x+92,33.5,(e.facts.length),{a:'middle',s:10,c:'#08121b',w:700}); }
+    s+=box(x,30,92,40,'#f1f3f5',col,8)+T(cx,49,e.source.replace(/_/g,' '),{a:'middle',s:9.5,c:C.ink});
+    if((e.facts||[]).length){ s+=`<circle cx="${x+92}" cy="30" r="9" fill="${col}"/>`+T(x+92,33.5,(e.facts.length),{a:'middle',s:10,c:'#1a1c20',w:700}); }
     s+=T(cx,86,e.stage,{a:'middle',s:9,c:C.mut});
     if(i<tl.length-1) s+=AR(x+92,50,x+step,50);
   });
@@ -257,25 +257,25 @@ function dataCaptureDiagram(){
   s+=T(fx+4,28,'③ Fact + surface policy',{w:700,s:12,c:C.accent});
   s+=T(sx+8,28,'④ Stored',{w:700,s:12,c:C.accent});
   // store panel
-  s+=box(sx,oy-6,sw,n*rh+4,'#0e141d',C.accent,10);
+  s+=box(sx,oy-6,sw,n*rh+4,'#f1f3f5',C.accent,10);
   s+=T(sx+12,oy+12,'customers.sqlite',{w:700,s:11})+T(sx+12,oy+25,'data/demo/customers.sqlite',{s:9,c:C.mut});
-  s+=box(sx+12,oy+32,sw-24,30,'#15324a',C.line,6);
+  s+=box(sx+12,oy+32,sw-24,30,'#eaf1fe',C.line,6);
   s+=T(sx+18,oy+45,'customers: c_9f… · maya.rivera@gmail.com',{s:9.5})+T(sx+18,oy+57,'magic_token a1b2c3… · stage relationship',{s:9,c:C.mut});
   s+=T(sx+18,oy+84,'facts',{w:700,s:10,c:C.mut})+T(sx+58,oy+84,'key',{s:9,c:C.mut})+T(sx+238,oy+84,'source',{s:9,c:C.mut})+T(sx+338,oy+84,'policy',{s:9,c:C.mut});
   EX.forEach((e,i)=>{ const y=oy+i*rh, col=C[e.pol];
-    s+=box(ix,y,iw,rh-14,'#0f1622',C.line,8);
+    s+=box(ix,y,iw,rh-14,'#f1f3f5',C.line,8);
     s+=T(ix+10,y+18,e.tp,{w:700,s:11});
     e.inp.slice(0,3).forEach((ln,j)=> s+=T(ix+10,y+34+j*13,ln,{s:9.5,c:C.mut}));
     s+=AR(ix+iw,y+(rh-14)/2,fx,y+(rh-14)/2);
     s+=T((ix+iw+fx)/2,y+(rh-14)/2-7,e.cap,{a:'middle',s:9,c:C.mut});
-    s+=box(fx,y+4,fw,rh-22,'#0f1622',col,8);
+    s+=box(fx,y+4,fw,rh-22,'#f1f3f5',col,8);
     s+=T(fx+10,y+24,e.key,{s:10.5,w:700});
     s+=T(fx+10,y+39,e.val,{s:9.5,c:C.mut});
-    s+=box(fx+fw-56,y+10,48,17,'#0e141d',col,5)+T(fx+fw-32,y+22,e.pol,{a:'middle',s:9,w:700,c:col});
+    s+=box(fx+fw-56,y+10,48,17,'#f1f3f5',col,5)+T(fx+fw-32,y+22,e.pol,{a:'middle',s:9,w:700,c:col});
     s+=AR(fx+fw,y+(rh-14)/2,sx,y+(rh-14)/2,col);
     const ry=oy+98+i*16;
     s+=T(sx+58,ry,(e.key.length>22?e.key.slice(0,22):e.key),{s:9})+T(sx+238,ry,e.src,{s:9,c:C.mut});
-    s+=box(sx+338,ry-9,46,13,'#0e141d',col,3)+T(sx+361,ry+1,e.pol,{a:'middle',s:8,w:700,c:col});
+    s+=box(sx+338,ry-9,46,13,'#f1f3f5',col,3)+T(sx+361,ry+1,e.pol,{a:'middle',s:8,w:700,c:col});
   });
   return svg(W,H,s);
 }

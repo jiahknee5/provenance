@@ -183,6 +183,40 @@ BY_EMAIL = {p["email"].lower(): p for p in COHORT}
 BY_TOKEN = {magic_token(p): p for p in COHORT}
 
 
+def _slug(name: str, email: str) -> str:
+    base = "".join(c for c in (name or email or "rec").lower() if c.isalnum()) or "rec"
+    base = base[:14]
+    sid, n = base, 2
+    while sid in BY_ID:
+        sid, n = f"{base}{n}", n + 1
+    return sid
+
+
+def add(*, name: str, email: str, company: str = "", title: str = "", industry: str = "",
+        lifecycle: str = "lead", lead_score: int = 0, source: str = "manual") -> dict:
+    """Append a manually-created record in the REAL COHORT shape and refresh the indexes.
+
+    In-memory only (resets on restart) — this is a demo store, not a database. Keeps the
+    three-source shape so view()/segments/landing read it exactly like a seed record. The
+    record is honest about provenance: a hand-entered record's source is `manual`."""
+    rec = {
+        "id": _slug(name, email), "email": (email or "").strip(),
+        "vector": {"name": (name or "").strip() or "—", "job_title": title or "—",
+                   "location": "", "company": company or "—", "org_type": industry or "—",
+                   "company_size": "—", "visit_time": "06/20/2026 12:00 PM", "linkedin_url": ""},
+        "hubspot": {"submitted": True, "role": title or "", "interest_reason": "", "phone": "",
+                    "lifecycle": (lifecycle or "lead"), "lead_score": int(lead_score or 0), "visits": 1,
+                    "top_pages": [], "source": source or "manual", "past_customer": lifecycle == "customer"},
+        "clay": {"seniority": "ic", "tenure": 0, "technical": False,
+                 "industry": industry or "—", "income_band": ""},
+    }
+    COHORT.append(rec)
+    BY_ID[rec["id"]] = rec
+    BY_EMAIL[rec["email"].lower()] = rec
+    BY_TOKEN[magic_token(rec)] = rec
+    return rec
+
+
 def match(email: str) -> dict | None:
     """Identify by email (typed, or verified via Google) → the record we already hold."""
     return BY_EMAIL.get((email or "").strip().lower())

@@ -3,8 +3,9 @@
 {% block crumb %}<i class="ph ph-pen-nib"></i> Composer{% endblock %}
 {% block content %}
   <div class="q-pagehead"><div>
+    <span class="q-pill b" style="margin-bottom:10px"><span class="d"></span>Provable</span>
     <h1>Composer</h1>
-    <p class="q-muted" style="margin:5px 0 0">Write outreach. The Gate checks every line before it can ship — you can hold a fact, but you can&rsquo;t recite it.</p>
+    <p class="q-muted" style="margin:5px 0 0"><b style="color:var(--slate)">Proves:</b> the Gate checks every line before it can ship — you can hold a fact, but you can&rsquo;t recite it.</p>
   </div></div>
 
   <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start">
@@ -41,8 +42,12 @@
 
     <div class="q-card">
       <div class="q-label">Try it</div>
-      <p style="font-size:13px;color:var(--slate);margin:8px 0 0;line-height:1.55">Add a line like <i>&ldquo;we noticed you&rsquo;ve been comparing us with other bootcamps&rdquo;</i> or <i>&ldquo;on your income you can easily afford this&rdquo;</i> — watch the Gate block the send and name the held fact + its source.</p>
-      <p class="q-muted" style="font-size:12px;margin:12px 0 0">This is the creepiness invariant: a <code style="background:var(--fill);border-radius:4px;padding:1px 5px">hold</code> fact can never reach copy — enforced, not hoped.</p>
+      <p style="font-size:13px;color:var(--slate);margin:8px 0 12px;line-height:1.55">Load an example — watch the Gate block any line that recites a <code style="background:var(--fill);border-radius:4px;padding:1px 5px">hold</code> fact and name its source.</p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <a class="q-btn outline" style="justify-content:flex-start" href="/composer?msg={{ 'Hi Maya — on your income you can easily afford this, and we noticed you’ve been comparing us with other bootcamps. Want the next start dates?'|urlencode }}"><i class="ph ph-prohibit"></i> A message that gets blocked</a>
+        <a class="q-btn outline" style="justify-content:flex-start" href="/composer?msg={{ 'Hi Maya, want the next start dates?'|urlencode }}"><i class="ph ph-check-circle"></i> A message that clears</a>
+      </div>
+      <p class="q-muted" style="font-size:12px;margin:14px 0 0">The creepiness invariant: a <code style="background:var(--fill);border-radius:4px;padding:1px 5px">hold</code> fact can never reach copy — enforced, not hoped.</p>
     </div>
   </div>
 {% endblock %}

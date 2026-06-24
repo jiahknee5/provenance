@@ -1,0 +1,33 @@
+{% extends "shell.html" %}
+{% block title %}Provenance — New record{% endblock %}
+{% block crumb %}<i class="ph ph-table"></i> Records <span style="color:var(--label)">/</span> New{% endblock %}
+{% block content %}
+  <div class="q-pagehead"><div>
+    <span class="q-pill b" style="margin-bottom:10px"><span class="d"></span>Provable</span>
+    <h1>New record</h1>
+    <p class="q-muted" style="margin:5px 0 0"><b style="color:var(--slate)">Proves:</b> a hand-entered record is stamped <code style="background:var(--fill);border-radius:4px;padding:1px 5px">source: manual</code> — even your own typing carries provenance.</p>
+  </div></div>
+
+  <form method="post" action="/records/new" style="max-width:680px">
+    <div class="q-card">
+      <div class="q-formgrid">
+        <div class="q-field"><label for="name">Name</label><input class="q-input" id="name" name="name" required placeholder="Jordan Lee"></div>
+        <div class="q-field"><label for="email">Email</label><input class="q-input" id="email" name="email" type="email" required placeholder="jordan@acme.com"></div>
+        <div class="q-field"><label for="company">Company</label><input class="q-input" id="company" name="company" placeholder="Acme"></div>
+        <div class="q-field"><label for="title">Title</label><input class="q-input" id="title" name="title" placeholder="VP Engineering"></div>
+        <div class="q-field"><label for="industry">Industry</label><input class="q-input" id="industry" name="industry" placeholder="SaaS"></div>
+        <div class="q-field"><label for="lead_score">Lead score</label><input class="q-input" id="lead_score" name="lead_score" type="number" min="0" max="100" value="20"></div>
+        <div class="q-field"><label for="lifecycle">Lifecycle stage</label>
+          <select class="q-input" id="lifecycle" name="lifecycle">
+            {% for lc in lifecycles %}<option value="{{ lc }}">{{ lc|capitalize }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="q-field"><label for="source">Source</label><input class="q-input" id="source" name="source" value="manual"></div>
+      </div>
+      <div style="display:flex;gap:9px;margin-top:18px">
+        <button class="q-btn ink" type="submit"><i class="ph ph-check"></i> Create record</button>
+        <a class="q-btn outline" href="/records"><i class="ph ph-x"></i> Cancel</a>
+      </div>
+    </div>
+  </form>
+{% endblock %}

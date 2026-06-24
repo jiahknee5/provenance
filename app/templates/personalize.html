@@ -56,7 +56,7 @@
   <h2>{{ page.headline }}</h2>
   {% for l in page.lines %}
     {% if l.policy == 'cta' %}
-      <a class="pcta" href="#">{{ l.text }}</a>
+      <a class="pcta" href="/">{{ l.text }}</a>
     {% else %}
       <p>{{ l.text }}{% if l.policy not in ('—','say') %}<span class="pol">{{ l.policy }}</span>{% endif %}</p>
     {% endif %}

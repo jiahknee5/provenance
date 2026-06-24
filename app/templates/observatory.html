@@ -6,10 +6,10 @@
 <title>Provenance Observatory</title>
 <style>
   :root{
-    --bg:#0b1018; --panel:#121a27; --panel2:#0f1622; --line:#1f2c3e; --ink:#dbe6f2;
-    --mut:#7e8ea3; --accent:#4cc4d4; --green:#2bb673; --amber:#d98a16; --red:#e0524a;
-    --library:#6b7cff; --gate:#0e9bab; --optimizer:#a07cf6; --drift:#d98a16;
-    --website:#2bb673; --assurance:#e0524a; --run:#5b6b7c;
+    --bg:#ffffff; --panel:#ffffff; --panel2:#f1f3f5; --line:#e5e9ef; --ink:#1a1c20;
+    --mut:#6b7480; --accent:#2e6ff5; --green:#2bb673; --amber:#d98a16; --red:#e0524a;
+    --library:#2e6ff5; --gate:#1b4dd1; --optimizer:#6b4bd6; --drift:#d98a16;
+    --website:#2bb673; --assurance:#e0524a; --run:#6b7480;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
@@ -28,8 +28,8 @@
   /* phase ribbon */
   .ribbon{display:flex;gap:6px;flex-wrap:wrap}
   .ph{flex:1;min-width:90px;padding:7px 9px;border-radius:7px;background:var(--panel2);border:1px solid var(--line);font-size:11px;color:var(--mut);text-align:center;transition:.2s}
-  .ph.done{color:var(--ink);border-color:#2a3a52}
-  .ph.active{background:#15324a;border-color:var(--accent);color:#eaf6ff;box-shadow:0 0 0 1px var(--accent) inset}
+  .ph.done{color:var(--ink);border-color:#e5e9ef}
+  .ph.active{background:#eaf1fe;border-color:var(--accent);color:#1b4dd1;box-shadow:0 0 0 1px var(--accent) inset}
   /* graph */
   .graphwrap{overflow-x:auto}
   svg .nodebox{cursor:pointer}
@@ -39,9 +39,9 @@
   svg .nodebox.active rect.body{filter:drop-shadow(0 0 6px var(--accent))}
   svg .nlabel{fill:var(--ink);font-size:12.5px;font-weight:600}
   svg .nsub{fill:var(--mut);font-size:10px}
-  svg .pbadge{fill:#1b2940;stroke:#2a3a52}
+  svg .pbadge{fill:#e5e9ef;stroke:#e5e9ef}
   svg .pbadge text{fill:var(--accent)}
-  svg path.edge{stroke:#33445c;stroke-width:1.4;fill:none}
+  svg path.edge{stroke:#6b7480;stroke-width:1.4;fill:none}
   .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--mut)}
   .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
   /* two-column main */
@@ -54,18 +54,18 @@
   .controls input[type=range]{flex:1}
   .controls label{font-size:12px;color:var(--mut);display:flex;align-items:center;gap:5px;cursor:pointer}
   .tl{max-height:520px;overflow:auto;border:1px solid var(--line);border-radius:8px}
-  .ev{display:grid;grid-template-columns:42px 92px 90px 1fr;gap:8px;padding:6px 10px;border-bottom:1px solid #16202e;font-size:12px;cursor:pointer;align-items:baseline}
-  .ev:hover{background:#0f1925}
-  .ev.cur{background:#15324a}
+  .ev{display:grid;grid-template-columns:42px 92px 90px 1fr;gap:8px;padding:6px 10px;border-bottom:1px solid #e5e9ef;font-size:12px;cursor:pointer;align-items:baseline}
+  .ev:hover{background:#f1f3f5}
+  .ev.cur{background:#eaf1fe}
   .ev.future{opacity:.32}
   .ev .seq{color:var(--mut);font-variant-numeric:tabular-nums}
   .ev .lane{font-weight:600}
   .ev .etype{color:var(--mut);font-size:10.5px;letter-spacing:.04em}
   .ev .det{color:var(--ink)}
-  .tag{font-size:9.5px;padding:1px 5px;border-radius:4px;background:#1b2940;color:var(--mut)}
+  .tag{font-size:9.5px;padding:1px 5px;border-radius:4px;background:#e5e9ef;color:var(--mut)}
   /* node panel */
   .np h3{margin:0 0 2px;font-size:16px}
-  .np .lanetag{font-size:11px;padding:2px 8px;border-radius:5px;color:#08121b;font-weight:700}
+  .np .lanetag{font-size:11px;padding:2px 8px;border-radius:5px;color:#1a1c20;font-weight:700}
   .np .row{margin:9px 0}
   .np .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);margin-bottom:2px}
   .np .v{color:var(--ink)}
@@ -76,7 +76,7 @@
   .io .k{margin-bottom:4px}
   pre{margin:0;white-space:pre-wrap;word-break:break-word;font:11px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;color:#cfe;max-height:170px;overflow:auto}
   .verdict{font-weight:700} .verdict.green{color:var(--green)} .verdict.amber{color:var(--amber)} .verdict.red{color:var(--red)}
-  .prop{display:flex;gap:9px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #16202e}
+  .prop{display:flex;gap:9px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #e5e9ef}
   .prop .pp{font-weight:700;font-size:12px;min-width:26px}
   .prop .pp.ok{color:var(--green)} .prop .pp.no{color:var(--red)}
   .prop .pd{font-size:12px}
@@ -199,7 +199,7 @@ function renderGraph(){
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   svg.style.minWidth = (W*0.62)+'px';
   let s = `<defs><marker id="arw" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-    <path d="M0,1 L7,4 L0,7" fill="#33445c"/></marker></defs>`;
+    <path d="M0,1 L7,4 L0,7" fill="#6b7480"/></marker></defs>`;
   // edges
   TOPO.edges.forEach(([a,b])=>{
     const A=NODE_BY_ID[a], B=NODE_BY_ID[b]; if(!A||!B) return;

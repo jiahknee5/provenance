@@ -9,7 +9,7 @@
   .gwrap{max-width:1100px;margin:0 auto;padding:18px 20px 60px}
   .login{max-width:440px;margin:60px auto;background:var(--panel);border:1px solid var(--line);
          border-radius:16px;padding:30px;text-align:center}
-  .gbtn{display:inline-flex;align-items:center;gap:10px;background:#fff;color:#3c4043;font-weight:700;
+  .gbtn{display:inline-flex;align-items:center;gap:10px;background:#fff;color:#2e353d;font-weight:700;
         border-radius:10px;padding:12px 18px;text-decoration:none;margin:14px 0}
   .gbtn .g{font-weight:900;font-size:18px;background:conic-gradient(#ea4335,#4285f4,#34a853,#fbbc05,#ea4335);
            -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
@@ -17,24 +17,24 @@
   .demos a{display:inline-block;font-size:12px;border:1px solid var(--line);border-radius:6px;padding:4px 8px;margin:0 4px 6px 0;color:var(--accent)}
   .banner{background:var(--panel2);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:12px 15px;margin-bottom:12px}
   .who{display:flex;align-items:center;gap:12px}
-  .who .pic{width:40px;height:40px;border-radius:50%;background:#2a3a52;display:flex;align-items:center;justify-content:center;font-weight:800;color:#cfe}
+  .who .pic{width:40px;height:40px;border-radius:50%;background:#e5e9ef;display:flex;align-items:center;justify-content:center;font-weight:800;color:#cfe}
   .matched{color:var(--green);font-weight:700}
   .tier{border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:12px}
   .tier.ok{border-left:4px solid var(--green)} .tier.warn{border-left:4px solid var(--amber)}
-  .tier.info{border-left:4px solid var(--blue)} .tier.bad{border-left:4px solid var(--hold);background:#170d12}
+  .tier.info{border-left:4px solid var(--blue)} .tier.bad{border-left:4px solid var(--hold);background:#fdebee}
   .tier .th{display:flex;align-items:baseline;gap:10px}
-  .tier .tn{font-size:10px;font-weight:800;color:#08121b;border-radius:5px;padding:1px 7px;background:var(--mut)}
+  .tier .tn{font-size:10px;font-weight:800;color:#1a1c20;border-radius:5px;padding:1px 7px;background:var(--mut)}
   .tier.ok .tn{background:var(--green)}.tier.warn .tn{background:var(--amber)}.tier.info .tn{background:var(--blue)}.tier.bad .tn{background:var(--hold)}
   .tier h3{margin:0;font-size:16px}
   .tier .bl{color:var(--mut);font-size:12.5px;margin:6px 0 4px}
   .tier .how{color:var(--mut);font-size:11px;font-style:italic;margin-bottom:8px}
-  .it{display:grid;grid-template-columns:160px 1fr auto;gap:10px;padding:6px 0;border-bottom:1px solid #16202e;font-size:13px;align-items:baseline}
+  .it{display:grid;grid-template-columns:160px 1fr auto;gap:10px;padding:6px 0;border-bottom:1px solid #e5e9ef;font-size:13px;align-items:baseline}
   .it:last-child{border:none}
   .it .lab{color:var(--mut)} .it .val{color:var(--ink)} .it .vh{color:var(--mut);font-size:11px;font-style:italic}
   .dots{letter-spacing:1px;font-size:10px;color:var(--hold);white-space:nowrap}.dots .o{color:var(--line)}
   .rb{font-size:9px;font-weight:800;border-radius:4px;padding:1px 6px;background:var(--line);color:var(--mut)}
-  .rb.real{background:var(--green);color:#08121b}
-  .payoff{background:#170d12;border:1px solid #5a2a2a;border-radius:10px;padding:12px 15px;margin:14px 0;font-size:13.5px}
+  .rb.real{background:var(--green);color:#1a1c20}
+  .payoff{background:#fdebee;border:1px solid #fdebee;border-radius:10px;padding:12px 15px;margin:14px 0;font-size:13.5px}
   .payoff b{color:#ff9bb0}
   .siteframe{width:100%;height:560px;border:1px solid var(--line);border-radius:12px;background:#fff;margin-top:8px}
   h2.sec2{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--mut);margin:22px 0 10px}
@@ -85,7 +85,7 @@
   {% endfor %}
 
   {% if data.real_extra %}
-  <div class="tier ok" style="border-left-color:var(--green);background:#0c1612">
+  <div class="tier ok" style="border-left-color:var(--green);background:#eaf7ef">
     <div class="th"><span class="tn" style="background:var(--green)">REAL</span><h3>Actually fetched for this email — live, just now</h3></div>
     <div class="bl">Not illustrative and not synthetic. These rows were fetched from real sources keyed on the verified email{% if data.pdl_on %} (People Data Labs is connected){% endif %} — if a field isn't here, no real source returned it.</div>
     {% for r in data.real_extra %}

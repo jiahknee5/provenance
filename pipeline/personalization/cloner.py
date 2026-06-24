@@ -103,27 +103,39 @@ def _inject_base(html: str, origin: str) -> str:
     return tag + html
 
 
+_CIRC = "①②③④⑤⑥⑦⑧⑨"
+
+
 def _overlay(scenario_id: str, v: Variant, url: str, brand: str = "this site") -> str:
     """The injected personalization hero + DATA USED provenance strip (self-contained styles).
     Copy is brand-templated: {brand} is filled from the cloned site, so the personalization
-    is about *that* site, not a hardcoded one."""
+    is about *that* site, not a hardcoded one. Each data chip is numbered (①②③) so it ties
+    back to the same row in the demo's Receipt rail, and the overlay names where it maps."""
     def fill(s: str) -> str:
         return _html.escape(s.replace("{brand}", brand))
     chips = "".join(
         f'<span style="display:inline-block;font-size:11px;font-weight:700;background:#fff;'
         f'border:1px solid #d9e2ec;border-radius:4px;padding:2px 7px;margin:0 4px 4px 0;color:#102a43;">'
+        f'<b style="color:{v.accent};margin-right:4px;">{_CIRC[i] if i < len(_CIRC) else "•"}</b>'
         f'{_html.escape(d.signal)} '
         f'<em style="font-style:normal;color:#627d98;font-weight:600;">· {_html.escape(d.source_label)} · {d.policy}</em></span>'
-        for d in v.data_used)
+        for i, d in enumerate(v.data_used))
     blocked = v.blocked
     bar_bg = "#fff5f5" if blocked else "#f4f9ff"
     bar_bd = v.accent
+    place_label, place_where, _place_what = v.place
     note = ("BLOCKED by the surface policy — shown greyed for contrast; the optimizer can never select it."
             if blocked else _html.escape(v.surface_note))
     return f"""
-<div id="prov-demo-overlay" style="all:initial;display:block;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Arial,sans-serif;
-  background:{bar_bg};border-bottom:4px solid {bar_bd};padding:18px 22px;color:#0a2540;{'opacity:.85;' if blocked else ''}">
+<div id="prov-demo-overlay" data-prov-variant="{v.id}" data-prov-placement="{v.placement}"
+  style="all:initial;display:block;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Arial,sans-serif;
+  background:{bar_bg};border:2px solid {bar_bd};border-radius:10px;margin:10px;padding:18px 22px;color:#0a2540;
+  box-shadow:0 10px 30px -16px rgba(10,37,64,.45);{'opacity:.85;' if blocked else ''}">
   <div style="max-width:1100px;margin:0 auto;">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px;">
+      <span style="font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#fff;background:{bar_bd};border-radius:5px;padding:3px 8px;">↳ maps to: {_html.escape(place_label)}</span>
+      <span style="font-size:11px;color:#627d98;">{_html.escape(place_where)}</span>
+    </div>
     <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:{bar_bd};">
       Provenance demo &middot; Scenario {scenario_id} &middot; variant {v.id} &middot; {_html.escape(v.label)}{' &middot; BLOCKED' if blocked else ''}</div>
     <div style="font-size:26px;font-weight:800;line-height:1.15;margin:6px 0 4px;color:#0a2540;">{fill(v.headline)}</div>
@@ -135,7 +147,7 @@ def _overlay(scenario_id: str, v: Variant, url: str, brand: str = "this site") -
       {chips}
       <div style="font-size:11px;color:#627d98;margin-top:5px;">Policy: {note} &middot; optimizing <b style="color:#102a43;">{_html.escape(v.kpi)}</b></div>
     </div>
-    <div style="font-size:10px;color:#90a4b8;margin-top:8px;">↓ below is the real, live-cloned page from <b>{_html.escape(url)}</b> — high-fidelity (its own CSS &amp; scripts run). This hero is the only thing we injected.</div>
+    <div style="font-size:10px;color:#90a4b8;margin-top:8px;">↓ below is the real, live-cloned page from <b>{_html.escape(url)}</b> — high-fidelity (its own CSS &amp; scripts run). The bordered block above is the only thing we injected.</div>
   </div>
 </div>"""
 
@@ -153,6 +165,35 @@ def _fallback_page(scenario_id: str, v: Variant, url: str, reason: str) -> str:
             f"<body style='margin:0;background:#eef2f6;'>{_overlay(scenario_id, v, url, brand_from_url(url))}{body}</body></html>")
 
 
+def _inject_overlay(doc: str, overlay: str, placement: str) -> str:
+    """Insert the overlay at a DOM anchor chosen by the variant's placement, so different
+    variants visibly map to different parts of the cloned page. Best-effort on arbitrary
+    markup with a safe fallback to the top of <body>; never raises.
+
+      banner → just below the site's own header/hero (after </header>|</h1>|</nav>)
+      cta    → right before the first prominent call-to-action link/button or <form>
+      hero / theme / fallback → immediately after <body>
+    """
+    placement = (placement or "hero").lower()
+    if placement == "banner":
+        for pat in (r"</header>", r"</h1>", r"</nav>"):
+            m = re.search(pat, doc, flags=re.I)
+            if m:
+                return doc[:m.end()] + overlay + doc[m.end():]
+    elif placement == "cta":
+        m = re.search(r'<a\b[^>]*\bhref=[^>]*>(?:(?!</a>).){0,90}?'
+                      r'(get started|sign up|sign in|apply now|apply|book|join|buy|try |demo|start|continue|get )',
+                      doc, flags=re.I | re.S)
+        if m:
+            return doc[:m.start()] + overlay + doc[m.start():]
+        m2 = re.search(r"<form\b", doc, flags=re.I)
+        if m2:
+            return doc[:m2.start()] + overlay + doc[m2.start():]
+    if re.search(r"<body[^>]*>", doc, flags=re.I):
+        return re.sub(r"(<body[^>]*>)", lambda m: m.group(1) + overlay, doc, count=1, flags=re.I)
+    return overlay + doc
+
+
 def clone(url: str, scenario_id: str, v: Variant, cache: LLMCache | None = None) -> dict:
     """Return {html, cloned: bool, source_url, note}. `html` is a full page ready to serve."""
     url = normalize_url(url)
@@ -163,8 +204,5 @@ def clone(url: str, scenario_id: str, v: Variant, cache: LLMCache | None = None)
     doc = _neutralize(res["html"])
     doc = _inject_base(doc, origin_of(url))
     overlay = _overlay(scenario_id, v, url, brand_of(res["html"], url))
-    if re.search(r"<body[^>]*>", doc, flags=re.I):
-        doc = re.sub(r"(<body[^>]*>)", r"\1" + overlay, doc, count=1, flags=re.I)
-    else:
-        doc = overlay + doc
+    doc = _inject_overlay(doc, overlay, v.placement)
     return {"html": doc, "cloned": True, "source_url": url, "note": "live clone"}

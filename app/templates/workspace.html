@@ -4,12 +4,18 @@
 {% block content %}
   <div class="q-pagehead">
     <div>
+      <span class="q-pill b" style="margin-bottom:10px"><span class="d"></span>Provable</span>
       <h1>Your revenue, provable.</h1>
-      <p class="q-muted" style="margin:5px 0 0">Every record, message, and metric traces back to a verified source.</p>
+      <p class="q-muted" style="margin:5px 0 0"><b style="color:var(--slate)">Proves:</b> every record, message, and metric traces back to a verified source.</p>
     </div>
     <div class="sp">
-      <a class="q-btn outline"><i class="ph ph-funnel"></i> Filter</a>
-      <a class="q-btn ink"><i class="ph ph-plus"></i> New record</a>
+      <details class="q-dd">
+        <summary class="q-btn outline"><i class="ph ph-funnel"></i> Filter{% if view!='all' %} · on{% endif %} <i class="ph ph-caret-down" style="font-size:12px"></i></summary>
+        <div class="q-menu">
+          {% for k,label,pred in views %}<a href="/workspace?view={{ k }}&sort={{ sort }}" class="{{ 'on' if k==view else '' }}">{{ label }}</a>{% endfor %}
+        </div>
+      </details>
+      <a class="q-btn ink" href="/records/new"><i class="ph ph-plus"></i> New record</a>
     </div>
   </div>
 
@@ -22,10 +28,16 @@
 
   <div class="q-panel">
     <div class="q-toolbar">
-      <span class="h">Pipeline</span>
+      <span class="h">Pipeline{% if view!='all' %} · {{ rows|length }} shown{% endif %}</span>
       <span class="sp">
-        <a class="q-btn ghost"><i class="ph ph-arrows-clockwise"></i> Refresh</a>
-        <a class="q-btn signal"><i class="ph ph-plus"></i> Add deal</a>
+        <details class="q-dd">
+          <summary class="q-btn outline"><i class="ph ph-faders-horizontal"></i> Sort <i class="ph ph-caret-down" style="font-size:12px"></i></summary>
+          <div class="q-menu">
+            {% for k,label,spec in sorts %}<a href="/workspace?view={{ view }}&sort={{ k }}" class="{{ 'on' if k==sort else '' }}">{{ label }}</a>{% endfor %}
+          </div>
+        </details>
+        <a class="q-btn ghost" href="/workspace?view={{ view }}&sort={{ sort }}"><i class="ph ph-arrows-clockwise"></i> Refresh</a>
+        <a class="q-btn signal" href="/records/new"><i class="ph ph-plus"></i> Add deal</a>
       </span>
     </div>
     <table class="q-table">

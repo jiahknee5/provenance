@@ -1,19 +1,18 @@
-{# Canonical header + nav — included by every navigable page so the tabs are identical
-   everywhere. Active tab is derived from request.url.path; optional `subtitle` per page. #}
+{# Light bridge nav for legacy/lab pages — re-themed via atlas.css (now light). Links back
+   into the Quiet-Workspace shell app and across the lab surfaces. Active tab from the path. #}
 <header class="top">
-  <span class="brand"><span class="dot">◈</span> Provenance{% if subtitle is defined and subtitle %} <span class="navsub">· {{ subtitle }}</span>{% endif %}</span>
+  <a class="brand" href="/workspace" style="text-decoration:none"><span class="dot">◈</span> Provenance{% if subtitle is defined and subtitle %} <span class="navsub">· {{ subtitle }}</span>{% endif %}</a>
   <nav>
     {% set p = request.url.path %}
-    <a href="/" class="{{ 'on' if p == '/' else '' }}">Form</a>
+    <a href="/workspace" class="{{ 'on' if p in ['/workspace','/records'] else '' }}">App ↗</a>
+    <a href="/demo" class="{{ 'on' if p.startswith('/demo') else '' }}">Demo</a>
+    <a href="/personalize" class="{{ 'on' if p == '/personalize' else '' }}">Personalize</a>
     <a href="/inspector" class="{{ 'on' if p == '/inspector' else '' }}">Inspector</a>
     <a href="/observatory" class="{{ 'on' if p == '/observatory' else '' }}">Observatory</a>
-    <a href="/assurance" class="{{ 'on' if p == '/assurance' else '' }}">Assurance</a>
-    <a href="/optimizer" class="{{ 'on' if p == '/optimizer' else '' }}">Optimizer</a>
     <a href="/funnel" class="{{ 'on' if p == '/funnel' else '' }}">Funnel</a>
-    <a href="/personalize" class="{{ 'on' if p == '/personalize' else '' }}">Personalize</a>
-    <a href="/demo" class="{{ 'on' if p.startswith('/demo') else '' }}">Demo</a>
     <a href="/admin/landings" class="{{ 'on' if p.startswith('/admin') or p == '/lp' else '' }}">Cohort</a>
     <a href="/google" class="{{ 'on' if p.startswith('/google') else '' }}">Google</a>
     <a href="/enrichment-catalog" class="{{ 'on' if p == '/enrichment-catalog' else '' }}">Catalog</a>
+    <a href="/" class="{{ 'on' if p == '/' else '' }}">Form</a>
   </nav>
 </header>

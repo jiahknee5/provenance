@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Admin — {{ d.name }}</title>
 <style>
-  :root{--bg:#0b1018;--panel:#121a27;--panel2:#0f1622;--line:#1f2c3e;--ink:#dbe6f2;--mut:#7e8ea3;--accent:#4cc4d4;
+  :root{--bg:#ffffff;--panel:#ffffff;--panel2:#f1f3f5;--line:#e5e9ef;--ink:#1a1c20;--mut:#6b7480;--accent:#2e6ff5;
         --acc: {{ d.archetype.accent }}}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font:13.5px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
@@ -15,7 +15,7 @@
   header .who{color:var(--mut)}
   header select,header .tier a{background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:7px;padding:4px 8px;font-size:12px}
   header .tier{margin-left:auto;display:flex;gap:5px;align-items:center;color:var(--mut)}
-  header .tier a.on{background:var(--acc);color:#08121b;border-color:var(--acc);font-weight:700}
+  header .tier a.on{background:var(--acc);color:#1a1c20;border-color:var(--acc);font-weight:700}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:0;height:calc(100vh - 50px)}
   @media(max-width:900px){.grid{grid-template-columns:1fr;height:auto}}
   .left{border-right:1px solid var(--line)}
@@ -24,19 +24,19 @@
   .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:13px 15px;margin-bottom:13px}
   h2{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);margin:0 0 9px}
   .email .subj{font-weight:700;margin-bottom:6px}
-  .email .ln{color:#c2d0e0;padding:2px 0}
-  .email .cta{display:inline-block;margin-top:8px;background:var(--acc);color:#08121b;border-radius:7px;padding:5px 11px;font-weight:700}
-  .arch{font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;color:#08121b;background:var(--acc)}
-  .dp{display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #16202e;font-size:12.5px}
+  .email .ln{color:#2e353d;padding:2px 0}
+  .email .cta{display:inline-block;margin-top:8px;background:var(--acc);color:#1a1c20;border-radius:7px;padding:5px 11px;font-weight:700}
+  .arch{font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;color:#1a1c20;background:var(--acc)}
+  .dp{display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #e5e9ef;font-size:12.5px}
   .dp:last-child{border:none}.dp .k{color:var(--mut);min-width:120px}
   .src{font-size:9px;text-transform:uppercase;letter-spacing:.04em;border-radius:4px;padding:1px 5px;font-weight:700}
-  .src.vector{background:#10243f;color:#6b9eff}.src.hubspot{background:#13313f;color:#4cc4d4}
-  .src.clay{background:#231a0a;color:#d98a16}
+  .src.vector{background:#eaf1fe;color:#2e6ff5}.src.hubspot{background:#eaf1fe;color:#2e6ff5}
+  .src.clay{background:#fef4e8;color:#d98a16}
   .fam{margin:8px 0;border-left:2px solid var(--line);padding-left:10px}
   .fam .fl{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
   .seg{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:2px 7px;margin:3px 4px 0 0;font-size:11.5px}
   .seg .ev{color:var(--mut);font-size:10px}
-  .lever{font-size:12px;color:#c2d0e0;padding:2px 0}
+  .lever{font-size:12px;color:#2e353d;padding:2px 0}
   .tiernote{color:var(--mut);font-size:11.5px;margin-top:6px}
 </style>
 <link rel="stylesheet" href="/static/atlas.css">

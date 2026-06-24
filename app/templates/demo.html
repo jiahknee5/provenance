@@ -1,66 +1,86 @@
-{% extends "base.html" %}
-{% block title %}Provenance — personalization demo{% endblock %}
+{% extends "shell.html" %}
+{% block title %}Provenance — Live demo{% endblock %}
+{% block crumb %}<i class="ph ph-monitor-play"></i> Live demo{% endblock %}
 {% block content %}
 <style>
-  main{max-width:none !important;margin:0 !important;padding:0 !important;}
-  .demo-layout{display:grid;grid-template-columns:216px 1fr;gap:16px;max-width:none;margin:0;padding:12px 16px 22px;align-items:start;}
-  /* ---- left sidebar tree ---- */
-  .demo-side{position:sticky;top:14px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px 10px;}
-  .side-title{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);padding:0 4px 8px;}
-  .scn-link{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:800;color:var(--ink);text-decoration:none;padding:7px 7px;border-radius:7px;}
-  .scn-link:hover{background:var(--panel2);}
-  .scn-link.on{background:var(--panel2);}
-  .scn-link .sid{font-size:10px;font-weight:800;color:#04222a;background:var(--mut);border-radius:5px;padding:1px 7px;}
-  .scn-link.on .sid{background:var(--accent);}
-  .vlist{margin:2px 0 8px 13px;border-left:1px solid var(--line);padding-left:9px;display:flex;flex-direction:column;gap:1px;}
-  .vlink{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--mut);text-decoration:none;padding:5px 7px;border-radius:6px;line-height:1.2;}
-  .vlink:hover{background:var(--panel2);color:var(--ink);}
-  .vlink.on{background:rgba(76,196,212,.14);color:var(--ink);font-weight:700;box-shadow:inset 2px 0 0 var(--accent);}
-  .vlink .vdot{width:8px;height:8px;border-radius:50%;flex:none;}
-  .vlink.ov{color:var(--ink);font-weight:700;}
-  .vlink.ov .vdot{background:var(--mut);border-radius:2px;}
-  .vlink.blk{opacity:.7;}
-  .vlink.blk .vdot{background:var(--hold);}
-  .side-mon{display:block;margin-top:10px;border-top:1px solid var(--line);padding-top:10px;font-size:12px;font-weight:800;color:var(--accent);text-decoration:none;padding-left:7px;}
-  /* ---- main ---- */
-  .demo-main{min-width:0;}
-  .demo-head h1{font-size:16px;font-weight:800;color:var(--ink);margin:0 0 2px;letter-spacing:-.01em;}
-  .demo-head p{font-size:11.5px;color:var(--mut);margin:0 0 9px;line-height:1.45;}
-  .urlbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);
-    border-radius:var(--radius);padding:8px 11px;margin-bottom:10px;}
-  .urlbar label{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mut);}
-  .urlbar input{flex:1;min-width:220px;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:8px 11px;color:var(--ink);font-size:13px;}
-  .urlbar button{background:var(--accent);color:#04222a;font-weight:800;border:none;border-radius:7px;padding:8px 14px;font-size:12.5px;cursor:pointer;}
-  .sc-meta{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:var(--radius);padding:9px 13px;margin-bottom:10px;}
-  .sc-meta .k{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);}
-  .sc-meta .b{font-size:12.5px;color:var(--ink);margin:3px 0 7px;}
-  .sc-meta .avail{display:flex;flex-wrap:wrap;gap:5px;}
-  .sc-meta .chip{font-size:10px;font-weight:700;color:var(--mut);background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:2px 8px;}
-  .vrow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
-  .vcard{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;}
-  .vcard.solo{grid-column:1 / -1;}
-  .vcard .vhead{padding:9px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;}
-  .vcard .vid{font-size:10px;font-weight:800;color:#04222a;border-radius:5px;padding:2px 7px;}
-  .vcard .vlabel{font-size:12px;font-weight:800;color:var(--ink);}
-  .vcard .kpi{margin-left:auto;font-size:9.5px;font-weight:800;color:var(--green);background:rgba(43,182,115,.14);border:1px solid rgba(43,182,115,.4);border-radius:5px;padding:2px 7px;}
-  .vcard iframe{width:100%;height:calc(100vh - 320px);min-height:460px;border:0;background:#fff;display:block;}
-  .vcard.solo iframe{height:calc(100vh - 210px);min-height:600px;}
-  .vcard .prov{padding:10px 12px;border-top:1px solid var(--line);}
-  .prov .pl{font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:4px;}
-  .prov .du{display:inline-block;font-size:10px;font-weight:700;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:2px 6px;margin:0 3px 4px 0;}
-  .prov .du em{font-style:normal;color:var(--mut);font-weight:600;}
-  .pp{font-weight:800;} .pp.say{color:var(--say);} .pp.allude{color:var(--allude);} .pp.hold{color:var(--hold);}
-  .prov .note{font-size:10px;color:var(--mut);margin-top:4px;}
-  .backlink{font-size:11.5px;color:var(--accent);text-decoration:none;font-weight:700;}
-  .blocked{margin-top:14px;background:rgba(224,82,74,.06);border:1px dashed var(--hold);border-radius:var(--radius);padding:11px 14px;}
-  .blocked .bh{font-size:11px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--hold);}
-  .blocked .bt{font-size:12.5px;color:var(--ink);margin:3px 0;}
-  .blocked .bn{font-size:11px;color:var(--mut);}
-  @media (max-width:980px){.demo-layout{grid-template-columns:1fr;}.demo-side{position:static;}.vrow{grid-template-columns:1fr;}}
+  .q-body{max-width:1500px}
+  .demo-layout{display:grid;grid-template-columns:212px 1fr;gap:18px;align-items:start}
+  /* left scenario → rendering tree */
+  .demo-side{position:sticky;top:74px;background:var(--fill2);border:1px solid var(--hairline);border-radius:var(--r-card);padding:12px 10px;box-shadow:var(--shadow-card)}
+  .side-title{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--label);padding:2px 6px 9px}
+  .scn-link{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink);padding:7px 8px;border-radius:8px;transition:background var(--t) var(--ease)}
+  .scn-link:hover,.scn-link.on{background:var(--fill)}
+  .scn-link .sid{font-size:10px;font-weight:700;color:var(--muted);background:var(--fill);border:1px solid var(--hairline);border-radius:6px;padding:1px 7px}
+  .scn-link.on .sid{background:var(--signal);color:#fff;border-color:transparent}
+  .vlist{margin:2px 0 10px 14px;border-left:1px solid var(--hairline);padding-left:10px;display:flex;flex-direction:column;gap:1px}
+  .vlink{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);padding:5px 8px;border-radius:7px;line-height:1.25;transition:all var(--t) var(--ease)}
+  .vlink:hover{background:var(--fill);color:var(--ink)}
+  .vlink.on{background:var(--bbg);color:var(--ink);font-weight:600;box-shadow:inset 2px 0 0 var(--signal)}
+  .vlink .vdot{width:8px;height:8px;border-radius:50%;flex:none}
+  .vlink.ov .vdot{background:var(--muted);border-radius:2px}
+  .vlink.blk{opacity:.7} .vlink.blk .vdot{background:var(--r)}
+  .side-mon{display:flex;align-items:center;gap:7px;margin-top:8px;border-top:1px solid var(--hairline);padding-top:10px;font-size:12.5px;font-weight:600;color:var(--signal);padding-left:8px}
+  /* main */
+  .demo-main{min-width:0}
+  .urlbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;background:#fff;border:1px solid var(--hairline);border-radius:var(--r-card);padding:10px 12px;margin-bottom:12px;box-shadow:var(--shadow-card)}
+  .urlbar label{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--label)}
+  .urlbar input{flex:1;min-width:220px;background:#fff;border:1px solid var(--border);border-radius:var(--r-input);padding:8px 11px;color:var(--ink);font-size:13.5px;font-family:var(--font-ui)}
+  .urlbar input:focus{outline:none;border-color:var(--signal)}
+  .urlbar button{background:var(--cta);color:#fff;font-weight:500;border:1px solid transparent;border-radius:var(--r-btn);padding:8px 15px;font-size:13px;cursor:pointer;font-family:var(--font-ui);transition:background var(--t) var(--ease)}
+  .urlbar button:hover{background:var(--ink)}
+  .sc-meta{background:#fff;border:1px solid var(--hairline);border-left:3px solid var(--signal);border-radius:var(--r-card);padding:11px 14px;margin-bottom:14px;box-shadow:var(--shadow-card)}
+  .sc-meta .k{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--signal)}
+  .sc-meta .b{font-size:13px;color:var(--slate);margin:4px 0 8px}
+  .sc-meta .avail{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .sc-meta .chip{font-size:11px;font-weight:500;color:var(--slate);background:#fff;border:1px solid var(--hairline);border-radius:var(--r-pill);padding:3px 9px}
+  .vrow{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .demo-focus{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start}
+  .vcard{background:#fff;border:1px solid var(--hairline);border-radius:var(--r-card);overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow-card);transition:all var(--t) var(--ease)}
+  .vcard:hover{border-color:var(--border)}
+  .vcard .vhead{padding:10px 13px;border-bottom:1px solid var(--hairline);display:flex;align-items:center;gap:9px}
+  .vcard .vid{font-size:10px;font-weight:700;color:#fff;border-radius:6px;padding:2px 8px}
+  .vcard .vlabel{font-size:13px;font-weight:600;color:var(--ink)}
+  .vcard .kpi{margin-left:auto;font-size:10px;font-weight:600;color:var(--g);background:var(--gbg);border:1px solid var(--gbg);border-radius:6px;padding:2px 8px}
+  .vcard iframe{width:100%;height:calc(100vh - 340px);min-height:420px;border:0;background:#fff;display:block}
+  .demo-focus iframe{height:calc(100vh - 250px);min-height:560px}
+  .vcard .prov{padding:11px 13px;border-top:1px solid var(--hairline)}
+  .prov .pl{font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--label);margin-right:5px}
+  .prov .du{display:inline-block;font-size:10.5px;font-weight:500;color:var(--slate);background:var(--fill);border:1px solid var(--hairline);border-radius:5px;padding:2px 7px;margin:0 4px 5px 0}
+  .prov .du em{font-style:normal;color:var(--muted)}
+  .pp{font-weight:700;text-transform:capitalize} .pp.say{color:var(--g)} .pp.allude{color:var(--a)} .pp.hold{color:var(--r)}
+  .prov .note{font-size:10.5px;color:var(--muted);margin-top:5px;line-height:1.45}
+  .backlink{font-size:12.5px;color:var(--signal);font-weight:600}
+  .blocked{margin-top:16px;background:var(--rbg);border:1px dashed var(--r);border-radius:var(--r-card);padding:12px 15px}
+  .blocked .bh{font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--r)}
+  .blocked .bt{font-size:13px;color:var(--ink);margin:4px 0}
+  .blocked .bn{font-size:11.5px;color:var(--muted);line-height:1.5}
+  /* receipt rail (the drill-down) */
+  .receipt{position:sticky;top:74px;background:#fff;border:1px solid var(--hairline);border-radius:var(--r-card);box-shadow:var(--shadow-card);overflow:hidden}
+  .receipt .rh{padding:13px 15px;border-bottom:1px solid var(--hairline);display:flex;align-items:center;gap:8px}
+  .receipt .rh .vid{font-size:10px;font-weight:700;color:#fff;border-radius:6px;padding:2px 8px}
+  .receipt .rh h3{font-size:13.5px}
+  .rsec{padding:12px 15px;border-bottom:1px solid var(--hairline)}
+  .rsec:last-child{border-bottom:0}
+  .rsec .rk{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--label);margin-bottom:6px}
+  .rsec .maps{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#fff;background:var(--signal);border-radius:5px;padding:3px 8px}
+  .rsec .where{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.4}
+  .rchange{font-size:12.5px;color:var(--slate);line-height:1.5}
+  .rchange b{color:var(--ink)}
+  .rcv{display:flex;gap:9px;padding:7px 0;border-top:1px dashed var(--hairline)}
+  .rcv:first-of-type{border-top:0}
+  .rcv .num{flex:none;width:18px;height:18px;border-radius:50%;background:var(--fill);color:var(--slate);font-size:10px;font-weight:700;display:grid;place-items:center;margin-top:1px}
+  .rcv .body{min-width:0}
+  .rcv .sig{font-size:12px;font-weight:600;color:var(--ink)}
+  .rcv .src{font-size:11px;color:var(--muted);margin-top:1px}
+  .rcv .role{font-size:11px;color:var(--muted);margin-top:2px;font-style:italic}
+  .rcv .pol{font-size:9.5px;font-weight:700;text-transform:uppercase;border-radius:4px;padding:1px 6px;margin-left:auto;align-self:flex-start}
+  .pol.say{color:var(--g);background:var(--gbg)} .pol.allude{color:var(--a);background:var(--abg)} .pol.hold{color:var(--r);background:var(--rbg)}
+  .rstamp{font-size:11px;color:var(--muted);line-height:1.5}
+  @media(max-width:1100px){.demo-layout{grid-template-columns:1fr}.demo-side{position:static}.vrow{grid-template-columns:1fr}.demo-focus{grid-template-columns:1fr}.receipt{position:static}}
 </style>
 
 <div class="demo-layout">
-  <!-- LEFT: scenario → rendering hierarchy -->
+  <!-- LEFT: scenario → rendering tree -->
   <aside class="demo-side">
     <div class="side-title">Scenarios → renderings</div>
     {% for sc in scenarios %}
@@ -79,15 +99,16 @@
     </div>
     {% endif %}
     {% endfor %}
-    <a class="side-mon" href="/demo/monitor">KPI control tower →</a>
+    <a class="side-mon" href="/demo/monitor"><i class="ph ph-gauge"></i> KPI control tower →</a>
   </aside>
 
   <!-- RIGHT: main -->
   <div class="demo-main">
-    <div class="demo-head">
-      <h1>Personalization demo — live-cloned site × scenario × rendering</h1>
-      <p>Pick a scenario and a rendering on the left. Each variant is injected onto the <b>live-cloned page</b> with its DATA USED provenance.</p>
-    </div>
+    <div class="q-pagehead" style="margin-bottom:12px"><div>
+      <span class="q-pill b" style="margin-bottom:10px"><span class="d"></span>Provable · the receipt</span>
+      <h1 style="font-size:22px">Live demo — site × scenario × rendering</h1>
+      <p class="q-muted" style="margin:4px 0 0;font-size:13px"><b style="color:var(--slate)">Proves:</b> each variant is injected onto the <b>live-cloned page</b> where it maps, carrying the data it used and its surface policy. Open one to drill into its receipt.</p>
+    </div></div>
 
     <form class="urlbar" method="get" action="/demo">
       <label for="url">Clone</label>
@@ -101,33 +122,62 @@
       <div class="k">Scenario {{ scenario.id }} · identity key: {{ scenario.key }}</div>
       <div class="b">{{ scenario.blurb }}</div>
       <div class="avail">
-        <span class="chip" style="color:var(--accent)">available data:</span>
+        <span class="chip" style="color:var(--signal)">available data:</span>
         {% for a in scenario.available %}<span class="chip">{{ a }}</span>{% endfor %}
       </div>
     </div>
 
     {% if focus %}
-    <!-- FOCUS one rendering -->
-    <div style="margin-bottom:9px;"><a class="backlink" href="/demo?url={{ url|urlencode }}&scenario={{ scenario.id }}">← all 3 renderings</a></div>
-    <div class="vrow">
-      <div class="vcard solo">
+    <!-- FOCUS: drill-down — cloned page with highlighted region + receipt rail -->
+    <div style="margin-bottom:9px"><a class="backlink" href="/demo?url={{ url|urlencode }}&scenario={{ scenario.id }}">← all 3 renderings</a></div>
+    <div class="demo-focus">
+      <div class="vcard">
         <div class="vhead">
           <span class="vid" style="background:{{ focus.accent }}">{{ focus.id }}</span>
           <span class="vlabel">{{ focus.label }}{% if focus.blocked %} · BLOCKED{% endif %}</span>
           <span class="kpi">↑ {{ focus.kpi }}</span>
         </div>
         <iframe src="/demo/variant?url={{ url|urlencode }}&scenario={{ scenario.id }}&v={{ focus.id }}" title="{{ focus.label }}" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" referrerpolicy="no-referrer"></iframe>
-        <div class="prov">
-          <span class="pl">Data used</span>
-          {% for d in focus.data_used %}
-            <span class="du">{{ d.signal }} <em>· {{ d.source_label }} ·</em> <span class="pp {{ d.policy }}">{{ d.policy }}</span></span>
-          {% endfor %}
-          <div class="note">{{ focus.surface_note }}</div>
-        </div>
       </div>
+
+      <aside class="receipt">
+        <div class="rh"><span class="vid" style="background:{{ focus.accent }}">{{ focus.id }}</span><h3>Receipt</h3></div>
+        <div class="rsec">
+          <div class="rk">Maps to</div>
+          <span class="maps"><i class="ph ph-target"></i> {{ focus.place[0] }}</span>
+          <div class="where">{{ focus.place[1] }} — {{ focus.place[2] }}.</div>
+        </div>
+        <div class="rsec">
+          <div class="rk">What it shows</div>
+          <div class="rchange"><b>{{ focus.headline.replace('{brand}', brand) }}</b><br>{{ focus.sub.replace('{brand}', brand) }}<br><span class="q-muted">CTA · {{ focus.cta }}</span></div>
+        </div>
+        <div class="rsec">
+          <div class="rk">Data used → its provenance</div>
+          {% for d in focus.data_used %}
+          <div class="rcv">
+            <span class="num">{{ loop.index }}</span>
+            <div class="body">
+              <div class="sig">{{ d.signal }}</div>
+              <div class="src">{{ d.source_label }}</div>
+              <div class="role">{{ d.role }}</div>
+            </div>
+            <span class="pol {{ d.policy }}">{{ d.policy }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="rsec">
+          <div class="rk">Optimizes</div>
+          <div class="rchange"><span class="q-pill b"><span class="d"></span>{{ focus.kpi }}</span></div>
+        </div>
+        <div class="rsec">
+          <div class="rk">Surface policy</div>
+          <div class="rstamp">{{ focus.surface_note }}.
+            {% if focus.blocked %}This arm recites a <b style="color:var(--r)">hold</b> fact, so it is kept out of the action pool — the optimizer can never select it.{% else %}Every signal carries a <b>say / allude / hold</b> policy; nothing here recites a held fact.{% endif %}</div>
+        </div>
+      </aside>
     </div>
     {% else %}
-    <!-- OVERVIEW: all 3 gated renderings -->
+    <!-- OVERVIEW: the 3 gated renderings -->
     <div class="vrow">
       {% for v in gated %}
       <div class="vcard">
@@ -138,11 +188,11 @@
         </div>
         <iframe src="/demo/variant?url={{ url|urlencode }}&scenario={{ scenario.id }}&v={{ v.id }}" loading="lazy" title="{{ v.label }}" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" referrerpolicy="no-referrer"></iframe>
         <div class="prov">
-          <span class="pl">Data used</span>
+          <span class="pl">Maps to {{ v.place[0] }} · data used</span>
           {% for d in v.data_used %}
-            <span class="du">{{ d.signal }} <em>· {{ d.source_label }} ·</em> <span class="pp {{ d.policy }}">{{ d.policy }}</span></span>
+            <span class="du">{{ loop.index }} {{ d.signal }} <em>· {{ d.source_label }} ·</em> <span class="pp {{ d.policy }}">{{ d.policy }}</span></span>
           {% endfor %}
-          <div class="note">{{ v.surface_note }}</div>
+          <div class="note">{{ v.surface_note }}. <a class="backlink" href="/demo?url={{ url|urlencode }}&scenario={{ scenario.id }}&v={{ v.id }}">Drill into the receipt →</a></div>
         </div>
       </div>
       {% endfor %}
@@ -150,11 +200,11 @@
 
     {% if blocked %}
     <div class="blocked">
-      <div class="bh">Blocked variant · {{ blocked.id }} · {{ blocked.label }}</div>
+      <div class="bh">Blocked variant · {{ blocked.id }} · {{ blocked.label }} · maps to {{ blocked.place[0] }}</div>
       <div class="bt">“{{ blocked.headline.replace('{brand}', brand) }}”</div>
       <div class="bn">{{ blocked.surface_note }}. It would win on engagement, but it relies on a
-        <b style="color:var(--hold)">hold</b> fact, so it is kept out of the action pool — the optimizer can never select it.
-        (Open it from the left to see it rendered, greyed.)</div>
+        <b style="color:var(--r)">hold</b> fact, so it is kept out of the action pool — the optimizer can never select it.
+        <a class="backlink" href="/demo?url={{ url|urlencode }}&scenario={{ scenario.id }}&v={{ blocked.id }}">Open it, greyed →</a></div>
     </div>
     {% endif %}
     {% endif %}

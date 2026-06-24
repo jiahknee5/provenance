@@ -3,22 +3,30 @@
 {% block crumb %}<i class="ph ph-table"></i> Records{% endblock %}
 {% block content %}
   <div class="q-pagehead">
-    <div><h1>Records</h1></div>
+    <div>
+      <span class="q-pill b" style="margin-bottom:10px"><span class="d"></span>Provable</span>
+      <h1>Records</h1>
+      <p class="q-muted" style="margin:5px 0 0"><b style="color:var(--slate)">Proves:</b> every record carries the source that justifies its stage and score.</p>
+    </div>
     <div class="sp">
-      <a class="q-btn outline"><i class="ph ph-funnel"></i> Filter</a>
-      <a class="q-btn outline"><i class="ph ph-faders-horizontal"></i> Sort</a>
-      <a class="q-btn ink"><i class="ph ph-plus"></i> New record</a>
+      <details class="q-dd">
+        <summary class="q-btn outline"><i class="ph ph-faders-horizontal"></i> Sort <i class="ph ph-caret-down" style="font-size:12px"></i></summary>
+        <div class="q-menu">
+          {% for k,label,spec in sorts %}<a href="/records?view={{ view }}&sort={{ k }}" class="{{ 'on' if k==sort else '' }}">{{ label }}</a>{% endfor %}
+        </div>
+      </details>
+      <a class="q-btn ink" href="/records/new"><i class="ph ph-plus"></i> New record</a>
     </div>
   </div>
 
   <div class="q-tabs" style="margin-bottom:16px">
-    <span class="q-tab on">All</span><span class="q-tab">Companies</span><span class="q-tab">People</span><span class="q-tab">Deals</span>
+    {% for k,label,pred in views %}<a class="q-tab {{ 'on' if k==view else '' }}" href="/records?view={{ k }}&sort={{ sort }}">{{ label.split(' (')[0] }}</a>{% endfor %}
   </div>
 
   <div class="q-panel">
     <div class="q-toolbar">
-      <span class="h">All records · {{ rows|length }}</span>
-      <span class="sp"><a class="q-btn ghost"><i class="ph ph-arrows-clockwise"></i> Refresh</a></span>
+      <span class="h">{{ view_label }} · {{ rows|length }}{% if view=='all' %} of {{ total }}{% endif %}</span>
+      <span class="sp"><a class="q-btn ghost" href="/records?view={{ view }}&sort={{ sort }}"><i class="ph ph-arrows-clockwise"></i> Refresh</a></span>
     </div>
     <table class="q-table">
       <thead><tr><th>Record</th><th>Company</th><th>Title</th><th>Industry</th><th>Stage</th><th>Score</th><th>Source</th></tr></thead>

@@ -1,66 +1,60 @@
-{% extends "base.html" %}
+{% extends "shell.html" %}
 {% block title %}Provenance — KPI control tower{% endblock %}
+{% block crumb %}<i class="ph ph-gauge"></i> KPI monitor{% endblock %}
 {% block content %}
 <style>
-  .mon-wrap{max-width:1280px;margin:0 auto;padding:18px 20px 40px;}
-  .mon-head h1{font-size:22px;font-weight:800;color:var(--ink);margin:0 0 4px;letter-spacing:-.01em;}
-  .mon-head p{font-size:13px;color:var(--mut);margin:0 0 6px;line-height:1.5;}
-  .sim{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
-    color:var(--amber);background:rgba(217,138,22,.12);border:1px solid rgba(217,138,22,.4);border-radius:5px;padding:3px 9px;margin-bottom:12px;}
-  .mon-head a{color:var(--accent);font-weight:700;text-decoration:none;}
-  .sec{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin:20px 0 9px;}
+  .q-body{max-width:1280px}
+  .sim{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--a);background:var(--abg);border:1px solid var(--abg);border-radius:5px;padding:3px 9px}
+  .sec{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--label);margin:26px 0 11px;display:flex;align-items:center;gap:9px}
+  .sec .q-pill{text-transform:none;letter-spacing:0}
   /* KPI tree */
-  .kpitree{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;}
-  .kgroup{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;}
-  .kgroup h3{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ink);margin:0 0 10px;}
-  .kpi{margin-bottom:13px;}
-  .kpi:last-child{margin-bottom:0;}
-  .kpi .top{display:flex;align-items:baseline;gap:6px;font-size:12px;}
-  .kpi .lab{font-weight:700;color:var(--ink);}
-  .kpi .cur{margin-left:auto;font-weight:800;}
-  .kpi .pct{font-size:10px;color:var(--mut);font-weight:700;}
-  .track{position:relative;height:8px;border-radius:5px;background:var(--panel2);border:1px solid var(--line);margin-top:5px;overflow:hidden;}
-  .track .fill{position:absolute;left:0;top:0;bottom:0;border-radius:5px;}
-  .bt-row{display:flex;justify-content:space-between;font-size:9px;color:var(--mut);margin-top:3px;}
-  .g-on .fill{background:var(--green);} .g-mid .fill{background:var(--amber);} .g-low .fill{background:var(--mut);}
-  .g-on .cur{color:var(--green);} .g-mid .cur{color:var(--amber);} .g-low .cur{color:var(--mut);}
+  .kpitree{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .kgroup{background:#fff;border:1px solid var(--hairline);border-radius:var(--r-card);padding:14px 16px;box-shadow:var(--shadow-card)}
+  .kgroup h3{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink);margin:0 0 12px}
+  .kpi{margin-bottom:14px} .kpi:last-child{margin-bottom:0}
+  .kpi .top{display:flex;align-items:baseline;gap:6px;font-size:12.5px}
+  .kpi .lab{font-weight:500;color:var(--ink)}
+  .kpi .cur{margin-left:auto;font-weight:700;font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+  .kpi .pct{font-size:10px;color:var(--muted);font-weight:600}
+  .track{position:relative;height:8px;border-radius:5px;background:var(--fill);border:1px solid var(--hairline);margin-top:6px;overflow:hidden}
+  .track .fill{position:absolute;left:0;top:0;bottom:0;border-radius:5px}
+  .bt-row{display:flex;justify-content:space-between;font-size:9.5px;color:var(--muted);margin-top:4px}
+  .g-on .fill{background:var(--g)} .g-mid .fill{background:var(--a)} .g-low .fill{background:var(--muted)}
+  .g-on .cur{color:var(--g)} .g-mid .cur{color:var(--a)} .g-low .cur{color:var(--muted)}
   /* scenarios */
-  .scn{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:13px 15px;margin-bottom:12px;}
-  .scn .sh{display:flex;align-items:center;gap:9px;margin-bottom:9px;flex-wrap:wrap;}
-  .scn .sid{font-size:11px;font-weight:800;color:#04222a;background:var(--accent);border-radius:5px;padding:2px 8px;}
-  .scn .slab{font-size:13px;font-weight:800;color:var(--ink);}
-  .scn .win{font-size:10px;font-weight:800;color:var(--green);background:rgba(43,182,115,.14);border:1px solid rgba(43,182,115,.4);border-radius:5px;padding:2px 8px;}
-  .scn .spark{margin-left:auto;}
-  .scn .spark svg{width:120px;height:26px;}
-  .arm{display:flex;align-items:center;gap:9px;font-size:11.5px;margin:5px 0;}
-  .arm .aid{font-size:9px;font-weight:800;color:#fff;border-radius:4px;padding:1px 6px;min-width:24px;text-align:center;}
-  .arm .alab{color:var(--ink);min-width:150px;}
-  .arm .sbar{flex:1;height:9px;border-radius:5px;background:var(--panel2);border:1px solid var(--line);overflow:hidden;position:relative;}
-  .arm .sbar i{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:5px;}
-  .arm .num{font-size:10px;color:var(--mut);font-weight:700;min-width:120px;text-align:right;}
-  .arm.w .alab{font-weight:800;}
-  .arm.blk{opacity:.6;}
-  .arm.blk .aid{background:var(--hold);}
-  .arm.blk .sbar i{background:var(--hold);}
-  /* health */
-  .rails{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;}
-  .rail{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:13px 15px;border-top:3px solid var(--green);}
-  .rail.warn{border-top-color:var(--amber);} .rail.ok{border-top-color:var(--green);}
-  .rail h4{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ink);margin:0 0 8px;}
-  .rail .big{font-size:24px;font-weight:800;color:var(--green);}
-  .rail .sub{font-size:11px;color:var(--mut);line-height:1.45;margin-top:5px;}
-  .rail .sub b{color:var(--ink);}
-  @media (max-width:980px){.kpitree,.rails{grid-template-columns:1fr;}}
+  .scn{background:#fff;border:1px solid var(--hairline);border-radius:var(--r-card);padding:14px 16px;margin-bottom:13px;box-shadow:var(--shadow-card)}
+  .scn .sh{display:flex;align-items:center;gap:9px;margin-bottom:10px;flex-wrap:wrap}
+  .scn .sid{font-size:11px;font-weight:700;color:#fff;background:var(--signal);border-radius:5px;padding:2px 8px}
+  .scn .slab{font-size:13px;font-weight:600;color:var(--ink)}
+  .scn .win{font-size:10px;font-weight:600;color:var(--g);background:var(--gbg);border:1px solid var(--gbg);border-radius:5px;padding:2px 8px}
+  .scn .spark{margin-left:auto} .scn .spark svg{width:120px;height:26px}
+  .arm{display:flex;align-items:center;gap:9px;font-size:11.5px;margin:6px 0}
+  .arm .aid{font-size:9px;font-weight:700;color:#fff;border-radius:4px;padding:1px 6px;min-width:24px;text-align:center}
+  .arm .alab{color:var(--ink);min-width:150px}
+  .arm .sbar{flex:1;height:9px;border-radius:5px;background:var(--fill);border:1px solid var(--hairline);overflow:hidden;position:relative}
+  .arm .sbar i{position:absolute;left:0;top:0;bottom:0;background:var(--signal);border-radius:5px}
+  .arm .num{font-size:10px;color:var(--muted);font-weight:600;min-width:130px;text-align:right;font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+  .arm.w .alab{font-weight:700}
+  .arm.blk{opacity:.6} .arm.blk .aid{background:var(--r)} .arm.blk .sbar i{background:var(--r)}
+  /* trust rails */
+  .rails{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .rail{background:#fff;border:1px solid var(--hairline);border-radius:var(--r-card);padding:14px 16px;border-top:3px solid var(--g);box-shadow:var(--shadow-card)}
+  .rail.warn{border-top-color:var(--a)} .rail.ok{border-top-color:var(--g)}
+  .rail h4{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink);margin:0 0 8px}
+  .rail .big{font-size:30px;font-weight:600;color:var(--g);font-family:var(--font-display);letter-spacing:-.02em}
+  .rail .sub{font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:5px}
+  .rail .sub b{color:var(--ink)}
+  @media(max-width:980px){.kpitree,.rails{grid-template-columns:1fr}}
 </style>
 
-<div class="mon-wrap">
-  <div class="mon-head">
-    <h1>KPI control tower — variants moving toward target</h1>
-    <span class="sim">⟳ Simulated reinforcement learning</span>
-    <p>{{ m.note }} — <a href="/demo">back to the demo →</a></p>
+  <div class="q-pagehead"><div>
+    <span class="q-pill v" style="margin-bottom:10px"><span class="d"></span>Optimizing</span>
+    <h1>KPI control tower</h1>
+    <p class="q-muted" style="margin:5px 0 0;font-size:13px"><b style="color:var(--slate)">Proves:</b> {{ m.note }} — <a href="/demo" style="color:var(--signal);font-weight:600">back to the demo →</a></p>
   </div>
+  <div class="sp"><span class="sim">⟳ Simulated RL</span></div></div>
 
-  <div class="sec">Master business KPIs · progress toward target</div>
+  <div class="sec">Master business KPIs · progress toward target <span class="q-pill v"><span class="d"></span>Optimizing</span></div>
   <div class="kpitree">
     {% for grp in m.kpi_tree %}
     <div class="kgroup">
@@ -80,13 +74,13 @@
     {% endfor %}
   </div>
 
-  <div class="sec">Per-scenario learning · which variant the bandit picked</div>
+  <div class="sec">Per-scenario learning · which variant the bandit picked <span class="q-pill v"><span class="d"></span>Optimizing</span></div>
   {% for sc in m.scenarios %}
   <div class="scn">
     <div class="sh">
       <span class="sid">{{ sc.id }}</span><span class="slab">{{ sc.label }}</span>
       <span class="win">learned winner: {{ sc.learned_winner }}{{ ' ✓' if sc.converged else '' }} · share {{ (sc.winner_share*100)|int }}%</span>
-      <span class="spark"><svg viewBox="0 0 100 26" preserveAspectRatio="none"><polyline points="{{ sc.spark }}" fill="none" stroke="var(--accent)" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg></span>
+      <span class="spark"><svg viewBox="0 0 100 26" preserveAspectRatio="none"><polyline points="{{ sc.spark }}" fill="none" stroke="var(--signal)" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg></span>
     </div>
     {% for a in sc.arms %}
     <div class="arm {{ 'w' if a.winner else '' }}">
@@ -101,13 +95,13 @@
       <span class="aid">{{ sc.blocked_arm.id }}</span>
       <span class="alab">{{ sc.blocked_arm.label }}</span>
       <span class="sbar"><i style="width:0%"></i></span>
-      <span class="num">would-be CTR {{ sc.blocked_arm.latent_ctr }} · <b style="color:var(--hold)">selected 0×</b></span>
+      <span class="num">would-be CTR {{ sc.blocked_arm.latent_ctr }} · <b style="color:var(--r)">selected 0×</b></span>
     </div>
     {% endif %}
   </div>
   {% endfor %}
 
-  <div class="sec">Trust rails · monitored continuously</div>
+  <div class="sec">Trust rails · monitored continuously <span class="q-pill a"><span class="d"></span>Watched</span></div>
   <div class="rails">
     <div class="rail {{ 'ok' if m.health.provenance.coverage_pct == 100 and not m.health.provenance.hold_in_copy else 'warn' }}">
       <h4>Provenance</h4>
@@ -131,5 +125,4 @@
         {{ m.health.hallucination.note }}.</div>
     </div>
   </div>
-</div>
 {% endblock %}
