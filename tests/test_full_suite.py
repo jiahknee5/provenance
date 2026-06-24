@@ -129,10 +129,11 @@ def test_skip_link_and_main_landmark():
     assert 'class="q-skip"' in html and 'href="#q-main"' in html and 'id="q-main"' in html
 
 
-def test_dark_mode_token_set_present():
-    """Craft: light/dark adaptation ships in the stylesheet."""
+def test_light_only_no_auto_dark():
+    """By decision the product is LIGHT ONLY (matches attio.com) — it must not flip with the OS."""
     css = (pathlib.Path(__file__).resolve().parents[1] / "app" / "static" / "quiet.css").read_text()
-    assert "prefers-color-scheme: dark" in css and "--surface" in css and "--on-cta" in css
+    assert "prefers-color-scheme: dark" not in css  # no OS-driven dark theme
+    assert "--surface" in css and "--on-cta" in css   # token indirection retained (light values)
 
 
 def test_filter_view_narrows_records():

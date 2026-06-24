@@ -318,29 +318,9 @@ h1{font-size:30px;line-height:1.1} h2{font-size:20px} h3{font-size:16px}
   .q-btn:active{transform:none!important}
 }
 
-/* ============================================================
-   v1.5 — Dark mode (WWDC26 Craft: "colors that adapt seamlessly across light and dark").
-   Token-driven: every surface/text/glass flips via :root; components use --surface/--on-* .
-   ============================================================ */
-@media (prefers-color-scheme: dark){
-  :root{
-    --paper:#0E1014; --ink:#EAECEF; --slate:#C3C8CF; --muted:#8B95A2; --label:#697483;
-    --hairline:#222831; --border:#343C47; --fill:#191D24; --fill2:#14171D;
-    --surface:#15181E; --surface2:#191D24; --cta:#EAECEF; --on-cta:#15171C; --on-ink:#15171C; --cta-hover:#FFFFFF;
-    --signal:#5B8DEF; --slate2:#A6AFBC;
-    --v:#A78BFA; --vbg:#241F39; --a:#E0A33A; --abg:#33280F; --g:#46C08A; --gbg:#11301F;
-    --bbg:#15233F; --r:#F2768C; --rbg:#3A1A22;
-    --shadow-card:0 1px 2px rgba(0,0,0,.5),0 1px 3px rgba(0,0,0,.4);
-    --shadow-pop:0 1px 2px rgba(0,0,0,.5),0 24px 60px -28px rgba(0,0,0,.72);
-    --glass-bg:rgba(20,24,30,.62); --glass-edge:inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 0 1px rgba(255,255,255,.04);
-    --glass-shadow:0 1px 0 rgba(0,0,0,.5),0 22px 60px -26px rgba(0,0,0,.72);
-    --carve:inset 0 0 0 1px rgba(255,255,255,.045);
-  }
-  /* dotted-grid + cmdk specular tuned for dark */
-  .q-dotgrid{background-image:radial-gradient(rgba(255,255,255,.07) 1px,transparent 1.6px)}
-  .q-cmdk{box-shadow:inset 0 1px 0 rgba(255,255,255,.1),inset 0 0 0 1px rgba(255,255,255,.05),0 1px 2px rgba(0,0,0,.5),0 44px 90px -22px rgba(0,0,0,.8)}
-  .q-showframe iframe,.q-feature-vis iframe{background:var(--surface)}
-}
+/* v1.5 — LIGHT ONLY (by decision): the product is light always, like attio.com.
+   No prefers-color-scheme dark override — the site does not follow OS appearance.
+   The --surface/--on-cta/--on-ink indirection tokens remain (light values). */
 
 /* ============================================================
    v1.6 — Agency (forgiveness) + Flexibility (accessibility) — WWDC26
