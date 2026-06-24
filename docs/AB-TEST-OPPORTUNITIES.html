@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>A/B Test Opportunities — Provenance</title>
+  <style>
+
+html {
+color: #1a1a1a;
+background-color: #fdfdfd;
+}
+body {
+margin: 0 auto;
+max-width: 36em;
+padding-left: 50px;
+padding-right: 50px;
+padding-top: 50px;
+padding-bottom: 50px;
+hyphens: auto;
+overflow-wrap: break-word;
+text-rendering: optimizeLegibility;
+font-kerning: normal;
+}
+@media (max-width: 600px) {
+body {
+font-size: 0.9em;
+padding: 12px;
+}
+h1 {
+font-size: 1.8em;
+}
+}
+@media print {
+html {
+background-color: white;
+}
+body {
+background-color: transparent;
+color: black;
+font-size: 12pt;
+}
+p, h2, h3 {
+orphans: 3;
+widows: 3;
+}
+h2, h3, h4 {
+page-break-after: avoid;
+}
+}
+p {
+margin: 1em 0;
+}
+a {
+color: #1a1a1a;
+}
+a:visited {
+color: #1a1a1a;
+}
+img {
+max-width: 100%;
+}
+svg {
+height: auto;
+max-width: 100%;
+}
+h1, h2, h3, h4, h5, h6 {
+margin-top: 1.4em;
+}
+h5, h6 {
+font-size: 1em;
+font-style: italic;
+}
+h6 {
+font-weight: normal;
+}
+ol, ul {
+padding-left: 1.7em;
+margin-top: 1em;
+}
+li > ol, li > ul {
+margin-top: 0;
+}
+blockquote {
+margin: 1em 0 1em 1.7em;
+padding-left: 1em;
+border-left: 2px solid #e6e6e6;
+color: #606060;
+}
+code {
+font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+font-size: 85%;
+margin: 0;
+hyphens: manual;
+}
+pre {
+margin: 1em 0;
+overflow: auto;
+}
+pre code {
+padding: 0;
+overflow: visible;
+overflow-wrap: normal;
+}
+.sourceCode {
+background-color: transparent;
+overflow: visible;
+}
+hr {
+border: none;
+border-top: 1px solid #1a1a1a;
+height: 1px;
+margin: 1em 0;
+}
+table {
+margin: 1em 0;
+border-collapse: collapse;
+width: 100%;
+overflow-x: auto;
+display: block;
+font-variant-numeric: lining-nums tabular-nums;
+}
+table caption {
+margin-bottom: 0.75em;
+}
+tbody {
+margin-top: 0.5em;
+border-top: 1px solid #1a1a1a;
+border-bottom: 1px solid #1a1a1a;
+}
+th {
+border-top: 1px solid #1a1a1a;
+padding: 0.25em 0.5em 0.25em 0.5em;
+}
+td {
+padding: 0.125em 0.5em 0.25em 0.5em;
+}
+header {
+margin-bottom: 4em;
+text-align: center;
+}
+#TOC li {
+list-style: none;
+}
+#TOC ul {
+padding-left: 1.3em;
+}
+#TOC > ul {
+padding-left: 0;
+}
+#TOC a:not(:hover) {
+text-decoration: none;
+}
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+</style>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+:root{
+--accent:#3b5bdb; --accent2:#5b8def; --ink:#16202c; --mut:#5b6b7c;
+--bg:#f4f6fb; --surface:#ffffff; --line:#e6ebf1;
+--say:#1f9d57; --allude:#c47f12; --bad:#e0524a; --inferred:#5b8def;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font:15px/1.62 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.page{max-width:1060px;margin:0 auto;padding:0 0 70px}
+.hero{background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);color:#fff;
+padding:42px 40px 38px;border-radius:0 0 22px 22px;box-shadow:0 16px 40px #3b5bdb22}
+.hero .badge{display:inline-block;background:#ffffff22;border:1px solid #ffffff44;border-radius:999px;
+padding:4px 12px;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.hero h1{font-size:clamp(26px,4.4vw,40px);margin:14px 0 8px;line-height:1.08;letter-spacing:-.02em}
+.hero p{margin:0;opacity:.94;font-size:15px;max-width:70ch}
+.hero .meta{margin-top:16px;font-size:12px;opacity:.82;display:flex;gap:8px;flex-wrap:wrap}
+.hero .meta span{background:#ffffff1c;border:1px solid #ffffff33;border-radius:7px;padding:3px 9px}
+main.wrap{background:var(--surface);margin:24px 20px 0;padding:34px 44px 46px;border:1px solid var(--line);
+border-radius:18px;box-shadow:0 12px 40px rgba(20,30,50,.06)}
+@media(max-width:760px){main.wrap{padding:22px 18px;margin:18px 10px 0}.hero{padding:30px 20px}}
+h1{font-size:26px;margin:0 0 6px} main.wrap > h1:first-child{display:none}
+h2{font-size:21px;margin:38px 0 12px;padding-left:13px;border-left:4px solid var(--accent);line-height:1.25}
+h3{font-size:16px;margin:26px 0 8px;color:#243244}
+p{margin:11px 0} a{color:var(--accent)}
+hr{border:none;border-top:1px solid var(--line);margin:30px 0}
+ul,ol{padding-left:22px} li{margin:5px 0}
+strong{color:#0e1726}
+code{font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+background:#eef2f7;color:#234;border:1px solid #e2e8f0;border-radius:5px;padding:1px 5px}
+table{border-collapse:collapse;width:100%;margin:16px 0;font-size:12.5px;display:block;overflow-x:auto}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+thead th{background:#eef2fb;color:#1b2a4a;font-weight:800;position:sticky;top:0}
+tbody tr:nth-child(even){background:#fafbfe}
+td code{white-space:nowrap}
+blockquote{margin:14px 0;padding:10px 16px;background:#f7f9fe;border-left:4px solid var(--accent2);
+border-radius:0 10px 10px 0;color:var(--mut)}
+
+h3 + table td:last-child,table td:last-child{font-weight:600}
+footer.foot{color:var(--mut);font-size:12px;text-align:center;margin:26px 20px 0}
+</style>
+</head>
+<body>
+<div class="page">
+<header class="hero">
+  <span class="badge">Provenance · CRO research swarm</span>
+  <h1>A/B Test Opportunities — Provenance Funnel</h1>
+  <p>68 evidence-cited, adversarially-verified copy &amp; page tests across both tenants (Helix Analytics B2B-health · AI-Academy education), ranked by KPI lift and wired to the truth-bounded bandit Optimizer.</p>
+  <div class="meta">
+    <span>Generated 2026-06-23</span>
+    <span>run wf_232c4b39-b48</span>
+    <span>10 research lanes · 1,057 verification look-ups</span>
+    <span>6 cut on verification · lifts 📉 corrected</span>
+  </div>
+</header>
+<main class="wrap">
+<header id="title-block-header">
+<h1 class="title">A/B Test Opportunities — Provenance</h1>
+</header>
+<!--
+Generated 2026-06-23 by the `ab-test-research-swarm` workflow (run wf_232c4b39-b48):
+10 parallel CRO research lanes (5 per-surface + 5 cross-cutting levers) → adversarial
+verification → synthesis. 68 hypotheses produced; verification complete (1,057 web look-ups).
+
+VERIFICATION OUTCOME: every high-confidence/high-impact hypothesis was adversarially
+verified against its cited evidence and the product's truth boundary. The verifiers
+downgraded almost every lift (most public CRO numbers are B2C single-test outliers or
+mis-attributed) and CUT 6 hypotheses (refuted and/or truth-boundary-violating) — see §3
+"Cut". Lifts marked 📉 are verification-corrected; use those, not the proposers' ranges.
+Verdict column: qualified = kept with a corrected number; null = not independently verified.
+-->
+
+<h1 id="ab-test-opportunities--provenance-funnel">A/B Test Opportunities
+— Provenance Funnel</h1>
+<h2 id="1-executive-summary">1. Executive summary</h2>
+<p>Provenance runs two tenants on one truth-bounded contextual bandit.
+Every hypothesis below stays inside the CONSTITUTION&#39;s &quot;can&#39;t say what
+it can&#39;t prove&quot; boundary — variants only re-order, re-frame, or
+re-emphasize <strong>already-Gate-cleared</strong> claims, or change
+pure UI/layout. Adversarial verification downgraded almost every cited
+lift: the public CRO evidence is overwhelmingly B2C e-commerce/SaaS, and
+the famous hero numbers (Aagaard +90%, HubSpot/Expedia &quot;remove a field
++50%&quot;, testimonial +34%) are single-test outliers or mis-attributed.
+<strong>Use the corrected lifts below, not the proposers&#39; optimistic
+ranges.</strong></p>
+<p><strong>Highest-leverage tests (by adjusted ICE + signal
+speed):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Rank</th>
+<th>Test</th>
+<th>Why it leads</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>helix-clinops-numbers-arm-C</code></td>
+<td>Pure new bandit arm in <code>variants.py</code>, zero truth-risk
+(verbatim <code>c_los</code>), clears Gate by construction. Corrected
+lift modest (0–4%) but ~free to ship.</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>edu-cta-first-person-outcome-verb</code></td>
+<td>Brings the <strong>entire education CTA into the optimizer</strong>
+(currently 100% static); per-archetype B-arm; warm consumer-like
+audience where evidence transfers best.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>cta-lp-entry-value-not-go</code> /
+<code>edu-gate-button-first-person-value</code></td>
+<td>&quot;Go →&quot; is contentless; near-B2C audience makes the evidence most
+applicable here; needs only entry-gate logging.</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>helix-form-proof-beside-form</code></td>
+<td>SOC2/HIPAA strip sourced from real <code>claim_ids</code>
+(<code>c_soc2/c_hipaa/c_deployed</code>); SOC 2 is a genuine
+B2B-healthcare procurement gate.</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>helix-cfo-loss-frame-arm-C</code></td>
+<td>New CFO arm; doubles as the MLR legal-hold demo (auto-suppressed
+when <code>c_tco</code> is on hold).</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>prov-tier-dial-as-bandit-context</code></td>
+<td>The signature mechanism: makes the personalization tier a learnable
+context dimension with tier-4 held out — the product&#39;s core thesis made
+measurable.</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>helix-form-risk-reversal-under-button</code></td>
+<td>Cheap, but <strong>split affirmative vs negation framing</strong> —
+the &quot;never sell&quot; wording has measured backfire risk (Aagaard
+−18.7%).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Single biggest KPI opportunity per tenant:</strong></p>
+<ul>
+<li><strong>Helix (B2B-healthcare):</strong> the
+<strong>form-completion</strong> step (<code>form.html</code> →
+<code>/submit</code>). It has 9 fields including 5 friction-heavy
+selects and no proof/trust signal at the conversion point. Realistic
+corrected upside is single-digit (not the 15–40% cited) and must be
+measured against <em>downstream booked rate</em>, not raw submits,
+because deferring/cutting firmographic fields risks lead-quality
+dilution and can starve the bandit&#39;s segment key (which is keyed on role
+<strong>+ company_size</strong>).</li>
+<li><strong>Academy (education):</strong> the
+<strong>landing→signup-CTA</strong> step. The education funnel&#39;s CTAs
+and proof-block selection are currently <strong>deterministic and
+outside the bandit entirely</strong> — the single highest-value move is
+wiring them in as arms. This is a near-B2C audience, the one place the
+cited CRO evidence transfers best.</li>
+</ul>
+<hr />
+<h2 id="2-funnel--kpi-map">2. Funnel → KPI map</h2>
+<table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>Funnel stage</th>
+<th>Primary KPI</th>
+<th># tests (surviving)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lp_entry.html</code> (edu gate)</td>
+<td>Email capture</td>
+<td>Go-submit / email-capture rate</td>
+<td>8</td>
+</tr>
+<tr>
+<td><code>landing.py</code> / <code>landing.html</code> (edu)</td>
+<td>Landing → signup CTA</td>
+<td>landing→signup CTA CTR</td>
+<td>11</td>
+</tr>
+<tr>
+<td><code>segments.py</code> (edu archetypes)</td>
+<td>Landing → signup CTA</td>
+<td>signup CTA CTR</td>
+<td>2</td>
+</tr>
+<tr>
+<td><code>form.html</code> (Helix)</td>
+<td>Lead capture</td>
+<td>form-completion (<code>/submit</code>)</td>
+<td>12</td>
+</tr>
+<tr>
+<td><code>site.html</code> (Helix)</td>
+<td>Site → ROI assessment</td>
+<td>site→CTA CTR (booked)</td>
+<td>8</td>
+</tr>
+<tr>
+<td><code>thanks.html</code> (Helix)</td>
+<td>Post-conversion momentum</td>
+<td>thanks→site CTR</td>
+<td>4</td>
+</tr>
+<tr>
+<td><code>site_cta.html</code> (Helix)</td>
+<td>Post-booking</td>
+<td>no-show reduction / attend</td>
+<td>2</td>
+</tr>
+<tr>
+<td><code>variants.py</code> (Helix ROLE_ANGLES)</td>
+<td>Site hero / email</td>
+<td>site→CTA CTR per role</td>
+<td>4</td>
+</tr>
+</tbody>
+</table>
+<p>(Counts are pre-cut; 6 tests are removed in §3 &quot;Cut&quot;.)</p>
+<hr />
+<h2 id="3-the-ranked-backlog-top-tests-ice-desc">3. The ranked backlog
+(top tests, ICE desc)</h2>
+<p>Lift column uses the <strong>verification-corrected</strong> number
+where the verdict adjusted it (📉 = downgraded from proposer&#39;s range).
+Verdict shown is the adversarial verdict; <code>null</code> = not
+independently verified.</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Surface</th>
+<th>Element</th>
+<th>KPI</th>
+<th>Current → Variant (terse)</th>
+<th>Expected lift (corrected)</th>
+<th>ICE</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cta-site-first-person-roi</code></td>
+<td>site.html</td>
+<td>cta</td>
+<td>site→CTA</td>
+<td>&quot;Start your&quot; → &quot;Start my&quot;</td>
+<td>📉 0 to +6% (~+2–3%)</td>
+<td>8.33</td>
+<td>qualified</td>
+</tr>
+<tr>
+<td><code>edu-cta-first-person-outcome-verb</code></td>
+<td>segments.py + landing.html</td>
+<td>cta</td>
+<td>landing→signup</td>
+<td>generic CTA → first-person+outcome</td>
+<td>📉 +3–12% (~+5–7%)</td>
+<td>8.0</td>
+<td>qualified</td>
+</tr>
+<tr>
+<td><code>helix-clinops-numbers-arm-C</code></td>
+<td>variants.py</td>
+<td>headline</td>
+<td>clinops site→CTA</td>
+<td>&quot;Cut LOS…&quot; → &quot;Reduce avg LOS by 1.2 days&quot;</td>
+<td>📉 0 to +4%</td>
+<td>8.0</td>
+<td>qualified</td>
+</tr>
+<tr>
+<td><code>helix-form-h1-numeric-test</code></td>
+<td>form.html</td>
+<td>headline</td>
+<td>form-completion</td>
+<td>vague H1 → deliverable-named/role-anchored</td>
+<td>📉 +2–8% (B), +3–8% (C)</td>
+<td>8.0</td>
+<td>qualified</td>
+</tr>
+<tr>
+<td><code>edu-outcome-angle-salary-anchor</code></td>
+<td>landing.py</td>
+<td>headline</td>
+<td>landing→signup</td>
+<td>vague salary → &quot;+$38K within 6mo (even if non-tech)&quot;</td>
+<td>📉 +3–12% (trim copy)</td>
+<td>8.0</td>
+<td>qualified</td>
+</tr>
+<tr>
+<td><code>edu-hero-outcome-specificity</code></td>
+<td>landing.py</td>
+<td>headline</td>
+<td>landing→signup</td>
+<td>&quot;where this takes your salary&quot; → &quot;+$38K median lift&quot;</td>
+<td>📉 +2–8% (0/neg elsewhere)</td>
+<td>7.33</td>
+<td>qualified</td>
+</tr>
+<tr>
+<td><code>cta-form-kill-friction-verb</code></td>
+<td>form.html</td>
+<td>cta</td>
+<td>form-completion</td>
+<td>&quot;Send me the report&quot; → &quot;Get my ROI report&quot;</td>
+<td>📉 −1 to +4% (~flat)</td>
+<td>7.67</td>
+<td>qualified</td>
+</tr>
+<tr>
+<td><code>proof-format-bandit-arm</code></td>
+<td>landing.html</td>
+<td>proof</td>
+<td>landing→signup</td>
+<td>deterministic stats/testimonial → 3-arm bandit</td>
+<td>📉 +1–5% (maybe flat)</td>
+<td>7.67</td>
+<td>qualified</td>
+</tr>
+<tr>
+<td><code>edu-gate-button-first-person-value</code></td>
+<td>lp_entry.html</td>
+<td>cta</td>
+<td>email-capture</td>
+<td>&quot;Go →&quot; → &quot;See/Build my page →&quot;</td>
+<td>📉 single-digit, maybe flat</td>
+<td>7.67</td>
+<td>qualified</td>
+</tr>
+<tr>
+<td><code>helix-cfo-loss-frame-arm-C</code></td>
+<td>variants.py</td>
+<td>headline</td>
+<td>cfo site→CTA</td>
+<td>gain-vague → &quot;Stop overpaying: cut TCO 47%&quot;</td>
+<td>📉 −5 to +10% (~+2–5%)</td>
+<td>7.33</td>
+<td>qualified</td>
+</tr>
+<tr>
+<td><code>cta-lp-entry-value-not-go</code></td>
+<td>lp_entry.html</td>
+<td>cta</td>
+<td>email-capture</td>
+<td>&quot;Go →&quot; → &quot;Build my page →&quot;</td>
+<td>📉 +3–12% (directional)</td>
+<td>7.33</td>
+<td>qualified</td>
+</tr>
+<tr>
+<td><code>helix-form-risk-reversal-under-button</code></td>
+<td>form.html</td>
+<td>trust</td>
+<td>form-completion</td>
+<td>none → time/no-sales-call/privacy line</td>
+<td>📉 −5 to +10% (split framing!)</td>
+<td>7.33</td>
+<td>qualified</td>
+</tr>
+<tr>
+<td><code>helix-cut-to-three-fields-enrich-rest</code></td>
+<td>form.html</td>
+<td>form</td>
+<td>form-completion</td>
+<td>8 fields → 3 + enrich</td>
+<td>📉 +3–12% (not 10–25)</td>
+<td>7.33</td>
+<td>qualified</td>
+</tr>
+<tr>
+<td><code>cta-landing-readiness-arm</code></td>
+<td>segments.py</td>
+<td>cta</td>
+<td>landing→signup</td>
+<td>high-commitment CTA → readiness-matched arm</td>
+<td>📉 +3–9% (mismatched segs only)</td>
+<td>6.33</td>
+<td>qualified</td>
+</tr>
+<tr>
+<td><code>helix-itsec-question-arm-C</code></td>
+<td>variants.py</td>
+<td>headline</td>
+<td>it_sec site→CTA</td>
+<td>feature stack → &quot;Will it pass security review?…&quot;</td>
+<td>📉 −8 to +8% (~0)</td>
+<td>7.0</td>
+<td>qualified</td>
+</tr>
+<tr>
+<td><code>helix-form-cut-to-essential-fields</code></td>
+<td>form.html</td>
+<td>form</td>
+<td>form-completion</td>
+<td>9 fields → 4 + progressive</td>
+<td>📉 +8–12% (keep company_size!)</td>
+<td>7.33</td>
+<td>qualified</td>
+</tr>
+<tr>
+<td><code>helix-form-button-get-my-roi-report</code></td>
+<td>form.html</td>
+<td>cta</td>
+<td>form-completion</td>
+<td>&quot;Send me the report&quot; → &quot;Get my ROI report&quot;</td>
+<td>+2–9% (B2C-skewed)</td>
+<td>7.0</td>
+<td>null</td>
+</tr>
+<tr>
+<td><code>edu-gate-reassurance-microcopy</code></td>
+<td>lp_entry.html</td>
+<td>trust</td>
+<td>email-capture</td>
+<td>none → &quot;no spam / page-only use&quot; line</td>
+<td>+2–6% (directional)</td>
+<td>6.67</td>
+<td>null</td>
+</tr>
+<tr>
+<td><code>edu-intro-loss-frame-arm</code></td>
+<td>landing.py</td>
+<td>headline</td>
+<td>landing→signup</td>
+<td>&quot;free class&quot; → &quot;claim seat before cohort fills&quot;</td>
+<td>📉 −3 to +6% (~flat)</td>
+<td>7.33</td>
+<td>qualified</td>
+</tr>
+<tr>
+<td><code>helix-form-proof-beside-form</code></td>
+<td>form.html</td>
+<td>proof</td>
+<td>form-completion</td>
+<td>none → SOC2/HIPAA/deployed strip</td>
+<td>📉 +3–12% (~+5–8%)</td>
+<td>6.33</td>
+<td>qualified</td>
+</tr>
+<tr>
+<td><code>cta-thanks-value-suffix-vs-bare</code></td>
+<td>thanks.html</td>
+<td>cta</td>
+<td>thanks→site</td>
+<td>&quot;View your personalized page&quot; → &quot;See your verified ROI page&quot;</td>
+<td>📉 0 to +5% (~+1–3%)</td>
+<td>7.33</td>
+<td>qualified</td>
+</tr>
+<tr>
+<td><code>thanks-value-first-cta-copy</code></td>
+<td>thanks.html</td>
+<td>cta</td>
+<td>thanks→site</td>
+<td>&quot;View your page&quot; → &quot;See my ROI report&quot;</td>
+<td>📉 0 to +8%</td>
+<td>7.0</td>
+<td>qualified</td>
+</tr>
+<tr>
+<td><code>prov-tier-dial-as-bandit-context</code></td>
+<td>landing.py</td>
+<td>personalization</td>
+<td>signup CTR</td>
+<td>manual tier param → bandit T1–T3 (T4 held out)</td>
+<td>📉 +1–6% (mis-tiered segs)</td>
+<td>6.33</td>
+<td>qualified</td>
+</tr>
+</tbody>
+</table>
+<h3 id="cut-failed-verification--verdict-refuted-or-truth_boundary_ok-false">Cut
+(failed verification — verdict <code>refuted</code> or
+<code>truth_boundary_ok: false</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>helix-cta-firstperson-riskreversal</code></td>
+<td><strong>Refuted + boundary breach.</strong> &quot;Free / no-obligation /
+~15 min&quot; can&#39;t be proven — product is priced per record, the 15-min
+duration is invented; no checkout = no risk-anxiety to reverse. Only a
+first-person-only swap would be legal.</td>
+</tr>
+<tr>
+<td><code>edu-gate-softening-we-already-know</code></td>
+<td><strong>Boundary breach.</strong> Variant C (&quot;info you already
+shared&quot;) asserts first-party consent, but
+<code>cohort.py</code>/<code>signals.py</code> show data is partly
+<strong>purchased/PDL-enriched</strong> — a new unprovable consent
+claim. (Variant B &quot;your cohort record&quot; alone would survive; the item as
+scored is cut.)</td>
+</tr>
+<tr>
+<td><code>helix-quality-you-frame-arm-C</code></td>
+<td><strong>Refuted + boundary breach.</strong> A tenant render-block
+rejects the reader-directed headline, and it reframes an
+<em>averaged</em> 1.2-day figure as a per-reader patient promise.</td>
+</tr>
+<tr>
+<td><code>receipts-as-proof-onbrand</code></td>
+<td><strong>Boundary breach.</strong> The &quot;{N} sources on file&quot; count is
+false as written — claims share sources (quality arm B = 3 claims → 2
+distinct docs); and on-site self-rendered receipts aren&#39;t the
+&quot;independent&quot; verification the cited research describes. Fixable, but
+cut as specified.</td>
+</tr>
+<tr>
+<td><code>specificity-recency-stats</code></td>
+<td><strong>Boundary breach.</strong> &quot;92% finish — across 600+
+enrollments&quot; mixes the <em>hired</em> and <em>enrollment</em>
+denominators; not Gate-safe. (The 6-month relabel alone would be
+safe.)</td>
+</tr>
+<tr>
+<td><code>booked-set-expectations-timeline</code></td>
+<td><strong>Boundary breach.</strong> &quot;within one business day&quot; is an
+unverifiable SLA the ops process may not honor; must downgrade to
+&quot;shortly.&quot;</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="4-per-funnel-stage-detail-surviving-tests">4. Per-funnel-stage
+detail (surviving tests)</h2>
+<h3 id="4a-education-email-gate-lp_entryhtml">4A. Education email gate
+(<code>lp_entry.html</code>)</h3>
+<p><strong>Shared caveat:</strong> this surface emits <strong>no reward
+signal today</strong> — it&#39;s a plain GET form with no arm, no
+<code>select()</code>, no UTM/referrer/UA capture. Every &quot;bandit arm&quot;
+here is really <em>&quot;add entry-logging + an enter-rate reward FIRST, then
+it becomes a learnable arm.&quot;</em> Device is already read elsewhere
+(<code>cohort.py</code>, <code>signals.py</code>), so device-adaptive
+ordering is feasible; arrival-channel learning is net-new
+instrumentation.</p>
+<ul>
+<li><strong><code>edu-gate-button-first-person-value</code> /
+<code>cta-lp-entry-value-not-go</code></strong> — H: &quot;Go →&quot; carries zero
+information scent; &quot;Build my page →&quot; names the payoff and uses the verb
+the body already uses (&quot;build your page on the spot&quot;). M: self-reference
++ benefit framing + scent. Evidence: Aagaard/ContentVerve first-person
+wins (+38–90%) are <strong>B2C single-tests</strong>; corrected to
+single-digit/maybe-flat because the cohort is captive and high-intent —
+<em>but</em> this near-B2C audience is where the evidence transfers
+best. Wiring:
+<code>ENTRY_CTA_ARMS = {A:&quot;Go →&quot;, B:&quot;Build my page →&quot;}</code> on a
+one-context <code>ThompsonBandit</code> keyed <code>__lp_entry__</code>;
+reward = <code>/lp</code> match. claim_ids=[] → clears Gate
+trivially.</li>
+<li><strong><code>edu-gate-reassurance-microcopy</code></strong>
+(verdict null) — one line under the field (&quot;…no spam / page-only use&quot;).
+Truth-watch: only true <strong>at this step</strong> — confirm the gate
+submit doesn&#39;t enqueue outreach before shipping.</li>
+<li><strong><code>edu-gate-error-recovery-rewrite</code></strong>
+(qualified) — the real win is the product-logic own-goal: current error
+routes a <em>legitimate</em> cohort member to <strong>demo
+addresses</strong>. Corrected +5–12% on post-error recovery, mostly from
+the copy fix not inline validation. Ship as two arms (copy-only vs
+copy+inline) to attribute the lift. Note: gate is an <strong>exact
+10-row allowlist</strong>, not a domain check — the dominant &quot;not in
+cohort&quot; bounce is untouched by domain-typo fixes.</li>
+<li><strong><code>edu-gate-qr-first-vs-email-first</code></strong>
+(qualified) — device-adaptive ordering. Best as a <strong>deterministic
+UA default</strong> (mobile→email-first, desktop→QR) + an enter-rate
+event, not a bandit arm, since no reward exists yet. Corrected +2–8%
+mobile only, ~0 desktop.</li>
+<li><strong><code>edu-gate-domain-friction-prefill</code></strong>
+(qualified) — corrected near-zero on submit (single-field forms already
+at ceiling); measure as <strong>error-rate</strong>, and keep the suffix
+<strong>editable</strong> — <code>johnny.c.chung@gmail.com</code> is a
+non-gauntletai cohort member who&#39;d be locked out by a hard suffix.</li>
+</ul>
+<h3 id="4b-education-landing-landingpy--landinghtml--segmentspy">4B.
+Education landing (<code>landing.py</code> / <code>landing.html</code> /
+<code>segments.py</code>)</h3>
+<p>This funnel is <strong>entirely deterministic today</strong> —
+bringing it onto the bandit is the headline structural change.</p>
+<ul>
+<li><strong><code>edu-cta-first-person-outcome-verb</code></strong> —
+per-archetype B-arm (&quot;Watch a free class&quot; → &quot;Start my free class&quot;).
+Corrected +3–12% (~+5–7%), real null chance on low-traffic segments.
+Wiring: change <code>ARCHETYPES[*].cta</code> from a string to
+<code>[(arm,text)]</code>; <code>_cta()</code> calls
+<code>bandit.select(f&quot;{arch.id}__t{tier}&quot;)</code>; reward = CTA click
+(already in <code>cta_events</code>). Both strings clear Gate (no
+claim).</li>
+<li><strong><code>cta-landing-readiness-arm</code></strong> —
+lower-commitment B-arm per archetype (&quot;Apply now&quot; → &quot;See if you&#39;re
+ready&quot;). Direction backed by a real <em>education</em> case (CRE/All
+About Learning +28% with no downstream cannibalization). <strong>Must
+reward on enrollment/attendance, not click</strong>, or softer CTAs
+inflate a vanity metric. Net-new plumbing (education funnel has no arm
+wiring).</li>
+<li><strong><code>edu-hero-outcome-specificity</code> /
+<code>edu-outcome-angle-salary-anchor</code></strong> — promote the
+already-proven &quot;+$38K median / 600+ hired&quot; into the hero. Reuses an
+approved <code>claim_id</code> → Gate-clears identically. Scope to
+<code>outcomes_first</code>/<code>cost_confident</code> (a salary hero
+reads transactional for explorer/prestige). <strong>Trim the
+sub</strong> — Unbounce shows education demands the lowest word count
+and penalizes dense/high-reading-level copy.</li>
+<li><strong><code>proof-format-bandit-arm</code> /
+<code>edu-proof-block-bandit-stats-vs-testimonial</code></strong> —
+replace the deterministic
+<code>proof = &quot;stats&quot; if data_driven else testimonial</code> rule
+(<code>design.py</code>) with a 3-arm bandit (stats / testimonial /
+both). Keep the psychographic flag as a <strong>warm-start
+prior</strong>, not a hard gate. Corrected +1–5% (possibly
+flat/negative) — only the <em>narrative-identification</em> mechanism
+transfers; the CXL/+34% numbers are mis-cited B2C. 3 arms need ~1.5×
+traffic — warm-start to degrade gracefully on a 10-seed cohort.</li>
+<li><strong><code>edu-section-order-financing-first</code></strong>
+(qualified) — order-as-arm, no copy change. Corrected −2 to +5%
+(weakest-evidenced; F-pattern direction only). Keep it a
+<strong>single-axis</strong> bandit before combining with other
+arms.</li>
+<li><strong><code>edu-subhead-declared-goal-mirror</code></strong>
+(qualified) — mirror the visitor&#39;s <strong>own declared goal</strong>
+(HubSpot <code>say</code>-layer) across all tiers. Lowest truth-risk in
+the set. Corrected +3–12% for the submitted-with-goal subset, ~0 at tier
+1 (already echoes), watch tier-4 redundancy. Gate to
+<code>has_declared_goal</code> context.</li>
+<li><strong><code>edu-intro-loss-frame-arm</code></strong> (qualified) —
+soft scarcity bound to the <strong>real</strong> &quot;night cohort starts in
+3 weeks&quot; fact (no fabricated timer). Corrected ~flat (−3 to +6%);
+Prospect Theory actually favors gain-framing on a free step. Fall back
+to plain <code>intro</code> if the date isn&#39;t Gate-verifiable at
+render.</li>
+<li><strong><code>edu-credibility-numeric-arm</code></strong>
+(qualified, thin verdict) — promote verified &quot;40+ orgs&quot; into the
+headline for prestige archetype.</li>
+</ul>
+<h3 id="4c-helix-form-formhtml--the-biggest-helix-opportunity">4C. Helix
+form (<code>form.html</code>) — the biggest Helix opportunity</h3>
+<ul>
+<li><strong><code>helix-form-h1-numeric-test</code></strong> — Variant C
+(proof-anchored &quot;Get a verified clinical-ops ROI report&quot;) is the better
+challenger for this risk-averse audience; gate role-aware Variant C
+behind an <code>inferred_role_confidence</code> feature. Corrected +1–5%
+(B), +3–8% (C where role known). Native fit to
+<code>ROLE_ANGLES</code>.</li>
+<li><strong><code>helix-cut-to-three-fields</code> /
+<code>helix-form-cut-to-essential-fields</code></strong> — <strong>DO
+NOT drop <code>company_size</code>.</strong> Verification found the
+bandit segment is keyed on <strong>role + company_size</strong>;
+dropping it starves arm selection and the synthetic-enrichment path
+can&#39;t recover it (only the capped/partial PDL path can). Keep role
+<em>and</em> company_size on screen 1; defer the rest. Corrected +3–12%
+(not 10–25%), and <strong>measure downstream booked rate</strong> —
+longer forms self-qualify higher-intent B2B leads (Aagaard&#39;s −14%
+precedent). Needs a second pre-segment <code>form_layout</code> bandit
+keyed on device.</li>
+<li><strong><code>helix-mark-optional-not-required</code></strong>
+(null) / <strong><code>helix-two-step-progressive</code></strong>
+(qualified) /
+<strong><code>helix-move-heardvia-postsubmit</code></strong> (null) —
+progressive-disclosure siblings. For the 2-step form the <strong>robust
+win is step-1 partial capture</strong> (email+role banked even on step-2
+abandon), +5–25% on captured leads; total-completion lift is
+~flat-to-+10% (Helix&#39;s 8 fields sit at the <em>bottom</em> of the
+field-count band where multi-step helps least). Use a <strong>graded
+float reward</strong> (1.0 full / 0.5 step-1 / 0 bounce).</li>
+<li><strong><code>cta-form-kill-friction-verb</code> /
+<code>helix-form-button-get-my-roi-report</code></strong> — both control
+and variant are already first-person, so the canonical +90% &quot;my vs your&quot;
+effect <strong>doesn&#39;t apply</strong>; corrected ~flat. Per-role arm,
+near-zero cost.</li>
+<li><strong><code>helix-form-risk-reversal-under-button</code></strong>
+— <strong>split into two arms: affirmative-privacy vs &quot;never-sell&quot;
+negation.</strong> Aagaard measured a negation/threat line (&quot;we will
+never spam you&quot;) <em>cutting</em> conversion −18.7%. Corrected −5 to
++10%. New context feature
+<code>submit_reassurance ∈ {none, affirmative, never_sell, time_only}</code>;
+route through Gate (clauses must stay operationally true of the
+flow).</li>
+<li><strong><code>helix-form-proof-beside-form</code></strong> — source
+the strip from real <code>claim_ids</code>
+(<code>c_deployed/c_soc2/c_hipaa</code>) through
+<code>gate.verify_variant</code>. Corrected +3–12% (~+5–8%) — SOC 2 is a
+documented B2B-healthcare procurement gate; the cited
+Hubstaff/testimonial numbers are inapplicable (testimonials forbidden by
+the Constitution). Let the bandit swap <em>which</em> proven claim leads
+per role (<code>c_soc2</code>→it_security,
+<code>c_deployed</code>→quality).</li>
+<li><strong><code>helix-inline-validation-positive</code></strong>
+(null) — <strong>on-blur only</strong> (per-keystroke validation
+<em>increases</em> errors per UX Movement). Device-conditioned
+(mobile-weighted).</li>
+<li><strong><code>helix-consent-uncheck-microcopy</code></strong> (null)
+— pre-checked consent is GDPR-non-compliant (Planet49); judge on
+<strong>quality-adjusted reward</strong> (propagate the form-arm id to
+the Recipient so a later unsubscribe <code>b += 3</code> credits the
+right arm).</li>
+</ul>
+<h3 id="4d-helix-hero--role-arms-variantspy">4D. Helix hero / role arms
+(<code>variants.py</code>)</h3>
+<p>All four add a <strong>third role arm reusing existing
+<code>claim_ids</code></strong> → Gate-clears by construction, no
+special-casing (Article II preserved). Corrected lifts are small and the
+cited 15–35% &quot;numeric headline&quot; stats were found
+<strong>fabricated/mis-attributed</strong> (not on the cited pages) —
+let the bandit, not the stats, decide.</p>
+<ul>
+<li><code>helix-clinops-numbers-arm-C</code> (+0–4%) —
+<code>c_los</code> is already in arm A&#39;s body, so the only novelty is
+promoting it to the headline.</li>
+<li><code>helix-cfo-loss-frame-arm-C</code> (−5 to +10%) — carries
+<code>c_tco</code>, so it doubles as the <strong>MLR legal-hold</strong>
+exhibit (auto-RED when the hold flips).</li>
+<li><code>helix-itsec-question-arm-C</code> (~0, −8 to +8%) — question
+vs declarative is a coin-flip; low-risk arm, reviewer wants the answer
+up front.</li>
+<li><code>helix-proof-headline-explicit</code> (qualified, −5 to +10%) —
+promote the muted Gate-verification line into the H2; likely positive
+for it_security/quality/cfo, negative for outcome-hungry clinops.
+<strong>Bandit arm, never a global swap.</strong></li>
+</ul>
+<h3 id="4e-helix-site--momentum--booked">4E. Helix site / momentum /
+booked</h3>
+<ul>
+<li><strong><code>cta-site-first-person-roi</code></strong> (corrected 0
+to +6%) — keystone wiring: extend <code>variant_id</code> with a CTA
+suffix so <code>oracle._arm_of</code>/<code>campaign.py</code> treat it
+as a distinct Beta arm; render <code>{{ variant.cta_text }}</code>.</li>
+<li><strong><code>helix-sticky-repeat-cta</code></strong> (qualified,
++2–7% mobile) — repeat the <strong>same</strong> CTA after the proof
+receipts + slim sticky mobile bar; the only controlled sticky tests
+(Growth Rock) show +5–8%, not the cited 5–15%. <strong>Placement is an
+orthogonal layout arm</strong>, not a <code>ROLE_ANGLES</code> swap.
+Single-CTA-vs-competing evidence validates the no-competing-CTA
+rule.</li>
+<li><strong><code>helix-disclosure-reframe-arm</code></strong>
+(qualified) — move the raw &quot;variant B, A/B winner&quot; jargon into an
+expandable receipt; keep a plain transparency line. Corrected −2 to +6%.
+This is <strong>template chrome, not a per-role arm</strong> — implement
+as a page-level A/B/C or context feature. Gartner: 53% of B2B buyers say
+over-personalization <em>harmed</em> their experience.</li>
+<li><strong><code>helix-claim-count-prioritize</code></strong>
+(qualified) — corrected −1 to +4%; the &quot;1–3 vs 7+ signals&quot; stat is
+mis-attributed and arms already show only 3 claims. <strong>Never drop
+the withheld notice</strong> — make it <em>more</em> prominent
+(costly-honesty signal).</li>
+<li><strong><code>helix-stakeholder-share-cta</code></strong> (null) —
+forward-the-verified-page secondary action; reward on the
+<strong>primary</strong> CTA so cannibalization prunes it.</li>
+<li><strong>Momentum (<code>thanks.html</code>):</strong>
+<code>thanks-value-first-cta-copy</code> /
+<code>cta-thanks-value-suffix-vs-bare</code> (both ~0 to +8%,
+per-segment &quot;my&quot; can read consumer-y for CFO/CISO);
+<code>thanks-yes-ladder-momentum</code> (qualified, ~flat-to-+6% —
+Zeigarnik is weak per 2025 meta-analysis; &quot;step 1 of 2&quot; must stay
+literally true); <code>thanks-enrichment-proof-lead</code> (null, guard
+on <code>enrich.usable&gt;0</code>);
+<code>thanks-urgency-context-feature</code> (null — extend context key
+to <code>role__tier__urgency</code>).</li>
+<li><strong>Booked (<code>site_cta.html</code>):</strong>
+<code>booked-add-to-calendar-self-schedule</code> (qualified — corrected
+to a 3–10pt absolute no-show drop <em>among savers</em>, ~+2–8% blended;
+hold arm C until a real scheduler exists);
+<code>booked-inspector-vs-share-proof</code> (null). First lane with a
+<strong>delayed reward</strong> (attended/no-show), handled by
+<code>PosteriorStore.update</code> when the outcome resolves.</li>
+</ul>
+<hr />
+<h2 id="5-provenance-as-a-lever-the-signature-finding">5.
+Provenance-as-a-lever (the signature finding)</h2>
+<p><strong>Does showing verification/receipts and dialing the tier (1→4)
+lift or depress conversion?</strong> The honest answer from
+verification: <strong>the mechanism is real and well-evidenced; the
+magnitude is not, and the direction flips by audience and
+tier.</strong></p>
+<p><strong>What the evidence actually says (after correcting
+citations):</strong></p>
+<ul>
+<li><strong>Overt personalization is non-monotonic.</strong> The
+defensible curve comes from the <em>Personalization Backfire</em> lab
+study (Behavioral Sciences 2025, n=360) and the inverted-U AI-ad work
+(JAR 2025): relevance lifts engagement up to an inflection, past which
+<strong>perceived surveillance triggers reactance</strong> and depresses
+intent. Crucially, the backfire fired only for <strong>high-PII /
+high-intensity</strong> personalization — <em>moderate, contextual</em>
+personalization did <strong>not</strong> backfire even under elevated
+privacy concern. Tiers 1–3 here are contextual; <strong>tier 4 (naming
+title+company unprompted) is the high-PII regime</strong> the literature
+flags.</li>
+<li><strong>The inflection is earlier for Helix.</strong> B2B-healthcare
+buyers are the high-need-for-cognition, risk-averse segment for whom
+Lambillotte (2022) shows transparency help is <em>conditional</em>;
+Gartner found 53% of B2B buyers say personalization harmed their
+experience. Education career-switchers sit closer to the (more
+forgiving) B2C evidence.</li>
+<li><strong>Control beats disclosure-alone.</strong> Tucker (2014, JMR)
+~doubled personalized-ad CTR purely by adding a privacy <em>control</em>
+(targeting unchanged); Kim/Barasz/John (2019, JCR) show transparency
+backfires <strong>only when it reveals an <em>unacceptable</em>
+flow</strong> (inferred + off-site). The <code>lp_entry</code> line
+&quot;even though you never filled out a form&quot; is a textbook
+unacceptable-flow disclosure.</li>
+<li>Corrected expected effects are <strong>low single digits</strong>
+and only on <strong>mis-tiered segments</strong> — with a real downside
+tail. On a 10-seed cohort, no tier comparison is statistically
+detectable; the honest value is <strong>qualitative
+ceiling-finding</strong>, not a measured lift.</li>
+</ul>
+<p><strong>Recommended transparency-dosage test design:</strong></p>
+<ol type="1">
+<li><strong>Tier as a capped context dimension</strong>
+(<code>prov-tier-dial-as-bandit-context</code>). Extend the bandit key
+<code>segment → (segment, tier)</code>; route the production tier from
+<code>bandit.select()</code> over arms <strong>{T1, T2, T3}</strong>.
+<strong>Tier 4 is held OUT of the live pool by an allowlist</strong> —
+the privacy twin of the planted-lie arm: it must be <em>unreachable by
+construction</em>, not by hoping the bandit avoids it. (Tiers 1–3 only
+re-frame already-source-tagged facts → truth boundary safe by
+construction.)</li>
+<li><strong>Reward on the downstream outcome</strong> (booked assessment
+/ class signup), <strong>not the click</strong> — plus an
+unsubscribe/bounce <strong>hard negative</strong> (<code>b += 3</code>).
+A creepy tier that spikes the click but tanks trust is then punished,
+not rewarded.</li>
+<li><strong>Tier-4 framing sub-test (demo-gated, off live
+auto-pool):</strong> A &quot;gotcha&quot; frame vs B &quot;consent+control&quot; frame (drop
+the unacceptable-flow clause, add a working &quot;show me the safe version&quot; →
+tier-1 switch). Measure <strong>bounce/scroll-depth as the primary
+endpoint, CTA secondary</strong>; treat a drop-to-tier-1 click as reward
+0 + a creepiness flag.</li>
+<li><strong>Provenance prominence arms</strong>
+(<code>prov-withheld-count-prominence</code>: corrected +1–5% B2B / 0–3%
+edu; <code>prov-source-receipt-default-open</code>: segment-gate to
+it_security/quality/cfo, ~flat-to-negative for low-skepticism edu;
+<code>prov-justify-data-use-line</code>: corrected ~wash for high-NFC
+Helix, +1–4% for edu — <strong>one sentence, not the long
+paragraph</strong>).</li>
+</ol>
+<p><strong>Net recommendation:</strong> treat radical transparency as a
+<strong>dosable</strong> variable the bandit tunes per segment, with
+tier-4 reveal and any unprovable count permanently outside the
+optimizable pool. Expect the wins to be small and concentrated in
+mis-tiered segments; the strategic value is proving the creepiness
+ceiling exists and where it sits — which <em>is</em> the product
+thesis.</p>
+<hr />
+<h2 id="6-recommended-first-wave-sequenced--highest-ice-lowest-effort-fastest-signal-first">6.
+Recommended first wave (sequenced — highest ICE, lowest effort, fastest
+signal first)</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Change</th>
+<th>Optimizer arm / feature to add</th>
+<th>Metric &amp; sample-size note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1</strong></td>
+<td><strong>Helix clinops headline arm C</strong> — add
+<code>(&#39;C&#39;,&#39;specificity&#39;,&#39;Reduce average length of stay by 1.2 days&#39;,[&#39;c_los&#39;,&#39;c_deployed&#39;,&#39;c_speed&#39;])</code>
+to <code>ROLE_ANGLES[&#39;clinops&#39;]</code>.</td>
+<td>New 3rd Beta arm per clinops micro-segment; auto-expanded by
+<code>build_variants()</code>, Gate-cleared by
+<code>build_action_pool()</code>. Zero new code.</td>
+<td>site→CTA CTR, clinops only. Corrected +0–4% → needs a <strong>large
+n</strong> (plan for a long run; at &lt;~1k weekly segment sessions
+expect inconclusive). Cheapest possible first arm — ships the wiring
+pattern.</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td><strong>Helix site CTA pronoun arm</strong> — render
+<code>{{ variant.cta_text }}</code>; arms A &quot;Start your ROI assessment&quot;
+/ B &quot;Start my…&quot;.</td>
+<td>CTA suffix on <code>variant_id</code>
+(<code>…__ctaP1/__ctaP2</code>) → distinct Beta arm via existing
+<code>oracle._arm_of</code>. No bandit changes.</td>
+<td>site→booked CTR per role. Corrected 0 to +6% (~+2–3%). Power for a
+~3pt MDE; let bandit down-weight &quot;my&quot; for cfo/it_security.</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td><strong>Education CTA onto the bandit</strong> —
+<code>ARCHETYPES[*].cta</code>: string →
+<code>[(A,current),(B,first-person-outcome)]</code>; <code>_cta()</code>
+calls <code>bandit.select(f&quot;{arch.id}__t{tier}&quot;)</code>.</td>
+<td>Brings the <strong>entire edu CTA into the optimizer</strong>
+(currently static). Reward = signup CTA click
+(<code>cta_events</code>).</td>
+<td>landing→signup CTR per archetype. Corrected +3–12% (~+5–7%);
+warmest/most-applicable evidence in the program. Real null chance on
+thin segments — warm-start priors.</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td><strong>lp_entry button + entry logging</strong> —
+<code>ENTRY_CTA_ARMS = {A:&quot;Go →&quot;, B:&quot;Build my page →&quot;}</code>;
+<strong>first add the enter-rate event</strong> the gate currently
+lacks.</td>
+<td>One-context <code>ThompsonBandit</code> keyed
+<code>__lp_entry__</code>; reward = <code>/lp</code> match. claim_ids=[]
+→ Gate-trivial.</td>
+<td>email-capture rate. Corrected +3–12% directional.
+<strong>Instrumentation is the gating work</strong> — ship logging in
+this wave so the gate becomes measurable at all.</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td><strong>Helix form proof strip</strong> — render
+<code>c_deployed/c_soc2/c_hipaa</code> (verbatim, via
+<code>gate.verify_variant</code>) beside the form card; arms {none,
+strip}.</td>
+<td>New <code>form_proof</code> context feature; bandit learns
+<em>which</em> proven claim leads per role.</td>
+<td>form-completion (<code>/submit</code>), measured
+<strong>and</strong> downstream booked rate. Corrected +3–12% (~+5–8%);
+strongest for it_security/quality.</td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td><strong>Helix form risk-reversal — split framing</strong> — arms
+{none, affirmative-privacy, never-sell-negation}, one line above the
+submit.</td>
+<td>New <code>submit_reassurance</code> context feature, routed through
+Gate (clauses must be operationally true of the flow).</td>
+<td>form-completion + unsubscribe-as-negative. Corrected −5 to +10% —
+<strong>the test&#39;s job is to catch the negation backfire</strong>
+(Aagaard −18.7%) before it ships, not to assume a win.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Sequencing rationale:</strong> #1–#2 are near-zero-effort and
+prove the Helix arm-suffix wiring; #3–#4 unlock the two funnels
+currently <em>outside</em> the optimizer (edu CTA, entry gate) — the
+highest structural leverage; #5–#6 are cheap Helix conversion-point
+trust tests, with #6 deliberately framed to surface a known downside.
+Across all six: reward on the <strong>deepest reliable signal</strong>
+(booked/enrolled where possible, not the immediate click), warm-start
+posteriors from the existing deterministic rules so 10-seed-cohort demos
+degrade gracefully, and treat every corrected single-digit lift as a
+directional prior to be replaced by the surface&#39;s own measured rate —
+not a forecast to bank.</p>
+</main>
+<footer class="foot">Provenance capstone · self-optimizing inside the truth boundary · every variant stays Gate-clearable.</footer>
+</div>
+</body>
+</html>
