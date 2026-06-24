@@ -101,7 +101,7 @@ def demo_live(request: Request):
     det = SC.detect(request)
     industry = det["industry"] or SC.DEFAULT_INDUSTRY
     sc = SC.build_scene(det["region"], industry, detected=bool(det["region"]),
-                        company=det["company"])
+                        company=det["company"], city=det["city"])
     return templates.TemplateResponse(request, "demo_live.html", {
         "det": det, "scene": sc, "industries": SC.INDUSTRIES, "states": SC.STATES,
         "client_map": SC.client_map(), "default_industry": industry,
@@ -109,8 +109,17 @@ def demo_live(request: Request):
     })
 
 
+@app.get("/api/demo/resolve")
+def api_demo_resolve(ip: str = ""):
+    """Resolve an ENTERED IP → company / location / industry (real reverse-IP + PDL).
+    Powers the 'try a different IP' override on /demo/live."""
+    return JSONResponse(SC.resolve_ip(ip))
+
+
 @app.get("/api/demo/scene")
-def api_demo_scene(region: str = "", industry: str = ""):
-    """Server-authoritative scene for a (region × industry) preview (used by the picker)."""
+def api_demo_scene(region: str = "", industry: str = "", company: str = "",
+                   city: str = "", policy: str = "allude"):
+    """Server-authoritative scene for a (region × industry × policy) preview."""
     return JSONResponse(SC.build_scene(region or None, industry or SC.DEFAULT_INDUSTRY,
-                                       detected=False))
+                                       detected=False, company=company or None,
+                                       city=city or None, policy=policy))

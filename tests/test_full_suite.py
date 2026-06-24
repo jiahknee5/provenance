@@ -123,12 +123,13 @@ def test_create_then_undo_removes_record():
     assert "Temp Undo" not in c.get("/records?view=all").text
 
 
-def test_demo_live_renders_with_overrides_and_real_imagery():
-    """The by-IP live landing renders, has location+industry override pickers, and uses
-    real licensed imagery with attribution."""
+def test_demo_live_renders_inspector_overrides_and_real_imagery():
+    """The by-IP landing: IP + manual overrides, allude/say toggle, the captured-data
+    inspector, and real licensed imagery with attribution."""
     t = c.get("/demo/live").text
-    assert 'id="sel-loc"' in t and 'id="sel-ind"' in t          # override pickers
-    assert 'class="lv-hero"' in t and "The receipt" in t
+    assert 'id="ip-in"' in t and 'id="sel-loc"' in t and 'id="sel-ind"' in t   # IP + manual overrides
+    assert 'id="seg-policy"' in t                                              # allude/say toggle
+    assert 'class="lv-hero"' in t and "Everything captured" in t and 'id="cap-body"' in t
     assert "license" in t.lower() and ("staticflickr" in t or "wikimedia" in t)  # real CC photo
 
 
@@ -139,9 +140,24 @@ def test_scene_engine_deterministic_and_sourced():
     assert "Arizona" in (a["headline"] + a["sub"] + a["eyebrow"])
     assert a["image"]["url"].startswith("http") and a["image"]["license"]
     assert all(r["source"] and r["policy"] for r in a["receipt"])  # every row sourced + policied
-    assert any("company" in r["signal"] for r in a["receipt"])
     assert SC._industry_to_bucket("Oil & Energy") == "energy"      # real industry→bucket mapping
     assert SC._industry_to_bucket("Computer Software") == "technology"
+
+
+def test_scene_say_recites_allude_does_not():
+    from pipeline.personalization import scene as SC
+    allude = SC.build_scene("Arizona", "technology", detected=True, company="Apple Inc", city="Cupertino", policy="allude")
+    say = SC.build_scene("Arizona", "technology", detected=True, company="Apple Inc", city="Cupertino", policy="say")
+    assert "Apple Inc" not in allude["headline"]       # allude never recites the company
+    assert "Apple Inc" in say["headline"]              # say (ungated) recites it
+    assert say["blocked"] is True and allude["blocked"] is False
+    assert any(r["policy"] == "say" and "company" in r["signal"] for r in say["receipt"])
+
+
+def test_resolve_ip_is_honest_offline():
+    from pipeline.personalization import scene as SC
+    d = SC.resolve_ip("10.0.0.1")   # private — no network, honest reason, no captured data
+    assert d["company"] is None and d["captured"] == [] and "local" in d["reason"].lower()
 
 
 def test_api_demo_scene_preview():

@@ -116,7 +116,8 @@ GENERIC_REGION = "your region"
 # REAL reverse-IP provider (free, no key): geo + the org/company behind the IP + mobile/proxy/
 # hosting flags so we know whether it's a clean corporate office IP vs an ISP/VPN/cloud.
 _IP_API = "http://ip-api.com/json/"
-_IP_FIELDS = "status,country,countryCode,region,regionName,city,isp,org,as,asname,mobile,proxy,hosting,query"
+_IP_FIELDS = ("status,country,countryCode,region,regionName,city,zip,lat,lon,timezone,"
+              "isp,org,as,asname,mobile,proxy,hosting,query")
 # REAL company → industry: PDL company-enrich (inert without PDL_API_KEY).
 _PDL_COMPANY = "https://api.peopledatalabs.com/v5/company/enrich"
 
@@ -176,8 +177,10 @@ def reverse_ip(ip: str) -> dict:
     if not d:
         return {}
     return {"region": d.get("regionName"), "city": d.get("city"), "country": d.get("country"),
+            "zip": d.get("zip"), "lat": d.get("lat"), "lon": d.get("lon"),
+            "timezone": d.get("timezone"), "asn": d.get("as"),
             "company": (d.get("org") or d.get("asname") or "").strip(), "isp": d.get("isp"),
-            "asname": d.get("asname"), "mobile": bool(d.get("mobile")),
+            "org": d.get("org"), "asname": d.get("asname"), "mobile": bool(d.get("mobile")),
             "proxy": bool(d.get("proxy")), "hosting": bool(d.get("hosting")),
             "is_corporate": not (d.get("mobile") or d.get("proxy") or d.get("hosting"))}
 
@@ -206,63 +209,152 @@ def _pdl_company_industry(name: str) -> str | None:
         return None
 
 
-def detect(request) -> dict:
-    """Resolve the visitor from their REAL IP: region + company (reverse-IP) + industry (PDL).
-    Honest about *why* it couldn't resolve a company (mobile / VPN / cloud / residential)."""
-    ip = client_ip(request)
+def _daypart(tz: str | None) -> str | None:
+    if not tz:
+        return None
+    try:
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+        h = datetime.now(ZoneInfo(tz)).hour
+    except Exception:
+        return None
+    return ("late night" if h >= 22 or h < 5 else "morning" if h < 12
+            else "afternoon" if h < 17 else "evening")
+
+
+def resolve_ip(ip: str) -> dict:
+    """Resolve ANY IP → EVERY signal captured + the derivation cascade. Used for the visitor's
+    own IP (default) and an entered IP (override). Returns a `captured` list (signal → value →
+    what it drives → surface policy) so the page can show the whole pipeline transparently."""
+    ip = (ip or "").strip()
     rv = reverse_ip(ip)
     company = rv.get("company") if rv.get("is_corporate") else None
-    industry, industry_raw = None, None
-    if company:
-        industry_raw = _pdl_company_industry(company)
-        industry = _industry_to_bucket(industry_raw)
+    industry_raw = _pdl_company_industry(company) if company else None
+    industry = _industry_to_bucket(industry_raw)
+    daypart = _daypart(rv.get("timezone"))
+    nettype = ("corporate" if rv.get("is_corporate") else "mobile" if rv.get("mobile")
+               else "VPN / proxy" if rv.get("proxy") else "hosting / cloud" if rv.get("hosting")
+               else "residential")
     reason = ""
     if not rv:
-        reason = "local/unreachable IP — pick a location to preview"
+        reason = "local / private / unreachable IP — pick a location or try a public IP"
     elif rv.get("mobile"):
         reason = f"mobile network ({rv.get('isp')}) — no company resolved"
     elif rv.get("proxy"):
-        reason = "VPN/proxy detected — no company resolved"
+        reason = "VPN / proxy detected — no company resolved"
     elif rv.get("hosting"):
-        reason = f"hosting/cloud IP ({rv.get('isp')}) — not a corporate office"
+        reason = f"hosting / cloud IP ({rv.get('isp')}) — not a corporate office"
     elif not company:
         reason = f"residential ISP ({rv.get('isp')}) — no company resolved"
+
+    cap: list[dict] = []
+
+    def add(label, value, drives, policy, group):
+        cap.append({"label": label, "value": value if value not in (None, "") else "—",
+                    "drives": drives, "policy": policy, "group": group})
+
+    if rv:
+        coords = (f"{rv.get('lat')}, {rv.get('lon')}" if rv.get("lat") is not None else None)
+        ind_label = (BY_KEY[industry]["label"] + f" (NAICS {BY_KEY[industry]['naics']})") if industry else (industry_raw or None)
+        add("Country", rv.get("country"), "—", "allude", "geo")
+        add("Region / state", rv.get("region"), "region copy + image region", "allude", "geo")
+        add("City", rv.get("city"), "headline (Say mode)", "allude", "geo")
+        add("Postal", rv.get("zip"), "—", "allude", "geo")
+        add("Coordinates", coords, "—", "allude", "geo")
+        add("Timezone", rv.get("timezone"), "→ daypart", "allude", "geo")
+        add("ASN", rv.get("asn"), "→ org / company", "allude", "net")
+        add("ISP / org", rv.get("org") or rv.get("isp"), "→ company", "allude", "net")
+        add("Network type", nettype, "gates company resolution", "observed", "net")
+        add("Company", company, "→ industry", "allude", "resolved")
+        add("Industry", ind_label, "copy template + backdrop", "allude", "resolved")
+        add("Daypart", daypart, "tone / dark-mode (available)", "observed", "resolved")
     return {"ip": ip, "region": rv.get("region"), "city": rv.get("city"), "company": company,
             "industry": industry, "industry_raw": industry_raw, "isp": rv.get("isp"),
-            "resolved_company": bool(company), "resolved_industry": bool(industry), "reason": reason}
+            "resolved_company": bool(company), "resolved_industry": bool(industry),
+            "reason": reason, "captured": cap}
+
+
+def detect(request) -> dict:
+    """The visitor's own IP → resolution + the request-derived signals (device / language /
+    referrer) that are captured but don't change when you override the IP."""
+    d = resolve_ip(client_ip(request))
+    ua = request.headers.get("user-agent", "")
+    lang = (request.headers.get("accept-language", "") or "").split(",")[0]
+    ref = request.headers.get("referer", "")
+    device = "mobile" if ("Mobi" in ua or "Android" in ua) else "desktop"
+    d["request_signals"] = [
+        {"label": "Device (User-Agent)", "value": device, "drives": "layout (available)",
+         "policy": "observed", "group": "request"},
+        {"label": "Language", "value": lang or "—", "drives": "locale (available)",
+         "policy": "observed", "group": "request"},
+        {"label": "Referrer", "value": ref or "direct", "drives": "source attribution (available)",
+         "policy": "observed", "group": "request"},
+    ]
+    return d
 
 
 def _fill(s: str, region: str | None) -> str:
     return s.replace("{region}", region or GENERIC_REGION)
 
 
+# SAY mode — the ungated version: recite the involuntary signals (company, precise location).
+# Shown for contrast; in production the Gate blocks it (reciting allude-class data = overclaim).
+SAY = {
+    "eyebrow": "Resolved from your IP",
+    "headline_co": "{company} — we see your {industry} team in {city}, {region}.",
+    "headline_noco": "We see a {industry} operator in {region}.",
+    "sub": "Down to the building. Most of your competitors already run us — want the same edge?",
+}
+
+
+def _say_fill(t: str, company, city, region, ind_label) -> str:
+    return (t.replace("{company}", company or "your company")
+             .replace("{industry}", (ind_label or "").lower())
+             .replace("{city}", city or "your city")
+             .replace("{region}", region or GENERIC_REGION))
+
+
 def build_scene(region: str | None, industry_key: str, *, detected: bool = False,
-                company: str | None = None) -> dict:
-    """Deterministic (region × industry) → copy + image + provenance receipt. No network."""
+                company: str | None = None, city: str | None = None,
+                policy: str = "allude") -> dict:
+    """Deterministic (region × industry × policy) → copy + image + provenance receipt. No network.
+    policy='allude' ships (industry/region framing); policy='say' recites the company + precise
+    location — the ungated version the Gate blocks in production, shown for contrast."""
     ind = BY_KEY.get(industry_key, BY_KEY[DEFAULT_INDUSTRY])
     img = _IMG.get(ind["key"], _IMG[DEFAULT_INDUSTRY])
-    loc_note = "detected from your IP" if detected else "preview — you set this"
+    say = policy == "say"
+    loc_note = "detected from your IP" if detected else "you set this"
+    if say:
+        eyebrow = SAY["eyebrow"]
+        headline = _say_fill(SAY["headline_co"] if company else SAY["headline_noco"],
+                             company, city, region, ind["label"])
+        sub = _say_fill(SAY["sub"], company, city, region, ind["label"])
+    else:
+        eyebrow = _fill(ind["eyebrow"], region)
+        headline = _fill(ind["headline"], region)
+        sub = _fill(ind["sub"], region)
+    p = "say" if say else "allude"
+    recite = "RECITED — the Gate blocks this in production"
     receipt = []
     if company:
         receipt.append({"signal": f"company: {company}", "source": "Reverse-IP (ip-api.com)",
-                        "policy": "allude", "role": "resolved from your IP — involuntary, so allude"})
+                        "policy": p, "role": recite if say else "resolved from your IP — involuntary, so allude"})
     receipt += [
-        {"signal": f"location: {region or 'unknown'}", "source": "Geo-IP (ip-api.com)",
-         "policy": "allude", "role": loc_note},
+        {"signal": f"location: {(city + ', ' if city and say else '') + (region or 'unknown')}",
+         "source": "Geo-IP (ip-api.com)", "policy": p,
+         "role": (recite if say else loc_note)},
         {"signal": f"industry: {ind['label']} (NAICS {ind['naics']})",
          "source": ("Company → PDL firmographic" if company else "Reverse-IP firmographic"),
-         "policy": "allude", "role": ("resolved via PDL" if company else "selected · production resolves from the IP")},
+         "policy": p, "role": (recite if say else ("resolved via PDL" if company else "selected · production resolves from the IP"))},
         {"signal": f"backdrop: {img['id']}", "source": f"Curated library · {img['license']}",
          "policy": "say", "role": f"by {img['creator']} — disclosed, licensed"},
-        {"signal": f"copy template: {ind['key']}", "source": "Deterministic rule",
+        {"signal": f"copy template: {ind['key']}/{p}", "source": "Deterministic rule",
          "policy": "say", "role": "templated, not generated"},
     ]
     return {
         "industry": ind["key"], "industry_label": ind["label"], "naics": ind["naics"],
-        "accent": ind["accent"], "region": region or GENERIC_REGION,
-        "eyebrow": _fill(ind["eyebrow"], region),
-        "headline": _fill(ind["headline"], region),
-        "sub": _fill(ind["sub"], region),
+        "accent": ind["accent"], "region": region or GENERIC_REGION, "policy": policy,
+        "blocked": say, "eyebrow": eyebrow, "headline": headline, "sub": sub,
         "cta": ind["cta"], "image": img, "receipt": receipt,
     }
 
