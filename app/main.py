@@ -13,7 +13,7 @@ import secrets
 from datetime import datetime, timezone
 
 from fastapi import Form, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app.server import app, templates
 from pipeline.common.schemas import Recipient
@@ -26,6 +26,12 @@ from pipeline.generation import recipients as rec
 def home(request: Request):
     """The main page — an Attio-landing-style home featuring the live demo (the front door)."""
     return templates.TemplateResponse(request, "home.html", {})
+
+
+@app.get("/talk")
+def talk():
+    """Internal enablement deck (GTM-is-engineering / trust-is-the-last-edge), served from static."""
+    return RedirectResponse("/static/talk/deck.html")
 
 
 @app.get("/lead", response_class=HTMLResponse)

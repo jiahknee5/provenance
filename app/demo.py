@@ -22,6 +22,7 @@ from app.server import app, templates
 from pipeline.common.config import OBSERVE_DIR
 from pipeline.personalization import demo_scenarios as DS
 from pipeline.personalization import demo_sim
+from pipeline.personalization import scene as SC
 from pipeline.personalization.cloner import DEFAULT_URL, brand_from_url, clone, normalize_url
 
 
@@ -90,3 +91,26 @@ def demo_monitor(request: Request):
 @app.get("/api/demo/monitor")
 def api_demo_monitor():
     return JSONResponse(_monitor_data())
+
+
+@app.get("/demo/live", response_class=HTMLResponse)
+def demo_live(request: Request):
+    """Real firmographic landing: resolves region + company + industry from the visitor's
+    actual IP (reverse-IP + PDL), renders localized copy + a curated licensed backdrop, and
+    lets you override location/industry to preview what any IP would get."""
+    det = SC.detect(request)
+    industry = det["industry"] or SC.DEFAULT_INDUSTRY
+    sc = SC.build_scene(det["region"], industry, detected=bool(det["region"]),
+                        company=det["company"])
+    return templates.TemplateResponse(request, "demo_live.html", {
+        "det": det, "scene": sc, "industries": SC.INDUSTRIES, "states": SC.STATES,
+        "client_map": SC.client_map(), "default_industry": industry,
+        "loc_detected": bool(det["region"]),
+    })
+
+
+@app.get("/api/demo/scene")
+def api_demo_scene(region: str = "", industry: str = ""):
+    """Server-authoritative scene for a (region × industry) preview (used by the picker)."""
+    return JSONResponse(SC.build_scene(region or None, industry or SC.DEFAULT_INDUSTRY,
+                                       detected=False))

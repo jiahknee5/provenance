@@ -123,6 +123,32 @@ def test_create_then_undo_removes_record():
     assert "Temp Undo" not in c.get("/records?view=all").text
 
 
+def test_demo_live_renders_with_overrides_and_real_imagery():
+    """The by-IP live landing renders, has location+industry override pickers, and uses
+    real licensed imagery with attribution."""
+    t = c.get("/demo/live").text
+    assert 'id="sel-loc"' in t and 'id="sel-ind"' in t          # override pickers
+    assert 'class="lv-hero"' in t and "The receipt" in t
+    assert "license" in t.lower() and ("staticflickr" in t or "wikimedia" in t)  # real CC photo
+
+
+def test_scene_engine_deterministic_and_sourced():
+    from pipeline.personalization import scene as SC
+    a = SC.build_scene("Arizona", "mining", detected=True, company="Acme Mining")
+    assert a == SC.build_scene("Arizona", "mining", detected=True, company="Acme Mining")  # deterministic
+    assert "Arizona" in (a["headline"] + a["sub"] + a["eyebrow"])
+    assert a["image"]["url"].startswith("http") and a["image"]["license"]
+    assert all(r["source"] and r["policy"] for r in a["receipt"])  # every row sourced + policied
+    assert any("company" in r["signal"] for r in a["receipt"])
+    assert SC._industry_to_bucket("Oil & Energy") == "energy"      # real industry→bucket mapping
+    assert SC._industry_to_bucket("Computer Software") == "technology"
+
+
+def test_api_demo_scene_preview():
+    d = c.get("/api/demo/scene?region=Texas&industry=energy").json()
+    assert d["industry"] == "energy" and "Texas" in d["sub"]
+
+
 def test_skip_link_and_main_landmark():
     """Accessibility (WWDC26 Flexibility): keyboard users skip straight to content."""
     html = c.get("/workspace").text

@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Provenance — live firmographic demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz@0,16..72;1,16..72&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="/static/quiet.css">
+  <style>
+    body{overflow-x:hidden}
+    .lv-top{height:52px;display:flex;align-items:center;gap:12px;padding:0 18px;border-bottom:1px solid var(--hairline);background:var(--glass-bg);backdrop-filter:var(--glass-blur);position:sticky;top:0;z-index:30}
+    .lv-top .brand{display:flex;align-items:center;gap:8px;font-family:var(--font-display);font-weight:600;font-size:15px;color:var(--ink)}
+    .lv-top .brand .av{width:21px;height:21px;border-radius:6px;background:var(--ink);color:var(--on-ink);display:grid;place-items:center;font-size:11px}
+    .lv-top a{font-size:13px;color:var(--muted);font-weight:500}
+    /* HERO */
+    .lv-hero{position:relative;min-height:74vh;display:flex;align-items:center;overflow:hidden;background:#1a1c20}
+    .lv-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:opacity .4s var(--ease)}
+    .lv-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(12,14,18,.82) 0%,rgba(12,14,18,.55) 42%,rgba(12,14,18,.2) 100%)}
+    .lv-hwrap{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:48px 28px;width:100%}
+    .lv-eye{font-size:13px;font-weight:600;letter-spacing:.03em;color:#fff;opacity:.92;margin-bottom:14px}
+    .lv-h1{font-family:var(--font-display);font-weight:600;font-size:clamp(34px,5vw,58px);line-height:1.04;letter-spacing:-.02em;color:#fff;margin:0;max-width:18ch}
+    .lv-sub{font-size:19px;color:#fff;opacity:.92;margin:16px 0 24px;max-width:46ch;line-height:1.4}
+    .lv-cta{display:inline-flex;align-items:center;gap:8px;background:#fff;color:#15171c;font-weight:600;font-size:14px;border-radius:10px;padding:10px 18px;text-decoration:none}
+    .lv-cta.ghost{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.28);margin-left:8px}
+    .lv-attr{position:absolute;right:12px;bottom:10px;z-index:2;font-size:10.5px;color:#fff;background:rgba(0,0,0,.45);border-radius:6px;padding:3px 9px}
+    .lv-attr a{color:#fff;text-decoration:underline}
+    /* corner badge (the IP read-out) */
+    .lv-badge{position:fixed;top:64px;right:16px;z-index:40;width:300px;background:var(--surface);border:1px solid var(--hairline);border-radius:var(--r-card);box-shadow:var(--shadow-pop),var(--carve);overflow:hidden}
+    .lv-badge .bh{display:flex;align-items:center;gap:8px;padding:10px 13px;border-bottom:1px solid var(--hairline);font-size:12px;font-weight:600}
+    .lv-badge .bh .mode{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:5px;padding:2px 7px}
+    .mode.det{color:var(--g);background:var(--gbg)} .mode.prev{color:var(--a);background:var(--abg)}
+    .lv-row{display:flex;align-items:baseline;gap:8px;padding:7px 13px;font-size:12.5px;border-bottom:1px solid var(--hairline)}
+    .lv-row .k{color:var(--muted);width:64px;flex:none} .lv-row .v{color:var(--ink);font-weight:500;min-width:0}
+    .lv-row .src{margin-left:auto;font-size:10px;color:var(--label)}
+    .lv-reason{padding:8px 13px;font-size:11px;color:var(--a);background:var(--abg);line-height:1.45}
+    .lv-ctrls{padding:11px 13px;display:flex;flex-direction:column;gap:9px}
+    .lv-ctrls label{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--label)}
+    .lv-ctrls select{appearance:none;width:100%;font:13px var(--font-ui);background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:8px 11px;color:var(--ink)}
+    .lv-ctrls .resetbtn{font-size:12px;color:var(--signal);font-weight:600;cursor:pointer;background:none;border:0;text-align:left;padding:0;display:none}
+    .lv-ctrls .resetbtn.show{display:inline}
+    /* receipt */
+    .lv-rcpt{max-width:1180px;margin:0 auto;padding:30px 28px 70px}
+    .lv-rcpt h2{font-family:var(--font-display);font-size:22px;font-weight:600;letter-spacing:-.02em;margin:0 0 4px}
+    .lv-rcpt p.lead{font-size:14px;color:var(--muted);margin:0 0 18px;max-width:70ch;line-height:1.55}
+    .rcpt-rows{display:flex;flex-direction:column;gap:8px;max-width:760px}
+    .rcpt-r{display:flex;align-items:flex-start;gap:11px;border:1px solid var(--hairline);border-radius:10px;background:var(--surface);padding:11px 13px;box-shadow:var(--shadow-card)}
+    .rcpt-r .sig{font-size:13px;font-weight:600;color:var(--ink)}
+    .rcpt-r .meta{font-size:11.5px;color:var(--muted);margin-top:2px}
+    .rcpt-r .pol{margin-left:auto;font-size:9.5px;font-weight:700;text-transform:uppercase;border-radius:5px;padding:2px 7px;align-self:flex-start}
+    .pol.say{color:var(--g);background:var(--gbg)} .pol.allude{color:var(--a);background:var(--abg)} .pol.hold{color:var(--r);background:var(--rbg)}
+    @media(max-width:680px){.lv-badge{position:static;width:auto;margin:14px}}
+  </style>
+</head>
+<body>
+  <nav class="lv-top">
+    <span class="brand"><span class="av">P</span>Provenance</span>
+    <a href="/demo" style="margin-left:auto"><i class="ph ph-arrow-left"></i> All demo scenarios</a>
+  </nav>
+
+  <!-- HERO (re-rendered live) -->
+  <section class="lv-hero">
+    <div class="lv-bg" id="bg" style="background-image:url('{{ scene.image.url }}')"></div>
+    <div class="lv-hwrap">
+      <div class="lv-eye" id="eye">{{ scene.eyebrow }}</div>
+      <h1 class="lv-h1" id="h1">{{ scene.headline }}</h1>
+      <p class="lv-sub" id="sub">{{ scene.sub }}</p>
+      <a class="lv-cta" id="cta" href="#">{{ scene.cta }} <i class="ph ph-arrow-right"></i></a>
+      <a class="lv-cta ghost" href="/lead">Talk to sales</a>
+    </div>
+    <div class="lv-attr" id="attr">image: {{ scene.image.id }} · <a href="{{ scene.image.landing }}" target="_blank" rel="noopener">{{ scene.image.creator }}</a> · {{ scene.image.license }}</div>
+  </section>
+
+  <!-- CORNER BADGE -->
+  <aside class="lv-badge">
+    <div class="bh"><i class="ph ph-globe-hemisphere-west"></i> What this IP tells us
+      <span class="mode {{ 'det' if loc_detected else 'prev' }}" id="mode">{{ 'Detected' if loc_detected else 'Preview' }}</span></div>
+    <div class="lv-row"><span class="k">Company</span><span class="v" id="b-co">{{ det.company or '—' }}</span><span class="src">reverse-IP</span></div>
+    <div class="lv-row"><span class="k">Location</span><span class="v" id="b-loc">{{ det.region or '—' }}</span><span class="src">geo-IP</span></div>
+    <div class="lv-row"><span class="k">Industry</span><span class="v" id="b-ind">{{ scene.industry_label }}</span><span class="src" id="b-ind-src">{{ 'PDL' if det.resolved_industry else 'select' }}</span></div>
+    {% if det.reason %}<div class="lv-reason" id="reason">{{ det.reason }}</div>{% else %}<div class="lv-reason" id="reason" style="display:none"></div>{% endif %}
+    <div class="lv-ctrls">
+      <div><label>Location (override)</label>
+        <select id="sel-loc"><option value="">— your region —</option>
+          {% for s in states %}<option value="{{ s }}" {{ 'selected' if s==det.region else '' }}>{{ s }}</option>{% endfor %}</select></div>
+      <div><label>Industry (override)</label>
+        <select id="sel-ind">
+          {% for i in industries %}<option value="{{ i.key }}" {{ 'selected' if i.key==default_industry else '' }}>{{ i.label }}</option>{% endfor %}</select></div>
+      <button class="resetbtn" id="reset"><i class="ph ph-arrow-counter-clockwise"></i> Reset to detected</button>
+    </div>
+  </aside>
+
+  <!-- RECEIPT -->
+  <section class="lv-rcpt">
+    <h2>The receipt</h2>
+    <p class="lead">Every element above traces to a source and a surface policy. Reverse-IP and geo are <b style="color:var(--a)">allude</b> — involuntary signals we shape with, never recite. The image and copy are <b style="color:var(--g)">say</b> — we disclose the exact licensed asset and the deterministic template.</p>
+    <div class="rcpt-rows" id="rcpt"></div>
+  </section>
+
+<script>
+  var IND = {{ client_map|tojson }};
+  var DET = {{ det|tojson }};
+  var BYKEY = {}; IND.forEach(function(i){BYKEY[i.key]=i;});
+  var detSnap = {region: DET.region, industry: ({{ default_industry|tojson }}), company: DET.company, hasCo: !!DET.company, indDetected: DET.resolved_industry, reason: DET.reason||''};
+  var cur = {region: detSnap.region, industry: detSnap.industry, mode:'detected'};
+
+  function fill(s, region){ return (s||'').replace(/\{region\}/g, region || 'your region'); }
+
+  function render(){
+    var ind = BYKEY[cur.industry] || IND[0];
+    var region = cur.region;
+    var detected = cur.mode==='detected';
+    // hero
+    document.getElementById('bg').style.backgroundImage = "url('"+ind.image.url+"')";
+    document.getElementById('eye').textContent = fill(ind.eyebrow, region);
+    document.getElementById('h1').textContent = fill(ind.headline, region);
+    document.getElementById('sub').textContent = fill(ind.sub, region);
+    document.getElementById('cta').firstChild.textContent = ind.cta + ' ';
+    document.getElementById('attr').innerHTML = "image: "+ind.image.id+" · <a href='"+ind.image.landing+"' target='_blank' rel='noopener'>"+ind.image.creator+"</a> · "+ind.image.license;
+    // badge
+    var mode = document.getElementById('mode');
+    mode.textContent = detected ? 'Detected' : 'Preview';
+    mode.className = 'mode ' + (detected ? 'det' : 'prev');
+    document.getElementById('b-co').textContent = (detected && detSnap.company) ? detSnap.company : (detected ? '—' : '— (preview)');
+    document.getElementById('b-loc').textContent = region || '—';
+    document.getElementById('b-ind').textContent = ind.label;
+    document.getElementById('b-ind-src').textContent = (detected && detSnap.indDetected) ? 'PDL' : 'select';
+    var rsn = document.getElementById('reason');
+    if(detected && detSnap.reason){ rsn.style.display='block'; rsn.textContent = detSnap.reason; }
+    else { rsn.style.display='none'; }
+    document.getElementById('reset').className = 'resetbtn' + (detected ? '' : ' show');
+    // receipt
+    var rows = [];
+    var co = (detected && detSnap.company) ? detSnap.company : null;
+    if(co) rows.push({sig:'company: '+co, src:'Reverse-IP (ip-api.com)', pol:'allude', role:'resolved from your IP — involuntary, so allude'});
+    rows.push({sig:'location: '+(region||'unknown'), src:'Geo-IP (ip-api.com)', pol:'allude', role: detected ? 'detected from your IP' : 'preview — you set this'});
+    rows.push({sig:'industry: '+ind.label+' (NAICS '+ind.naics+')', src: co ? 'Company → PDL firmographic' : 'Reverse-IP firmographic', pol:'allude', role: (detected && detSnap.indDetected) ? 'resolved via PDL' : 'selected · production resolves from the IP'});
+    rows.push({sig:'backdrop: '+ind.image.id, src:'Curated library · '+ind.image.license, pol:'say', role:'by '+ind.image.creator+' — disclosed, licensed'});
+    rows.push({sig:'copy template: '+ind.key, src:'Deterministic rule', pol:'say', role:'templated, not generated'});
+    document.getElementById('rcpt').innerHTML = rows.map(function(r){
+      return "<div class='rcpt-r'><div><div class='sig'>"+r.sig+"</div><div class='meta'>"+r.src+" · "+r.role+"</div></div><span class='pol "+r.pol+"'>"+r.pol+"</span></div>";
+    }).join('');
+  }
+
+  document.getElementById('sel-loc').addEventListener('change', function(e){ cur.region = e.target.value || null; cur.mode='preview'; render(); });
+  document.getElementById('sel-ind').addEventListener('change', function(e){ cur.industry = e.target.value; cur.mode='preview'; render(); });
+  document.getElementById('reset').addEventListener('click', function(){ cur={region:detSnap.region, industry:detSnap.industry, mode:'detected'}; document.getElementById('sel-loc').value = detSnap.region||''; document.getElementById('sel-ind').value = detSnap.industry; render(); });
+  render();
+</script>
+</body>
+</html>
