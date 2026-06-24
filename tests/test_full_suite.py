@@ -35,7 +35,7 @@ SHELL_ROUTES = ["/workspace", "/records", "/records/new", "/composer", "/optimiz
 # All legacy/lab routes (now light) — param routes filled with valid demo values.
 TOKEN = __import__("pipeline.personalization.cohort", fromlist=["x"]).magic_token(
     __import__("pipeline.personalization.cohort", fromlist=["x"]).COHORT[1])
-LAB_ROUTES = ["/", "/personalize", "/inspector", "/observatory", "/funnel",
+LAB_ROUTES = ["/", "/lead", "/personalize", "/inspector", "/observatory", "/funnel",
               "/admin/landings", "/admin/landing/maya", "/google", "/enrichment-catalog",
               "/lp", "/lp?email=maya.chen@gauntletai.com"]
 
@@ -232,6 +232,14 @@ def test_shell_pages_carry_no_off_token_raw_hex():
         if found:
             offenders[name] = found
     assert not offenders, f"raw hex outside the token set: {offenders}"
+
+
+def test_home_is_attio_landing_featuring_the_demo():
+    html = c.get("/").text
+    assert 'class="q-display"' in html and 'class="q-hero"' in html  # the big attio hero
+    assert 'class="q-showtabs"' in html and 'id="showframe"' in html  # tabbed product showcase
+    assert 'href="/demo"' in html and 'href="/workspace"' in html  # demo is the front door
+    assert "prove every move" in html.lower()
 
 
 def test_pages_lead_with_the_proves_spine_line():

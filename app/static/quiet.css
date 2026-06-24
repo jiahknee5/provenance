@@ -165,3 +165,133 @@ h1{font-size:30px;line-height:1.1} h2{font-size:20px} h3{font-size:16px}
 .q-field.full{grid-column:1/-1}
 .q-field label{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--label)}
 .q-field select.q-input{appearance:none;background:#fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M3 4.5L6 7.5L9 4.5' stroke='%236B7480' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>") no-repeat right 11px center}
+
+/* ============================================================
+   v1.2 — attio.com LANDING composition (docs/03-spec/DESIGN-ATTIO.md)
+   Real captured values: Inter Display 600 / -0.02em / lh 1.0 huge hero;
+   slate-blue lede; black 10px pill CTA; tabbed showcase; mono logos; dot-grid.
+   ============================================================ */
+:root{ --slate2:#525C6E; --landing-nav-h:68px; }
+
+/* big display headline — the signature attio hero type */
+.q-display{font-family:var(--font-display);font-weight:600;color:var(--ink);
+  font-size:clamp(40px,4.6vw,66px);line-height:1.02;letter-spacing:-.02em;margin:0}
+.q-display.sm{font-size:clamp(30px,3.6vw,48px);line-height:1.05}
+.q-display.xs{font-size:clamp(24px,2.4vw,34px);line-height:1.1;letter-spacing:-.018em}
+.q-lede{font-family:var(--font-ui);font-size:20px;font-weight:500;color:var(--slate2);
+  line-height:1.35;letter-spacing:-.01em;margin:0}
+.q-lede.sm{font-size:16px;line-height:1.5}
+
+/* centered landing hero with generous breathing room */
+.q-hero{max-width:920px;margin:0 auto;text-align:center;padding:96px 24px 56px;
+  display:flex;flex-direction:column;align-items:center;gap:22px}
+.q-hero .q-lede{max-width:48ch}
+.q-cta-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+
+/* section header block (centered, reused down the page) */
+.q-section{max-width:1180px;margin:0 auto;padding:72px 24px}
+.q-section-head{max-width:720px;margin:0 auto 36px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px}
+
+/* product showcase — tab switcher + rounded screenshot frame */
+.q-showcase{max-width:1180px;margin:0 auto;padding:0 24px}
+.q-showtabs{display:flex;gap:0;border-bottom:1px solid var(--hairline);margin-bottom:18px}
+.q-showtab{position:relative;flex:1;text-align:center;padding:15px 12px;font-size:15px;font-weight:500;
+  color:var(--muted);cursor:pointer;transition:color var(--t) var(--ease)}
+.q-showtab::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--ink);
+  transform:scaleX(0);transition:transform var(--t) var(--ease)}
+.q-showtab.on{color:var(--ink)} .q-showtab.on::after{transform:scaleX(1)}
+.q-showframe{border:1px solid var(--hairline);border-radius:var(--r-card);overflow:hidden;background:#fff;
+  box-shadow:0 1px 2px rgba(16,24,40,.04),0 30px 70px -40px rgba(16,24,40,.22)}
+.q-showframe img,.q-showframe iframe{display:block;width:100%;border:0}
+
+/* monochrome customer/source logo strip */
+.q-logos{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:48px;
+  padding:8px 24px;opacity:.62}
+.q-logos .lg{font-family:var(--font-display);font-weight:600;font-size:18px;color:var(--slate);
+  letter-spacing:-.02em;display:inline-flex;align-items:center;gap:8px;filter:grayscale(1)}
+.q-logos .lg i{font-size:20px}
+.q-eyebrow-lbl{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--label);text-align:center}
+
+/* faint dotted-grid section background (attio feature blocks) */
+.q-dotgrid{background-image:radial-gradient(var(--border) 1px,transparent 1.6px);background-size:22px 22px}
+
+/* big-bento feature grid */
+.q-bento{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.q-bento .q-card{padding:24px}
+.q-bento .ic{width:38px;height:38px;border-radius:10px;background:var(--fill);display:grid;place-items:center;color:var(--ink);font-size:20px;margin-bottom:14px}
+@media(max-width:900px){.q-bento{grid-template-columns:1fr}.q-showtab{font-size:13px;padding:12px 6px}.q-logos{gap:28px}}
+
+/* landing top nav (attio-style: centered links, 68px, black pill CTA) */
+.q-lnav{height:var(--landing-nav-h);display:flex;align-items:center;gap:26px;padding:0 28px;
+  border-bottom:1px solid var(--hairline);position:sticky;top:0;background:rgba(255,255,255,.86);
+  backdrop-filter:saturate(180%) blur(10px);z-index:30}
+.q-lnav .brand{display:flex;align-items:center;gap:9px;font-family:var(--font-display);font-weight:600;font-size:18px;color:var(--ink);letter-spacing:-.02em}
+.q-lnav .brand .av{width:24px;height:24px;border-radius:7px;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:13px}
+.q-lnav .lnav-links{display:flex;gap:22px;margin:0 auto}
+.q-lnav .lnav-links a{font-size:15px;font-weight:500;color:var(--slate);letter-spacing:-.01em;transition:color var(--t) var(--ease)}
+.q-lnav .lnav-links a:hover{color:var(--ink)}
+.q-lnav .lnav-cta{display:flex;gap:9px;align-items:center}
+@media(max-width:760px){.q-lnav .lnav-links{display:none}}
+
+/* ============================================================
+   v1.3 — M3 Expressive + Apple/visionOS enhancement layer (on the LIGHT attio base)
+   Spring-physics motion · scroll-reveal · Spatial Liquid Glass (light) · carved edges.
+   (design-system-components skill, light-compatible — dark Carved-Hardware canvas skipped.)
+   ============================================================ */
+:root{
+  /* M3 Expressive / spring kinematics as CSS linear() easings */
+  --ease-spring:linear(0,.006,.025 2.8%,.101 6.1%,.539 18.9%,.721 25.3%,.849 31.5%,.937 38.1%,.968 41.8%,.991 45.7%,1.006 50.1%,1.013 58.4%,1.004 75.4%,1);
+  --ease-emphatic:cubic-bezier(.2,0,0,1); --ease-out:cubic-bezier(0,0,0,1);
+  --t-reveal:.62s; --t-press:.34s;
+  /* Spatial Liquid Glass (light frosted) */
+  --glass-bg:rgba(255,255,255,.66); --glass-blur:saturate(184%) blur(22px);
+  --glass-edge:inset 0 1px 0 rgba(255,255,255,.85),inset 0 0 0 1px rgba(16,24,40,.05);
+  --glass-shadow:0 1px 0 rgba(16,24,40,.04),0 22px 60px -26px rgba(16,24,40,.22);
+  /* carved hairline (light "milled" inner edge for bento/data surfaces) */
+  --carve:inset 0 0 0 1px rgba(255,255,255,.7);
+}
+
+/* scroll-reveal — attio's reveal-to-bottom; fade + lift, calm. JS adds .in on intersect. */
+.q-reveal{opacity:0;transform:translateY(22px);transition:opacity var(--t-reveal) var(--ease-out),transform var(--t-reveal) var(--ease-emphatic)}
+.q-reveal.in{opacity:1;transform:none}
+.q-reveal.d1{transition-delay:.06s}.q-reveal.d2{transition-delay:.12s}.q-reveal.d3{transition-delay:.18s}.q-reveal.d4{transition-delay:.24s}
+@media(prefers-reduced-motion:reduce){.q-reveal{opacity:1;transform:none;transition:none}}
+
+/* expressive press — spring micro-overshoot on interactive press (Apple/M3) */
+.q-btn{transition:background var(--t) var(--ease),border-color var(--t) var(--ease),color var(--t) var(--ease),transform var(--t-press) var(--ease-spring),box-shadow var(--t) var(--ease)}
+.q-btn:active{transform:scale(.96)}
+.q-btn.ink:hover,.q-btn.signal:hover{transform:translateY(-1px)}
+.q-card.hover{transition:transform var(--t-press) var(--ease-spring),box-shadow var(--t) var(--ease),border-color var(--t) var(--ease)}
+
+/* Spatial Liquid Glass — Z-50 floating + Z-30 sticky nav (light frosted, specular edge, ambient shadow) */
+.q-top,.q-lnav{background:var(--glass-bg);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);box-shadow:var(--glass-edge),var(--glass-shadow)}
+.q-cmdk{background:var(--glass-bg);backdrop-filter:var(--glass-blur) blur(8px);-webkit-backdrop-filter:var(--glass-blur) blur(8px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px rgba(16,24,40,.06),0 1px 2px rgba(16,24,40,.06),0 44px 90px -22px rgba(16,24,40,.42)}
+.q-menu{box-shadow:var(--glass-edge),var(--shadow-pop)}
+
+/* carved bento — light milled inner edge on the landing feature cards */
+.q-bento .q-card{box-shadow:var(--shadow-card),var(--carve)}
+
+/* numbered section eyebrow — attio's [01] category system */
+.q-secnum{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.q-secnum .n{font-variant-numeric:tabular-nums;color:var(--signal);font-weight:700}
+
+/* feature row — numbered eyebrow + big statement + supporting copy + visual */
+.q-feature{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;max-width:1180px;margin:0 auto;padding:64px 24px}
+.q-feature.flip .q-feature-copy{order:2}
+.q-feature-copy{display:flex;flex-direction:column;gap:16px;align-items:flex-start}
+.q-feature-vis{border:1px solid var(--hairline);border-radius:var(--r-card);overflow:hidden;background:#fff;box-shadow:var(--shadow-card),var(--carve);min-height:280px}
+@media(max-width:900px){.q-feature{grid-template-columns:1fr;gap:28px}.q-feature.flip .q-feature-copy{order:0}}
+
+/* big editorial pull-quote — two-tone ink→grey on dotted grid (attio signature) */
+.q-quote{max-width:1000px;margin:0 auto;padding:96px 24px;text-align:center}
+.q-quote blockquote{font-family:var(--font-display);font-weight:600;font-size:clamp(28px,3.4vw,46px);line-height:1.18;letter-spacing:-.02em;color:var(--ink);margin:0}
+.q-quote blockquote .dim{color:var(--border)}
+.q-quote .who{margin-top:28px;font-size:14px;color:var(--muted)} .q-quote .who b{color:var(--ink);font-weight:600}
+
+/* trial / closing band */
+.q-band{max-width:1180px;margin:0 auto;padding:80px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:20px}
+
+/* app-wide expressive page entrance (M3) — one calm fade-up on load */
+@keyframes q-enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:no-preference){.q-body{animation:q-enter .42s var(--ease-emphatic) both}}

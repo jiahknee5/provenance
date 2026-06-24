@@ -23,6 +23,12 @@ from pipeline.generation import recipients as rec
 
 
 @app.get("/", response_class=HTMLResponse)
+def home(request: Request):
+    """The main page — an Attio-landing-style home featuring the live demo (the front door)."""
+    return templates.TemplateResponse(request, "home.html", {})
+
+
+@app.get("/lead", response_class=HTMLResponse)
 def form(request: Request):
     return templates.TemplateResponse(request, "form.html", {
         "roles": rec.ROLE_TITLES, "sizes": rec.SIZES,
