@@ -15,7 +15,7 @@ now lives here (`pipeline/`, `app/`, `scripts/`, `tests/`). It runs **fully offl
 key**. See **[RUNBOOK.md](./RUNBOOK.md)** and the locked **[PRD](./docs/01-intake/PRD.md)**.
 
 ```bash
-.venv/bin/python -m pytest -q                       # 25 tests: the 5 headline properties + per-module
+.venv/bin/python -m pytest -q                       # 34 tests: the 5 headline properties + per-module
 .venv/bin/python -m scripts.pipeline                # full pipeline, byte-identical each run
 PYTHONPATH=. .venv/bin/python -m uvicorn app.main:app --port 8099   # form · /site/<token> · /inspector
 ```
