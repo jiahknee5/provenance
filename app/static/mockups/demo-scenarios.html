@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Demo scenarios D & E — mockups</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz@0,16..72;1,16..72&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="/static/quiet.css">
+  <style>
+    .mk-wrap{max-width:1180px;margin:0 auto;padding:40px 24px 80px}
+    .mk-head{max-width:760px;margin-bottom:8px}
+    .mk-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+    .mk{border:1px solid var(--hairline);border-radius:var(--r-card);overflow:hidden;background:var(--surface);box-shadow:var(--shadow-card),var(--carve);display:flex;flex-direction:column}
+    .mk.blocked{opacity:.96;border-style:dashed;border-color:var(--r)}
+    .mk-tag{display:flex;align-items:center;gap:8px;padding:9px 13px;border-bottom:1px solid var(--hairline);font-size:11px;font-weight:600}
+    /* the faux landing hero inside each mockup */
+    .hero{position:relative;min-height:208px;padding:26px 24px;display:flex;flex-direction:column;justify-content:center;gap:9px;overflow:hidden}
+    .hero .eye{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;opacity:.85}
+    .hero h3{font-family:var(--font-display);font-size:25px;font-weight:600;letter-spacing:-.02em;line-height:1.1;margin:0}
+    .hero p{font-size:13.5px;margin:0;max-width:42ch;opacity:.9}
+    .hero .cta{align-self:flex-start;margin-top:6px;font-size:13px;font-weight:600;border-radius:10px;padding:8px 14px}
+    .hero .logos{display:flex;gap:12px;margin-top:6px;opacity:.8;font-weight:600;font-size:12px;filter:grayscale(1)}
+    /* light (D) heroes */
+    .hero.lite{background:var(--fill2)} .hero.lite h3{color:var(--ink)} .hero.lite p{color:var(--slate2)} .hero.lite .eye{color:var(--signal)} .hero.lite .cta{background:var(--cta);color:#fff}
+    /* AZ mining backdrop (E1) — curated, license-tagged image stand-in */
+    .hero.az{color:#fff;background:linear-gradient(180deg,#dfb88a 0%,#c98f5a 26%,#a9683b 46%,#7c4a2c 64%,#5a3722 100%)}
+    .hero.az::after{content:"";position:absolute;inset:0;background:
+      repeating-linear-gradient(180deg,rgba(0,0,0,.10) 0 2px,transparent 2px 26px),
+      radial-gradient(120% 60% at 80% 0%,rgba(255,244,214,.5),transparent 60%);mix-blend-mode:multiply;pointer-events:none}
+    .hero.az>*{position:relative;z-index:1} .hero.az .eye{color:#ffe9c2} .hero.az .cta{background:#fff;color:#3a2415}
+    .hero.az .src{position:absolute;right:10px;bottom:9px;z-index:2;font-size:9.5px;font-weight:600;background:rgba(0,0,0,.4);border-radius:5px;padding:2px 7px;color:#fff}
+    /* gulf (E2) */
+    .hero.gulf{color:#fff;background:linear-gradient(180deg,#9ec7d6 0%,#5b94ad 38%,#33647d 64%,#1f3f55 100%)}
+    .hero.gulf::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 60% at 20% 0%,rgba(255,255,255,.35),transparent 55%);pointer-events:none}
+    .hero.gulf>*{position:relative;z-index:1} .hero.gulf .eye{color:#dff0f7} .hero.gulf .cta{background:#fff;color:#1f3f55} .hero.gulf .src{position:absolute;right:10px;bottom:9px;z-index:2;font-size:9.5px;font-weight:600;background:rgba(0,0,0,.4);border-radius:5px;padding:2px 7px;color:#fff}
+    /* receipt strip */
+    .rcpt{padding:11px 13px;border-top:1px solid var(--hairline);background:var(--surface)}
+    .rcpt .lbl{font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--label);margin-bottom:5px}
+    .rcpt .chips{display:flex;flex-wrap:wrap;gap:6px}
+    .du{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;color:var(--slate);background:var(--fill);border:1px solid var(--hairline);border-radius:5px;padding:2px 7px}
+    .du em{font-style:normal;color:var(--muted)}
+    .pp{font-weight:700;text-transform:capitalize} .pp.say{color:var(--g)} .pp.allude{color:var(--a)} .pp.hold{color:var(--r)}
+    .rcpt .note{font-size:11px;color:var(--muted);margin-top:7px;line-height:1.5}
+    .scn-h{display:flex;align-items:center;gap:10px;margin:38px 0 4px}
+    @media(max-width:860px){.mk-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="mk-wrap">
+  <div class="mk-head">
+    <span class="q-pill b" style="margin-bottom:10px"><span class="d"></span>Concept mockups</span>
+    <h1 class="q-display sm">Two B2B scenarios — the same data, two policies.</h1>
+    <p class="q-lede sm" style="margin-top:10px">Reverse-IP and geo are real signals — but on Provenance they&rsquo;re <b style="color:var(--a)">allude</b>, not <b style="color:var(--g)">say</b>. The shippable copy alludes to industry, peers, and region. The version that recites the company, names a rival, or pinpoints a site is the <b style="color:var(--r)">blocked</b> arm: it would win on engagement, and is provably never selected.</p>
+  </div>
+
+  <!-- SCENARIO D -->
+  <div class="scn-h"><span class="q-pill"><span class="d"></span>Scenario D</span><h2 class="q-display xs">B2B, identified by IP &mdash; competitor-aware copy</h2></div>
+  <p class="q-muted" style="font-size:13px;max-width:760px">Reverse-IP resolves the visitor&rsquo;s <b>company</b> (corporate-network traffic only; company-level + probabilistic). We <b style="color:var(--a)">allude</b> to industry and peers; we don&rsquo;t recite the name.</p>
+  <div class="mk-grid">
+    <div class="mk">
+      <div class="mk-tag"><span class="q-pill g"><span class="d"></span>Ships · allude</span><span class="q-muted" style="margin-left:auto;font-weight:500">D1 · industry peer-proof</span></div>
+      <div class="hero lite">
+        <span class="eye">For copper &amp; hard-rock operators</span>
+        <h3>Built for mining teams that move tonnage, not tickets.</h3>
+        <p>The platform operators in your sector standardize on &mdash; from pit to plant.</p>
+        <span class="cta">See it for mining ops &rarr;</span>
+        <div class="logos"><span>◆ Freeport-style</span><span>◆ peer co-op</span><span>◆ NAICS 2122</span></div>
+      </div>
+      <div class="rcpt">
+        <div class="lbl">Data used → provenance</div>
+        <div class="chips">
+          <span class="du">① reverse-IP → company <em>· Bought (reverse-IP) ·</em> <span class="pp allude">allude</span></span>
+          <span class="du">② firmographic: industry=mining <em>· Bought ·</em> <span class="pp allude">allude</span></span>
+        </div>
+        <div class="note">Tailors the proof to the sector. Never names the company &mdash; reverse-IP is involuntary, so it stays <b>allude</b>.</div>
+      </div>
+    </div>
+    <div class="mk blocked">
+      <div class="mk-tag"><span class="q-pill r"><span class="d"></span>Blocked · say + hold</span><span class="q-muted" style="margin-left:auto;font-weight:500">Dx · recite company + rival</span></div>
+      <div class="hero lite" style="background:var(--rbg)">
+        <span class="eye" style="color:var(--r)">⛔ ungated &mdash; would win, never ships</span>
+        <h3>Welcome, Acme Mining &mdash; your rival BHP already runs us.</h3>
+        <p>We saw you visiting from Acme&rsquo;s Phoenix office and figured you&rsquo;re comparing us against them.</p>
+        <span class="cta" style="background:var(--r)">Switch from BHP&rsquo;s stack &rarr;</span>
+      </div>
+      <div class="rcpt">
+        <div class="lbl">Data used → provenance</div>
+        <div class="chips">
+          <span class="du">① company name (reverse-IP) <em>· Bought ·</em> <span class="pp say">say</span></span>
+          <span class="du">② inferred rival "BHP" <em>· Broker/inferred ·</em> <span class="pp hold">hold</span></span>
+        </div>
+        <div class="note">Reciting the company + naming a rival is probabilistic (often wrong) and advertises surveillance. Kept out of the action pool &mdash; the optimizer can never select it.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENARIO E -->
+  <div class="scn-h"><span class="q-pill"><span class="d"></span>Scenario E</span><h2 class="q-display xs">Location &times; industry &mdash; a localized landing</h2></div>
+  <p class="q-muted" style="font-size:13px;max-width:760px">Geo (IP&rarr;state, <b>observed</b>) + industry (reverse-IP, <b style="color:var(--a)">allude</b>) pick a <b>curated, license-tagged</b> backdrop keyed on (region &times; industry). Region-level, not site-level.</p>
+  <div class="mk-grid">
+    <div class="mk">
+      <div class="mk-tag"><span class="q-pill g"><span class="d"></span>Ships · allude</span><span class="q-muted" style="margin-left:auto;font-weight:500">E1 · Arizona &times; mining</span></div>
+      <div class="hero az">
+        <span class="eye">For operators across the Arizona copper belt</span>
+        <h3>Engineered for the pace of the pit.</h3>
+        <p>Built for hard-rock operators in the Southwest &mdash; from Morenci to Bagdad.</p>
+        <span class="cta">Talk to a mining-ops lead &rarr;</span>
+        <span class="src">curated image · az-mining-03 · licensed</span>
+      </div>
+      <div class="rcpt">
+        <div class="lbl">Data used → provenance</div>
+        <div class="chips">
+          <span class="du">① IP → state: Arizona <em>· Observed at load ·</em> <span class="pp allude">allude</span></span>
+          <span class="du">② industry: mining <em>· Bought (reverse-IP) ·</em> <span class="pp allude">allude</span></span>
+          <span class="du">③ backdrop az-mining-03 <em>· Library (licensed) ·</em> <span class="pp say">say</span></span>
+        </div>
+        <div class="note">Region + sector select a backdrop from the tagged library &mdash; provable, fast, no hallucinated imagery. Alludes to the region; never names the visitor&rsquo;s exact site.</div>
+      </div>
+    </div>
+    <div class="mk">
+      <div class="mk-tag"><span class="q-pill g"><span class="d"></span>Ships · allude</span><span class="q-muted" style="margin-left:auto;font-weight:500">E2 · generalizes (Gulf &times; energy)</span></div>
+      <div class="hero gulf">
+        <span class="eye">For Gulf Coast energy operators</span>
+        <h3>Built for uptime on the water.</h3>
+        <p>The same engine, re-localized &mdash; region &times; industry picks the scene.</p>
+        <span class="cta">See it for energy &rarr;</span>
+        <span class="src">curated image · gulf-energy-01 · licensed</span>
+      </div>
+      <div class="rcpt">
+        <div class="lbl">Data used → provenance</div>
+        <div class="chips">
+          <span class="du">① IP → state: Texas/LA <em>· Observed ·</em> <span class="pp allude">allude</span></span>
+          <span class="du">② industry: energy <em>· Bought ·</em> <span class="pp allude">allude</span></span>
+        </div>
+        <div class="note">Proves the mechanism generalizes &mdash; one (region × industry) → image map, not bespoke per-account art.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- the blocked E arm -->
+  <div class="mk-grid" style="grid-template-columns:1fr;max-width:560px;margin-top:18px">
+    <div class="mk blocked">
+      <div class="mk-tag"><span class="q-pill r"><span class="d"></span>Blocked · say</span><span class="q-muted" style="margin-left:auto;font-weight:500">Ex · pinpoint the site</span></div>
+      <div class="hero lite" style="background:var(--rbg)">
+        <span class="eye" style="color:var(--r)">⛔ too precise &mdash; blocked</span>
+        <h3>We see you&rsquo;re at the Morenci mine, Greenlee County.</h3>
+        <p>Down to the building. Creepy, often wrong for remote workers, and reveals tracking.</p>
+      </div>
+      <div class="rcpt">
+        <div class="lbl">Data used → provenance</div>
+        <div class="chips"><span class="du">① IP → precise site <em>· Observed ·</em> <span class="pp say">say</span></span></div>
+        <div class="note">IP&rarr;state is reliable; IP&rarr;site is not. Asserting the exact site is <b>say</b> on an unreliable signal &mdash; blocked.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

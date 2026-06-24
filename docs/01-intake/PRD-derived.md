@@ -61,6 +61,43 @@ Built on the existing routes; reorganized under the Quiet-Workspace shell (left 
 7. **Catalog / Settings** — sources, lawful basis, TTL, members, policy. (reuses `enrichment_catalog`)
 8. **Demo** (public) — the live-cloner personalization showcase (already shipped). Kept as the top-of-funnel demo.
 
+### 5a. New demo scenarios (D, E) — B2B firmographic lane (added 2026-06-24)
+
+Two scenarios that extend the reverse-IP lane (Scenario A). Both reinforce the thesis: the data is
+real and sourceable, the **shippable** copy *alludes* to the firmographic, and the aggressive
+"recite it" version is the BLOCKED arm — provably never selected.
+
+**Scenario D — B2B, identified by IP (reverse-IP → company → competitor-aware copy).**
+Reverse-IP resolves the visitor's **company** — *corporate-network traffic only* (remote/home/mobile/VPN
+don't resolve → partial coverage), company-level + probabilistic. Surface policy = `allude` (they
+de-anonymized involuntarily). Identity key: corporate IP → ASN → firmographic (industry / size / region).
+- **Gated (ships · `allude`):** D1 industry/peer-proof hero ("Built for copper-mining operators like you");
+  D2 category framing + a peer-logo wall of *consenting public* customers; D3 competitor-aware
+  *positioning* against **our** category incumbent ("switching from a legacy CRM?"), sourced.
+- **Blocked (`say`/`hold`):** Dx recites the company name and **names the visitor's rival**
+  ("Acme Mining — your competitor BHP already runs us"). Highest engagement, never ships: it's
+  probabilistic (often wrong) and advertises surveillance. Receipt: reverse-IP → company/industry · `allude`.
+
+**Scenario E — location × industry (geo + firmographic → localized landing).**
+Combine **geo** (IP → state, `observed`) + **industry** (reverse-IP firmographic, `bought`/`allude`) → a
+region-and-sector-localized hero. Arizona + mining → a Sonoran open-pit backdrop.
+- **Gated (ships · `allude`):** E1 region+sector hero ("Built for operators across the Arizona copper belt")
+  over a **curated, license-tagged** backdrop keyed on (region × industry); E2 the same engine for a second
+  region/sector (proves it generalizes); E3 localized social proof ("teams across the Southwest").
+- **Blocked (`say`/`hold`):** Ex pinpoints the precise site ("we see you're at the Morenci mine, Greenlee
+  County"). Creepy; blocked. Receipt: geo=AZ + industry=mining → image `az-mining-03` (licensed) · `allude`.
+
+**Recommendation (provenance-correct vs the naive build):**
+1. **Allude, don't say** — reverse-IP is `allude`: feature industry/peer proof; reciting the company name
+   or the visitor's rival is the blocked arm (probabilistic + surveillance-revealing).
+2. **Curate imagery, don't generate per-visitor** — a region×industry image *library* (each asset
+   source/license-tagged) is provable, fast, and can't hallucinate "a generic mine that isn't Arizona."
+   Per-visitor AI image-gen has no provable provenance → contradicts the product.
+3. **Region-level, not site-level** — IP→state is reliable; IP→city/site is not, and remote workers break it.
+
+Both ship as gated `allude` variants + a blocked `say`/`hold` arm in `demo_scenarios.py`, rendered by the
+existing cloner + Receipt rail. Mockups: `app/static/mockups/demo-scenarios.html`.
+
 ## 6. UI quality bar (the loop gates on this)
 
 - **One token set** (`Quiet Workspace`) applied app-wide via `base.html`; no page defines its own palette/type.
