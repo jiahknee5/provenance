@@ -62,7 +62,7 @@ h1{font-size:30px;line-height:1.1} h2{font-size:20px} h3{font-size:16px}
 .q-btn.outline{background:var(--surface);color:var(--slate);border-color:var(--border)} .q-btn.outline:hover{border-color:var(--muted);background:var(--fill)}
 .q-btn.signal{background:var(--signal);color:#fff} .q-btn.signal:hover{filter:brightness(1.07)}
 .q-btn.ghost{background:transparent;color:var(--slate)} .q-btn.ghost:hover{background:var(--fill)}
-.q-btn.lg{font-size:14px;padding:9px 16px}
+.q-btn.lg{font-size:14px;padding:8px 15px}
 
 /* ---- pills / tags (the only color) ---- */
 .q-pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:3px 9px;border-radius:var(--r-pill);border:1px solid var(--hairline);background:var(--surface);color:var(--slate)}
@@ -175,23 +175,24 @@ h1{font-size:30px;line-height:1.1} h2{font-size:20px} h3{font-size:16px}
 :root{ --slate2:#525C6E; --landing-nav-h:68px; }
 
 /* big display headline — the signature attio hero type */
+/* type scale matched to attio.com: hero h1 64px, section h3 32px, feature h3 ~28px */
 .q-display{font-family:var(--font-display);font-weight:600;color:var(--ink);
-  font-size:clamp(40px,4.6vw,66px);line-height:1.02;letter-spacing:-.02em;margin:0}
-.q-display.sm{font-size:clamp(30px,3.6vw,48px);line-height:1.05}
-.q-display.xs{font-size:clamp(24px,2.4vw,34px);line-height:1.1;letter-spacing:-.018em}
-.q-lede{font-family:var(--font-ui);font-size:20px;font-weight:500;color:var(--slate2);
-  line-height:1.35;letter-spacing:-.01em;margin:0}
+  font-size:clamp(38px,4.2vw,64px);line-height:1.04;letter-spacing:-.02em;margin:0}
+.q-display.sm{font-size:clamp(25px,2.5vw,32px);line-height:1.15;letter-spacing:-.015em}
+.q-display.xs{font-size:clamp(21px,2vw,28px);line-height:1.2;letter-spacing:-.018em}
+.q-lede{font-family:var(--font-ui);font-size:19px;font-weight:500;color:var(--slate2);
+  line-height:1.4;letter-spacing:-.01em;margin:0}
 .q-lede.sm{font-size:16px;line-height:1.5}
 
 /* centered landing hero with generous breathing room */
-.q-hero{max-width:920px;margin:0 auto;text-align:center;padding:96px 24px 56px;
-  display:flex;flex-direction:column;align-items:center;gap:22px}
-.q-hero .q-lede{max-width:48ch}
+.q-hero{max-width:860px;margin:0 auto;text-align:center;padding:76px 24px 48px;
+  display:flex;flex-direction:column;align-items:center;gap:20px}
+.q-hero .q-lede{max-width:46ch}
 .q-cta-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 
 /* section header block (centered, reused down the page) */
-.q-section{max-width:1180px;margin:0 auto;padding:72px 24px}
-.q-section-head{max-width:720px;margin:0 auto 36px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px}
+.q-section{max-width:1180px;margin:0 auto;padding:56px 24px}
+.q-section-head{max-width:680px;margin:0 auto 28px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
 
 /* product showcase — tab switcher + rounded screenshot frame */
 .q-showcase{max-width:1180px;margin:0 auto;padding:0 24px}
@@ -278,20 +279,20 @@ h1{font-size:30px;line-height:1.1} h2{font-size:20px} h3{font-size:16px}
 .q-secnum .n{font-variant-numeric:tabular-nums;color:var(--signal);font-weight:700}
 
 /* feature row — numbered eyebrow + big statement + supporting copy + visual */
-.q-feature{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;max-width:1180px;margin:0 auto;padding:64px 24px}
+.q-feature{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center;max-width:1140px;margin:0 auto;padding:48px 24px}
 .q-feature.flip .q-feature-copy{order:2}
 .q-feature-copy{display:flex;flex-direction:column;gap:16px;align-items:flex-start}
 .q-feature-vis{border:1px solid var(--hairline);border-radius:var(--r-card);overflow:hidden;background:var(--surface);box-shadow:var(--shadow-card),var(--carve);min-height:280px}
 @media(max-width:900px){.q-feature{grid-template-columns:1fr;gap:28px}.q-feature.flip .q-feature-copy{order:0}}
 
 /* big editorial pull-quote — two-tone ink→grey on dotted grid (attio signature) */
-.q-quote{max-width:1000px;margin:0 auto;padding:96px 24px;text-align:center}
+.q-quote{max-width:940px;margin:0 auto;padding:76px 24px;text-align:center}
 .q-quote blockquote{font-family:var(--font-display);font-weight:600;font-size:clamp(28px,3.4vw,46px);line-height:1.18;letter-spacing:-.02em;color:var(--ink);margin:0}
 .q-quote blockquote .dim{color:var(--border)}
 .q-quote .who{margin-top:28px;font-size:14px;color:var(--muted)} .q-quote .who b{color:var(--ink);font-weight:600}
 
 /* trial / closing band */
-.q-band{max-width:1180px;margin:0 auto;padding:80px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:20px}
+.q-band{max-width:1180px;margin:0 auto;padding:60px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:18px}
 
 /* app-wide expressive page entrance (M3) — one calm fade-up on load */
 @keyframes q-enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
@@ -354,3 +355,35 @@ h1{font-size:30px;line-height:1.1} h2{font-size:20px} h3{font-size:16px}
   padding:8px 14px;border-radius:var(--r-btn);font-size:13px;font-weight:500;
   transition:top var(--t) var(--ease)}
 .q-skip:focus{top:12px}
+
+/* ============================================================
+   v1.7 — "How it works" workflow steps (the home explains end-to-end usage)
+   ============================================================ */
+.q-flow{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:1180px;margin:0 auto;padding:0 24px}
+.q-step{position:relative;display:flex;flex-direction:column;gap:9px;align-items:flex-start;padding:22px;
+  border:1px solid var(--hairline);border-radius:var(--r-card);background:var(--surface);
+  box-shadow:var(--shadow-card),var(--carve);
+  transition:transform var(--t-press) var(--ease-spring),box-shadow var(--t) var(--ease),border-color var(--t) var(--ease)}
+.q-step:hover{transform:translateY(-2px);box-shadow:var(--shadow-pop);border-color:var(--border)}
+.q-step .ic{width:38px;height:38px;border-radius:10px;background:var(--fill);display:grid;place-items:center;color:var(--ink);font-size:20px}
+.q-step .q-step-n{font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--signal)}
+.q-step h4{font-size:15.5px;font-weight:600;color:var(--ink);margin:0;letter-spacing:-.01em}
+.q-step p{font-size:13px;color:var(--muted);line-height:1.55;margin:0}
+.q-step .go{font-size:12.5px;font-weight:600;color:var(--signal);margin-top:auto;padding-top:6px;display:inline-flex;align-items:center;gap:5px}
+.q-step .conn{position:absolute;right:-10px;top:40px;color:var(--border);font-size:16px;z-index:1}
+@media(max-width:900px){.q-flow{grid-template-columns:1fr}.q-step .conn{display:none}}
+
+/* ============================================================
+   v1.8 — Scroll-triggered autostart animations (attio: animations autostart on scroll-in)
+   When a .q-reveal enters the viewport (.in), its data-viz plays automatically.
+   ============================================================ */
+/* bars/meters grow from 0 → their set width when the card scrolls into view */
+.q-grow{transform:scaleX(0);transform-origin:left;transition:transform .9s var(--ease-emphatic) .18s}
+.q-reveal.in .q-grow{transform:scaleX(1)}
+/* numbers/figures rise + fade as the card reveals */
+.q-rise{opacity:0;transform:translateY(8px);transition:opacity .6s var(--ease-out) .25s,transform .6s var(--ease-emphatic) .25s}
+.q-reveal.in .q-rise{opacity:1;transform:none}
+/* a continuously-running "live" pulse (autostart loop) for status indicators */
+@keyframes q-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.82)}}
+.q-live{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--g);animation:q-pulse 1.8s var(--ease) infinite}
+@media(prefers-reduced-motion:reduce){.q-grow{transform:none}.q-rise{opacity:1;transform:none}.q-live{animation:none}}
