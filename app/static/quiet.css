@@ -295,3 +295,23 @@ h1{font-size:30px;line-height:1.1} h2{font-size:20px} h3{font-size:16px}
 /* app-wide expressive page entrance (M3) — one calm fade-up on load */
 @keyframes q-enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:no-preference){.q-body{animation:q-enter .42s var(--ease-emphatic) both}}
+
+/* ============================================================
+   v1.4 — Craft pass (WWDC26 "Principles of great design"): high-quality details.
+   Focus-visible feedback · expressive shape-morph press · global reduced-motion guard.
+   ============================================================ */
+/* Craft: clear keyboard focus feedback (answers "what can I interact with") + accessibility */
+:where(a,button,.q-btn,.q-ni,.q-tab,.q-showtab,.q-cmd,.q-cmdk .qi,.q-dd>summary,.q-input,select,textarea,[tabindex]):focus-visible{
+  outline:2px solid var(--signal);outline-offset:2px}
+.q-cmdk input:focus-visible,.ag-search input:focus-visible{outline:none}
+
+/* M3 Expressive: subtle shape-morph on press — immediate, natural feedback */
+.q-btn.ink:active,.q-btn.signal:active,.q-eyebrow:active{border-radius:15px}
+
+/* Craft: motion must never feel fragile — honour reduced-motion globally */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;
+    transition-duration:.001ms!important;scroll-behavior:auto!important}
+  .q-reveal{opacity:1!important;transform:none!important}
+  .q-btn:active{transform:none!important}
+}
