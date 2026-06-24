@@ -4,23 +4,7 @@
 {% block content %}
 <style>
   .q-body{max-width:1280px}
-  .sim{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--a);background:var(--abg);border:1px solid var(--abg);border-radius:5px;padding:3px 9px}
-  .sec{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--label);margin:26px 0 11px;display:flex;align-items:center;gap:9px}
-  .sec .q-pill{text-transform:none;letter-spacing:0}
-  /* KPI tree */
-  .kpitree{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-  .kgroup{background:#fff;border:1px solid var(--hairline);border-radius:var(--r-card);padding:14px 16px;box-shadow:var(--shadow-card)}
-  .kgroup h3{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink);margin:0 0 12px}
-  .kpi{margin-bottom:14px} .kpi:last-child{margin-bottom:0}
-  .kpi .top{display:flex;align-items:baseline;gap:6px;font-size:12.5px}
-  .kpi .lab{font-weight:500;color:var(--ink)}
-  .kpi .cur{margin-left:auto;font-weight:700;font-family:var(--font-mono);font-variant-numeric:tabular-nums}
-  .kpi .pct{font-size:10px;color:var(--muted);font-weight:600}
-  .track{position:relative;height:8px;border-radius:5px;background:var(--fill);border:1px solid var(--hairline);margin-top:6px;overflow:hidden}
-  .track .fill{position:absolute;left:0;top:0;bottom:0;border-radius:5px}
-  .bt-row{display:flex;justify-content:space-between;font-size:9.5px;color:var(--muted);margin-top:4px}
-  .g-on .fill{background:var(--g)} .g-mid .fill{background:var(--a)} .g-low .fill{background:var(--muted)}
-  .g-on .cur{color:var(--g)} .g-mid .cur{color:var(--a)} .g-low .cur{color:var(--muted)}
+  /* .q-sim / .q-sec / .q-kpitree KPI-tree component now live in quiet.css (v1.9, shared with /assurance) */
   /* scenarios */
   .scn{background:#fff;border:1px solid var(--hairline);border-radius:var(--r-card);padding:14px 16px;margin-bottom:13px;box-shadow:var(--shadow-card)}
   .scn .sh{display:flex;align-items:center;gap:9px;margin-bottom:10px;flex-wrap:wrap}
@@ -44,7 +28,7 @@
   .rail .big{font-size:30px;font-weight:600;color:var(--g);font-family:var(--font-display);letter-spacing:-.02em}
   .rail .sub{font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:5px}
   .rail .sub b{color:var(--ink)}
-  @media(max-width:980px){.kpitree,.rails{grid-template-columns:1fr}}
+  @media(max-width:980px){.rails{grid-template-columns:1fr}}
 </style>
 
   <div class="q-pagehead"><div>
@@ -52,21 +36,21 @@
     <h1>KPI control tower</h1>
     <p class="q-muted" style="margin:5px 0 0;font-size:13px"><b style="color:var(--slate)">Proves:</b> {{ m.note }} — <a href="/demo" style="color:var(--signal);font-weight:600">back to the demo →</a></p>
   </div>
-  <div class="sp"><span class="sim">⟳ Simulated RL</span></div></div>
+  <div class="sp"><span class="q-sim">⟳ Simulated RL</span></div></div>
 
-  <div class="sec">Master business KPIs · progress toward target <span class="q-pill v"><span class="d"></span>Optimizing</span></div>
-  <div class="kpitree">
+  <div class="q-sec">Master business KPIs · progress toward target <span class="q-pill v"><span class="d"></span>Optimizing</span></div>
+  <div class="q-kpitree">
     {% for grp in m.kpi_tree %}
-    <div class="kgroup">
+    <div class="q-kgroup">
       <h3>{{ grp.group }}</h3>
       {% for k in grp.kpis %}
       {% set cls = 'g-on' if k.pct_to_target >= 60 else ('g-mid' if k.pct_to_target >= 25 else 'g-low') %}
-      <div class="kpi {{ cls }}">
+      <div class="q-kpi {{ cls }}">
         <div class="top"><span class="lab">{{ k.label }}</span>
           <span class="cur">{{ k.current }}{{ k.unit if k.unit == '%' else '' }}</span>
           <span class="pct">· {{ k.pct_to_target|int }}% to target</span></div>
-        <div class="track"><span class="fill" style="width:{{ k.pct_to_target if k.pct_to_target <= 100 else 100 }}%"></span></div>
-        <div class="bt-row"><span>base {{ k.baseline }}{{ k.unit if k.unit=='%' else '' }}</span>
+        <div class="q-track"><span class="fill" style="width:{{ k.pct_to_target if k.pct_to_target <= 100 else 100 }}%"></span></div>
+        <div class="q-btrow"><span>base {{ k.baseline }}{{ k.unit if k.unit=='%' else '' }}</span>
           <span>{{ '↓' if k.direction=='down' else '↑' }} target {{ k.target }}{{ k.unit if k.unit=='%' else (' '+k.unit) }}</span></div>
       </div>
       {% endfor %}
@@ -74,7 +58,7 @@
     {% endfor %}
   </div>
 
-  <div class="sec">Per-scenario learning · which variant the bandit picked <span class="q-pill v"><span class="d"></span>Optimizing</span></div>
+  <div class="q-sec">Per-scenario learning · which variant the bandit picked <span class="q-pill v"><span class="d"></span>Optimizing</span></div>
   {% for sc in m.scenarios %}
   <div class="scn">
     <div class="sh">
@@ -101,7 +85,7 @@
   </div>
   {% endfor %}
 
-  <div class="sec">Trust rails · monitored continuously <span class="q-pill a"><span class="d"></span>Watched</span></div>
+  <div class="q-sec">Trust rails · monitored continuously <span class="q-pill a"><span class="d"></span>Watched</span></div>
   <div class="rails">
     <div class="rail {{ 'ok' if m.health.provenance.coverage_pct == 100 and not m.health.provenance.hold_in_copy else 'warn' }}">
       <h4>Provenance</h4>

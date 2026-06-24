@@ -2,41 +2,269 @@
 {% block title %}Provenance — Assurance{% endblock %}
 {% block crumb %}<i class="ph ph-shield-check"></i> Assurance{% endblock %}
 {% block content %}
-  <div class="q-pagehead"><div>
-    <span class="q-pill a" style="margin-bottom:10px"><span class="d"></span>Watched</span>
-    <h1>Assurance</h1>
-    <p class="q-muted" style="margin:5px 0 0"><b style="color:var(--slate)">Proves:</b> one number you can take to the board — and the live watch behind it.</p>
-  </div></div>
+<style>
+  .q-body{max-width:1280px}                       /* match the KPI control tower's dashboard width */
+  .ass-top{display:grid;grid-template-columns:280px 1fr;gap:16px;align-items:stretch}
+  .trust-hero{text-align:center;display:flex;flex-direction:column;justify-content:center;padding:24px 18px}
+  .trust-num{font-family:var(--font-display);font-size:62px;font-weight:600;color:var(--g);line-height:1;margin:6px 0 4px;letter-spacing:-.03em}
+  .trust-num span{font-size:26px;color:var(--muted)}
+  .trust-parts{font-size:11.5px;color:var(--slate);margin-top:10px;line-height:1.5;font-variant-numeric:tabular-nums}
+  .ass-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(176px,1fr));gap:12px}
+  .ass-kpis .q-stat .v{font-size:26px}
+  .ass-kpis .q-stat .v.g{color:var(--g)} .ass-kpis .q-stat .v.r{color:var(--r)}
+  .stamp{font-size:12px;margin:12px 0 0;font-variant-numeric:tabular-nums}
+  .ass-tabs{margin:26px 0 4px}
+  .ass-panel{padding-top:14px}
+  .q-tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .cap{font-size:12px;color:var(--muted);margin:10px 0 0;line-height:1.55}
+  .cap b{color:var(--slate);font-weight:600}
+  .chart-card .q-label{margin-bottom:10px;display:block}
+  .bind{background:var(--fill2);border:1px solid var(--hairline);border-radius:var(--r-card);padding:13px 16px;font-size:13px;color:var(--slate);margin-top:16px;line-height:1.55}
+  .bind b{color:var(--ink)}
+  .banner{background:var(--bbg);border:1px solid transparent;border-radius:var(--r-card);padding:13px 16px;font-size:13.5px;color:var(--slate);margin-bottom:16px;line-height:1.5}
+  .banner b{color:var(--signal)}
+  .sev-row{display:flex;align-items:center;gap:10px;margin:12px 0}
+  .sev-row .nm{width:74px;font-size:12.5px;color:var(--ink);font-weight:500}
+  .sev-bar{flex:1;height:9px;border-radius:5px;background:var(--fill);position:relative;overflow:hidden}
+  .sev-bar .fill{position:absolute;left:0;top:0;height:100%;border-radius:5px}
+  .sev-bar .mk{position:absolute;top:-3px;width:2px;height:15px;background:var(--a)}
+  .sev-num{width:120px;text-align:right;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .cov-row{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:12.5px}
+  .cov-row .nm{width:230px;color:var(--slate)}
+  .cov-bar{flex:1;height:8px;border-radius:5px;background:var(--fill);overflow:hidden}
+  .cov-bar .fill{height:100%;background:var(--signal);border-radius:5px}
+  .cov-row .ct{width:66px;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+  .prop-pills{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px}
+  .fence{border:1px solid var(--hairline);border-top:3px solid var(--a);border-radius:var(--r-card);background:var(--surface);padding:20px;margin-top:18px}
+  .led-lift{background:var(--gbg)}
+  .tick{color:var(--g);font-weight:700}.cross{color:var(--r);font-weight:700}
+  @media(max-width:900px){.ass-top{grid-template-columns:1fr}}
+</style>
 
-  <div style="display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start">
-    <div class="q-card" style="text-align:center;padding:28px 20px">
-      <div class="q-label">Trust score</div>
-      <div style="font-family:var(--font-display);font-size:64px;font-weight:600;color:var(--g);line-height:1;margin:10px 0 6px;letter-spacing:-.03em">{{ trust }}<span style="font-size:28px;color:var(--muted)">%</span></div>
-      <div class="q-muted" style="font-size:13px">provenance · no-hold-in-copy · ungated-blocked · traps</div>
+<div class="q-pagehead"><div>
+  <span class="q-pill a" style="margin-bottom:10px"><span class="d"></span>Watched</span>
+  <h1>Assurance</h1>
+  <p class="q-muted" style="margin:5px 0 0"><b style="color:var(--slate)">Proves:</b> one number you can take to the board — and the decomposed reliability behind it. Every figure is shown beside the single-judge baseline, with its denominator.</p>
+</div></div>
+
+<!-- ── the one number + the contrast band (board view) ───────────────── -->
+<div class="ass-top q-reveal">
+  <div class="q-card trust-hero">
+    <div class="q-label">Trust score</div>
+    <div class="trust-num">{{ trust }}<span>%</span></div>
+    <div class="q-muted" style="font-size:12px">unweighted mean of four checks</div>
+    <div class="trust-parts">provenance {{ prov_cov }}% ({{ prov_facts }} facts) · hold-in-copy {{ hold_n }} · ungated {{ ungated_sel }}/{{ ungated_n }} selected · traps {{ gate_cm.tp }}/{{ n_bad }}</div>
+    <div class="q-muted" style="font-size:10.5px;margin-top:8px;line-height:1.5">Blends a <b style="color:var(--slate)">structural</b> signal (ungated-never-selected, from the illustrative bandit) with a <b style="color:var(--slate)">statistical</b> one (trap catch-rate) — not a single empirical measurement.</div>
+  </div>
+  <div class="ass-kpis">
+    <div class="q-stat"><div class="k">Trap catch-rate vs single judge</div><div class="v g">{{ gate_cm.tp }}/{{ n_bad }}</div><div class="sub">judge {{ base_cm.tp }}/{{ n_bad }} ({{ (base_catch*100)|round(1) }}%) · +{{ lift_pp }} pts / {{ lift_x }}× · 95% CI [{{ (gate_ci[0]*100)|round|int }}–{{ (gate_ci[1]*100)|round|int }}%]</div></div>
+    <div class="q-stat"><div class="k">False-reject (clean)</div><div class="v g">{{ gate_cm.fp }}/{{ n_clean }}</div><div class="sub">0 clean blocked · CI upper ~{{ (fr_ci[1]*100)|round(1) }}% — n={{ n_clean }}, weakest evidence</div></div>
+    <div class="q-stat"><div class="k">Missed bad claims</div><div class="v"><span style="color:var(--g)">{{ gate_cm.fn }}</span> <span class="q-muted" style="font-size:18px">vs</span> <span style="color:var(--r)">{{ base_cm.fn }}</span></div><div class="sub">Gate vs single judge — of {{ n_bad }} bad claims</div></div>
+    <div class="q-stat"><div class="k">Calibration (ECE)</div><div class="v g">{{ '%.3f'|format(ece) }}</div><div class="sub">decisive verifier · correct-when-confident · 2 of 5 bins populated</div></div>
+    <div class="q-stat"><div class="k">Stability</div><div class="v g">{{ n_runs }}/{{ n_runs }} runs</div><div class="sub">{{ gsum.passed }}/{{ gsum.total }} golden · {{ props_pass }}/{{ props_total }} properties</div></div>
+  </div>
+</div>
+<p class="q-muted stamp">Source: <span class="q-mono">data/demo/runs/assurance.json</span> · single seeded replay (decision R5, byte-identical) · n={{ n_bad }} traps / {{ n_clean }} clean.</p>
+
+<!-- ── tabs ──────────────────────────────────────────────────────────── -->
+<div class="q-tabs ass-tabs" id="assTabs">
+  <div class="q-tab on" data-tab="overview">Overview</div>
+  <div class="q-tab" data-tab="mutation">By mutation</div>
+  <div class="q-tab" data-tab="channel">By channel</div>
+  <div class="q-tab" data-tab="ledger">Trap ledger</div>
+</div>
+
+<!-- Overview -->
+<div class="ass-panel" data-panel="overview">
+  <div class="q-grid c2">
+    <div class="q-card chart-card"><span class="q-label">Operating point — catch-rate at fixed false-reject</span>
+      {{ op_svg|safe }}
+      <p class="cap">Higher catch at the <b>same 0% false-reject</b> — apples-to-apples (<b>P5</b>). Two real points, no threshold sweep exists, so no curve is drawn between them. Whiskers are Wilson 95% CIs.</p></div>
+    <div class="q-card chart-card"><span class="q-label">Confusion — Gate vs single judge</span>
+      {{ confusion_svg|safe }}
+      <p class="cap">Raw counts (sum {{ n_bad + n_clean }}). A single LLM judge let <b>{{ base_cm.fn }} of {{ n_bad }}</b> bad claims through; the Gate let <b>{{ gate_cm.fn }}</b>. The baseline's missed cell is the information — a lone Gate matrix would just be two zeros.</p></div>
+  </div>
+  <div class="q-grid c2" style="margin-top:16px">
+    <div class="q-card chart-card"><span class="q-label">Catch-rate by attack type — Gate vs single judge</span>
+      {{ lift_svg|safe }}
+      <p class="cap">The Gate clears every family; the story is the baseline's <b>holes</b> — a number-blind judge catches <b>0/7</b> number-drift traps. Per-type n=7–10, so decimals are coarse; the pattern is the durable claim.</p></div>
+    <div class="q-card chart-card"><span class="q-label">Calibration (reliability)</span>
+      {{ reliab_svg|safe }}
+      <p class="cap"><b>Decisive verifier:</b> confidence concentrates at 0/1, so only 2 of 5 bins populate and the mid-range is empty by design (not missing data). ECE&nbsp;0.000 means <b>correct-when-confident</b>, not graded-probability calibration.</p></div>
+  </div>
+  <div class="bind">Same set ({{ n_bad }} traps, {{ n_clean }} clean), same false-reject (0%) — the Gate catches <b>{{ lift_x }}×</b> what a number-blind judge does, with no calibration line invented through data it doesn't have.</div>
+</div>
+
+<!-- By mutation -->
+<div class="ass-panel" data-panel="mutation" hidden>
+  <div class="q-card chart-card"><span class="q-label">Catch-rate by attack type — Gate vs single judge</span>
+    {{ lift_svg|safe }}
+    <p class="cap">Lift per family: {% for r in lift_rows %}{{ r.label|lower }} +{{ r.lift_pp }}pp{% if not loop.last %} · {% endif %}{% endfor %}.</p></div>
+  <div class="q-grid c2" style="margin-top:16px">
+    <div class="q-card chart-card"><span class="q-label">Single judge — per claim × attack (where it misses)</span>
+      {{ tile_svg|safe }}
+      <p class="cap"><span class="tick">✓</span> caught · <span class="cross">✗</span> missed · hatched = no trap for that claim×family (number-drift has only {{ tax.number_drift }} of 10). The <b>Gate's grid is all-caught</b> ({{ gate_cm.tp }}/{{ n_bad }}); shown here is the single judge, so its red cells are visible.</p></div>
+    <div class="q-card chart-card"><span class="q-label">By severity — material vs puffery</span>
+      {% for s in sev_rows %}
+      <div class="sev-row">
+        <span class="nm">{{ s.sev }}</span>
+        <div class="sev-bar"><div class="fill" style="width:{{ (s.gate*100)|round }}%;background:var(--g)"></div><div class="mk" style="left:{{ (s.base*100)|round }}%"></div></div>
+        <span class="sev-num">Gate {{ s.gate_frac }} · judge {{ s.base_frac }}</span>
+      </div>
+      {% endfor %}
+      <p class="cap">Green bar = Gate; amber tick = single judge (<b>derived from items[]</b>, not shipped in assurance.json). The Gate catches every <b>material</b> (number/legal) trap; the single judge catches barely 1 in 5.</p></div>
+  </div>
+  <div class="q-card" style="margin-top:16px"><span class="q-label">Trap taxonomy</span>
+    <table class="q-table" style="margin-top:8px">
+      <thead><tr><th>Family</th><th>n</th><th>What it mutates</th></tr></thead>
+      <tbody>
+        {% for mut, desc in mut_desc.items() %}
+        <tr><td style="font-weight:500;color:var(--ink)">{{ mut.replace('_',' ') }}</td><td class="q-mono">{{ tax[mut] }}</td><td class="q-muted">{{ desc }}</td></tr>
+        {% endfor %}
+        <tr><td style="font-weight:500;color:var(--ink)">clean (held-out)</td><td class="q-mono">{{ tax.clean }}</td><td class="q-muted">genuine sayable claims — must <b>not</b> be blocked (the false-reject set)</td></tr>
+      </tbody>
+    </table>
+    <p class="cap">Self-authored adversarial suite, n={{ n_bad + n_clean }} ({{ n_bad }} traps + {{ n_clean }} clean). Widening it — especially the clean set — is the clearest next eval.</p></div>
+</div>
+
+<!-- By channel -->
+<div class="ass-panel" data-panel="channel" hidden>
+  <div class="banner"><b>Property P4</b> — the same Gate runs on email and website; same <span class="q-mono">claim_id</span> → same verdict. Identical <b style="color:var(--slate)">by design</b>, not two independent samples. Divergence here would be the bug.</div>
+  <div class="q-grid c2">
+    <div class="q-card chart-card"><span class="q-label">Catch-rate per channel</span>
+      {{ chan_svg|safe }}
+      <p class="cap">Zero divergence between channels — an invariant, not corroboration.</p></div>
+    <div class="q-card chart-card"><span class="q-label">Per-channel slice</span>
+      <div class="q-tablewrap"><table class="q-table" style="margin-top:8px">
+        <thead><tr><th>Channel</th><th>traps</th><th>clean</th><th>Gate catch</th><th>false-reject</th><th>judge catch</th></tr></thead>
+        <tbody>
+          {% for c, mm in channels.items() %}
+          <tr><td style="font-weight:500;color:var(--ink)">{{ c }}</td><td class="q-mono">{{ mm.n_traps }}</td><td class="q-mono">{{ mm.n_clean }}</td>
+            <td class="q-mono">{{ (mm.gate_catch_rate*100)|round(1) }}%</td><td class="q-mono">{{ (mm.gate_false_reject*100)|round(1) }}%</td>
+            <td class="q-mono">{{ (mm.baseline_catch_rate*100)|round(1) }}%</td></tr>
+          {% endfor %}
+        </tbody>
+      </table></div>
+      <p class="cap">Every field identical across channels — proof the boundary is shared, not duplicated.</p></div>
+  </div>
+</div>
+
+<!-- Trap ledger -->
+<div class="ass-panel" data-panel="ledger" hidden>
+  <div class="q-panel">
+    <div class="q-toolbar"><span class="h">Trap ledger — {{ items|length }} adversarial + clean cases</span>
+      <span class="sp"><span class="q-pill g"><span class="d"></span>Gate caught {{ gate_cm.tp }}/{{ n_bad }}</span><span class="q-pill a"><span class="d"></span>judge missed {{ base_cm.fn }}</span></span></div>
+    <div class="q-tablewrap"><table class="q-table">
+      <thead><tr><th>Trap</th><th>Family</th><th>Severity</th><th>Source claim</th><th>Kind</th><th>Verdict</th><th>conf</th><th>Gate call</th><th>judge score</th><th>Judge call</th></tr></thead>
+      <tbody>
+        {% for it in items %}
+        <tr{% if it.gate_caught and not it.base_caught %} class="led-lift"{% endif %}>
+          <td class="q-mono">{{ it.trap_id }}</td>
+          <td>{{ it.mutation.replace('_',' ') if it.mutation != 'clean' else 'clean' }}</td>
+          <td class="q-muted">{{ it.severity }}</td>
+          <td class="q-mono q-muted">{{ it.source }}</td>
+          <td>{% if it.label == 1 %}<span class="q-pill r"><span class="d"></span>bad</span>{% else %}<span class="q-pill g"><span class="d"></span>clean</span>{% endif %}</td>
+          <td><span class="q-pill {{ 'r' if it.gate_verdict=='red' else ('a' if it.gate_verdict=='amber' else 'g') }}"><span class="d"></span>{{ it.gate_verdict }}</span></td>
+          <td class="q-mono">{{ '%.2f'|format(it.gate_confidence) }}</td>
+          <td>{% set gc = it.gate_caught if it.label == 1 else not it.gate_caught %}{% if gc %}<span class="tick" title="correct">✓</span>{% else %}<span class="cross" title="wrong">✗</span>{% endif %}</td>
+          <td class="q-mono">{{ '%.2f'|format(it.base_score) }}</td>
+          <td>{% set bc = it.base_caught if it.label == 1 else not it.base_caught %}{% if bc %}<span class="tick" title="correct">✓</span>{% else %}<span class="cross" title="wrong">✗</span>{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table></div>
+  </div>
+  <p class="cap"><b class="tick">✓</b> = correct call (a trap caught, or a clean claim correctly allowed) · <b class="cross">✗</b> = wrong call. The single judge makes <b>{{ base_cm.fn }}</b> wrong calls — all misses; the Gate makes <b>0</b>. <span style="background:var(--gbg);padding:1px 6px;border-radius:4px">Highlighted</span> rows are the lift: the Gate caught them, the judge missed. Clean rows are correctly never blocked (amber ≠ reject), so false-reject = 0.</p>
+</div>
+
+<!-- ── below the tabs: real regression evidence ─────────────────────── -->
+<div class="q-sec">Stability over time · regression safety <span class="q-pill g"><span class="d"></span>{{ n_runs }}/{{ n_runs }} runs green</span></div>
+<p class="q-muted" style="margin:-4px 0 12px;font-size:13px">{{ date_from }} → {{ date_to }} — zero regression. Deterministic seeded replay (R5): flat <b style="color:var(--slate)">by construction</b> = harness non-regression, not {{ n_runs }} independent samples.</p>
+<div class="q-card chart-card q-reveal">{{ stab_svg|safe }}</div>
+
+<div class="q-grid c2 q-reveal" style="margin-top:16px">
+  <div class="q-card"><span class="q-label">The five headline properties</span>
+    <div class="prop-pills">
+      {% for p, label in props %}<span class="q-pill g" title="{{ label }}"><span class="d"></span>{{ p }}</span>{% endfor %}
     </div>
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px">
-      <div class="q-stat"><div class="k">Provenance coverage</div><div class="v" style="color:var(--g)">{{ h.provenance.coverage_pct }}%</div><div class="sub">{{ h.provenance.facts }} facts, each with a source</div></div>
-      <div class="q-stat"><div class="k">Hold facts in copy</div><div class="v" style="color:var(--g)">{{ h.provenance.hold_in_copy|length }}</div><div class="sub">held facts never recited</div></div>
-      <div class="q-stat"><div class="k">Ungated arms selected</div><div class="v" style="color:var(--g)">{{ h.hallucination.selected }}</div><div class="sub">of {{ h.hallucination.ungated_arms }} blocked — provably never</div></div>
-      <div class="q-stat"><div class="k">Trap catch-rate</div><div class="v" style="color:var(--g)">{% if catch %}{{ catch }}%{% else %}100%{% endif %}</div><div class="sub">Assurance Lab adversarial traps</div></div>
+    <table class="q-table" style="margin-top:6px">
+      <tbody>{% for p, label in props %}<tr><td class="q-mono" style="width:36px;color:var(--g);font-weight:600">{{ p }}</td><td class="q-muted">{{ label }}</td></tr>{% endfor %}</tbody>
+    </table>
+    <p class="cap">{{ props_pass }}/{{ props_total }} green every run — proven in <span class="q-mono">tests/</span> against the real Gate (no mocks).</p></div>
+  <div class="q-card"><span class="q-label">Golden coverage — cases per pipeline step</span>
+    {% for s in step_rows %}
+    <div class="cov-row"><span class="nm">{{ s.label }}</span><div class="cov-bar"><div class="fill" style="width:{{ (s.n/max_step*100)|round }}%"></div></div><span class="ct">{{ s.passed }}/{{ s.n }}</span></div>
+    {% endfor %}
+    <p class="cap">Bar = case <b>count</b> (all pass, so pass-rate would be a wall of full bars). Gate ({{ step_rows[1].n if step_rows|length > 1 else '' }}) and enrich-gate carry the load; 5 steps have only 1 golden case — hand-authored regression cases, not exhaustive coverage. Thin coverage is the roadmap.</p>
+    {% if lifecycle %}<p class="cap" style="margin-top:8px"><span class="q-pill g"><span class="d"></span>lifecycle ✓</span> end-to-end: {{ lifecycle.name }}. Full per-step graph logs at <a href="/observatory" style="color:var(--signal)">/observatory</a> · <a href="/api/observe/golden" style="color:var(--signal)">/api/observe/golden</a>.</p>{% endif %}
+  </div>
+</div>
+
+<!-- ── fenced: ILLUSTRATIVE synthetic traffic ───────────────────────── -->
+<div class="fence q-reveal">
+  <div class="q-sec" style="margin-top:0">Optimizer behaviour <span class="q-sim">⟳ Simulated RL · synthetic traffic</span></div>
+  <p class="q-muted" style="font-size:12.5px;margin:0 0 14px;line-height:1.55">{{ sim_note }} (seed {{ sim_seed }}, {{ sim_rounds }} rounds). These are <b style="color:var(--slate)">simulated</b> outcomes, not achieved results. The one measured fact here is the blocked arm: selected <b style="color:var(--slate)">0×</b> in every scenario (<b style="color:var(--slate)">P1</b> — an invariant from the real ThompsonBandit, not a simulated CTR).</p>
+  <span class="q-label">Bandit convergence — share of pulls on the eventual winner</span>
+  <div style="margin:10px 0 4px">{{ conv_svg|safe }}</div>
+  <p class="cap">Each panel: the winner's traffic share climbing as the bandit learns; the dashed grey line is the ungated arm, flat at 0 (never selectable).</p>
+
+  <div style="margin-top:18px"><span class="q-label">Projected master-KPI movement (illustrative)</span>
+    <div class="q-kpitree" style="margin-top:10px">
+      {% for grp in kpi_tree %}
+      <div class="q-kgroup">
+        <h3>{{ grp.group }}</h3>
+        {% for k in grp.kpis %}
+        {% set cls = 'g-on' if k.pct_to_target >= 60 else ('g-mid' if k.pct_to_target >= 25 else 'g-low') %}
+        <div class="q-kpi {{ cls }}">
+          <div class="top"><span class="lab">{{ k.label }}</span>
+            <span class="cur">{{ k.current }}{{ k.unit if k.unit == '%' else '' }}</span>
+            <span class="pct">· {{ k.pct_to_target|int }}% to target</span></div>
+          <div class="q-track"><span class="fill" style="width:{{ k.pct_to_target if k.pct_to_target <= 100 else 100 }}%"></span></div>
+          <div class="q-btrow"><span>base {{ k.baseline }}{{ k.unit if k.unit=='%' else '' }}</span>
+            <span>{{ '↓' if k.direction=='down' else '↑' }} target {{ k.target }}{{ k.unit if k.unit=='%' else (' '+k.unit) }}</span></div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
     </div>
+    <p class="cap">The same KPI-tree component as the <a href="/demo/monitor" style="color:var(--signal)">KPI control tower</a> — fill = progress to target, base/target below; bounce is "lower is better" (↓). Simulated outcomes, not achieved results.</p>
   </div>
 
-  <div class="q-pagehead" style="margin:32px 0 14px"><div>
-    <h2>Drift watch</h2>
-    <p class="q-muted" style="margin:4px 0 0;font-size:13.5px">{{ h.drift.paused }} paused · {{ h.drift.fresh }}/{{ h.drift.ttl_facts }} TTL-governed facts fresh. On a source change, Drift pauses the dependent variant automatically.</p>
-  </div></div>
-  <div class="q-panel"><table class="q-table">
-    <thead><tr><th>Fact</th><th>Source</th><th>Used by</th><th>Status</th></tr></thead>
-    <tbody>
-      {% for r in drift_rows %}
-      <tr>
-        <td style="font-weight:500;color:var(--ink)">{{ r.signal }}</td>
-        <td class="q-muted">{{ r.source }}</td>
-        <td class="q-muted">{{ r.variant }}</td>
-        <td><span class="q-pill g"><span class="d"></span>{{ r.status }}</span></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table></div>
+  <div style="margin-top:18px"><span class="q-label">Drift watch <span class="q-sim" style="margin-left:6px">illustrative source</span></span>
+    <p class="q-muted" style="margin:6px 0 10px;font-size:12.5px">{{ h.drift.fresh }}/{{ h.drift.ttl_facts }} TTL-governed facts fresh · {{ h.drift.paused }} paused. On a source change, Drift re-verifies <b style="color:var(--slate)">exactly</b> the affected claims and pauses only the dependent variant (<b style="color:var(--slate)">P3</b> — surgical, not whole-corpus).</p>
+    <div class="q-panel"><table class="q-table">
+      <thead><tr><th>Fact</th><th>Source</th><th>Used by</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for r in drift_rows %}
+        <tr><td style="font-weight:500;color:var(--ink)">{{ r.signal }}</td><td class="q-muted">{{ r.source }}</td><td class="q-muted">{{ r.variant }}</td>
+          <td><span class="q-pill g"><span class="d"></span>{{ r.status }}</span></td></tr>
+        {% endfor %}
+      </tbody>
+    </table></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // tab switcher (no dependency)
+  var tabs=document.getElementById('assTabs');
+  if(tabs){
+    var btns=[].slice.call(tabs.querySelectorAll('.q-tab'));
+    var panels=[].slice.call(document.querySelectorAll('.ass-panel'));
+    btns.forEach(function(b){b.addEventListener('click',function(){
+      btns.forEach(function(x){x.classList.remove('on');});
+      b.classList.add('on');
+      var t=b.getAttribute('data-tab');
+      panels.forEach(function(p){p.hidden=(p.getAttribute('data-panel')!==t);});
+    });});
+  }
+  // scroll-reveal (matches the rest of the app)
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.08});
+    [].slice.call(document.querySelectorAll('.q-reveal')).forEach(function(el){io.observe(el);});
+  } else {
+    [].slice.call(document.querySelectorAll('.q-reveal')).forEach(function(el){el.classList.add('in');});
+  }
+})();
+</script>
 {% endblock %}
