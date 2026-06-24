@@ -61,11 +61,13 @@ def fetch_raw(url: str, cache: LLMCache | None = None) -> dict:
     return cache.get_or_compute(key, _do)
 
 
-def _strip_scripts(html: str) -> str:
-    html = re.sub(r"<script\b[^>]*>.*?</script>", "", html, flags=re.I | re.S)
-    html = re.sub(r"<noscript\b[^>]*>.*?</noscript>", "", html, flags=re.I | re.S)
-    # neutralize meta-refresh redirects
-    return re.sub(r'<meta[^>]+http-equiv=["\']?refresh["\']?[^>]*>', "", html, flags=re.I)
+def _neutralize(html: str) -> str:
+    """For a HIGH-FIDELITY clone we keep the page's own scripts (so JS-loaded fonts, lazy
+    images and dynamic sections render). We only remove what would either bounce the page
+    away or block our injected hero: meta-refresh redirects + a page-level CSP."""
+    html = re.sub(r'<meta[^>]+http-equiv=["\']?refresh["\']?[^>]*>', "", html, flags=re.I)
+    html = re.sub(r'<meta[^>]+http-equiv=["\']?content-security-policy["\']?[^>]*>', "", html, flags=re.I)
+    return html
 
 
 def _inject_base(html: str, origin: str) -> str:
@@ -105,7 +107,7 @@ def _overlay(scenario_id: str, v: Variant, url: str) -> str:
       {chips}
       <div style="font-size:11px;color:#627d98;margin-top:5px;">Policy: {note} &middot; optimizing <b style="color:#102a43;">{_html.escape(v.kpi)}</b></div>
     </div>
-    <div style="font-size:10px;color:#90a4b8;margin-top:8px;">↓ below is the real, live-cloned page from <b>{_html.escape(url)}</b> (scripts stripped). This hero is the only thing we injected.</div>
+    <div style="font-size:10px;color:#90a4b8;margin-top:8px;">↓ below is the real, live-cloned page from <b>{_html.escape(url)}</b> — high-fidelity (its own CSS &amp; scripts run). This hero is the only thing we injected.</div>
   </div>
 </div>"""
 
@@ -130,7 +132,7 @@ def clone(url: str, scenario_id: str, v: Variant, cache: LLMCache | None = None)
     if not res["ok"]:
         return {"html": _fallback_page(scenario_id, v, url, res["error"]),
                 "cloned": False, "source_url": url, "note": res["error"]}
-    doc = _strip_scripts(res["html"])
+    doc = _neutralize(res["html"])
     doc = _inject_base(doc, origin_of(url))
     overlay = _overlay(scenario_id, v, url)
     if re.search(r"<body[^>]*>", doc, flags=re.I):

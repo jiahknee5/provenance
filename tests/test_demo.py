@@ -76,23 +76,30 @@ def test_health_rails_clean():
     assert h["hallucination"]["selected"] == 0
 
 
-# --- cloner: inject + graceful fallback (offline) -----------------------------
-_FIXTURE = ("<html><head><title>Real</title></head><body><h1>Original page</h1>"
-            "<script>track();</script></body></html>")
+# --- cloner: high-fidelity inject + graceful fallback (offline) ---------------
+_FIXTURE = ('<html><head><title>Real</title>'
+            '<meta http-equiv="refresh" content="0;url=https://elsewhere.example">'
+            '<meta http-equiv="Content-Security-Policy" content="default-src \'self\'">'
+            '</head><body><h1>Original page</h1>'
+            '<script>track();</script></body></html>')
 
 
-def test_cloner_injects_overlay_and_strips_scripts(monkeypatch):
+def test_cloner_is_high_fidelity_keeps_scripts(monkeypatch):
+    """High fidelity = keep the page's own scripts/CSS so it renders like the real site;
+    only redirects + CSP are neutralized, and our hero is injected."""
     monkeypatch.setattr(cloner, "fetch_raw",
                         lambda url, cache=None: {"ok": True, "status": 200, "html": _FIXTURE, "error": ""})
     s = DS.scenario("A")
     v = DS.gated_variants(s)[0]
     out = cloner.clone("https://example.com", "A", v)
     assert out["cloned"] is True
-    assert "prov-demo-overlay" in out["html"]
-    assert v.headline in out["html"]          # personalization injected
-    assert "Original page" in out["html"]      # real content preserved
-    assert "<script" not in out["html"].lower()  # scripts stripped
-    assert "<base href=" in out["html"]        # origin base injected
+    assert "prov-demo-overlay" in out["html"]   # personalization hero injected
+    assert v.headline in out["html"]
+    assert "Original page" in out["html"]        # real content preserved
+    assert "<script" in out["html"].lower()      # scripts KEPT (fidelity)
+    assert "<base href=" in out["html"]          # origin base injected
+    assert "http-equiv=\"refresh\"" not in out["html"].lower().replace("'", '"')  # redirect neutralized
+    assert "content-security-policy" not in out["html"].lower()  # CSP neutralized (so our hero renders)
 
 
 def test_cloner_falls_back_when_fetch_fails(monkeypatch):

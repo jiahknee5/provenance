@@ -48,8 +48,13 @@ def _spark(curve: list[float]) -> str:
 
 
 @app.get("/demo", response_class=HTMLResponse)
-def demo(request: Request, url: str = DEFAULT_URL, scenario: str = "A"):
+def demo(request: Request, url: str = DEFAULT_URL, scenario: str = "A", v: str = ""):
     s = DS.scenario(scenario) or DS.SCENARIOS[0]
+    focus = None
+    if v:
+        found = DS.find_variant(s.id, v)
+        if found:
+            focus = found[1]
     return templates.TemplateResponse(request, "demo.html", {
         "subtitle": "personalization demo",
         "url": normalize_url(url),
@@ -57,6 +62,7 @@ def demo(request: Request, url: str = DEFAULT_URL, scenario: str = "A"):
         "scenario": s,
         "gated": DS.gated_variants(s),
         "blocked": DS.blocked_variant(s),
+        "focus": focus,
     })
 
 
