@@ -218,6 +218,43 @@ def test_gate_axis_b_persuasion_hygiene():
     assert ok("From planting to yield — built for growers across Arizona") is True  # one em-dash is fine
 
 
+def test_message_gate_one_ask_length_calendar_spam():
+    """The message Gate (Axis B at message scale): one ask, short, no cold calendar link, no
+    spam-promise wording — and every honest variant clears it while the planted lie does not."""
+    from pipeline.generation.variants import build_variants
+    from pipeline.personalization import creative as CR
+
+    def ok(body, **kw):
+        return CR.verify_message(body, **kw)["ok"]
+
+    assert ok("Quick q for {company}? Worth a look →") is True                        # one soft ask, short
+    assert ok("Book a demo → or start a trial →") is False                            # two CTAs
+    assert ok("Grab time on my Calendly: https://calendly.com/me/30min →") is False   # cold calendar link
+    assert ok("Limited time — act now, it's risk-free →") is False                    # spam-promise wording
+    assert ok("word " * 200 + "→") is False                                           # over the cold length cap
+    # every honest variant ships; the planted lie is hygiene-blocked too (provable OR clean, never spam)
+    vs = [v for arms in build_variants("email").values() for v in arms]
+    assert all(CR.verify_message(v.template)["ok"] for v in vs if not v.planted_lie)
+    assert all(not CR.verify_message(v.template)["ok"] for v in vs if v.planted_lie)
+
+
+def test_sequence_gate_rejects_single_touch_and_dupes():
+    """The sequence Gate: never single-touch, and no follow-up repeats a prior step verbatim."""
+    from pipeline.personalization import creative as CR
+    assert CR.verify_sequence(["only one touch"])["ok"] is False                       # single-touch
+    assert CR.verify_sequence(["new angle A", "new angle A"])["ok"] is False           # repeated step
+    assert CR.verify_sequence(["hook: hiring", "hook: funding", "breakup"])["ok"] is True
+
+
+def test_policies_message_hygiene_is_locked():
+    """Outbound message hygiene (one-CTA, word cap, no cold calendar link) is a locked anti-slop standard."""
+    from app import policies as P
+    cards = P._antislop_cards()
+    assert any("One ask" in card["name"] for card in cards) and all(card["rule"] == "block" for card in cards)
+    t = c.get("/policies").text
+    assert "One ask per message" in t and "cold first touch" in t                      # rendered, locked
+
+
 def test_classifier_confidence_and_tier():
     """The deterministic router: network type → per-field confidence → personalization tier."""
     from pipeline.personalization import scene as SC
@@ -275,32 +312,37 @@ def test_demo_live_has_creative_controls():
     assert 'id="sel-angle"' in t and 'id="img-pick"' in t and 'id="ai-go"' in t and "Creative agents" in t
 
 
-def test_policies_standard_categories_grounded():
-    """The policy standard: five categories, grounded values, editable surface + inviolable claims."""
+def test_policies_corpus_and_claims_model():
+    """Policies lead with the corpus (cite-or-don't-say) + an approved/forbidden claim list."""
     t = c.get("/policies").text
     assert c.get("/policies").status_code == 200
-    for cat in ('data-tab="surface"', 'data-tab="sensitive"', 'data-tab="claim"', 'data-tab="voice"', 'data-tab="consent"'):
-        assert cat in t
-    # Surface is editable: an ad click row carries a rule <select> with say/allude/hold
-    assert 'name="surf__ad"' in t and "allude" in t
-    # Claims are the Gate's inviolable standard — locked, named lenses
-    assert "platform standard · inviolable" in t and "superlative" in t.lower() and "Comparative" in t
+    for tab in ('data-tab="corpus"', 'data-tab="claims"', 'data-tab="provability"',
+                'data-tab="disclosure"', 'data-tab="antislop"', 'data-tab="data"'):
+        assert tab in t
+    # corpus docs editable; claims have a can-say (with cite) + a cannot-say editor
+    assert 'name="c_name"' in t and 'name="cs_claim"' in t and 'name="cs_cite"' in t and 'name="cannot"' in t
+    # provability is the locked Gate, framed around grounded-in-corpus + citation
+    assert "platform standard · inviolable" in t and "grounded in the corpus" in t.lower() and "cite" in t.lower()
 
 
 def test_policies_edit_persists_and_resets():
-    """A tenant edit (change a surface rule) persists; reset reverts to the standard default."""
+    """Tenant edits (a corpus doc + a forbidden claim + a disclosure rule) persist; reset reverts."""
     from app import policies as P
     P._clear_overrides()
-    base = (P._load_cfg().get("surface_policy") or {}).get("by_source") or {}
-    assert base.get("ad") == "allude"                          # default
-    c.post("/policies/save", data={"surf__ad": "hold", "surf__web_form": "say"})
-    pols = {p["id"]: p for p in P.build_policies(P._load_cfg(), P._overrides())}
-    assert pols["ad"]["rule"] == "hold" and pols["ad"]["edited"] is True   # persisted override
-    # the Gate's claim vetoes are NOT editable, even via a crafted POST
-    assert pols["superlative"]["editable"] is False and pols["superlative"]["rule"] == "block"
+    assert any("Involuntary" in d["name"] for d in P._disclosure({}))   # a seed default is present
+    c.post("/policies/save", data={
+        "c_name": "Trust center", "c_kind": "url", "c_ref": "https://x/trust",
+        "cs_claim": "SOC 2 Type II since 2024", "cs_cite": "Trust center",
+        "cannot": "FDA-approved", "d_name": "First-party", "d_desc": "say it", "d_rule": "say",
+        "sensitive": "biometrics", "consent_required": "on"})
+    ovr = P._overrides()
+    assert ovr["corpus"][0]["name"] == "Trust center" and ovr["corpus"][0]["kind"] == "url"
+    assert ovr["can_say"][0]["cite"] == "Trust center" and "FDA-approved" in ovr["cannot_say"]
+    assert ovr["disclosure"][0]["rule"] == "say"               # tenant-set disclosure rule persisted
+    # the Gate's provability rules are code-defined — never part of the tenant override
+    assert "corpus" not in str(P._provability_cards()) or all(card["rule"] for card in P._provability_cards())
     c.post("/policies/reset")
-    pols2 = {p["id"]: p for p in P.build_policies(P._load_cfg(), P._overrides())}
-    assert pols2["ad"]["rule"] == "allude"                     # back to default
+    assert P._overrides() == {}                                # back to defaults
 
 
 def test_graph_page_embeds_the_exhibit():

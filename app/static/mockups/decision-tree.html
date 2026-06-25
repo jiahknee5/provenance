@@ -391,7 +391,7 @@
         <div class="cex">“Tue 2pm or Thu 10am ET — or a time that’s easier?”</div>
         <div class="cwhen"><b>Only</b> after a positive reply. Include timezone + one link.</div></div>
     </div>
-    <p class="note" style="margin-top:14px"><b>Sequence, not single-touch:</b> default 4–7 total touches, each carrying a <i>new</i> angle (never “just bumping this”), and reuse the <b>same anchor signal</b> across email · voicemail · call so the channels reinforce one identity. The CTA is the only place the message asks for a finite resource — so it’s the last thing to escalate.</p>
+    <p class="note" style="margin-top:14px"><b>Sequence, not single-touch:</b> default 4–7 total touches, each carrying a <i>new</i> angle (never “just bumping this”), and reuse the <b>same anchor signal</b> across email · voicemail · call so the channels reinforce one identity. The CTA is the only place the message asks for a finite resource — so it’s the last thing to escalate. <b>Wired:</b> the no-cold-calendar-link veto (<code>verify_message</code>) and the never-single-touch / no-repeat rules (<code>verify_sequence</code>) are enforced; the staged escalation itself is the lead-temperature policy layered on top.</p>
   </section>
 
   <!-- ============ EXHIBIT 5 — THE GATE (TWO AXES) ============ -->
@@ -421,13 +421,13 @@
         </ul>
       </div>
       <div class="gcol">
-        <h4><span class="mk w">+ partly wired</span> Axis B — persuasion hygiene (in <code>verify_copy()</code>)</h4>
+        <h4><span class="mk w">+ wired</span> Axis B — persuasion hygiene (<code>verify_copy</code> + <code>verify_message</code>)</h4>
         <ul>
-          <li><span style="color:var(--say)">●</span> blocks <b>AI-tell phrases</b> — “hope this finds you well”, “circling back”, “came across your profile” <span class="mk w">wired</span></li>
-          <li><span style="color:var(--say)">●</span> blocks <b>AI-tell words</b> — delve / leverage / robust / seamless / synergy / elevate <span class="mk w">wired</span></li>
-          <li><span style="color:var(--say)">●</span> blocks <b>&gt;1 em-dash</b> in a line (one is fine) <span class="mk w">wired</span></li>
+          <li><span style="color:var(--say)">●</span> per-line: blocks <b>AI-tell phrases/words</b> (delve / leverage / “hope this finds you well” …) <span class="mk w">wired</span></li>
+          <li><span style="color:var(--say)">●</span> per-line: blocks <b>&gt;1 em-dash</b> (one is fine) <span class="mk w">wired</span></li>
           <li><span style="color:var(--say)">●</span> offers the <code>loss</code> cost-of-inaction angle, provable by construction <span class="mk w">wired</span></li>
-          <li><span style="color:var(--act)">○</span> <b>one trigger · one CTA · ≤125 words · no cold calendar link</b> — message-level, outbound sequence validator <span class="mk p">proposed</span></li>
+          <li><span style="color:var(--say)">●</span> <b>message Gate</b> — one CTA · ≤125 words · no cold calendar link · no spam-promise, in <code>verify_message()</code>; enforced where variants enter the action pool + on <code>/policies</code> <span class="mk w">wired</span></li>
+          <li><span style="color:var(--say)">●</span> <b>sequence Gate</b> — never single-touch · no repeated step, in <code>verify_sequence()</code> <span class="mk w">wired</span></li>
         </ul>
       </div>
     </div>
@@ -489,7 +489,7 @@
   <footer>
     <div class="caveat"><b>Can ≠ should.</b> Every signal here carries a say / allude / hold surface policy. Geo + firmographic are <b>allude</b> (involuntary — shape, don’t recite). “Creepy mode” is this exact same data with the policy turned off — reciting the company, the precise location, an inferred competitor, <b>or stacking unrelated/behavioral signals to fake intimacy</b>. The action layer caps relevance at <b>one provable, professional point</b>; the Gate makes the surveillance arm <b>provably never selected</b>, not merely discouraged.</div>
     <div class="illus"><b>Illustrative figures.</b> The persuasion principles (one trigger, soft CTA, loss-frame, matched-peer proof, follow up, don’t sound like a bot) are cross-source robust. The reply/booking <i>magnitudes</i> behind them are <b>illustrative external benchmarks</b>, not Provenance’s own computed metrics — the research fact-check dropped the inflated single-vendor stats (the “5.2× signal lift”, “287% multichannel”). Per Constitution Art. I, no demo number here is hand-typed as fact.</div>
-    <p style="margin:12px 0 0">Grounded in <b>pipeline/personalization/scene.py</b> (<code>reverse_ip</code> + <code>resolve_ip</code> classification, <code>resolve_email</code> first-party lane, PDL enrich) and <b>creative.py</b> (<code>ANGLES</code>, <code>ai_copy</code> + <code>competitor_brief</code> + the Gate <code>verify_copy</code> + LLMCache). <b>Pass 1 (permission)</b> and <b>Axis A of the Gate</b> have always been wired. As of this pass the copy research is <b>partly merged too</b>: the <code>loss</code> cost-of-inaction angle and Axis B’s per-line hygiene (AI-tell denylist + em-dash limit) now run in <code>verify_copy()</code>, locked by two added tests (<b>full suite: 140 passed</b>). The message-level checks (one trigger · one CTA · ≤125 words · no cold calendar link) remain proposed — they belong to the outbound sequence validator, not this hero Gate. Real fields only — no fabricated provider claims.</p>
+    <p style="margin:12px 0 0">Grounded in <b>pipeline/personalization/scene.py</b> (<code>reverse_ip</code> + <code>resolve_ip</code> classification, <code>resolve_email</code> first-party lane, PDL enrich) and <b>creative.py</b> (<code>ANGLES</code>, <code>ai_copy</code> + <code>competitor_brief</code> + the Gate <code>verify_copy</code> + LLMCache). <b>Pass 1 (permission)</b> and <b>Axis A of the Gate</b> have always been wired. As of this pass the copy research is <b>merged</b>: the <code>loss</code> cost-of-inaction angle and Axis B’s per-line hygiene run in <code>verify_copy()</code>, and the message + sequence Gate (one CTA · ≤125 words · no cold calendar link · no spam-promise · never single-touch) runs in <code>verify_message()</code> / <code>verify_sequence()</code> — enforced where outbound variants enter the action pool (<code>build_action_pool</code>) and published as a locked standard on <code>/policies</code> (Voice &amp; hygiene). Locked by added tests (<b>full suite: 144 passed</b>). Real fields only — no fabricated provider claims.</p>
   </footer>
 </div>
 </body>

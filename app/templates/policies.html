@@ -1,83 +1,114 @@
 {% extends "shell.html" %}
 {% block title %}Provenance — Policies{% endblock %}
 {% block crumb %}<i class="ph ph-scroll"></i> Policies{% endblock %}
+{% macro kindopts(sel) %}{% for k in corpus_kinds %}<option value="{{ k }}" {{ 'selected' if k==sel else '' }}>{{ k }}</option>{% endfor %}{% endmacro %}
+{% macro ruleopts(sel) %}{% for r in disclosure_rules %}<option value="{{ r }}" {{ 'selected' if r==sel else '' }}>{{ r }}</option>{% endfor %}{% endmacro %}
 {% block content %}
   <div class="q-pagehead"><div>
     <span class="q-pill a" style="margin-bottom:10px"><span class="d"></span>Watched</span>
-    <h1>Policies <span class="q-muted" style="font-size:15px;font-weight:500">· the standard for what the LLMs may say</span></h1>
-    <p class="q-muted" style="margin:5px 0 0;max-width:84ch"><b style="color:var(--slate)">Proves:</b> a controlled framework your company configures — five categories, a fixed rule vocabulary (<b style="color:var(--g)">say</b> / <b style="color:var(--a)">allude</b> / <b style="color:var(--r)">hold</b>, <b style="color:var(--g)">allow</b> / <b style="color:var(--r)">block</b>). <b style="color:var(--slate)">Tenant-editable</b> rows are yours to set; the <b style="color:var(--slate)">Claims</b> category is the Gate&rsquo;s inviolable standard — locked by design, because &ldquo;can&rsquo;t say what it can&rsquo;t prove&rdquo; is the product.</p>
+    <h1>Policies <span class="q-muted" style="font-size:15px;font-weight:500">· what the AI may and may not say</span></h1>
+    <p class="q-muted" style="margin:5px 0 0;max-width:86ch"><b style="color:var(--slate)">Proves:</b> your <b>corpus</b> is the source of truth — the AI may state anything grounded in it, <b>must cite it</b>, and may say nothing the corpus can&rsquo;t back. On top sit your approved claims, a deny-list, and how facts may be disclosed. The <b>Provability</b> section is the Gate — inviolable.</p>
   </div></div>
 
   <div class="pol-bar">
-    <div class="q-muted" style="font-size:12.5px">Editing as tenant <b style="color:var(--ink)">{{ tenant }}</b>{% if n_edit %} · <span class="q-pill a"><span class="d"></span>{{ n_edit }} edited</span>{% elif dirty %} · <span class="q-pill g"><span class="d"></span>customized</span>{% else %} · <span class="q-muted">standard defaults</span>{% endif %}</div>
+    <div class="q-muted" style="font-size:12.5px">Editing as tenant <b style="color:var(--ink)">{{ tenant }}</b> · {% if dirty %}<span class="q-pill g"><span class="d"></span>customized</span>{% else %}<span class="q-muted">standard defaults</span>{% endif %}</div>
     <div style="display:flex;gap:8px;align-items:center">
-      {% if dirty %}<form method="post" action="/policies/reset" style="margin:0"><button class="q-btn outline" type="submit"><i class="ph ph-arrow-counter-clockwise"></i> Reset to defaults</button></form>{% endif %}
+      {% if dirty %}<form method="post" action="/policies/reset" style="margin:0"><button class="q-btn outline" type="submit"><i class="ph ph-arrow-counter-clockwise"></i> Reset</button></form>{% endif %}
       <button class="q-btn ink" type="submit" form="polform"><i class="ph ph-check"></i> Save policies</button>
     </div>
   </div>
 
   <div class="q-tabs" id="polTabs" style="margin:14px 0 18px">
-    {% for c in cats %}<div class="q-tab {{ 'on' if loop.first else '' }}" data-tab="{{ c.key }}"><i class="ph ph-{{ c.icon }}"></i> {{ c.label }}{% if not c.editable %} <i class="ph ph-lock-simple" style="font-size:11px;opacity:.6"></i>{% endif %}</div>{% endfor %}
+    {% for s in sections %}<div class="q-tab {{ 'on' if loop.first else '' }}" data-tab="{{ s.key }}"><i class="ph ph-{{ s.icon }}"></i> {{ s.label }}{% if not s.editable %} <i class="ph ph-lock-simple" style="font-size:11px;opacity:.6"></i>{% endif %}</div>{% endfor %}
   </div>
 
   <form method="post" action="/policies/save" id="polform">
-  {% for c in cats %}
-  <section class="pol-pane" data-pane="{{ c.key }}" style="{{ '' if loop.first else 'display:none' }}">
+  {% for s in sections %}
+  <section class="pol-pane" data-pane="{{ s.key }}" style="{{ '' if loop.first else 'display:none' }}">
     <div class="pol-cathead">
-      <div><b>{{ c.label }}</b> <span class="q-pill {{ 'g' if c.editable else 'v' }}" style="margin-left:6px"><span class="d"></span>{{ 'tenant-editable' if c.editable else 'platform standard · inviolable' }}</span></div>
-      <p class="q-muted" style="font-size:12.5px;margin:5px 0 0;max-width:82ch">{{ c.blurb }}</p>
+      <div><b style="font-size:14px">{{ s.label }}</b> <span class="q-pill {{ 'g' if s.editable else 'v' }}" style="margin-left:6px"><span class="d"></span>{{ 'tenant-editable' if s.editable else 'platform standard · inviolable' }}</span></div>
+      <p class="q-muted" style="font-size:12.5px;margin:5px 0 0;max-width:84ch">{{ s.blurb }}</p>
     </div>
 
-    {% if c.key == 'sensitive' %}
-      <div class="q-panel" style="padding:14px 16px">
-        <div class="chips" id="sens-chips">
-          {% for r in c.rows %}<span class="chip-x"><input type="hidden" name="sensitive" value="{{ r.raw }}">{{ r.subject }} <button type="button" class="x" onclick="this.parentNode.remove()">×</button></span>{% endfor %}
+    {% if s.key == 'corpus' %}
+      <div id="corpus-list">
+        {% for d in s.docs %}
+        <div class="pcard"><div class="pc-row">
+          <input class="q-input nm" name="c_name" value="{{ d.name }}" placeholder="Document name">
+          <select class="q-input kind" name="c_kind">{{ kindopts(d.kind) }}</select>
+          <button type="button" class="rm" onclick="rmCard(this)" title="remove">✕</button>
         </div>
-        <div class="addrow"><input class="q-input" id="sens-in" placeholder="add a topic — e.g. biometrics" autocomplete="off">
-          <button class="q-btn outline" type="button" onclick="addChip('sens-chips','sensitive','sens-in')"><i class="ph ph-plus"></i> Add</button></div>
-        <p class="q-muted" style="font-size:11.5px;margin:9px 0 0">All are <b style="color:var(--r)">hold</b> — never referenced, regardless of source.</p>
+        <input class="q-input ref" name="c_ref" value="{{ d.ref }}" placeholder="URL, or a one-line note on what it backs"></div>
+        {% endfor %}
       </div>
+      <button type="button" class="q-btn outline" onclick="addCard('corpus-list','tpl-corpus')"><i class="ph ph-plus"></i> Add document</button>
+      <p class="q-muted" style="font-size:11.5px;margin:10px 0 0"><i class="ph ph-info"></i> Every claim the AI ships is cited back to one of these. Pasted/URL sources persist now; file ingestion + embedding wires to the Gate&rsquo;s claims library.</p>
 
-    {% elif c.key == 'voice' %}
-      <div class="q-panel" style="padding:14px 16px">
-        <div class="q-label" style="margin-bottom:7px">Platform AI-tell defaults · locked</div>
-        <div class="chips">{% for r in c.rows if not r.editable %}<span class="chip-lock">{{ r.subject }}</span>{% endfor %}</div>
-        <div class="q-label" style="margin:14px 0 7px">Your banned phrases</div>
-        <div class="chips" id="voice-chips">
-          {% for r in c.rows if r.editable %}<span class="chip-x"><input type="hidden" name="voice_add" value="{{ r.raw }}">{{ r.subject }} <button type="button" class="x" onclick="this.parentNode.remove()">×</button></span>{% endfor %}
+    {% elif s.key == 'claims' %}
+      <div class="q-label" style="margin:2px 0 8px"><i class="ph ph-check-circle" style="color:var(--g)"></i> Can say · approved claims (carry a citation)</div>
+      <div id="can-list">
+        {% for k in s.can %}
+        <div class="pcard"><div class="pc-row">
+          <textarea class="q-input cl" name="cs_claim" rows="2" placeholder="An approved claim…">{{ k.claim }}</textarea>
+          <button type="button" class="rm" onclick="rmCard(this)" title="remove">✕</button>
         </div>
-        <div class="addrow"><input class="q-input" id="voice-in" placeholder="add a banned phrase — e.g. just circling back" autocomplete="off">
-          <button class="q-btn outline" type="button" onclick="addChip('voice-chips','voice_add','voice-in')"><i class="ph ph-plus"></i> Add</button></div>
+        <input class="q-input ref" name="cs_cite" value="{{ k.cite }}" placeholder="cite → which corpus document backs it"></div>
+        {% endfor %}
+      </div>
+      <button type="button" class="q-btn outline" onclick="addCard('can-list','tpl-claim')"><i class="ph ph-plus"></i> Add approved claim</button>
+
+      <div class="q-label" style="margin:20px 0 8px"><i class="ph ph-prohibit" style="color:var(--r)"></i> Cannot say · never make these claims</div>
+      <div class="chips" id="cannot-chips">
+        {% for c in s.cannot %}<span class="chip-x"><input type="hidden" name="cannot" value="{{ c }}">{{ c }} <button type="button" class="x" onclick="this.parentNode.remove()">×</button></span>{% endfor %}
+      </div>
+      <div class="addrow"><input class="q-input" id="cannot-in" placeholder="add a forbidden claim — e.g. “HIPAA-certified”" autocomplete="off">
+        <button class="q-btn outline" type="button" onclick="addChip('cannot-chips','cannot','cannot-in')"><i class="ph ph-plus"></i> Add</button></div>
+
+    {% elif s.key == 'disclosure' %}
+      <div id="disc-list">
+        {% for d in s.cards %}
+        <div class="pcard"><div class="pc-row">
+          <input class="q-input nm" name="d_name" value="{{ d.name }}" placeholder="Rule name">
+          <select class="q-input rule-sel {{ d.rule }}" name="d_rule" onchange="this.className='q-input rule-sel '+this.value">{{ ruleopts(d.rule) }}</select>
+          <button type="button" class="rm" onclick="rmCard(this)" title="remove">✕</button>
+        </div>
+        <textarea class="q-input ds" name="d_desc" rows="2" placeholder="Plain-English description…">{{ d.desc }}</textarea></div>
+        {% endfor %}
+      </div>
+      <button type="button" class="q-btn outline" onclick="addCard('disc-list','tpl-disc')"><i class="ph ph-plus"></i> Add rule</button>
+
+    {% elif s.key == 'antislop' %}
+      {% for d in s.cards %}
+      <div class="pcard lock"><div class="pc-row">
+        <b style="font-size:13px">{{ d.name }}</b>
+        <span class="q-pill r" style="margin-left:auto"><span class="d"></span>block</span> <i class="ph ph-lock-simple" style="color:var(--label)"></i>
+      </div><p class="q-muted" style="font-size:12.5px;margin:5px 0 0">{{ d.desc }}</p></div>
+      {% endfor %}
+      <div class="q-label" style="margin:16px 0 8px">Your banned phrases</div>
+      <div class="chips" id="slop-chips">
+        {% for c in s.custom %}<span class="chip-x"><input type="hidden" name="antislop_add" value="{{ c.raw }}">{{ c.raw }} <button type="button" class="x" onclick="this.parentNode.remove()">×</button></span>{% endfor %}
+      </div>
+      <div class="addrow"><input class="q-input" id="slop-in" placeholder="add a banned phrase — e.g. “just following up”" autocomplete="off">
+        <button class="q-btn outline" type="button" onclick="addChip('slop-chips','antislop_add','slop-in')"><i class="ph ph-plus"></i> Add</button></div>
+
+    {% elif s.key == 'data' %}
+      <div class="q-label" style="margin:2px 0 8px">Sensitive topics · never referenced (hold)</div>
+      <div class="chips" id="sens-chips">
+        {% for c in s.sensitive %}<span class="chip-x"><input type="hidden" name="sensitive" value="{{ c.raw }}">{{ c.label }} <button type="button" class="x" onclick="this.parentNode.remove()">×</button></span>{% endfor %}
+      </div>
+      <div class="addrow"><input class="q-input" id="sens-in" placeholder="add a topic — e.g. biometrics" autocomplete="off">
+        <button class="q-btn outline" type="button" onclick="addChip('sens-chips','sensitive','sens-in')"><i class="ph ph-plus"></i> Add</button></div>
+      <div class="q-panel" style="padding:14px 16px;margin-top:16px">
+        <label class="toggle"><input type="checkbox" name="consent_required" {{ 'checked' if s.consent_required else '' }}> <span><b>Require consent before personalization</b> — gate every fact on consent.</span></label>
       </div>
 
-    {% elif c.key == 'consent' %}
-      <div class="q-panel" style="padding:15px 16px">
-        {% set cr = c.rows[0] %}
-        <label class="toggle"><input type="checkbox" name="consent_required" {{ 'checked' if cr.on else '' }}> <span><b>Require consent before personalization</b> — gate every fact on consent.</span></label>
-      </div>
-
-    {% else %}
-      <div class="q-panel"><table class="q-table">
-        <thead><tr><th>{{ 'Source of the fact' if c.key=='surface' else 'Claim type' }}</th><th>Rule</th><th>Basis</th><th>Scope</th></tr></thead>
-        <tbody>
-          {% for r in c.rows %}
-          <tr>
-            <td style="font-weight:500;color:var(--ink)">{{ r.subject }}{% if r.edited %} <span class="q-pill a" style="margin-left:4px"><span class="d"></span>edited</span>{% endif %}</td>
-            <td>
-              {% if c.editable %}
-                <select class="rule-sel {{ r.rule }}" name="surf__{{ r.id }}">
-                  {% for opt in surface_rules %}<option value="{{ opt }}" {{ 'selected' if opt==r.rule else '' }}>{{ opt }}</option>{% endfor %}
-                </select>
-              {% else %}
-                <span class="q-pill {{ rule_pill.get(r.rule, 'b') }}"><span class="d"></span>{{ r.rule }}</span> <i class="ph ph-lock-simple" style="font-size:11px;color:var(--label)"></i>
-              {% endif %}
-            </td>
-            <td class="q-muted">{{ r.basis }}</td>
-            <td class="q-muted">{{ r.scope }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table></div>
+    {% else %}{# provability — locked cards #}
+      {% for d in s.cards %}
+      <div class="pcard lock"><div class="pc-row">
+        <b style="font-size:13px">{{ d.name }}</b>
+        <span class="q-pill {{ rule_pill.get(d.rule,'b') }}" style="margin-left:auto"><span class="d"></span>{{ d.rule }}</span> <i class="ph ph-lock-simple" style="color:var(--label)"></i>
+      </div><p class="q-muted" style="font-size:12.5px;margin:5px 0 0">{{ d.desc }}</p></div>
+      {% endfor %}
     {% endif %}
   </section>
   {% endfor %}
@@ -86,24 +117,45 @@
   <div class="q-panel" style="margin-top:20px;padding:14px 17px;display:flex;gap:12px;align-items:flex-start">
     <i class="ph ph-shield-check" style="font-size:18px;color:var(--g);flex:none;margin-top:1px"></i>
     <div class="q-muted" style="font-size:12.5px;line-height:1.55">
-      <b style="color:var(--ink)">The standard.</b> Edits persist per tenant and are the source the Gate reads — a blocked claim never becomes a sendable variant. <b>Claims</b> are platform-inviolable: a tenant can add stricter rules (Voice, Sensitive) but can never loosen the Gate&rsquo;s vetoes. See it live on the <a href="/demo">copy agent</a> and the <a href="/graph">agent graph</a>.
+      <b style="color:var(--ink)">How it binds.</b> The corpus is the boundary of what&rsquo;s sayable; the Gate cites it on every line and blocks anything ungrounded or on your deny-list. Edits persist per tenant. See it on the <a href="/demo">copy agent</a> and the <a href="/graph">agent graph</a>.
     </div>
   </div>
+
+  <!-- add-card templates -->
+  <template id="tpl-corpus"><div class="pcard"><div class="pc-row">
+    <input class="q-input nm" name="c_name" placeholder="Document name">
+    <select class="q-input kind" name="c_kind">{{ kindopts('doc') }}</select>
+    <button type="button" class="rm" onclick="rmCard(this)">✕</button></div>
+    <input class="q-input ref" name="c_ref" placeholder="URL, or a one-line note on what it backs"></div></template>
+  <template id="tpl-claim"><div class="pcard"><div class="pc-row">
+    <textarea class="q-input cl" name="cs_claim" rows="2" placeholder="An approved claim…"></textarea>
+    <button type="button" class="rm" onclick="rmCard(this)">✕</button></div>
+    <input class="q-input ref" name="cs_cite" placeholder="cite → which corpus document backs it"></div></template>
+  <template id="tpl-disc"><div class="pcard"><div class="pc-row">
+    <input class="q-input nm" name="d_name" placeholder="Rule name">
+    <select class="q-input rule-sel allude" name="d_rule" onchange="this.className='q-input rule-sel '+this.value">{{ ruleopts('allude') }}</select>
+    <button type="button" class="rm" onclick="rmCard(this)">✕</button></div>
+    <textarea class="q-input ds" name="d_desc" rows="2" placeholder="Plain-English description…"></textarea></div></template>
 
 <style>
   .pol-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
     background:var(--surface);border:1px solid var(--hairline);border-radius:var(--r-card);padding:11px 15px;box-shadow:var(--shadow-card)}
   .pol-cathead{margin:0 0 14px}
-  .rule-sel{appearance:none;font:600 11px var(--font-ui);border-radius:7px;padding:4px 24px 4px 10px;border:1px solid var(--border);
-    background:var(--surface) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'><path d='M2 3l3 3 3-3' stroke='%236b7280' fill='none' stroke-width='1.5'/></svg>") right 8px center no-repeat;cursor:pointer}
+  .pcard{border:1px solid var(--hairline);border-radius:var(--r-card);background:var(--surface);padding:12px 14px;margin-bottom:10px;box-shadow:var(--shadow-card)}
+  .pcard.lock{background:var(--fill);box-shadow:none}
+  .pc-row{display:flex;gap:9px;align-items:center}
+  .pcard .nm{flex:1;font-weight:600}
+  .pcard .cl{flex:1;resize:vertical;font-weight:500}
+  .pcard .kind{width:120px;flex:none} .pcard .ref,.pcard .ds{margin-top:8px}
+  .pcard .ds{resize:vertical}
+  .pcard .rm{flex:none;border:0;background:none;color:var(--label);font-size:14px;cursor:pointer;padding:4px}
+  .pcard .rm:hover{color:var(--r)}
+  .rule-sel{width:104px;flex:none;font-weight:600}
   .rule-sel.say{color:var(--g);border-color:var(--g)} .rule-sel.allude{color:var(--a);border-color:var(--a)} .rule-sel.hold{color:var(--r);border-color:var(--r)}
   .chips{display:flex;flex-wrap:wrap;gap:7px}
-  .chip-x,.chip-lock{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;border-radius:20px;padding:5px 11px}
-  .chip-x{background:var(--rbg);color:var(--r);border:1px solid var(--r)}
-  .chip-lock{background:var(--fill);color:var(--muted);border:1px solid var(--hairline)}
+  .chip-x{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;border-radius:20px;padding:5px 11px;background:var(--rbg);color:var(--r);border:1px solid var(--r)}
   .chip-x .x{border:0;background:none;color:var(--r);font-size:15px;line-height:1;cursor:pointer;padding:0}
-  .addrow{display:flex;gap:8px;margin-top:11px;max-width:480px}
-  .addrow .q-input{flex:1}
+  .addrow{display:flex;gap:8px;margin-top:11px;max-width:520px}.addrow .q-input{flex:1}
   .toggle{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--slate);cursor:pointer}
   .toggle input{width:16px;height:16px;accent-color:var(--ink)}
 </style>
@@ -116,10 +168,11 @@
     tabs.forEach(function(x){x.classList.toggle('on',x===t);});
     panes.forEach(function(p){p.style.display=(p.getAttribute('data-pane')===k)?'':'none';});
   });});
-  // colour the rule selects live as they change
-  [].forEach.call(document.querySelectorAll('.rule-sel'),function(s){
-    s.addEventListener('change',function(){ s.className='rule-sel '+s.value; });
-  });
+  window.rmCard=function(btn){ var c=btn.closest('.pcard'); if(c) c.remove(); };
+  window.addCard=function(listId,tplId){
+    var t=document.getElementById(tplId); var node=t.content.cloneNode(true);
+    document.getElementById(listId).appendChild(node);
+  };
   window.addChip=function(wrapId,name,inId){
     var inp=document.getElementById(inId), v=(inp.value||'').trim(); if(!v) return;
     var span=document.createElement('span'); span.className='chip-x';
@@ -129,10 +182,9 @@
     b.onclick=function(){span.remove();}; span.appendChild(b);
     document.getElementById(wrapId).appendChild(span); inp.value='';
   };
-  // Enter in an add-input adds a chip instead of submitting the form
-  ['sens-in','voice-in'].forEach(function(id){ var el=document.getElementById(id); if(!el) return;
-    el.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault();
-      addChip(id==='sens-in'?'sens-chips':'voice-chips', id==='sens-in'?'sensitive':'voice_add', id); } }); });
+  ['cannot-in','slop-in','sens-in'].forEach(function(id){ var el=document.getElementById(id); if(!el) return;
+    var map={'cannot-in':['cannot-chips','cannot'],'slop-in':['slop-chips','antislop_add'],'sens-in':['sens-chips','sensitive']};
+    el.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); addChip(map[id][0],map[id][1],id); } }); });
 })();
 </script>
 {% endblock %}
