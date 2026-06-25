@@ -4,45 +4,109 @@
 {% block content %}
   <div class="q-pagehead"><div>
     <span class="q-pill a" style="margin-bottom:10px"><span class="d"></span>Watched</span>
-    <h1>Policies</h1>
-    <p class="q-muted" style="margin:5px 0 0"><b style="color:var(--slate)">Proves:</b> the provenance for what the LLMs can and cannot say — three layers the Gate enforces, most-general first. <b style="color:var(--slate)">Can ≠ should:</b> every fact carries a <b style="color:var(--g)">say</b> / <b style="color:var(--a)">allude</b> / <b style="color:var(--r)">hold</b> surface policy.</p>
+    <h1>Policies <span class="q-muted" style="font-size:15px;font-weight:500">· the standard for what the LLMs may say</span></h1>
+    <p class="q-muted" style="margin:5px 0 0;max-width:84ch"><b style="color:var(--slate)">Proves:</b> a controlled framework your company configures — five categories, a fixed rule vocabulary (<b style="color:var(--g)">say</b> / <b style="color:var(--a)">allude</b> / <b style="color:var(--r)">hold</b>, <b style="color:var(--g)">allow</b> / <b style="color:var(--r)">block</b>). <b style="color:var(--slate)">Tenant-editable</b> rows are yours to set; the <b style="color:var(--slate)">Claims</b> category is the Gate&rsquo;s inviolable standard — locked by design, because &ldquo;can&rsquo;t say what it can&rsquo;t prove&rdquo; is the product.</p>
   </div></div>
 
-  <div class="q-tabs" id="polTabs" style="margin-bottom:18px">
-    {% for t in tabs %}<div class="q-tab {{ 'on' if loop.first else '' }}" data-tab="{{ t.key }}"><i class="ph ph-{{ t.icon }}"></i> {{ t.label }}</div>{% endfor %}
-  </div>
-
-  {% for t in tabs %}
-  <section class="pol-pane" data-pane="{{ t.key }}" style="{{ '' if loop.first else 'display:none' }}">
-    <p class="q-muted" style="margin:0 0 14px;max-width:78ch;line-height:1.55">{{ t.blurb }}</p>
-    <div class="q-panel" style="margin-bottom:8px"><table class="q-table">
-      <thead><tr><th>Topic</th><th>The LLM may…</th><th>Rule</th><th>Basis</th><th>Scope</th></tr></thead>
-      <tbody>
-        {% for r in t.rows %}
-        <tr>
-          <td style="font-weight:500;color:var(--ink)">{{ r.topic }}</td>
-          <td class="q-muted">{{ r.detail }}</td>
-          <td><span class="q-pill {{ rule_pill.get(r.rule, 'b') }}"><span class="d"></span>{{ r.rule }}</span></td>
-          <td class="q-muted">{{ r.basis }}</td>
-          <td class="q-muted">{{ r.scope }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table></div>
-    <p class="q-label" style="margin:6px 2px 0"><i class="ph ph-seal-check"></i> source of truth · {{ t.meta }}</p>
-  </section>
-  {% endfor %}
-
-  <div class="q-panel" style="margin-top:22px;padding:15px 17px;display:flex;gap:12px;align-items:flex-start">
-    <i class="ph ph-shield-check" style="font-size:19px;color:var(--g);flex:none;margin-top:1px"></i>
-    <div class="q-muted" style="font-size:13px;line-height:1.55">
-      <b style="color:var(--ink)">How it's enforced.</b> These aren't guidelines — they're the rules the Gate runs before any line ships.
-      A blocked claim is RED and never becomes a sendable variant; the copy agent proposes, the Gate disposes.
-      Personal tightens Product tightens Company — a sender can never say something a broader layer forbids.
-      See it live on the <a href="/demo">copy agent</a> and the <a href="/graph">agent graph</a>.
+  <div class="pol-bar">
+    <div class="q-muted" style="font-size:12.5px">Editing as tenant <b style="color:var(--ink)">{{ tenant }}</b>{% if n_edit %} · <span class="q-pill a"><span class="d"></span>{{ n_edit }} edited</span>{% elif dirty %} · <span class="q-pill g"><span class="d"></span>customized</span>{% else %} · <span class="q-muted">standard defaults</span>{% endif %}</div>
+    <div style="display:flex;gap:8px;align-items:center">
+      {% if dirty %}<form method="post" action="/policies/reset" style="margin:0"><button class="q-btn outline" type="submit"><i class="ph ph-arrow-counter-clockwise"></i> Reset to defaults</button></form>{% endif %}
+      <button class="q-btn ink" type="submit" form="polform"><i class="ph ph-check"></i> Save policies</button>
     </div>
   </div>
 
+  <div class="q-tabs" id="polTabs" style="margin:14px 0 18px">
+    {% for c in cats %}<div class="q-tab {{ 'on' if loop.first else '' }}" data-tab="{{ c.key }}"><i class="ph ph-{{ c.icon }}"></i> {{ c.label }}{% if not c.editable %} <i class="ph ph-lock-simple" style="font-size:11px;opacity:.6"></i>{% endif %}</div>{% endfor %}
+  </div>
+
+  <form method="post" action="/policies/save" id="polform">
+  {% for c in cats %}
+  <section class="pol-pane" data-pane="{{ c.key }}" style="{{ '' if loop.first else 'display:none' }}">
+    <div class="pol-cathead">
+      <div><b>{{ c.label }}</b> <span class="q-pill {{ 'g' if c.editable else 'v' }}" style="margin-left:6px"><span class="d"></span>{{ 'tenant-editable' if c.editable else 'platform standard · inviolable' }}</span></div>
+      <p class="q-muted" style="font-size:12.5px;margin:5px 0 0;max-width:82ch">{{ c.blurb }}</p>
+    </div>
+
+    {% if c.key == 'sensitive' %}
+      <div class="q-panel" style="padding:14px 16px">
+        <div class="chips" id="sens-chips">
+          {% for r in c.rows %}<span class="chip-x"><input type="hidden" name="sensitive" value="{{ r.raw }}">{{ r.subject }} <button type="button" class="x" onclick="this.parentNode.remove()">×</button></span>{% endfor %}
+        </div>
+        <div class="addrow"><input class="q-input" id="sens-in" placeholder="add a topic — e.g. biometrics" autocomplete="off">
+          <button class="q-btn outline" type="button" onclick="addChip('sens-chips','sensitive','sens-in')"><i class="ph ph-plus"></i> Add</button></div>
+        <p class="q-muted" style="font-size:11.5px;margin:9px 0 0">All are <b style="color:var(--r)">hold</b> — never referenced, regardless of source.</p>
+      </div>
+
+    {% elif c.key == 'voice' %}
+      <div class="q-panel" style="padding:14px 16px">
+        <div class="q-label" style="margin-bottom:7px">Platform AI-tell defaults · locked</div>
+        <div class="chips">{% for r in c.rows if not r.editable %}<span class="chip-lock">{{ r.subject }}</span>{% endfor %}</div>
+        <div class="q-label" style="margin:14px 0 7px">Your banned phrases</div>
+        <div class="chips" id="voice-chips">
+          {% for r in c.rows if r.editable %}<span class="chip-x"><input type="hidden" name="voice_add" value="{{ r.raw }}">{{ r.subject }} <button type="button" class="x" onclick="this.parentNode.remove()">×</button></span>{% endfor %}
+        </div>
+        <div class="addrow"><input class="q-input" id="voice-in" placeholder="add a banned phrase — e.g. just circling back" autocomplete="off">
+          <button class="q-btn outline" type="button" onclick="addChip('voice-chips','voice_add','voice-in')"><i class="ph ph-plus"></i> Add</button></div>
+      </div>
+
+    {% elif c.key == 'consent' %}
+      <div class="q-panel" style="padding:15px 16px">
+        {% set cr = c.rows[0] %}
+        <label class="toggle"><input type="checkbox" name="consent_required" {{ 'checked' if cr.on else '' }}> <span><b>Require consent before personalization</b> — gate every fact on consent.</span></label>
+      </div>
+
+    {% else %}
+      <div class="q-panel"><table class="q-table">
+        <thead><tr><th>{{ 'Source of the fact' if c.key=='surface' else 'Claim type' }}</th><th>Rule</th><th>Basis</th><th>Scope</th></tr></thead>
+        <tbody>
+          {% for r in c.rows %}
+          <tr>
+            <td style="font-weight:500;color:var(--ink)">{{ r.subject }}{% if r.edited %} <span class="q-pill a" style="margin-left:4px"><span class="d"></span>edited</span>{% endif %}</td>
+            <td>
+              {% if c.editable %}
+                <select class="rule-sel {{ r.rule }}" name="surf__{{ r.id }}">
+                  {% for opt in surface_rules %}<option value="{{ opt }}" {{ 'selected' if opt==r.rule else '' }}>{{ opt }}</option>{% endfor %}
+                </select>
+              {% else %}
+                <span class="q-pill {{ rule_pill.get(r.rule, 'b') }}"><span class="d"></span>{{ r.rule }}</span> <i class="ph ph-lock-simple" style="font-size:11px;color:var(--label)"></i>
+              {% endif %}
+            </td>
+            <td class="q-muted">{{ r.basis }}</td>
+            <td class="q-muted">{{ r.scope }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table></div>
+    {% endif %}
+  </section>
+  {% endfor %}
+  </form>
+
+  <div class="q-panel" style="margin-top:20px;padding:14px 17px;display:flex;gap:12px;align-items:flex-start">
+    <i class="ph ph-shield-check" style="font-size:18px;color:var(--g);flex:none;margin-top:1px"></i>
+    <div class="q-muted" style="font-size:12.5px;line-height:1.55">
+      <b style="color:var(--ink)">The standard.</b> Edits persist per tenant and are the source the Gate reads — a blocked claim never becomes a sendable variant. <b>Claims</b> are platform-inviolable: a tenant can add stricter rules (Voice, Sensitive) but can never loosen the Gate&rsquo;s vetoes. See it live on the <a href="/demo">copy agent</a> and the <a href="/graph">agent graph</a>.
+    </div>
+  </div>
+
+<style>
+  .pol-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    background:var(--surface);border:1px solid var(--hairline);border-radius:var(--r-card);padding:11px 15px;box-shadow:var(--shadow-card)}
+  .pol-cathead{margin:0 0 14px}
+  .rule-sel{appearance:none;font:600 11px var(--font-ui);border-radius:7px;padding:4px 24px 4px 10px;border:1px solid var(--border);
+    background:var(--surface) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'><path d='M2 3l3 3 3-3' stroke='%236b7280' fill='none' stroke-width='1.5'/></svg>") right 8px center no-repeat;cursor:pointer}
+  .rule-sel.say{color:var(--g);border-color:var(--g)} .rule-sel.allude{color:var(--a);border-color:var(--a)} .rule-sel.hold{color:var(--r);border-color:var(--r)}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip-x,.chip-lock{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;border-radius:20px;padding:5px 11px}
+  .chip-x{background:var(--rbg);color:var(--r);border:1px solid var(--r)}
+  .chip-lock{background:var(--fill);color:var(--muted);border:1px solid var(--hairline)}
+  .chip-x .x{border:0;background:none;color:var(--r);font-size:15px;line-height:1;cursor:pointer;padding:0}
+  .addrow{display:flex;gap:8px;margin-top:11px;max-width:480px}
+  .addrow .q-input{flex:1}
+  .toggle{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--slate);cursor:pointer}
+  .toggle input{width:16px;height:16px;accent-color:var(--ink)}
+</style>
 <script>
 (function(){
   var tabs=[].slice.call(document.querySelectorAll('#polTabs .q-tab')),
@@ -52,6 +116,23 @@
     tabs.forEach(function(x){x.classList.toggle('on',x===t);});
     panes.forEach(function(p){p.style.display=(p.getAttribute('data-pane')===k)?'':'none';});
   });});
+  // colour the rule selects live as they change
+  [].forEach.call(document.querySelectorAll('.rule-sel'),function(s){
+    s.addEventListener('change',function(){ s.className='rule-sel '+s.value; });
+  });
+  window.addChip=function(wrapId,name,inId){
+    var inp=document.getElementById(inId), v=(inp.value||'').trim(); if(!v) return;
+    var span=document.createElement('span'); span.className='chip-x';
+    var h=document.createElement('input'); h.type='hidden'; h.name=name; h.value=v;
+    span.appendChild(h); span.appendChild(document.createTextNode(' '+v+' '));
+    var b=document.createElement('button'); b.type='button'; b.className='x'; b.textContent='×';
+    b.onclick=function(){span.remove();}; span.appendChild(b);
+    document.getElementById(wrapId).appendChild(span); inp.value='';
+  };
+  // Enter in an add-input adds a chip instead of submitting the form
+  ['sens-in','voice-in'].forEach(function(id){ var el=document.getElementById(id); if(!el) return;
+    el.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault();
+      addChip(id==='sens-in'?'sens-chips':'voice-chips', id==='sens-in'?'sensitive':'voice_add', id); } }); });
 })();
 </script>
 {% endblock %}

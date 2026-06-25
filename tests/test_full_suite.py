@@ -191,6 +191,33 @@ def test_creative_agents_and_the_gate():
     assert d["source"] == "template" and d["headline"] and d["blocked_example"]["ok"] is False  # falls back, Gate visible
 
 
+def test_loss_angle_is_provable_and_ships():
+    """Pass-2 action layer: the cost-of-inaction angle frames the status quo without inventing a
+    number, so it's provable by construction and clears the Gate."""
+    from pipeline.personalization import creative as CR
+    assert any(a["key"] == "loss" for a in CR.ANGLES)                       # the angle exists
+    a = CR.angle_copy("mining", "loss", "Arizona")
+    assert a == CR.angle_copy("mining", "loss", "Arizona")                  # deterministic
+    assert not re.search(r"\d", a["headline"] + a["sub"])                   # never fabricates a number
+    checks = CR.verify_copy([a["headline"], a["sub"]], "industry=mining", None, "allude")
+    assert all(ch["ok"] for ch in checks)                                   # loss-framed AND provable → ships
+
+
+def test_gate_axis_b_persuasion_hygiene():
+    """Axis B: AI-generated tells and em-dash overuse are unshippable — but clean copy is untouched."""
+    from pipeline.personalization import creative as CR
+
+    def ok(line):
+        return CR.verify_copy([line], "x", None, "allude")[0]["ok"]
+
+    assert ok("I hope this email finds you well, just circling back.") is False   # AI-tell phrases
+    assert ok("We leverage robust, seamless synergy to elevate teams.") is False  # AI-tell words
+    assert ok("Built for scale — at the pace of growth — across your region.") is False  # >1 em-dash
+    # the hygiene axis must NOT flip clean, provable copy
+    assert ok("Every claim ships with its source and policy") is True
+    assert ok("From planting to yield — built for growers across Arizona") is True  # one em-dash is fine
+
+
 def test_classifier_confidence_and_tier():
     """The deterministic router: network type → per-field confidence → personalization tier."""
     from pipeline.personalization import scene as SC
@@ -248,16 +275,32 @@ def test_demo_live_has_creative_controls():
     assert 'id="sel-angle"' in t and 'id="img-pick"' in t and 'id="ai-go"' in t and "Creative agents" in t
 
 
-def test_policies_page_three_tabs_grounded():
-    """The 3-tab governance surface — what the LLM may say, grounded in the real surface policy."""
+def test_policies_standard_categories_grounded():
+    """The policy standard: five categories, grounded values, editable surface + inviolable claims."""
     t = c.get("/policies").text
     assert c.get("/policies").status_code == 200
-    for tab in ('data-tab="company"', 'data-tab="product"', 'data-tab="personal"'):
-        assert tab in t
-    # Company rows come from the tenant YAML: an ad click is allude, sensitive topics are held
-    assert "Ad click" in t and "allude" in t and "hold" in t
-    # Product rows name the actual Gate lenses
-    assert "superlative" in t.lower() and "Comparative" in t
+    for cat in ('data-tab="surface"', 'data-tab="sensitive"', 'data-tab="claim"', 'data-tab="voice"', 'data-tab="consent"'):
+        assert cat in t
+    # Surface is editable: an ad click row carries a rule <select> with say/allude/hold
+    assert 'name="surf__ad"' in t and "allude" in t
+    # Claims are the Gate's inviolable standard — locked, named lenses
+    assert "platform standard · inviolable" in t and "superlative" in t.lower() and "Comparative" in t
+
+
+def test_policies_edit_persists_and_resets():
+    """A tenant edit (change a surface rule) persists; reset reverts to the standard default."""
+    from app import policies as P
+    P._clear_overrides()
+    base = (P._load_cfg().get("surface_policy") or {}).get("by_source") or {}
+    assert base.get("ad") == "allude"                          # default
+    c.post("/policies/save", data={"surf__ad": "hold", "surf__web_form": "say"})
+    pols = {p["id"]: p for p in P.build_policies(P._load_cfg(), P._overrides())}
+    assert pols["ad"]["rule"] == "hold" and pols["ad"]["edited"] is True   # persisted override
+    # the Gate's claim vetoes are NOT editable, even via a crafted POST
+    assert pols["superlative"]["editable"] is False and pols["superlative"]["rule"] == "block"
+    c.post("/policies/reset")
+    pols2 = {p["id"]: p for p in P.build_policies(P._load_cfg(), P._overrides())}
+    assert pols2["ad"]["rule"] == "allude"                     # back to default
 
 
 def test_graph_page_embeds_the_exhibit():

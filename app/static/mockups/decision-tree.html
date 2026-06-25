@@ -3,13 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Provenance — visitor → personalization decision tree</title>
+<title>Provenance — the decision tree: what you may say × what makes them act</title>
 <style>
   :root{
     --canvas:#ffffff; --ink:#14171a; --muted:#6b7280; --hair:#e6e8eb; --fill:#f6f7f9;
     --signal:#3b5bdb; --signal-bg:#eef1fc;
     --say:#15803d; --say-bg:#eaf5ec; --allude:#b45309; --allude-bg:#fbf1e3; --hold:#b91c1c; --hold-bg:#fbeaea;
     --det:#0f172a; --det-bg:#eef0f3; --llm:#6d28d9; --llm-bg:#f1ebfb;
+    --act:#0e7490; --act-bg:#e3f4f7;
     --r:10px; --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
     --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
   }
@@ -20,13 +21,26 @@
          border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 30px rgba(0,0,0,.05);overflow:hidden}
   header{padding:26px 32px 20px;border-bottom:1px solid var(--hair)}
   .kicker{font:600 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--signal)}
-  h1{font-size:23px;line-height:1.25;margin:11px 0 0;letter-spacing:-.01em;max-width:62ch}
-  h1 b{color:var(--signal)}
-  .sub{color:var(--muted);font-size:13.5px;margin-top:8px;max-width:78ch}
+  h1{font-size:23px;line-height:1.25;margin:11px 0 0;letter-spacing:-.01em;max-width:64ch}
+  h1 b{color:var(--signal)} h1 i{color:var(--act);font-style:normal}
+  .sub{color:var(--muted);font-size:13.5px;margin-top:8px;max-width:80ch}
+  .axes{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+  .axis{flex:1 1 320px;border:1px solid var(--hair);border-radius:var(--r);padding:11px 14px;background:var(--fill)}
+  .axis b{font-size:12.5px} .axis .d{font-size:12px;color:var(--muted);margin-top:3px}
+  .axis.say{border-left:3px solid var(--signal)} .axis.act{border-left:3px solid var(--act)}
   section{padding:24px 32px;border-bottom:1px solid var(--hair)}
   section:last-child{border-bottom:0}
-  .ex{font:600 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 16px}
+  .ex{font:600 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
   .ex span{color:var(--ink)}
+  .exsub{font-size:12.5px;color:var(--muted);margin:0 0 16px;max-width:84ch}
+
+  /* ---- status key: wired vs proposed (Article VIII — honest reporting) ---- */
+  .statuskey{display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:var(--muted);margin:2px 0 16px}
+  .statuskey span{display:inline-flex;align-items:center;gap:7px}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .dot.w{background:var(--say)} .dot.p{background:var(--act);outline:2px solid var(--act-bg)}
+  .mk{font:600 9.5px/1 var(--mono);padding:2px 6px;border-radius:5px;text-transform:uppercase;letter-spacing:.04em}
+  .mk.w{background:var(--say-bg);color:var(--say)} .mk.p{background:var(--act-bg);color:var(--act)}
 
   /* ---- decision tree (nested guide-rails) ---- */
   .tree{font-size:13px}
@@ -52,6 +66,9 @@
   .flag{font-family:var(--mono);font-size:11px;color:var(--hold)}
   .note{font-size:12px;color:var(--muted);margin-top:5px;padding-left:2px}
   .note b{color:var(--ink)}
+  .default{border:1px dashed var(--act);background:var(--act-bg);border-radius:var(--r);
+           padding:10px 14px;margin:10px 0 2px;font-size:12.5px;color:#0a5564}
+  .default b{color:#063e49}
 
   /* ---- confidence ladder ---- */
   .ladder{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
@@ -62,6 +79,32 @@
   .tag{font:600 10px/1 var(--mono);padding:3px 7px;border-radius:6px;text-transform:uppercase}
   .tag.say{background:var(--say-bg);color:var(--say)} .tag.allude{background:var(--allude-bg);color:var(--allude)}
   .tag.hold{background:var(--hold-bg);color:var(--hold)}
+
+  /* ---- play map (permission × play) ---- */
+  .play{border:1px solid var(--hair);border-radius:var(--r);background:#fff;margin:9px 0;overflow:hidden}
+  .play .ph{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--hair);background:var(--fill)}
+  .play .ph .pq{font-size:12px;color:var(--muted)}
+  .play .pb{display:grid;grid-template-columns:1.35fr 1.65fr;gap:0}
+  .play .pcell{padding:11px 14px}
+  .play .pcell + .pcell{border-left:1px solid var(--hair)}
+  .play .plabel{font:600 10px/1 var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+  .play .pmove{font-size:12.5px} .play .pmove b{color:var(--ink)}
+  .play .pex{font-size:12px;color:#0a5564;background:var(--act-bg);border-radius:7px;padding:8px 10px;margin-top:7px;
+             font-family:var(--mono);line-height:1.5}
+  .play .pmeta{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px;font-size:11.5px;color:var(--muted)}
+  .play .pmeta code{font-family:var(--mono);font-size:11px;background:var(--fill);padding:1px 5px;border-radius:5px}
+  .pr{font:600 9.5px/1 var(--mono);color:var(--act);background:var(--act-bg);padding:2px 6px;border-radius:5px}
+
+  /* ---- CTA ladder (the ask, by temperature) ---- */
+  .cta{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  .crung{border:1px solid var(--hair);border-radius:var(--r);padding:12px;background:#fff;position:relative}
+  .crung .ctemp{font:600 9.5px/1 var(--mono);text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  .crung h5{margin:7px 0 5px;font-size:12.5px}
+  .crung .cex{font-size:11.5px;color:#0a5564;font-family:var(--mono);line-height:1.45}
+  .crung .cwhen{font-size:11px;color:var(--muted);margin-top:7px;padding-top:7px;border-top:1px dashed var(--hair)}
+  .fric{position:absolute;top:10px;right:10px;font:600 9px/1 var(--mono);padding:2px 5px;border-radius:4px;background:var(--fill);color:var(--muted)}
+  .ctabar{font-size:11.5px;color:var(--muted);margin:4px 0 14px;display:flex;align-items:center;gap:8px}
+  .ctabar b{color:var(--ink)}
 
   /* ---- agent graph ---- */
   .graph{display:flex;flex-wrap:wrap;align-items:stretch;gap:0}
@@ -79,6 +122,27 @@
   .feedback{font-size:12px;color:var(--muted);margin-top:2px}
   .feedback code{font-family:var(--mono);font-size:11px;background:var(--fill);padding:1px 5px;border-radius:5px}
 
+  /* ---- gate two-axis list ---- */
+  .gax{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+  .gcol{border:1px solid var(--hair);border-radius:var(--r);padding:13px 15px;background:#fff}
+  .gcol h4{margin:0 0 8px;font-size:12.5px;display:flex;align-items:center;gap:8px}
+  .gcol ul{margin:0;padding-left:0;list-style:none;font-size:12px}
+  .gcol li{padding:5px 0;border-top:1px dashed var(--hair);display:flex;gap:8px;align-items:flex-start}
+  .gcol li:first-child{border-top:0}
+  .gcol li code{font-family:var(--mono);font-size:11px;background:var(--fill);padding:1px 5px;border-radius:5px}
+
+  /* ---- node-by-node mapping table ---- */
+  .maptable{width:100%;border-collapse:collapse;font-size:12px}
+  .maptable th{text-align:left;font:600 10px/1.3 var(--mono);letter-spacing:.04em;text-transform:uppercase;
+               color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--hair);vertical-align:bottom}
+  .maptable td{padding:9px 10px;border-bottom:1px solid var(--hair);vertical-align:top}
+  .maptable tr:last-child td{border-bottom:0}
+  .maptable td:first-child{font-weight:600;white-space:nowrap}
+  .maptable code{font-family:var(--mono);font-size:11px;background:var(--fill);padding:1px 5px;border-radius:5px;color:#334}
+  .maptable .def{color:#0a5564}
+  .maptable td .tp{font:600 9px/1 var(--mono);padding:2px 5px;border-radius:4px;margin-right:5px}
+  .maptable td .tp.w{background:var(--say-bg);color:var(--say)} .maptable td .tp.p{background:var(--act-bg);color:var(--act)}
+
   /* ---- legend / footer ---- */
   .legend{display:flex;flex-wrap:wrap;gap:18px;font-size:12px;color:var(--muted);margin-top:4px}
   .legend span{display:inline-flex;align-items:center;gap:7px}
@@ -87,20 +151,33 @@
   footer b{color:var(--ink)}
   .caveat{border-left:3px solid var(--hold);background:var(--hold-bg);padding:10px 14px;border-radius:0 8px 8px 0;
           color:#7a1d1d;font-size:13px;margin-top:6px}
-  @media(max-width:740px){.ladder{grid-template-columns:1fr}.gnode:after{content:"↓";right:auto;left:50%;top:auto;bottom:-15px;transform:translateX(-50%)}}
+  .illus{border-left:3px solid var(--allude);background:var(--allude-bg);padding:9px 14px;border-radius:0 8px 8px 0;
+         color:#7a4a0c;font-size:12.5px;margin-top:10px}
+  @media(max-width:820px){.ladder,.gax{grid-template-columns:1fr}.cta{grid-template-columns:1fr 1fr}
+    .play .pb{grid-template-columns:1fr}.play .pcell+.pcell{border-left:0;border-top:1px solid var(--hair)}
+    .gnode:after{content:"↓";right:auto;left:50%;top:auto;bottom:-15px;transform:translateX(-50%)}}
 </style>
 </head>
 <body>
 <div class="sheet">
   <header>
-    <div class="kicker">Provenance · personalization router</div>
-    <h1>The <b>identity key you can prove</b> — not a guess — gates what you may personalize on. The router is deterministic; the LLM only drafts; <b>the Gate disposes</b>.</h1>
-    <p class="sub">Every visitor IP runs through one tree: classify the network from real ip-api flags → score per-field confidence → route to a personalization tier. A specific industry is asserted <i>only</i> at high confidence; everything else falls back to a true neutral default. The same tree decides whether a B2B visitor earns competitor-aware copy — and the Gate verifies every comparative claim before it ships.</p>
+    <div class="kicker">Provenance · personalization router + action layer</div>
+    <h1>Two decisions, one tree: <b>what you may say</b> — gated by the identity you can prove — and <i>what makes them act</i>, the play that tier permits. The router proposes; <b>the Gate disposes</b> — now on persuasion too.</h1>
+    <p class="sub">The research is blunt: <b>relevance you can’t verify reads as spam, and nothing else fires</b> — which is this product’s whole thesis. So the tree runs in two passes. <b>Pass 1 (permission):</b> classify the identity key, score per-field confidence, route to a personalization tier — assert an industry <i>only</i> at high confidence, else fall to a true neutral default. <b>Pass 2 (action):</b> the tier hands the copy agent exactly one provable hook, and the action layer turns it into a move that drives a reply — then the Gate verifies both the claim <i>and</i> the persuasion hygiene before a line ships.</p>
+    <div class="axes">
+      <div class="axis say"><b>Axis 1 — Permission · “what may I say?”</b><div class="d">Provable identity → Tier 0·1·2·3 · say / allude / hold. Deterministic, cheap, itself provable. <span class="mk w">wired</span></div></div>
+      <div class="axis act"><b>Axis 2 — Action · “what makes them act?”</b><div class="d">One trigger → loss-frame → matched-peer proof → one soft CTA. The copy research, encoded as the play each tier earns. <span class="mk w">partly wired now</span></div></div>
+    </div>
+    <div class="statuskey" style="margin-top:16px">
+      <span><i class="dot w"></i> <b style="color:var(--ink)">wired</b> — live in <code style="font-family:var(--mono)">scene.py</code> / <code style="font-family:var(--mono)">creative.py</code> today</span>
+      <span><i class="dot p"></i> <b style="color:var(--ink)">proposed</b> — the research integration designed here; code target named, not yet merged</span>
+    </div>
   </header>
 
-  <!-- ============ DECISION TREE ============ -->
+  <!-- ============ EXHIBIT 1 — PERMISSION ROUTER ============ -->
   <section>
-    <p class="ex">Exhibit 1 — <span>The decision tree: visitor IP → personalization tier</span></p>
+    <p class="ex">Exhibit 1 — <span>Pass 1 · the permission router: identity key → personalization tier</span> <span class="mk w" style="margin-left:6px">wired</span></p>
+    <p class="exsub">Unchanged spine, one rule made explicit: when the company won’t resolve, <b>default down the identity ladder to the individual</b> — never sideways to a guessed sector.</p>
     <div class="tree">
 
       <div class="node" style="border-color:var(--say);background:var(--say-bg)">
@@ -109,7 +186,7 @@
       <div class="kids">
         <div class="branch"><div class="node leaf l2">
           <span class="pill t2">TIER 2 · FIRMOGRAPHIC <span style="opacity:.7">· SAY</span></span>
-          <span><b>Works for any company size.</b> A startup's domain IDs the company even when reverse-IP only sees a CDN (gauntletai.com → Fastly). The visitor told us — so these facts are <b>say</b> (recitable), not allude.<div class="out">email → company (high conf) + title / seniority (PDL person). A consumer mailbox (gmail.com) → no company.</div></span>
+          <span><b>Works for any company size.</b> A startup’s domain IDs the company even when reverse-IP only sees a CDN (gauntletai.com → Fastly). The visitor told us — so these facts are <b>say</b> (recitable), not allude.<div class="out">email → company (high conf) + title / seniority (PDL person). A consumer mailbox (gmail.com) → no company → drop to the individual default ↓.</div></span>
         </div></div>
       </div>
 
@@ -152,15 +229,15 @@
           <span class="meta">datacenter / cloud — bot, scraper, or VPN exit</span></div>
           <div class="kids"><div class="branch"><div class="node leaf l0">
             <span class="pill t0">TIER 0 · NEUTRAL</span>
-            <span>Not a human office IP.<div class="out">Serve neutral; this is also where bot traffic lands — don't spend enrichment on it.</div></span>
+            <span>Not a human office IP.<div class="out">Serve neutral; this is also where bot traffic lands — don’t spend enrichment on it.</div></span>
           </div></div></div>
         </div>
 
         <div class="branch"><div class="node"><span class="q">④ <code>is_isp</code> — consumer ISP / carrier name?</span>
-          <span class="meta">name heuristic (AT&amp;T, Comcast…) — ip-api's flags miss residential</span></div>
+          <span class="meta">name heuristic (AT&amp;T, Comcast…) — ip-api’s flags miss residential</span></div>
           <div class="kids"><div class="branch"><div class="node leaf l1">
             <span class="pill t1">TIER 1 · LOCATION-AWARE NEUTRAL</span>
-            <span>The org is the <b>provider</b>, not the visitor's company. <span class="flag">company void</span><div class="out">Location generally OK → region-aware copy, <b>neutral backdrop, no industry/company claim</b>. ← this is the AT&amp;T / Tailscale-egress case.</div></span>
+            <span>The org is the <b>provider</b>, not the visitor’s company. <span class="flag">company void</span><div class="out">Location generally OK → region-aware copy, <b>neutral backdrop, no industry/company claim</b>. ← this is the AT&amp;T / Tailscale-egress case.</div></span>
           </div></div></div>
         </div>
 
@@ -171,19 +248,26 @@
             <div class="lbl yes">industry resolved · high confidence</div>
             <div class="branch"><div class="node leaf l2">
               <span class="pill t2">TIER 2 · FIRMOGRAPHIC</span>
-              <span>Industry-tailored copy + curated backdrop, region-aware. <b>Allude</b> — tailored, never recites "we detected you".<div class="out">+ if a competitive category is known → escalates to Tier 3 ↓</div></span>
+              <span>Industry-tailored copy + curated backdrop, region-aware. <b>Allude</b> — tailored, never recites “we detected you”.<div class="out">+ if a competitive category is known → escalates to Tier 3 ↓</div></span>
             </div></div>
             <div class="branch"><div class="node leaf l3">
               <span class="pill t3">TIER 3 · FIRMOGRAPHIC + COMPETITIVE</span>
-              <span><b>The gauntletai.com case.</b> Competitor-research sub-agent → a brief of <i>provable</i> differentiators for the visitor's category → copy agent drafts the comparative angle → <b>the Gate verifies every comparative claim</b> → unproven lines fall back to category value.<div class="out">Allude the edge, don't name the enemy. No "your current tool can't…" — that recites an inferred vendor.</div></span>
+              <span><b>The gauntletai.com case.</b> Competitor-research sub-agent → a brief of <i>provable</i> differentiators for the visitor’s category → copy agent drafts the comparative angle → <b>the Gate verifies every comparative claim</b> → unproven lines fall back to category value.<div class="out">Allude the edge, don’t name the enemy. No “your current tool can’t…” — that recites an inferred vendor.</div></span>
             </div></div>
             <div class="lbl no">company resolved, but PDL industry sparse / no bucket match</div>
             <div class="branch"><div class="node leaf l0">
               <span class="pill t0">TIER 1 · NEUTRAL (company-aware)</span>
-              <span>Hold the industry specialization — don't guess a sector.<div class="out">Region + company-shape tone only; backdrop stays neutral. Falls to <code>General</code> for industry.</div></span>
+              <span>Hold the industry specialization — don’t guess a sector.<div class="out">Region + company-shape tone only; backdrop stays neutral. Falls to the individual default ↓ for the hook.</div></span>
             </div></div>
           </div>
         </div>
+      </div>
+
+      <div class="default">
+        <b>Default rule (the practical fallback):</b> can’t resolve the company → <b>don’t guess a sector, step DOWN the identity ladder to the individual.</b>
+        Firmographic (reverse-IP company) fails → try the <b>person lane</b> (<code>resolve_email()</code> → PDL person: role / seniority you <i>can</i> prove) →
+        if no person either → honest <b>segment / neutral</b> default (<code>General</code>). A confident-looking sector on a guess is the exact failure mode this removes.
+        <b>Industry is opt-in by proof; identity degrades gracefully — it never fabricates upward.</b>
       </div>
     </div>
     <div class="legend" style="margin-top:18px">
@@ -194,9 +278,9 @@
     </div>
   </section>
 
-  <!-- ============ CONFIDENCE LADDER ============ -->
+  <!-- ============ EXHIBIT 2 — CONFIDENCE LADDER ============ -->
   <section>
-    <p class="ex">Exhibit 2 — <span>Industry needs a confidence gate — assertion is earned, not defaulted</span></p>
+    <p class="ex">Exhibit 2 — <span>Industry needs a confidence gate — assertion is earned, not defaulted</span> <span class="mk w" style="margin-left:6px">wired</span></p>
     <div class="ladder">
       <div class="rung">
         <h4><span class="tag allude">ALLUDE</span> HIGH</h4>
@@ -211,38 +295,201 @@
       <div class="rung">
         <h4><span class="tag hold">HOLD</span> LOW / UNKNOWN</h4>
         <div class="when">No company resolved (consumer ISP, mobile, VPN, bot) — nothing to attribute an industry to.</div>
-        <div class="does"><b>Never assert a sector.</b> Fall to the <code>General</code> neutral default. ← the fix for "why is my industry <i>mining</i>?"</div>
+        <div class="does"><b>Never assert a sector.</b> Fall to the <code>General</code> neutral default. ← the fix for “why is my industry <i>mining</i>?”</div>
       </div>
     </div>
     <p class="note" style="margin-top:14px"><b>Why this matters:</b> location is ~city-accurate on fixed-line broadband, so we treat it as generally correct (and still <i>allude</i>, never recite). Industry is a second-order inference (IP→company→PDL→sector) — each hop loses confidence, so it must clear a bar before it changes the page. A confident-looking sector on a guess is the failure mode we just removed.</p>
   </section>
 
-  <!-- ============ AGENT GRAPH ============ -->
+  <!-- ============ EXHIBIT 3 — PERMISSION × PLAY ============ -->
   <section>
-    <p class="ex">Exhibit 3 — <span>Where it lives in the agent graph: a deterministic router, LLM leaves, one Gate</span></p>
+    <p class="ex">Exhibit 3 — <span>Pass 2 · permission × play: what drives action at each tier</span> <span class="mk p" style="margin-left:6px">proposed integration</span></p>
+    <p class="exsub">Each tier is a <b>budget of provable facts</b>. The play spends exactly that budget — no more (that’s creepy/unprovable), no less (that’s a wasted send). One trigger, a loss-framed implication, matched-peer proof, one soft ask. <span class="pr">loss angle + AI-tell Gate now wired in creative.py · full play orchestration proposed</span></p>
+
+    <div class="play">
+      <div class="ph"><span class="pill t0">TIER 0 · NEUTRAL</span><span class="pq">budget: nothing provable about <i>this</i> visitor</span></div>
+      <div class="pb">
+        <div class="pcell"><div class="plabel">The play</div>
+          <div class="pmove"><b>Honest segment copy — don’t fake 1:1.</b> Lead with the category pain + a <b>matched-peer</b> proof at <i>segment</i> level, label it segment-level. No merge tags pretending to be personal.</div>
+          <div class="pmeta"><span class="pr">P#1 relevance-gate</span><span class="pr">P#8 matched-peer</span><span>angle <code>default</code>/<code>peer</code></span></div>
+        </div>
+        <div class="pcell"><div class="plabel">Example line</div>
+          <div class="pex">“Most RevOps leads at 200–300-person SaaS shops tell me the data’s in five tools and none of them agree.”</div>
+          <div class="pmeta"><span><b>CTA:</b> lowest-friction permission — “Worth a look, or not a priority?”</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="play">
+      <div class="ph"><span class="pill t1">TIER 1 · LOCATION-AWARE</span><span class="pq">budget: region (allude) only</span></div>
+      <div class="pb">
+        <div class="pcell"><div class="plabel">The play</div>
+          <div class="pmove"><b>Region framing, zero company/sector claim.</b> Shape tone to the locale; never imply we know the employer. Region is a backdrop, not a hook.</div>
+          <div class="pmeta"><span class="pr">P#2 one real anchor</span><span>angle <code>local</code></span></div>
+        </div>
+        <div class="pcell"><div class="plabel">Example line</div>
+          <div class="pex">“Built for the way {region} teams actually run pipeline.”</div>
+          <div class="pmeta"><span><b>CTA:</b> soft interest — “Is that worth two minutes this quarter?”</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="play">
+      <div class="ph"><span class="pill t2">TIER 2 · FIRMOGRAPHIC</span><span class="pq">budget: industry + region + (person: role/seniority)</span></div>
+      <div class="pb">
+        <div class="pcell"><div class="plabel">The play</div>
+          <div class="pmove"><b>One provable trigger → loss-frame → matched-peer proof → one personal-value line.</b> ≤20-word opener from a public fact; convert the upside into the <i>cost of inaction</i> (only if the loss is real); proof from the visitor’s own segment with a sharp, non-round number; one line aimed at <i>their</i> standing.</div>
+          <div class="pmeta"><span class="pr">P#2 trigger</span><span class="pr">P#6 loss-frame</span><span class="pr">P#7 personal value</span><span class="pr">P#8 sharp peer</span></div>
+        </div>
+        <div class="pcell"><div class="plabel">Example line</div>
+          <div class="pex">“Saw {company} is scaling the SDR team — when outbound ramps that fast, account research usually becomes the choke point before headcount pays off.”</div>
+          <div class="pmeta"><span><b>CTA:</b> one soft interest question — never a calendar link cold (see Exhibit 4)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="play">
+      <div class="ph"><span class="pill t3">TIER 3 · + COMPETITIVE</span><span class="pq">budget: + a provable category differentiator (Gate-verified)</span></div>
+      <div class="pb">
+        <div class="pcell"><div class="plabel">The play</div>
+          <div class="pmove"><b>Allude the edge, loss-frame the status quo — never name the enemy.</b> Lead with a <i>structural</i> differentiator of our own product (provable by construction); frame the cost of the current approach. The Gate blocks any superiority claim or recited competitor.</div>
+          <div class="pmeta"><span class="pr">P#6 loss-frame</span><span class="pr">P#9 don’t pitch first</span><span>fn <code>competitor_brief()</code></span></div>
+        </div>
+        <div class="pcell"><div class="plabel">Example line</div>
+          <div class="pex">“Most tools personalize on guesses you can’t audit. Here, every line ships with its source — so nothing goes out you can’t defend.”</div>
+          <div class="pmeta"><span><b>CTA:</b> offer-based, named asset — “Want the 1-page teardown? No call needed.” (once warm)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="note" style="margin-top:6px"><b>Mapping back to your one-liner:</b> “can’t figure out the company → default to individual” is the spine of Pass 2 too — Tier&nbsp;2’s play degrades to Tier&nbsp;1/0’s the instant the firmographic budget empties. The play <b>always has a provable fallback move</b>, so the page never blocks; it spends a smaller, honest budget.</p>
+  </section>
+
+  <!-- ============ EXHIBIT 4 — THE ASK, BY TEMPERATURE ============ -->
+  <section>
+    <p class="ex">Exhibit 4 — <span>The ask, by temperature: drive action with one CTA, friction-matched to trust</span> <span class="mk p" style="margin-left:6px">proposed integration</span></p>
+    <p class="ctabar"><b>Rule:</b> exactly ONE ask per message · ≤15 words · escalate commitment only as the lead warms · <b>never a calendar link in a cold first touch.</b></p>
+    <div class="cta">
+      <div class="crung"><span class="fric">friction ▁</span><div class="ctemp">Cold · 1st touch</div>
+        <h5>Permission / one-word</h5>
+        <div class="cex">“Worth a look, or not a priority right now?”</div>
+        <div class="cwhen">Max reply volume; busy senior buyers; breakup touches.</div></div>
+      <div class="crung"><span class="fric">friction ▂</span><div class="ctemp">Cold · default</div>
+        <h5>Interest question</h5>
+        <div class="cex">“Is keeping ramp under 60 days on your plate this quarter?”</div>
+        <div class="cwhen">The default cold first ask. Costs the reader nothing = a micro-yes.</div></div>
+      <div class="crung"><span class="fric">friction ▃</span><div class="ctemp">Hook present</div>
+        <h5>Offer (named asset)</h5>
+        <div class="cex">“Want the 1-page teardown? No call needed.”</div>
+        <div class="cwhen">When you hold a real, relevant asset + any personalization.</div></div>
+      <div class="crung"><span class="fric">friction ▅</span><div class="ctemp">Engaged · touch 3+</div>
+        <h5>Soft conversation</h5>
+        <div class="cex">“Worth 15 minutes to compare notes?”</div>
+        <div class="cwhen">After light engagement, not before.</div></div>
+      <div class="crung"><span class="fric">friction ▇</span><div class="ctemp">In eval · replied</div>
+        <h5>Two-option time</h5>
+        <div class="cex">“Tue 2pm or Thu 10am ET — or a time that’s easier?”</div>
+        <div class="cwhen"><b>Only</b> after a positive reply. Include timezone + one link.</div></div>
+    </div>
+    <p class="note" style="margin-top:14px"><b>Sequence, not single-touch:</b> default 4–7 total touches, each carrying a <i>new</i> angle (never “just bumping this”), and reuse the <b>same anchor signal</b> across email · voicemail · call so the channels reinforce one identity. The CTA is the only place the message asks for a finite resource — so it’s the last thing to escalate.</p>
+  </section>
+
+  <!-- ============ EXHIBIT 5 — THE GATE (TWO AXES) ============ -->
+  <section>
+    <p class="ex">Exhibit 5 — <span>Where it lives: a deterministic router, LLM leaves, one Gate — now disposing on two axes</span></p>
     <div class="graph">
       <div class="gnode"><div class="gt"><span class="chip det">det</span> Classify</div><div class="gd">ip-api flags → network type (the 6-way fork above).</div></div>
       <div class="gnode"><div class="gt"><span class="chip det">det</span> Score</div><div class="gd">Per-field confidence: location / company / industry. Optional LLM corroboration only.</div></div>
-      <div class="gnode"><div class="gt"><span class="chip det">det</span> Route</div><div class="gd">→ Tier 0 · 1 · 2 · 3. Pure, reproducible, itself provable.</div></div>
-      <div class="gnode"><div class="gt"><span class="chip cache">cache</span> Cache</div><div class="gd">LLMCache by (industry × region × angle × policy). Hit → skip the LLM (~0ms). Only successes cached, so a bad call retries.</div></div>
+      <div class="gnode"><div class="gt"><span class="chip det">det</span> Route</div><div class="gd">→ Tier 0·1·2·3. Pure, reproducible, itself provable.</div></div>
+      <div class="gnode"><div class="gt"><span class="chip cache">cache</span> Cache</div><div class="gd">LLMCache by (industry × region × angle × policy). Hit → skip the LLM (~0ms).</div></div>
       <div class="gnode"><div class="gt"><span class="chip llm">llm</span> Research</div><div class="gd">Tier 3 only — competitor brief: provable category differentiators.</div></div>
-      <div class="gnode"><div class="gt"><span class="chip llm">llm</span> Copy agent</div><div class="gd">Proposes headline/sub/CTA from the brief. Claude Haiku. Inert offline.</div></div>
-      <div class="gnode gate"><div class="gt"><span class="chip gate">gate</span> The Gate</div><div class="gd"><b>Disposes.</b> Verifies every claim vs source + surface policy. Comparative claims = highest scrutiny.</div></div>
+      <div class="gnode"><div class="gt"><span class="chip llm">llm</span> Copy agent</div><div class="gd">Proposes headline/sub/CTA from the brief + the one provable hook. Claude Haiku. Inert offline.</div></div>
+      <div class="gnode gate"><div class="gt"><span class="chip gate">gate</span> The Gate</div><div class="gd"><b>Disposes.</b> Verifies every claim vs source <b>and</b> persuasion hygiene. Comparative claims = highest scrutiny.</div></div>
       <div class="gnode"><div class="gt"><span class="chip det">det</span> Design</div><div class="gd">Backdrop / accent / tone from firmographic + confidence.</div></div>
-      <div class="gnode last"><div class="gt"><span class="chip det">det</span> Render</div><div class="gd">+ provenance receipt: every line's source, basis, policy.</div></div>
+      <div class="gnode last"><div class="gt"><span class="chip det">det</span> Render</div><div class="gd">+ provenance receipt: every line’s source, basis, policy.</div></div>
     </div>
-    <p class="feedback">↩ <b>Fallback path:</b> any line the Gate rejects → the deterministic angle template ships instead (<code>angle_copy</code>). The page never blocks; it degrades to what's provable. <b>Both identity keys (email · IP) feed this same graph.</b> The <b>Cache</b> turns a repeat (industry × region × angle × policy) from a ~1.3s model call into ~0ms, so the page never waits on the LLM; only two nodes are LLM (Research, Copy), the spine is deterministic, and the Gate stays the single point of disposition.</p>
-    <div class="legend" style="margin-top:14px">
-      <span><i class="sw" style="background:var(--det-bg);border:1px solid #cdd2da"></i> deterministic — provable, cheap, reproducible</span>
-      <span><i class="sw" style="background:#e7f3ee;border:1px solid #b9ddcb"></i> cache — short-circuits the LLM</span>
-      <span><i class="sw" style="background:var(--llm-bg);border:1px solid #d8c9f2"></i> LLM agent — proposes only</span>
-      <span><i class="sw" style="background:var(--hold-bg);border:1px solid #eecccc"></i> the Gate — disposes</span>
+
+    <div class="gax">
+      <div class="gcol">
+        <h4><span class="mk w">wired</span> Axis A — provability (<code>verify_copy()</code>)</h4>
+        <ul>
+          <li><span>✓</span> blocks unprovable <b>superlatives</b> (<code>#1</code>, best, leading)</li>
+          <li><span>✓</span> blocks <b>comparative</b> superiority it can’t source (better/faster than, vs)</li>
+          <li><span>✓</span> blocks <b>reciting an inferred competitor</b> (Clay, Apollo…)</li>
+          <li><span>✓</span> blocks a <b>number not in the facts</b> (<code>\d+% / \dx / $\d</code>)</li>
+          <li><span>✓</span> blocks <b>reciting the company</b> under an <code>allude</code> policy</li>
+        </ul>
+      </div>
+      <div class="gcol">
+        <h4><span class="mk w">+ partly wired</span> Axis B — persuasion hygiene (in <code>verify_copy()</code>)</h4>
+        <ul>
+          <li><span style="color:var(--say)">●</span> blocks <b>AI-tell phrases</b> — “hope this finds you well”, “circling back”, “came across your profile” <span class="mk w">wired</span></li>
+          <li><span style="color:var(--say)">●</span> blocks <b>AI-tell words</b> — delve / leverage / robust / seamless / synergy / elevate <span class="mk w">wired</span></li>
+          <li><span style="color:var(--say)">●</span> blocks <b>&gt;1 em-dash</b> in a line (one is fine) <span class="mk w">wired</span></li>
+          <li><span style="color:var(--say)">●</span> offers the <code>loss</code> cost-of-inaction angle, provable by construction <span class="mk w">wired</span></li>
+          <li><span style="color:var(--act)">○</span> <b>one trigger · one CTA · ≤125 words · no cold calendar link</b> — message-level, outbound sequence validator <span class="mk p">proposed</span></li>
+        </ul>
+      </div>
     </div>
+
+    <p class="feedback" style="margin-top:14px">↩ <b>Fallback path:</b> any line the Gate rejects — on either axis — → the deterministic angle template ships instead (<code>angle_copy</code>). The page never blocks; it degrades to what’s provable <i>and</i> clean. Only two nodes are LLM (Research, Copy); the spine is deterministic, and the Gate stays the single point of disposition. <b>Axis B keeps Provenance’s rule intact: a line that can’t be proven OR can’t be defended as non-spam is structurally unable to ship — never hand-excluded (Constitution Art. II).</b></p>
+  </section>
+
+  <!-- ============ EXHIBIT 6 — EVERY NODE EXPLAINED ============ -->
+  <section>
+    <p class="ex">Exhibit 6 — <span>Every node explained: input → branches → output → default → code</span></p>
+    <table class="maptable">
+      <thead><tr><th style="width:15%">Node</th><th style="width:18%">Reads (input)</th><th style="width:24%">Branches</th><th style="width:21%">Output</th><th style="width:22%">Default / fallback</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tp w">wired</span>Identity key</td>
+          <td>work email <i>or</i> visitor IP</td>
+          <td>email present → first-party lane · else → IP lane</td>
+          <td>company + person (email) or raw IP to classify</td>
+          <td class="def">consumer mailbox / no email → <b>IP lane</b></td></tr>
+        <tr><td><span class="tp w">wired</span>Network classify</td>
+          <td><code>mobile/proxy/hosting</code> + <code>org</code> name</td>
+          <td>mobile · proxy · hosting · is_isp · is_corporate (priority order)</td>
+          <td>which signal class the IP actually carries</td>
+          <td class="def">unreachable/private → <b>Tier 0 neutral</b></td></tr>
+        <tr><td><span class="tp w">wired</span>Company enrich</td>
+          <td>corporate domain / netblock → PDL</td>
+          <td>company resolves? · industry maps to a sector?</td>
+          <td>firmographic facts (industry, region)</td>
+          <td class="def">no company → <b>person lane</b>, then neutral</td></tr>
+        <tr><td><span class="tp w">wired</span>Confidence score</td>
+          <td>per-field: location / company / industry</td>
+          <td>HIGH · MEDIUM · LOW/UNKNOWN</td>
+          <td>the bar each claim must clear to surface</td>
+          <td class="def">below bar → <b>hold the claim</b> (don’t assert sector)</td></tr>
+        <tr><td><span class="tp w">wired</span>Tier route</td>
+          <td>classify + score</td>
+          <td>Tier 0 · 1 · 2 · 3</td>
+          <td>the permission budget + surface policy (say/allude/hold)</td>
+          <td class="def">always resolves to a tier — <b>0 is the floor</b></td></tr>
+        <tr><td><span class="tp p">proposed</span>Play select</td>
+          <td>the tier’s provable budget</td>
+          <td>segment · region · trigger+loss+peer · differentiator</td>
+          <td>the action move (Exhibit 3)</td>
+          <td class="def">budget empties → <b>step down a tier’s play</b></td></tr>
+        <tr><td><span class="tp p">proposed</span>CTA / temperature</td>
+          <td>lead stage (cold → replied)</td>
+          <td>permission · interest · offer · soft-talk · two-option time</td>
+          <td>exactly one ask, friction-matched</td>
+          <td class="def">cold/unknown → <b>soft interest question</b></td></tr>
+        <tr><td><span class="tp w">wired</span><span class="tp p">+B</span>The Gate</td>
+          <td>every proposed line + facts + policy</td>
+          <td>provable & clean? → ship · else → block</td>
+          <td>verdict + reason per line</td>
+          <td class="def">any block → <b>deterministic <code>angle_copy</code></b> ships</td></tr>
+      </tbody>
+    </table>
+    <p class="note" style="margin-top:12px">Read top-to-bottom, the tree never widens a claim it can’t back and never asks for more than trust earned: <b>identity gates permission, permission gates the play, the play gates the ask, and the Gate gates the send.</b> Every branch has a provable default, so the worst case is always honest, never broken.</p>
   </section>
 
   <footer>
-    <div class="caveat"><b>Can ≠ should.</b> Every signal here carries a say / allude / hold surface policy. Geo + firmographic are <b>allude</b> (involuntary — shape, don't recite). "Creepy mode" is this exact same data with the policy turned off — reciting the company, the precise location, or an inferred competitor. The Gate makes that arm <b>provably never selected</b>, not merely discouraged.</div>
-    <p style="margin:12px 0 0">Grounded in <b>pipeline/personalization/scene.py</b> (<code>reverse_ip</code> + <code>resolve_ip</code> classification, <code>resolve_email</code> first-party lane, PDL enrich) and <b>creative.py</b> (copy agent + Gate + LLMCache). All of it is wired: both identity keys, the corporate-VPN check, confidence scoring, the Tier-3 competitor agent, and the copy cache. Real fields only — no fabricated provider claims.</p>
+    <div class="caveat"><b>Can ≠ should.</b> Every signal here carries a say / allude / hold surface policy. Geo + firmographic are <b>allude</b> (involuntary — shape, don’t recite). “Creepy mode” is this exact same data with the policy turned off — reciting the company, the precise location, an inferred competitor, <b>or stacking unrelated/behavioral signals to fake intimacy</b>. The action layer caps relevance at <b>one provable, professional point</b>; the Gate makes the surveillance arm <b>provably never selected</b>, not merely discouraged.</div>
+    <div class="illus"><b>Illustrative figures.</b> The persuasion principles (one trigger, soft CTA, loss-frame, matched-peer proof, follow up, don’t sound like a bot) are cross-source robust. The reply/booking <i>magnitudes</i> behind them are <b>illustrative external benchmarks</b>, not Provenance’s own computed metrics — the research fact-check dropped the inflated single-vendor stats (the “5.2× signal lift”, “287% multichannel”). Per Constitution Art. I, no demo number here is hand-typed as fact.</div>
+    <p style="margin:12px 0 0">Grounded in <b>pipeline/personalization/scene.py</b> (<code>reverse_ip</code> + <code>resolve_ip</code> classification, <code>resolve_email</code> first-party lane, PDL enrich) and <b>creative.py</b> (<code>ANGLES</code>, <code>ai_copy</code> + <code>competitor_brief</code> + the Gate <code>verify_copy</code> + LLMCache). <b>Pass 1 (permission)</b> and <b>Axis A of the Gate</b> have always been wired. As of this pass the copy research is <b>partly merged too</b>: the <code>loss</code> cost-of-inaction angle and Axis B’s per-line hygiene (AI-tell denylist + em-dash limit) now run in <code>verify_copy()</code>, locked by two added tests (<b>full suite: 140 passed</b>). The message-level checks (one trigger · one CTA · ≤125 words · no cold calendar link) remain proposed — they belong to the outbound sequence validator, not this hero Gate. Real fields only — no fabricated provider claims.</p>
   </footer>
 </div>
 </body>

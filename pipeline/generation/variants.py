@@ -13,6 +13,7 @@ from typing import Optional
 from pipeline.common.schemas import Variant
 from pipeline.generation.recipients import ALL_SEGMENTS
 from pipeline.library import seed_data
+from pipeline.personalization import creative as CR
 
 # role -> [(arm, angle, headline, claim_ids)]
 ROLE_ANGLES: dict[str, list[tuple]] = {
@@ -78,10 +79,12 @@ def build_variants(channel: str = "email") -> dict[str, list[Variant]]:
 
 
 def build_action_pool(gate, channel: str, campaign: str, constrained: bool = True):
-    """Gate every variant's claims once (claim-level cache -> not per user) and add the
-    cleared ones to the action pool. constrained=False keeps blocked variants in the pool
-    — the unconstrained twin used to prove the bandit *would* pick the lie if allowed.
-    Returns (ActionPool, clearance_report)."""
+    """Gate every variant's claims once (claim-level cache -> not per user) AND its message
+    hygiene, and add only the doubly-cleared ones to the action pool. A variant clears when its
+    claims are not-red (provable) AND its message passes the persuasion Gate (one ask, short, no
+    cold calendar link, no spam-promise wording, clean lines) — provable-but-spammy never ships.
+    constrained=False keeps blocked variants in the pool — the unconstrained twin used to prove
+    the bandit *would* pick the lie if allowed. Returns (ActionPool, clearance_report)."""
     from pipeline.common.store import ActionPool
 
     pool = ActionPool(campaign, channel)
@@ -89,12 +92,16 @@ def build_action_pool(gate, channel: str, campaign: str, constrained: bool = Tru
     for seg, variants in build_variants(channel).items():
         for v in variants:
             verdicts = gate.verify_variant(v)
-            cleared = all(cv.verdict.value != "red" for cv in verdicts)
+            claims_cleared = all(cv.verdict.value != "red" for cv in verdicts)
+            msg = CR.verify_message(v.template, channel=channel, stage="cold")
+            cleared = claims_cleared and msg["ok"]
             if cleared or not constrained:
                 pool.add(seg, v.variant_id)
             report.append({
                 "variant_id": v.variant_id, "segment": seg, "arm": v.arm_label,
                 "planted_lie": v.planted_lie, "cleared": cleared,
+                "claims_cleared": claims_cleared, "message_ok": msg["ok"],
+                "message_vetoes": msg["vetoes"], "message_warnings": msg["warnings"],
                 "in_pool": cleared or not constrained,
                 "verdicts": [{"claim_id": cv.claim_id, "verdict": cv.verdict.value,
                               "flags": cv.rule_flags} for cv in verdicts],

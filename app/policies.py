@@ -1,33 +1,55 @@
-"""Policies surface — the provenance for what the LLMs can and cannot say.
+"""Policies — the Provenance Policy Standard: the provenance for what the LLMs can and cannot say.
 
-Three scopes, each a layer the Gate enforces, most-general first:
-  • Company  — tenant-wide surface policy (say / allude / hold by HOW a fact was obtained) +
-               always-held sensitive topics + consent. Source of truth: rules/<tenant>.yaml.
-  • Product  — the claim-class rules the Gate runs on every generated line (no unprovable
-               superlatives, no fabricated numbers, no comparative / competitor claims).
-  • Personal — per-sender rules: say only what they told you; allude to involuntary signals;
-               a sender inherits Company + Product policy and may tighten, never loosen.
+A controlled framework a tenant company adopts and configures. Five categories, each with a
+fixed rule vocabulary; every policy carries the same schema (subject · rule · scope · basis ·
+enforcement). Two classes:
 
-Nothing here is hand-waved: the Company rows are read from the tenant YAML and the Product rows
-name the actual Gate lenses in pipeline.personalization.creative / pipeline.gate.
+  • TENANT-EDITABLE  — a company configures these for itself (persisted in app_kv, DB-backed):
+      Surface (say/allude/hold by how a fact was obtained) · Sensitive topics (always hold) ·
+      Voice (banned phrases / tone) · Consent (required basis).
+  • PLATFORM-STANDARD (inviolable) — the Gate's claim vetoes. NOT editable by design: "can't say
+      what it can't prove" is the product. Shown locked, with the rule that enforces it.
+
+Base values are grounded in real sources (rules/<tenant>.yaml, the Gate in
+pipeline.personalization.creative); a tenant's edits are an override layer on top.
 """
 from __future__ import annotations
 
 import pathlib
+import re
 
 import yaml
 from fastapi import Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app.server import app, templates
+from pipeline.common import db
 from pipeline.personalization import creative as CR
 
 _RULES = pathlib.Path(__file__).resolve().parents[1] / "rules" / "academy_tenant.yaml"
+_OVR_KEY = "policy_overrides_v1"
 
-# rule → quiet.css pill variant + display order (say first, hold/block last)
-RULE_PILL = {"say": "g", "allow": "g", "allude": "a", "hold": "r", "block": "r",
-             "inherit": "v", "consent": "b"}
-_RANK = {"say": 0, "allow": 0, "allude": 1, "inherit": 2, "consent": 2, "hold": 3, "block": 3}
+# ---- the standard: controlled rule vocabulary + pill colour ----------------------------------
+RULE_PILL = {"say": "g", "allow": "g", "allude": "a", "require-proof": "a", "require": "a",
+             "hold": "r", "block": "r", "inherit": "v"}
+SURFACE_RULES = ["say", "allude", "hold"]          # what a 1:1 may do with a fact, by its source
+
+# the five categories — the organizing standard
+CATEGORIES = [
+    {"key": "surface", "label": "Surface", "icon": "eye", "rules": SURFACE_RULES, "editable": True,
+     "blurb": "What a 1:1 message may do with a fact, by HOW it was obtained. The anti-creepiness "
+              "control. Choose say (recite) · allude (adjacent only) · hold."},
+    {"key": "sensitive", "label": "Sensitive topics", "icon": "prohibit", "rules": ["hold"], "editable": True,
+     "blurb": "Topics never referenced, no matter how they were learned. Add or remove your own."},
+    {"key": "claim", "label": "Claims", "icon": "seal-check", "rules": ["allow", "block"], "editable": False,
+     "blurb": "What kinds of claims may ship — enforced in the Gate. Platform standard, inviolable: "
+              "“can’t say what it can’t prove.” Shown for transparency; locked by design."},
+    {"key": "voice", "label": "Voice & hygiene", "icon": "chat-text", "rules": ["block"], "editable": True,
+     "blurb": "Banned phrases / tone. Platform AI-tell defaults are locked; add your own banned phrases."},
+    {"key": "consent", "label": "Consent & basis", "icon": "handshake", "rules": ["require"], "editable": True,
+     "blurb": "Consent and lawful-basis requirements before any fact is used."},
+]
+CAT_BY = {c["key"]: c for c in CATEGORIES}
 
 _SOURCE_LABEL = {
     "web_form": "Web form", "class_signup": "Class signup",
@@ -43,95 +65,151 @@ _WHY = {
 }
 
 
-def _load() -> dict:
+def _slug(s: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")[:40]
+
+
+def _load_cfg() -> dict:
     try:
         return yaml.safe_load(_RULES.read_text()) or {}
     except Exception:
         return {}
 
 
-def _company_rows(cfg: dict) -> list[dict]:
+# ---- tenant overrides (DB-backed; survives restarts on the persistent volume) ----------------
+def _overrides() -> dict:
+    db.init_db()
+    conn = db.connect()
+    try:
+        return db.kv_get(conn, "app_kv", "k", _OVR_KEY, "v") or {}
+    finally:
+        conn.close()
+
+
+def _save_overrides(d: dict) -> None:
+    db.init_db()
+    conn = db.connect()
+    try:
+        db.kv_put(conn, "app_kv", "k", _OVR_KEY, "v", d)
+    finally:
+        conn.close()
+
+
+def _clear_overrides() -> None:
+    db.init_db()
+    conn = db.connect()
+    try:
+        conn.execute("DELETE FROM app_kv WHERE k=?", (_OVR_KEY,))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+# ---- build the effective policy set (standard base + tenant overrides) ------------------------
+def _voice_defaults() -> list[str]:
+    """Platform AI-tell defaults — the locked banned phrases, drawn from the Gate."""
+    return [f"“{p}”" for p in list(CR._AI_TELL_PHRASES)[:5]] + [f"word: {w}" for w in list(CR._AI_TELL_WORDS)[:6]]
+
+
+def build_policies(cfg: dict, ovr: dict) -> list[dict]:
     sp = cfg.get("surface_policy") or {}
-    rows: list[dict] = []
-    if sp.get("consent_required"):
-        rows.append({"topic": "Consent", "rule": "consent",
-                     "detail": "Personalization is gated on consent before any fact is used.",
-                     "basis": "consent_required: true", "scope": "all reps · all messages"})
-    for src, rule in (sp.get("by_source") or {}).items():
-        rows.append({"topic": _SOURCE_LABEL.get(src, src), "rule": rule,
-                     "detail": ("Reference it directly in a 1:1 message." if rule == "say"
-                                else "Touch the adjacent topic only — never recite the fact."),
-                     "basis": _WHY.get(src, ""), "scope": "all reps · all messages"})
-    for k in (sp.get("sensitive_keys") or []):
-        rows.append({"topic": k.replace("_", " ").title(), "rule": "hold",
-                     "detail": "Never referenced, no matter how we learned it.",
-                     "basis": "sensitive category", "scope": "all reps · all messages"})
-    rows.sort(key=lambda r: _RANK.get(r["rule"], 9))
-    return rows
+    ovr_surface = ovr.get("surface") or {}
+    pol: list[dict] = []
 
+    # Surface (editable) — base from the tenant yaml, rule overridable
+    base_by = sp.get("by_source") or {}
+    for src in base_by:
+        rule = ovr_surface.get(src, base_by[src])
+        pol.append({"cat": "surface", "id": src, "subject": _SOURCE_LABEL.get(src, src), "rule": rule,
+                    "basis": _WHY.get(src, ""), "scope": "company", "editable": True,
+                    "edited": src in ovr_surface and ovr_surface[src] != base_by[src]})
 
-def _product_rows() -> list[dict]:
+    # Sensitive (editable) — full effective list = override if present else yaml
+    sens = ovr["sensitive"] if "sensitive" in ovr else (sp.get("sensitive_keys") or [])
+    for k in sens:
+        pol.append({"cat": "sensitive", "id": _slug(k), "subject": k.replace("_", " ").title(), "raw": k,
+                    "rule": "hold", "basis": "sensitive category", "scope": "company", "editable": True})
+
+    # Claims (INVIOLABLE) — the Gate's veto classes
     sup = " · ".join(list(CR._SUPERLATIVES)[:4])
     comp = " · ".join(c.strip() for c in list(CR._COMPARATIVE)[:4])
-    return [
-        {"topic": "Cited, sourced claims", "rule": "say",
-         "detail": "Any line whose every claim traces to a source in the library.",
-         "basis": "Gate · coverage + NLI", "scope": "every generated line"},
-        {"topic": "Only verified variants ship", "rule": "allow",
-         "detail": "The optimizer can only promote a variant whose lines already cleared the Gate.",
-         "basis": "Optimizer × Gate", "scope": "every experiment"},
-        {"topic": "Unprovable superlatives", "rule": "block",
-         "detail": f"#1 / best / leading / guaranteed … ({sup}).",
-         "basis": "Gate · superlative veto", "scope": "every generated line"},
-        {"topic": "Fabricated stats / numbers", "rule": "block",
-         "detail": "A % / $ / ×N not present in the cited sources.",
-         "basis": "Gate · numeric veto", "scope": "every generated line"},
-        {"topic": "Comparative / superiority claims", "rule": "block",
-         "detail": f"“{comp}” … blocked unless backed by a proof.",
-         "basis": "Gate · comparative class", "scope": "Tier-3 competitive copy"},
-        {"topic": "Reciting an inferred competitor", "rule": "block",
-         "detail": f"Naming a competitor we only inferred ({len(CR.COMPETITOR_HINTS)} distinctive hints).",
-         "basis": "Gate · allude", "scope": "Tier-3 competitive copy"},
-        {"topic": "Reciting the company under allude", "rule": "block",
-         "detail": "Naming the visitor's company resolved from their IP.",
-         "basis": "Gate · allude", "scope": "firmographic copy"},
+    pol += [
+        {"cat": "claim", "id": "sourced", "subject": "Cited, sourced claims", "rule": "allow",
+         "basis": "Gate · coverage + NLI", "scope": "all senders", "editable": False},
+        {"cat": "claim", "id": "superlative", "subject": "Unprovable superlatives", "rule": "block",
+         "basis": f"Gate · superlative veto ({sup})", "scope": "all senders", "editable": False},
+        {"cat": "claim", "id": "numeric", "subject": "Fabricated stats / numbers", "rule": "block",
+         "basis": "Gate · numeric veto", "scope": "all senders", "editable": False},
+        {"cat": "claim", "id": "comparative", "subject": "Comparative / superiority", "rule": "block",
+         "basis": f"Gate · comparative class ({comp})", "scope": "all senders", "editable": False},
+        {"cat": "claim", "id": "competitor", "subject": "Reciting an inferred competitor", "rule": "block",
+         "basis": f"Gate · allude ({len(CR.COMPETITOR_HINTS)} hints)", "scope": "all senders", "editable": False},
+        {"cat": "claim", "id": "recite", "subject": "Reciting the company under allude", "rule": "block",
+         "basis": "Gate · allude", "scope": "firmographic copy", "editable": False},
     ]
 
+    # Voice (platform defaults locked + tenant additions editable)
+    for d in _voice_defaults():
+        pol.append({"cat": "voice", "id": _slug(d), "subject": d, "rule": "block",
+                    "basis": "AI-tell · platform default", "scope": "all senders", "editable": False})
+    for ph in (ovr.get("voice_add") or []):
+        pol.append({"cat": "voice", "id": "add-" + _slug(ph), "subject": f"“{ph}”", "raw": ph, "rule": "block",
+                    "basis": "your banned phrase", "scope": "company", "editable": True})
 
-def _personal_rows() -> list[dict]:
-    return [
-        {"topic": "Facts they told you directly", "rule": "say",
-         "detail": "Form / signup / on-record questions — reference them.",
-         "basis": "first-party", "scope": "this sender"},
-        {"topic": "Involuntary signals", "rule": "allude",
-         "detail": "IP / location / behavior — shape the message, never recite.",
-         "basis": "involuntary", "scope": "this sender"},
-        {"topic": "Your own notes", "rule": "allude",
-         "detail": "Don't quote your rep notes back at them (rep_note).",
-         "basis": "your inference", "scope": "this sender"},
-        {"topic": "Inherits Company + Product policy", "rule": "inherit",
-         "detail": "A sender may tighten any rule, never loosen one.",
-         "basis": "policy composition", "scope": "this sender"},
-    ]
+    # Consent (editable toggle)
+    creq = ovr.get("consent_required", bool(sp.get("consent_required")))
+    pol.append({"cat": "consent", "id": "consent", "subject": "Consent before personalization",
+                "rule": "require" if creq else "off", "basis": "lawful basis", "scope": "company",
+                "editable": True, "on": creq})
+    return pol
+
+
+def _grouped(cfg: dict, ovr: dict) -> list[dict]:
+    pols = build_policies(cfg, ovr)
+    out = []
+    for cat in CATEGORIES:
+        rows = [p for p in pols if p["cat"] == cat["key"]]
+        out.append({**cat, "rows": rows, "editcount": sum(1 for r in rows if r.get("edited"))})
+    return out
 
 
 @app.get("/policies", response_class=HTMLResponse)
 def policies(request: Request):
-    cfg = _load()
-    officers = cfg.get("admissions_officers") or []
-    tabs = [
-        {"key": "company", "label": "Company", "icon": "buildings",
-         "blurb": "Tenant-wide surface policy — what a 1:1 message may do with a fact, by how we obtained it. "
-                  "Read from the tenant config; the Gate enforces it.",
-         "rows": _company_rows(cfg), "meta": f"tenant: {cfg.get('tenant', '—')} · rules/academy_tenant.yaml"},
-        {"key": "product", "label": "Product", "icon": "package",
-         "blurb": "The claim-class rules the Gate runs on every generated line. Deterministic vetoes — "
-                  "a blocked line never becomes a sendable variant.",
-         "rows": _product_rows(), "meta": "pipeline.gate · pipeline.personalization.creative"},
-        {"key": "personal", "label": "Personal", "icon": "user",
-         "blurb": "Per-sender rules. A sender says only what the recipient told them, alludes to everything "
-                  "involuntary, and inherits the layers above — they can tighten, never loosen.",
-         "rows": _personal_rows(),
-         "meta": ("senders: " + ", ".join(o.get("name", "?") for o in officers)) if officers else "per-sender"},
-    ]
-    return templates.TemplateResponse(request, "policies.html", {"tabs": tabs, "rule_pill": RULE_PILL})
+    cfg = _load_cfg()
+    ovr = _overrides()
+    cats = _grouped(cfg, ovr)
+    n_edit = sum(1 for c in cats for r in c["rows"] if r.get("edited"))
+    return templates.TemplateResponse(request, "policies.html", {
+        "cats": cats, "rule_pill": RULE_PILL, "surface_rules": SURFACE_RULES,
+        "tenant": cfg.get("tenant", "—"), "dirty": bool(ovr), "n_edit": n_edit,
+    })
+
+
+@app.post("/policies/save")
+async def policies_save(request: Request):
+    """Persist a tenant's edits as an override layer (DB-backed)."""
+    form = await request.form()
+    cfg = _load_cfg()
+    base_by = (cfg.get("surface_policy") or {}).get("by_source") or {}
+    surface = {}
+    for k, v in form.multi_items():
+        if k.startswith("surf__") and v in SURFACE_RULES:
+            src = k[6:]
+            if src in base_by:
+                surface[src] = v
+    sensitive = [s.strip() for s in form.getlist("sensitive") if s.strip()]
+    voice_add = [s.strip() for s in form.getlist("voice_add") if s.strip()]
+    new = form.get("voice_new", "").strip()
+    if new:
+        voice_add.append(new)
+    ovr = {"surface": surface, "sensitive": sensitive, "voice_add": voice_add,
+           "consent_required": form.get("consent_required") == "on"}
+    _save_overrides(ovr)
+    return RedirectResponse("/policies", status_code=303)
+
+
+@app.post("/policies/reset")
+async def policies_reset():
+    """Revert to the standard defaults (drop the tenant override layer)."""
+    _clear_overrides()
+    return RedirectResponse("/policies", status_code=303)

@@ -46,6 +46,10 @@ CREATE TABLE IF NOT EXISTS llm_cache (
     input_hash   TEXT PRIMARY KEY,
     output_json  TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS app_kv (
+    k            TEXT PRIMARY KEY,         -- editable app settings (e.g. policy overrides)
+    v            TEXT NOT NULL
+);
 """
 
 
