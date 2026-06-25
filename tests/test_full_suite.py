@@ -154,6 +154,22 @@ def test_scene_say_recites_allude_does_not():
     assert any(r["policy"] == "say" and "company" in r["signal"] for r in say["receipt"])
 
 
+def test_default_industry_is_neutral_not_a_sector():
+    """When no industry resolves, the fallback is a TRUE neutral default — not a specific
+    sector (the 'why is my industry mining' bug), and not industry-inferred imagery."""
+    from pipeline.personalization import scene as SC
+    assert SC.DEFAULT_INDUSTRY == "general"
+    g = SC.BY_KEY[SC.DEFAULT_INDUSTRY]
+    assert g["label"] == "General"                     # badge reads "General", not a sector
+    s = SC.build_scene("Texas", SC.DEFAULT_INDUSTRY, detected=True)
+    blob = (s["eyebrow"] + s["headline"] + s["sub"]).lower()
+    for sector in ("mining", "energy", "healthcare", "logistics", "manufacturing", "construction"):
+        assert sector not in blob                       # neutral copy names no sector
+    # backdrop is a brand wash — no inferred photo — and still carries a provenance receipt
+    assert s["image"]["id"] == "neutral-wash" and not s["image"]["url"].startswith("http")
+    assert all(r["source"] and r["policy"] for r in s["receipt"])
+
+
 def test_isp_is_classified_not_a_company():
     """A consumer ISP/carrier behind the IP is the provider, not the visitor's company."""
     from pipeline.personalization import scene as SC

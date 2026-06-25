@@ -185,7 +185,7 @@
     document.getElementById('h1').textContent  = say ? fS(S.company?SAY.hco:SAY.hnoco) : (ac?ac.headline:fA(ind.headline));
     document.getElementById('sub').textContent = say ? fS(SAY.sub) : (ac?ac.sub:fA(ind.sub));
     document.getElementById('cta').firstChild.textContent = ind.cta + ' ';
-    document.getElementById('attr').innerHTML = "image: "+img.id+" · <a href='"+img.landing+"' target='_blank' rel='noopener'>"+img.creator+"</a> · "+img.license;
+    document.getElementById('attr').innerHTML = "image: "+img.id+" · "+(img.landing?("<a href='"+img.landing+"' target='_blank' rel='noopener'>"+img.creator+"</a>"):img.creator)+" · "+img.license;
     renderCreative(ind, gal);
     document.getElementById('blocked').style.display = say ? 'flex' : 'none';
     var m=document.getElementById('mode'); var lab = S.mode==='detected'?'Detected':(S.mode==='lookup'?'Looked up':'Preview');
@@ -204,7 +204,7 @@
       var v = r.value;
       if(r.label==='Region / state') v = S.region||'—';
       else if(r.label==='Company') v = S.company||'—';
-      else if(r.label==='Industry') v = ind.label+' (NAICS '+ind.naics+')';
+      else if(r.label==='Industry') v = ind.label+((ind.naics&&ind.naics!=='—')?' (NAICS '+ind.naics+')':'');
       return {label:r.label, value:v, drives:r.drives, policy:r.policy};
     });
     var produced = [

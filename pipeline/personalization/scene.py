@@ -38,7 +38,14 @@ def image_for(industry_key: str, idx: int = 0) -> dict:
     return imgs[idx % len(imgs)]
 
 # --- industries: NAICS sector + deterministic copy template ({region} filled at render) ----
+# "general" is the TRUE neutral fallback (no industry resolved) — not a specific sector. Its
+# backdrop is a brand wash (no inferred imagery) and its copy leads with the product thesis.
 INDUSTRIES = [
+    {"key": "general", "label": "General", "naics": "—", "accent": "#3B5BD6",
+     "eyebrow": "Provable personalization for teams in {region}",
+     "headline": "Outreach that can’t say what it can’t prove.",
+     "sub": "The GTM workspace that carries the source, basis, and surface policy behind every move.",
+     "cta": "See how it works"},
     {"key": "mining", "label": "Mining & metals", "naics": "212", "accent": "#B5731B",
      "eyebrow": "For {region} mining & hard-rock operators",
      "headline": "Engineered for the pace of the pit.",
@@ -87,7 +94,7 @@ STATES = ["Arizona", "California", "Texas", "New York", "Florida", "Illinois", "
           "Colorado", "Georgia", "Pennsylvania", "Ohio", "North Carolina", "Nevada", "Oregon",
           "Michigan", "Massachusetts", "Minnesota", "Louisiana", "Oklahoma", "Wyoming"]
 
-DEFAULT_INDUSTRY = "technology"   # neutral fallback when no industry resolves (not "mining")
+DEFAULT_INDUSTRY = "general"   # TRUE neutral fallback when no industry resolves (not a sector)
 GENERIC_REGION = "your region"
 
 # REAL reverse-IP provider (free, no key): geo + the org/company behind the IP + mobile/proxy/
