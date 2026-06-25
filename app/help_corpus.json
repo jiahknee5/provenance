@@ -1,5 +1,63 @@
 [
  {
+  "slug": "whats-new",
+  "title": "What's new",
+  "category": "Start here",
+  "summary": "The latest updates to apt — newest first. The version tag in the sidebar foot points here.",
+  "read_min": 2,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "Recent changes to apt, newest first. The version tag in the bottom-left of every page links here."
+   },
+   {
+    "type": "h",
+    "text": "v0.9 · Jun 25, 2026 — apt"
+   },
+   {
+    "type": "ul",
+    "items": [
+     "Rebranded to <b>apt</b> — the Proof Seal logo + favicon, across the shell, the demo, and the landing.",
+     "Landing integration strip split into <b>Built in</b> (live: People Data Labs, Reverse-IP, public web, Google) vs <b>Connect your stack</b>; a new <a href=\"/help/integrations\">Integrations</a> page details what each one adds.",
+     "<b>Archive</b>: non-core / lab surfaces moved off the main nav into <a href=\"/archive\">/archive</a> — the sidebar now shows only the core surfaces."
+    ]
+   },
+   {
+    "type": "h",
+    "text": "Jun 24, 2026 — Policies & the corpus"
+   },
+   {
+    "type": "ul",
+    "items": [
+     "<a href=\"/policies\">Policies</a> rebuilt around the <b>corpus model</b>: source documents (with real synthetic content you can View), a can-say / cannot-say claim list, and the Gate locked around grounded-in-corpus + cited.",
+     "Editable per tenant and persisted; tone/voice was dropped (a style choice, not a policy).",
+     "<a href=\"/help\">Help</a> reorganized to mirror the app, and now documents Policies + the Agent graph."
+    ]
+   },
+   {
+    "type": "h",
+    "text": "Jun 24, 2026 — Live demo & routing"
+   },
+   {
+    "type": "ul",
+    "items": [
+     "First-party <b>email lane</b> on the <a href=\"/demo/live\">live demo</a> — identifies any company (even a startup) the reverse-IP lane can't see.",
+     "Reverse-IP <b>tiers + confidence</b>, a copy-agent cache (~0ms on a repeat), and a Gate-enforced Tier-3 competitor angle.",
+     "<a href=\"/graph\">Agent graph</a> — the visitor→personalization decision tree, on its own page."
+    ]
+   },
+   {
+    "type": "note",
+    "html": "This is the changelog the sidebar version tag (apt · v0.9) points to — bumped on each release."
+   }
+  ],
+  "related": [
+   "overview",
+   "getting-started",
+   "surface-policies"
+  ]
+ },
+ {
   "slug": "overview",
   "title": "What Provenance is",
   "category": "Start here",
@@ -1175,24 +1233,33 @@
     "text": "Built in — the base (live today)"
    },
    {
-    "type": "kv",
+    "type": "table",
     "title": "Runs out of the box",
+    "cols": [
+     "Source",
+     "What it adds",
+     "Why it matters"
+    ],
     "rows": [
      [
       "People Data Labs",
-      "<b>Adds:</b> name, title, seniority, company, industry, skills, work history (email&rarr;person; domain&rarr;company). <b>Value:</b> turns a bare email or domain into a verified profile, live."
+      "name, title, seniority, company, industry, skills, work history (email&rarr;person; domain&rarr;company)",
+      "turns a bare email or domain into a verified profile, live."
      ],
      [
       "Reverse-IP (ip-api)",
-      "<b>Adds:</b> company, location, and network type from a visitor's IP. <b>Value:</b> firmographic personalization for anonymous B2B traffic — no form needed."
+      "company, location, and network type from a visitor's IP",
+      "firmographic personalization for anonymous B2B traffic — no form needed."
      ],
      [
       "Public web",
-      "<b>Adds:</b> public profile (Gravatar), recent company news (RSS), domain / MX class. <b>Value:</b> free, low-risk context on any email or domain."
+      "public profile (Gravatar), recent company news (RSS), domain / MX class",
+      "free, low-risk context on any email or domain."
      ],
      [
       "Google sign-in",
-      "<b>Adds:</b> a verified email + basic profile (OAuth). <b>Value:</b> deterministic identity to load the right record."
+      "a verified email + basic profile (OAuth)",
+      "deterministic identity to load the right record."
      ]
     ]
    },
@@ -1201,68 +1268,95 @@
     "text": "Connect your stack — what each adds"
    },
    {
-    "type": "kv",
+    "type": "table",
     "title": "First-party / CRM",
+    "cols": [
+     "Integration",
+     "What it adds",
+     "Why it matters"
+    ],
     "rows": [
      [
       "HubSpot",
-      "<b>Adds:</b> the full first-party record — lifecycle stage, email & behavior engagement, deal history. <b>Value:</b> your source of truth, and where segments live."
+      "the full first-party record — lifecycle stage, email & behavior engagement, deal history",
+      "your source of truth, and where segments live."
      ],
      [
       "Salesforce",
-      "<b>Adds:</b> accounts, opportunities, activity history. <b>Value:</b> CRM ground truth for SFDC shops."
+      "accounts, opportunities, activity history",
+      "CRM ground truth for SFDC shops."
      ],
      [
       "Segment",
-      "<b>Adds:</b> a unified event + identity stream (CDP). <b>Value:</b> one identity across your whole stack."
+      "a unified event + identity stream (CDP)",
+      "one identity across your whole stack."
      ],
      [
       "Snowflake / warehouse",
-      "<b>Adds:</b> your own first-party data via reverse-ETL. <b>Value:</b> ground claims in your warehouse, not a vendor's guess."
+      "your own first-party data via reverse-ETL",
+      "ground claims in your warehouse, not a vendor's guess."
      ]
     ]
    },
    {
-    "type": "kv",
+    "type": "table",
     "title": "Enrichment & contact data",
+    "cols": [
+     "Integration",
+     "What it adds",
+     "Why it matters"
+    ],
     "rows": [
      [
       "Clay",
-      "<b>Adds:</b> waterfall enrichment across many providers (batch / async). <b>Value:</b> bulk gap-fill + GTM data orchestration. <i>Note: not a real-time API — it writes back on a schedule.</i>"
+      "waterfall enrichment across many providers (batch / async)",
+      "bulk gap-fill + GTM data orchestration. <i>Note: not a real-time API — it writes back on a schedule.</i>"
      ],
      [
       "Clearbit / HubSpot Breeze",
-      "<b>Adds:</b> firmographics + reverse-IP company. <b>Value:</b> company enrichment on form-fill or an anonymous visit."
+      "firmographics + reverse-IP company",
+      "company enrichment on form-fill or an anonymous visit."
      ],
      [
       "ZoomInfo",
-      "<b>Adds:</b> direct dials, verified contacts, org charts. <b>Value:</b> deep B2B contact + company coverage."
+      "direct dials, verified contacts, org charts",
+      "deep B2B contact + company coverage."
      ],
      [
       "Apollo.io",
-      "<b>Adds:</b> a contact database + intent + sequences. <b>Value:</b> prospecting and outbound data."
+      "a contact database + intent + sequences",
+      "prospecting and outbound data."
      ],
      [
       "LinkedIn Sales Navigator",
-      "<b>Adds:</b> the professional graph — roles, tenure, org context. <b>Value:</b> enrich the people graph."
+      "the professional graph — roles, tenure, org context",
+      "enrich the people graph."
      ]
     ]
    },
    {
-    "type": "kv",
+    "type": "table",
     "title": "Intent & de-anonymization",
+    "cols": [
+     "Integration",
+     "What it adds",
+     "Why it matters"
+    ],
     "rows": [
      [
       "6sense / Demandbase",
-      "<b>Adds:</b> account intent, buying stage, surging accounts. <b>Value:</b> prioritize the accounts in-market now."
+      "account intent, buying stage, surging accounts",
+      "prioritize the accounts in-market now."
      ],
      [
       "Bombora",
-      "<b>Adds:</b> third-party topic-surge intent. <b>Value:</b> see who's researching your category."
+      "third-party topic-surge intent",
+      "see who's researching your category."
      ],
      [
       "Vector / RB2B",
-      "<b>Adds:</b> person-level website de-anonymization (named visitors, even on residential IPs). <b>Value:</b> turn anonymous traffic into people without a form."
+      "person-level website de-anonymization (named visitors, even on residential IPs)",
+      "turn anonymous traffic into people without a form."
      ]
     ]
    },
@@ -1757,6 +1851,287 @@
    {
     "type": "note",
     "html": "Restraint is the point. The Quiet Workspace is engineered for a calm, confident feel — strong type hierarchy, generous spacing, motion that never bounces — so that when colour does appear, it always means something: it is product data with a verdict behind it."
+   }
+  ]
+ },
+ {
+  "slug": "copy-that-drives-action",
+  "title": "Copy that drives action — and the Gate that enforces it",
+  "category": "Methodology",
+  "summary": "What a research swarm taught us about outreach that converts, and how every lesson became a deterministic Gate check — because relevance you can't verify reads as spam.",
+  "read_min": 6,
+  "related": [
+   "the-gate",
+   "surface-graph",
+   "surface-policies",
+   "surface-policy",
+   "build-methodology"
+  ],
+  "blocks": [
+   {
+    "type": "p",
+    "html": "This started as a question — <b>how do you write personalized copy that drives a customer to act?</b> — answered by a 15-agent research swarm: seven researchers, one per dimension of action-driving copy, each running real web searches, each pipelined into an adversarial fact-checker that downgraded inflated single-vendor stats, then a synthesizer that merged the verified findings into one playbook. The full engineering writeup lives at <a href=\"/guide\">/guide</a>; this is the distilled methodology."
+   },
+   {
+    "type": "h",
+    "text": "The one insight that shaped the design"
+   },
+   {
+    "type": "p",
+    "html": "The research's #1 finding — <b>relevance you can't verify reads as spam, and nothing else fires</b> — is the same sentence as this product's thesis: <i>can't say what it can't prove.</i> Persuasion isn't a layer on top of provenance; it <b>is</b> provenance, pointed at outreach. So the decision tree runs as two passes on one spine, and the Gate disposes on both."
+   },
+   {
+    "type": "kv",
+    "title": "Two axes, one Gate",
+    "rows": [
+     [
+      "Permission — “what may I say?”",
+      "Provable identity → personalization tier (say / allude / hold). Already wired in the router."
+     ],
+     [
+      "Action — “what makes them act?”",
+      "One trigger → loss-frame → matched-peer proof → one soft CTA, with the bot-fingerprint stripped. Wired in this work."
+     ]
+    ]
+   },
+   {
+    "type": "h",
+    "text": "The robust, cross-source spine"
+   },
+   {
+    "type": "ul",
+    "items": [
+     "<b>Relevance gates every lever.</b> One provable, public trigger — not a <code>{{first_name}}</code> merge tag.",
+     "<b>Frame the cost of inaction</b>, not just the upside — loss is felt about twice as strongly as an equal gain.",
+     "<b>Matched-peer proof</b> with a sharp, non-round number beats “trusted by 500+.”",
+     "<b>One soft CTA</b> on a cold first touch — an interest question, never a calendar link.",
+     "<b>Don't pitch first; follow up; never sound like a bot.</b>"
+    ]
+   },
+   {
+    "type": "note",
+    "html": "<b>Honest about the numbers (Constitution Art. I).</b> The principles are cross-source robust; the reply/booking <i>magnitudes</i> are illustrative external benchmarks, not our own metrics. The fact-check dropped the inflated “5.2× signal lift” and “287% multichannel” figures as cross-stitched or untraceable."
+   },
+   {
+    "type": "h",
+    "text": "Every lesson became a deterministic Gate check"
+   },
+   {
+    "type": "p",
+    "html": "A playbook nobody enforces is a poster. So each durable lesson was wired into the Gate — at the line, the message, and the sequence scale — and enforced where outbound copy actually flows: a variant enters the optimizer's action pool only if it is <b>provable AND non-spam</b>."
+   },
+   {
+    "type": "kv",
+    "title": "What the Gate enforces",
+    "rows": [
+     [
+      "<code>verify_copy</code> — Axis A",
+      "Per line: blocks superlatives, comparatives, an inferred competitor, an ungrounded number, reciting the company under <code>allude</code>."
+     ],
+     [
+      "<code>verify_copy</code> — Axis B",
+      "Per line: blocks AI-tells (delve, leverage, “hope this finds you well”…) and more than one em-dash."
+     ],
+     [
+      "<code>verify_message</code>",
+      "Per message: one CTA, ≤125 words on a cold touch, no cold calendar link, one link max, no spam-promise wording."
+     ],
+     [
+      "<code>verify_sequence</code>",
+      "Per sequence: never single-touch; no follow-up repeats a prior step verbatim."
+     ],
+     [
+      "<code>build_action_pool</code>",
+      "A variant ships only if <code>claims_cleared AND message_ok</code> — provable-but-spammy never enters the pool."
+     ],
+     [
+      "A new <code>loss</code> angle",
+      "Frames the cost of the status quo without inventing a number — loss-framing that's provable by construction."
+     ]
+    ]
+   },
+   {
+    "type": "p",
+    "html": "These rules are also published, in plain English, on the <a href=\"/policies\">Policies</a> surface under <b>Anti-slop</b> — a locked, platform-standard card set a tenant can read but not loosen."
+   },
+   {
+    "type": "h",
+    "text": "The practical default: degrade to the individual, never fabricate upward"
+   },
+   {
+    "type": "p",
+    "html": "When the company can't be resolved, the tree doesn't guess a sector — it <b>steps down the identity ladder to the individual</b> (the role and seniority you can actually prove), then to an honest neutral default. Numbers stay claim-gated, so a real “30 EHR systems” ships while a fabricated stat is blocked one layer down. Identity degrades gracefully; it never fabricates upward."
+   },
+   {
+    "type": "h",
+    "text": "Verified, not just compiled"
+   },
+   {
+    "type": "p",
+    "html": "Every layer was exercised and locked by added tests (existing tests untouched, per Art. VII): the message Gate clears all honest variants — the cold meeting-ask is a <i>warning</i>, not a veto — and vetoes the spammy ones; the optimizer's truth-boundary tests still pass unchanged. <b>Full suite: 144 passed.</b>"
+   },
+   {
+    "type": "note",
+    "html": "See the live decision tree at <a href=\"/graph\">Agent graph &amp; decision trees</a>, the full writeup at <a href=\"/guide\">/guide</a>, and the enforced rules on <a href=\"/policies\">Policies</a>."
+   }
+  ]
+ },
+ {
+  "slug": "personalization-and-metrics",
+  "title": "Does personalization actually move the metrics?",
+  "category": "Methodology",
+  "summary": "The agent-swarm research on personalization → reply and booking, graded by an adversarial fact-check. These are external benchmarks (sourced, by confidence) — not Provenance's own measured numbers.",
+  "read_min": 5,
+  "related": [
+   "copy-that-drives-action",
+   "the-gate",
+   "surface-graph"
+  ],
+  "blocks": [
+   {
+    "type": "p",
+    "html": "We ran the question through a 15-agent research swarm — <b>does personalizing outreach actually move the numbers, and by how much?</b> Seven researchers gathered the evidence; an adversarial verifier then graded every figure and <b>threw out the inflated ones</b>. What follows is what survived, by confidence. These are <b>external research benchmarks</b> (sourced) — not Provenance's own metrics; the product enforces the <i>principles</i> via the Gate, it doesn't claim the numbers as its own."
+   },
+   {
+    "type": "h",
+    "text": "What held up — verified across sources"
+   },
+   {
+    "type": "table",
+    "title": "Personalization → the metric (graded)",
+    "cols": [
+     "Lever",
+     "Effect on the metric",
+     "Confidence",
+     "Source"
+    ],
+    "rows": [
+     [
+      "Signal-based opener vs a generic blast",
+      "≈ 2–2.5× reply rate",
+      "<b>cross-source</b>",
+      "multiple datasets"
+     ],
+     [
+      "Soft interest CTA vs a hard meeting ask",
+      "≈ 3× reply (4.2% vs 1.4%); 15% cold-stage booking",
+      "<b>robust</b>",
+      "Gong · Puzzle Inbox"
+     ],
+     [
+      "One contact per account vs 10+",
+      "7.8% vs 3.8% reply",
+      "<b>supported</b>",
+      "Belkins"
+     ],
+     [
+      "Personal / career value vs company ROI",
+      "≈ 2× the impact; ≈ 50% more likely to buy",
+      "<b>supported</b>",
+      "Google / CEB (B2B)"
+     ],
+     [
+      "Not pitching in the first email",
+      "up to −57% reply when you do",
+      "<b>supported</b>",
+      "Gong · 28M emails"
+     ],
+     [
+      "Following up vs a single touch",
+      "42–55% of replies come from follow-ups; +50–66% from the first",
+      "<b>cross-source</b>",
+      "multiple"
+     ],
+     [
+      "Loss framing vs upside-only",
+      "a loss is felt ≈ 2× an equal gain",
+      "<b>supported</b>",
+      "prospect theory"
+     ],
+     [
+      "Voice: rapport + a stated reason",
+      "“did I catch you at a bad time?” → 0.9% success",
+      "<b>supported</b>",
+      "Gong · 90,380 calls"
+     ]
+    ]
+   },
+   {
+    "type": "h",
+    "text": "Calibration — what “good” looks like"
+   },
+   {
+    "type": "table",
+    "title": "Cold-outbound reply benchmarks",
+    "cols": [
+     "Benchmark",
+     "Value"
+    ],
+    "rows": [
+     [
+      "Average cold reply rate",
+      "≈ 3.4%"
+     ],
+     [
+      "Good",
+      "5–10%"
+     ],
+     [
+      "Elite",
+      "10.7%+"
+     ],
+     [
+      "Optimize on",
+      "reply / positive-reply — <b>not opens</b> (Apple MPP inflates opens)"
+     ],
+     [
+      "Deliverability ceilings",
+      "spam complaints &lt; 0.3% · bounce &lt; 2%"
+     ]
+    ]
+   },
+   {
+    "type": "note",
+    "html": "The takeaway isn't a single magic number — it's the <b>direction and the order of operations</b>: relevance first (it gates everything), then a soft ask, match the peer, frame the loss, don't pitch first, and follow up. Those are exactly the rules the <a href=\"/help/copy-that-drives-action\">Gate now enforces</a>."
+   },
+   {
+    "type": "h",
+    "text": "What we threw out — inflated or untraceable"
+   },
+   {
+    "type": "table",
+    "title": "Dropped by the fact-check",
+    "cols": [
+     "Claim we found",
+     "Verdict",
+     "Why"
+    ],
+    "rows": [
+     [
+      "“5.2× from signal personalization”",
+      "<b>dropped</b>",
+      "a cross-stitch of two unrelated studies; the real lift is ≈ 2–2.5×"
+     ],
+     [
+      "“287% from multichannel”",
+      "<b>dropped</b>",
+      "misattributed — untraceable to a primary source"
+     ],
+     [
+      "“25–40% reply” (vendor tiers)",
+      "<b>dropped</b>",
+      "single-vendor marketing, well above the ≈ 7.8% real-world ceiling"
+     ],
+     [
+      "“44% time-ask penalty”",
+      "<b>dropped</b>",
+      "untraceable"
+     ]
+    ]
+   },
+   {
+    "type": "note",
+    "html": "The full swarm playbook (all 7 dimensions, every source and verdict) is persisted in the repo at <code>docs/research/copy-personalization-research.md</code>. For how these findings became enforced code, see <a href=\"/help/copy-that-drives-action\">Copy that drives action</a> and the <a href=\"/guide\">engineering writeup</a>."
    }
   ]
  }

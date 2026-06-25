@@ -32,8 +32,10 @@
       <a class="q-ni {{ 'on' if p.startswith('/demo') else '' }}" href="/demo"><i class="ph ph-monitor-play"></i>Live demo</a>
     </nav>
     <div class="q-side-foot">
-      <a class="q-ni {{ 'on' if p.startswith('/help') else '' }}" href="/help"><i class="ph ph-question"></i>Help</a>
+      <a class="q-ni {{ 'on' if p == '/help/whats-new' else '' }}" href="/help/whats-new"><i class="ph ph-megaphone"></i>What&rsquo;s new</a>
+      <a class="q-ni {{ 'on' if p.startswith('/help') and p != '/help/whats-new' else '' }}" href="/help"><i class="ph ph-question"></i>Help</a>
       <a class="q-ni {{ 'on' if p.startswith('/archive') else '' }}" href="/archive"><i class="ph ph-archive"></i>Archive</a>
+      <div class="q-ver">apt · v{{ APP_VERSION }} · {{ APP_BUILT }}</div>
     </div>
   </aside>
 
@@ -77,6 +79,7 @@
       <a class="qi" data-label="home landing marketing site" href="/"><i class="ph ph-house-line"></i>Home (landing)<span class="hint">site</span></a>
       <a class="qi" data-label="help docs guide how it works explain research methodology glossary" href="/help"><i class="ph ph-question"></i>Help<span class="hint">go</span></a>
       <a class="qi" data-label="archive demo lab views superseded personalize inspector funnel cohort observatory google enrichment lead deck" href="/archive"><i class="ph ph-archive"></i>Archive<span class="hint">go</span></a>
+      <a class="qi" data-label="whats new updates changelog version release latest" href="/help/whats-new"><i class="ph ph-megaphone"></i>What's new<span class="hint">go</span></a>
     </div>
     <div class="qfoot"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>⏎</kbd> open</span><span><kbd>esc</kbd> close</span></div>
   </div>

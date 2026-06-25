@@ -43,6 +43,7 @@ h1{font-size:30px;line-height:1.1} h2{font-size:20px} h3{font-size:16px}
 .q-ni.on{background:var(--fill);color:var(--ink);font-weight:600} .q-ni.on i{color:var(--signal)}
 .q-sect{margin:14px 8px 5px}
 .q-side-foot{margin-top:auto;padding-top:10px;border-top:1px solid var(--hairline)}
+.q-ver{font-size:10.5px;color:var(--label);padding:9px 9px 3px;letter-spacing:.01em}
 
 .q-main{min-width:0;display:flex;flex-direction:column}
 .q-top{height:var(--topbar-h);display:flex;align-items:center;gap:12px;padding:0 22px;border-bottom:1px solid var(--hairline);position:sticky;top:0;background:rgba(255,255,255,.9);backdrop-filter:saturate(180%) blur(10px);z-index:20}
@@ -410,6 +411,13 @@ h1{font-size:30px;line-height:1.1} h2{font-size:20px} h3{font-size:16px}
 .q-kv tr:last-child td{border-bottom:0}
 .q-kv td:first-child{font-weight:600;color:var(--ink);white-space:nowrap;width:1%;padding-right:18px}
 .q-kvtitle{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--label);margin:0 0 6px}
+.q-tbl{width:100%;border-collapse:collapse;font-size:13px;margin:0 0 18px;table-layout:auto}
+.q-tbl th{text-align:left;font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--label);padding:7px 12px;border-bottom:1px solid var(--hairline);vertical-align:bottom}
+.q-tbl td{border-bottom:1px solid var(--hairline);padding:9px 12px;vertical-align:top;color:var(--slate);line-height:1.5}
+.q-tbl tr:last-child td{border-bottom:0}
+.q-tbl td:first-child{font-weight:600;color:var(--ink);padding-right:18px;white-space:nowrap}
+.q-tbl th:first-child{padding-left:12px}
+@media(max-width:680px){.q-tbl td:first-child{white-space:normal}}
 .help-cat{margin:26px 0 12px}
 .help-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
 .help-card{display:flex;flex-direction:column;gap:6px;border:1px solid var(--hairline);border-radius:var(--r-card);background:var(--surface);padding:16px 18px;box-shadow:var(--shadow-card),var(--carve);transition:transform var(--t-press) var(--ease-spring),box-shadow var(--t) var(--ease),border-color var(--t) var(--ease)}
