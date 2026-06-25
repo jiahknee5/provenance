@@ -76,6 +76,39 @@ def test_optimizer_use_case_is_truth_bounded():
     assert "0×" in o                                         # the lie/creepy arm selected 0 times
 
 
+def test_rich_firmographic_is_multi_section_with_impact():
+    t = c.get("/showcase/gauntletai").text
+    assert 'class="fp-hero"' in t and 'class="blk' in t            # hero + content blocks
+    assert "personalized from" in t                                 # each block tagged with its signal
+    assert "blocks personalized" in t and "signals used" in t       # the business-impact band
+    # the three-way end-visitor toggle
+    assert "Personalized · ships" in t and "Generic · everyone else" in t and "Ungated · blocked" in t
+
+
+def test_persona_switch_changes_the_page():
+    founder = c.get("/showcase/gauntletai/production", params={"persona": "founder_sf"}).text
+    enterprise = c.get("/showcase/gauntletai/production", params={"persona": "vp_bank"}).text
+    assert "Start with one engineer" in founder                     # startup → self-serve offer
+    assert "Cohorts for whole teams" in enterprise                  # enterprise → team offer
+    assert founder != enterprise                                    # the page genuinely differs
+    assert "Be a visitor" in founder                                # the persona switcher is present
+
+
+def test_generic_versus_personalized_differ():
+    g = c.get("/showcase/gauntletai/production", params={"v": "generic", "persona": "vp_bank"}).text
+    p = c.get("/showcase/gauntletai/production", params={"v": "gated", "persona": "vp_bank"}).text
+    assert "Train your team to build with AI." in g                 # generic hero (no signals)
+    assert "Train your team to build with AI." not in p             # personalized hero is different
+    assert "generic — no signal" in g                               # blocks marked un-personalized
+
+
+def test_observability_has_the_live_ip_input_and_assembly_map():
+    o = c.get("/showcase/skyfi/observability").text
+    assert 'name="ip"' in o and "reverse-IP" in o                   # same IP input as the live demo
+    assert "Be a visitor" in o                                      # + the persona switcher
+    assert "Page assembly — block" in o                             # which signal drove which block
+
+
 def test_unknown_use_case_404():
     assert c.get("/showcase/nope").status_code == 404
     assert c.get("/showcase/nope/observability").status_code == 404

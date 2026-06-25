@@ -118,57 +118,162 @@ def _vm(demo, *, gated, ungated, hero, sections, gate, trace,
             "loc_detected": loc_detected, "demos": [DEMOS[s] for s in ORDER]}
 
 
-# --- kind: firmographic (UC1, UC2) ------------------------------------------
+# --- kind: firmographic (UC1, UC2) — rich, multi-section, persona-driven -----
+_SIZE_LABEL = {"startup": "Early-stage", "mid": "Growing", "enterprise": "Enterprise"}
+_ROLE_LABEL = {"founder": "Founder", "exec": "Executive", "technical": "Technical leader", "ops": "Operator"}
+_INTENT_LABEL = {"hiring": "Hiring", "expansion": "Expanding"}
+
+# Curated personas for the switcher — rich signals an IP alone can't give (size / role / intent).
+PERSONAS: dict[str, list[dict]] = {
+    "gauntletai": [
+        {"key": "vp_bank", "label": "VP Eng · F500 bank · New York", "sub": "enterprise · technical · expanding",
+         "industry": "technology", "region": "New York", "size": "enterprise", "role": "technical", "intent": "expansion"},
+        {"key": "founder_sf", "label": "Founder · seed startup · California", "sub": "startup · founder · hiring",
+         "industry": "technology", "region": "California", "size": "startup", "role": "founder", "intent": "hiring"},
+        {"key": "health_data", "label": "Head of Data · hospital net · Texas", "sub": "growing · technical",
+         "industry": "healthcare", "region": "Texas", "size": "mid", "role": "technical", "intent": ""},
+    ],
+    "skyfi": [
+        {"key": "mine_gm", "label": "Mine GM · large operator · Arizona", "sub": "enterprise · ops · expanding",
+         "industry": "mining", "region": "Arizona", "size": "enterprise", "role": "ops", "intent": "expansion"},
+        {"key": "ag_coop", "label": "Precision-ag dir · co-op · Iowa", "sub": "growing · ops",
+         "industry": "agriculture", "region": "Iowa", "size": "mid", "role": "ops", "intent": ""},
+        {"key": "build_pm", "label": "Construction PM · regional · Texas", "sub": "growing · ops · expanding",
+         "industry": "construction", "region": "Texas", "size": "mid", "role": "ops", "intent": "expansion"},
+    ],
+}
+
+
+def persona(slug: str, key: str) -> dict | None:
+    return next((p for p in PERSONAS.get(slug, []) if p["key"] == key), None)
+
+
+def _firmo_sections(slug: str, cx: dict) -> list[dict]:
+    """The page's blocks, each with a personalized (p) and generic (g) version + the signal that drove it."""
+    ind, reg = cx["ind_label"].lower(), cx["region"]
+    size, role, intent = cx["size"], cx["role"], cx["intent"]
+    sizew = _SIZE_LABEL.get(size, "")
+    tech = role in ("technical", "ops")
+    if slug == "gauntletai":
+        hero_p = {"eyebrow": f"For {ind} teams in {reg}", "headline": f"Your {ind} team is one cohort from building with AI.",
+                  "sub": f"Gauntlet trains {ind} engineers in {reg} to ship with AI in 10 weeks — not 10 hires.", "cta": f"See the {ind} track"}
+        hero_g = {"eyebrow": "For engineering teams", "headline": "Train your team to build with AI.",
+                  "sub": "A rigorous, hands-on AI engineering program.", "cta": "See the program"}
+        proof_p = {"headline": f"{sizew} {ind} teams already ship with Gauntlet.".strip(),
+                   "sub": f"Engineering leaders across {reg} send their teams here.", "chips": [f"a {ind} team", f"a {reg} org", "10-week cohort"]}
+        proof_g = {"headline": "Trusted by engineering teams.", "sub": "Across industries.", "chips": ["—", "—", "—"]}
+        feat_p = ({"headline": "Build the real thing.", "sub": "Agents, RAG, evals, and deploys — graded on systems that run, not slides."} if tech
+                  else {"headline": "Outcomes you can measure.", "sub": "Your team ships a working AI system in 10 weeks — not after 10 senior hires."})
+        feat_g = {"headline": "A hands-on curriculum.", "sub": "Project-based AI engineering."}
+        if size == "enterprise":
+            offer_p = {"headline": "Cohorts for whole teams.", "sub": "Custom onboarding and a dedicated lead.", "cta": "Talk to our team"}
+        elif size == "startup":
+            offer_p = {"headline": "Start with one engineer.", "sub": "First module free — see the bar before you commit.", "cta": "Start free"}
+        else:
+            offer_p = {"headline": "Bring your team up fast.", "sub": "Flexible cohorts for growing teams.", "cta": "See cohorts"}
+        if intent == "hiring":
+            offer_p["sub"] = "Hiring senior AI talent is brutal — train the team you have. " + offer_p["sub"]
+        elif intent == "expansion":
+            offer_p["sub"] = "Scaling fast? Get your team building now. " + offer_p["sub"]
+        offer_g = {"headline": "Enroll today.", "sub": "Join the next cohort.", "cta": "Enroll"}
+        cat_p = {"headline": "Outcomes, not certificates.", "sub": "Every grad ships a working system — and every claim on this page carries its source."}
+        cat_g = {"headline": "Why Gauntlet.", "sub": "A different kind of program."}
+    else:  # skyfi
+        hero_p = {"eyebrow": f"For {ind} operations across {reg}", "headline": f"See change across your {reg} {ind} sites — weekly.",
+                  "sub": f"On-demand satellite imagery tuned to {ind} operators in {reg}.", "cta": f"Image your {reg} sites"}
+        hero_g = {"eyebrow": "On-demand satellite imagery", "headline": "See your sites from above, on demand.",
+                  "sub": "Fresh, licensed satellite imagery.", "cta": "Get imagery"}
+        proof_p = {"headline": f"{sizew} {ind} operators run on SkyFi.".strip(),
+                   "sub": f"Teams across {reg} monitor their sites with us.", "chips": [f"a {ind} operator", f"a {reg} co-op", "fleet coverage"]}
+        proof_g = {"headline": "Trusted by operators.", "sub": "Across sectors.", "chips": ["—", "—", "—"]}
+        feat_p = {"headline": f"Tuned to {ind}.", "sub": "Tasking, change-detection, and alerts on the cadence your operation needs."}
+        feat_g = {"headline": "Imagery, on demand.", "sub": "Task a satellite, get the image."}
+        if size == "enterprise":
+            offer_p = {"headline": "Fleet-wide coverage.", "sub": "Every site, one dashboard, a dedicated lead.", "cta": "Talk to our team"}
+        else:
+            offer_p = {"headline": "Image one site, on demand.", "sub": "Pay per capture — no subscription to start.", "cta": "Image a site"}
+        if intent == "expansion":
+            offer_p["sub"] = "Breaking ground on new sites? Baseline them from orbit. " + offer_p["sub"]
+        offer_g = {"headline": "Get started.", "sub": "Order imagery today.", "cta": "Order"}
+        cat_p = {"headline": "Fresh and licensed — not last year's basemap.", "sub": "Every image dated and sourced; every line on this page carries its provenance."}
+        cat_g = {"headline": "Why SkyFi.", "sub": "On-demand, high-resolution."}
+    return [
+        {"id": "hero", "label": "Hero", "tag": "industry · region · role", "p": hero_p, "g": hero_g},
+        {"id": "proof", "label": "Peer proof", "tag": "industry · company size", "p": proof_p, "g": proof_g},
+        {"id": "features", "label": "What you get", "tag": "role", "p": feat_p, "g": feat_g},
+        {"id": "offer", "label": "Offer", "tag": "company size · intent", "p": offer_p, "g": offer_g},
+        {"id": "category", "label": "Why us", "tag": "category · provable", "p": cat_p, "g": cat_g},
+    ]
+
+
 def _build_firmographic(slug: str, det: dict, octx: dict) -> dict:
     d = DEMOS[slug]
-    region, ind = octx["region"], octx["industry"]
+    ind, region = octx["industry"], octx["region"]
     company, city, detected = octx["company"], octx["city"], octx["detected"]
-    gated = SC.build_scene(region, ind, detected=detected, company=company, city=city, policy="allude")
-    ungated = SC.build_scene(region, ind, detected=detected, company=company, city=city, policy="say")
-    label = gated["industry_label"]
-    hero = {k: _fill(v, label, region) for k, v in d.angle.items()}
-    say = {k: _fill_say(v, company=company, city=city, industry_label=label, region=region) for k, v in d.say_angle.items()}
-    img = gated["image"]
-    cta = _fill(d.angle.get("cta", "Get started"), label, region)
-    gated_card = {"eyebrow": hero["eyebrow"], "headline": hero["headline"], "sub": hero["sub"], "cta": cta,
-                  "image": img["url"], "attr": img, "badge": "Gated · ships", "kind": "ok",
-                  "desc": "What ships. Involuntary signals (company, precise location) only shape the copy — "
-                          "region and sector framing — and are never recited. Every line is provable, so the Gate clears it."}
-    ungated_card = {"eyebrow": say["eyebrow"], "headline": say["headline"], "sub": say["sub"], "cta": cta,
-                    "image": img["url"], "attr": img, "badge": "Ungated · blocked", "kind": "block",
-                    "desc": "What the Gate blocks. Recites the company and precise location pulled from the IP — "
-                            "an overclaim that crosses the creepiness ceiling. Shown for contrast; never ships."}
-    inputs = [{"k": r["label"], "v": r["value"], "conf": r.get("conf"), "meta": f"{r['policy']} · {r['drives']}"}
-              for r in (det.get("captured") or [])]
-    inputs += [{"k": r["label"], "v": r["value"], "meta": f"{r['policy']} · {r['drives']}"} for r in det.get("request_signals", [])]
+    size, role, intent = octx.get("size", ""), octx.get("role", ""), octx.get("intent", "")
+    label = SC.BY_KEY.get(ind, SC.BY_KEY[SC.DEFAULT_INDUSTRY])["label"]
+    img = SC.image_for(ind)
+    cx = {"ind": ind, "ind_label": label, "region": region or "your region",
+          "size": size, "role": role, "intent": intent, "company": company, "city": city}
+    sections = _firmo_sections(slug, cx)
+
+    signals_used: list[dict] = []
+
+    def _sig(name, val, src, drives):
+        if val:
+            signals_used.append({"name": name, "value": val, "source": src, "drives": drives})
+    _sig("Industry", label, "reverse-IP / PDL", "hero · proof · features · imagery")
+    _sig("Region", region, "geo-IP", "hero · proof · local framing")
+    _sig("Company size", _SIZE_LABEL.get(size), "enrichment / declared", "the offer + proof scale")
+    _sig("Role / seniority", _ROLE_LABEL.get(role), "enrichment / declared", "feature framing")
+    _sig("Buying intent", _INTENT_LABEL.get(intent), "intent signals", "urgency in the offer")
+
+    impact = {"blocks": len(sections), "signals": len(signals_used), "recited": 0,
+              "lift_label": "1.5–3× conversion vs a generic page",
+              "lift_note": "illustrative benchmark for relevance-matched landing pages — not a measured result on this page"}
+
+    ungated_hero = {"eyebrow": "Resolved from your IP",
+                    "headline": _fill_say(d.say_angle["headline"], company=company, city=city, industry_label=label, region=region),
+                    "sub": _fill_say(d.say_angle["sub"], company=company, city=city, industry_label=label, region=region),
+                    "cta": sections[0]["p"]["cta"], "image": img["url"], "attr": img}
+
+    captured = [{"k": r["label"], "v": r["value"], "conf": r.get("conf"), "meta": f"{r['policy']} · {r['drives']}"}
+                for r in (det.get("captured") or [])]
+    captured += [{"k": r["label"], "v": r["value"], "meta": f"{r['policy']} · {r['drives']}"} for r in det.get("request_signals", [])]
     conf = det.get("confidence", {})
     routing = [{"k": "Network type", "v": det.get("network_type", "—")},
                {"k": "Personalization tier", "v": f"{det.get('tier', 0)} · {det.get('tier_label', '—')}"},
                {"k": "Confidence", "v": f"location {conf.get('location','—')} · company {conf.get('company','—')} · industry {conf.get('industry','—')}"}]
     if det.get("reason"):
         routing.append({"k": "Why", "v": det["reason"]})
-    prov = [{"k": r["signal"], "v": r["role"], "meta": f"{r['policy']} · {r['source']}"} for r in gated["receipt"]]
-    sections = [
-        {"title": "Inputs — signals captured", "icon": "ph-traffic-signal", "mode": detected, "rows": inputs or
-         [{"k": "Local / private IP", "v": "pick a sector + region, or pass ?ip= a public address", "meta": "no capture"}]},
+    scene = SC.build_scene(region, ind, detected=detected, company=company, city=city, policy="allude")
+    prov = [{"k": r["signal"], "v": r["role"], "meta": f"{r['policy']} · {r['source']}"} for r in scene["receipt"]]
+    obs_sections = [
+        {"title": "Inputs — signals captured", "icon": "ph-traffic-signal", "mode": detected,
+         "rows": captured or [{"k": "Local / private IP", "v": "enter a public IP above, or pick an example account", "meta": "no capture"}]},
         {"title": "Routing decision — deterministic, no LLM", "icon": "ph-git-fork", "rows": routing},
+        {"title": "Page assembly — block ← signal", "icon": "ph-stack",
+         "rows": [{"k": s["label"], "v": s["p"]["headline"], "meta": "from " + s["tag"]} for s in sections]},
         {"title": "Provenance — what touched the page", "icon": "ph-seal-check", "rows": prov}]
     ai = CR.ai_copy(industry=ind, region=region, company=company, city=city, angle="default", policy="allude")
-    gchk = CR.verify_copy([hero["headline"], hero["sub"]], "", company, "allude")
+    gchk = CR.verify_copy([sections[0]["p"]["headline"], sections[0]["p"]["sub"]], "", company, "allude")
     gate = [{"verdict": "ok" if ai["ships"] else "block", "line": ai["headline"], "why": "proposed hero — agent → Gate"}]
-    gate += [{"verdict": "ok", "line": c["line"], "why": f"gated version — {c['reason']}"} for c in gchk]
-    gate += [{"verdict": "block", "line": say["headline"], "why": "ungated — recites company / precise location (say policy)"},
+    gate += [{"verdict": "ok", "line": ck["line"], "why": f"gated — {ck['reason']}"} for ck in gchk]
+    gate += [{"verdict": "block", "line": ungated_hero["headline"], "why": "ungated — recites company / precise location (say policy)"},
              {"verdict": "block", "line": ai["blocked_example"]["line"], "why": ai["blocked_example"]["reason"]}]
     trace = [
-        {"n": 1, "name": "Resolve", "detail": f"IP → region {gated['region']}" + (f", company {company}" if company else ", no company resolved")},
+        {"n": 1, "name": "Resolve", "detail": f"IP → region {scene['region']}" + (f", company {company}" if company else ", no company")},
         {"n": 2, "name": "Classify", "detail": f"network {det.get('network_type','—')} · tier {det.get('tier',0)} · {det.get('tier_label','—')}"},
-        {"n": 3, "name": "Enrich", "detail": f"industry → {label} (NAICS {gated['naics']})"},
-        {"n": 4, "name": "Gate", "detail": "gated copy clears; ungated (recites company/city) blocked"},
-        {"n": 5, "name": "Personalize", "detail": f"template {gated['industry']}/allude · region {gated['region']} · backdrop {img['id']}"},
-        {"n": 6, "name": "Receipt", "detail": f"{len(gated['receipt'])} signals, each bound to a source + surface policy"}]
-    hero_vm = {"eyebrow": hero["eyebrow"], "headline": hero["headline"], "sub": hero["sub"], "image": img["url"], "attr": img}
-    return _vm(d, gated=gated_card, ungated=ungated_card, hero=hero_vm, sections=sections, gate=gate, trace=trace,
-               show_controls=True, active_industry=ind, active_region=region or "", loc_detected=detected)
+        {"n": 3, "name": "Enrich", "detail": f"industry → {label}; size/role/intent → {', '.join(s['value'] for s in signals_used[2:]) or 'not from IP (use a persona)'}"},
+        {"n": 4, "name": "Assemble", "detail": f"{len(sections)} blocks personalized from {len(signals_used)} signals"},
+        {"n": 5, "name": "Gate", "detail": "every block provable; the recite version blocked"},
+        {"n": 6, "name": "Receipt", "detail": f"{len(scene['receipt'])} sources bound · 0 recited"}]
+
+    return {"demo": d, "kind": "firmographic", "img": img, "sections": sections, "impact": impact,
+            "signals_used": signals_used, "ungated_hero": ungated_hero, "personas": PERSONAS.get(slug, []),
+            "examples": SC.EXAMPLE_ACCOUNTS, "active_persona": octx.get("persona", ""), "active_ip": octx.get("ip", ""),
+            "ctx": cx, "det": det, "loc_detected": detected, "active_industry": ind, "active_region": region or "",
+            "obs_sections": obs_sections, "gate": gate, "trace": trace, "demos": [DEMOS[s] for s in ORDER]}
 
 
 # --- kind: known customer (UC3) ---------------------------------------------

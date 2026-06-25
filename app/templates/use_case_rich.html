@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ demo.brand }} — {{ 'observability' if view == 'observability' else 'production' }} · apt</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz@0,16..72;1,16..72&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="/static/quiet.css">
+  <link rel="icon" type="image/svg+xml" href="/static/brand/apt-favicon.svg">
+  <style>
+    body{overflow-x:hidden}
+    .sc-top{height:52px;display:flex;align-items:center;gap:15px;padding:0 20px;border-bottom:1px solid var(--hairline);background:var(--glass-bg,var(--surface));backdrop-filter:var(--glass-blur);position:sticky;top:0;z-index:30;overflow-x:auto}
+    .sc-top .brand{display:flex;align-items:center;gap:8px;font-family:var(--font-display);font-weight:600;font-size:15px;color:var(--ink);text-decoration:none;flex:none}
+    .sc-top .brand .av{width:21px;height:21px;border-radius:6px;background:var(--ink);color:var(--on-ink,#fff);display:grid;place-items:center;font-size:11px}
+    .sc-top .brand .sep{color:var(--muted);font-weight:500}
+    .sc-top a{font-size:13px;color:var(--muted);font-weight:500;text-decoration:none;flex:none} .sc-top a:hover{color:var(--ink)}
+    .sc-top a.on{color:var(--ink);font-weight:600} .sc-top .ucn{display:flex;gap:13px}
+    .uc-head{max-width:1180px;margin:0 auto;padding:20px 28px 0}
+    .uc-htop{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .uc-htop .ttl{font-family:var(--font-display);font-weight:600;font-size:17px;color:var(--ink)}
+    .uc-htop .cat{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--label,#94a3b8);font-weight:600}
+    .uc-tabs{display:inline-flex;gap:4px;background:var(--chip,#f1f5f9);border-radius:10px;padding:3px;margin-left:auto}
+    .uc-tabs a{font-size:13px;font-weight:600;color:var(--muted);text-decoration:none;padding:6px 13px;border-radius:8px;display:inline-flex;align-items:center;gap:6px}
+    .uc-tabs a.on{background:var(--surface);color:var(--ink);box-shadow:var(--carve)}
+    /* controls: persona switcher + IP input + industry/region */
+    .ctl{max-width:1180px;margin:13px auto 0;padding:11px 28px;border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);background:var(--canvas,#fafbfc);display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+    .ctl .lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--label,#94a3b8);margin-right:3px}
+    .psw{display:flex;gap:6px;flex-wrap:wrap}
+    .psw a{font-size:12px;font-weight:600;color:var(--slate,#475569);text-decoration:none;border:1px solid var(--border,#d7dde6);border-radius:8px;padding:5px 10px;line-height:1.25;background:var(--surface)}
+    .psw a small{display:block;font-weight:500;color:var(--muted);font-size:10px}
+    .psw a.on{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+    .ipf{display:flex;gap:6px;align-items:center}
+    .ipf input{font:12.5px var(--font-ui);background:var(--surface);border:1px solid var(--border,#d7dde6);border-radius:8px;padding:7px 10px;color:var(--ink);width:180px}
+    .ipf button,.ctl-sel button{font:600 12px var(--font-ui);color:#fff;background:var(--ink);border:0;border-radius:8px;padding:7px 12px;cursor:pointer}
+    .ipf .ex{font-size:11px;color:var(--a,#1d4ed8);text-decoration:none}
+    .ctl-sel{display:flex;gap:6px;align-items:center} .ctl-sel select{appearance:none;font:12px var(--font-ui);background:var(--surface);border:1px solid var(--border,#d7dde6);border-radius:8px;padding:6px 9px;color:var(--ink)}
+    /* version toggle + impact */
+    .fp-bar{max-width:1180px;margin:14px auto 0;padding:0 28px;display:flex;align-items:center;gap:13px;flex-wrap:wrap}
+    .fp-bar .lbl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--label,#94a3b8)}
+    .fp-tog{display:inline-flex;gap:3px;background:var(--chip,#f1f5f9);border-radius:9px;padding:3px}
+    .fp-tog a{font-size:12.5px;font-weight:600;color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:7px;display:inline-flex;align-items:center;gap:6px}
+    .fp-tog a.p.on{background:var(--gbg,#e7f6ee);color:var(--g,#0a8a4f)} .fp-tog a.n.on{background:var(--abg,#e8efff);color:var(--a,#1d4ed8)} .fp-tog a.b.on{background:var(--rbg,#fcebed);color:var(--r,#c0354b)}
+    .imp{max-width:1180px;margin:12px auto 0;padding:12px 18px;border:1px solid var(--hairline);border-radius:12px;background:var(--surface);box-shadow:var(--carve);display:flex;gap:22px;flex-wrap:wrap;align-items:center}
+    .imp .m{display:flex;flex-direction:column} .imp .m b{font-family:var(--font-display);font-size:20px;color:var(--ink);line-height:1.1} .imp .m span{font-size:11px;color:var(--muted)}
+    .imp .lift{margin-left:auto;text-align:right} .imp .lift b{color:var(--g,#0a8a4f)} .imp .lift .note{font-size:10.5px;color:var(--label,#94a3b8);max-width:34ch}
+    /* the landing blocks */
+    .fp-hero{position:relative;min-height:74vh;display:flex;align-items:center;overflow:hidden;background:#14161a;margin-top:14px}
+    .uc-bg{position:absolute;inset:0;background-size:cover;background-position:center}
+    .uc-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,12,16,.86) 0%,rgba(10,12,16,.55) 50%,rgba(10,12,16,.2) 100%)}
+    .uc-hwrap{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:60px 28px;width:100%}
+    .uc-mark{display:flex;align-items:center;gap:10px;margin-bottom:13px}
+    .uc-mark .wm{font-family:var(--font-display);font-weight:700;font-size:19px;color:#fff}
+    .uc-pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:#fff;background:rgba(61,220,132,.22);border:1px solid rgba(61,220,132,.5);border-radius:20px;padding:3px 11px}
+    .uc-eye{font-size:13px;font-weight:600;color:#fff;opacity:.9;margin-bottom:11px}
+    .uc-h1{font-family:var(--font-display);font-weight:600;font-size:clamp(32px,5vw,54px);line-height:1.06;letter-spacing:-.02em;color:#fff;margin:0;max-width:19ch}
+    .uc-sub{font-size:19px;color:#fff;opacity:.92;margin:14px 0 0;max-width:48ch;line-height:1.4}
+    .fp-cta{display:inline-flex;align-items:center;gap:8px;color:#fff;font-weight:600;font-size:15px;border-radius:11px;padding:13px 22px;text-decoration:none}
+    .fp-cta.ghost{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);margin-left:8px}
+    .uc-attr{position:absolute;right:12px;bottom:9px;z-index:2;font-size:10px;color:#fff;background:rgba(0,0,0,.45);border-radius:6px;padding:3px 9px}.uc-attr a{color:#fff}
+    .fp-banner{position:absolute;top:0;left:0;right:0;z-index:5;background:rgba(192,53,75,.96);color:#fff;font-size:12.5px;font-weight:600;padding:9px 28px;display:flex;align-items:center;gap:8px}
+    .blk{max-width:1180px;margin:0 auto;padding:46px 28px;border-bottom:1px solid var(--hairline);position:relative}
+    .blk .tag{position:absolute;top:14px;right:28px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--a,#1d4ed8);background:var(--abg,#e8efff);border-radius:5px;padding:2px 8px}
+    .blk .tag.gen{color:var(--muted);background:var(--chip,#eef2f7)}
+    .blk h2{font-family:var(--font-display);font-weight:600;font-size:clamp(22px,3vw,30px);color:var(--ink);margin:0;max-width:24ch;letter-spacing:-.01em}
+    .blk p{font-size:16.5px;color:var(--slate,#475569);line-height:1.5;margin:11px 0 0;max-width:60ch}
+    .blk.proof{background:var(--canvas,#fafbfc)} .chips{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+    .chips span{font-size:13px;font-weight:600;color:var(--slate,#475569);background:var(--surface);border:1px solid var(--hairline);border-radius:9px;padding:8px 14px;box-shadow:var(--carve)}
+    .blk .bcta{display:inline-flex;align-items:center;gap:7px;margin-top:18px;font-weight:600;font-size:14px;color:#fff;border-radius:10px;padding:11px 18px;text-decoration:none}
+    .fp-foot{max-width:1180px;margin:0 auto;padding:18px 28px 60px;font-size:13px;color:var(--muted)}
+    /* observability */
+    .uc-body{max-width:1180px;margin:0 auto;padding:24px 28px 70px}
+    h2.uc-sh{font-family:var(--font-display);font-weight:600;font-size:16px;color:var(--ink);margin:0 0 4px}
+    .uc-story{font-size:14px;color:var(--slate,#475569);line-height:1.6;max-width:80ch}
+    .o-hero{position:relative;min-height:30vh;display:flex;align-items:flex-end;overflow:hidden;background:#14161a;margin-top:14px}
+    .obs{display:grid;grid-template-columns:1.25fr 1fr;gap:18px;align-items:start;margin-top:18px}
+    @media(max-width:900px){.obs{grid-template-columns:1fr}}
+    .obs-sec{border:1px solid var(--hairline);border-radius:13px;background:var(--surface);box-shadow:var(--carve);overflow:hidden;margin-bottom:18px}
+    .obs-sec .h{display:flex;align-items:center;gap:8px;padding:11px 15px;border-bottom:1px solid var(--hairline);font-size:12.5px;font-weight:600;color:var(--ink)}
+    .obs-sec .h .mode{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:5px;padding:2px 7px}
+    .mode.det{color:var(--g,#0a8a4f);background:var(--gbg,#e7f6ee)} .mode.prev{color:var(--a,#1d4ed8);background:var(--abg,#e8efff)}
+    .row{display:flex;gap:8px;padding:8px 15px;border-bottom:1px solid var(--hairline);font-size:12.5px;align-items:baseline}
+    .row:last-child{border-bottom:0}
+    .row .k{color:var(--muted);min-width:118px;flex:none} .row .v{color:var(--ink);font-weight:500;min-width:0;word-break:break-word}
+    .row .meta{margin-left:auto;font-size:10.5px;color:var(--label,#94a3b8);flex:none;text-align:right;max-width:46%}
+    .conf{font-size:9.5px;font-weight:700;text-transform:uppercase;border-radius:4px;padding:1px 5px;margin-left:6px}
+    .conf.high{color:var(--g,#0a8a4f);background:var(--gbg,#e7f6ee)} .conf.medium{color:#9a6a00;background:#fdf3df} .conf.low,.conf.none,.conf.declared{color:var(--muted);background:var(--chip,#eef2f7)}
+    .gate-line{display:flex;align-items:flex-start;gap:8px;padding:9px 15px;border-bottom:1px solid var(--hairline);font-size:12.5px} .gate-line:last-child{border-bottom:0}
+    .gv{font-size:9.5px;font-weight:700;text-transform:uppercase;border-radius:4px;padding:2px 6px;flex:none;margin-top:1px}
+    .gv.ok{color:var(--g,#0a8a4f);background:var(--gbg,#e7f6ee)} .gv.block{color:var(--r,#c0354b);background:var(--rbg,#fcebed)}
+    .gate-line .tx{min-width:0} .gate-line .tx .ln{color:var(--ink)} .gate-line .tx .why{color:var(--muted);font-size:11px;margin-top:2px}
+    .trace .step{display:flex;gap:11px;padding:10px 15px;border-bottom:1px solid var(--hairline)} .trace .step:last-child{border-bottom:0}
+    .trace .n{width:21px;height:21px;border-radius:6px;background:var(--ink);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;flex:none}
+    .trace .nm{font-weight:600;color:var(--ink);font-size:12.5px} .trace .dt{color:var(--muted);font-size:12px;margin-top:1px}
+  </style>
+</head>
+<body>
+  {% set base = '/showcase/' ~ slug ~ '/' ~ ('observability' if view == 'observability' else 'production') %}
+  <nav class="sc-top">
+    <a class="brand" href="/showcase"><span class="av"><img src="/static/brand/apt-mark-dark.svg" alt="" width="14" height="14"></span>apt <span class="sep">· Showcase</span></a>
+    <a href="/demo/live"><i class="ph ph-monitor-play"></i> Live demo</a>
+    <span class="ucn">{% for d in demos %}<a href="/showcase/{{ d.slug }}" class="{{ 'on' if d.slug == slug else '' }}">{{ d.num }} · {{ d.brand }}</a>{% endfor %}</span>
+    <a href="/showcase" style="margin-left:auto"><i class="ph ph-squares-four"></i> All use cases</a>
+  </nav>
+
+  <header class="uc-head">
+    <div class="uc-htop">
+      <span class="ttl">Use case {{ demo.num }} · {{ demo.brand }}</span><span class="cat">{{ demo.category }}</span>
+      <span class="uc-tabs">
+        <a href="/showcase/{{ slug }}/production" class="{{ 'on' if view != 'observability' else '' }}"><i class="ph ph-browser"></i> Production</a>
+        <a href="/showcase/{{ slug }}/observability" class="{{ 'on' if view == 'observability' else '' }}"><i class="ph ph-pulse"></i> Observability</a>
+      </span>
+    </div>
+  </header>
+
+  <div class="ctl">
+    <span class="lbl">Be a visitor</span>
+    <span class="psw">{% for p in personas %}<a href="{{ base }}?persona={{ p.key }}" class="{{ 'on' if active_persona == p.key else '' }}">{{ p.label }}<small>{{ p.sub }}</small></a>{% endfor %}</span>
+    <span class="lbl" style="margin-left:6px">or an IP</span>
+    <form class="ipf" method="get" action="{{ base }}">
+      <input name="ip" value="{{ active_ip }}" placeholder="reverse-IP — e.g. 17.253.144.10" autocomplete="off" spellcheck="false">
+      <button type="submit">Resolve</button>
+      <a class="ex" href="{{ base }}?ip=17.253.144.10">try Apple</a>
+    </form>
+    <form class="ctl-sel" method="get" action="{{ base }}">
+      <select name="industry">{% for i in industries %}<option value="{{ i.key }}" {{ 'selected' if i.key == active_industry else '' }}>{{ i.label }}</option>{% endfor %}</select>
+      <select name="region"><option value="">— region —</option>{% for s in states %}<option value="{{ s }}" {{ 'selected' if s == active_region else '' }}>{{ s }}</option>{% endfor %}</select>
+      <button type="submit">Set</button>
+    </form>
+  </div>
+
+  {% if view == 'observability' %}
+  {% set hs = sections[0].p %}
+  <section class="o-hero">
+    <div class="uc-bg" style="background-image:url('{{ img.url }}')"></div>
+    <div class="uc-hwrap" style="padding:26px 28px">
+      <div class="uc-mark"><span class="wm">{{ demo.brand }}</span><span class="uc-pill"><i class="ph ph-seal-check"></i> gated · ships</span></div>
+      <div class="uc-eye">{{ hs.eyebrow }}</div><h1 class="uc-h1" style="font-size:clamp(24px,3.4vw,34px)">{{ hs.headline }}</h1>
+    </div>
+  </section>
+  <div class="uc-body">
+    <h2 class="uc-sh">Observability — every input, decision, and source behind this page</h2>
+    <p class="uc-story" style="margin-bottom:6px">{{ demo.what_apt_does }} Enter an IP or pick a visitor above and every panel re-resolves.</p>
+    <div class="obs">
+      <div>
+        {% for sec in obs_sections %}
+        <div class="obs-sec">
+          <div class="h"><i class="ph {{ sec.icon }}"></i> {{ sec.title }}{% if sec.mode is defined %}<span class="mode {{ 'det' if sec.mode else 'prev' }}">{{ 'Detected' if sec.mode else 'Preview' }}</span>{% endif %}</div>
+          {% for r in sec.rows %}<div class="row"><span class="k">{{ r.k }}</span><span class="v">{{ r.v }}{% if r.conf %}<span class="conf {{ r.conf }}">{{ r.conf }}</span>{% endif %}</span>{% if r.meta %}<span class="meta">{{ r.meta }}</span>{% endif %}</div>{% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+      <div>
+        <div class="obs-sec">
+          <div class="h"><i class="ph ph-sparkle"></i> Gate — what ships, what's blocked</div>
+          {% for g in gate %}<div class="gate-line"><span class="gv {{ g.verdict }}">{{ 'ships' if g.verdict == 'ok' else 'blocked' }}</span><div class="tx"><div class="ln">{{ g.line }}</div><div class="why">{{ g.why }}</div></div></div>{% endfor %}
+        </div>
+        <div class="obs-sec trace">
+          <div class="h"><i class="ph ph-flow-arrow"></i> Trace — the pipeline path</div>
+          {% for s in trace %}<div class="step"><span class="n">{{ s.n }}</span><div><div class="nm">{{ s.name }}</div><div class="dt">{{ s.detail }}</div></div></div>{% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+  {% set qp = ('&persona=' ~ active_persona if active_persona else '') ~ ('&ip=' ~ active_ip if active_ip else '') ~ ('&industry=' ~ active_industry if (active_industry and not active_persona and not active_ip) else '') ~ ('&region=' ~ active_region if (active_region and not active_persona) else '') %}
+  <div class="fp-bar">
+    <span class="lbl">End-visitor view</span>
+    <span class="fp-tog">
+      <a class="p {{ 'on' if version == 'gated' else '' }}" href="/showcase/{{ slug }}/production?v=gated{{ qp }}"><i class="ph ph-seal-check"></i> Personalized · ships</a>
+      <a class="n {{ 'on' if version == 'generic' else '' }}" href="/showcase/{{ slug }}/production?v=generic{{ qp }}"><i class="ph ph-circle"></i> Generic · everyone else</a>
+      <a class="b {{ 'on' if version == 'ungated' else '' }}" href="/showcase/{{ slug }}/production?v=ungated{{ qp }}"><i class="ph ph-prohibit"></i> Ungated · blocked</a>
+    </span>
+  </div>
+  {% if version == 'gated' %}
+  <div class="imp">
+    <span class="m"><b>{{ impact.blocks }}</b><span>blocks personalized</span></span>
+    <span class="m"><b>{{ impact.signals }}</b><span>signals used</span></span>
+    <span class="m"><b>{{ impact.recited }}</b><span>recited (every change provable)</span></span>
+    <span class="lift"><b>{{ impact.lift_label }}</b><div class="note">{{ impact.lift_note }}</div></span>
+  </div>
+  {% elif version == 'generic' %}
+  <div class="imp"><span class="m"><b>0</b><span>blocks personalized</span></span><span class="m" style="flex:1"><span style="font-size:13px;color:var(--muted)">This is what a visitor we can't resolve sees — no industry, no region, no role. Toggle back to <b>Personalized</b> to feel the difference.</span></span></div>
+  {% endif %}
+
+  {% if version == 'ungated' %}
+  <section class="fp-hero">
+    <div class="fp-banner"><i class="ph ph-warning"></i> Ungated — the Gate blocks this in production (recites involuntary data). Shown for contrast only; the recite version would do this in every block.</div>
+    <div class="uc-bg" style="background-image:url('{{ ungated_hero.image }}')"></div>
+    <div class="uc-hwrap">
+      <div class="uc-mark"><span class="wm">{{ demo.brand }}</span><span class="uc-pill" style="background:rgba(192,53,75,.22);border-color:rgba(192,53,75,.5)"><i class="ph ph-prohibit"></i> personalized live by apt</span></div>
+      <div class="uc-eye">{{ ungated_hero.eyebrow }}</div><h1 class="uc-h1">{{ ungated_hero.headline }}</h1><p class="uc-sub">{{ ungated_hero.sub }}</p>
+      <div style="margin-top:24px"><a class="fp-cta" style="background:{{ demo.accent }}" href="#">{{ ungated_hero.cta }} <i class="ph ph-arrow-right"></i></a></div>
+    </div>
+    {% if ungated_hero.attr %}<div class="uc-attr">backdrop: {{ ungated_hero.attr.id }} · <a href="{{ ungated_hero.attr.landing }}" target="_blank" rel="noopener">{{ ungated_hero.attr.creator }}</a> · {{ ungated_hero.attr.license }}</div>{% endif %}
+  </section>
+  {% else %}
+  {% set g = (version == 'generic') %}
+  {% for s in sections %}
+  {% set b = s.g if g else s.p %}
+  {% if s.id == 'hero' %}
+  <section class="fp-hero">
+    <div class="uc-bg" style="background-image:url('{{ img.url }}')"></div>
+    <div class="uc-hwrap">
+      <div class="uc-mark"><span class="wm">{{ demo.brand }}</span><span class="uc-pill"><i class="ph ph-seal-check"></i> personalized live by apt</span></div>
+      <div class="uc-eye">{{ b.eyebrow }}</div><h1 class="uc-h1">{{ b.headline }}</h1><p class="uc-sub">{{ b.sub }}</p>
+      <div style="margin-top:24px"><a class="fp-cta" style="background:{{ demo.accent }}" href="#">{{ b.cta }} <i class="ph ph-arrow-right"></i></a><a class="fp-cta ghost" href="/showcase/{{ slug }}/observability">See the receipt</a></div>
+    </div>
+    {% if img %}<div class="uc-attr">backdrop: {{ img.id }} · <a href="{{ img.landing }}" target="_blank" rel="noopener">{{ img.creator }}</a> · {{ img.license }}</div>{% endif %}
+  </section>
+  {% else %}
+  <section class="blk {{ 'proof' if s.id == 'proof' else '' }}">
+    <span class="tag {{ 'gen' if g else '' }}">{{ 'generic — no signal' if g else 'personalized from ' ~ s.tag }}</span>
+    <h2>{{ b.headline }}</h2><p>{{ b.sub }}</p>
+    {% if s.id == 'proof' and b.chips %}<div class="chips">{% for ch in b.chips %}<span>{{ ch }}</span>{% endfor %}</div>{% endif %}
+    {% if s.id == 'offer' %}<a class="bcta" style="background:{{ demo.accent }}" href="#">{{ b.cta }} <i class="ph ph-arrow-right"></i></a>{% endif %}
+  </section>
+  {% endif %}
+  {% endfor %}
+  {% endif %}
+  <div class="fp-foot">This is exactly what an end visitor sees. <a href="/showcase/{{ slug }}/observability" style="color:var(--a,#1d4ed8);font-weight:600">See every input, decision, and source → Observability</a></div>
+  {% endif %}
+</body>
+</html>
