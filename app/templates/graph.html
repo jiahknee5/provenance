@@ -1,0 +1,26 @@
+{% extends "shell.html" %}
+{% block title %}Provenance — Agent graph{% endblock %}
+{% block crumb %}<i class="ph ph-tree-structure"></i> Agent graph{% endblock %}
+{% block content %}
+  <div class="q-pagehead"><div>
+    <span class="q-pill v" style="margin-bottom:10px"><span class="d"></span>Quiet</span>
+    <h1>Agent graph &amp; decision trees</h1>
+    <p class="q-muted" style="margin:5px 0 0"><b style="color:var(--slate)">Proves:</b> how a visitor IP is routed — classify (deterministic) → confidence-gate → tier → the agent graph. The router is deterministic, the LLM only drafts, and <b style="color:var(--slate)">the Gate disposes</b>.</p>
+  </div></div>
+
+  <div class="q-panel" style="padding:0;overflow:hidden">
+    <iframe id="graphFrame" src="/static/mockups/decision-tree.html" title="Visitor → personalization decision tree"
+            style="width:100%;border:0;display:block;min-height:2200px;background:var(--fill)"></iframe>
+  </div>
+  <p class="q-label" style="margin:10px 2px 0"><i class="ph ph-seal-check"></i> grounded in pipeline/personalization/scene.py (classifier) + creative.py (copy agent + Gate) · standalone at <a href="/static/mockups/decision-tree.html" target="_blank" rel="noopener">/static/mockups/decision-tree.html</a></p>
+
+<script>
+(function(){
+  // same-origin → size the embed to its content so it reads as one page, not a scroll-box
+  var f=document.getElementById('graphFrame');
+  function fit(){ try{ var h=f.contentWindow.document.body.scrollHeight; if(h) f.style.height=(h+24)+'px'; }catch(e){} }
+  f.addEventListener('load',function(){ fit(); setTimeout(fit,300); });
+  window.addEventListener('resize',fit);
+})();
+</script>
+{% endblock %}

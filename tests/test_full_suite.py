@@ -248,6 +248,24 @@ def test_demo_live_has_creative_controls():
     assert 'id="sel-angle"' in t and 'id="img-pick"' in t and 'id="ai-go"' in t and "Creative agents" in t
 
 
+def test_policies_page_three_tabs_grounded():
+    """The 3-tab governance surface — what the LLM may say, grounded in the real surface policy."""
+    t = c.get("/policies").text
+    assert c.get("/policies").status_code == 200
+    for tab in ('data-tab="company"', 'data-tab="product"', 'data-tab="personal"'):
+        assert tab in t
+    # Company rows come from the tenant YAML: an ad click is allude, sensitive topics are held
+    assert "Ad click" in t and "allude" in t and "hold" in t
+    # Product rows name the actual Gate lenses
+    assert "superlative" in t.lower() and "Comparative" in t
+
+
+def test_graph_page_embeds_the_exhibit():
+    r = c.get("/graph")
+    assert r.status_code == 200
+    assert "/static/mockups/decision-tree.html" in r.text and "Agent graph" in r.text
+
+
 def test_api_aicopy_gate_verified():
     d = c.get("/api/demo/aicopy?industry=energy&region=Texas&angle=peer").json()
     assert d["headline"] and isinstance(d["checks"], list) and d["blocked_example"]["ok"] is False
