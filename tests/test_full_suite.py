@@ -356,6 +356,19 @@ def test_corpus_files_are_grounded_and_served():
     assert c.get("/policies/corpus/nope-not-real").status_code == 404   # unknown slug is honest
 
 
+def test_help_aligns_with_the_app():
+    """Help is organized to mirror the nav and documents the real surfaces — incl. Policies + graph."""
+    idx = c.get("/help")
+    assert idx.status_code == 200
+    for cat in ("Core workflow", "Live demo", "Lab", "provenance"):   # nav-aligned categories
+        assert cat in idx.text
+    # the two surfaces that existed but were undocumented now have articles, pointing at real routes
+    pol = c.get("/help/surface-policies").text
+    assert "corpus" in pol.lower() and 'href="/policies"' in pol
+    gr = c.get("/help/surface-graph").text
+    assert "decision tree" in gr.lower() and 'href="/graph"' in gr
+
+
 def test_graph_page_embeds_the_exhibit():
     r = c.get("/graph")
     assert r.status_code == 200

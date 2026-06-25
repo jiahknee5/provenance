@@ -18,8 +18,9 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app.server import app, templates
 
-# fixed display order for the index; anything else falls under a trailing "More" group
-CATEGORIES = ["Start here", "Pipeline & trust", "Data & provenance", "Using the surfaces", "Methodology"]
+# fixed display order for the index — mirrors the app's navigation (Core · Trust · Live demo · Lab).
+# Anything uncategorized falls under a trailing "More" group.
+CATEGORIES = ["Start here", "Core workflow", "Trust & provenance", "Live demo", "Lab", "Methodology"]
 _CORPUS = Path(__file__).with_name("help_corpus.json")
 
 
