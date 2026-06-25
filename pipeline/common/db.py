@@ -38,6 +38,16 @@ CREATE TABLE IF NOT EXISTS cta_events (
     clicked      INTEGER,                 -- 1 click, 0 no-click, -1 unsubscribe
     ts           TEXT
 );
+CREATE TABLE IF NOT EXISTS impressions (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant       TEXT DEFAULT 'helix',    -- which tenant's bandit served this (multi-tenant isolation)
+    recipient_id TEXT,
+    segment      TEXT,
+    variant_id   TEXT,                    -- the arm pulled for a REAL /site visit
+    policy       TEXT DEFAULT 'bandit',   -- 'bandit' (Thompson) | 'control' (random holdout, for lift)
+    ts           TEXT,
+    resolved     INTEGER DEFAULT 0        -- 0 pending, 1 click (reward 1), 2 settled no-click (reward 0)
+);
 CREATE TABLE IF NOT EXISTS verdict_cache (
     cache_key    TEXT PRIMARY KEY,        -- claim_id|source_version|rules_version
     verdict_json TEXT NOT NULL
@@ -75,7 +85,7 @@ def reset_db(path: Optional[Path] = None) -> None:
     conn = connect(p)
     try:
         conn.executescript(_SCHEMA)
-        for t in ("recipients", "form_events", "cta_events", "verdict_cache", "llm_cache"):
+        for t in ("recipients", "form_events", "cta_events", "impressions", "verdict_cache", "llm_cache"):
             conn.execute(f"DELETE FROM {t};")
         conn.commit()
     finally:

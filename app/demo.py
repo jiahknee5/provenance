@@ -110,6 +110,7 @@ def demo_live(request: Request):
         "client_map": SC.client_map(), "default_industry": industry,
         "loc_detected": bool(det["region"]), "gallery": SC.GALLERY,
         "angles": CR.ANGLES, "design": design, "examples": SC.EXAMPLE_ACCOUNTS,
+        "use_cases": DS.USE_CASES,
     })
 
 

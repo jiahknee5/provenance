@@ -79,6 +79,7 @@ from app import inspector as _inspector  # noqa: E402,F401
 from app import observatory as _observatory  # noqa: E402,F401
 from app import assurance as _assurance  # noqa: E402,F401
 from app import optimizer as _optimizer  # noqa: E402,F401
+from app import persuasion as _persuasion  # noqa: E402,F401
 from app import funnel as _funnel  # noqa: E402,F401
 from app import personalize as _personalize  # noqa: E402,F401
 from app import cohort as _cohort  # noqa: E402,F401

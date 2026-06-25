@@ -164,6 +164,40 @@
     <table class="cap-tbl"><thead><tr><th>Signal</th><th>Value</th><th>Drives →</th><th>Policy</th></tr></thead><tbody id="cap-body"></tbody></table>
   </section>
 
+  <style>
+    .uc-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+    @media(max-width:760px){.uc-grid{grid-template-columns:1fr}}
+    .uc{display:flex;flex-direction:column;gap:9px}
+    .uc-top{display:flex;align-items:baseline;gap:9px}
+    .uc-co{font-weight:700;color:var(--slate,#0b1220)}
+    .uc-dom{font-size:10.5px;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.05em}
+    .uc-title{font-weight:650;color:var(--slate,#334155)}
+    .uc-blurb{font-size:12.5px;color:var(--muted,#64748b);line-height:1.5;margin:0}
+    .uc-sig{display:flex;flex-wrap:wrap;gap:5px}
+    .uc-chip{font-size:10.5px;padding:2px 8px;border-radius:999px;background:var(--chip,#f1f5f9);color:var(--slate,#475569)}
+    .uc-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:auto;flex-wrap:wrap;padding-top:3px}
+    .uc-maps{font-size:11px;color:var(--muted,#64748b)}
+    .uc-links a{font-size:12px;font-weight:600;color:var(--a,#1d4ed8);text-decoration:none;margin-left:12px;white-space:nowrap}
+  </style>
+  <section class="lv-rcpt">
+    <h2>Where apt is used</h2>
+    <p class="lead">The same engine — <b>resolve → gate → personalize → receipt → optimize</b> — applied to four go-to-market shapes. Each links to the live scenario that demonstrates it.</p>
+    <div class="uc-grid">
+      {% for u in use_cases %}
+      <div class="q-card uc">
+        <div class="uc-top"><span class="uc-co">{{ u.customer }}</span><span class="uc-dom">{{ u.domain }}</span></div>
+        <div class="uc-title">{{ u.title }}</div>
+        <p class="uc-blurb">{{ u.blurb }}</p>
+        <div class="uc-sig">{% for s in u.signals %}<span class="uc-chip">{{ s }}</span>{% endfor %}</div>
+        <div class="uc-foot">
+          <span class="uc-maps">{{ u.maps_to }}</span>
+          <span class="uc-links">{% for label, href in u.links %}<a href="{{ href }}">{{ label }} <i class="ph ph-arrow-right"></i></a>{% endfor %}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
 <script>
   var IND = {{ client_map|tojson }};
   var DET = {{ det|tojson }};

@@ -285,3 +285,60 @@ def find_variant(sid: str, vid: str) -> tuple[Scenario, Variant] | None:
         return None
     v = next((x for x in s.variants if x.id == vid), None)
     return (s, v) if v else None
+
+
+# --------------------------------------------------------------------------- #
+# USE CASES — the four go-to-market shapes the same engine serves, each tied to
+# the live scenario/surface that demonstrates it. Shown on /demo/live so a viewer
+# can see how apt applies to a named customer, not just an abstract scenario.
+# --------------------------------------------------------------------------- #
+@dataclass(frozen=True)
+class UseCase:
+    customer: str                          # example customer / shape
+    domain: str                            # their category
+    title: str
+    blurb: str
+    signals: tuple[str, ...]               # the inputs apt uses
+    maps_to: str                           # which scenario/surface backs it
+    links: tuple[tuple[str, str], ...]     # (label, href) — page routes only
+
+
+USE_CASES: tuple[UseCase, ...] = (
+    UseCase(
+        customer="gauntletai.com", domain="AI training",
+        title="Anonymous visitor → personalized hero",
+        blurb="A first-time visitor with no identity. apt resolves company, industry and region "
+              "from the IP and rewrites the hero before it paints — every line carries a receipt. "
+              "You're looking at it: change the IP above and the page follows.",
+        signals=("reverse-IP company", "industry", "region", "daypart"),
+        maps_to="Scenario A · this page",
+        links=(("New-anonymous scenario", "/demo?scenario=A"),)),
+    UseCase(
+        customer="skyfi.com", domain="satellite imagery",
+        title="Geography is the product",
+        blurb="For a geo-pinned business, apt detects the operator's region + sector and swaps the "
+              "copy and a licensed backdrop to match — and refuses to pinpoint the exact asset "
+              "(the creepiness ceiling). Pick a region + industry above to see it move.",
+        signals=("region", "industry", "licensed imagery", "surface policy"),
+        maps_to="this page · region × industry",
+        links=(("All demo scenarios", "/demo"),)),
+    UseCase(
+        customer="Known customer", domain="email / magic-link",
+        title="Close the sale, provably",
+        blurb="A known visitor gets a Gate-bounded persuasion play — authority, social proof, loss "
+              "aversion, reciprocity — that surfaces only claims it can prove. Held claims are "
+              "dropped. The receipt makes a bold closing claim safe to make.",
+        signals=("CRM history", "on-site behaviour", "persuasion principle", "Gate-checked"),
+        maps_to="Scenarios B & C · /api/persuasion/plan",
+        links=(("Existing-customer scenario", "/demo?scenario=B"),
+               ("Clicked-lead scenario", "/demo?scenario=C"))),
+    UseCase(
+        customer="Long-running A/B", domain="reinforcement learning",
+        title="The bandit that can't win by lying",
+        blurb="Over time the bandit learns which framing converts per segment from real clicks — and "
+              "can only ever pull Gate-cleared arms, so it provably can't select a lie. Its lift is "
+              "measured against a random control slice, not asserted.",
+        signals=("Thompson sampling", "real clicks", "measured lift", "truth-bounded"),
+        maps_to="/optimizer · /demo/monitor",
+        links=(("Optimizer", "/optimizer"), ("KPI control tower", "/demo/monitor"))),
+)

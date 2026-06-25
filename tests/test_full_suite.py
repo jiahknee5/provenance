@@ -312,6 +312,21 @@ def test_demo_live_has_creative_controls():
     assert 'id="sel-angle"' in t and 'id="img-pick"' in t and 'id="ai-go"' in t and "Creative agents" in t
 
 
+def test_demo_live_lists_use_cases():
+    """The four go-to-market use cases are surfaced on the live demo, each linked to the
+    scenario/surface that backs it, and every link points at a registered route."""
+    t = c.get("/demo/live").text
+    assert "Where apt is used" in t
+    for cust in ("gauntletai.com", "skyfi.com", "Known customer", "Long-running A/B"):
+        assert cust in t, f"use case missing: {cust}"
+    # the use-case section's links resolve (truncate query strings the way the app does)
+    sec = t.split("Where apt is used", 1)[1]
+    links = {h.split("?")[0] for h in re.findall(r'href="(/[^"#]*)', sec)}
+    assert {"/demo", "/optimizer", "/demo/monitor"} <= links
+    for href in links:
+        assert _is_registered(href), f"use-case link -> dead route {href}"
+
+
 def test_policies_corpus_and_claims_model():
     """Policies lead with the corpus (cite-or-don't-say) + an approved/forbidden claim list."""
     t = c.get("/policies").text
