@@ -29,19 +29,10 @@
       <a class="q-ni {{ 'on' if p.startswith('/sources') else '' }}" href="/sources"><i class="ph ph-database"></i>Sources</a>
       <div class="q-sect q-label">Showcase</div>
       <a class="q-ni {{ 'on' if p.startswith('/demo') else '' }}" href="/demo"><i class="ph ph-monitor-play"></i>Live demo</a>
-      <div class="q-sect q-label">Lab</div>
-      <a class="q-ni {{ 'on' if p.startswith('/personalize') else '' }}" href="/personalize"><i class="ph ph-magic-wand"></i>Personalize</a>
-      <a class="q-ni {{ 'on' if p.startswith('/inspector') else '' }}" href="/inspector"><i class="ph ph-magnifying-glass-plus"></i>Inspector</a>
-      <a class="q-ni {{ 'on' if p.startswith('/observatory') else '' }}" href="/observatory"><i class="ph ph-graph"></i>Observatory</a>
-      <a class="q-ni {{ 'on' if p.startswith('/funnel') else '' }}" href="/funnel"><i class="ph ph-funnel"></i>Funnel</a>
-      <a class="q-ni {{ 'on' if p.startswith('/admin') or p == '/lp' else '' }}" href="/admin/landings"><i class="ph ph-users-three"></i>Cohort</a>
-      <a class="q-ni {{ 'on' if p.startswith('/google') else '' }}" href="/google"><i class="ph ph-google-logo"></i>Google sign-in</a>
-      <a class="q-ni {{ 'on' if p == '/enrichment-catalog' else '' }}" href="/enrichment-catalog"><i class="ph ph-stack"></i>Enrichment catalog</a>
-      <a class="q-ni {{ 'on' if p == '/lead' else '' }}" href="/lead"><i class="ph ph-textbox"></i>Lead form</a>
     </nav>
     <div class="q-side-foot">
       <a class="q-ni {{ 'on' if p.startswith('/help') else '' }}" href="/help"><i class="ph ph-question"></i>Help</a>
-      <a class="q-ni" href="/demo/monitor"><i class="ph ph-gauge"></i>KPI monitor</a>
+      <a class="q-ni {{ 'on' if p.startswith('/archive') else '' }}" href="/archive"><i class="ph ph-archive"></i>Archive</a>
     </div>
   </aside>
 
@@ -74,16 +65,17 @@
       <a class="qi" data-label="sources data provenance connectors catalog" href="/sources"><i class="ph ph-database"></i>Sources<span class="hint">go</span></a>
       <a class="qi" data-label="live demo personalization clone variant receipt" href="/demo"><i class="ph ph-monitor-play"></i>Live demo<span class="hint">go</span></a>
       <a class="qi" data-label="kpi monitor control tower metrics rl" href="/demo/monitor"><i class="ph ph-gauge"></i>KPI monitor<span class="hint">go</span></a>
-      <a class="qi" data-label="lab personalize tiers creepy super-personalization" href="/personalize"><i class="ph ph-magic-wand"></i>Personalize<span class="hint">lab</span></a>
-      <a class="qi" data-label="lab inspector claim ledger regret" href="/inspector"><i class="ph ph-magnifying-glass-plus"></i>Inspector<span class="hint">lab</span></a>
-      <a class="qi" data-label="lab observatory pipeline run node graph" href="/observatory"><i class="ph ph-graph"></i>Observatory<span class="hint">lab</span></a>
-      <a class="qi" data-label="lab funnel customer journey paths" href="/funnel"><i class="ph ph-funnel"></i>Funnel<span class="hint">lab</span></a>
-      <a class="qi" data-label="lab cohort gallery seed users landings" href="/admin/landings"><i class="ph ph-users-three"></i>Cohort<span class="hint">lab</span></a>
-      <a class="qi" data-label="lab google sign-in oauth dossier" href="/google"><i class="ph ph-google-logo"></i>Google sign-in<span class="hint">lab</span></a>
-      <a class="qi" data-label="lab enrichment catalog sources cost basis" href="/enrichment-catalog"><i class="ph ph-stack"></i>Enrichment catalog<span class="hint">lab</span></a>
-      <a class="qi" data-label="lead capture form helix" href="/lead"><i class="ph ph-textbox"></i>Lead form<span class="hint">lab</span></a>
+      <a class="qi" data-label="lab personalize tiers creepy super-personalization" href="/personalize"><i class="ph ph-magic-wand"></i>Personalize<span class="hint">archive</span></a>
+      <a class="qi" data-label="lab inspector claim ledger regret" href="/inspector"><i class="ph ph-magnifying-glass-plus"></i>Inspector<span class="hint">archive</span></a>
+      <a class="qi" data-label="lab observatory pipeline run node graph" href="/observatory"><i class="ph ph-graph"></i>Observatory<span class="hint">archive</span></a>
+      <a class="qi" data-label="lab funnel customer journey paths" href="/funnel"><i class="ph ph-funnel"></i>Funnel<span class="hint">archive</span></a>
+      <a class="qi" data-label="lab cohort gallery seed users landings" href="/admin/landings"><i class="ph ph-users-three"></i>Cohort<span class="hint">archive</span></a>
+      <a class="qi" data-label="lab google sign-in oauth dossier" href="/google"><i class="ph ph-google-logo"></i>Google sign-in<span class="hint">archive</span></a>
+      <a class="qi" data-label="lab enrichment catalog sources cost basis" href="/enrichment-catalog"><i class="ph ph-stack"></i>Enrichment catalog<span class="hint">archive</span></a>
+      <a class="qi" data-label="lead capture form helix" href="/lead"><i class="ph ph-textbox"></i>Lead form<span class="hint">archive</span></a>
       <a class="qi" data-label="home landing marketing site" href="/"><i class="ph ph-house-line"></i>Home (landing)<span class="hint">site</span></a>
       <a class="qi" data-label="help docs guide how it works explain research methodology glossary" href="/help"><i class="ph ph-question"></i>Help<span class="hint">go</span></a>
+      <a class="qi" data-label="archive demo lab views superseded personalize inspector funnel cohort observatory google enrichment lead deck" href="/archive"><i class="ph ph-archive"></i>Archive<span class="hint">go</span></a>
     </div>
     <div class="qfoot"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>⏎</kbd> open</span><span><kbd>esc</kbd> close</span></div>
   </div>

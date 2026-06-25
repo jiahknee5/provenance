@@ -1,0 +1,30 @@
+{% extends "shell.html" %}
+{% block title %}Provenance — Archive{% endblock %}
+{% block crumb %}<i class="ph ph-archive"></i> Archive{% endblock %}
+{% block content %}
+  <div class="q-pagehead"><div>
+    <span class="q-pill" style="margin-bottom:10px;background:var(--fill);color:var(--muted)"><span class="d"></span>{{ count }} archived</span>
+    <h1>Archive</h1>
+    <p class="q-muted" style="margin:5px 0 0;max-width:74ch">Surfaces kept for reference but out of the core workflow. The routes still work — they&rsquo;re off the main nav to keep the app focused on the eight core surfaces. Several were folded into a core surface; the rest are focused demo exhibits.</p>
+  </div></div>
+
+  {% for g in groups %}
+  <div class="q-pagehead" style="margin:{{ '2px' if loop.first else '26px' }} 0 4px"><div>
+    <h2 style="font-size:17px">{{ g.group }}</h2>
+    <p class="q-muted" style="font-size:12.5px;margin:3px 0 0">{{ g.note }}</p>
+  </div></div>
+  <div class="q-panel" style="margin-bottom:6px"><table class="q-table">
+    <thead><tr><th style="width:20%">Surface</th><th>What it showed</th><th style="width:18%">Now in</th><th></th></tr></thead>
+    <tbody>
+      {% for it in g['items'] %}
+      <tr>
+        <td style="font-weight:500;color:var(--ink)">{{ it.name }}</td>
+        <td class="q-muted">{{ it.desc }}</td>
+        <td class="q-muted">{% if it.by %}<i class="ph ph-arrow-bend-up-right" style="font-size:11px"></i> {{ it.by }}{% else %}—{% endif %}</td>
+        <td style="text-align:right"><a class="q-btn outline" href="{{ it.route }}" style="padding:5px 11px"><i class="ph ph-arrow-up-right"></i> Open</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table></div>
+  {% endfor %}
+{% endblock %}

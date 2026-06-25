@@ -20,9 +20,9 @@ from app.main import app
 
 TPL = pathlib.Path(__file__).resolve().parents[1] / "app" / "templates"
 SHELL_PAGES = ["workspace", "records", "records_new", "agent", "assurance", "optimizer",
-               "sources", "composer", "demo", "demo_monitor", "policies", "graph"]
+               "sources", "composer", "demo", "demo_monitor", "policies", "graph", "archive", "help"]
 ROUTES = ["/workspace", "/records", "/records/new", "/agent", "/assurance", "/optimizer",
-          "/sources", "/composer", "/demo", "/demo/monitor", "/policies", "/graph"]
+          "/sources", "/composer", "/demo", "/demo/monitor", "/policies", "/graph", "/archive", "/help"]
 _HEX = re.compile(r"#[0-9a-fA-F]{6}\b")
 
 

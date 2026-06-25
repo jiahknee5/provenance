@@ -369,6 +369,21 @@ def test_help_aligns_with_the_app():
     assert "decision tree" in gr.lower() and 'href="/graph"' in gr
 
 
+def test_archive_moves_noncore_surfaces_off_the_nav():
+    """Non-core/lab surfaces are off the sidebar and collected in /archive; routes still resolve."""
+    assert c.get("/archive").status_code == 200
+    from app import archive as AR
+    lab = [it["route"] for g in AR.ARCHIVE if g["group"] != "Internal decks" for it in g["items"]]
+    assert "/personalize" in lab and "/inspector" in lab and "/enrichment-catalog" in lab
+    for rt in lab:
+        assert c.get(rt).status_code == 200, rt              # every archived surface still works
+    shell = c.get("/workspace").text
+    sidebar = shell.split("q-cmdk-scrim")[0]                 # nav markup, before the ⌘K palette
+    assert 'href="/archive"' in sidebar                      # Archive reachable from the shell
+    assert 'href="/personalize"' not in sidebar              # but the lab surfaces are off the sidebar
+    assert 'href="/inspector"' not in sidebar
+
+
 def test_graph_page_embeds_the_exhibit():
     r = c.get("/graph")
     assert r.status_code == 200
