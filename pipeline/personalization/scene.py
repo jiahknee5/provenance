@@ -251,14 +251,15 @@ def _pdl_company_by_domain(domain: str) -> dict:
     if not key or not domain:
         return {}
     cache = LLMCache()
-    ck = LLMCache.hash_input("pdl_company_web_v1", domain)
+    ck = LLMCache.hash_input("pdl_company_web_v2", domain)
 
     def fetch() -> dict:
         r = httpx.get(_PDL_COMPANY, params={"website": domain, "min_likelihood": 2},
                       headers={"X-Api-Key": key}, timeout=8)
         if r.status_code != 200:
             return {}
-        d = (r.json() or {}).get("data") or {}
+        d = r.json() or {}
+        d = d.get("data") or d        # company-enrich returns fields at the TOP level, not under data
         return {"name": d.get("display_name") or d.get("name"), "industry": d.get("industry")}
 
     try:
