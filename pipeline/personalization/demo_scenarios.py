@@ -311,8 +311,8 @@ USE_CASES: tuple[UseCase, ...] = (
               "from the IP and rewrites the hero before it paints — every line carries a receipt. "
               "You're looking at it: change the IP above and the page follows.",
         signals=("reverse-IP company", "industry", "region", "daypart"),
-        maps_to="Scenario A · this page",
-        links=(("New-anonymous scenario", "/demo?scenario=A"),)),
+        maps_to="Use case 1 · live demo site",
+        links=(("Open the live demo", "/showcase/gauntletai"),)),
     UseCase(
         customer="skyfi.com", domain="satellite imagery",
         title="Geography is the product",
@@ -320,8 +320,8 @@ USE_CASES: tuple[UseCase, ...] = (
               "copy and a licensed backdrop to match — and refuses to pinpoint the exact asset "
               "(the creepiness ceiling). Pick a region + industry above to see it move.",
         signals=("region", "industry", "licensed imagery", "surface policy"),
-        maps_to="this page · region × industry",
-        links=(("All demo scenarios", "/demo"),)),
+        maps_to="Use case 2 · live demo site",
+        links=(("Open the live demo", "/showcase/skyfi"),)),
     UseCase(
         customer="Known customer", domain="email / magic-link",
         title="Close the sale, provably",

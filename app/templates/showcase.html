@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>apt — Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz@0,16..72;1,16..72&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="/static/quiet.css">
+  <link rel="icon" type="image/svg+xml" href="/static/brand/apt-favicon.svg">
+  <style>
+    .sc-top{height:52px;display:flex;align-items:center;gap:16px;padding:0 20px;border-bottom:1px solid var(--hairline);background:var(--glass-bg,var(--surface));backdrop-filter:var(--glass-blur);position:sticky;top:0;z-index:30}
+    .sc-top .brand{display:flex;align-items:center;gap:8px;font-family:var(--font-display);font-weight:600;font-size:15px;color:var(--ink);text-decoration:none}
+    .sc-top .brand .av{width:21px;height:21px;border-radius:6px;background:var(--ink);color:var(--on-ink,#fff);display:grid;place-items:center;font-size:11px}
+    .sc-top .brand .sep{color:var(--muted);font-weight:500}
+    .sc-top a{font-size:13px;color:var(--muted);font-weight:500;text-decoration:none}
+    .sc-top a:hover{color:var(--ink)}
+    .sc-top .ucn{display:flex;gap:14px} .sc-top .ucn b{color:var(--label,#94a3b8);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+    .sc-wrap{max-width:1080px;margin:0 auto;padding:46px 26px 70px}
+    .sc-eye{font-size:13px;font-weight:600;letter-spacing:.04em;color:var(--signal,#1d4ed8);text-transform:uppercase}
+    .sc-h1{font-family:var(--font-display);font-weight:600;font-size:clamp(30px,4.4vw,46px);line-height:1.05;letter-spacing:-.02em;color:var(--ink);margin:12px 0 0;max-width:20ch}
+    .sc-lead{font-size:18px;color:var(--muted);line-height:1.5;margin:14px 0 0;max-width:60ch}
+    .sc-sech{display:flex;align-items:baseline;gap:10px;margin:42px 0 16px}
+    .sc-sech h2{font-family:var(--font-display);font-weight:600;font-size:19px;color:var(--ink);margin:0}
+    .sc-sech span{font-size:12.5px;color:var(--muted)}
+    .sc-live{display:flex;gap:18px;align-items:center;background:var(--surface);border:1px solid var(--hairline);border-radius:var(--r-card,14px);box-shadow:var(--carve);padding:20px 22px}
+    .sc-live .ic{width:46px;height:46px;border-radius:12px;background:#101319;color:#fff;display:grid;place-items:center;font-size:22px;flex:none}
+    .sc-live .t{font-weight:650;color:var(--ink);font-size:16px} .sc-live .d{font-size:13.5px;color:var(--muted);margin-top:3px;max-width:62ch}
+    .sc-live a.go{margin-left:auto;font-weight:600;color:var(--signal,#1d4ed8);font-size:14px;text-decoration:none;white-space:nowrap;flex:none}
+    .sc-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    @media(max-width:740px){.sc-grid{grid-template-columns:1fr}}
+    .uc{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--hairline);border-radius:var(--r-card,14px);box-shadow:var(--carve);overflow:hidden;text-decoration:none}
+    .uc .bar{height:5px}
+    .uc .pad{padding:18px 20px;display:flex;flex-direction:column;gap:9px;flex:1}
+    .uc .top{display:flex;align-items:center;gap:10px}
+    .uc .num{width:24px;height:24px;border-radius:7px;background:var(--ink);color:var(--on-ink,#fff);font-size:12px;font-weight:700;display:grid;place-items:center;flex:none}
+    .uc .brand{font-weight:700;color:var(--ink);font-size:16px} .uc .dom{font-size:12px;color:var(--muted)}
+    .uc .tag{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--label,#94a3b8);font-weight:600}
+    .uc .sum{font-size:13.5px;color:var(--slate,#475569);line-height:1.5}
+    .uc .go{margin-top:auto;font-weight:600;font-size:13.5px;color:var(--signal,#1d4ed8);display:flex;align-items:center;gap:6px}
+    .uc:hover{box-shadow:var(--shadow-pop,0 8px 30px rgba(2,6,23,.10))}
+  </style>
+</head>
+<body>
+  <nav class="sc-top">
+    <a class="brand" href="/showcase"><span class="av"><img src="/static/brand/apt-mark-dark.svg" alt="" width="14" height="14"></span>apt <span class="sep">· Showcase</span></a>
+    <a href="/demo/live"><i class="ph ph-monitor-play"></i> Live demo</a>
+    <span class="ucn"><b>Use cases</b>
+      {% for d in demos %}<a href="/showcase/{{ d.slug }}">{{ d.num }} · {{ d.brand }}</a>{% endfor %}
+    </span>
+    <a href="/" style="margin-left:auto"><i class="ph ph-arrow-left"></i> apt home</a>
+  </nav>
+
+  <div class="sc-wrap">
+    <div class="sc-eye">Showcase</div>
+    <h1 class="sc-h1">See apt personalize a real website, live.</h1>
+    <p class="sc-lead">The same engine — resolve → gate → personalize → receipt — running on real
+      landing pages. Start with the live demo, then open a use case to see it applied to a named
+      seller and personalized to your own company, industry, and region.</p>
+
+    <div class="sc-sech"><h2>Live demo</h2><span>the generic, by-IP firmographic landing</span></div>
+    <a class="sc-live" href="/demo/live">
+      <span class="ic"><i class="ph ph-monitor-play"></i></span>
+      <span><span class="t">Live firmographic demo</span>
+        <span class="d">Resolves your region, company and industry from your IP and personalizes
+          the hero, backdrop and copy — every line carrying its source. Override the IP to preview any visitor.</span></span>
+      <span class="go">Open <i class="ph ph-arrow-right"></i></span>
+    </a>
+
+    <div class="sc-sech"><h2>Use cases</h2><span>actual personalized demo websites</span></div>
+    <div class="sc-grid">
+      {% for d in demos %}
+      <a class="uc" href="/showcase/{{ d.slug }}">
+        <span class="bar" style="background:{{ d.accent }}"></span>
+        <span class="pad">
+          <span class="top"><span class="num">{{ d.num }}</span>
+            <span><span class="brand">{{ d.brand }}</span> <span class="dom">{{ d.domain }}</span></span></span>
+          <span class="tag">{{ d.category }}</span>
+          <span class="sum">{{ d.summary }}</span>
+          <span class="go">Open the live demo <i class="ph ph-arrow-right"></i></span>
+        </span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</body>
+</html>

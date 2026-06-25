@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ demo.brand }} — personalized live by apt</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz@0,16..72;1,16..72&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="/static/quiet.css">
+  <link rel="icon" type="image/svg+xml" href="/static/brand/apt-favicon.svg">
+  <style>
+    body{overflow-x:hidden}
+    .sc-top{height:52px;display:flex;align-items:center;gap:16px;padding:0 20px;border-bottom:1px solid var(--hairline);background:var(--glass-bg,var(--surface));backdrop-filter:var(--glass-blur);position:sticky;top:0;z-index:30}
+    .sc-top .brand{display:flex;align-items:center;gap:8px;font-family:var(--font-display);font-weight:600;font-size:15px;color:var(--ink);text-decoration:none}
+    .sc-top .brand .av{width:21px;height:21px;border-radius:6px;background:var(--ink);color:var(--on-ink,#fff);display:grid;place-items:center;font-size:11px}
+    .sc-top .brand .sep{color:var(--muted);font-weight:500}
+    .sc-top a{font-size:13px;color:var(--muted);font-weight:500;text-decoration:none} .sc-top a:hover{color:var(--ink)}
+    .sc-top a.on{color:var(--ink);font-weight:600}
+    .sc-top .ucn{display:flex;gap:14px}
+    /* hero — the seller's site, personalized */
+    .uc-hero{position:relative;min-height:70vh;display:flex;align-items:center;overflow:hidden;background:#14161a}
+    .uc-bg{position:absolute;inset:0;background-size:cover;background-position:center}
+    .uc-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,12,16,.86) 0%,rgba(10,12,16,.58) 46%,rgba(10,12,16,.22) 100%)}
+    .uc-hwrap{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:46px 28px;width:100%}
+    .uc-mark{display:flex;align-items:center;gap:10px;margin-bottom:22px}
+    .uc-mark .wm{font-family:var(--font-display);font-weight:700;font-size:20px;color:#fff;letter-spacing:-.01em}
+    .uc-pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:20px;padding:3px 11px}
+    .uc-pill .dot{width:7px;height:7px;border-radius:50%;background:#3ddc84;box-shadow:0 0 0 0 rgba(61,220,132,.6);animation:pulse 2s infinite}
+    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(61,220,132,.5)}70%{box-shadow:0 0 0 7px rgba(61,220,132,0)}100%{box-shadow:0 0 0 0 rgba(61,220,132,0)}}
+    .uc-eye{font-size:13px;font-weight:600;letter-spacing:.03em;color:#fff;opacity:.9;margin-bottom:13px}
+    .uc-h1{font-family:var(--font-display);font-weight:600;font-size:clamp(32px,5vw,54px);line-height:1.05;letter-spacing:-.02em;color:#fff;margin:0;max-width:19ch}
+    .uc-sub{font-size:18.5px;color:#fff;opacity:.92;margin:16px 0 24px;max-width:48ch;line-height:1.42}
+    .uc-cta{display:inline-flex;align-items:center;gap:8px;color:#fff;font-weight:600;font-size:14px;border-radius:10px;padding:11px 19px;text-decoration:none}
+    .uc-cta.ghost{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.28);margin-left:8px}
+    .uc-attr{position:absolute;right:12px;bottom:10px;z-index:2;font-size:10.5px;color:#fff;background:rgba(0,0,0,.45);border-radius:6px;padding:3px 9px}
+    .uc-attr a{color:#fff;text-decoration:underline}
+    /* below the fold: story + receipt */
+    .uc-body{max-width:1180px;margin:0 auto;padding:34px 28px 70px;display:grid;grid-template-columns:1.3fr 1fr;gap:26px}
+    @media(max-width:860px){.uc-body{grid-template-columns:1fr}}
+    h2.uc-sh{font-family:var(--font-display);font-weight:600;font-size:18px;color:var(--ink);margin:0 0 8px}
+    .uc-story{font-size:14.5px;color:var(--slate,#475569);line-height:1.6;margin:0 0 22px}
+    .uc-ctrls{background:var(--surface);border:1px solid var(--hairline);border-radius:12px;box-shadow:var(--carve);padding:16px 18px}
+    .uc-ctrls .lab{font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--label,#94a3b8);display:block;margin:0 0 5px}
+    .uc-ctrls .row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+    .uc-ctrls .fld{flex:1;min-width:150px}
+    .uc-ctrls select{appearance:none;width:100%;font:13px var(--font-ui);background:var(--surface);border:1px solid var(--border,#d7dde6);border-radius:9px;padding:9px 11px;color:var(--ink)}
+    .uc-ctrls button{font:600 13px var(--font-ui);color:#fff;background:var(--ink);border:0;border-radius:9px;padding:10px 16px;cursor:pointer}
+    .uc-ctrls .reset{display:inline-block;margin-top:10px;font-size:12px;color:var(--muted);text-decoration:none}
+    .uc-card{background:var(--surface);border:1px solid var(--hairline);border-radius:14px;box-shadow:var(--carve);overflow:hidden;align-self:start}
+    .uc-card .ch{display:flex;align-items:center;gap:8px;padding:12px 15px;border-bottom:1px solid var(--hairline);font-size:12.5px;font-weight:600;color:var(--ink)}
+    .uc-card .ch .mode{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:5px;padding:2px 7px}
+    .mode.det{color:var(--g,#0a8a4f);background:var(--gbg,#e7f6ee)} .mode.prev{color:var(--a,#1d4ed8);background:var(--abg,#e8efff)}
+    .rcv{display:flex;flex-direction:column;gap:2px;padding:9px 15px;border-bottom:1px solid var(--hairline)}
+    .rcv:last-child{border-bottom:0}
+    .rcv .s{font-size:13px;color:var(--ink);font-weight:500}
+    .rcv .m{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
+    .rcv .pol{font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:4px;padding:1px 6px}
+    .pol.allude{color:var(--a,#1d4ed8);background:var(--abg,#e8efff)} .pol.say{color:var(--g,#0a8a4f);background:var(--gbg,#e7f6ee)}
+    .rcv .role{color:var(--label,#94a3b8)}
+  </style>
+</head>
+<body>
+  <nav class="sc-top">
+    <a class="brand" href="/showcase"><span class="av"><img src="/static/brand/apt-mark-dark.svg" alt="" width="14" height="14"></span>apt <span class="sep">· Showcase</span></a>
+    <a href="/demo/live"><i class="ph ph-monitor-play"></i> Live demo</a>
+    <span class="ucn">{% for d in demos %}<a href="/showcase/{{ d.slug }}" class="{{ 'on' if d.slug == slug else '' }}">{{ d.num }} · {{ d.brand }}</a>{% endfor %}</span>
+    <a href="/showcase" style="margin-left:auto"><i class="ph ph-squares-four"></i> All use cases</a>
+  </nav>
+
+  <!-- THE SELLER'S SITE, personalized live -->
+  <section class="uc-hero">
+    <div class="uc-bg" style="background-image:url('{{ scene.image.url }}')"></div>
+    <div class="uc-hwrap">
+      <div class="uc-mark">
+        <span class="wm">{{ demo.brand }}</span>
+        <span class="uc-pill"><span class="dot"></span> personalized live by apt</span>
+      </div>
+      <div class="uc-eye">{{ hero.eyebrow }}</div>
+      <h1 class="uc-h1">{{ hero.headline }}</h1>
+      <p class="uc-sub">{{ hero.sub }}</p>
+      <a class="uc-cta" style="background:{{ demo.accent }}" href="#how">{{ hero.cta }} <i class="ph ph-arrow-right"></i></a>
+      <a class="uc-cta ghost" href="#how">How apt does this</a>
+    </div>
+    <div class="uc-attr">backdrop: {{ scene.image.id }} · <a href="{{ scene.image.landing }}" target="_blank" rel="noopener">{{ scene.image.creator }}</a> · {{ scene.image.license }}</div>
+  </section>
+
+  <div class="uc-body" id="how">
+    <div>
+      <h2 class="uc-sh">Use case {{ demo.num }} · {{ demo.brand }} — {{ demo.category }}</h2>
+      <p class="uc-story">{{ demo.what_apt_does }}</p>
+
+      <div class="uc-ctrls">
+        <span class="lab">Preview what any visitor would get</span>
+        <form method="get" action="/showcase/{{ slug }}">
+          <div class="row">
+            <div class="fld"><span class="lab">Industry / sector</span>
+              <select name="industry">{% for i in industries %}<option value="{{ i.key }}" {{ 'selected' if i.key == active_industry else '' }}>{{ i.label }}</option>{% endfor %}</select></div>
+            <div class="fld"><span class="lab">Region</span>
+              <select name="region"><option value="">— your region —</option>{% for s in states %}<option value="{{ s }}" {{ 'selected' if s == active_region else '' }}>{{ s }}</option>{% endfor %}</select></div>
+            <button type="submit">Personalize</button>
+          </div>
+        </form>
+        <a class="reset" href="/showcase/{{ slug }}"><i class="ph ph-arrow-counter-clockwise"></i> Reset to my IP</a>
+      </div>
+    </div>
+
+    <div class="uc-card">
+      <div class="ch"><i class="ph ph-seal-check"></i> What this page used
+        <span class="mode {{ 'det' if loc_detected else 'prev' }}">{{ 'Detected' if loc_detected else 'Preview' }}</span></div>
+      {% for r in scene.receipt %}
+      <div class="rcv">
+        <span class="s">{{ r.signal }}</span>
+        <span class="m"><span class="pol {{ r.policy }}">{{ r.policy }}</span> {{ r.source }}</span>
+        <span class="m role">{{ r.role }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</body>
+</html>
