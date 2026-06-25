@@ -27,7 +27,8 @@ class UseCaseDemo:
     default_industry: str       # what to show before anything is detected
     summary: str                # one line for the showcase index
     what_apt_does: str          # the story panel on the demo page
-    angle: dict                 # {eyebrow, headline, sub, cta} with {industry}/{region} slots
+    angle: dict                 # GATED {eyebrow, headline, sub, cta} — {industry}/{region} only (ships)
+    say_angle: dict             # UNGATED {eyebrow, headline, sub} — recites company/city (Gate blocks)
 
 
 DEMOS: dict[str, UseCaseDemo] = {
@@ -46,6 +47,12 @@ DEMOS: dict[str, UseCaseDemo] = {
             "sub": "Gauntlet trains {industry} engineers to ship with AI in 10 weeks — not 10 hires. "
                    "Built around how {region} teams actually work.",
             "cta": "See the {industry} track",
+        },
+        say_angle={
+            "eyebrow": "Resolved from your IP",
+            "headline": "{company} in {city} — one cohort from building with AI.",
+            "sub": "We pulled your company and your office from your IP. Most {industry} teams near "
+                   "{city} already train with us.",
         }),
     "skyfi": UseCaseDemo(
         slug="skyfi", num=2, brand="SkyFi", domain="skyfi.com",
@@ -62,6 +69,12 @@ DEMOS: dict[str, UseCaseDemo] = {
             "sub": "SkyFi delivers on-demand satellite imagery tuned to {industry} operators. "
                    "Point us at your area of interest; we image it.",
             "cta": "Image your {region} operations",
+        },
+        say_angle={
+            "eyebrow": "Resolved from your IP",
+            "headline": "{company} — we see your {industry} sites near {city}, {region}.",
+            "sub": "Down to the parcel. We imaged your exact area of interest already — want the same "
+                   "cadence on your operations?",
         }),
 }
 ORDER = ["gauntletai", "skyfi"]
@@ -72,12 +85,24 @@ def _fill(t: str, industry_label: str | None, region: str | None) -> str:
     return t.replace("{industry}", ind).replace("{region}", region or SC.GENERIC_REGION)
 
 
+def _fill_say(t: str, *, company, city, industry_label, region) -> str:
+    return (t.replace("{company}", company or "your company")
+             .replace("{city}", city or "your city")
+             .replace("{industry}", (industry_label or "your").lower())
+             .replace("{region}", region or SC.GENERIC_REGION))
+
+
 def build(slug: str, *, region: str | None, industry: str | None,
           company: str | None = None, city: str | None = None, detected: bool = False) -> dict:
     """A personalized scene for this use case: real image + provenance receipt from the scene
-    engine, with the seller's copy overridden + personalized to the (industry × region)."""
+    engine, with the seller's copy overridden + personalized to the (industry × region). Returns
+    BOTH the gated version (ships) and the ungated version (recites company/city — the Gate blocks)."""
     d = DEMOS[slug]
-    scene = SC.build_scene(region, industry or d.default_industry, detected=detected,
-                           company=company, city=city)
-    hero = {k: _fill(v, scene["industry_label"], region) for k, v in d.angle.items()}
-    return {"demo": d, "scene": scene, "hero": hero}
+    ind_key = industry or d.default_industry
+    gated = SC.build_scene(region, ind_key, detected=detected, company=company, city=city, policy="allude")
+    ungated = SC.build_scene(region, ind_key, detected=detected, company=company, city=city, policy="say")
+    ind_label = gated["industry_label"]
+    hero = {k: _fill(v, ind_label, region) for k, v in d.angle.items()}
+    hero_say = {k: _fill_say(v, company=company, city=city, industry_label=ind_label, region=region)
+                for k, v in d.say_angle.items()}
+    return {"demo": d, "scene": gated, "scene_say": ungated, "hero": hero, "hero_say": hero_say}

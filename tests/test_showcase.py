@@ -1,8 +1,8 @@
-"""Showcase — the live-demo gallery and the two actual personalized use-case sites.
+"""Showcase — the gallery + each use case's two sister pages (Production, Observability).
 
-Proves: the index lists Live demo + the use cases; each use case renders a real, branded,
-personalized landing with a provenance receipt; overrides re-personalize the hero; the
-licensed backdrop is real; unknown slugs 404.
+Production shows the gated version (ships) vs the ungated version (blocked) with a short
+description of each. Observability shows, like the live demo, every input, the routing +
+copy/Gate decisions, the provenance receipt, and the full trace.
 """
 from __future__ import annotations
 
@@ -20,40 +20,48 @@ def test_showcase_index_lists_live_demo_and_use_cases():
     assert "Showcase" in t and "Live demo" in t and "Use cases" in t
     assert 'href="/demo/live"' in t
     for slug in SH.ORDER:
-        assert f'href="/showcase/{slug}"' in t, f"missing card link for {slug}"
+        assert f'href="/showcase/{slug}"' in t
 
 
-def test_use_case_demos_render_branded_and_personalized():
+def test_production_shows_gated_and_ungated_with_descriptions():
     for slug in SH.ORDER:
         d = SH.DEMOS[slug]
-        r = c.get(f"/showcase/{slug}")
-        assert r.status_code == 200
-        t = r.text
-        assert d.brand in t                              # branded as the seller, not "apt"
-        assert "personalized live by apt" in t           # ...but disclosed as an apt demo
-        assert f"Use case {d.num}" in t
-        assert "What this page used" in t                # the provenance receipt rail
-        assert "Reset to my IP" in t                     # the override controls
+        t = c.get(f"/showcase/{slug}").text          # /showcase/{slug} defaults to Production
+        assert c.get(f"/showcase/{slug}").status_code == 200
+        assert d.brand in t and f"Use case {d.num}" in t
+        assert "Gated · ships" in t and "Ungated · blocked" in t      # both versions...
+        assert "What ships" in t and "What the Gate blocks" in t      # ...each with a description
+        # the two sister-page tabs are present
+        assert f'href="/showcase/{slug}/production"' in t
+        assert f'href="/showcase/{slug}/observability"' in t
 
 
-def test_overrides_repersonalize_the_hero():
-    t = c.get("/showcase/skyfi", params={"industry": "mining", "region": "Texas"}).text
-    assert "mining" in t.lower() and "Texas" in t
-    t2 = c.get("/showcase/gauntletai", params={"industry": "healthcare", "region": "Florida"}).text
-    assert "healthcare" in t2.lower() and "Florida" in t2
+def test_observability_shows_inputs_decisions_provenance_trace():
+    for slug in SH.ORDER:
+        t = c.get(f"/showcase/{slug}/observability").text
+        assert c.get(f"/showcase/{slug}/observability").status_code == 200
+        for panel in ("Inputs", "Routing decision", "Copy agent", "Provenance", "Trace"):
+            assert panel in t, f"{slug} observability missing panel: {panel}"
+        assert "ip-api.com" in t                       # a real provenance source
+        assert "gated · ships" in t                    # the page being observed is the gated one
+        # the Gate's verdicts are shown, including a blocked line
+        assert "blocked" in t and "ships" in t
 
 
-def test_receipt_is_sourced_and_backdrop_is_really_licensed():
-    t = c.get("/showcase/skyfi", params={"industry": "mining", "region": "Arizona"}).text
-    assert "ip-api.com" in t                             # a real provenance source in the receipt
-    assert "backdrop:" in t                              # the licensed-image attribution row
-    assert ("staticflickr" in t or "wikimedia" in t)     # the actual CC photo, not a placeholder
+def test_overrides_repersonalize_both_views():
+    p = c.get("/showcase/skyfi/production", params={"industry": "mining", "region": "Texas"}).text
+    assert "Texas" in p and "mining" in p.lower()
+    o = c.get("/showcase/skyfi/observability", params={"industry": "mining", "region": "Texas"}).text
+    assert "Texas" in o and ("Mining & metals" in o or "mining" in o.lower())
 
 
 def test_unknown_use_case_404():
     assert c.get("/showcase/nope").status_code == 404
+    assert c.get("/showcase/nope/observability").status_code == 404
 
 
-def test_all_showcase_routes_resolve():
-    for path in ("/showcase", "/showcase/gauntletai", "/showcase/skyfi", "/demo/live"):
-        assert c.get(path).status_code == 200, path
+def test_all_sister_routes_resolve():
+    for slug in SH.ORDER:
+        for suffix in ("", "/production", "/observability"):
+            assert c.get(f"/showcase/{slug}{suffix}").status_code == 200, f"/showcase/{slug}{suffix}"
+    assert c.get("/demo/live").status_code == 200
