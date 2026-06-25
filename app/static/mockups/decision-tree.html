@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Provenance — visitor → personalization decision tree</title>
+<style>
+  :root{
+    --canvas:#ffffff; --ink:#14171a; --muted:#6b7280; --hair:#e6e8eb; --fill:#f6f7f9;
+    --signal:#3b5bdb; --signal-bg:#eef1fc;
+    --say:#15803d; --say-bg:#eaf5ec; --allude:#b45309; --allude-bg:#fbf1e3; --hold:#b91c1c; --hold-bg:#fbeaea;
+    --det:#0f172a; --det-bg:#eef0f3; --llm:#6d28d9; --llm-bg:#f1ebfb;
+    --r:10px; --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#eceef1;color:var(--ink);font-family:var(--sans);line-height:1.45;
+       -webkit-font-smoothing:antialiased;padding:34px 18px}
+  .sheet{max-width:1180px;margin:0 auto;background:var(--canvas);border:1px solid var(--hair);
+         border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 30px rgba(0,0,0,.05);overflow:hidden}
+  header{padding:26px 32px 20px;border-bottom:1px solid var(--hair)}
+  .kicker{font:600 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--signal)}
+  h1{font-size:23px;line-height:1.25;margin:11px 0 0;letter-spacing:-.01em;max-width:62ch}
+  h1 b{color:var(--signal)}
+  .sub{color:var(--muted);font-size:13.5px;margin-top:8px;max-width:78ch}
+  section{padding:24px 32px;border-bottom:1px solid var(--hair)}
+  section:last-child{border-bottom:0}
+  .ex{font:600 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 16px}
+  .ex span{color:var(--ink)}
+
+  /* ---- decision tree (nested guide-rails) ---- */
+  .tree{font-size:13px}
+  .node{position:relative;padding:9px 13px;border:1px solid var(--hair);border-radius:var(--r);
+        background:#fff;margin:7px 0;display:flex;gap:11px;align-items:flex-start}
+  .node .q{font-weight:600}
+  .node .meta{color:var(--muted);font-size:12px}
+  .node code{font-family:var(--mono);font-size:11.5px;background:var(--fill);padding:1px 5px;border-radius:5px;color:#334}
+  .kids{margin-left:22px;padding-left:18px;border-left:2px solid var(--hair)}
+  .branch{position:relative}
+  .branch::before{content:"";position:absolute;left:-18px;top:23px;width:16px;height:2px;background:var(--hair)}
+  .lbl{display:inline-block;font:600 10.5px/1 var(--mono);letter-spacing:.04em;padding:3px 7px;border-radius:6px;
+       margin:8px 0 -2px;background:var(--fill);color:var(--muted);text-transform:uppercase}
+  .lbl.yes{background:var(--say-bg);color:var(--say)} .lbl.no{background:var(--hold-bg);color:var(--hold)}
+  .pill{display:inline-flex;align-items:center;gap:5px;font:600 10.5px/1 var(--mono);
+        padding:3px 8px;border-radius:20px;white-space:nowrap}
+  .t0{background:var(--det-bg);color:var(--det)} .t1{background:var(--allude-bg);color:var(--allude)}
+  .t2{background:var(--signal-bg);color:var(--signal)} .t3{background:var(--llm-bg);color:var(--llm)}
+  .leaf{border-left:3px solid var(--hair)}
+  .leaf.l0{border-left-color:#9aa3af} .leaf.l1{border-left-color:var(--allude)}
+  .leaf.l2{border-left-color:var(--signal)} .leaf.l3{border-left-color:var(--llm)}
+  .leaf .out{font-size:12px;color:var(--muted);margin-top:3px}
+  .flag{font-family:var(--mono);font-size:11px;color:var(--hold)}
+  .note{font-size:12px;color:var(--muted);margin-top:5px;padding-left:2px}
+  .note b{color:var(--ink)}
+
+  /* ---- confidence ladder ---- */
+  .ladder{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .rung{border:1px solid var(--hair);border-radius:var(--r);padding:14px;background:#fff}
+  .rung h4{margin:0 0 4px;font-size:13px;display:flex;align-items:center;gap:8px}
+  .rung .when{font-size:12px;color:var(--muted);min-height:46px}
+  .rung .does{font-size:12.5px;margin-top:9px;padding-top:9px;border-top:1px dashed var(--hair)}
+  .tag{font:600 10px/1 var(--mono);padding:3px 7px;border-radius:6px;text-transform:uppercase}
+  .tag.say{background:var(--say-bg);color:var(--say)} .tag.allude{background:var(--allude-bg);color:var(--allude)}
+  .tag.hold{background:var(--hold-bg);color:var(--hold)}
+
+  /* ---- agent graph ---- */
+  .graph{display:flex;flex-wrap:wrap;align-items:stretch;gap:0}
+  .gnode{flex:1 1 120px;min-width:120px;border:1px solid var(--hair);border-radius:var(--r);padding:11px 12px;
+         background:#fff;position:relative;margin:0 16px 14px 0}
+  .gnode:after{content:"→";position:absolute;right:-15px;top:50%;transform:translateY(-50%);color:#b6bcc4;font-size:15px}
+  .gnode.last:after{content:""}
+  .gnode .gt{font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:7px}
+  .gnode .gd{font-size:11.5px;color:var(--muted);margin-top:4px}
+  .chip{font:600 9.5px/1 var(--mono);padding:3px 6px;border-radius:5px;text-transform:uppercase;letter-spacing:.03em}
+  .chip.det{background:var(--det-bg);color:var(--det)} .chip.llm{background:var(--llm-bg);color:var(--llm)}
+  .chip.gate{background:var(--hold-bg);color:var(--hold)}
+  .gnode.gate{border-color:var(--hold);box-shadow:0 0 0 1px var(--hold) inset}
+  .feedback{font-size:12px;color:var(--muted);margin-top:2px}
+  .feedback code{font-family:var(--mono);font-size:11px;background:var(--fill);padding:1px 5px;border-radius:5px}
+
+  /* ---- legend / footer ---- */
+  .legend{display:flex;flex-wrap:wrap;gap:18px;font-size:12px;color:var(--muted);margin-top:4px}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .sw{width:13px;height:13px;border-radius:4px;display:inline-block}
+  footer{padding:18px 32px;background:var(--fill);font-size:12px;color:var(--muted)}
+  footer b{color:var(--ink)}
+  .caveat{border-left:3px solid var(--hold);background:var(--hold-bg);padding:10px 14px;border-radius:0 8px 8px 0;
+          color:#7a1d1d;font-size:13px;margin-top:6px}
+  @media(max-width:740px){.ladder{grid-template-columns:1fr}.gnode:after{content:"↓";right:auto;left:50%;top:auto;bottom:-15px;transform:translateX(-50%)}}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <header>
+    <div class="kicker">Provenance · personalization router</div>
+    <h1>The <b>identity key you can prove</b> — not a guess — gates what you may personalize on. The router is deterministic; the LLM only drafts; <b>the Gate disposes</b>.</h1>
+    <p class="sub">Every visitor IP runs through one tree: classify the network from real ip-api flags → score per-field confidence → route to a personalization tier. A specific industry is asserted <i>only</i> at high confidence; everything else falls back to a true neutral default. The same tree decides whether a B2B visitor earns competitor-aware copy — and the Gate verifies every comparative claim before it ships.</p>
+  </header>
+
+  <!-- ============ DECISION TREE ============ -->
+  <section>
+    <p class="ex">Exhibit 1 — <span>The decision tree: visitor IP → personalization tier</span></p>
+    <div class="tree">
+
+      <div class="node"><span class="q">Reverse-IP the visitor</span>
+        <span class="meta">· <code>reverse_ip()</code> → ip-api.com (cached): geo + org + <code>mobile/proxy/hosting</code> flags</span></div>
+
+      <div class="kids">
+        <div class="lbl no">IP private / loopback / unreachable</div>
+        <div class="branch"><div class="node leaf l0">
+          <span class="pill t0">TIER 0 · NEUTRAL</span>
+          <span><b>Product-thesis landing</b>, brand wash.<div class="out">No signal → assert nothing. <code>General</code> default.</div></span>
+        </div></div>
+
+        <div class="lbl yes">IP resolves → classify the network (priority order, as in code)</div>
+
+        <div class="branch"><div class="node"><span class="q">① <code>mobile</code> = true?</span>
+          <span class="meta">cellular gateway — geo coarse, no company</span></div>
+          <div class="kids"><div class="branch"><div class="node leaf l1">
+            <span class="pill t1">TIER 1 · LOCATION-AWARE NEUTRAL</span>
+            <span>Region framing only. <span class="flag">company void</span><div class="out">Carrier IP geolocates to the gateway metro — treat location as low-precision.</div></span>
+          </div></div></div>
+        </div>
+
+        <div class="branch"><div class="node"><span class="q">② <code>proxy</code> = true?</span>
+          <span class="meta">VPN / proxy / Tor — the IP describes the exit node, not the visitor</span></div>
+          <div class="kids">
+            <div class="lbl">…but does <code>org</code> still look corporate? (not a VPN-provider / hosting / ISP name)</div>
+            <div class="branch"><div class="node leaf l2">
+              <span class="pill t2">TIER 2 · FIRMOGRAPHIC <span style="opacity:.7">(med-conf)</span></span>
+              <span><b>Corporate-VPN exception.</b> Employee on the company VPN → exits via the company netblock = a real B2B signal.<div class="out">Personalize, but cap industry confidence at MEDIUM (the netblock, not a clean office IP).</div></span>
+            </div></div>
+            <div class="branch"><div class="node leaf l0">
+              <span class="pill t0">TIER 0/1 · NEUTRAL + BEHAVIORAL</span>
+              <span>Commercial VPN → the IP signal is <b>void</b>. There is no other firmographic variable hiding in it.<div class="out">Pivot to a different signal <i>class</i>: referrer / UTM / landing-path, language, or first-party (known cookie/email). Never fabricate firmographics.</div></span>
+            </div></div>
+          </div>
+        </div>
+
+        <div class="branch"><div class="node"><span class="q">③ <code>hosting</code> = true?</span>
+          <span class="meta">datacenter / cloud — bot, scraper, or VPN exit</span></div>
+          <div class="kids"><div class="branch"><div class="node leaf l0">
+            <span class="pill t0">TIER 0 · NEUTRAL</span>
+            <span>Not a human office IP.<div class="out">Serve neutral; this is also where bot traffic lands — don't spend enrichment on it.</div></span>
+          </div></div></div>
+        </div>
+
+        <div class="branch"><div class="node"><span class="q">④ <code>is_isp</code> — consumer ISP / carrier name?</span>
+          <span class="meta">name heuristic (AT&amp;T, Comcast…) — ip-api's flags miss residential</span></div>
+          <div class="kids"><div class="branch"><div class="node leaf l1">
+            <span class="pill t1">TIER 1 · LOCATION-AWARE NEUTRAL</span>
+            <span>The org is the <b>provider</b>, not the visitor's company. <span class="flag">company void</span><div class="out">Location generally OK → region-aware copy, <b>neutral backdrop, no industry/company claim</b>. ← this is the AT&amp;T / Tailscale-egress case.</div></span>
+          </div></div></div>
+        </div>
+
+        <div class="lbl yes">⑤ none of the above → <code>is_corporate</code> = true · clean corporate office IP</div>
+        <div class="branch"><div class="node"><span class="q">Company resolved → <code>PDL company-enrich</code> → industry</span>
+          <span class="meta">does PDL return an industry that maps to a known sector?</span></div>
+          <div class="kids">
+            <div class="lbl yes">industry resolved · high confidence</div>
+            <div class="branch"><div class="node leaf l2">
+              <span class="pill t2">TIER 2 · FIRMOGRAPHIC</span>
+              <span>Industry-tailored copy + curated backdrop, region-aware. <b>Allude</b> — tailored, never recites "we detected you".<div class="out">+ if a competitive category is known → escalates to Tier 3 ↓</div></span>
+            </div></div>
+            <div class="branch"><div class="node leaf l3">
+              <span class="pill t3">TIER 3 · FIRMOGRAPHIC + COMPETITIVE</span>
+              <span><b>The gauntletai.com case.</b> Competitor-research sub-agent → a brief of <i>provable</i> differentiators for the visitor's category → copy agent drafts the comparative angle → <b>the Gate verifies every comparative claim</b> → unproven lines fall back to category value.<div class="out">Allude the edge, don't name the enemy. No "your current tool can't…" — that recites an inferred vendor.</div></span>
+            </div></div>
+            <div class="lbl no">company resolved, but PDL industry sparse / no bucket match</div>
+            <div class="branch"><div class="node leaf l0">
+              <span class="pill t0">TIER 1 · NEUTRAL (company-aware)</span>
+              <span>Hold the industry specialization — don't guess a sector.<div class="out">Region + company-shape tone only; backdrop stays neutral. Falls to <code>General</code> for industry.</div></span>
+            </div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="legend" style="margin-top:18px">
+      <span><i class="sw" style="background:#9aa3af"></i> Tier 0 — neutral (no provable signal)</span>
+      <span><i class="sw" style="background:var(--allude)"></i> Tier 1 — location-aware neutral</span>
+      <span><i class="sw" style="background:var(--signal)"></i> Tier 2 — firmographic (B2B)</span>
+      <span><i class="sw" style="background:var(--llm)"></i> Tier 3 — + competitive (LLM + Gate)</span>
+    </div>
+  </section>
+
+  <!-- ============ CONFIDENCE LADDER ============ -->
+  <section>
+    <p class="ex">Exhibit 2 — <span>Industry needs a confidence gate — assertion is earned, not defaulted</span></p>
+    <div class="ladder">
+      <div class="rung">
+        <h4><span class="tag allude">ALLUDE</span> HIGH</h4>
+        <div class="when">Clean corporate IP · PDL returns an industry · it maps to a known sector (optionally corroborated by the company domain).</div>
+        <div class="does"><b>Ship industry-tailored</b> copy + backdrop. Still <i>allude</i> — shape to the sector, never recite that we detected it.</div>
+      </div>
+      <div class="rung">
+        <h4><span class="tag allude">ALLUDE</span> MEDIUM</h4>
+        <div class="when">Company resolved but industry is sparse/ambiguous, or a corporate-VPN netblock (not a clean office IP).</div>
+        <div class="does"><b>Shape tone only</b> — region + company-aware framing, <b>neutral backdrop</b>. Hold the sector claim.</div>
+      </div>
+      <div class="rung">
+        <h4><span class="tag hold">HOLD</span> LOW / UNKNOWN</h4>
+        <div class="when">No company resolved (consumer ISP, mobile, VPN, bot) — nothing to attribute an industry to.</div>
+        <div class="does"><b>Never assert a sector.</b> Fall to the <code>General</code> neutral default. ← the fix for "why is my industry <i>mining</i>?"</div>
+      </div>
+    </div>
+    <p class="note" style="margin-top:14px"><b>Why this matters:</b> location is ~city-accurate on fixed-line broadband, so we treat it as generally correct (and still <i>allude</i>, never recite). Industry is a second-order inference (IP→company→PDL→sector) — each hop loses confidence, so it must clear a bar before it changes the page. A confident-looking sector on a guess is the failure mode we just removed.</p>
+  </section>
+
+  <!-- ============ AGENT GRAPH ============ -->
+  <section>
+    <p class="ex">Exhibit 3 — <span>Where it lives in the agent graph: a deterministic router, LLM leaves, one Gate</span></p>
+    <div class="graph">
+      <div class="gnode"><div class="gt"><span class="chip det">det</span> Classify</div><div class="gd">ip-api flags → network type (the 6-way fork above).</div></div>
+      <div class="gnode"><div class="gt"><span class="chip det">det</span> Score</div><div class="gd">Per-field confidence: location / company / industry. Optional LLM corroboration only.</div></div>
+      <div class="gnode"><div class="gt"><span class="chip det">det</span> Route</div><div class="gd">→ Tier 0 · 1 · 2 · 3. Pure, reproducible, itself provable.</div></div>
+      <div class="gnode"><div class="gt"><span class="chip llm">llm</span> Research</div><div class="gd">Tier 3 only — competitor brief: provable category differentiators.</div></div>
+      <div class="gnode"><div class="gt"><span class="chip llm">llm</span> Copy agent</div><div class="gd">Proposes headline/sub/CTA from the brief. Claude Haiku. Inert offline.</div></div>
+      <div class="gnode gate"><div class="gt"><span class="chip gate">gate</span> The Gate</div><div class="gd"><b>Disposes.</b> Verifies every claim vs source + surface policy. Comparative claims = highest scrutiny.</div></div>
+      <div class="gnode"><div class="gt"><span class="chip det">det</span> Design</div><div class="gd">Backdrop / accent / tone from firmographic + confidence.</div></div>
+      <div class="gnode last"><div class="gt"><span class="chip det">det</span> Render</div><div class="gd">+ provenance receipt: every line's source, basis, policy.</div></div>
+    </div>
+    <p class="feedback">↩ <b>Fallback path:</b> any line the Gate rejects → the deterministic angle template ships instead (<code>angle_copy</code>). The page never blocks; it degrades to what's provable. <b>So yes — this tree is part of the agent graph: it's the router in front of the existing propose→dispose flow.</b> Only two nodes are LLM (Research, Copy); the spine is deterministic, and the Gate stays the single point of disposition.</p>
+    <div class="legend" style="margin-top:14px">
+      <span><i class="sw" style="background:var(--det-bg);border:1px solid #cdd2da"></i> deterministic — provable, cheap, reproducible</span>
+      <span><i class="sw" style="background:var(--llm-bg);border:1px solid #d8c9f2"></i> LLM agent — proposes only</span>
+      <span><i class="sw" style="background:var(--hold-bg);border:1px solid #eecccc"></i> the Gate — disposes</span>
+    </div>
+  </section>
+
+  <footer>
+    <div class="caveat"><b>Can ≠ should.</b> Every signal here carries a say / allude / hold surface policy. Geo + firmographic are <b>allude</b> (involuntary — shape, don't recite). "Creepy mode" is this exact same data with the policy turned off — reciting the company, the precise location, or an inferred competitor. The Gate makes that arm <b>provably never selected</b>, not merely discouraged.</div>
+    <p style="margin:12px 0 0">Grounded in <b>pipeline/personalization/scene.py</b> (<code>reverse_ip</code>, <code>resolve_ip</code> network classification, PDL enrich) and <b>creative.py</b> (copy agent + Gate). Tiers 0–1 ship today; the corporate-VPN check, confidence scoring, and Tier 3 competitor agent are the proposed additions. Real fields only — no fabricated provider claims.</p>
+  </footer>
+</div>
+</body>
+</html>
