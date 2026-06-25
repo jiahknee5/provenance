@@ -32,6 +32,9 @@ from pipeline.common.cache import LLMCache
 GALLERY = json.loads((pathlib.Path(__file__).with_name("scene_images.json")).read_text())
 _IMG = {k: v[0] for k, v in GALLERY.items()}    # primary image per industry (back-compat)
 
+# curated example accounts — real corporate IPs verified against the live resolver (ip-api + PDL)
+EXAMPLE_ACCOUNTS = json.loads((pathlib.Path(__file__).with_name("example_accounts.json")).read_text())
+
 
 def image_for(industry_key: str, idx: int = 0) -> dict:
     imgs = GALLERY.get(industry_key) or GALLERY.get(DEFAULT_INDUSTRY) or [next(iter(_IMG.values()))]
@@ -104,6 +107,14 @@ _IP_FIELDS = ("status,country,countryCode,region,regionName,city,zip,lat,lon,tim
               "isp,org,as,asname,mobile,proxy,hosting,query")
 # REAL company → industry: PDL company-enrich (inert without PDL_API_KEY).
 _PDL_COMPANY = "https://api.peopledatalabs.com/v5/company/enrich"
+# REAL email → person (title / seniority / company): PDL person-enrich. The first-party lane —
+# works for ANY company size (a startup's domain IDs the company; reverse-IP can't).
+_PDL_PERSON = "https://api.peopledatalabs.com/v5/person/enrich"
+# personal mailboxes: a work email IDs a company, these don't.
+_CONSUMER_DOMAINS = {"gmail.com", "googlemail.com", "yahoo.com", "ymail.com", "outlook.com",
+                     "hotmail.com", "live.com", "msn.com", "icloud.com", "me.com", "mac.com",
+                     "aol.com", "proton.me", "protonmail.com", "gmx.com", "mail.com", "yandex.com",
+                     "zoho.com", "fastmail.com", "hey.com", "pm.me"}
 
 # map a free-text industry (from PDL's taxonomy) → our nearest sector bucket
 _IND_HINTS = {
@@ -231,6 +242,121 @@ def _pdl_company_industry(name: str) -> str | None:
         return (cache.get_or_compute(ck, fetch) or {}).get("industry")
     except Exception:
         return None
+
+
+def _pdl_company_by_domain(domain: str) -> dict:
+    """REAL domain → company name + industry via PDL company-enrich (website=). Inert/cached."""
+    key = os.environ.get("PDL_API_KEY", "").strip()
+    domain = (domain or "").strip().lower()
+    if not key or not domain:
+        return {}
+    cache = LLMCache()
+    ck = LLMCache.hash_input("pdl_company_web_v1", domain)
+
+    def fetch() -> dict:
+        r = httpx.get(_PDL_COMPANY, params={"website": domain, "min_likelihood": 2},
+                      headers={"X-Api-Key": key}, timeout=8)
+        if r.status_code != 200:
+            return {}
+        d = (r.json() or {}).get("data") or {}
+        return {"name": d.get("display_name") or d.get("name"), "industry": d.get("industry")}
+
+    try:
+        return cache.get_or_compute(ck, fetch) or {}
+    except Exception:
+        return {}
+
+
+def _pdl_person(email: str) -> dict:
+    """REAL email → person (title / seniority / company / industry) via PDL person-enrich."""
+    key = os.environ.get("PDL_API_KEY", "").strip()
+    email = (email or "").strip().lower()
+    if not key or not email:
+        return {}
+    cache = LLMCache()
+    ck = LLMCache.hash_input("pdl_person_v1", email)
+
+    def fetch() -> dict:
+        r = httpx.get(_PDL_PERSON, params={"email": email, "min_likelihood": 4},
+                      headers={"X-Api-Key": key}, timeout=8)
+        if r.status_code != 200:
+            return {}
+        d = (r.json() or {}).get("data") or {}
+        levels = d.get("job_title_levels") or []
+        return {"name": d.get("full_name"), "title": d.get("job_title"),
+                "seniority": (levels[0] if levels else None),
+                "company": d.get("job_company_name"), "industry": d.get("job_company_industry")}
+
+    try:
+        return cache.get_or_compute(ck, fetch) or {}
+    except Exception:
+        return {}
+
+
+def _company_from_domain(domain: str) -> str:
+    """Honest fallback when PDL doesn't know a domain: the domain IS the identifier."""
+    core = (domain or "").split(".")[0].replace("-", " ").strip()
+    return core.title() if core else domain
+
+
+def resolve_email(email: str) -> dict:
+    """FIRST-PARTY identity key: a work email → company (domain) + person (PDL). Unlike the IP
+    lane, these facts are `say` — the visitor told us directly, so we may recite them. Works for
+    ANY company size: a startup's domain identifies the company even when reverse-IP only sees a CDN."""
+    email = (email or "").strip()
+    dom = email.split("@")[-1].lower() if "@" in email else ""
+    bad = ("@" not in email) or ("." not in dom)
+    cap: list[dict] = []
+
+    def add(label, value, drives, policy, conf=None):
+        cap.append({"label": label, "value": value if value not in (None, "") else "—",
+                    "drives": drives, "policy": policy, "group": "email", "conf": conf})
+
+    if bad:
+        return {"email": email, "company": None, "industry": None, "tier": 0, "tier_label": TIER_LABELS[0],
+                "region": None, "city": None, "resolved_company": False, "resolved_industry": False,
+                "confidence": {"location": "none", "company": "none", "industry": "none"},
+                "competitive_eligible": False, "captured": [], "person": {},
+                "reason": "enter a work email (name@company.com)"}
+    if dom in _CONSUMER_DOMAINS:
+        add("Email", email, "first-party identity", "say", "high")
+        add("Domain", dom, "→ company", "say", "high")
+        return {"email": email, "company": None, "industry": None, "tier": 0, "tier_label": TIER_LABELS[0],
+                "region": None, "city": None, "resolved_company": False, "resolved_industry": False,
+                "confidence": {"location": "none", "company": "none", "industry": "none"},
+                "competitive_eligible": False, "captured": cap, "person": {},
+                "reason": f"{dom} is a personal mailbox — no company. A work email IDs the company."}
+
+    person = _pdl_person(email)
+    co = _pdl_company_by_domain(dom)
+    company = person.get("company") or co.get("name") or _company_from_domain(dom)
+    industry_raw = person.get("industry") or co.get("industry")
+    industry = _industry_to_bucket(industry_raw)
+    title, seniority, name = person.get("title"), person.get("seniority"), person.get("name")
+    # first-party email → company is HIGH confidence (self-declared). Tier 2 once we have a sector.
+    conf = {"location": "none", "company": "high",
+            "industry": "high" if industry else ("low" if company else "none")}
+    tier = 2 if (company and industry) else (1 if company else 0)
+    ind_label = (BY_KEY[industry]["label"] + f" (NAICS {BY_KEY[industry]['naics']})") if industry else (industry_raw or None)
+
+    add("Email", email, "first-party identity", "say", "high")
+    add("Domain", dom, "→ company", "say", "high")
+    add("Company", company, "→ industry", "say", "high")
+    if name:
+        add("Person", name, "personalization", "say", "high")
+    if title:
+        add("Title", title + (f" · {seniority}" if seniority else ""), "role-aware copy", "say", "high")
+    add("Industry", ind_label, "copy template + backdrop", "say", conf["industry"])
+    add("Personalization tier", f"{tier} · {TIER_LABELS[tier]}", "which copy path runs", "observed")
+
+    reason = ("" if industry else
+              (f"{company} resolved from {dom}, but no industry came back — neutral copy, no sector guessed"
+               if company else f"couldn't resolve {dom}"))
+    return {"email": email, "company": company, "industry": industry, "industry_raw": industry_raw,
+            "region": None, "city": None, "tier": tier, "tier_label": TIER_LABELS[tier],
+            "resolved_company": bool(company), "resolved_industry": bool(industry),
+            "confidence": conf, "competitive_eligible": tier == 2, "captured": cap,
+            "person": {"name": name, "title": title, "seniority": seniority}, "reason": reason}
 
 
 def _daypart(tz: str | None) -> str | None:

@@ -277,6 +277,19 @@ def test_resolve_ip_is_honest_offline():
     assert d["company"] is None and d["captured"] == [] and "local" in d["reason"].lower()
 
 
+def test_resolve_email_first_party_lane():
+    """The email lane IDs any company (a startup's domain), and its facts are SAY (first-party)."""
+    from pipeline.personalization import scene as SC
+    bad = SC.resolve_email("not-an-email")
+    assert bad["company"] is None and bad["tier"] == 0 and "work email" in bad["reason"]
+    consumer = SC.resolve_email("jordan@gmail.com")          # personal mailbox → no company
+    assert consumer["company"] is None and "personal mailbox" in consumer["reason"]
+    # a work email at a startup reverse-IP can't see — offline, company falls back to the domain
+    d = SC.resolve_email("jordan@gauntletai.com")
+    assert d["company"] and d["tier"] >= 1 and d["confidence"]["company"] == "high"
+    assert d["captured"] and all(r["policy"] == "say" for r in d["captured"] if r["label"] != "Personalization tier")
+
+
 def test_api_demo_scene_preview():
     d = c.get("/api/demo/scene?region=Texas&industry=energy").json()
     assert d["industry"] == "energy" and "Texas" in d["sub"]

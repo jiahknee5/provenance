@@ -107,8 +107,8 @@
   <aside class="lv-badge">
     <div class="bh"><i class="ph ph-globe-hemisphere-west"></i> What this IP tells us
       <span class="mode {{ 'det' if loc_detected else 'prev' }}" id="mode">{{ 'Detected' if loc_detected else 'Preview' }}</span></div>
-    <div class="lv-row"><span class="k">IP</span><span class="v" id="b-ip">{{ det.ip or '—' }}</span><span class="src">current</span></div>
-    <div class="lv-row"><span class="k">Company</span><span class="v" id="b-co">{{ det.company or '—' }}</span><span class="src">reverse-IP</span></div>
+    <div class="lv-row"><span class="k" id="b-keylab">IP</span><span class="v" id="b-ip">{{ det.ip or '—' }}</span><span class="src" id="b-keysrc">current</span></div>
+    <div class="lv-row"><span class="k">Company</span><span class="v" id="b-co">{{ det.company or '—' }}</span><span class="src" id="b-co-src">reverse-IP</span></div>
     <div class="lv-row"><span class="k">Location</span><span class="v" id="b-loc">{{ (det.city ~ ', ' if det.city else '') ~ (det.region or '—') }}</span><span class="src">geo-IP</span></div>
     <div class="lv-row"><span class="k">Industry</span><span class="v" id="b-ind">{{ scene.industry_label }}{{ ' · default' if (not det.resolved_industry and loc_detected) else '' }}</span><span class="src" id="b-ind-src">{{ ('PDL · ' ~ det.confidence.industry) if det.resolved_industry else ('manual' if not loc_detected else 'default') }}</span></div>
     <div class="lv-row"><span class="k">Tier</span><span class="v" id="b-tier">{{ (det.tier ~ ' · ' ~ det.tier_label) if loc_detected else 'preview' }}</span><span class="src">routed</span></div>
@@ -119,9 +119,13 @@
           <button type="button" data-p="allude" class="on">Allude · ships</button>
           <button type="button" data-p="say">Say · ungated</button>
         </div></div>
-      <div><label>Try a different IP / target account</label>
-        <div class="ip-line"><input id="ip-in" placeholder="e.g. 17.253.144.10" autocomplete="off" spellcheck="false"><button type="button" id="ip-go">Look up</button></div>
-        <div class="ip-msg" id="ip-msg">Real reverse-IP. Defaults to your current IP — production reads it automatically.</div></div>
+      <div><label>Identify by IP <span style="color:var(--a)">(allude)</span> — or by work email <span style="color:var(--g)">(say)</span></label>
+        <div class="ip-line"><input id="ip-in" placeholder="reverse-IP — e.g. 17.253.144.10" autocomplete="off" spellcheck="false"><button type="button" id="ip-go">Look up</button></div>
+        <div class="ip-line" style="margin-top:6px"><input id="em-in" placeholder="first-party — jordan@gauntletai.com" autocomplete="off" spellcheck="false"><button type="button" id="em-go">ID</button></div>
+        <div class="ip-msg" id="ip-msg">Reverse-IP IDs enterprises (allude). A <b>work email</b> IDs <b>any</b> company — even a startup — and is first-party, so it&rsquo;s <b>say</b>.</div>
+        <select id="ex-acct" style="margin-top:7px"><option value="">Jump to an example account…</option>
+          {% for g in examples.groups %}<optgroup label="{{ g.label }}">{% for r in g.rows %}<option value="{{ r.ip }}">{{ r.company }}{{ ' · ' ~ r.industry if r.industry else '' }}</option>{% endfor %}</optgroup>{% endfor %}
+        </select></div>
       <div><label>…or set location / industry manually</label>
         <select id="sel-loc"><option value="">— region —</option>
           {% for s in states %}<option value="{{ s }}" {{ 'selected' if s==det.region else '' }}>{{ s }}</option>{% endfor %}</select>
@@ -219,9 +223,13 @@
     document.getElementById('blocked').style.display = say ? 'flex' : 'none';
     var m=document.getElementById('mode'); var lab = S.mode==='detected'?'Detected':(S.mode==='lookup'?'Looked up':'Preview');
     m.textContent=lab; m.className='mode '+(S.mode==='detected'?'det':'prev');
-    document.getElementById('b-ip').textContent = S.ip||'—';
+    var viaEmail = S.via==='email';
+    document.getElementById('b-keylab').textContent = viaEmail?'Email':'IP';
+    document.getElementById('b-keysrc').textContent = viaEmail?'first-party':'current';
+    document.getElementById('b-ip').textContent = viaEmail?(S.email||'—'):(S.ip||'—');
     document.getElementById('b-co').textContent = S.company||'—';
-    document.getElementById('b-loc').textContent = (S.city?S.city+', ':'')+(S.region||'—');
+    document.getElementById('b-co-src').textContent = viaEmail?'first-party · say':'reverse-IP';
+    document.getElementById('b-loc').textContent = viaEmail?'— (email has no location)':((S.city?S.city+', ':'')+(S.region||'—'));
     var indDefault = !S.indDetected && S.mode!=='preview';
     document.getElementById('b-ind').textContent = ind.label + (indDefault?' · default':'');
     document.getElementById('b-ind-src').textContent = S.indDetected?('PDL · '+S.indConf):(S.mode==='preview'?'manual':'default');
@@ -275,10 +283,25 @@
       render();
     }).catch(function(){msg.textContent='lookup failed — try another IP';});
   }
-  document.getElementById('ip-go').addEventListener('click',function(){var v=document.getElementById('ip-in').value.trim(); if(v) lookup(v);});
-  document.getElementById('ip-in').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();var v=e.target.value.trim();if(v)lookup(v);}});
-  document.getElementById('sel-loc').addEventListener('change',function(e){S.region=e.target.value||null;S.company=null;S.city=null;S.indDetected=false;S.reason='';S.mode='preview';render();});
-  document.getElementById('sel-ind').addEventListener('change',function(e){S.industry=e.target.value;S.indDetected=false;if(S.mode==='detected')S.mode='preview';render();});
+  // FIRST-PARTY lane: a work email → company (domain) + person (PDL). Works for small companies.
+  function lookupEmail(email){
+    var msg=document.getElementById('ip-msg'); msg.textContent='Resolving '+email+' …';
+    fetch('/api/demo/resolve_email?email='+encodeURIComponent(email)).then(function(r){return r.json();}).then(function(d){
+      CAP = d.captured || [];
+      if(!d.company){ msg.textContent = d.reason || 'no company for that email'; render(); return; }
+      S = fresh(d,'lookup'); S.via='email'; S.email=d.email; S.person=d.person||{};
+      document.getElementById('sel-ind').value = S.industry;
+      var p=d.person||{}; msg.textContent='Resolved: '+(p.name?p.name+' · ':'')+(p.title?p.title+' · ':'')+d.company+(d.industry?'':' (no sector)');
+      render();
+    }).catch(function(){msg.textContent='lookup failed — try another email';});
+  }
+  document.getElementById('ip-go').addEventListener('click',function(){var v=document.getElementById('ip-in').value.trim(); if(v){S.via=null;lookup(v);}});
+  document.getElementById('ip-in').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();var v=e.target.value.trim();if(v){S.via=null;lookup(v);}}});
+  document.getElementById('ex-acct').addEventListener('change',function(e){var v=e.target.value; if(v){document.getElementById('ip-in').value=v;S.via=null;lookup(v);}});
+  document.getElementById('em-go').addEventListener('click',function(){var v=document.getElementById('em-in').value.trim(); if(v) lookupEmail(v);});
+  document.getElementById('em-in').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();var v=e.target.value.trim();if(v)lookupEmail(v);}});
+  document.getElementById('sel-loc').addEventListener('change',function(e){S.via=null;S.region=e.target.value||null;S.company=null;S.city=null;S.indDetected=false;S.reason='';S.mode='preview';render();});
+  document.getElementById('sel-ind').addEventListener('change',function(e){S.via=null;S.industry=e.target.value;S.indDetected=false;if(S.mode==='detected')S.mode='preview';render();});
   [].forEach.call(document.querySelectorAll('#seg-policy button'),function(b){b.addEventListener('click',function(){policy=b.getAttribute('data-p');render();});});
   document.getElementById('reset').addEventListener('click',function(){S=fresh(DET,{{ 'true' if loc_detected else 'false' }}?'detected':'preview');document.getElementById('sel-loc').value=S.region||'';document.getElementById('sel-ind').value=S.industry;document.getElementById('ip-in').value='';render();});
 

@@ -74,6 +74,7 @@
   .chip{font:600 9.5px/1 var(--mono);padding:3px 6px;border-radius:5px;text-transform:uppercase;letter-spacing:.03em}
   .chip.det{background:var(--det-bg);color:var(--det)} .chip.llm{background:var(--llm-bg);color:var(--llm)}
   .chip.gate{background:var(--hold-bg);color:var(--hold)}
+  .chip.cache{background:#e7f3ee;color:#0f6b4f}
   .gnode.gate{border-color:var(--hold);box-shadow:0 0 0 1px var(--hold) inset}
   .feedback{font-size:12px;color:var(--muted);margin-top:2px}
   .feedback code{font-family:var(--mono);font-size:11px;background:var(--fill);padding:1px 5px;border-radius:5px}
@@ -102,8 +103,18 @@
     <p class="ex">Exhibit 1 — <span>The decision tree: visitor IP → personalization tier</span></p>
     <div class="tree">
 
-      <div class="node"><span class="q">Reverse-IP the visitor</span>
-        <span class="meta">· <code>reverse_ip()</code> → ip-api.com (cached): geo + org + <code>mobile/proxy/hosting</code> flags</span></div>
+      <div class="node" style="border-color:var(--say);background:var(--say-bg)">
+        <span class="q">① Identity key: <b>work email</b> (first-party)</span>
+        <span class="meta">· <code>resolve_email()</code> → domain → PDL company + person</span></div>
+      <div class="kids">
+        <div class="branch"><div class="node leaf l2">
+          <span class="pill t2">TIER 2 · FIRMOGRAPHIC <span style="opacity:.7">· SAY</span></span>
+          <span><b>Works for any company size.</b> A startup's domain IDs the company even when reverse-IP only sees a CDN (gauntletai.com → Fastly). The visitor told us — so these facts are <b>say</b> (recitable), not allude.<div class="out">email → company (high conf) + title / seniority (PDL person). A consumer mailbox (gmail.com) → no company.</div></span>
+        </div></div>
+      </div>
+
+      <div class="node" style="margin-top:15px"><span class="q">② Identity key: <b>IP only</b> (involuntary) — classify it</span>
+        <span class="meta">· <code>reverse_ip()</code> → ip-api.com (cached): geo + org + <code>mobile/proxy/hosting</code>. Everything below is <b>allude</b>.</span></div>
 
       <div class="kids">
         <div class="lbl no">IP private / loopback / unreachable</div>
@@ -213,15 +224,17 @@
       <div class="gnode"><div class="gt"><span class="chip det">det</span> Classify</div><div class="gd">ip-api flags → network type (the 6-way fork above).</div></div>
       <div class="gnode"><div class="gt"><span class="chip det">det</span> Score</div><div class="gd">Per-field confidence: location / company / industry. Optional LLM corroboration only.</div></div>
       <div class="gnode"><div class="gt"><span class="chip det">det</span> Route</div><div class="gd">→ Tier 0 · 1 · 2 · 3. Pure, reproducible, itself provable.</div></div>
+      <div class="gnode"><div class="gt"><span class="chip cache">cache</span> Cache</div><div class="gd">LLMCache by (industry × region × angle × policy). Hit → skip the LLM (~0ms). Only successes cached, so a bad call retries.</div></div>
       <div class="gnode"><div class="gt"><span class="chip llm">llm</span> Research</div><div class="gd">Tier 3 only — competitor brief: provable category differentiators.</div></div>
       <div class="gnode"><div class="gt"><span class="chip llm">llm</span> Copy agent</div><div class="gd">Proposes headline/sub/CTA from the brief. Claude Haiku. Inert offline.</div></div>
       <div class="gnode gate"><div class="gt"><span class="chip gate">gate</span> The Gate</div><div class="gd"><b>Disposes.</b> Verifies every claim vs source + surface policy. Comparative claims = highest scrutiny.</div></div>
       <div class="gnode"><div class="gt"><span class="chip det">det</span> Design</div><div class="gd">Backdrop / accent / tone from firmographic + confidence.</div></div>
       <div class="gnode last"><div class="gt"><span class="chip det">det</span> Render</div><div class="gd">+ provenance receipt: every line's source, basis, policy.</div></div>
     </div>
-    <p class="feedback">↩ <b>Fallback path:</b> any line the Gate rejects → the deterministic angle template ships instead (<code>angle_copy</code>). The page never blocks; it degrades to what's provable. <b>So yes — this tree is part of the agent graph: it's the router in front of the existing propose→dispose flow.</b> Only two nodes are LLM (Research, Copy); the spine is deterministic, and the Gate stays the single point of disposition.</p>
+    <p class="feedback">↩ <b>Fallback path:</b> any line the Gate rejects → the deterministic angle template ships instead (<code>angle_copy</code>). The page never blocks; it degrades to what's provable. <b>Both identity keys (email · IP) feed this same graph.</b> The <b>Cache</b> turns a repeat (industry × region × angle × policy) from a ~1.3s model call into ~0ms, so the page never waits on the LLM; only two nodes are LLM (Research, Copy), the spine is deterministic, and the Gate stays the single point of disposition.</p>
     <div class="legend" style="margin-top:14px">
       <span><i class="sw" style="background:var(--det-bg);border:1px solid #cdd2da"></i> deterministic — provable, cheap, reproducible</span>
+      <span><i class="sw" style="background:#e7f3ee;border:1px solid #b9ddcb"></i> cache — short-circuits the LLM</span>
       <span><i class="sw" style="background:var(--llm-bg);border:1px solid #d8c9f2"></i> LLM agent — proposes only</span>
       <span><i class="sw" style="background:var(--hold-bg);border:1px solid #eecccc"></i> the Gate — disposes</span>
     </div>
@@ -229,7 +242,7 @@
 
   <footer>
     <div class="caveat"><b>Can ≠ should.</b> Every signal here carries a say / allude / hold surface policy. Geo + firmographic are <b>allude</b> (involuntary — shape, don't recite). "Creepy mode" is this exact same data with the policy turned off — reciting the company, the precise location, or an inferred competitor. The Gate makes that arm <b>provably never selected</b>, not merely discouraged.</div>
-    <p style="margin:12px 0 0">Grounded in <b>pipeline/personalization/scene.py</b> (<code>reverse_ip</code>, <code>resolve_ip</code> network classification, PDL enrich) and <b>creative.py</b> (copy agent + Gate). Tiers 0–1 ship today; the corporate-VPN check, confidence scoring, and Tier 3 competitor agent are the proposed additions. Real fields only — no fabricated provider claims.</p>
+    <p style="margin:12px 0 0">Grounded in <b>pipeline/personalization/scene.py</b> (<code>reverse_ip</code> + <code>resolve_ip</code> classification, <code>resolve_email</code> first-party lane, PDL enrich) and <b>creative.py</b> (copy agent + Gate + LLMCache). All of it is wired: both identity keys, the corporate-VPN check, confidence scoring, the Tier-3 competitor agent, and the copy cache. Real fields only — no fabricated provider claims.</p>
   </footer>
 </div>
 </body>

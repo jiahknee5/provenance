@@ -1,0 +1,49 @@
+{
+ "_note": "Verified against the live resolver (ip-api + PDL). Reverse-IP only IDs enterprises that route their own netblocks — so this skews to legacy /8 holders + large firms. Finance/retail/media resolve the company but no sector (our taxonomy is 8 industrial sectors) → Tier 1.",
+ "groups": [
+  {"label": "Technology (Tier 2)", "rows": [
+    {"ip": "17.253.144.10", "company": "Apple", "industry": "technology"},
+    {"ip": "131.107.0.1", "company": "Microsoft", "industry": "technology"},
+    {"ip": "9.20.0.1", "company": "IBM", "industry": "technology"},
+    {"ip": "134.134.0.1", "company": "Intel", "industry": "technology"},
+    {"ip": "173.37.145.84", "company": "Cisco", "industry": "technology"},
+    {"ip": "148.87.0.1", "company": "Oracle", "industry": "technology"},
+    {"ip": "136.146.0.1", "company": "Salesforce", "industry": "technology"},
+    {"ip": "137.69.0.1", "company": "Dell", "industry": "technology"},
+    {"ip": "15.73.0.1", "company": "HP", "industry": "technology"},
+    {"ip": "192.94.94.1", "company": "Texas Instruments", "industry": "technology"},
+    {"ip": "192.111.0.1", "company": "Stack Exchange", "industry": "technology"},
+    {"ip": "138.108.0.1", "company": "Nielsen", "industry": "technology"},
+    {"ip": "156.80.0.1", "company": "Booz Allen Hamilton", "industry": "technology"},
+    {"ip": "198.151.49.1", "company": "Expedia", "industry": "technology"},
+    {"ip": "129.42.38.1", "company": "Kyndryl", "industry": "technology"},
+    {"ip": "129.250.0.1", "company": "NTT America", "industry": "technology"},
+    {"ip": "38.100.0.1", "company": "Cogent Communications", "industry": "technology"},
+    {"ip": "192.84.0.1", "company": "GlobalLogic", "industry": "technology"},
+    {"ip": "163.187.0.1", "company": "Schlumberger", "industry": "technology"},
+    {"ip": "161.69.0.1", "company": "Skyhigh Security", "industry": "technology"}
+  ]},
+  {"label": "Manufacturing · Logistics (Tier 2)", "rows": [
+    {"ip": "19.7.0.1", "company": "Ford Motor Company", "industry": "manufacturing"},
+    {"ip": "130.76.0.1", "company": "Boeing", "industry": "logistics"},
+    {"ip": "129.99.0.1", "company": "NASA", "industry": "logistics"}
+  ]},
+  {"label": "Healthcare (Tier 2)", "rows": [
+    {"ip": "148.177.0.1", "company": "Johnson & Johnson", "industry": "healthcare"},
+    {"ip": "198.203.177.1", "company": "UnitedHealth Group", "industry": "healthcare"},
+    {"ip": "204.99.0.1", "company": "PCS Health Systems", "industry": "healthcare"},
+    {"ip": "192.5.7.1", "company": "Allegheny-Singer Research", "industry": "healthcare"}
+  ]},
+  {"label": "Finance · Retail · Media — company resolved, no sector (Tier 1)", "rows": [
+    {"ip": "148.86.0.1", "company": "Goldman Sachs", "industry": null},
+    {"ip": "171.161.0.1", "company": "Bank of America", "industry": null},
+    {"ip": "198.36.0.1", "company": "JPMorgan Chase", "industry": null},
+    {"ip": "198.45.24.1", "company": "S&P Global", "industry": null},
+    {"ip": "161.170.244.1", "company": "Walmart", "industry": null},
+    {"ip": "199.181.132.1", "company": "Disney", "industry": null},
+    {"ip": "129.176.0.1", "company": "Mayo Clinic", "industry": null},
+    {"ip": "156.5.0.1", "company": "Amazon", "industry": null},
+    {"ip": "163.231.0.1", "company": "Thomson Reuters (West)", "industry": null}
+  ]}
+ ]
+}

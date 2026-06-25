@@ -109,7 +109,7 @@ def demo_live(request: Request):
         "det": det, "scene": sc, "industries": SC.INDUSTRIES, "states": SC.STATES,
         "client_map": SC.client_map(), "default_industry": industry,
         "loc_detected": bool(det["region"]), "gallery": SC.GALLERY,
-        "angles": CR.ANGLES, "design": design,
+        "angles": CR.ANGLES, "design": design, "examples": SC.EXAMPLE_ACCOUNTS,
     })
 
 
@@ -128,6 +128,13 @@ def api_demo_resolve(ip: str = ""):
     """Resolve an ENTERED IP → company / location / industry (real reverse-IP + PDL).
     Powers the 'try a different IP' override on /demo/live."""
     return JSONResponse(SC.resolve_ip(ip))
+
+
+@app.get("/api/demo/resolve_email")
+def api_demo_resolve_email(email: str = ""):
+    """FIRST-PARTY lane: a work email → company (domain) + person (PDL). Works for small
+    companies the reverse-IP lane can't see; the facts are `say` (self-declared)."""
+    return JSONResponse(SC.resolve_email(email))
 
 
 @app.get("/api/demo/scene")

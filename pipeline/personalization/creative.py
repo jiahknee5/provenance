@@ -16,6 +16,7 @@ from __future__ import annotations
 import re
 
 from pipeline.common import config
+from pipeline.common.cache import LLMCache
 from pipeline.personalization import scene as SC
 
 # --- deterministic creative angles (the briefs) -------------------------------------------
@@ -111,10 +112,14 @@ def verify_copy(lines, facts: str, company: str | None, policy: str,
 
 
 def _llm_hero(prompt: str) -> dict | None:
-    """One Claude Haiku call → {headline, sub}. None on any failure / no key — caller falls back."""
+    """One Claude Haiku call → {headline, sub}, cached by prompt (LLMCache). None on any failure /
+    no key — caller falls back. The cache cuts a repeat (industry × region × angle × policy) from a
+    ~1.3s model call to ~0; only successful drafts are cached, so a transient failure retries."""
     if not config.ANTHROPIC_API_KEY:
         return None
-    try:
+    ck = LLMCache.hash_input("copy_hero_v1", prompt)
+
+    def compute() -> dict:
         import json as _json
 
         import anthropic
@@ -126,9 +131,12 @@ def _llm_hero(prompt: str) -> dict | None:
         d = _json.loads(m.group(0)) if m else {}
         if d.get("headline") and d.get("sub"):
             return {"headline": d["headline"].strip(), "sub": d["sub"].strip()}
+        raise ValueError("empty draft")   # raise → not cached → a bad call retries next time
+
+    try:
+        return LLMCache().get_or_compute(ck, compute) or None
     except Exception:
         return None
-    return None
 
 
 def _llm_draft(ind: dict, region: str | None, angle: str) -> dict | None:
@@ -164,7 +172,9 @@ def _llm_brief(category: str, region: str | None) -> list[str] | None:
               "List 3 differentiators that are STRUCTURAL properties of a tool that can prove every claim.\n"
               "Rules: do NOT name any competitor. Do NOT claim superiority (no 'better/faster/cheaper than').\n"
               "Each is a provable property of our product, ≤ 12 words. Return JSON: {\"diffs\": [\"…\",\"…\",\"…\"]}.")
-    try:
+    ck = LLMCache.hash_input("copy_brief_v1", prompt)
+
+    def compute() -> dict:
         import json as _json
 
         import anthropic
@@ -175,7 +185,12 @@ def _llm_brief(category: str, region: str | None) -> list[str] | None:
         m = re.search(r"\{.*\}", txt, re.S)
         d = _json.loads(m.group(0)) if m else {}
         diffs = [x.strip() for x in (d.get("diffs") or []) if x and x.strip()]
-        return diffs[:3] or None
+        if diffs:
+            return {"diffs": diffs[:3]}
+        raise ValueError("no diffs")
+
+    try:
+        return (LLMCache().get_or_compute(ck, compute) or {}).get("diffs") or None
     except Exception:
         return None
 
