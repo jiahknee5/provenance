@@ -1,5 +1,5 @@
 {% extends "shell.html" %}
-{% block title %}Provenance — Policies{% endblock %}
+{% block title %}apt — Policies{% endblock %}
 {% block crumb %}<i class="ph ph-scroll"></i> Policies{% endblock %}
 {% macro kindopts(sel) %}{% for k in corpus_kinds %}<option value="{{ k }}" {{ 'selected' if k==sel else '' }}>{{ k }}</option>{% endfor %}{% endmacro %}
 {% macro ruleopts(sel) %}{% for r in disclosure_rules %}<option value="{{ r }}" {{ 'selected' if r==sel else '' }}>{{ r }}</option>{% endfor %}{% endmacro %}
