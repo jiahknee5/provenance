@@ -64,7 +64,31 @@
     <div class="q-stat"><div class="k">Stability</div><div class="v g">{{ n_runs }}/{{ n_runs }} runs</div><div class="sub">{{ gsum.passed }}/{{ gsum.total }} golden · {{ props_pass }}/{{ props_total }} properties</div></div>
   </div>
 </div>
-<p class="q-muted stamp">Source: <span class="q-mono">data/demo/runs/assurance.json</span> · single seeded replay (decision R5, byte-identical) · n={{ n_bad }} traps / {{ n_clean }} clean.</p>
+<p class="q-muted stamp">Source: <span class="q-mono">data/demo/runs/assurance.json</span> · single seeded replay (decision R5, byte-identical) · n={{ n_bad }} traps / {{ n_clean }} clean. · <a href="/help/how-assurance-was-built" style="color:var(--signal);font-weight:600">How this was built →</a></p>
+
+<!-- ── board view: business KPIs → target (the exec roll-up — trust number above, KPIs here) ── -->
+<div class="q-sec" style="margin-top:26px">Business KPIs · progress toward target
+  <span class="q-pill v"><span class="d"></span>Optimizing</span>
+  <span class="q-sim" style="margin-left:6px">⟳ Simulated RL · synthetic traffic</span></div>
+<p class="q-muted" style="font-size:12.5px;margin:0 0 12px;line-height:1.55">The board view: the trust number above, and the business KPIs the <b style="color:var(--slate)">verified</b> optimizer is moving toward target — it can only win with variants that already cleared the Gate. <b style="color:var(--slate)">Simulated</b> outcomes; the full RL loop runs on the <a href="/demo/monitor" style="color:var(--signal)">live-demo control tower</a>.</p>
+<div class="q-kpitree" style="margin-bottom:6px">
+  {% for grp in kpi_tree %}
+  <div class="q-kgroup">
+    <h3>{{ grp.group }}</h3>
+    {% for k in grp.kpis %}
+    {% set cls = 'g-on' if k.pct_to_target >= 60 else ('g-mid' if k.pct_to_target >= 25 else 'g-low') %}
+    <div class="q-kpi {{ cls }}">
+      <div class="top"><span class="lab">{{ k.label }}</span>
+        <span class="cur">{{ k.current }}{{ k.unit if k.unit == '%' else '' }}</span>
+        <span class="pct">· {{ k.pct_to_target|int }}% to target</span></div>
+      <div class="q-track"><span class="fill" style="width:{{ k.pct_to_target if k.pct_to_target <= 100 else 100 }}%"></span></div>
+      <div class="q-btrow"><span>base {{ k.baseline }}{{ k.unit if k.unit=='%' else '' }}</span>
+        <span>{{ '↓' if k.direction=='down' else '↑' }} target {{ k.target }}{{ k.unit if k.unit=='%' else (' '+k.unit) }}</span></div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
 
 <!-- ── tabs ──────────────────────────────────────────────────────────── -->
 <div class="q-tabs ass-tabs" id="assTabs">
@@ -208,27 +232,7 @@
   <div style="margin:10px 0 4px">{{ conv_svg|safe }}</div>
   <p class="cap">Each panel: the winner's traffic share climbing as the bandit learns; the dashed grey line is the ungated arm, flat at 0 (never selectable).</p>
 
-  <div style="margin-top:18px"><span class="q-label">Projected master-KPI movement (illustrative)</span>
-    <div class="q-kpitree" style="margin-top:10px">
-      {% for grp in kpi_tree %}
-      <div class="q-kgroup">
-        <h3>{{ grp.group }}</h3>
-        {% for k in grp.kpis %}
-        {% set cls = 'g-on' if k.pct_to_target >= 60 else ('g-mid' if k.pct_to_target >= 25 else 'g-low') %}
-        <div class="q-kpi {{ cls }}">
-          <div class="top"><span class="lab">{{ k.label }}</span>
-            <span class="cur">{{ k.current }}{{ k.unit if k.unit == '%' else '' }}</span>
-            <span class="pct">· {{ k.pct_to_target|int }}% to target</span></div>
-          <div class="q-track"><span class="fill" style="width:{{ k.pct_to_target if k.pct_to_target <= 100 else 100 }}%"></span></div>
-          <div class="q-btrow"><span>base {{ k.baseline }}{{ k.unit if k.unit=='%' else '' }}</span>
-            <span>{{ '↓' if k.direction=='down' else '↑' }} target {{ k.target }}{{ k.unit if k.unit=='%' else (' '+k.unit) }}</span></div>
-        </div>
-        {% endfor %}
-      </div>
-      {% endfor %}
-    </div>
-    <p class="cap">The same KPI-tree component as the <a href="/demo/monitor" style="color:var(--signal)">KPI control tower</a> — fill = progress to target, base/target below; bounce is "lower is better" (↓). Simulated outcomes, not achieved results.</p>
-  </div>
+  <p class="cap" style="margin-top:14px">The bandit&rsquo;s reward projects onto the <b style="color:var(--slate)">Business KPIs</b> shown at the top of this page — fill = progress to target. (Same KPI-tree component as the <a href="/demo/monitor" style="color:var(--signal)">live-demo control tower</a>.)</p>
 
   <div style="margin-top:18px"><span class="q-label">Drift watch <span class="q-sim" style="margin-left:6px">illustrative source</span></span>
     <p class="q-muted" style="margin:6px 0 10px;font-size:12.5px">{{ h.drift.fresh }}/{{ h.drift.ttl_facts }} TTL-governed facts fresh · {{ h.drift.paused }} paused. On a source change, Drift re-verifies <b style="color:var(--slate)">exactly</b> the affected claims and pauses only the dependent variant (<b style="color:var(--slate)">P3</b> — surgical, not whole-corpus).</p>
