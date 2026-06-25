@@ -106,19 +106,85 @@
   .ctabar{font-size:11.5px;color:var(--muted);margin:4px 0 14px;display:flex;align-items:center;gap:8px}
   .ctabar b{color:var(--ink)}
 
-  /* ---- agent graph ---- */
-  .graph{display:flex;flex-wrap:wrap;align-items:stretch;gap:0}
-  .gnode{flex:1 1 120px;min-width:120px;border:1px solid var(--hair);border-radius:var(--r);padding:11px 12px;
-         background:#fff;position:relative;margin:0 16px 14px 0}
-  .gnode:after{content:"→";position:absolute;right:-15px;top:50%;transform:translateY(-50%);color:#b6bcc4;font-size:15px}
-  .gnode.last:after{content:""}
-  .gnode .gt{font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:7px}
-  .gnode .gd{font-size:11.5px;color:var(--muted);margin-top:4px}
-  .chip{font:600 9.5px/1 var(--mono);padding:3px 6px;border-radius:5px;text-transform:uppercase;letter-spacing:.03em}
-  .chip.det{background:var(--det-bg);color:var(--det)} .chip.llm{background:var(--llm-bg);color:var(--llm)}
-  .chip.gate{background:var(--hold-bg);color:var(--hold)}
-  .chip.cache{background:#e7f3ee;color:#0f6b4f}
-  .gnode.gate{border-color:var(--hold);box-shadow:0 0 0 1px var(--hold) inset}
+  /* ---- interactive agent graph (node-link directed graph) ---- */
+  .agctl{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin:4px 0 12px}
+  .agtrace,.agzoom{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .agtl{font:600 10px/1 var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-right:3px}
+  .agctl button{font:600 11.5px/1 var(--sans);padding:7px 11px;border:1px solid var(--hair);border-radius:8px;
+    background:#fff;color:var(--ink);cursor:pointer;transition:.12s}
+  .agctl button:hover{border-color:#c2c8d0;background:var(--fill)}
+  .agctl button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .agzoom button{font-family:var(--mono);min-width:34px;text-align:center}
+
+  .agstage{position:relative;height:560px;border:1px solid var(--hair);border-radius:12px;overflow:hidden;
+    background:radial-gradient(circle at 1px 1px,#e6e9ee 1px,transparent 0) 0 0/22px 22px,var(--fill);
+    cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none}
+  .agstage.grab{cursor:grabbing}
+  .agcanvas{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform}
+  .agedges{position:absolute;top:0;left:0;overflow:visible;pointer-events:none}
+  .agedges path{fill:none;stroke:#b3bbc5;stroke-width:1.7;transition:stroke .15s,opacity .15s,stroke-width .15s}
+  .agedges path.cache{stroke:#2f9e6f;stroke-dasharray:6 4}
+  .agedges path.fallback{stroke:var(--hold);stroke-dasharray:6 4}
+  .agedges path.loop{stroke:#aeb6c0;stroke-dasharray:2 6}
+  .agedges path.hot{stroke:var(--signal);stroke-width:2.5;opacity:1}
+  .agedges path.dim{opacity:.13}
+
+  .agelabel{position:absolute;transform:translate(-50%,-50%);font:600 9px/1 var(--mono);
+    color:var(--muted);background:rgba(255,255,255,.94);border:1px solid var(--hair);
+    padding:2px 6px;border-radius:5px;white-space:nowrap;pointer-events:none;transition:.15s}
+  .agelabel.dim{opacity:.15}
+  .agelabel.hot{color:var(--signal);border-color:#b9c8f3}
+
+  .agnode{position:absolute;border:1px solid var(--hair);border-radius:10px;background:#fff;
+    padding:9px 11px;text-align:left;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04);font-family:var(--sans);
+    transition:box-shadow .15s,border-color .15s,opacity .15s;overflow:hidden}
+  .agnode:hover{box-shadow:0 4px 14px rgba(0,0,0,.1)}
+  .agnode:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+  .agnode .nh{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+  .agnode .nt{font:600 9px/1 var(--mono);padding:2px 5px;border-radius:5px;text-transform:uppercase;letter-spacing:.03em}
+  .agnode .nl{font-size:12.5px;font-weight:650;letter-spacing:-.01em}
+  .agnode .nd{font-size:10.5px;color:var(--muted);line-height:1.3}
+  .agnode.sel{border-color:var(--signal);box-shadow:0 0 0 2px var(--signal-bg),0 6px 18px rgba(59,91,219,.18)}
+  .agnode.dim{opacity:.3}
+  .t-io .nt{background:var(--det-bg);color:var(--det)} .t-io{border-left:3px solid #9aa3af}
+  .t-det .nt{background:var(--det-bg);color:var(--det)} .t-det{border-left:3px solid var(--det)}
+  .t-cache .nt{background:#e7f3ee;color:#0f6b4f} .t-cache{border-left:3px solid #2f9e6f}
+  .t-llm .nt{background:var(--llm-bg);color:var(--llm)} .t-llm{border-left:3px solid var(--llm)}
+  .t-gate .nt{background:var(--hold-bg);color:var(--hold)} .t-gate{border-left:3px solid var(--hold);box-shadow:0 0 0 1px var(--hold) inset}
+  .t-term .nt{background:var(--act-bg);color:var(--act)} .t-term{border-left:3px solid var(--act)}
+
+  .aghint{position:absolute;left:12px;bottom:10px;font:500 11px/1 var(--sans);color:var(--muted);
+    background:rgba(255,255,255,.86);padding:5px 9px;border-radius:7px;border:1px solid var(--hair);pointer-events:none}
+
+  .aglegend{display:flex;flex-wrap:wrap;gap:9px 22px;margin-top:13px;font-size:11.5px;color:var(--muted)}
+  .aglegend .grp{display:flex;flex-wrap:wrap;gap:9px 13px;align-items:center}
+  .aglegend span.it{display:inline-flex;align-items:center;gap:6px}
+  .aglegend .nt{font:600 8.5px/1 var(--mono);padding:2px 5px;border-radius:4px;text-transform:uppercase}
+  .aglegend .ed{width:22px;height:0;border-top:2px solid #b3bbc5;display:inline-block}
+  .aglegend .ed.cache{border-top-style:dashed;border-color:#2f9e6f}
+  .aglegend .ed.fallback{border-top-style:dashed;border-color:var(--hold)}
+  .aglegend .ed.loop{border-top-style:dotted;border-color:#aeb6c0}
+
+  /* the selected node, as a spec */
+  .agdetail{margin-top:14px;border:1px solid var(--hair);border-radius:12px;background:#fff;overflow:hidden;min-height:128px}
+  .agd-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--hair);background:var(--fill)}
+  .agd-head .nt{font:600 9px/1 var(--mono);padding:3px 6px;border-radius:5px;text-transform:uppercase}
+  .agd-head h4{margin:0;font-size:14.5px}
+  .agd-head .st{margin-left:auto;font:600 9px/1 var(--mono);padding:3px 7px;border-radius:5px;text-transform:uppercase;letter-spacing:.04em;background:var(--say-bg);color:var(--say)}
+  .agd-grid{display:grid;grid-template-columns:repeat(3,1fr)}
+  @media(max-width:760px){.agd-grid{grid-template-columns:1fr}}
+  .agd-cell{padding:11px 16px;border-right:1px solid var(--hair);border-top:1px solid var(--hair)}
+  .agd-cell:nth-child(-n+3){border-top:0}
+  .agd-cell .k{font:600 9px/1 var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:5px}
+  .agd-cell .v{font-size:12px;line-height:1.45}
+  .agd-cell.def .v{color:#0a5564}
+  .agd-cell code{font-family:var(--mono);font-size:11px;background:var(--fill);padding:1px 5px;border-radius:5px;color:#334}
+  .agd-empty{padding:30px 18px;text-align:center;color:var(--muted);font-size:13px}
+
+  @keyframes ex6flash{0%{background:var(--signal-bg)}100%{background:transparent}}
+  .maptable tr.flash td{animation:ex6flash 1.4s ease-out}
+
+  /* fallback note (kept from the prior exhibit) */
   .feedback{font-size:12px;color:var(--muted);margin-top:2px}
   .feedback code{font-family:var(--mono);font-size:11px;background:var(--fill);padding:1px 5px;border-radius:5px}
 
@@ -172,6 +238,7 @@
       <span><i class="dot w"></i> <b style="color:var(--ink)">wired</b> — live in <code style="font-family:var(--mono)">scene.py</code> / <code style="font-family:var(--mono)">creative.py</code> today</span>
       <span><i class="dot p"></i> <b style="color:var(--ink)">proposed</b> — the research integration designed here; code target named, not yet merged</span>
     </div>
+    <p style="margin:14px 0 0;font-size:12.5px"><a href="/guide" style="color:var(--signal);font-weight:600;text-decoration:none">▸ Read the full engineering writeup</a> — how the 15-agent research swarm became this wired, tested Gate.</p>
   </header>
 
   <!-- ============ EXHIBIT 1 — PERMISSION ROUTER ============ -->
@@ -394,20 +461,54 @@
     <p class="note" style="margin-top:14px"><b>Sequence, not single-touch:</b> default 4–7 total touches, each carrying a <i>new</i> angle (never “just bumping this”), and reuse the <b>same anchor signal</b> across email · voicemail · call so the channels reinforce one identity. The CTA is the only place the message asks for a finite resource — so it’s the last thing to escalate. <b>Wired:</b> the no-cold-calendar-link veto (<code>verify_message</code>) and the never-single-touch / no-repeat rules (<code>verify_sequence</code>) are enforced; the staged escalation itself is the lead-temperature policy layered on top.</p>
   </section>
 
-  <!-- ============ EXHIBIT 5 — THE GATE (TWO AXES) ============ -->
-  <section>
-    <p class="ex">Exhibit 5 — <span>Where it lives: a deterministic router, LLM leaves, one Gate — now disposing on two axes</span></p>
-    <div class="graph">
-      <div class="gnode"><div class="gt"><span class="chip det">det</span> Classify</div><div class="gd">ip-api flags → network type (the 6-way fork above).</div></div>
-      <div class="gnode"><div class="gt"><span class="chip det">det</span> Score</div><div class="gd">Per-field confidence: location / company / industry. Optional LLM corroboration only.</div></div>
-      <div class="gnode"><div class="gt"><span class="chip det">det</span> Route</div><div class="gd">→ Tier 0·1·2·3. Pure, reproducible, itself provable.</div></div>
-      <div class="gnode"><div class="gt"><span class="chip cache">cache</span> Cache</div><div class="gd">LLMCache by (industry × region × angle × policy). Hit → skip the LLM (~0ms).</div></div>
-      <div class="gnode"><div class="gt"><span class="chip llm">llm</span> Research</div><div class="gd">Tier 3 only — competitor brief: provable category differentiators.</div></div>
-      <div class="gnode"><div class="gt"><span class="chip llm">llm</span> Copy agent</div><div class="gd">Proposes headline/sub/CTA from the brief + the one provable hook. Claude Haiku. Inert offline.</div></div>
-      <div class="gnode gate"><div class="gt"><span class="chip gate">gate</span> The Gate</div><div class="gd"><b>Disposes.</b> Verifies every claim vs source <b>and</b> persuasion hygiene. Comparative claims = highest scrutiny.</div></div>
-      <div class="gnode"><div class="gt"><span class="chip det">det</span> Design</div><div class="gd">Backdrop / accent / tone from firmographic + confidence.</div></div>
-      <div class="gnode last"><div class="gt"><span class="chip det">det</span> Render</div><div class="gd">+ provenance receipt: every line’s source, basis, policy.</div></div>
+  <!-- ============ EXHIBIT 5 — THE AGENT GRAPH (interactive) ============ -->
+  <section id="ex5">
+    <p class="ex">Exhibit 5 — <span>The agent graph: a deterministic router, LLM leaves, one Gate</span> <span class="mk w" style="margin-left:6px">wired spine</span></p>
+    <p class="exsub">Every visit runs this graph. The spine is <b>deterministic and reproducible</b>; only two nodes call an LLM (Research · Copy agent); <b style="color:var(--hold)">the Gate is the single point of disposition</b>; and any blocked line falls back to provable copy — so the page degrades, never blocks. <b>Drag to pan · ⌘/Ctrl-scroll to zoom · click a node for its spec · trace a tier.</b></p>
+
+    <div class="agctl">
+      <div class="agtrace" id="agtrace">
+        <span class="agtl">Trace the path</span>
+        <button type="button" data-tier="all" class="on">All</button>
+        <button type="button" data-tier="0">Tier 0</button>
+        <button type="button" data-tier="1">Tier 1</button>
+        <button type="button" data-tier="2">Tier 2</button>
+        <button type="button" data-tier="3">Tier 3</button>
+      </div>
+      <div class="agzoom" id="agzoom">
+        <button type="button" data-z="out" aria-label="Zoom out">−</button>
+        <button type="button" data-z="in" aria-label="Zoom in">+</button>
+        <button type="button" data-z="fit">Fit</button>
+      </div>
     </div>
+
+    <div class="agstage" id="agstage" role="img" aria-label="Agent graph. Flow: detect the identity key, then either the first-party email lane or the IP lane (reverse-IP, then the classify router), into score and route-to-tier. Tiers 0 and 1 take deterministic angle copy; tiers 2 and 3 take the LLM cache, optional Tier-3 competitor research, and the copy agent. All copy converges on the Gate, which ships it or falls back to deterministic copy, then renders with a provenance receipt — looping every navigation. The same graph is given as a table in Exhibit 6 below.">
+      <div class="agcanvas" id="agcanvas">
+        <svg class="agedges" id="agedges"><defs>
+          <marker id="agar" markerWidth="7.5" markerHeight="7.5" refX="6" refY="3.2" orient="auto"><path d="M0,0 L7,3.2 L0,6.4 Z" fill="#b3bbc5"/></marker>
+          <marker id="agarh" markerWidth="7.5" markerHeight="7.5" refX="6" refY="3.2" orient="auto"><path d="M0,0 L7,3.2 L0,6.4 Z" fill="#3b5bdb"/></marker>
+        </defs></svg>
+      </div>
+      <div class="aghint">Drag to pan · ⌘/Ctrl-scroll to zoom · click a node</div>
+    </div>
+
+    <div class="aglegend">
+      <div class="grp">
+        <span class="it"><span class="nt" style="background:var(--det-bg);color:var(--det)">det</span> deterministic</span>
+        <span class="it"><span class="nt" style="background:#e7f3ee;color:#0f6b4f">cache</span> LLM cache</span>
+        <span class="it"><span class="nt" style="background:var(--llm-bg);color:var(--llm)">llm</span> agent (LLM)</span>
+        <span class="it"><span class="nt" style="background:var(--hold-bg);color:var(--hold)">gate</span> the Gate</span>
+        <span class="it"><span class="nt" style="background:var(--act-bg);color:var(--act)">out</span> render</span>
+      </div>
+      <div class="grp">
+        <span class="it"><span class="ed"></span> control flow</span>
+        <span class="it"><span class="ed cache"></span> cache hit (skip LLM)</span>
+        <span class="it"><span class="ed fallback"></span> Gate block → fallback</span>
+        <span class="it"><span class="ed loop"></span> loop · every navigation</span>
+      </div>
+    </div>
+
+    <div class="agdetail" id="agdetail"><div class="agd-empty">Click any node — or trace a tier — to see what it reads, how it branches, what it outputs, its provable default, and the code it maps to. The full table is Exhibit 6 below.</div></div>
 
     <div class="gax">
       <div class="gcol">
@@ -438,30 +539,31 @@
   <!-- ============ EXHIBIT 6 — EVERY NODE EXPLAINED ============ -->
   <section>
     <p class="ex">Exhibit 6 — <span>Every node explained: input → branches → output → default → code</span></p>
+    <p class="exsub">The same agent graph as a table — the accessible, printable form of the diagram above. Click a node in Exhibit 5 and its row flashes here.</p>
     <table class="maptable">
       <thead><tr><th style="width:15%">Node</th><th style="width:18%">Reads (input)</th><th style="width:24%">Branches</th><th style="width:21%">Output</th><th style="width:22%">Default / fallback</th></tr></thead>
       <tbody>
-        <tr><td><span class="tp w">wired</span>Identity key</td>
+        <tr id="ex6-identity"><td><span class="tp w">wired</span>Identity key</td>
           <td>work email <i>or</i> visitor IP</td>
           <td>email present → first-party lane · else → IP lane</td>
           <td>company + person (email) or raw IP to classify</td>
           <td class="def">consumer mailbox / no email → <b>IP lane</b></td></tr>
-        <tr><td><span class="tp w">wired</span>Network classify</td>
+        <tr id="ex6-classify"><td><span class="tp w">wired</span>Network classify</td>
           <td><code>mobile/proxy/hosting</code> + <code>org</code> name</td>
           <td>mobile · proxy · hosting · is_isp · is_corporate (priority order)</td>
           <td>which signal class the IP actually carries</td>
           <td class="def">unreachable/private → <b>Tier 0 neutral</b></td></tr>
-        <tr><td><span class="tp w">wired</span>Company enrich</td>
+        <tr id="ex6-company"><td><span class="tp w">wired</span>Company enrich</td>
           <td>corporate domain / netblock → PDL</td>
           <td>company resolves? · industry maps to a sector?</td>
           <td>firmographic facts (industry, region)</td>
           <td class="def">no company → <b>person lane</b>, then neutral</td></tr>
-        <tr><td><span class="tp w">wired</span>Confidence score</td>
+        <tr id="ex6-score"><td><span class="tp w">wired</span>Confidence score</td>
           <td>per-field: location / company / industry</td>
           <td>HIGH · MEDIUM · LOW/UNKNOWN</td>
           <td>the bar each claim must clear to surface</td>
           <td class="def">below bar → <b>hold the claim</b> (don’t assert sector)</td></tr>
-        <tr><td><span class="tp w">wired</span>Tier route</td>
+        <tr id="ex6-route"><td><span class="tp w">wired</span>Tier route</td>
           <td>classify + score</td>
           <td>Tier 0 · 1 · 2 · 3</td>
           <td>the permission budget + surface policy (say/allude/hold)</td>
@@ -476,7 +578,7 @@
           <td>permission · interest · offer · soft-talk · two-option time</td>
           <td>exactly one ask, friction-matched</td>
           <td class="def">cold/unknown → <b>soft interest question</b></td></tr>
-        <tr><td><span class="tp w">wired</span><span class="tp p">+B</span>The Gate</td>
+        <tr id="ex6-gate"><td><span class="tp w">wired</span><span class="tp p">+B</span>The Gate</td>
           <td>every proposed line + facts + policy</td>
           <td>provable & clean? → ship · else → block</td>
           <td>verdict + reason per line</td>
@@ -492,5 +594,218 @@
     <p style="margin:12px 0 0">Grounded in <b>pipeline/personalization/scene.py</b> (<code>reverse_ip</code> + <code>resolve_ip</code> classification, <code>resolve_email</code> first-party lane, PDL enrich) and <b>creative.py</b> (<code>ANGLES</code>, <code>ai_copy</code> + <code>competitor_brief</code> + the Gate <code>verify_copy</code> + LLMCache). <b>Pass 1 (permission)</b> and <b>Axis A of the Gate</b> have always been wired. As of this pass the copy research is <b>merged</b>: the <code>loss</code> cost-of-inaction angle and Axis B’s per-line hygiene run in <code>verify_copy()</code>, and the message + sequence Gate (one CTA · ≤125 words · no cold calendar link · no spam-promise · never single-touch) runs in <code>verify_message()</code> / <code>verify_sequence()</code> — enforced where outbound variants enter the action pool (<code>build_action_pool</code>) and published as a locked standard on <code>/policies</code> (Voice &amp; hygiene). Locked by added tests (<b>full suite: 144 passed</b>). Real fields only — no fabricated provider claims.</p>
   </footer>
 </div>
+
+<script>
+/* ===== Exhibit 5 — interactive agent graph (node-link directed graph) =====
+   Faithful to pipeline/personalization/scene.py (detect → reverse_ip/resolve_email →
+   _classify → tier) + creative.py (LLMCache, competitor_brief, ai_copy, the Gate,
+   angle_copy fallback). Dependency-free: HTML node cards + an SVG edge layer, both
+   pan/zoom transformed. Click a node for its spec; trace a tier; the Gate is the
+   single point of disposition; a blocked line loops back to angle_copy. */
+(function(){
+  var stage=document.getElementById('agstage');
+  if(!stage) return;
+  var canvas=document.getElementById('agcanvas'),
+      svg=document.getElementById('agedges'),
+      detail=document.getElementById('agdetail'),
+      trace=document.getElementById('agtrace'),
+      zoom=document.getElementById('agzoom');
+  var CW=1812, CH=600, NS='http://www.w3.org/2000/svg';
+
+  var TYPE={io:{l:'in',bg:'var(--det-bg)',fg:'var(--det)'},det:{l:'det',bg:'var(--det-bg)',fg:'var(--det)'},
+    cache:{l:'cache',bg:'#e7f3ee',fg:'#0f6b4f'},llm:{l:'llm',bg:'var(--llm-bg)',fg:'var(--llm)'},
+    gate:{l:'gate',bg:'var(--hold-bg)',fg:'var(--hold)'},term:{l:'out',bg:'var(--act-bg)',fg:'var(--act)'}};
+
+  var NODES=[
+   {id:'detect',t:'io',x:24,y:250,w:128,h:74,l:'Detect',d:'identity key: IP or email',row:'ex6-identity',
+    reads:'the request → client IP, or a first-party work email (known cookie / token)',br:'email present → first-party lane · else → IP lane',out:'the identity key to resolve',def:'no email → IP lane',code:'detect() · client_ip()'},
+   {id:'resolve_email',t:'det',x:196,y:120,w:164,h:88,l:'Resolve email',d:'first-party · PDL company + person',row:'ex6-company',
+    reads:'work email → domain → PDL company + person',br:'company resolves → Tier 2 · consumer mailbox (gmail) → drop to the individual',out:'company (HIGH confidence — self-declared) + title / seniority',def:'no company → person lane, then neutral',code:'resolve_email() · _pdl_person()'},
+   {id:'reverse_ip',t:'cache',x:196,y:372,w:164,h:88,l:'Reverse-IP',d:'ip-api (cached) · geo · org · flags',row:'ex6-classify',
+    reads:'the visitor IP → ip-api.com (cached)',br:'returns geo · org · mobile / proxy / hosting flags',out:'network facts to classify (surface policy: allude)',def:'private / unreachable → Tier 0 neutral',code:'reverse_ip() · LLMCache'},
+   {id:'classify',t:'det',x:400,y:372,w:164,h:88,l:'Classify',d:'router · 6-way network fork',row:'ex6-classify',
+    reads:'mobile / proxy / hosting flags + the org name',br:'private · mobile · proxy · hosting · is_isp · is_corporate (priority order)',out:'network_type → which signal class the IP carries',def:'unreachable → Tier 0 neutral',code:'_classify() · resolve_ip()'},
+   {id:'score',t:'det',x:604,y:250,w:150,h:82,l:'Score',d:'per-field confidence gate',row:'ex6-score',
+    reads:'per-field: location / company / industry',br:'HIGH · MEDIUM · LOW / UNKNOWN',out:'the bar each claim must clear to surface',def:'below the bar → hold the claim (never assert a sector)',code:'confidence in resolve_ip() / resolve_email()'},
+   {id:'route',t:'det',x:800,y:244,w:158,h:96,l:'Route → tier',d:'Tier 0 · 1 · 2 · 3',row:'ex6-route',
+    reads:'classify + score',br:'Tier 0 neutral · 1 location · 2 firmographic · 3 + competitive',out:'the permission budget + surface policy (say / allude / hold)',def:'always resolves — Tier 0 is the floor',code:'TIER_LABELS · tier (scene.py)'},
+   {id:'cache',t:'cache',x:998,y:138,w:152,h:76,l:'LLM cache',d:'industry×region×angle×policy',row:'',
+    reads:'key = industry × region × angle × policy',br:'hit → skip the LLM (~0 ms) · miss → call the agent',out:'cached creative, or a miss',def:'—',code:'LLMCache (creative.py)'},
+   {id:'angle_copy',t:'det',x:998,y:372,w:166,h:88,l:'Angle copy',d:'deterministic · the fallback',row:'',
+    reads:'industry · angle · region · company',br:'the ANGLES templates — provable by construction',out:'deterministic copy that always clears the Gate',def:'this IS the fallback — always available',code:'angle_copy() · ANGLES'},
+   {id:'competitor_brief',t:'llm',x:1200,y:44,w:172,h:80,l:'Research',d:'Tier 3 · category brief',row:'',
+    reads:"the visitor's competitive category",br:'Tier 3 only',out:'a brief of provable category differentiators',def:'no brief → fall back to category value',code:'competitor_brief() · _llm_brief()'},
+   {id:'ai_copy',t:'llm',x:1200,y:152,w:172,h:86,l:'Copy agent',d:'Claude Haiku · inert offline',row:'',
+    reads:'the brief + the one provable hook + the facts',br:'—',out:'proposed headline / sub / CTA',def:'offline / empty → deterministic angle copy',code:'ai_copy() · _llm_draft()'},
+   {id:'gate',t:'gate',x:1416,y:246,w:152,h:100,l:'The Gate',d:'disposes · provable + clean',row:'ex6-gate',
+    reads:'every proposed line + facts + policy',br:'Axis A provable? AND Axis B clean? → ship · else → block',out:'a verdict + reason, per line',def:'any block → deterministic angle copy ships',code:'verify_copy() · verify_message() · verify_sequence()'},
+   {id:'render',t:'term',x:1612,y:250,w:176,h:88,l:'Render',d:'+ provenance receipt',row:'',
+    reads:'the gated lines + design',br:'design_select → backdrop / accent / tone',out:"the page + a receipt: every line's source · basis · policy",def:'neutral backdrop',code:'design_select() · build_scene() + receipt'}
+  ];
+  var EDGES=[
+   ['detect','resolve_email','cond','email'],['detect','reverse_ip','cond','IP only'],
+   ['resolve_email','score','solid',''],['reverse_ip','classify','solid',''],['classify','score','solid',''],
+   ['score','route','solid',''],
+   ['route','angle_copy','cond','Tier 0·1'],['route','cache','cond','Tier 2·3'],['route','competitor_brief','cond','Tier 3'],
+   ['competitor_brief','ai_copy','solid','brief'],['cache','ai_copy','cond','miss'],['cache','gate','cache','hit · skip LLM'],
+   ['ai_copy','gate','solid',''],['angle_copy','gate','solid',''],
+   ['gate','render','cond','pass'],['gate','angle_copy','fallback','block → fallback'],
+   ['render','detect','loop','↺ every navigation']
+  ];
+  var TIERSET={
+   '0':['detect','reverse_ip','classify','score','route','angle_copy','gate','render'],
+   '1':['detect','reverse_ip','classify','score','route','angle_copy','gate','render'],
+   '2':['detect','reverse_ip','classify','score','route','cache','ai_copy','gate','render'],
+   '3':['detect','reverse_ip','classify','score','route','competitor_brief','cache','ai_copy','gate','render']
+  };
+  var TIERNOTE={
+   '0':['Tier 0 · neutral','#6b7280','No provable signal about this visitor. Deterministic angle copy only — no LLM, no sector claim. The floor every visit can always reach.'],
+   '1':['Tier 1 · location-aware','var(--allude)','Region framing only (allude). Still deterministic copy; company and sector are held.'],
+   '2':['Tier 2 · firmographic','var(--signal)','Company resolved (first-party email or a clean corporate IP). The copy agent drafts from real facts via the cache; the Gate verifies; angle copy is always the fallback.'],
+   '3':['Tier 3 · + competitive','var(--llm)','Adds the competitor-research brief before the copy agent. Every comparative line gets the Gate’s highest scrutiny — unproven lines fall back to category value.']
+  };
+
+  var byId={}, nodeEl={}, edgeRec=[];
+  NODES.forEach(function(n){byId[n.id]=n;});
+  function box(id){var n=byId[id];return{x:n.x,y:n.y,w:n.w,h:n.h,cx:n.x+n.w/2,cy:n.y+n.h/2,
+    rx:n.x+n.w,ry:n.y+n.h/2,lx:n.x,ly:n.y+n.h/2,bx:n.x+n.w/2,by:n.y+n.h,tx:n.x+n.w/2,ty:n.y};}
+  function cmid(p0,p1,p2,p3){return{x:.125*p0.x+.375*p1.x+.375*p2.x+.125*p3.x,y:.125*p0.y+.375*p1.y+.375*p2.y+.125*p3.y};}
+
+  function geom(e){
+    var a=box(e[0]),b=box(e[1]),kind=e[2],d,mid;
+    if(kind==='loop'){var s={x:a.bx,y:a.by},t={x:b.bx,y:b.by};
+      d='M'+s.x+','+s.y+' C'+s.x+',575 '+t.x+',575 '+t.x+','+t.y;mid=cmid(s,{x:s.x,y:575},{x:t.x,y:575},t);}
+    else if(kind==='fallback'){var s2={x:a.bx,y:a.by},t2={x:b.rx,y:b.ry},c1={x:s2.x,y:s2.y+72},c2={x:t2.x+96,y:t2.y};
+      d='M'+s2.x+','+s2.y+' C'+c1.x+','+c1.y+' '+c2.x+','+c2.y+' '+t2.x+','+t2.y;mid=cmid(s2,c1,c2,t2);}
+    else if(Math.abs(a.cx-b.cx)<24 && b.ty>a.by){ // vertical (same column, b below a)
+      var s3={x:a.bx,y:a.by},t3={x:b.tx,y:b.ty};d='M'+s3.x+','+s3.y+' L'+t3.x+','+t3.y;mid={x:(s3.x+t3.x)/2,y:(s3.y+t3.y)/2};}
+    else{var s4={x:a.rx,y:a.ry},t4={x:b.lx,y:b.ly},dx=Math.max(26,Math.min(150,(t4.x-s4.x)*0.5));
+      var p1={x:s4.x+dx,y:s4.y},p2={x:t4.x-dx,y:t4.y};
+      d='M'+s4.x+','+s4.y+' C'+p1.x+','+p1.y+' '+p2.x+','+p2.y+' '+t4.x+','+t4.y;mid=cmid(s4,p1,p2,t4);}
+    return{d:d,mid:mid};
+  }
+
+  // ---- build edges + labels ----
+  svg.setAttribute('width',CW);svg.setAttribute('height',CH);svg.setAttribute('viewBox','0 0 '+CW+' '+CH);
+  EDGES.forEach(function(e){
+    var g=geom(e),kind=e[2],cls=(kind==='cache'?'cache':kind==='fallback'?'fallback':kind==='loop'?'loop':'');
+    var p=document.createElementNS(NS,'path');p.setAttribute('d',g.d);if(cls)p.setAttribute('class',cls);
+    p.setAttribute('marker-end','url(#agar)');svg.appendChild(p);
+    var lab=null;
+    if(e[3]){lab=document.createElement('div');lab.className='agelabel';lab.textContent=e[3];
+      lab.style.left=g.mid.x+'px';lab.style.top=g.mid.y+'px';canvas.appendChild(lab);}
+    edgeRec.push({from:e[0],to:e[1],kind:kind,path:p,label:lab});
+  });
+
+  // ---- build nodes ----
+  NODES.forEach(function(n){
+    var b=document.createElement('button');b.type='button';b.className='agnode t-'+n.t;b.setAttribute('data-id',n.id);
+    b.style.left=n.x+'px';b.style.top=n.y+'px';b.style.width=n.w+'px';b.style.height=n.h+'px';
+    b.setAttribute('aria-label',n.l+' — '+n.d);
+    b.innerHTML='<div class="nh"><span class="nt">'+TYPE[n.t].l+'</span> <span class="nl">'+n.l+'</span></div><div class="nd">'+n.d+'</div>';
+    b.addEventListener('click',function(ev){ev.stopPropagation();selectNode(n.id);});
+    b.addEventListener('mouseenter',function(){hoverNode(n.id);});
+    b.addEventListener('mouseleave',function(){hoverNode(null);});
+    canvas.appendChild(b);nodeEl[n.id]=b;
+  });
+
+  // ---- highlight engine ----
+  function setEdge(rec,st){var p=rec.path,l=rec.label;p.classList.remove('hot','dim');if(l)l.classList.remove('hot','dim');
+    if(st==='hot'){p.classList.add('hot');p.setAttribute('marker-end','url(#agarh)');if(l)l.classList.add('hot');}
+    else{p.setAttribute('marker-end','url(#agar)');if(st==='dim'){p.classList.add('dim');if(l)l.classList.add('dim');}}}
+  function clearHL(){Object.keys(nodeEl).forEach(function(k){nodeEl[k].classList.remove('sel','dim');});
+    edgeRec.forEach(function(r){setEdge(r,'normal');});}
+  function applyHL(litN,litE,sel){
+    Object.keys(nodeEl).forEach(function(k){nodeEl[k].classList.toggle('dim',litN&&litN.indexOf(k)<0&&k!==sel);
+      nodeEl[k].classList.toggle('sel',k===sel);});
+    edgeRec.forEach(function(r){var on=litE?litE.indexOf(r.from+'>'+r.to)>=0:(r.from===sel||r.to===sel);
+      setEdge(r,on?'hot':(litN?'dim':'dim'));});
+  }
+
+  // ---- detail panel ----
+  function escapeOpen(){detail.innerHTML='<div class="agd-empty">Click any node — or trace a tier — to see what it reads, how it branches, what it outputs, its provable default, and the code it maps to. The full table is Exhibit 6 below.</div>';}
+  function nodeDetail(n){
+    var tm=TYPE[n.t];
+    detail.innerHTML='<div class="agd-head"><span class="nt" style="background:'+tm.bg+';color:'+tm.fg+'">'+tm.l+'</span>'+
+      '<h4>'+n.l+'</h4><span class="st">wired</span></div>'+
+      '<div class="agd-grid">'+
+        '<div class="agd-cell"><div class="k">Reads · input</div><div class="v">'+n.reads+'</div></div>'+
+        '<div class="agd-cell"><div class="k">Branches</div><div class="v">'+n.br+'</div></div>'+
+        '<div class="agd-cell"><div class="k">Output</div><div class="v">'+n.out+'</div></div>'+
+        '<div class="agd-cell def"><div class="k">Default · fallback</div><div class="v">'+n.def+'</div></div>'+
+        '<div class="agd-cell"><div class="k">Code</div><div class="v"><code>'+n.code+'</code></div></div>'+
+        '<div class="agd-cell"><div class="k">In the graph</div><div class="v">click another node, or use <b>Trace the path</b> to follow a tier end-to-end</div></div>'+
+      '</div>';
+  }
+  function tierDetail(t){var n=TIERNOTE[t];
+    detail.innerHTML='<div class="agd-head"><span class="nt" style="background:'+n[1]+';color:#fff">tier '+t+'</span>'+
+      '<h4>'+n[0]+'</h4></div><div class="agd-empty" style="text-align:left;padding:14px 16px;color:var(--ink)">'+n[2]+'</div>';
+  }
+
+  function flashRow(id){if(!id)return;var tr=document.getElementById(id);if(!tr)return;
+    tr.classList.remove('flash');void tr.offsetWidth;tr.classList.add('flash');}
+
+  // ---- modes ----
+  var selected=null;
+  function selectNode(id){
+    selected=id;setTier('all',true);
+    var n=byId[id];applyHL(null,null,id);nodeDetail(n);flashRow(n.row);notifyParent();
+  }
+  function hoverNode(id){
+    if(selected)return; // don't fight an active selection
+    if(activeTier!=='all'){return;}
+    if(!id){clearHL();return;}
+    applyHL(null,null,id); // hot the incident edges, no detail change
+  }
+  var activeTier='all';
+  function setTier(t,silent){
+    activeTier=t;selected=(t==='all'&&silent)?selected:null;
+    [].forEach.call(trace.querySelectorAll('button'),function(b){b.classList.toggle('on',b.getAttribute('data-tier')===t);});
+    if(silent)return;
+    if(t==='all'){clearHL();escapeOpen();notifyParent();return;}
+    var litN=TIERSET[t],litE=[];
+    EDGES.forEach(function(e){if(litN.indexOf(e[0])>=0&&litN.indexOf(e[1])>=0)litE.push(e[0]+'>'+e[1]);});
+    applyHL(litN,litE,null);tierDetail(t);notifyParent();
+  }
+  [].forEach.call(trace.querySelectorAll('button'),function(b){b.addEventListener('click',function(){setTier(b.getAttribute('data-tier'),false);});});
+
+  // ---- pan / zoom ----
+  var view={x:0,y:0,k:1};
+  function apply(){canvas.style.transform='translate('+view.x+'px,'+view.y+'px) scale('+view.k+')';}
+  function clampK(k){return Math.max(0.3,Math.min(2.2,k));}
+  function zoomAt(f,px,py){var nk=clampK(view.k*f);var wx=(px-view.x)/view.k,wy=(py-view.y)/view.k;
+    view.k=nk;view.x=px-wx*nk;view.y=py-wy*nk;apply();}
+  function fit(){var r=stage.getBoundingClientRect(),pad=26;
+    var k=Math.min((r.width-2*pad)/CW,(r.height-2*pad)/CH);k=Math.max(0.32,Math.min(1.1,k));
+    view.k=k;view.x=(r.width-CW*k)/2;view.y=(r.height-CH*k)/2;apply();}
+  zoom.querySelector('[data-z="in"]').addEventListener('click',function(){var r=stage.getBoundingClientRect();zoomAt(1.25,r.width/2,r.height/2);});
+  zoom.querySelector('[data-z="out"]').addEventListener('click',function(){var r=stage.getBoundingClientRect();zoomAt(0.8,r.width/2,r.height/2);});
+  zoom.querySelector('[data-z="fit"]').addEventListener('click',fit);
+
+  var drag=null;
+  stage.addEventListener('pointerdown',function(e){
+    if(e.target.closest('.agnode'))return; // let node clicks through
+    drag={x:e.clientX,y:e.clientY,vx:view.x,vy:view.y,moved:false};stage.classList.add('grab');
+    try{stage.setPointerCapture(e.pointerId);}catch(_){}
+  });
+  stage.addEventListener('pointermove',function(e){if(!drag)return;
+    view.x=drag.vx+(e.clientX-drag.x);view.y=drag.vy+(e.clientY-drag.y);drag.moved=true;apply();});
+  function endDrag(){drag=null;stage.classList.remove('grab');}
+  stage.addEventListener('pointerup',endDrag);stage.addEventListener('pointercancel',endDrag);
+  stage.addEventListener('click',function(e){ // click empty space → clear selection
+    if(drag&&drag.moved)return;if(e.target.closest('.agnode'))return;
+    if(selected){selected=null;clearHL();escapeOpen();notifyParent();}
+  });
+  stage.addEventListener('wheel',function(e){if(!(e.ctrlKey||e.metaKey))return; // plain wheel scrolls the page
+    e.preventDefault();var r=stage.getBoundingClientRect();zoomAt(e.deltaY<0?1.12:0.893,e.clientX-r.left,e.clientY-r.top);},{passive:false});
+  stage.addEventListener('dblclick',function(e){if(e.target.closest('.agnode'))return;
+    var r=stage.getBoundingClientRect();zoomAt(1.3,e.clientX-r.left,e.clientY-r.top);});
+
+  function notifyParent(){try{if(window.parent&&window.parent!==window)window.parent.postMessage('prov-graph-refit','*');}catch(_){}}
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(fit,120);});
+
+  fit();setTimeout(fit,80);
+})();
+</script>
 </body>
 </html>

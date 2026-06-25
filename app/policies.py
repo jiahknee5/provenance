@@ -25,14 +25,21 @@ import re
 
 import yaml
 from fastapi import Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
 
 from app.server import app, templates
 from pipeline.common import db
 from pipeline.personalization import creative as CR
 
-_RULES = pathlib.Path(__file__).resolve().parents[1] / "rules" / "academy_tenant.yaml"
+_ROOT = pathlib.Path(__file__).resolve().parents[1]
+_RULES = _ROOT / "rules" / "academy_tenant.yaml"
+_CORPUS_DIR = _ROOT / "corpus"
 _OVR_KEY = "policy_overrides_v1"
+
+
+def _corpus_path(slug: str) -> pathlib.Path:
+    safe = re.sub(r"[^a-z0-9-]", "", (slug or "").lower())
+    return _CORPUS_DIR / f"{safe}.md"
 
 RULE_PILL = {"say": "g", "allow": "g", "allude": "a", "require": "a", "hold": "r", "block": "r"}
 DISCLOSURE_RULES = ["say", "allude", "hold"]
@@ -61,10 +68,14 @@ SECTIONS = [
 
 # ---- seeds: a FEW main, descriptive policies (a tenant edits / replaces these) ----------------
 SEED_CORPUS = [
-    {"name": "Product one-pager", "kind": "doc", "ref": "what it does + the load-bearing capabilities"},
-    {"name": "Customer case studies", "kind": "case study", "ref": "named outcomes & metrics you can cite"},
-    {"name": "Security & compliance", "kind": "doc", "ref": "SOC 2, data handling, sub-processors"},
-    {"name": "Pricing & packaging", "kind": "doc", "ref": "plans, limits, contract terms"},
+    {"name": "Product one-pager", "kind": "doc", "slug": "product-one-pager",
+     "ref": "what it does + the load-bearing capabilities"},
+    {"name": "Customer case studies", "kind": "case study", "slug": "customer-case-studies",
+     "ref": "named outcomes & metrics you can cite"},
+    {"name": "Security & compliance", "kind": "doc", "slug": "security-compliance",
+     "ref": "data handling, retention, sub-processors"},
+    {"name": "Pricing & packaging", "kind": "doc", "slug": "pricing-packaging",
+     "ref": "tuition, plans, terms"},
 ]
 SEED_CAN = [
     {"claim": "Every personalization ships with a receipt — source, basis, and surface policy.", "cite": "Product one-pager"},
@@ -78,16 +89,13 @@ SEED_CANNOT = [
 ]
 SEED_DISCLOSURE = [
     {"name": "First-party facts", "rule": "say",
-     "desc": "Anything they told you directly — a form, a reply, a question on the record — may be "
-             "referenced by name. They volunteered it."},
+     "desc": "They told you directly (form, reply, on-record question) — reference it by name."},
     {"name": "Involuntary signals", "rule": "allude",
-     "desc": "IP, location, ad clicks, page visits — anything inferred — shape the message but are "
-             "never recited. “Built for energy teams in Texas,” not “we saw you from ExxonMobil.”"},
+     "desc": "IP, location, ad clicks, page visits — shape the message, never recite."},
     {"name": "Voice & recordings", "rule": "allude",
-     "desc": "Captured calls or class questions are more sensitive than typed ones — allude to the "
-             "topic, don’t quote the recording back."},
+     "desc": "Captured calls/questions are sensitive — allude to the topic, don’t quote."},
     {"name": "Third-party & enrichment", "rule": "allude",
-     "desc": "Bought or appended data informs targeting but is never quoted as if they’d told you."},
+     "desc": "Bought or appended data targets the message, but is never quoted as if they’d told you."},
 ]
 
 
@@ -171,8 +179,12 @@ def _corpus(ovr: dict) -> list[dict]:
     items = ovr.get("corpus")
     if items is None:
         items = SEED_CORPUS
-    return [{"id": f"c{i}", "name": it.get("name", ""), "kind": it.get("kind", "doc"),
-             "ref": it.get("ref", "")} for i, it in enumerate(items)]
+    out = []
+    for i, it in enumerate(items):
+        slug = it.get("slug") or _slug(it.get("name", ""))
+        out.append({"id": f"c{i}", "name": it.get("name", ""), "kind": it.get("kind", "doc"),
+                    "ref": it.get("ref", ""), "slug": slug, "hasfile": _corpus_path(slug).exists()})
+    return out
 
 
 def _can_say(ovr: dict) -> list[dict]:
@@ -234,7 +246,8 @@ async def policies_save(request: Request):
         cols = [form.getlist(k) for k in keys]
         return list(zip(*cols)) if cols and cols[0] else []
 
-    corpus = [{"name": n.strip(), "kind": (k or "doc").strip(), "ref": (r or "").strip()}
+    corpus = [{"name": n.strip(), "kind": (k or "doc").strip(), "ref": (r or "").strip(),
+               "slug": _slug(n)}
               for n, k, r in rows("c_name", "c_kind", "c_ref") if n.strip()]
     can_say = [{"claim": c.strip(), "cite": (ci or "").strip()}
                for c, ci in rows("cs_claim", "cs_cite") if c.strip()]
@@ -254,6 +267,16 @@ async def policies_save(request: Request):
                      "disclosure": disclosure, "antislop_add": antislop, "sensitive": sensitive,
                      "consent_required": form.get("consent_required") == "on"})
     return RedirectResponse("/policies", status_code=303)
+
+
+@app.get("/policies/corpus/{slug}", response_class=PlainTextResponse)
+def policies_corpus(slug: str):
+    """Serve a corpus document's content (the synthetic file the AI may cite)."""
+    p = _corpus_path(slug)
+    if p.exists():
+        return PlainTextResponse(p.read_text())
+    return PlainTextResponse("No file content yet for this document. Add a URL or upload to ground "
+                             "it — the Gate cites what's here.", status_code=404)
 
 
 @app.post("/policies/reset")

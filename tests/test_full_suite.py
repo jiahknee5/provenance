@@ -345,6 +345,17 @@ def test_policies_edit_persists_and_resets():
     assert P._overrides() == {}                                # back to defaults
 
 
+def test_corpus_files_are_grounded_and_served():
+    """Seed corpus docs carry real (synthetic) content, served for citation + the View modal."""
+    from app import policies as P
+    seeded = [d for d in P._corpus({}) if d["hasfile"]]
+    assert len(seeded) >= 4                                    # the synthetic files exist on disk
+    body = c.get("/policies/corpus/product-one-pager").text
+    assert "12-week" in body and "cite" in body.lower()        # practical + on-thesis content
+    assert c.get("/policies/corpus/pricing-packaging").text.count("$12,000") >= 1
+    assert c.get("/policies/corpus/nope-not-real").status_code == 404   # unknown slug is honest
+
+
 def test_graph_page_embeds_the_exhibit():
     r = c.get("/graph")
     assert r.status_code == 200

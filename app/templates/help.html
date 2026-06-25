@@ -1,0 +1,23 @@
+{% extends "shell.html" %}
+{% block title %}Provenance — Help{% endblock %}
+{% block crumb %}<i class="ph ph-question"></i> Help{% endblock %}
+{% block content %}
+<div class="q-pagehead"><div>
+  <span class="q-pill b" style="margin-bottom:10px"><span class="d"></span>{{ count }} articles</span>
+  <h1>Help</h1>
+  <p class="q-muted" style="margin:5px 0 0;max-width:60ch">How Provenance works and how to use it — the thesis, the pipeline and trust model, the data &amp; provenance rules, every surface in the app, and the methodology behind the build.</p>
+</div></div>
+
+{% for g in groups %}
+<div class="q-sec help-cat">{{ g.category }}</div>
+<div class="help-grid">
+  {% for a in g.articles %}
+  <a class="help-card" href="/help/{{ a.slug }}">
+    <span class="ht">{{ a.title }}</span>
+    <span class="hs">{{ a.summary }}</span>
+    <span class="hm">{{ a.read_min }} min read</span>
+  </a>
+  {% endfor %}
+</div>
+{% endfor %}
+{% endblock %}

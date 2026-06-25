@@ -1,0 +1,415 @@
+<!doctype html>
+<!-- apt. — "Split Receipt" mockup. BLENDS two design languages:
+     LEFT  = editorial apt aesthetic (Fraunces display headline + wordmark, mono eyebrow pill, Ink/Bone + ghost CTAs, warm ink on bone).
+     RIGHT = Apple Liquid Glass (backdrop blur+saturate, specular rim, layered shadows, a floating receipt LENS overlapping the app panel) —
+             skinned as a verification CERTIFICATE: mono labels, dashed hairline rules, green/brass proof dots.
+     Archival warm palette + Proven Green (#1F4E3B) + Brass (#B4894C) accents. Scroll-reveal + autostart, prefers-reduced-motion safe. Self-contained.
+     Brand: apt. — truth-bounded personalization. "Can't say what it can't prove." -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>apt — Every word, apt.</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%231A150F'/%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%23F4EFE5' stroke-width='3.2'/%3E%3Ccircle cx='32' cy='32' r='7.4' fill='%23C79A55'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* archival warm spine */
+    --bg:#F4EFE5; --soft:#FBF8F1; --ink:#1A150F; --ink2:#463B2C; --mut:#7A6F5C;
+    --line:#E4DDCD; --line2:#DDD4C2; --black:#1A150F;
+    /* proof accents — used sparingly */
+    --pine:#1F4E3B; --pine-2:#2E6B52; --brass:#B4894C; --brass-2:#C79A55;
+    /* certificate proof status */
+    --ok:#1F4E3B; --ok-bg:#e7efea; --no:#8a662f; --no-bg:#f3ead9;
+    --radius:12px;
+    --shadow:0 1px 2px rgba(40,32,18,.05),0 12px 40px -12px rgba(40,32,18,.14);
+    /* glass spec (right side) */
+    --g1:rgba(255,253,248,.66); --g2:rgba(250,246,238,.42);
+    --spec:inset 0 1px 0 rgba(255,255,255,.85), inset 0 0 0 1px rgba(255,255,255,.34);
+    --amb:0 24px 60px -18px rgba(48,40,24,.30);
+    --chroma:0 12px 40px -16px rgba(180,137,76,.20);
+    --spring:cubic-bezier(.22,1.2,.36,1);
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);
+    font:16px/1.55 "Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-optical-sizing:auto;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+
+  /* ---------- nav (clean editorial across the top) ---------- */
+  nav{position:sticky;top:0;z-index:50;background:rgba(244,239,229,.84);backdrop-filter:saturate(180%) blur(12px);-webkit-backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line)}
+  nav .row{display:flex;align-items:center;gap:34px;height:64px;max-width:1200px;margin:0 auto;padding:0 24px}
+  .logo{display:flex;align-items:center;gap:11px}
+  .logo .mk{width:26px;height:26px;display:block}
+  .logo .wm{font-family:'Fraunces',Georgia,serif;font-optical-sizing:auto;font-weight:600;font-size:25px;line-height:1;letter-spacing:-.02em;color:var(--ink)}
+  .logo .wm .dot{color:var(--pine)}
+  .nlinks{display:flex;gap:26px;font-size:14.5px;color:var(--ink2);font-weight:500}
+  .nlinks a:hover{color:var(--ink)}
+  .caret{font-size:10px;color:var(--mut);margin-left:3px;vertical-align:1px}
+  .nav-r{margin-left:auto;display:flex;align-items:center;gap:12px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:600;font-size:14.5px;border-radius:10px;padding:9px 16px;border:1px solid transparent;cursor:pointer;transition:.15s;white-space:nowrap}
+  .btn.dark{background:var(--black);color:var(--bg)}
+  .btn.dark:hover{background:#2a2218}
+  .btn.proof{background:var(--pine);color:#fff}
+  .btn.proof:hover{background:var(--pine-2)}
+  .btn.proof .pdot{width:8px;height:8px;border-radius:50%;background:#fff;flex:none}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line2)}
+  .btn.ghost:hover{border-color:var(--brass);background:var(--soft)}
+  .btn.lg{padding:12px 22px;font-size:15.5px;border-radius:11px}
+  @media(max-width:860px){.nlinks{display:none}}
+
+  /* ---------- split hero ---------- */
+  .hero{max-width:1200px;margin:0 auto;padding:0 24px}
+  .split{display:grid;grid-template-columns:1.02fr 1.18fr;gap:40px;align-items:center;min-height:660px}
+
+  /* LEFT — editorial apt bone */
+  .left{padding:64px 12px 64px 0;max-width:600px}
+  .pill{display:inline-flex;align-items:center;gap:9px;background:var(--soft);border:1px solid var(--line2);border-radius:999px;padding:6px 13px 6px 9px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);font-weight:500;box-shadow:0 1px 2px rgba(40,32,18,.04)}
+  .pill .arc{width:9px;height:9px;border-radius:50%;background:var(--pine);flex:none;box-shadow:0 0 6px rgba(31,78,59,.4)}
+  h1.disp{font-family:'Fraunces',Georgia,serif;font-optical-sizing:auto;font-size:clamp(46px,6vw,86px);line-height:.94;font-weight:500;letter-spacing:-.03em;margin:24px 0 0;max-width:11ch;color:var(--ink)}
+  h1.disp .dot{color:var(--pine)}
+  .sub{margin:24px 0 0;max-width:46ch;font-size:clamp(17px,1.4vw,20px);line-height:1.55;color:var(--ink2);font-weight:400}
+  .hero-cta{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap}
+  .micro{margin-top:18px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.06em;color:var(--mut)}
+  .micro b{color:var(--ink2);font-weight:500}
+
+  /* RIGHT — liquid-glass composition over a warm bone/brass-tinted panel */
+  .right{position:relative;align-self:stretch;display:flex;align-items:center}
+  .stage{position:relative;width:100%;border-radius:28px;padding:46px 40px;min-height:560px;display:flex;align-items:center;overflow:visible;
+    background:
+      radial-gradient(120% 90% at 78% 8%, rgba(180,137,76,.16), transparent 60%),
+      radial-gradient(90% 80% at 12% 96%, rgba(31,78,59,.12), transparent 62%),
+      linear-gradient(165deg,#FBF8F1 0%, #EFE9DC 52%, #F4EFE5 100%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 1px 2px rgba(40,32,18,.05);}
+  /* drifting warm orbs the glass refracts */
+  .orb{position:absolute;border-radius:50%;filter:blur(54px);z-index:0;pointer-events:none;will-change:transform}
+  .orb.a{width:300px;height:300px;left:-40px;top:-50px;background:radial-gradient(circle,rgba(180,137,76,.34),transparent 70%);animation:drift1 20s var(--spring) infinite alternate}
+  .orb.b{width:340px;height:340px;right:-70px;bottom:-80px;background:radial-gradient(circle,rgba(31,78,59,.24),transparent 70%);animation:drift2 24s ease-in-out infinite alternate}
+  @keyframes drift1{to{transform:translate(36px,28px) scale(1.08)}}
+  @keyframes drift2{to{transform:translate(-30px,-22px) scale(1.06)}}
+
+  .compose{position:relative;width:100%;z-index:1}
+
+  /* shared glass on light */
+  .glass{position:relative;background:linear-gradient(160deg,var(--g1),var(--g2));
+    backdrop-filter:blur(26px) saturate(180%);-webkit-backdrop-filter:blur(26px) saturate(180%);
+    border-radius:22px;box-shadow:var(--spec),var(--amb),var(--chroma);isolation:isolate}
+  .glass::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    background:linear-gradient(180deg,rgba(255,255,255,.55),transparent 24%),
+               radial-gradient(120% 60% at 18% 0%,rgba(255,255,255,.40),transparent 58%)}
+
+  /* the glass app panel (personalize UI) */
+  .app{position:relative;width:94%;max-width:560px;border-radius:22px;overflow:hidden}
+  .app .bar{display:flex;align-items:center;gap:8px;padding:12px 15px;border-bottom:1px solid rgba(150,128,90,.18);position:relative;z-index:1}
+  .dots{display:flex;gap:6px}.dots i{width:10px;height:10px;border-radius:50%;background:rgba(122,111,92,.32);display:block}
+  .url{margin-left:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.02em;color:var(--mut);font-weight:400}
+  .appbody{display:grid;grid-template-columns:178px 1fr;min-height:300px;position:relative;z-index:1}
+  .side{padding:15px 13px;border-right:1px solid rgba(150,128,90,.16)}
+  .side .g{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin:4px 6px 8px;font-weight:500}
+  .it{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:10px;font-size:13px;color:var(--ink2);font-weight:500}
+  .it.on{background:rgba(255,255,255,.62);box-shadow:inset 0 0 0 1px rgba(255,255,255,.55);color:var(--ink)}
+  .it .d{width:7px;height:7px;border-radius:50%;background:rgba(122,111,92,.34);flex:none}
+  .it.on .d{background:var(--pine);box-shadow:0 0 6px rgba(31,78,59,.5)}
+  .it.heldout{opacity:.62}
+  .it.heldout .d{background:var(--brass)}
+  .main{padding:20px 22px}
+  .chips{display:flex;gap:8px;margin-bottom:12px}
+  .chip{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;font-weight:500;padding:4px 11px;border-radius:999px;text-transform:uppercase}
+  .chip.k{background:rgba(31,78,59,.12);color:var(--pine);box-shadow:inset 0 0 0 1px rgba(31,78,59,.18)}
+  .chip.t{background:rgba(255,255,255,.55);color:var(--ink2);box-shadow:inset 0 0 0 1px rgba(255,255,255,.6)}
+  .mh{font-family:'Fraunces',Georgia,serif;font-size:23px;font-weight:500;letter-spacing:-.01em;line-height:1.18;color:var(--ink)}
+  .mh em{font-style:normal;color:var(--pine)}
+  .mp{color:var(--ink2);font-size:13px;margin-top:8px;max-width:44ch}
+  .claim{display:flex;align-items:center;gap:10px;margin-top:11px;padding:10px 12px;border-radius:12px;
+    background:rgba(255,255,255,.50);box-shadow:inset 0 0 0 1px rgba(255,255,255,.6)}
+  .claim .ck{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none;
+    background:var(--ok-bg);color:var(--ok);box-shadow:inset 0 0 0 1px rgba(31,78,59,.25)}
+  .claim .ct{font-size:13px;color:var(--ink)}
+  .claim .src{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mut);padding:2px 8px;border-radius:7px;background:rgba(255,255,255,.6);box-shadow:inset 0 0 0 1px rgba(150,128,90,.22);font-weight:500}
+  .claim.no{background:rgba(180,137,76,.07);border:1px dashed rgba(180,137,76,.42)}
+  .claim.no .ck{background:var(--no-bg);color:var(--no);box-shadow:inset 0 0 0 1px rgba(180,137,76,.32)}
+  .claim.no .ct{text-decoration:line-through;color:var(--mut)}
+
+  /* the floating receipt LENS — hero of the right side · glassiest · a verification CERTIFICATE · overlaps the app corner */
+  .receipt{position:absolute;width:272px;right:-22px;bottom:-30px;padding:16px 17px;border-radius:20px;z-index:6;
+    background:linear-gradient(160deg,rgba(255,253,248,.82),rgba(250,246,238,.58));
+    backdrop-filter:blur(30px) saturate(190%);-webkit-backdrop-filter:blur(30px) saturate(190%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.95), inset 0 0 0 1px rgba(255,255,255,.5),
+      0 30px 70px -18px rgba(48,40,24,.42), 0 12px 36px -14px rgba(180,137,76,.30);}
+  .receipt::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    background:linear-gradient(180deg,rgba(255,255,255,.65),transparent 22%),
+               radial-gradient(120% 55% at 12% 0%,rgba(255,255,255,.5),transparent 56%)}
+  .receipt .rh{display:flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;color:var(--ink);position:relative;z-index:1;padding-bottom:11px;border-bottom:1px dashed rgba(150,128,90,.4)}
+  .receipt .rh .pdot{width:8px;height:8px;border-radius:50%;background:var(--pine);flex:none}
+  .rr{display:flex;justify-content:space-between;gap:12px;font-size:12px;padding:9px 0;border-bottom:1px dashed rgba(150,128,90,.32);position:relative;z-index:1}
+  .rr:last-child{border-bottom:none}
+  .rr .k{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--mut)}
+  .rr .v{text-align:right;font-weight:600;color:var(--ink);font-size:12px}
+  .rr .v small{display:block;font-family:'IBM Plex Mono',monospace;color:var(--mut);font-weight:400;font-size:10px;letter-spacing:.02em;margin-top:2px}
+  .rr .v.held{color:var(--ink2)}
+  .rr .v .vdot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:1px}
+  .rr .v .vdot.ok{background:var(--pine)} .rr .v .vdot.no{background:var(--brass)}
+
+  /* small carved-glass "gate" lens floating top-left to add depth */
+  .gate{position:absolute;left:-26px;top:18px;width:190px;padding:13px 14px;border-radius:16px;z-index:5;
+    background:linear-gradient(160deg,rgba(255,253,248,.74),rgba(250,246,238,.52));
+    backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px rgba(255,255,255,.45),0 20px 48px -18px rgba(48,40,24,.36)}
+  .gate .glab{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);font-weight:500}
+  .gate .grow{display:flex;align-items:center;gap:8px;margin-top:9px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.02em;color:var(--ink);font-weight:500}
+  .gate .grow .mini{width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex:none}
+  .gate .grow .mini.ok{background:var(--ok-bg);color:var(--ok)}
+  .gate .grow .mini.no{background:var(--no-bg);color:var(--no)}
+  .gate .grow.blk{color:var(--mut)}
+  @media(max-width:980px){.gate{display:none}}
+
+  /* ---------- below the fold: one "show the receipt" feature row ---------- */
+  .feat{padding:84px 0 30px}
+  .feat .lab{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--brass);font-weight:500;text-align:center}
+  .feat h2{font-family:'Fraunces',Georgia,serif;font-size:clamp(28px,3.4vw,44px);font-weight:500;letter-spacing:-.02em;margin:14px auto 0;line-height:1.1;color:var(--ink);text-align:center;max-width:18ch}
+  .feat .lede{color:var(--ink2);font-size:17px;margin:16px auto 0;max-width:52ch;text-align:center;line-height:1.55}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:46px}
+  .card{border:1px solid var(--line2);border-radius:16px;background:var(--soft);box-shadow:var(--shadow);padding:24px 22px}
+  .card .ic{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;background:var(--pine);box-shadow:inset 0 1px 0 rgba(255,255,255,.22)}
+  .card h3{font-family:'Fraunces',Georgia,serif;font-size:19px;font-weight:500;letter-spacing:-.01em;margin-top:14px;color:var(--ink)}
+  .card p{color:var(--ink2);font-size:14px;margin-top:8px;line-height:1.55}
+  .card p code{font-family:'IBM Plex Mono',monospace;font-size:12px;background:rgba(31,78,59,.08);color:var(--pine);padding:1px 5px;border-radius:5px}
+  .card .ck{color:var(--ok);font-weight:700}
+  @media(max-width:860px){.cards{grid-template-columns:1fr;gap:16px}}
+
+  .tagline{font-family:'Fraunces',Georgia,serif;text-align:center;margin:62px auto 0;max-width:24ch;font-size:clamp(24px,2.8vw,36px);font-weight:500;letter-spacing:-.02em;color:var(--ink);line-height:1.14}
+  .tagline span{color:var(--pine);font-style:italic;font-weight:400}
+  .endmicro{text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;color:var(--mut);margin:18px auto 0}
+
+  footer{margin-top:80px;border-top:1px solid var(--line);padding:30px 0 50px}
+  .fbar{display:flex;justify-content:space-between;align-items:center;color:var(--mut);font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.04em;flex-wrap:wrap;gap:12px}
+
+  /* ---------- responsive: stack the split on mobile ---------- */
+  @media(max-width:960px){
+    .split{grid-template-columns:1fr;gap:8px;min-height:0}
+    .left{padding:48px 0 6px;max-width:none}
+    .right{padding-bottom:62px}
+    .stage{padding:40px 22px 56px;min-height:0}
+    .app{margin:0 auto}
+    .receipt{right:50%;transform:translateX(50%);bottom:-44px;width:280px}
+  }
+  @media(max-width:520px){
+    .appbody{grid-template-columns:1fr}
+    .side{display:none}
+    .receipt{width:88%;right:50%}
+  }
+
+  /* ---------- motion: autostart hero · scroll-reveal rest ---------- */
+  .reveal{opacity:0;transform:translateY(12px) scale(.985);
+    transition:opacity .72s var(--ease),transform .72s var(--ease);will-change:opacity,transform}
+  .reveal.in{opacity:1;transform:none}
+  /* the right-side glass pieces rise with a spring once their parent is in */
+  .compose .app,.compose .receipt,.compose .gate{opacity:0;transform:translateY(22px) scale(.985)}
+  .compose.in .app{animation:rise 1s .12s var(--spring) forwards}
+  .compose.in .gate{animation:rise 1s .30s var(--spring) forwards}
+  .compose.in .receipt{animation:rise 1.05s .46s var(--spring) forwards, floaty 7s 1.5s ease-in-out infinite}
+
+  @keyframes rise{to{opacity:1;transform:none}}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+
+  @media(prefers-reduced-motion:reduce){
+    .reveal{opacity:1!important;transform:none!important;transition:none!important}
+    .orb{animation:none}
+    .compose .app,.compose .receipt,.compose .gate{opacity:1!important;transform:none!important;animation:none!important}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="row">
+    <a class="logo" href="#">
+      <svg class="mk" viewBox="0 0 120 120" aria-label="apt">
+        <circle cx="60" cy="60" r="46" fill="none" stroke="#1A150F" stroke-width="4.5"/>
+        <circle cx="60" cy="60" r="37.5" fill="none" stroke="#B4894C" stroke-width="1.4"/>
+        <g stroke="#B4894C" stroke-width="1.4" stroke-linecap="round">
+          <line x1="60" y1="10.5" x2="60" y2="16.5"/><line x1="60" y1="103.5" x2="60" y2="109.5"/>
+          <line x1="10.5" y1="60" x2="16.5" y2="60"/><line x1="103.5" y1="60" x2="109.5" y2="60"/>
+        </g>
+        <circle cx="60" cy="60" r="13" fill="#1F4E3B"/>
+      </svg>
+      <span class="wm">apt<span class="dot">.</span></span>
+    </a>
+    <div class="nlinks">
+      <a href="#">Platform<span class="caret">▾</span></a>
+      <a href="#">Resources<span class="caret">▾</span></a>
+      <a href="#">Customers</a>
+      <a href="#">Pricing</a>
+    </div>
+    <div class="nav-r">
+      <a class="btn ghost" href="#">Sign in</a>
+      <a class="btn dark" href="#">Start for free</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ SPLIT HERO ============ -->
+<header class="hero">
+  <div class="split">
+
+    <!-- LEFT: editorial apt bone -->
+    <div class="left">
+      <span class="pill"><span class="arc"></span> Every claim ships a receipt</span>
+      <h1 class="disp">Every word, apt<span class="dot">.</span></h1>
+      <p class="sub">apt tailors every visit to who's reading, learns what converts, and can't say what it can't prove. The proof rides along on the page.</p>
+      <div class="hero-cta">
+        <a class="btn dark lg" href="#">Start for free</a>
+        <a class="btn proof lg" href="#"><span class="pdot"></span> See a receipt</a>
+      </div>
+      <div class="micro">NO CREDIT CARD · <b>CLAIMS GATED BY SOURCE ON DAY ONE</b></div>
+    </div>
+
+    <!-- RIGHT: liquid-glass composition over a warm tinted panel -->
+    <div class="right">
+      <div class="stage">
+        <div class="orb a" aria-hidden="true"></div>
+        <div class="orb b" aria-hidden="true"></div>
+
+        <div class="compose">
+
+          <!-- glass app panel: the personalize UI -->
+          <div class="app glass">
+            <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">apt.site/r/ax9f2 · resolved at the edge</span></div>
+            <div class="appbody">
+              <aside class="side">
+                <div class="g">Resolved</div>
+                <div class="it on"><span class="d"></span>Sarah Chen · R&amp;D Dir.</div>
+                <div class="it"><span class="d"></span>Acme Bio · 1,200</div>
+                <div class="it"><span class="d"></span>Segment · clinops</div>
+                <div class="g" style="margin-top:13px">Tier</div>
+                <div class="it on"><span class="d"></span>Tier 2 · contextual</div>
+                <div class="it heldout"><span class="d"></span>Tier 4 · held out</div>
+              </aside>
+              <div class="main">
+                <div class="chips"><span class="chip k">Known · 100% match</span><span class="chip t">Tier 2</span></div>
+                <div class="mh">Hi Sarah — here's how Acme Bio cuts <em>assay turnaround 40%</em></div>
+                <p class="mp">Hero, proof and CTA chosen for a clinical-ops lead. Every figure traces to a verified source.</p>
+                <div class="claim"><span class="ck">✓</span><span class="ct">Reduce average length of stay 1.2 days</span><span class="src">c_los</span></div>
+                <div class="claim"><span class="ck">✓</span><span class="ct">SOC 2 Type II · HIPAA</span><span class="src">c_soc2</span></div>
+                <div class="claim no"><span class="ck">✕</span><span class="ct">"Trusted by 500+ hospitals" — unprovable</span><span class="src">held</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- small glass "gate" lens (top-left, adds depth) -->
+          <div class="gate" aria-hidden="false">
+            <div class="glab">Truth gate</div>
+            <div class="grow"><span class="mini ok">✓</span> length-of-stay → c_los</div>
+            <div class="grow"><span class="mini ok">✓</span> SOC 2 / HIPAA → c_soc2</div>
+            <div class="grow blk"><span class="mini no">✕</span> 500+ hospitals · held</div>
+          </div>
+
+          <!-- THE floating receipt lens — hero of the right side · a verification certificate -->
+          <div class="receipt">
+            <div class="rh"><span class="pdot"></span> · VERIFICATION RECEIPT</div>
+            <div class="rr"><span class="k">Length-of-stay</span><span class="v"><span class="vdot ok"></span>VERIFIED<small>case-acme.pdf §3</small></span></div>
+            <div class="rr"><span class="k">SOC 2 / HIPAA</span><span class="v"><span class="vdot ok"></span>VERIFIED<small>soc2-typeii.pdf §4.2</small></span></div>
+            <div class="rr"><span class="k">Personalized using</span><span class="v held">Company + role<small>tier 2 · contextual</small></span></div>
+            <div class="rr"><span class="k">Withheld</span><span class="v held"><span class="vdot no"></span>1 CLAIM<small>unprovable · held out</small></span></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</header>
+
+<!-- ============ BELOW THE FOLD: show the receipt ============ -->
+<section class="feat wrap">
+  <div class="lab">Show the receipt</div>
+  <h2>Honesty becomes a visible, costly signal.</h2>
+  <p class="lede">Resolution happens at the edge. The truth gate binds every claim to a source. And the verification receipt rides along on the page — so the visitor can see exactly what was proven, and what was withheld.</p>
+
+  <div class="cards">
+    <div class="card">
+      <div class="ic">⌖</div>
+      <h3>Resolve at the edge</h3>
+      <p>A tokenized link becomes <b>Sarah Chen · R&amp;D Dir.</b> An IP becomes <b>Acme Bio · 1,200</b>, segment <b>clinops</b>. Tier 2 personalizes; tier 4 is held out by design.</p>
+    </div>
+    <div class="card">
+      <div class="ic">⊟</div>
+      <h3>Gate on the truth</h3>
+      <p>Each claim maps to a source tag. <span class="ck">✓</span> length-of-stay → <code>c_los</code>. <span class="ck">✓</span> SOC 2 → <code>c_soc2</code>. "Trusted by 500+ hospitals" is unprovable, so it's <b>held out</b> — by construction, not by review.</p>
+    </div>
+    <div class="card">
+      <div class="ic">●</div>
+      <h3>Ship the receipt</h3>
+      <p>The page shows what it proved: length-of-stay <b>Verified</b>, SOC 2 / HIPAA <b>Verified</b>, personalized using company + role at tier 2, and <b>1 claim withheld</b> as unprovable.</p>
+    </div>
+  </div>
+
+  <div class="tagline">Every word, apt — <span>can't say what it can't prove.</span></div>
+  <div class="endmicro">TRUTH-BOUNDED PERSONALIZATION · RESOLVED AT THE EDGE · GATED BY SOURCE · RECEIPT ON EVERY PAGE</div>
+</section>
+
+<footer class="wrap">
+  <div class="fbar">
+    <span>© 2026 apt.</span>
+    <span>SOC 2 TYPE II · HIPAA-READY · CAN-SPAM / CASL BOUND</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Left (editorial) elements autostart on load, staggered top-to-bottom.
+  var heroSel = ['.left .pill','.left h1','.left .sub','.left .hero-cta','.left .micro'];
+  // The right-side composition + the below-fold row reveal on scroll.
+  var revealSel = ['.compose','.feat .lab','.feat h2','.feat .lede','.feat .card','.tagline','.endmicro','.fbar'];
+
+  var hero = [];
+  heroSel.forEach(function(s){ document.querySelectorAll(s).forEach(function(e){ hero.push(e); }); });
+  var rest = [];
+  revealSel.forEach(function(s){ document.querySelectorAll(s).forEach(function(e){ rest.push(e); }); });
+
+  hero.concat(rest).forEach(function(e){ e.classList.add('reveal'); });
+
+  if(reduce){
+    hero.concat(rest).forEach(function(e){ e.classList.add('in'); });
+    return;
+  }
+
+  // stagger siblings (feature cards) by index in their parent
+  rest.forEach(function(e){
+    var sibs = [].slice.call(e.parentNode.children).filter(function(c){ return c.classList.contains('reveal'); });
+    var i = sibs.indexOf(e);
+    if(i > 0) e.style.transitionDelay = (i * 80) + 'ms';
+  });
+
+  // AUTOSTART: reveal the editorial left on load, staggered.
+  window.addEventListener('load', function(){
+    hero.forEach(function(e, i){ setTimeout(function(){ e.classList.add('in'); }, 70 + i * 95); });
+  });
+
+  // SCROLL-TRIGGERED: reveal the rest (incl. the glass composition) as they enter view.
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+  rest.forEach(function(e){ io.observe(e); });
+
+  // The glass composition is above the fold — if it's already in view at load, kick it.
+  window.addEventListener('load', function(){
+    var c = document.querySelector('.compose');
+    if(c){ var r = c.getBoundingClientRect(); if(r.top < window.innerHeight){ c.classList.add('in'); } }
+  });
+})();
+</script>
+</body>
+</html>

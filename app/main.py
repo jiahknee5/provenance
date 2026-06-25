@@ -34,6 +34,12 @@ def talk():
     return RedirectResponse("/static/talk/deck.html")
 
 
+@app.get("/guide")
+def guide():
+    """Engineering writeup: the copy-research swarm → the two-axis Gate (verify_copy/message/sequence)."""
+    return RedirectResponse("/static/mockups/copy-research-guide.html")
+
+
 @app.get("/lead", response_class=HTMLResponse)
 def form(request: Request):
     return templates.TemplateResponse(request, "form.html", {
@@ -84,3 +90,4 @@ from app import sources as _sources  # noqa: E402,F401
 from app import composer as _composer  # noqa: E402,F401
 from app import policies as _policies  # noqa: E402,F401
 from app import graph as _graph  # noqa: E402,F401
+from app import help as _help  # noqa: E402,F401

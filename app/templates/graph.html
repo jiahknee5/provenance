@@ -21,6 +21,8 @@
   function fit(){ try{ var h=f.contentWindow.document.body.scrollHeight; if(h) f.style.height=(h+24)+'px'; }catch(e){} }
   f.addEventListener('load',function(){ fit(); setTimeout(fit,300); });
   window.addEventListener('resize',fit);
+  // the embedded agent graph posts this when its detail panel / tier trace changes height
+  window.addEventListener('message',function(ev){ if(ev.data==='prov-graph-refit'){ fit(); setTimeout(fit,60); } });
 })();
 </script>
 {% endblock %}

@@ -7,7 +7,7 @@
   <div class="q-pagehead"><div>
     <span class="q-pill a" style="margin-bottom:10px"><span class="d"></span>Watched</span>
     <h1>Policies <span class="q-muted" style="font-size:15px;font-weight:500">· what the AI may and may not say</span></h1>
-    <p class="q-muted" style="margin:5px 0 0;max-width:86ch"><b style="color:var(--slate)">Proves:</b> your <b>corpus</b> is the source of truth — the AI may state anything grounded in it, <b>must cite it</b>, and may say nothing the corpus can&rsquo;t back. On top sit your approved claims, a deny-list, and how facts may be disclosed. The <b>Provability</b> section is the Gate — inviolable.</p>
+    <p class="q-muted" style="margin:5px 0 0;max-width:86ch"><b style="color:var(--slate)">Proves:</b> your <b>corpus</b> is the source of truth — the AI may state anything grounded in it, <b>must cite it</b>, and may say nothing the corpus can&rsquo;t back. On top: approved claims, a deny-list, and how facts may be disclosed. <b>Provability</b> is the Gate — inviolable.</p>
   </div></div>
 
   <div class="pol-bar">
@@ -31,31 +31,29 @@
     </div>
 
     {% if s.key == 'corpus' %}
-      <div id="corpus-list">
+      <table class="ptable"><thead><tr><th style="width:24%">Document</th><th style="width:13%">Type</th><th>What it backs</th><th></th></tr></thead>
+      <tbody id="corpus-body">
         {% for d in s.docs %}
-        <div class="pcard"><div class="pc-row">
-          <input class="q-input nm" name="c_name" value="{{ d.name }}" placeholder="Document name">
-          <select class="q-input kind" name="c_kind">{{ kindopts(d.kind) }}</select>
-          <button type="button" class="rm" onclick="rmCard(this)" title="remove">✕</button>
-        </div>
-        <input class="q-input ref" name="c_ref" value="{{ d.ref }}" placeholder="URL, or a one-line note on what it backs"></div>
+        <tr><td><input name="c_name" value="{{ d.name }}" placeholder="Document name"></td>
+          <td><select name="c_kind">{{ kindopts(d.kind) }}</select></td>
+          <td><input name="c_ref" value="{{ d.ref }}" placeholder="URL or a one-line note on what it backs"></td>
+          <td class="act">{% if d.hasfile %}<button type="button" class="lnk" onclick="viewDoc('{{ d.slug }}','{{ d.name }}')"><i class="ph ph-eye"></i> View</button>{% endif %}<button type="button" class="rm" onclick="rmRow(this)" title="remove">✕</button></td></tr>
         {% endfor %}
-      </div>
-      <button type="button" class="q-btn outline" onclick="addCard('corpus-list','tpl-corpus')"><i class="ph ph-plus"></i> Add document</button>
-      <p class="q-muted" style="font-size:11.5px;margin:10px 0 0"><i class="ph ph-info"></i> Every claim the AI ships is cited back to one of these. Pasted/URL sources persist now; file ingestion + embedding wires to the Gate&rsquo;s claims library.</p>
+      </tbody></table>
+      <button type="button" class="q-btn outline" style="margin-top:11px" onclick="addRow('corpus-body','tr-corpus')"><i class="ph ph-plus"></i> Add document</button>
+      <p class="q-muted" style="font-size:11.5px;margin:10px 0 0"><i class="ph ph-info"></i> Every claim the AI ships is cited back to one of these. The seed docs carry real (synthetic) content — click <b>View</b>. File ingestion + embedding wires to the Gate&rsquo;s claims library.</p>
 
     {% elif s.key == 'claims' %}
-      <div class="q-label" style="margin:2px 0 8px"><i class="ph ph-check-circle" style="color:var(--g)"></i> Can say · approved claims (carry a citation)</div>
-      <div id="can-list">
+      <div class="q-label" style="margin:2px 0 8px"><i class="ph ph-check-circle" style="color:var(--g)"></i> Can say · approved claims, each with a citation</div>
+      <table class="ptable"><thead><tr><th>Approved claim</th><th style="width:24%">Cites</th><th></th></tr></thead>
+      <tbody id="can-body">
         {% for k in s.can %}
-        <div class="pcard"><div class="pc-row">
-          <textarea class="q-input cl" name="cs_claim" rows="2" placeholder="An approved claim…">{{ k.claim }}</textarea>
-          <button type="button" class="rm" onclick="rmCard(this)" title="remove">✕</button>
-        </div>
-        <input class="q-input ref" name="cs_cite" value="{{ k.cite }}" placeholder="cite → which corpus document backs it"></div>
+        <tr><td><input name="cs_claim" value="{{ k.claim }}" placeholder="An approved claim…"></td>
+          <td><input name="cs_cite" value="{{ k.cite }}" placeholder="which document"></td>
+          <td class="act"><button type="button" class="rm" onclick="rmRow(this)">✕</button></td></tr>
         {% endfor %}
-      </div>
-      <button type="button" class="q-btn outline" onclick="addCard('can-list','tpl-claim')"><i class="ph ph-plus"></i> Add approved claim</button>
+      </tbody></table>
+      <button type="button" class="q-btn outline" style="margin-top:11px" onclick="addRow('can-body','tr-claim')"><i class="ph ph-plus"></i> Add approved claim</button>
 
       <div class="q-label" style="margin:20px 0 8px"><i class="ph ph-prohibit" style="color:var(--r)"></i> Cannot say · never make these claims</div>
       <div class="chips" id="cannot-chips">
@@ -65,25 +63,24 @@
         <button class="q-btn outline" type="button" onclick="addChip('cannot-chips','cannot','cannot-in')"><i class="ph ph-plus"></i> Add</button></div>
 
     {% elif s.key == 'disclosure' %}
-      <div id="disc-list">
+      <table class="ptable"><thead><tr><th style="width:22%">Rule</th><th style="width:14%">Setting</th><th>What it means</th><th></th></tr></thead>
+      <tbody id="disc-body">
         {% for d in s.cards %}
-        <div class="pcard"><div class="pc-row">
-          <input class="q-input nm" name="d_name" value="{{ d.name }}" placeholder="Rule name">
-          <select class="q-input rule-sel {{ d.rule }}" name="d_rule" onchange="this.className='q-input rule-sel '+this.value">{{ ruleopts(d.rule) }}</select>
-          <button type="button" class="rm" onclick="rmCard(this)" title="remove">✕</button>
-        </div>
-        <textarea class="q-input ds" name="d_desc" rows="2" placeholder="Plain-English description…">{{ d.desc }}</textarea></div>
+        <tr><td><input name="d_name" value="{{ d.name }}" placeholder="Rule name"></td>
+          <td><select name="d_rule" class="rule-sel {{ d.rule }}" onchange="this.className='rule-sel '+this.value">{{ ruleopts(d.rule) }}</select></td>
+          <td><input name="d_desc" value="{{ d.desc }}" placeholder="Plain-English description"></td>
+          <td class="act"><button type="button" class="rm" onclick="rmRow(this)">✕</button></td></tr>
         {% endfor %}
-      </div>
-      <button type="button" class="q-btn outline" onclick="addCard('disc-list','tpl-disc')"><i class="ph ph-plus"></i> Add rule</button>
+      </tbody></table>
+      <button type="button" class="q-btn outline" style="margin-top:11px" onclick="addRow('disc-body','tr-disc')"><i class="ph ph-plus"></i> Add rule</button>
 
     {% elif s.key == 'antislop' %}
-      {% for d in s.cards %}
-      <div class="pcard lock"><div class="pc-row">
-        <b style="font-size:13px">{{ d.name }}</b>
-        <span class="q-pill r" style="margin-left:auto"><span class="d"></span>block</span> <i class="ph ph-lock-simple" style="color:var(--label)"></i>
-      </div><p class="q-muted" style="font-size:12.5px;margin:5px 0 0">{{ d.desc }}</p></div>
-      {% endfor %}
+      <table class="ptable"><thead><tr><th style="width:26%">Rule</th><th>What it blocks</th><th></th></tr></thead>
+      <tbody>
+        {% for d in s.cards %}
+        <tr><td><b>{{ d.name }}</b></td><td class="q-muted">{{ d.desc }}</td><td class="act"><span class="q-pill r"><span class="d"></span>block</span> <i class="ph ph-lock-simple" style="color:var(--label)"></i></td></tr>
+        {% endfor %}
+      </tbody></table>
       <div class="q-label" style="margin:16px 0 8px">Your banned phrases</div>
       <div class="chips" id="slop-chips">
         {% for c in s.custom %}<span class="chip-x"><input type="hidden" name="antislop_add" value="{{ c.raw }}">{{ c.raw }} <button type="button" class="x" onclick="this.parentNode.remove()">×</button></span>{% endfor %}
@@ -102,13 +99,13 @@
         <label class="toggle"><input type="checkbox" name="consent_required" {{ 'checked' if s.consent_required else '' }}> <span><b>Require consent before personalization</b> — gate every fact on consent.</span></label>
       </div>
 
-    {% else %}{# provability — locked cards #}
-      {% for d in s.cards %}
-      <div class="pcard lock"><div class="pc-row">
-        <b style="font-size:13px">{{ d.name }}</b>
-        <span class="q-pill {{ rule_pill.get(d.rule,'b') }}" style="margin-left:auto"><span class="d"></span>{{ d.rule }}</span> <i class="ph ph-lock-simple" style="color:var(--label)"></i>
-      </div><p class="q-muted" style="font-size:12.5px;margin:5px 0 0">{{ d.desc }}</p></div>
-      {% endfor %}
+    {% else %}{# provability — locked table #}
+      <table class="ptable"><thead><tr><th style="width:26%">Rule</th><th>What it enforces</th><th></th></tr></thead>
+      <tbody>
+        {% for d in s.cards %}
+        <tr><td><b>{{ d.name }}</b></td><td class="q-muted">{{ d.desc }}</td><td class="act"><span class="q-pill {{ rule_pill.get(d.rule,'b') }}"><span class="d"></span>{{ d.rule }}</span> <i class="ph ph-lock-simple" style="color:var(--label)"></i></td></tr>
+        {% endfor %}
+      </tbody></table>
     {% endif %}
   </section>
   {% endfor %}
@@ -121,43 +118,55 @@
     </div>
   </div>
 
-  <!-- add-card templates -->
-  <template id="tpl-corpus"><div class="pcard"><div class="pc-row">
-    <input class="q-input nm" name="c_name" placeholder="Document name">
-    <select class="q-input kind" name="c_kind">{{ kindopts('doc') }}</select>
-    <button type="button" class="rm" onclick="rmCard(this)">✕</button></div>
-    <input class="q-input ref" name="c_ref" placeholder="URL, or a one-line note on what it backs"></div></template>
-  <template id="tpl-claim"><div class="pcard"><div class="pc-row">
-    <textarea class="q-input cl" name="cs_claim" rows="2" placeholder="An approved claim…"></textarea>
-    <button type="button" class="rm" onclick="rmCard(this)">✕</button></div>
-    <input class="q-input ref" name="cs_cite" placeholder="cite → which corpus document backs it"></div></template>
-  <template id="tpl-disc"><div class="pcard"><div class="pc-row">
-    <input class="q-input nm" name="d_name" placeholder="Rule name">
-    <select class="q-input rule-sel allude" name="d_rule" onchange="this.className='q-input rule-sel '+this.value">{{ ruleopts('allude') }}</select>
-    <button type="button" class="rm" onclick="rmCard(this)">✕</button></div>
-    <textarea class="q-input ds" name="d_desc" rows="2" placeholder="Plain-English description…"></textarea></div></template>
+  <!-- add-row templates -->
+  <template id="tr-corpus"><tr><td><input name="c_name" placeholder="Document name"></td>
+    <td><select name="c_kind">{{ kindopts('doc') }}</select></td>
+    <td><input name="c_ref" placeholder="URL or a one-line note on what it backs"></td>
+    <td class="act"><button type="button" class="rm" onclick="rmRow(this)">✕</button></td></tr></template>
+  <template id="tr-claim"><tr><td><input name="cs_claim" placeholder="An approved claim…"></td>
+    <td><input name="cs_cite" placeholder="which document"></td>
+    <td class="act"><button type="button" class="rm" onclick="rmRow(this)">✕</button></td></tr></template>
+  <template id="tr-disc"><tr><td><input name="d_name" placeholder="Rule name"></td>
+    <td><select name="d_rule" class="rule-sel allude" onchange="this.className='rule-sel '+this.value">{{ ruleopts('allude') }}</select></td>
+    <td><input name="d_desc" placeholder="Plain-English description"></td>
+    <td class="act"><button type="button" class="rm" onclick="rmRow(this)">✕</button></td></tr></template>
+
+  <!-- corpus document viewer -->
+  <div class="docmodal" id="docmodal"><div class="docbox">
+    <div class="dochead"><span><i class="ph ph-file-text"></i> <b id="doc-title"></b> <span class="q-muted" style="font-size:11.5px">· the AI may cite from this</span></span><button type="button" onclick="closeDoc()">✕</button></div>
+    <pre id="doc-body" class="docpre"></pre>
+  </div></div>
 
 <style>
   .pol-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
     background:var(--surface);border:1px solid var(--hairline);border-radius:var(--r-card);padding:11px 15px;box-shadow:var(--shadow-card)}
   .pol-cathead{margin:0 0 14px}
-  .pcard{border:1px solid var(--hairline);border-radius:var(--r-card);background:var(--surface);padding:12px 14px;margin-bottom:10px;box-shadow:var(--shadow-card)}
-  .pcard.lock{background:var(--fill);box-shadow:none}
-  .pc-row{display:flex;gap:9px;align-items:center}
-  .pcard .nm{flex:1;font-weight:600}
-  .pcard .cl{flex:1;resize:vertical;font-weight:500}
-  .pcard .kind{width:120px;flex:none} .pcard .ref,.pcard .ds{margin-top:8px}
-  .pcard .ds{resize:vertical}
-  .pcard .rm{flex:none;border:0;background:none;color:var(--label);font-size:14px;cursor:pointer;padding:4px}
-  .pcard .rm:hover{color:var(--r)}
-  .rule-sel{width:104px;flex:none;font-weight:600}
-  .rule-sel.say{color:var(--g);border-color:var(--g)} .rule-sel.allude{color:var(--a);border-color:var(--a)} .rule-sel.hold{color:var(--r);border-color:var(--r)}
+  .ptable{width:100%;border-collapse:collapse;font-size:13px;background:var(--surface);border:1px solid var(--hairline);border-radius:var(--r-card);overflow:hidden;box-shadow:var(--shadow-card)}
+  .ptable th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--label);font-weight:600;padding:9px 12px;border-bottom:1px solid var(--hairline)}
+  .ptable td{padding:5px 8px;border-bottom:1px solid var(--hairline);vertical-align:middle}
+  .ptable tr:last-child td{border-bottom:0}
+  .ptable td.act{white-space:nowrap;text-align:right;width:1%}
+  .ptable td b{font-weight:600;color:var(--ink);font-size:12.5px}
+  .ptable input,.ptable select{width:100%;border:1px solid transparent;background:transparent;font:13px var(--font-ui);color:var(--ink);padding:6px 8px;border-radius:7px}
+  .ptable input:hover,.ptable select:hover{border-color:var(--hairline)}
+  .ptable input:focus,.ptable select:focus{border-color:var(--signal);background:var(--surface);outline:none}
+  .ptable .rule-sel{font-weight:600;width:auto;min-width:84px}
+  .rule-sel.say{color:var(--g)} .rule-sel.allude{color:var(--a)} .rule-sel.hold{color:var(--r)}
+  .ptable .rm{border:0;background:none;color:var(--label);cursor:pointer;font-size:13px;padding:5px}
+  .ptable .rm:hover{color:var(--r)}
+  .ptable .lnk{border:0;background:none;color:var(--signal);cursor:pointer;font:600 12px var(--font-ui);margin-right:8px}
   .chips{display:flex;flex-wrap:wrap;gap:7px}
   .chip-x{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;border-radius:20px;padding:5px 11px;background:var(--rbg);color:var(--r);border:1px solid var(--r)}
   .chip-x .x{border:0;background:none;color:var(--r);font-size:15px;line-height:1;cursor:pointer;padding:0}
   .addrow{display:flex;gap:8px;margin-top:11px;max-width:520px}.addrow .q-input{flex:1}
   .toggle{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--slate);cursor:pointer}
   .toggle input{width:16px;height:16px;accent-color:var(--ink)}
+  .docmodal{display:none;position:fixed;inset:0;background:rgba(15,18,22,.45);z-index:60;align-items:center;justify-content:center;padding:30px}
+  .docmodal.on{display:flex}
+  .docbox{background:var(--surface);border-radius:var(--r-card);max-width:760px;width:100%;max-height:82vh;display:flex;flex-direction:column;box-shadow:var(--shadow-pop);overflow:hidden}
+  .dochead{display:flex;align-items:center;justify-content:space-between;padding:13px 17px;border-bottom:1px solid var(--hairline);font-size:14px}
+  .dochead button{border:0;background:none;font-size:16px;cursor:pointer;color:var(--muted)}
+  .docpre{margin:0;padding:18px 20px;overflow:auto;font:12.5px/1.65 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;color:var(--slate)}
 </style>
 <script>
 (function(){
@@ -168,11 +177,8 @@
     tabs.forEach(function(x){x.classList.toggle('on',x===t);});
     panes.forEach(function(p){p.style.display=(p.getAttribute('data-pane')===k)?'':'none';});
   });});
-  window.rmCard=function(btn){ var c=btn.closest('.pcard'); if(c) c.remove(); };
-  window.addCard=function(listId,tplId){
-    var t=document.getElementById(tplId); var node=t.content.cloneNode(true);
-    document.getElementById(listId).appendChild(node);
-  };
+  window.rmRow=function(btn){ var tr=btn.closest('tr'); if(tr) tr.remove(); };
+  window.addRow=function(bodyId,tplId){ document.getElementById(bodyId).appendChild(document.getElementById(tplId).content.cloneNode(true)); };
   window.addChip=function(wrapId,name,inId){
     var inp=document.getElementById(inId), v=(inp.value||'').trim(); if(!v) return;
     var span=document.createElement('span'); span.className='chip-x';
@@ -185,6 +191,18 @@
   ['cannot-in','slop-in','sens-in'].forEach(function(id){ var el=document.getElementById(id); if(!el) return;
     var map={'cannot-in':['cannot-chips','cannot'],'slop-in':['slop-chips','antislop_add'],'sens-in':['sens-chips','sensitive']};
     el.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); addChip(map[id][0],map[id][1],id); } }); });
+  var modal=document.getElementById('docmodal');
+  window.viewDoc=function(slug,name){
+    document.getElementById('doc-title').textContent=name;
+    document.getElementById('doc-body').textContent='Loading…';
+    fetch('/policies/corpus/'+encodeURIComponent(slug)).then(function(r){return r.text();})
+      .then(function(t){ document.getElementById('doc-body').textContent=t; })
+      .catch(function(){ document.getElementById('doc-body').textContent='Could not load.'; });
+    modal.classList.add('on');
+  };
+  window.closeDoc=function(){ modal.classList.remove('on'); };
+  modal.addEventListener('click',function(e){ if(e.target===modal) closeDoc(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeDoc(); });
 })();
 </script>
 {% endblock %}

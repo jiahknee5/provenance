@@ -393,3 +393,35 @@ h1{font-size:30px;line-height:1.1} h2{font-size:20px} h3{font-size:16px}
 .q-kpi.g-on .fill{background:var(--g)} .q-kpi.g-mid .fill{background:var(--a)} .q-kpi.g-low .fill{background:var(--muted)}
 .q-kpi.g-on .cur{color:var(--g)} .q-kpi.g-mid .cur{color:var(--a)} .q-kpi.g-low .cur{color:var(--muted)}
 @media(max-width:980px){.q-kpitree{grid-template-columns:1fr}}
+
+/* ============================================================
+   v2.0 — Help corpus (/help): long-form doc prose + index cards. Token-only.
+   ============================================================ */
+.q-prose{max-width:760px}
+.q-prose .hp{font-size:14.5px;line-height:1.65;color:var(--slate);margin:0 0 14px}
+.q-prose .hp code,.q-prose li code,.q-kv code{font-family:var(--font-mono);font-size:.88em;background:var(--fill);border:1px solid var(--hairline);border-radius:5px;padding:1px 5px;color:var(--ink)}
+.q-prose h3.hh{font-size:16px;margin:26px 0 10px}
+.q-prose ul.hul,.q-prose ol.hol{margin:0 0 14px;padding-left:22px;color:var(--slate);font-size:14.5px;line-height:1.6}
+.q-prose ul.hul li,.q-prose ol.hol li{margin:5px 0}
+.q-prose .hnote{background:var(--fill2);border:1px solid var(--hairline);border-left:3px solid var(--signal);border-radius:8px;padding:11px 14px;margin:0 0 16px;font-size:13.5px;color:var(--slate);line-height:1.6}
+.q-prose .hcode{background:var(--cta);color:var(--on-cta);font-family:var(--font-mono);font-size:12.5px;border-radius:8px;padding:12px 14px;margin:0 0 16px;overflow-x:auto;line-height:1.5}
+.q-kv{width:100%;border-collapse:collapse;font-size:13.5px;margin:0 0 16px}
+.q-kv td{border-bottom:1px solid var(--hairline);padding:8px 12px;vertical-align:top;color:var(--slate)}
+.q-kv tr:last-child td{border-bottom:0}
+.q-kv td:first-child{font-weight:600;color:var(--ink);white-space:nowrap;width:1%;padding-right:18px}
+.q-kvtitle{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--label);margin:0 0 6px}
+.help-cat{margin:26px 0 12px}
+.help-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.help-card{display:flex;flex-direction:column;gap:6px;border:1px solid var(--hairline);border-radius:var(--r-card);background:var(--surface);padding:16px 18px;box-shadow:var(--shadow-card),var(--carve);transition:transform var(--t-press) var(--ease-spring),box-shadow var(--t) var(--ease),border-color var(--t) var(--ease)}
+.help-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-pop);border-color:var(--border)}
+.help-card .ht{font-size:15px;font-weight:600;color:var(--ink);letter-spacing:-.01em}
+.help-card .hs{font-size:13px;color:var(--muted);line-height:1.5}
+.help-card .hm{font-size:11px;color:var(--label);font-variant-numeric:tabular-nums;margin-top:auto;padding-top:4px}
+.help-crumb{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);margin-bottom:14px}
+.help-crumb a{color:var(--muted)} .help-crumb a:hover{color:var(--ink)}
+.help-nextprev{display:flex;gap:12px;margin-top:30px;padding-top:18px;border-top:1px solid var(--hairline)}
+.help-np{flex:1;border:1px solid var(--hairline);border-radius:var(--r-card);padding:12px 15px;transition:border-color var(--t) var(--ease),background var(--t) var(--ease)}
+.help-np:hover{border-color:var(--border);background:var(--fill2)}
+.help-np .d{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--label)}
+.help-np .t{font-size:13.5px;font-weight:600;color:var(--ink);margin-top:3px}
+@media(max-width:760px){.help-grid{grid-template-columns:1fr}}

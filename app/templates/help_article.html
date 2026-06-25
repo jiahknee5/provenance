@@ -1,0 +1,37 @@
+{% extends "shell.html" %}
+{% block title %}Provenance — {{ a.title }}{% endblock %}
+{% block crumb %}<i class="ph ph-question"></i> Help{% endblock %}
+{% block content %}
+<div class="help-crumb"><a href="/help">Help</a><i class="ph ph-caret-right" style="font-size:11px"></i><span>{{ a.category }}</span></div>
+<div class="q-pagehead"><div>
+  <h1>{{ a.title }}</h1>
+  <p class="q-muted" style="margin:6px 0 0">{{ a.summary }}{% if a.read_min %} · {{ a.read_min }} min read{% endif %}</p>
+</div></div>
+
+<div class="q-prose">
+  {% for b in a.blocks %}
+    {% if b.type == 'p' %}<p class="hp">{{ b.html|safe }}</p>
+    {% elif b.type == 'h' %}<h3 class="hh">{{ b.text }}</h3>
+    {% elif b.type == 'ul' %}<ul class="hul">{% for it in b['items'] %}<li>{{ it|safe }}</li>{% endfor %}</ul>
+    {% elif b.type == 'ol' %}<ol class="hol">{% for it in b['items'] %}<li>{{ it|safe }}</li>{% endfor %}</ol>
+    {% elif b.type == 'note' %}<div class="hnote">{{ b.html|safe }}</div>
+    {% elif b.type == 'kv' %}{% if b.title %}<div class="q-kvtitle">{{ b.title }}</div>{% endif %}<table class="q-kv"><tbody>{% for r in b.rows %}<tr><td>{{ r[0]|safe }}</td><td>{{ r[1]|safe }}</td></tr>{% endfor %}</tbody></table>
+    {% elif b.type == 'code' %}<pre class="hcode">{{ b.text }}</pre>
+    {% endif %}
+  {% endfor %}
+</div>
+
+{% if related %}
+<div class="q-sec" style="margin-top:30px">Related</div>
+<div class="help-grid">
+  {% for r in related %}
+  <a class="help-card" href="/help/{{ r.slug }}"><span class="ht">{{ r.title }}</span><span class="hs">{{ r.summary }}</span></a>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="help-nextprev">
+  {% if prev %}<a class="help-np" href="/help/{{ prev.slug }}"><div class="d">← Previous</div><div class="t">{{ prev.title }}</div></a>{% endif %}
+  {% if next %}<a class="help-np" href="/help/{{ next.slug }}" style="text-align:right"><div class="d">Next →</div><div class="t">{{ next.title }}</div></a>{% endif %}
+</div>
+{% endblock %}

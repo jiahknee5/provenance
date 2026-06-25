@@ -1,0 +1,1511 @@
+[
+ {
+  "slug": "overview",
+  "title": "What Provenance is",
+  "category": "Start here",
+  "summary": "The problem, the thesis, the five modules, and the two channels — what Provenance actually is.",
+  "read_min": 5,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "Welcome to <b>Provenance</b> — a system of record for claims, built around one idea: <b>outreach that can't say what it can't prove</b>. This article is the front door. It explains the problem we're solving, the thesis behind the design, and the pieces you'll meet as you explore."
+   },
+   {
+    "type": "h",
+    "text": "The problem"
+   },
+   {
+    "type": "p",
+    "html": "Ultra-personalization breaks human review. You can't legally read 100,000 unique messages, so in claims-heavy domains (health-tech, finance, anything regulated) you're forced to choose: <b>generic-but-reviewed</b>, or <b>personal-but-unverified</b>. The real bottleneck isn't writing — it's <b>verification at scale</b>. Once every message is unique, no human can stand behind what each one says."
+   },
+   {
+    "type": "h",
+    "text": "The thesis"
+   },
+   {
+    "type": "p",
+    "html": "Provenance flips the trade-off: instead of reviewing output after the fact, it makes the system unable to assert anything it can't ground in an approved source. Personalization is then free to optimize — but only <b>inside the truth boundary</b>. An AI move can't win by saying something it can't prove, because an unprovable variant is never admitted to the pool in the first place."
+   },
+   {
+    "type": "note",
+    "html": "Optimizing <i>inside</i> the truth boundary is the whole trick: the bandit still hunts for the best-performing variant per segment, but the choices it's allowed to make are pre-constrained to verified, permissible ones. The constraint is structural, not a downstream filter you hope catches the lie."
+   },
+   {
+    "type": "h",
+    "text": "The five modules"
+   },
+   {
+    "type": "p",
+    "html": "Provenance is built from five modules. Each one has its own help article — follow the link to go deeper."
+   },
+   {
+    "type": "kv",
+    "title": "The system, end to end",
+    "rows": [
+     [
+      "Claims Library",
+      "Approved source documents become atomic claims, each bound to a verbatim source span — a versioned claim–evidence graph. <a href=\"/help/claims-library\">Read more →</a>"
+     ],
+     [
+      "The Gate",
+      "Decompose → retrieve → NLI → calibrated ensemble → compliance rules → a green/amber/red ledger. A blocked claim never becomes a sendable variant. <a href=\"/help/the-gate\">Read more →</a>"
+     ],
+     [
+      "The Optimizer",
+      "A contextual bandit that learns the best <i>verified</i> variant per segment — the ungated arm is out of the pool by construction. <a href=\"/help/the-optimizer\">Read more →</a>"
+     ],
+     [
+      "Drift Monitor",
+      "On a source change or legal-hold flip, it surgically re-verifies only the affected claims and pauses the dependent variants. <a href=\"/help/drift-monitor\">Read more →</a>"
+     ],
+     [
+      "Assurance Lab",
+      "An adversarial harness that proves the Gate works — it runs trap claims through the real Gate and beats a single-judge baseline. <a href=\"/help/assurance-lab\">Read more →</a>"
+     ]
+    ]
+   },
+   {
+    "type": "h",
+    "text": "The two channels"
+   },
+   {
+    "type": "p",
+    "html": "The same Gate governs outreach across <b>two channels</b>: the <b>email</b> campaign (the bandit optimizes verified variants per segment) and the <b>website</b> (a personalized page that renders <i>only</i> Gate-passed claims). The same <code>claim_id</code> gets the same verdict on both channels — the truth boundary doesn't change when the surface does."
+   },
+   {
+    "type": "h",
+    "text": "What kind of demo this is"
+   },
+   {
+    "type": "p",
+    "html": "Everything here is a <b>deterministic, offline-by-default, 100%-synthetic</b> demo. \"Live\" means a seed-locked replay — given the global seed, every run is byte-identical. It runs with <b>no API key</b> and sends no real email. There is <b>no real PII</b>: the recipients, profiles, and facts are synthetic."
+   },
+   {
+    "type": "ul",
+    "items": [
+     "<b>Deterministic</b> — seed-locked; re-running the pipeline produces identical artifacts.",
+     "<b>Offline by default</b> — no network and no API key required (an optional \"rich\" profile can use real models, and an optional live news connector exists, both off by default).",
+     "<b>Synthetic</b> — no real PII; the demo tenant and its data are fabricated for the showcase."
+    ]
+   },
+   {
+    "type": "note",
+    "html": "Ready to look around? Head to <a href=\"/help/getting-started\">Take the tour</a> for a guided first pass, or jump straight to the <a href=\"/demo\">live demo</a>."
+   }
+  ]
+ },
+ {
+  "slug": "getting-started",
+  "title": "Take the tour",
+  "category": "Start here",
+  "summary": "A guided first pass through Provenance — from the home page to the Composer, Optimizer, Assurance, and Observatory.",
+  "read_min": 4,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "This is the fastest way to feel what Provenance does. Follow the steps in order — each one builds on the last, and the whole loop takes a few minutes. Nothing you click here sends a real message or touches real data."
+   },
+   {
+    "type": "ol",
+    "items": [
+     "<b>Start at the front door.</b> Open the <a href=\"/\">home</a> page to see the thesis, then go to the <a href=\"/demo\">live demo</a> to watch personalization happen — clone a site, personalize it, and drill into the receipt behind each variant (the region it changed, the data it used, and the surface policy behind it).",
+     "<b>Write something the Gate checks.</b> Open the <a href=\"/composer\">Composer</a> and draft a line of outreach. The Gate checks every line as you go — try writing one that recites a <b>hold</b> fact (like a modeled income) and watch the send get blocked with a reason. You can steer with a held fact; you just can't say it.",
+     "<b>Watch it optimize inside the truth.</b> Open the <a href=\"/optimizer\">Optimizer</a> to see the contextual bandit learn the best verified variant per segment. Note the ungated \"creepy\" arm: it's selected 0× — not filtered out, but unreachable by construction.",
+     "<b>Check the one trust number.</b> Open <a href=\"/assurance\">Assurance</a> to see the trust score, the drift watch, and the adversarial trap catch-rate — the single board-ready view that proves the Gate is holding.",
+     "<b>See the run, node by node.</b> Open the <a href=\"/observatory\">Observatory</a> to watch the pipeline as a live node graph: each node's tooling, its INPUT → DECISION → OUTPUT, and the event timeline of a recorded run."
+    ]
+   },
+   {
+    "type": "note",
+    "html": "Anywhere in the app, press <kbd>⌘K</kbd> to open the command palette. Type to jump to any surface, or start a question and hit <kbd>⏎</kbd> to ask the deterministic agent — every answer it gives carries its provenance."
+   },
+   {
+    "type": "p",
+    "html": "Want the concepts behind what you just saw? Read <a href=\"/help/overview\">What Provenance is</a> for the big picture, or the <a href=\"/help/glossary\">Glossary</a> for precise definitions of every term."
+   }
+  ]
+ },
+ {
+  "slug": "glossary",
+  "title": "Glossary",
+  "category": "Start here",
+  "summary": "Precise, code-grounded definitions of the key terms used throughout Provenance.",
+  "read_min": 6,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "These are the load-bearing terms in Provenance, defined the way the system actually uses them. Skim it once and the rest of the app reads more clearly."
+   },
+   {
+    "type": "kv",
+    "title": "Core concepts",
+    "rows": [
+     [
+      "claim",
+      "An atomic, single-fact assertion extracted from an approved source — the smallest unit the Gate verifies and the unit a verdict attaches to."
+     ],
+     [
+      "evidence",
+      "The verbatim source span (character offsets into a source document) that a claim is bound to — what the Gate retrieves and checks the claim against."
+     ],
+     [
+      "the ledger",
+      "The Gate's output: the per-claim record of each claim's verdict, confidence, source, and reasons — idempotent and cached per <code>(claim_id, source_version, rules_version)</code>."
+     ],
+     [
+      "verdict",
+      "The Gate's ruling on a claim: <b>green</b> = entailed by source and permissible (cited), <b>amber</b> = uncertain / needs a disclaimer (repaired), <b>red</b> = unsupported or impermissible (blocked, never a sendable variant)."
+     ],
+     [
+      "provenance class",
+      "Where a fact came from (declared, behavioral, modeled, broker, OAuth, etc.) — the source dimension that, together with the surface policy, governs how a fact may be used."
+     ]
+    ]
+   },
+   {
+    "type": "kv",
+    "title": "Surface policy",
+    "rows": [
+     [
+      "say / allude / hold",
+      "The surface policy on a fact: <b>say</b> = may appear verbatim in copy (e.g. a name they typed), <b>allude</b> = may shape the message but not be recited (e.g. de-anonymized firmographics), <b>hold</b> = may steer selection but can never appear in copy (e.g. modeled income)."
+     ],
+     [
+      "the truth boundary",
+      "The set of moves the system is allowed to make — a variant is admitted only if it has no red claim and respects surface policy; enforced at pool construction, not by a downstream filter."
+     ]
+    ]
+   },
+   {
+    "type": "kv",
+    "title": "The Gate",
+    "rows": [
+     [
+      "the Gate",
+      "The verification module: decompose → retrieve → NLI → calibrated ensemble → compliance rules → ledger; idempotent and claim-level cached, and a compliance rule can only make a verdict more restrictive."
+     ],
+     [
+      "NLI ensemble",
+      "A diverse set of entailment judges (\"is this claim entailed by its evidence?\") whose agreement is a better-calibrated signal than any single judge, because different lenses fail differently — the LLM judge is one ensemble member, not the verifier."
+     ]
+    ]
+   },
+   {
+    "type": "kv",
+    "title": "The Optimizer",
+    "rows": [
+     [
+      "the Optimizer",
+      "A contextual bandit campaign that drives verified variants over recipients per segment, learning from a simulated CTA oracle — it can only ever pull arms in its pool, and the blocked-lie arm is never in it."
+     ],
+     [
+      "bandit",
+      "The Thompson-sampling policy: it samples each active arm's Beta posterior and pulls the best, updating from observed reward."
+     ],
+     [
+      "arm",
+      "One verified variant the bandit can choose for a segment; an ungated or red-claim variant is structurally excluded from the arm pool, so it can be selected 0×."
+     ],
+     [
+      "regret",
+      "The cumulative shortfall versus always playing the best honest arm — it trends toward 0 as the constrained bandit converges, while the unconstrained twin chases the planted lie."
+     ]
+    ]
+   },
+   {
+    "type": "kv",
+    "title": "Drift & Assurance",
+    "rows": [
+     [
+      "drift",
+      "A change to a source or a legal-hold flip that invalidates affected claims — Drift re-verifies exactly those claims (no under/over-invalidation) and pauses the dependent variants."
+     ],
+     [
+      "trap",
+      "An adversarially mutated claim (number drift, unsupported superlative, false equivalence, or a true-but-unsayable guarantee) used to test whether the Gate catches what a shallow judge would miss."
+     ],
+     [
+      "catch-rate",
+      "The fraction of bad (trap) claims the Gate correctly catches — the headline number the Assurance Lab reports against a single-judge baseline."
+     ],
+     [
+      "false-reject",
+      "The fraction of clean, approved claims that get wrongly blocked — measured alongside catch-rate so a high catch-rate at zero false-reject is a fair comparison."
+     ],
+     [
+      "ECE / calibration",
+      "Expected Calibration Error — how far the Gate's stated confidence is from observed accuracy across bins; calibration (an isotonic PAV calibrator) turns a raw entailment score into a probability you can trust, so \"0.9\" means roughly 90%."
+     ]
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "the-gate",
+  "title": "The Gate",
+  "category": "Pipeline & trust",
+  "summary": "How one claim is verified — decompose, retrieve, NLI, a calibrated diverse ensemble, compliance rules — into a green/amber/red claim ledger.",
+  "read_min": 4,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "The Gate answers one question for every claim in a message: <b>is this entailed by an approved source, and is it permissible?</b> It produces a <b>claim ledger</b> where each claim is <code>green</code> (entailed and permissible), <code>amber</code> (uncertain or needs a disclaimer), or <code>red</code> (unsupported or impermissible). A red claim is blocked and never becomes a sendable variant. The code lives in <code>pipeline/gate/gate.py</code>."
+   },
+   {
+    "type": "h",
+    "text": "The stages of one verification"
+   },
+   {
+    "type": "ol",
+    "items": [
+     "Decompose — a rendered message is split into sentences, and each one is kept as a checkable claim only if it covers an approved library claim by token overlap, or asserts a superlative/guarantee. Greetings and CTAs are skipped (pipeline/gate/decompose.py).",
+     "Retrieve — a BM25 lexical search over the Library's current source sentences returns the top evidence sentence for the claim. The index is rebuilt whenever the Library version changes, so a changed source is seen (pipeline/gate/retrieve.py).",
+     "NLI — a deterministic, number-aware entailment scorer compares claim to evidence; it is strict about unsupported numbers and absolutes (pipeline/gate/nli.py).",
+     "Ensemble — a diverse judge ensemble votes: a coverage lens, a numeric lens, and a superlative lens. Numeric and superlative are veto lenses (pipeline/gate/ensemble.py).",
+     "Calibrate — an isotonic (PAV) calibrator turns the raw entailment score into a confidence; unfit, it is the identity (pipeline/gate/calibrate.py).",
+     "Rules — the compliance engine applies legal holds, text blocks, and disclaimers; it can only make a verdict more restrictive (pipeline/gate/rules.py).",
+     "Ledger — the most-severe of the entailment verdict and the rule verdict becomes the claim's final color."
+    ]
+   },
+   {
+    "type": "h",
+    "text": "The judge is one ensemble member, not the verifier"
+   },
+   {
+    "type": "p",
+    "html": "The LLM judge is not the decision-maker. The verdict is computed by combining the deterministic NLI score with the ensemble votes: support lenses (coverage, NLI, and any LLM judges) are averaged, then capped by the <b>minimum of the numeric and superlative veto lenses</b> (see <code>Gate._combine</code>). So a claim that drifts a number or invents a superlative is held down regardless of how confident any single judge is. LLM judges (Ollama / Claude) only run in the optional rich profile, only on uncertain claims, and only ever add votes — they cannot overrule a veto."
+   },
+   {
+    "type": "h",
+    "text": "Idempotent and claim-level cached"
+   },
+   {
+    "type": "p",
+    "html": "Every verdict is cached on the key <code>(claim_id, source_version, rules_version)</code> (<code>pipeline/common/cache.py</code>). Each unique claim is Gated <b>once</b>, not once per recipient — the website channel reads the same cache the email channel wrote. A second verification of the same claim is served from cache with no recomputation, which is exactly what <code>tests/test_gate.py::test_claim_is_gated_once</code> asserts."
+   },
+   {
+    "type": "note",
+    "html": "Cheap-first cascade: rules run first and can short-circuit a claim straight to red; LLM judges are only spent when the NLI score is in the uncertain band. The default profile is fully deterministic and offline — no API key required."
+   }
+  ]
+ },
+ {
+  "slug": "the-optimizer",
+  "title": "The Optimizer",
+  "category": "Pipeline & trust",
+  "summary": "A per-segment Thompson-sampling bandit that can only ever pull Gate-cleared arms, so a planted lie is structurally unreachable — proven against an unconstrained twin that converges to it.",
+  "read_min": 4,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "The Optimizer is a contextual bandit that learns the best message per micro-segment from a simulated click-through oracle. The context is the recipient's segment (role and company size); within a segment it samples each active arm's Beta posterior (Thompson sampling) and pulls the best one (<code>pipeline/optimizer/bandit.py</code>). You can watch it converge on the <a href=\"/optimizer\">Optimizer</a> page."
+   },
+   {
+    "type": "h",
+    "text": "The truth boundary is structural"
+   },
+   {
+    "type": "p",
+    "html": "The bandit can only ever pull arms that are in the <b>action pool</b>, and the Gate decides what goes into the pool. The pool is the set of Gate-cleared variant ids per segment; a blocked or unverified variant is never added (<code>pipeline/common/store.py</code>). So a planted lie is unreachable <b>by construction</b> — there is no special case in the bandit that filters it out. It simply is not an option to sample."
+   },
+   {
+    "type": "h",
+    "text": "The unconstrained twin"
+   },
+   {
+    "type": "p",
+    "html": "The proof is a contrast on identical data. The planted-lie arm is given the <b>highest</b> latent click-through rate by the oracle (<code>pipeline/optimizer/oracle.py</code>), so a bandit that is allowed to pull it will converge to it. The constrained run (verified arms only) and the unconstrained twin (the lie is in the pool) use the same recipients and the same oracle — only the truth boundary differs."
+   },
+   {
+    "type": "kv",
+    "title": "Same data, two outcomes",
+    "rows": [
+     [
+      "Constrained bandit",
+      "lie is absent from the pool; 0 selections of the lie; converges to the best honest arm"
+     ],
+     [
+      "Unconstrained twin",
+      "lie is in the pool and has the highest reward; converges to the lie"
+     ]
+    ]
+   },
+   {
+    "type": "h",
+    "text": "Regret"
+   },
+   {
+    "type": "p",
+    "html": "Regret is measured against the best arm <b>available in that pool</b>. So both campaigns converge (regret tends toward zero) — the difference is <i>what</i> they converge to: the constrained run to the best honest arm, the twin to the lie (<code>pipeline/optimizer/campaign.py</code>). That contrast is the whole point: you cannot win by lying when lies never enter the reward loop."
+   },
+   {
+    "type": "note",
+    "html": "This is headline property <b>P1</b>, proven in <code>tests/test_optimizer.py</code>: the constrained bandit records 0 selections of the lie while the twin selects it and converges to it across most segments."
+   }
+  ]
+ },
+ {
+  "slug": "drift-monitor",
+  "title": "The Drift Monitor",
+  "category": "Pipeline & trust",
+  "summary": "A legal-hold flip or source change triggers a surgical re-verify of exactly the affected claims, then mutates the action pool to pause the variants that assert a newly-red claim.",
+  "read_min": 4,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "The Drift Monitor treats truth as temporal: an approved claim can stop being true (a source number changes) or stop being sayable (legal flips a hold). When that happens it re-verifies <b>only</b> the affected claims and pauses any variant that depends on a claim that just went red (<code>pipeline/drift/monitor.py</code>)."
+   },
+   {
+    "type": "h",
+    "text": "Two triggers"
+   },
+   {
+    "type": "ul",
+    "items": [
+     "Legal-hold flip — flipping a hold changes the active rule set, which changes rules_version, which changes the verdict-cache key and forces a re-Gate of the held claim (pipeline/gate/rules.py).",
+     "Source change — editing a source's text changes its content hash (source_version); the monitor walks the claim-to-source dependency edges to find exactly the claims that depend on it."
+    ]
+   },
+   {
+    "type": "h",
+    "text": "Surgical re-verification"
+   },
+   {
+    "type": "p",
+    "html": "Because verdicts are cached on <code>(claim_id, source_version, rules_version)</code>, only the claims whose key actually changed are recomputed; every other claim is a cache hit. The monitor counts the Gate's recompute calls before and after the change to prove which claims were re-Gated — no under-invalidation and no over-invalidation. This is attributable to a single dimension: the legal-hold demo flips <b>only</b> <code>rules_version</code>, with the same claim text and same source_version."
+   },
+   {
+    "type": "h",
+    "text": "Action-pool mutation"
+   },
+   {
+    "type": "p",
+    "html": "After re-verifying, the monitor mutates every action pool: if an affected claim went red, every variant that asserts it is <b>paused</b> (removed from the arms the bandit may pull); if a claim recovered from red, its variants are unblocked (<code>pipeline/common/store.py</code>). So the optimizer keeps sending every variant that is still clean and stops only the ones that just became unsafe."
+   },
+   {
+    "type": "kv",
+    "title": "Freshness and attribution",
+    "rows": [
+     [
+      "TTL freshness",
+      "the Enrichment Gate blocks facts past their time-to-live, so stale personalization never ships"
+     ],
+     [
+      "Attributable change",
+      "a legal-hold flip is attributable to rules_version alone — same text, same source"
+     ]
+    ]
+   },
+   {
+    "type": "note",
+    "html": "These are headline properties <b>P2</b> (the hold flips the verdict, attributable to rules_version) and <b>P3</b> (re-verify exactly the affected claims), proven in <code>tests/test_gate.py</code> and <code>tests/test_drift.py</code>."
+   }
+  ]
+ },
+ {
+  "slug": "assurance-lab",
+  "title": "The Assurance Lab",
+  "category": "Pipeline & trust",
+  "summary": "An adversarial wind tunnel that mutates approved claims into labeled traps and runs them through the real Gate versus a single number-blind judge, reporting decomposed reliability.",
+  "read_min": 5,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "The Assurance Lab is a wind tunnel for the checker. It generates adversarial traps from the approved claims, runs them through the <b>real Gate</b> and a single number-blind judge, and reports not one pass-rate but decomposed reliability (<code>pipeline/assurance/harness.py</code>). See it live on <a href=\"/assurance\">the Assurance dashboard</a>."
+   },
+   {
+    "type": "h",
+    "text": "Four mutation families"
+   },
+   {
+    "type": "p",
+    "html": "Each verified claim is mutated into labeled traps, plus a clean control for measuring false rejects (<code>pipeline/assurance/traps.py</code>):"
+   },
+   {
+    "type": "ul",
+    "items": [
+     "number_drift — change the asserted number (a material trap that looks almost identical lexically, so a similarity judge passes it).",
+     "unsupported_superlative — inject a #1 / best-in-class claim that no source supports.",
+     "false_equivalence — append an unsubstantiated competitor comparison.",
+     "true_but_unsayable — a true statistic wrapped in a guarantee, so it is entailed but impermissible."
+    ]
+   },
+   {
+    "type": "h",
+    "text": "Decomposed reliability"
+   },
+   {
+    "type": "p",
+    "html": "Rather than a single score, the harness reports catch-rate <b>at a fixed false-reject rate</b>, broken down by mutation family and by severity (material vs puffery), and it fits an isotonic calibrator on the labeled mix to report ECE and a reliability diagram. The same harness is sliced per channel (email and website) — one lab, not two."
+   },
+   {
+    "type": "h",
+    "text": "Why the ensemble beats one judge"
+   },
+   {
+    "type": "p",
+    "html": "The baseline is a single number-blind similarity judge — the same coverage lens the Gate uses, but on its own. It is blind to number-drift: a claim that quietly changes a number still looks topically similar, so the baseline passes it. The Gate's numeric and rule lenses catch it. That is the honest, principled reason the diverse ensemble beats a single judge — not a tuned number."
+   },
+   {
+    "type": "note",
+    "html": "This is headline property <b>P5</b>, proven in <code>tests/test_assurance.py</code>: at a fixed false-reject ceiling the Gate's catch-rate exceeds the single-judge baseline by a wide margin, and the Gate catches all number-drift traps while the baseline catches almost none."
+   }
+  ]
+ },
+ {
+  "slug": "five-properties",
+  "title": "The five trust properties",
+  "category": "Pipeline & trust",
+  "summary": "P1 through P5 plus E1 — the headline properties that must be provably true, each tied to the test file that proves it.",
+  "read_min": 3,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "Provenance rests on a handful of properties that are not asserted in slides — they are proven in <code>tests/</code> and the test suite is the authoritative gate. Each one below is stated in plain language with the file that proves it (see <code>docs/01-intake/PRD.md</code>)."
+   },
+   {
+    "type": "h",
+    "text": "P1 through P5, plus the enrichment property E1"
+   },
+   {
+    "type": "kv",
+    "title": "Property and its proof",
+    "rows": [
+     [
+      "P1 — Can't win by lying",
+      "A Gate-blocked lie can never be selected by the optimizer (0 selections), while an unconstrained twin converges to it. tests/test_optimizer.py"
+     ],
+     [
+      "P2 — Holds bind instantly",
+      "The Gate blocks a held claim the instant legal flips the hold, attributable to rules_version alone — same text, same source. tests/test_gate.py"
+     ],
+     [
+      "P3 — Drift is surgical",
+      "A drift event re-verifies exactly the affected claims — no under- or over-invalidation. tests/test_gate.py, tests/test_drift.py"
+     ],
+     [
+      "P4 — Same claim, same verdict",
+      "The website renders only Gate-passed claims, and a given claim_id gets the same verdict on email and website. tests/test_website.py"
+     ],
+     [
+      "P5 — The Gate beats one judge",
+      "Assurance catch-rate exceeds the single-judge baseline at a fixed false-reject rate. tests/test_assurance.py"
+     ],
+     [
+      "E1 — No un-receipted fact ships",
+      "An enrichment fact with no recorded lawful basis can never be inlined into a message. tests/test_enrichment.py"
+     ]
+    ]
+   },
+   {
+    "type": "p",
+    "html": "P1 belongs to <a href=\"/optimizer\">the Optimizer</a>; P2 and P3 to the Gate and <a href=\"/observatory\">Drift Monitor</a>; P5 to <a href=\"/assurance\">the Assurance Lab</a>. Each is a structural guarantee in code, not a tuned threshold."
+   },
+   {
+    "type": "note",
+    "html": "Per the project's Constitution, the tests assert <b>inequalities and floors</b> (for example, catch-rate above a ceiling on false-rejects), not the deck's illustrative point values — so the properties hold by construction, not by a lucky number."
+   }
+  ]
+ },
+ {
+  "slug": "claims-library",
+  "title": "The Claims Library",
+  "category": "Data & provenance",
+  "summary": "The versioned claim-evidence graph: four approved sources, ten atomic claims each bound to a source span, with dependency edges and human-owned compliance rules.",
+  "read_min": 4,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "The Claims Library is the substrate behind the promise <i>\"can't say what it can't prove.\"</i> It holds the approved source documents for the demo tenant (<b>Helix Analytics</b>, a regulated health-tech firm), the atomic claims drawn from them, and the edges that tie each claim back to the exact text it came from. It lives in <code>pipeline/library/library.py</code>, seeded from <code>pipeline/library/seed_data.py</code>."
+   },
+   {
+    "type": "h",
+    "text": "What a source is"
+   },
+   {
+    "type": "p",
+    "html": "A <b>source</b> (<code>SourceDoc</code>) is an approved document: an id, a title, and its text. Its <b>version</b> is the SHA-256 hash of that text (<code>content_version</code> in <code>pipeline/common/schemas.py</code>) — so when the text changes, the version changes, and that is exactly how Drift is detected. The demo ships four approved sources:"
+   },
+   {
+    "type": "kv",
+    "title": "The four approved sources",
+    "rows": [
+     [
+      "s_casestudy",
+      "Northwind Health — deployed case study"
+     ],
+     [
+      "s_datasheet",
+      "Helix Analytics — product data sheet"
+     ],
+     [
+      "s_pricing",
+      "Helix Analytics — pricing fact sheet"
+     ],
+     [
+      "s_security",
+      "Helix Analytics — security & compliance overview"
+     ]
+    ]
+   },
+   {
+    "type": "h",
+    "text": "What a claim is"
+   },
+   {
+    "type": "p",
+    "html": "A <b>claim</b> (<code>ClaimNode</code>) is one atomic, citable assertion bound to a <b>source span</b> — the exact character offsets of the evidence substring inside its source. The span isn't hand-counted: at load, the library finds the evidence text inside the source and computes the offsets (and raises if the evidence isn't actually there). Each claim also records the <code>source_version</code> it was verified against, any asserted <code>numeric</code> value, the role <code>segments</code> it's relevant to, and the compliance <code>rule_tags</code> the rules engine keys on. There are <b>ten</b> atomic claims across the four sources — for example, <code>c_tco</code> (\"cuts total cost of ownership by 47%\") is bound to the substring <i>\"Northwind Health cut total cost of ownership by 47%\"</i> in the case study."
+   },
+   {
+    "type": "p",
+    "html": "<b>Evidence</b> is that bound substring. <code>bound_evidence(claim_id)</code> returns it by slicing the live source text at the claim's span, so a claim can always show the words it stands on. The library can also rebuild a sentence-level retrieval corpus from the current source text (<code>evidence_sentences</code>) for the Gate's retriever."
+   },
+   {
+    "type": "h",
+    "text": "A versioned graph with dependency edges"
+   },
+   {
+    "type": "p",
+    "html": "The library is a <b>versioned claim-evidence graph</b>. The dependency edge is claim → source: <code>claims_for_source(source_id)</code> returns every claim that depends on a given source, which is the surgical set Drift re-verifies when that source changes. <code>apply_source_change</code> updates a source's text (yielding a new version) and returns exactly those dependent claim ids; a claim is <code>is_drifted</code> when its stored <code>source_version</code> no longer matches the source's current version, until the Gate re-verifies it. The whole library also has a <code>library_version</code> — a hash over its sources' versions and its claim ids."
+   },
+   {
+    "type": "note",
+    "html": "There is also a <b>planted lie</b> (\"guarantees a 60% reduction in hospital readmissions\") defined in <code>seed_data.py</code>. It is deliberately <b>never</b> added to the Library — generation can attempt to inline it, and the Gate must block it. It is a trap, not a claim."
+   },
+   {
+    "type": "p",
+    "html": "Compliance rules are also versioned. They live in the human-owned <code>rules/helix_tenant.yaml</code> and can veto a claim (for example, a legal hold flips <code>c_tco</code> to red). Because the rules carry a version that feeds the verdict-cache key, changing a rule forces a re-Gate — the legal-hold demo."
+   }
+  ]
+ },
+ {
+  "slug": "enrichment-touchpoints",
+  "title": "Enrichment & touchpoints",
+  "category": "Data & provenance",
+  "summary": "How connectors fan out into the Enrichment Gate, become usable / disclaimer / blocked facts, synthesize a profile DB, and personalize copy — with the rule that an un-receipted fact can never be inlined.",
+  "read_min": 5,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "Enrichment applies the <b>same discipline to personal data that the Gate applies to product claims</b>. Just as a claim binds to a source span, a personal fact binds to a source connector, a lawful basis, and a freshness TTL. This is PRD amendment <b>A2</b>. The lane lives in <code>pipeline/enrichment/</code>."
+   },
+   {
+    "type": "h",
+    "text": "Connectors fan out"
+   },
+   {
+    "type": "p",
+    "html": "When a lead submits the form, <code>pipeline/enrichment/engine.py</code> fans out to a set of connectors (<code>pipeline/enrichment/connectors.py</code>), each answering one question and returning <code>RawFact</code>s tagged with the source id the Gate keys on:"
+   },
+   {
+    "type": "ul",
+    "items": [
+     "<b>Email-domain parse</b> — a pure parse of the domain the user gave us (no network).",
+     "<b>Public news RSS</b> — keyed on the company name. Live in <code>live</code> mode, simulated by default.",
+     "<b>Simulated firmographics</b> (Clearbit/ZoomInfo class) and <b>simulated account intent</b> (6sense/Bombora class) — deterministic synthetic stand-ins for paid vendors; nothing calls a paid API."
+    ]
+   },
+   {
+    "type": "h",
+    "text": "The Enrichment Gate"
+   },
+   {
+    "type": "p",
+    "html": "Each fact passes the <b>Enrichment Gate</b> (<code>pipeline/enrichment/gate.py</code>), which checks four things against the human-owned policy in <code>rules/helix_tenant.yaml</code>: the source must be <b>allow-listed</b>, the recipient must have <b>consented</b>, the fact must be <b>fresh</b> (age within the source's TTL), and the key must not be a blocked PHI/PII key. The verdict is one of three:"
+   },
+   {
+    "type": "kv",
+    "rows": [
+     [
+      "usable",
+      "allow-listed + consented + fresh — may be inlined, basis on file"
+     ],
+     [
+      "disclaimer",
+      "usable but account-level inferred — inlined with an \"inferred\" flag"
+     ],
+     [
+      "blocked",
+      "no basis / not allow-listed / stale / non-consent / PHI — never reaches a message"
+     ]
+    ]
+   },
+   {
+    "type": "h",
+    "text": "Synthesize, then personalize"
+   },
+   {
+    "type": "p",
+    "html": "The usable facts are merged into a <code>Profile</code> and written to the profile DB (<code>profiles.sqlite</code>), where every row is a receipt: value + source + basis + verdict. Personalization (<b>Fork 1-B</b>) may then inline usable/disclaimer facts into the copy — but each one is placed in a clearly labelled block and is recorded with its source and basis in the message receipts. Verified product claims still come from the claim Gate; enrichment adds the personal layer, it does not replace verification."
+   },
+   {
+    "type": "note",
+    "html": "<b>Property E1:</b> an un-receipted fact can never be inlined. Personalization only ever iterates <code>profile.usable_facts</code> (verdict usable or disclaimer); blocked facts are withheld by construction. This is proved in <code>tests/test_enrichment.py</code>."
+   },
+   {
+    "type": "h",
+    "text": "Default: synthetic, offline, $0"
+   },
+   {
+    "type": "p",
+    "html": "By default the demo runs in <code>synthetic</code> mode — every connector emits deterministic synthetic facts, so the build is offline, $0, and byte-identical. The <b>one live connector</b> is the news RSS (<b>Fork 2-B</b>), opt-in via <code>PROVENANCE_ENRICH=live</code>. Even live, it sends only the public company name to a public feed (never the recipient's name, email, or role), caches every response so re-runs replay deterministically, and fails honestly — no network means no fact, never a fabricated one. No PII goes to any third party."
+   },
+   {
+    "type": "p",
+    "html": "See <a href=\"/enrichment-catalog\">the Enrichment catalog</a> for every source, its cost, its basis, and where the data lives."
+   }
+  ]
+ },
+ {
+  "slug": "surface-policy",
+  "title": "Say / allude / hold — the surface policy",
+  "category": "Data & provenance",
+  "summary": "Every fact carries a provenance class and a surface policy; a HOLD fact may steer selection but may never be recited in copy — the privacy core of the system.",
+  "read_min": 4,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "Knowing a fact and being allowed to <i>say</i> it are two different things. Every fact in the system carries both a <b>provenance class</b> (where it came from) and a <b>surface policy</b> (how it may be used). The surface policy is the privacy core: it decides whether a fact may be spoken, merely hinted at, or held silent. It is defined as <code>SurfacePolicy</code> in <code>pipeline/customer/schemas.py</code> and reused across the personalization signal catalog (<code>pipeline/personalization/signals.py</code>)."
+   },
+   {
+    "type": "h",
+    "text": "The three policies"
+   },
+   {
+    "type": "kv",
+    "title": "SurfacePolicy",
+    "rows": [
+     [
+      "say",
+      "Reference it directly. May be inlined in mass copy, with its receipt."
+     ],
+     [
+      "allude",
+      "Never state it; raise an adjacent topic. May steer which claim/class is featured, but is never recited literally."
+     ],
+     [
+      "hold",
+      "Never surface and never allude. May not even steer selection."
+     ]
+    ]
+   },
+   {
+    "type": "p",
+    "html": "These aren't loose conventions — they're derived properties on the fact, so the 1:1 view and the mass-copy view read from one source of truth. A <code>CustomerFact</code> is <code>mass_inlineable</code> only when its policy is <b>say</b> (\"only facts the customer stated to us directly may be put in mass copy verbatim\"), and <code>selection_ok</code> for any policy except <b>hold</b> (\"<b>allude</b>/<b>say</b> may silently steer which claim we feature; <b>hold</b> may not\")."
+   },
+   {
+    "type": "h",
+    "text": "A HOLD fact may steer, never recite"
+   },
+   {
+    "type": "p",
+    "html": "This is the whole point. The signal catalog assigns the responsible default per provenance class: things the visitor <b>declared</b> (their name, email, stated goal) are <b>say</b>; passively observed or inferred signals (neighborhood-level location, device economics, battery level) are typically <b>hold</b>; a few mid-risk signals (approximate city, languages-as-second-language) sit at <b>allude</b>. A held fact can shift which already-verified claim leads — it can never appear as a sentence in the copy."
+   },
+   {
+    "type": "h",
+    "text": "Provenance classes — where a fact comes from"
+   },
+   {
+    "type": "ul",
+    "items": [
+     "<b>observed</b> — collected by us passively at page load (HTTP request + a little JavaScript)",
+     "<b>first_party</b> — our own logs / CRM; behavior we recorded, data we hold",
+     "<b>declared</b> — the visitor typed it / handed it to us (the cleanest data there is)",
+     "<b>oauth</b> — granted via \"Sign in with Google\" scopes",
+     "<b>broker</b> — purchased from a third-party data broker / append",
+     "<b>identity_graph</b> — cross-device + offline match bought from an identity-resolution vendor"
+    ]
+   },
+   {
+    "type": "note",
+    "html": "The receipt always shows the <b>lawful basis</b>. On the enrichment side, the Gate's policy records a <code>basis</code> per source (for example <code>public_record</code> for news, <code>legitimate_interest_b2b</code> for the email domain, <code>contract_vendor_dpa</code> for simulated vendors); on the customer side, each <code>CustomerFact</code> carries its <code>basis</code> alongside its surface policy. A fact you can't justify isn't surfaced."
+   }
+  ]
+ },
+ {
+  "slug": "sources-and-cost",
+  "title": "Sources & cost basis",
+  "category": "Data & provenance",
+  "summary": "The honest catalog of paid and free enrichment sources — what each gives, what it costs, its lawful basis — and where the synthesized data lives.",
+  "read_min": 4,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "The enrichment catalog (<code>pipeline/enrichment/catalog.py</code>) is reference data that lists <b>every source we could enrich with, paid or free</b>, and is honest about cost and the lawful-basis question per source. It is grouped into three stages of the touchpoint flow: <b>free / low-cost</b>, <b>paid append</b>, and <b>engagement</b>."
+   },
+   {
+    "type": "h",
+    "text": "Free / low-cost"
+   },
+   {
+    "type": "kv",
+    "rows": [
+     [
+      "Email domain parse",
+      "$0 · user-provided (low risk) · instant"
+     ],
+     [
+      "DNS / MX / WHOIS",
+      "$0 · public record · days"
+     ],
+     [
+      "News / RSS / Google News",
+      "$0 · public, attribute the source · hours"
+     ],
+     [
+      "SEC EDGAR, GitHub, LinkedIn public, BuiltWith",
+      "$0 / free tier · public or ToS-restricted · cataloged"
+     ]
+    ]
+   },
+   {
+    "type": "h",
+    "text": "Paid append"
+   },
+   {
+    "type": "kv",
+    "rows": [
+     [
+      "Clearbit / HubSpot Enrichment",
+      "per-enrichment / seat · vendor AUP + your basis"
+     ],
+     [
+      "ZoomInfo, Apollo.io, People Data Labs",
+      "seat + credits · strict AUP, record basis"
+     ],
+     [
+      "6sense / Demandbase, Bombora",
+      "platform / subscription · account-level, lower PII risk"
+     ]
+    ]
+   },
+   {
+    "type": "h",
+    "text": "Engagement"
+   },
+   {
+    "type": "kv",
+    "rows": [
+     [
+      "Email open pixel",
+      "$0 · disclose tracking; some clients block it"
+     ],
+     [
+      "Click tracking (wrapped links)",
+      "$0 · first-party, low risk"
+     ],
+     [
+      "First-party site analytics",
+      "$0 · first-party cookie + notice"
+     ],
+     [
+      "Reverse-IP (Clearbit Reveal / KickFire)",
+      "per-lookup · account-level, no PII"
+     ]
+    ]
+   },
+   {
+    "type": "p",
+    "html": "Each row carries a <code>used_in_demo</code> flag and a <code>live</code> flag. In the demo, sources are simulated unless marked live; the one genuinely live source is the news RSS. <b>Nothing in the catalog calls a paid API</b> — the paid rows are documented, not invoked."
+   },
+   {
+    "type": "h",
+    "text": "Where the data lives"
+   },
+   {
+    "type": "kv",
+    "title": "All stores are local, synthetic, and gitignored",
+    "rows": [
+     [
+      "provenance.sqlite",
+      "recipients · form_events · cta_events · verdict_cache · llm_cache"
+     ],
+     [
+      "profiles.sqlite",
+      "synthesized profiles + every fact receipt (source · basis · verdict)"
+     ],
+     [
+      "claims/library.json",
+      "the versioned claim-evidence graph"
+     ],
+     [
+      "observe/*.jsonl",
+      "append-only observability event ledger (one per lane)"
+     ],
+     [
+      "helix_tenant.yaml",
+      "human-owned claim policy + enrichment-source policy"
+     ]
+    ]
+   },
+   {
+    "type": "note",
+    "html": "All local, synthetic, and gitignored — the demo's $0 / offline / no-PII guarantee holds. The synthesized profile DB and its receipts are readable on the Observatory and via <code>/api/observe/profiles</code>."
+   },
+   {
+    "type": "p",
+    "html": "Browse the full tables: <a href=\"/sources\">Sources</a> and the <a href=\"/enrichment-catalog\">Enrichment catalog</a>."
+   }
+  ]
+ },
+ {
+  "slug": "surface-workspace",
+  "title": "Home / Workspace",
+  "category": "Using the surfaces",
+  "summary": "The home pipeline view — stat cards plus a filterable, sortable record table where every row carries the source that justifies its stage and score.",
+  "read_min": 2,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "<b>Home</b> (the Workspace) is the first surface in the sidebar. It opens on a live pipeline table built from the cohort data — every control on it does real server-side work, nothing is decorative."
+   },
+   {
+    "type": "h",
+    "text": "How to use it"
+   },
+   {
+    "type": "ul",
+    "items": [
+     "Read the four stat cards across the top: <b>Records</b>, <b>Qualified</b> (SQL + MQL), <b>Customers</b> (won), and <b>Provenance</b> (facts with a source).",
+     "Use the <b>Filter</b> menu to narrow the view — All records, Customers, Qualified, Leads, or Visitors. The view is applied server-side via the <code>view=</code> query param.",
+     "Use the <b>Sort</b> menu to order by Lead score, Name, or Company (the <code>sort=</code> param).",
+     "Click <b>New record</b> or <b>Add deal</b> to jump to the create form at <a href=\"/records/new\">/records/new</a>."
+    ]
+   },
+   {
+    "type": "p",
+    "html": "The table shows each record's name, company, title, industry, lifecycle <b>Stage</b>, lead <b>Score</b>, and <b>Source</b> — the last column is the point: every record names where it came from."
+   },
+   {
+    "type": "note",
+    "html": "What it proves: a record's stage and score are never free-floating — each row carries its source, so the pipeline is traceable end to end. The Provenance card reads <b>100%</b> because every fact has a source."
+   },
+   {
+    "type": "kv",
+    "title": "At a glance",
+    "rows": [
+     [
+      "Route",
+      "<a href=\"/workspace\">/workspace</a>"
+     ],
+     [
+      "Module",
+      "<code>app/workspace.py</code>"
+     ],
+     [
+      "Controls",
+      "Filter (<code>view=</code>), Sort (<code>sort=</code>), New record"
+     ]
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "surface-records",
+  "title": "Records",
+  "category": "Using the surfaces",
+  "summary": "The full record table with tabbed views, server-side sort, a create form that stamps source: manual, and a one-click Undo for the record you just made.",
+  "read_min": 2,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "<b>Records</b> is the table surface. It shows every record with its company, title, industry, lifecycle stage, score, and source — and lets you create new ones."
+   },
+   {
+    "type": "h",
+    "text": "How to use it"
+   },
+   {
+    "type": "ol",
+    "items": [
+     "Switch between the tabbed views — All records, Customers, Qualified, Leads, Visitors — to filter the table.",
+     "Use the <b>Sort</b> menu to order by Lead score, Name, or Company.",
+     "Click <b>New record</b> to open the form at <a href=\"/records/new\">/records/new</a>, fill in name, email, company, title, industry, lead score, and lifecycle stage, then <b>Create record</b>.",
+     "You'll land back on Records with a confirmation flash for the record you just created."
+    ]
+   },
+   {
+    "type": "p",
+    "html": "When you create a record by hand it is stamped <code>source: manual</code> — even your own typing carries provenance. The confirmation flash shows that stamp inline."
+   },
+   {
+    "type": "note",
+    "html": "Forgiveness: the create flash includes an <b>Undo</b> button (it posts to <code>/records/undo</code>) that removes the record you just added. Any action is easy to recover from — you are never one click away from a mess you can't reverse."
+   },
+   {
+    "type": "kv",
+    "title": "At a glance",
+    "rows": [
+     [
+      "Route",
+      "<a href=\"/records\">/records</a>"
+     ],
+     [
+      "Create",
+      "<a href=\"/records/new\">/records/new</a> (POST), stamps <code>source: manual</code>"
+     ],
+     [
+      "Undo",
+      "POST <code>/records/undo</code> from the create flash"
+     ],
+     [
+      "Module",
+      "<code>app/workspace.py</code>"
+     ]
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "surface-composer",
+  "title": "Composer",
+  "category": "Using the surfaces",
+  "summary": "Write outreach copy; the Gate scans every line before it can ship and blocks any message that recites a held fact, naming the fact and its source.",
+  "read_min": 3,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "<b>Composer</b> is where you write a message to a recipient. Before anything can ship, the <b>Gate</b> verifies the draft — it is deterministic, runs offline, and costs nothing."
+   },
+   {
+    "type": "h",
+    "text": "How to use it"
+   },
+   {
+    "type": "ol",
+    "items": [
+     "Edit the draft in the message box (a policy-safe example is pre-loaded).",
+     "Click <b>Check &amp; send</b>. The Gate scans the text for facts whose surface policy is <code>hold</code> — modeled income, competitor-shopping, churn-risk, life-events, home value, device recognition.",
+     "If the draft is clean you'll see <b>Cleared to send</b> — it uses only declared (<code>say</code>) facts and behavioural steer (<code>allude</code>).",
+     "If it recites a held fact you'll see <b>Send blocked</b>, with each offending fact and its source listed (e.g. modeled income / net worth · broker append · policy: hold)."
+    ]
+   },
+   {
+    "type": "p",
+    "html": "Use the <b>Try it</b> panel on the right to load a message that gets blocked and one that clears, so you can watch the Gate name the problem line by line."
+   },
+   {
+    "type": "note",
+    "html": "What it proves (P1, the creepiness invariant T-P2b): a <code>hold</code> fact may steer who you target and what you feature, but it can never reach the copy — the lie/over-share path is unreachable by construction, enforced rather than hoped."
+   },
+   {
+    "type": "kv",
+    "title": "At a glance",
+    "rows": [
+     [
+      "Route",
+      "<a href=\"/composer\">/composer</a>"
+     ],
+     [
+      "Module",
+      "<code>app/composer.py</code>"
+     ],
+     [
+      "Behaviour",
+      "Gate blocks held facts; deterministic, $0, offline"
+     ]
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "surface-optimizer",
+  "title": "Optimizer dashboard",
+  "category": "Using the surfaces",
+  "summary": "A per-segment truth-bounded bandit — every proposed A/B variant, ranked by realistic KPI lift, where an arm that relies on a held fact stays out of the pool and is selected zero times.",
+  "read_min": 2,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "<b>Optimizer</b> is the growth / A/B surface. For each scenario it shows the proposed variants as bandit arms, ranked by realistic KPI lift, with the learned winner marked."
+   },
+   {
+    "type": "h",
+    "text": "How to read it"
+   },
+   {
+    "type": "ul",
+    "items": [
+     "Each panel is one segment/scenario; the header names the <b>learned winner</b> and its share of traffic.",
+     "Per arm you'll see its <b>traffic share</b> bar, its <b>posterior</b> mean, and the <b>KPI</b> it optimizes; the winner is starred.",
+     "A <b>blocked arm</b> appears greyed at the bottom when a variant relies on a held fact — it sits at 0% traffic, out of the pool, and is <b>selected 0×</b>."
+    ]
+   },
+   {
+    "type": "note",
+    "html": "What it proves: the bandit is truth-bounded — it can only ever pull verified variants. The same assurance discipline that powers the Composer Gate is applied to the optimizer's own copy proposals, so an unverified or held-fact arm never wins."
+   },
+   {
+    "type": "kv",
+    "title": "At a glance",
+    "rows": [
+     [
+      "Route",
+      "<a href=\"/optimizer\">/optimizer</a>"
+     ],
+     [
+      "Module",
+      "<code>app/optimizer.py</code>"
+     ],
+     [
+      "Data",
+      "Simulated RL (deterministic), <code>pipeline.personalization.demo_sim</code>"
+     ]
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "surface-agent",
+  "title": "The Agent",
+  "category": "Using the surfaces",
+  "summary": "A deterministic navigator in place of a dashboard — it routes your question over the optimizer, KPIs, drift, assurance, and records, and distills the state into a sourced answer.",
+  "read_min": 2,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "<b>The Agent</b> answers questions about the system instead of making you read a dashboard. It is deterministic, offline, and $0 — there is no LLM in this path; your text is mapped to one of a fixed set of intents that do the work."
+   },
+   {
+    "type": "h",
+    "text": "How to use it"
+   },
+   {
+    "type": "ol",
+    "items": [
+     "Type a question in the box, or click one of the suggested chips.",
+     "It routes to one of five intents: <b>Why did a variant win?</b>, <b>How are my KPIs tracking?</b>, <b>Is anything drifting?</b>, <b>Can I trust the personalization?</b>, or <b>Show me the hottest records</b>.",
+     "Read the answer: a summary, stat cards, and (where relevant) a table.",
+     "Check the <b>Data used</b> rail at the bottom — every signal the answer drew on, with its source and policy."
+    ]
+   },
+   {
+    "type": "note",
+    "html": "What it proves: every answer carries its provenance. The intents do the work and stamp their sources either way, so the navigator can't make an unsourced claim. The same data is available as JSON at <code>/api/agent/run</code>."
+   },
+   {
+    "type": "kv",
+    "title": "At a glance",
+    "rows": [
+     [
+      "Route",
+      "<a href=\"/agent\">/agent</a> (also <code>/agent?q=…</code>)"
+     ],
+     [
+      "Module",
+      "<code>app/agent.py</code>"
+     ],
+     [
+      "Intents",
+      "why_won · kpis · drift · assurance · records"
+     ]
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "surface-observatory",
+  "title": "Observatory",
+  "category": "Using the surfaces",
+  "summary": "The live, watchable view of a pipeline run — a clickable node graph, a per-node input to decision to output inspector, a phase ribbon, and an append-only event timeline you can scrub.",
+  "read_min": 3,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "The <b>Observatory</b> replays a recorded pipeline run so you can watch it node by node. If no run has been traced it degrades honestly — no run, no green board — and tells you how to produce one."
+   },
+   {
+    "type": "h",
+    "text": "How to use it"
+   },
+   {
+    "type": "ul",
+    "items": [
+     "Scan the <b>health chips</b> (P1–P5 pass count, profile, $0 cost, seed, node/event counts) and the <b>phase ribbon</b> showing where the run is.",
+     "Click any box in the <b>node graph</b> — the <b>Node inspector</b> opens its tooling and its <b>INPUT → DECISION → OUTPUT</b> contract plus the events that node emitted.",
+     "Use the <b>event ledger</b> on the left: Play, Step, or scrub the timeline. It is append-only with a monotonic <code>seq</code>, so the surface polls new events with <code>since=N</code>.",
+     "Review the <b>P1–P5</b> headline-properties panel and the enrichment / data-provenance panel beneath the inspector."
+    ]
+   },
+   {
+    "type": "note",
+    "html": "What it proves: observability is the trust mechanism for hands-off autonomy. The replay is deterministic seeded (decision R5), so the run is byte-identical every time, and the per-node I/O evals show that each node's decision follows from its inputs."
+   },
+   {
+    "type": "kv",
+    "title": "At a glance",
+    "rows": [
+     [
+      "Route",
+      "<a href=\"/observatory\">/observatory</a>"
+     ],
+     [
+      "Module",
+      "<code>app/observatory.py</code>"
+     ],
+     [
+      "Polling APIs",
+      "<code>/api/observe/events?since=N</code> · <code>/nodes</code> · <code>/evals</code> · <code>/meta</code>"
+     ]
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "surface-live-demo",
+  "title": "Live demo & KPI monitor",
+  "category": "Using the surfaces",
+  "summary": "Live-clone a website and render three personalized variants per scenario — each with its own DATA USED receipt — then watch a simulated RL loop climb toward target KPIs on the monitor.",
+  "read_min": 3,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "The <b>Live demo</b> clones a real website and renders three personalized variants for the selected scenario, each injected onto the cloned page so you see the rendering, not a mockup."
+   },
+   {
+    "type": "h",
+    "text": "How to use the demo"
+   },
+   {
+    "type": "ul",
+    "items": [
+     "Pick a <b>scenario</b> in the left tree; expand it to see its three renderings (and any blocked variant).",
+     "Set the <b>URL</b> in the bar to clone a different site — <code>gauntletai.com</code> is the default. Cloning a new URL touches the network.",
+     "Open any variant to see its full <b>receipt</b>: the DATA USED signals, each with source and policy (say / allude / hold), and what the variant changed.",
+     "A blocked variant shows why it can't ship — it relies on a held fact."
+    ]
+   },
+   {
+    "type": "h",
+    "text": "KPI control tower"
+   },
+   {
+    "type": "ul",
+    "items": [
+     "Open the <b>KPI monitor</b> to watch a simulated reinforcement-learning loop move toward target KPIs (a KPI tree with progress-to-target).",
+     "See per-scenario learning — which arm the bandit picked and its share — with a blocked arm's would-be CTR shown but <b>selected 0×</b>.",
+     "Watch the three <b>trust rails</b>: provenance coverage, drift (paused arms / fresh TTL facts), and hallucination/overclaim (ungated arms selected)."
+    ]
+   },
+   {
+    "type": "note",
+    "html": "What it proves: every rendered variant carries a receipt, the optimizer can only pull verified arms (hallucination rail shows ungated arms selected as 0, blocked by construction), and provenance coverage is monitored continuously."
+   },
+   {
+    "type": "kv",
+    "title": "At a glance",
+    "rows": [
+     [
+      "Routes",
+      "<a href=\"/demo\">/demo</a> · <a href=\"/demo/monitor\">/demo/monitor</a>"
+     ],
+     [
+      "Module",
+      "<code>app/demo.py</code>"
+     ],
+     [
+      "Also",
+      "<code>/demo/variant</code> (cloned page) · <code>/api/demo/monitor</code> (JSON)"
+     ]
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "surface-more",
+  "title": "More surfaces",
+  "category": "Using the surfaces",
+  "summary": "A roundup of the remaining Lab and trust surfaces — each one a focused view that links out to its own route.",
+  "read_min": 2,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "Beyond the main surfaces, the sidebar carries a set of focused Lab and trust views. Each links out to its own route — open one to go deeper."
+   },
+   {
+    "type": "kv",
+    "title": "More surfaces",
+    "rows": [
+     [
+      "Inspector",
+      "<a href=\"/inspector\">/inspector</a> — claim-ledger lights, the regret contrast (constrained vs the unconstrained twin), the blocked-lie panel, and the drift log, read from a recorded run."
+     ],
+     [
+      "Funnel",
+      "<a href=\"/funnel\">/funnel</a> — every way a customer enters, what's captured at each step, and who may use it."
+     ],
+     [
+      "Cohort",
+      "<a href=\"/admin/landings\">/admin/landings</a> — a gallery of the seed users, each with their archetype and a link to their personalized landing."
+     ],
+     [
+      "Personalize",
+      "<a href=\"/personalize\">/personalize</a> — what a site could know the instant it loads, by data tier (anonymous → broker → CRM), in tasteful or creepy mode, with the full provenance ledger."
+     ],
+     [
+      "Google sign-in",
+      "<a href=\"/google\">/google</a> — what a Google login actually gives, in honest tiers, using the verified email to load our DB and build a personalized page."
+     ],
+     [
+      "Enrichment catalog",
+      "<a href=\"/enrichment-catalog\">/enrichment-catalog</a> — every data source we could enrich with, paid or free, honest about cost and basis."
+     ],
+     [
+      "Lead form",
+      "<a href=\"/lead\">/lead</a> — the lead-capture form."
+     ]
+    ]
+   },
+   {
+    "type": "note",
+    "html": "These are intentionally one-line pointers — open each route for its own help and detail."
+   }
+  ]
+ },
+ {
+  "slug": "build-methodology",
+  "title": "How this was built",
+  "category": "Methodology",
+  "summary": "Provenance is built to the same bar it holds outbound copy: a Constitution, a locked PRD, deterministic offline replay, and an immutable pytest harness that is the authoritative gate.",
+  "read_min": 5,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "Provenance is a demo whose entire thesis is <b>“can't say what it can't prove.”</b> The build holds itself to that same standard. Three files at the repository root govern every change: <code>CONSTITUTION.md</code> (inviolable guardrails), <code>docs/01-intake/PRD.md</code> (the locked specification), and <code>BUILD-AUTONOMY.md</code> (the standing-approval charter). Together they let the build run to completion without per-step approvals, while the Constitution keeps it honest."
+   },
+   {
+    "type": "h",
+    "text": "The Constitution — ten articles, checked before merge"
+   },
+   {
+    "type": "p",
+    "html": "Every agent (human or AI) is checked against <code>CONSTITUTION.md</code> before a merge. Articles I–V are inviolable; VI–X are overridable only with a logged decision in <code>docs/05-build/DECISIONS.md</code>. The four load-bearing articles for this build:"
+   },
+   {
+    "type": "kv",
+    "title": "Key Constitution articles",
+    "rows": [
+     [
+      "I — Truthfulness",
+      "No fabricated results, metrics, or capabilities. Demo numbers (catch-rate, regret, ECE) are computed from a real run, never hand-typed. A claim the code can't substantiate is a bug, not a feature — a CRITICAL violation that halts the build."
+     ],
+     [
+      "V — Scope discipline",
+      "Build the end-to-end thin slice the PRD describes — real where it matters (Gate, NLI, Assurance math, the form/website), simulated where it is theatre (the CTA oracle). No production auth, no real sending."
+     ],
+     [
+      "VII — No test theatre",
+      "The eval harness in tests/ is immutable once written. Tests are never weakened, skipped, or rewritten to make code pass. They hit the real Gate (no mocks of the decision logic) and assert inequalities and floors, not hardcoded numbers."
+     ],
+     [
+      "VIII — Honest reporting",
+      "Report what actually ran vs. what was only inspected, per layer. “Compiles” is not “works.” A layer that couldn't be exercised is surfaced as a gap, never reported green."
+     ]
+    ]
+   },
+   {
+    "type": "h",
+    "text": "The locked PRD and the autonomy charter"
+   },
+   {
+    "type": "p",
+    "html": "<code>docs/01-intake/PRD.md</code> is the authority and is immutable from build start — new requirements land as numbered, dated amendments rather than silent edits (a deck-vs-PRD conflict resolves to the PRD). With the Constitution, the PRD, and <code>BUILD-AUTONOMY.md</code> all present at the root, the build carries <b>standing approval</b> to create files, set local config, and install the declared dependencies without per-step gates. It still halts and escalates for four fixed stop conditions: anything destructive or irreversible, anything outward-facing (a push, a deploy, a real send), anything that spends money beyond budget, or a genuinely undecidable high-stakes fork. Everything the PRD is silent on is decided and logged as a numbered <code>Rn</code> entry in <code>docs/05-build/DECISIONS.md</code>, flagged <code>basis=spec</code> or <code>basis=interpretation</code>."
+   },
+   {
+    "type": "h",
+    "text": "Determinism — seed-locked, offline, $0, byte-identical"
+   },
+   {
+    "type": "p",
+    "html": "Per decision <code>R5</code>, “live” means <b>deterministic seeded replay</b>, not live inference. The whole demo runs offline by default with no API key, at $0, and re-running <code>python -m scripts.pipeline</code> produces byte-identical artifacts. Every artifact — the 1000 synthetic recipients, the claim ledgers, the campaign runs, the metrics — is reproducible from <code>scripts/</code> plus the global seed (guarded across processes; see <code>R9</code>, which replaced Python's salted built-in <code>hash()</code> with a stable hash). An optional <code>rich</code> profile can upgrade the verifier with real models, but those outputs are cached so the run still replays deterministically afterward."
+   },
+   {
+    "type": "h",
+    "text": "Pytest is the authoritative gate"
+   },
+   {
+    "type": "p",
+    "html": "The five headline properties aren't claims in a slide — they live in <code>tests/</code> and are run with <code>python -m pytest -q</code>. They hit the real Gate with no mocks of the decision logic: <b>P1</b> a Gate-blocked lie can never be selected (<code>test_optimizer.py</code>); <b>P2</b> the Gate blocks a legal-hold claim the instant the hold flips, attributable to <code>rules_version</code> alone (<code>test_gate.py</code>); <b>P3</b> a drift event re-verifies exactly the affected claims (<code>test_gate.py</code>, <code>test_drift.py</code>); <b>P4</b> the website renders only Gate-passed claims, with the same verdict per <code>claim_id</code> on both channels (<code>test_website.py</code>); <b>P5</b> Assurance catch-rate beats the single-judge baseline at fixed false-reject (<code>test_assurance.py</code>)."
+   },
+   {
+    "type": "note",
+    "html": "The Observatory (PRD amendment <b>A1</b>) and the enrichment lane (<b>A2</b>, property <b>E1</b>) added watchable observability and data-provenance touchpoints — but their instrumentation is a no-op unless a recorder is attached, so the test count and the determinism guarantee are unchanged. Pytest stays the authoritative gate for P1–P5."
+   }
+  ]
+ },
+ {
+  "slug": "how-assurance-was-built",
+  "title": "How the Assurance dashboard was built",
+  "category": "Methodology",
+  "summary": "The research and rationale behind /assurance — a decomposed-reliability dashboard where every number comes from a real run.",
+  "read_min": 6,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "The <a href=\"/assurance\">Assurance dashboard</a> began as a single trust score and a drift table. It was rebuilt into a decomposed-reliability dashboard — the kind a risk committee and an ML engineer can both read — without inventing a single number. This article records the research and the reasoning behind it."
+   },
+   {
+    "type": "h",
+    "text": "The research"
+   },
+   {
+    "type": "p",
+    "html": "A four-lens specialist review was run, each grounded in the <b>real</b> data the pipeline already produces (<code>data/demo/runs/assurance.json</code>, the eval history, the golden suite) and in the Quiet Workspace design system:"
+   },
+   {
+    "type": "ul",
+    "items": [
+     "an <b>ML-eval / calibration data scientist</b> — what decomposed-reliability panel an NLI-ensemble verifier needs (operating point, confusion, per-mutation lift, calibration / ECE) and how to render a near-perfect result honestly;",
+     "a <b>dashboard / information-design</b> lens — the two-audience information architecture (one board number plus an engineer's drill-down) expressed in quiet.css components;",
+     "a <b>trust &amp; audit</b> lens — what makes the number defensible to a regulator: the baseline contrast, the trap taxonomy, sample sizes, the structural guarantees;",
+     "an <b>SVG dataviz</b> lens — concrete, dependency-free inline-SVG charts that honour the design tokens."
+    ]
+   },
+   {
+    "type": "p",
+    "html": "Their recommendations were synthesised into one build spec in which <b>every</b> chart and KPI maps to a real field in a real artifact. Two further adversarial review passes (honesty, data-science, design, frontend) then verified the build and triaged the fixes."
+   },
+   {
+    "type": "h",
+    "text": "The honesty discipline"
+   },
+   {
+    "type": "p",
+    "html": "The product's whole thesis is “can't say what it can't prove,” so the dashboard is held to the same bar (CONSTITUTION <a href=\"/help/build-methodology\">Articles I &amp; VIII</a>): every metric is computed from a real, seeded run — never hand-typed. Confidence intervals are computed (Wilson) in <code>app/charts.py</code>, not written into the HTML. A saturated rate is never shown naked — it always carries its denominator and the single-judge contrast."
+   },
+   {
+    "type": "note",
+    "html": "Because the Gate is perfect on the held-out trap set (37/37 caught, 0 false-rejects, ECE 0), a lone “100%” would read as fake. So the page leads with the <b>contrast</b> — the Gate catches 37/37 where a number-blind single judge catches 9/37 — and renders the calibration of a <b>decisive</b> verifier honestly (only 2 of 5 reliability bins populate; no curve is drawn through the empty middle)."
+   },
+   {
+    "type": "h",
+    "text": "The chart catalogue"
+   },
+   {
+    "type": "kv",
+    "title": "every chart ← a real field",
+    "rows": [
+     [
+      "Operating point",
+      "catch-rate vs false-reject, Gate vs single judge — from <code>gate</code>/<code>baseline</code> in assurance.json, with Wilson whiskers"
+     ],
+     [
+      "Confusion pair",
+      "raw counts {37,0,0,10} vs {9,28,0,10}, derived from the 47 per-trap <code>items[]</code>"
+     ],
+     [
+      "Lift bars",
+      "catch-rate by mutation family (number-drift, superlative, false-equivalence, unsayable) with real per-type denominators"
+     ],
+     [
+      "Reliability + ECE",
+      "the 5 calibration bins + ECE, rendered for a decisive verifier"
+     ],
+     [
+      "Trap heat-grid",
+      "per-claim × attack — where the single judge misses"
+     ],
+     [
+      "Stability strip",
+      "7 seeded runs over time — flat by construction (decision R5)"
+     ],
+     [
+      "Bandit + KPI tree",
+      "the real ThompsonBandit on synthetic traffic — fenced and labelled illustrative"
+     ]
+    ]
+   },
+   {
+    "type": "h",
+    "text": "How it's verified — and kept aligned"
+   },
+   {
+    "type": "ul",
+    "items": [
+     "The eval harness is immutable (CONSTITUTION Article VII) — all <a href=\"/help/five-properties\">trust properties</a> stay green in <code>tests/</code>; the dashboard adapts to the tests, never the reverse.",
+     "Every derived count (confusion, per-type fractions, CIs) is recomputed from <code>items[]</code> at request time, so a stale number is impossible.",
+     "Shared dashboard primitives (<code>q-sec</code>, <code>q-sim</code>, <code>q-kpitree</code>) live in <a href=\"/help/design-system\">quiet.css</a> so /assurance and the <a href=\"/demo/monitor\">KPI control tower</a> render the same components."
+    ]
+   },
+   {
+    "type": "p",
+    "html": "See it live: <a href=\"/assurance\">the Assurance dashboard</a>. For the engine it audits, see <a href=\"/help/assurance-lab\">The Assurance Lab</a>."
+   }
+  ],
+  "related": [
+   "assurance-lab",
+   "five-properties",
+   "design-system",
+   "build-methodology"
+  ]
+ },
+ {
+  "slug": "design-system",
+  "title": "The Quiet Workspace design system",
+  "category": "Methodology",
+  "summary": "quiet.css is a single light, near-monochrome token set where colour appears only in product data; pages compose its components and never restyle them, and charts are dependency-free inline SVG.",
+  "read_min": 5,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "Every surface in Provenance is drawn from one stylesheet, <code>app/static/quiet.css</code> — the <b>Quiet Workspace</b> design system, reverse-designed from attio.com (real captured values, not guessed). It is a light, near-monochrome system on a pure-white canvas with near-black Inter Display headings and a cool-grey scale. The governing rule: <b>colour appears only in product data.</b> The chrome stays quiet so the verdicts, the ledger lights, and the metrics are the only things that carry hue."
+   },
+   {
+    "type": "h",
+    "text": "One token set"
+   },
+   {
+    "type": "p",
+    "html": "There is a single <code>:root</code> token set. The structural greys carry the layout: <code>--ink</code> (near-black headings), <code>--slate</code> (body text), <code>--muted</code> (secondary text), and <code>--hairline</code> (the 1px borders that divide everything). Colour is reserved for data through a small named palette — <code>--g</code> green (verified/pass), <code>--a</code> amber (allude/simulated), <code>--r</code> red (hold/blocked) — plus exactly one accent, <code>--signal</code>, used sparingly for primary actions and active states. Type is Inter Display for headings, Inter for UI, Newsreader for the occasional pull-quote; radii and the calm <code>cubic-bezier(.2,0,0,1)</code> easing are tokens too."
+   },
+   {
+    "type": "h",
+    "text": "The core components"
+   },
+   {
+    "type": "p",
+    "html": "Each component is defined once and composed everywhere:"
+   },
+   {
+    "type": "ul",
+    "items": [
+     "<code>q-card</code> — the bordered, soft-shadowed content surface (with a <code>.hover</code> lift variant).",
+     "<code>q-stat</code> — the metric card: uppercase label over a large Inter Display figure.",
+     "<code>q-panel</code> / <code>q-table</code> — the record panel and its hairline-ruled data table.",
+     "<code>q-pill</code> — the tinted, dotted tag that carries a verdict colour (green/amber/red/signal).",
+     "<code>q-tabs</code> — the sliding-underline tab switcher.",
+     "<code>q-sec</code> / <code>q-sim</code> / <code>q-kpitree</code> — the shared dashboard primitives: a compact uppercase section divider, the amber “this is synthetic” marker chip, and the baseline→current→target KPI-tree.",
+     "<code>q-mono</code> — the tabular-figures monospace role for numeric arrays and metrics, so layout stays stable."
+    ]
+   },
+   {
+    "type": "h",
+    "text": "Pages compose, never restyle"
+   },
+   {
+    "type": "p",
+    "html": "The contract is explicit in the spec: <b>pages compose components, never restyle.</b> No page sets its own palette or rogue <code>max-width</code> outside the tokens, and a UI-consistency harness asserts it — every navigable route is rendered and its computed palette must be a subset of the token set, with one type family and token-driven radii. The payoff is the WWDC26 <b>Consistency</b> principle in practice: the shared dashboard primitives (<code>q-sec</code> / <code>q-sim</code> / <code>q-kpitree</code>, added in <b>quiet.css v1.9</b>) are used by <b>both</b> the KPI control tower at <code>/demo/monitor</code> and the Assurance dashboard at <code>/assurance</code> — one definition, not two, so the same surfaces look and behave the same everywhere."
+   },
+   {
+    "type": "h",
+    "text": "Charts are dependency-free inline SVG"
+   },
+   {
+    "type": "p",
+    "html": "Every chart is hand-rendered inline SVG by <code>app/charts.py</code> — no CDN, no JavaScript chart library — so each surface stays fully offline. The charts reference the design tokens directly (for example <code>style=\"fill:var(--g)\"</code>) rather than hard-coding colours, so they stay on-brand and adapt with the system. Crucially, the helpers take already-real values and invent nothing: <code>wilson_ci</code> computes confidence intervals from real counts so a number is never hand-typed into a template — the Constitution's Article I, enforced in the chart layer."
+   },
+   {
+    "type": "h",
+    "text": "Principles applied — light only"
+   },
+   {
+    "type": "p",
+    "html": "The system applies the WWDC26 <i>Principles of great design</i> and the Material 3 Expressive layer on the light Attio base: spring-physics motion, scroll-reveal, focus-visible rings, a global reduced-motion guard, and a light “Spatial Liquid Glass” frosted-nav treatment. The dark Carved-Hardware canvas was deliberately skipped — the product is <b>light-only by decision</b>, matching attio.com, which does not follow OS dark appearance. The surface/on-* token indirection is kept (at clean light values), but there is no <code>prefers-color-scheme</code> dark override."
+   },
+   {
+    "type": "note",
+    "html": "Restraint is the point. The Quiet Workspace is engineered for a calm, confident feel — strong type hierarchy, generous spacing, motion that never bounces — so that when colour does appear, it always means something: it is product data with a verdict behind it."
+   }
+  ]
+ }
+]
