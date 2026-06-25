@@ -191,6 +191,58 @@ def test_creative_agents_and_the_gate():
     assert d["source"] == "template" and d["headline"] and d["blocked_example"]["ok"] is False  # falls back, Gate visible
 
 
+def test_classifier_confidence_and_tier():
+    """The deterministic router: network type → per-field confidence → personalization tier."""
+    from pipeline.personalization import scene as SC
+
+    def rv(**k):
+        b = dict(mobile=False, proxy=False, hosting=False, is_isp=False, corp_via_vpn=False,
+                 is_corporate=False, org="X", isp="X")
+        b.update(k); return b
+
+    # clean corporate + resolved industry → Tier 2, everything high, competitive-eligible
+    c = SC._classify(rv(is_corporate=True, org="Apple Inc"), "Apple Inc", "technology")
+    assert c["tier"] == 2 and c["confidence"]["industry"] == "high" and c["competitive_eligible"]
+    # corporate IP but PDL gave nothing → drop to Tier 1, NO sector guessed
+    c = SC._classify(rv(is_corporate=True, org="Acme LLC"), "Acme LLC", None)
+    assert c["tier"] == 1 and c["confidence"]["industry"] == "low" and not c["competitive_eligible"]
+    # corporate-VPN exception → Tier 2 but capped at MEDIUM (not a clean office IP)
+    c = SC._classify(rv(proxy=True, corp_via_vpn=True, is_corporate=True, org="Acme Corp"), "Acme Corp", "manufacturing")
+    assert c["tier"] == 2 and c["confidence"]["company"] == "medium"
+    # consumer ISP → Tier 1 location-aware, company void (the AT&T case)
+    c = SC._classify(rv(is_isp=True, isp="AT&T"), None, None)
+    assert c["tier"] == 1 and c["confidence"]["location"] == "high" and c["confidence"]["company"] == "none"
+    # commercial VPN / hosting → Tier 0 neutral, location not trustworthy
+    assert SC._classify(rv(proxy=True, isp="NordVPN"), None, None)["tier"] == 0
+    assert SC._classify(rv(hosting=True, isp="Amazon"), None, None)["confidence"]["location"] == "low"
+    # commercial VPN provider names are distinguished from a corporate org
+    assert SC._looks_like_vpn("NordVPN") is True and SC._looks_like_vpn("Acme Corporation") is False
+
+
+def test_gate_blocks_comparative_and_competitor_claims():
+    """Comparative superiority + reciting an inferred competitor are the highest-scrutiny class."""
+    from pipeline.personalization import creative as CR
+    hints = CR.COMPETITOR_HINTS
+    assert CR.verify_copy(["We're faster than the rest"], "x", None, "allude")[0]["ok"] is False
+    assert CR.verify_copy(["Switch from your old tool today"], "x", None, "allude")[0]["ok"] is False
+    assert CR.verify_copy(["Unlike legacy CRMs, we never guess"], "x", None, "allude")[0]["ok"] is False
+    assert CR.verify_copy(["Beat Clay at de-anonymization"], "x", None, "allude", competitors=hints)[0]["ok"] is False
+    # a provable, category-level differentiator clears the Gate
+    assert CR.verify_copy(["Every claim ships with its source and policy"], "x", None, "allude", competitors=hints)[0]["ok"] is True
+
+
+def test_tier3_competitor_agent_is_gated():
+    """Tier-3 competitive copy leads with provable differentiators; the creepy arm is blocked."""
+    from pipeline.personalization import creative as CR
+    b = CR.competitor_brief(industry="technology", region="Texas")
+    assert b["differentiators"] and b["source"] == "template"          # deterministic offline
+    d = CR.ai_copy(industry="technology", region="Texas", company="Acme Inc", city=None,
+                   angle="default", policy="allude", competitive=True)
+    assert d["competitive"] is True and d["ships"] is True             # its own copy clears the Gate
+    assert all(c["ok"] for c in d["checks"])                           # no comparative/competitor slip
+    assert d["blocked_example"]["ok"] is False                         # the named-competitor arm is blocked
+
+
 def test_demo_live_has_creative_controls():
     t = c.get("/demo/live").text
     assert 'id="sel-angle"' in t and 'id="img-pick"' in t and 'id="ai-go"' in t and "Creative agents" in t

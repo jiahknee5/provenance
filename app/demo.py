@@ -115,11 +115,12 @@ def demo_live(request: Request):
 
 @app.get("/api/demo/aicopy")
 def api_demo_aicopy(industry: str = "", region: str = "", company: str = "", city: str = "",
-                    angle: str = "default", policy: str = "allude"):
-    """The gated copy agent: LLM proposes (if keyed) → Gate verifies → angle falls back."""
+                    angle: str = "default", policy: str = "allude", competitive: bool = False):
+    """The gated copy agent: LLM proposes (if keyed) → Gate verifies → angle falls back.
+    competitive=true engages the Tier-3 path (provable differentiators, Gate-enforced)."""
     return JSONResponse(CR.ai_copy(industry=industry or SC.DEFAULT_INDUSTRY, region=region or None,
                                    company=company or None, city=city or None,
-                                   angle=angle, policy=policy))
+                                   angle=angle, policy=policy, competitive=competitive))
 
 
 @app.get("/api/demo/resolve")

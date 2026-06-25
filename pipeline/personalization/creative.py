@@ -77,17 +77,30 @@ def design_select(*, industry: str, region: str | None = None, company: str | No
 # --- the Gate (focused, for ad-hoc generated copy) ----------------------------------------
 _SUPERLATIVES = ("#1", "number one", "the best", "best-in-class", "best in class", "leading",
                  "world's", "world’s", "unrivaled", "unmatched", "guaranteed", "#1 ", "no. 1")
+# comparative / competitive claims — the highest-scrutiny class: a superiority claim the Gate
+# can't back from a proof store, or reciting a competitor we only *inferred* from the visitor.
+_COMPARATIVE = ("better than", "beats ", "outperform", "smarter than", "faster than",
+                "cheaper than", " vs ", " vs.", "versus", "unlike ", "switch from", "switch off",
+                "replace your", "rip out", "ditch ", "leave behind", "superior to", "win against")
 
 
-def verify_copy(lines, facts: str, company: str | None, policy: str) -> list[dict]:
-    """The Gate for generated copy: block the unprovable. Every line gets a verdict + reason."""
+def verify_copy(lines, facts: str, company: str | None, policy: str,
+                competitors: list[str] | None = None) -> list[dict]:
+    """The Gate for generated copy: block the unprovable. Every line gets a verdict + reason.
+    Comparative claims (superiority we can't prove) and reciting an inferred competitor are the
+    highest-scrutiny class — blocked by construction, not merely discouraged."""
     out = []
     fl = (facts or "").lower()
+    comps = [c.lower() for c in (competitors or []) if c]
     for ln in lines:
         s = (ln or "").lower()
         reason = None
         if any(w in s for w in _SUPERLATIVES):
             reason = "unprovable superlative — no source backs it"
+        elif any(w in s for w in _COMPARATIVE):
+            reason = "comparative claim — the Gate blocks superiority it can't prove from a source"
+        elif any(c in s for c in comps):
+            reason = "recites a competitor inferred from the visitor — allude forbids naming it"
         elif re.search(r"\d+\s*%|\b\d+x\b|\$\s?\d", s) and not re.search(r"\d", fl):
             reason = "cites a number that isn't in the sources"
         elif company and policy == "allude" and company.lower() in s:
@@ -97,22 +110,16 @@ def verify_copy(lines, facts: str, company: str | None, policy: str) -> list[dic
     return out
 
 
-def _llm_draft(ind: dict, region: str | None, angle: str) -> dict | None:
-    """Ask the LLM for a headline + sub for this (industry × region × angle). None on any failure
-    or when no key is set — the caller falls back to the deterministic angle."""
+def _llm_hero(prompt: str) -> dict | None:
+    """One Claude Haiku call → {headline, sub}. None on any failure / no key — caller falls back."""
     if not config.ANTHROPIC_API_KEY:
         return None
-    a = ANGLE_BY.get(angle, ANGLE_BY["default"])
-    prompt = (f"Write a B2B SaaS landing hero for a {ind['label']} company in {region or 'the US'}.\n"
-              f"Angle: {a.get('brief', 'clear value')}.\n"
-              "Rules: no superlatives (#1/best/leading), no invented stats or numbers, never name the\n"
-              "visitor's company. Return JSON only: {\"headline\": \"…\", \"sub\": \"…\"} — headline ≤ 9 words.")
     try:
         import json as _json
 
         import anthropic
         client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
-        r = client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=200,
+        r = client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=220,
                                    messages=[{"role": "user", "content": prompt}])
         txt = "".join(b.text for b in r.content if getattr(b, "type", "") == "text")
         m = re.search(r"\{.*\}", txt, re.S)
@@ -124,12 +131,101 @@ def _llm_draft(ind: dict, region: str | None, angle: str) -> dict | None:
     return None
 
 
+def _llm_draft(ind: dict, region: str | None, angle: str) -> dict | None:
+    """Ask the LLM for a hero for this (industry × region × angle)."""
+    a = ANGLE_BY.get(angle, ANGLE_BY["default"])
+    return _llm_hero(
+        f"Write a B2B SaaS landing hero for a {ind['label']} company in {region or 'the US'}.\n"
+        f"Angle: {a.get('brief', 'clear value')}.\n"
+        "Rules: no superlatives (#1/best/leading), no invented stats or numbers, never name the\n"
+        "visitor's company. Return JSON only: {\"headline\": \"…\", \"sub\": \"…\"} — headline ≤ 9 words.")
+
+
+# Tier-3 competitor-research agent ---------------------------------------------------------
+# Provable, category-level differentiators — structural properties of a tool that can prove every
+# claim. Claims about OUR product (never "we beat X"), so they clear the Gate by construction.
+_DIFFERENTIATORS = [
+    "every claim ships with its source, basis, and surface policy",
+    "it withholds any line it can't prove — by construction",
+    "every personalization carries a receipt you can audit",
+    "the optimizer only ships variants that already cleared verification",
+]
+# competitor names used ONLY to BLOCK reciting an inferred competitor (the safe direction).
+# Distinctive tokens only — deliberately excludes generic words that double as product
+# vocabulary (e.g. "outreach"), which would false-positive on our own copy.
+COMPETITOR_HINTS = ("clay", "apollo.io", "salesloft", "zoominfo", "hubspot", "clearbit",
+                    "6sense", "rb2b", "common room", "gauntletai")
+
+
+def _llm_brief(category: str, region: str | None) -> list[str] | None:
+    if not config.ANTHROPIC_API_KEY:
+        return None
+    prompt = (f"You are positioning a provenance-verified GTM/CRM product within the {category} field.\n"
+              "List 3 differentiators that are STRUCTURAL properties of a tool that can prove every claim.\n"
+              "Rules: do NOT name any competitor. Do NOT claim superiority (no 'better/faster/cheaper than').\n"
+              "Each is a provable property of our product, ≤ 12 words. Return JSON: {\"diffs\": [\"…\",\"…\",\"…\"]}.")
+    try:
+        import json as _json
+
+        import anthropic
+        client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
+        r = client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=240,
+                                   messages=[{"role": "user", "content": prompt}])
+        txt = "".join(b.text for b in r.content if getattr(b, "type", "") == "text")
+        m = re.search(r"\{.*\}", txt, re.S)
+        d = _json.loads(m.group(0)) if m else {}
+        diffs = [x.strip() for x in (d.get("diffs") or []) if x and x.strip()]
+        return diffs[:3] or None
+    except Exception:
+        return None
+
+
+def competitor_brief(*, industry: str, region: str | None = None, company: str | None = None) -> dict:
+    """Tier-3 research agent: a brief of *provable* category differentiators. LLM-assisted when
+    keyed, deterministic always. It never names a competitor or asserts superiority — it's
+    positioning material; the Gate is what keeps the copy honest downstream."""
+    ind = SC.BY_KEY.get(industry, SC.BY_KEY[SC.DEFAULT_INDUSTRY])
+    category = f"{ind['label']} GTM / revenue tooling"
+    diffs, source = list(_DIFFERENTIATORS), "template"
+    llm = _llm_brief(category, region)
+    if llm:
+        diffs, source = llm, "ai"
+    return {"category": category, "differentiators": diffs, "source": source,
+            "note": ("Researched by the competitor agent — provable category differentiators only."
+                     if source == "ai" else
+                     "Competitor agent off (no key) — deterministic differentiators. Same discipline.")}
+
+
 def ai_copy(*, industry: str, region: str | None, company: str | None, city: str | None,
-            angle: str, policy: str) -> dict:
+            angle: str, policy: str, competitive: bool = False) -> dict:
     """The gated copy agent: LLM proposes (if keyed) → Gate verifies → angle falls back.
-    Always returns a Gate-blocked example too, so the Gate is visible even with the AI off."""
+    Always returns a Gate-blocked example too, so the Gate is visible even with the AI off.
+    competitive=True engages the Tier-3 path: positioning that leads with a provable differentiator
+    — never naming a competitor or claiming superiority (the Gate enforces both)."""
     ind = SC.BY_KEY.get(industry, SC.BY_KEY[SC.DEFAULT_INDUSTRY])
     facts = f"region={region or '—'}; industry={ind['label']}; company={company or '—'}"
+
+    if competitive:
+        brief = competitor_brief(industry=industry, region=region, company=company)
+        diff = brief["differentiators"][0] if brief["differentiators"] else "every claim carries a receipt"
+        draft = _llm_hero(
+            f"Write a B2B SaaS landing hero for a {ind['label']} buyer in {region or 'the US'}.\n"
+            f"Lead with this provable differentiator: \"{diff}\".\n"
+            "Rules: do NOT name any competitor. Do NOT claim superiority (no 'better/faster/cheaper than',\n"
+            "no 'switch from', no 'vs'). No superlatives, no invented numbers.\n"
+            "Return JSON only: {\"headline\": \"…\", \"sub\": \"…\"} — headline ≤ 9 words.")
+        source = "ai" if draft else "template"
+        if not draft:
+            draft = {"headline": f"Outreach your {ind['label'].lower()} buyers can trust.",
+                     "sub": f"Where others guess, {diff}."}
+        checks = verify_copy([draft["headline"], draft["sub"]], facts, company, policy, competitors=COMPETITOR_HINTS)
+        # the creepy arm: a named-competitor superiority claim — provably blocked
+        blocked = verify_copy(["Switch from Clay — we're faster and cheaper than the rest."],
+                              facts, company, policy, competitors=COMPETITOR_HINTS)[0]
+        return {"source": source, "headline": draft["headline"], "sub": draft["sub"], "cta": ind["cta"],
+                "checks": checks, "blocked_example": blocked, "ships": all(c["ok"] for c in checks),
+                "note": brief["note"], "competitive": True, "brief": brief}
+
     draft = _llm_draft(ind, region, angle)
     source = "ai" if draft else "template"
     if not draft:
@@ -143,4 +239,4 @@ def ai_copy(*, industry: str, region: str | None, company: str | None, city: str
     note = ("Drafted by the AI copy agent — every line Gate-verified." if source == "ai"
             else "AI agent off (no ANTHROPIC_API_KEY) — showing the deterministic angle. The Gate still runs.")
     return {"source": source, "headline": draft["headline"], "sub": draft["sub"], "cta": ind["cta"],
-            "checks": checks, "blocked_example": blocked, "ships": ships, "note": note}
+            "checks": checks, "blocked_example": blocked, "ships": ships, "note": note, "competitive": False}

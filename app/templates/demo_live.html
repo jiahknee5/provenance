@@ -52,6 +52,11 @@
     .pol{font-size:9.5px;font-weight:700;text-transform:uppercase;border-radius:5px;padding:2px 7px;white-space:nowrap}
     .pol.say{color:var(--g);background:var(--gbg)} .pol.allude{color:var(--a);background:var(--abg)}
     .pol.recite{color:#fff;background:var(--r)} .pol.obs{color:var(--muted);background:var(--fill)}
+    .cf{font-size:9px;font-weight:700;text-transform:uppercase;border-radius:4px;padding:1px 5px;margin-left:4px;letter-spacing:.03em}
+    .cf.high{color:var(--g);background:var(--gbg)} .cf.medium{color:var(--a);background:var(--abg)} .cf.low{color:var(--muted);background:var(--fill)}
+    .comp-tog{display:flex;align-items:center;gap:7px;margin-top:9px;font-size:12px;color:var(--slate);cursor:pointer;user-select:none}
+    .comp-tog.off{opacity:.45;cursor:not-allowed} .comp-tog input{accent-color:var(--ink)}
+    .comp-hint{font-style:normal;font-size:11px;color:var(--muted)}
     .cap-tbl{width:100%;border-collapse:collapse;font-size:13px;max-width:880px;background:var(--surface);border:1px solid var(--hairline);border-radius:var(--r-card);overflow:hidden;box-shadow:var(--shadow-card)}
     .cap-tbl th{text-align:left;font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--label);padding:10px 14px;border-bottom:1px solid var(--hairline)}
     .cap-tbl td{padding:9px 14px;border-bottom:1px solid var(--hairline);vertical-align:top}
@@ -99,7 +104,8 @@
     <div class="lv-row"><span class="k">IP</span><span class="v" id="b-ip">{{ det.ip or '—' }}</span><span class="src">current</span></div>
     <div class="lv-row"><span class="k">Company</span><span class="v" id="b-co">{{ det.company or '—' }}</span><span class="src">reverse-IP</span></div>
     <div class="lv-row"><span class="k">Location</span><span class="v" id="b-loc">{{ (det.city ~ ', ' if det.city else '') ~ (det.region or '—') }}</span><span class="src">geo-IP</span></div>
-    <div class="lv-row"><span class="k">Industry</span><span class="v" id="b-ind">{{ scene.industry_label }}{{ ' · default' if (not det.resolved_industry and loc_detected) else '' }}</span><span class="src" id="b-ind-src">{{ 'PDL' if det.resolved_industry else ('manual' if not loc_detected else 'default') }}</span></div>
+    <div class="lv-row"><span class="k">Industry</span><span class="v" id="b-ind">{{ scene.industry_label }}{{ ' · default' if (not det.resolved_industry and loc_detected) else '' }}</span><span class="src" id="b-ind-src">{{ ('PDL · ' ~ det.confidence.industry) if det.resolved_industry else ('manual' if not loc_detected else 'default') }}</span></div>
+    <div class="lv-row"><span class="k">Tier</span><span class="v" id="b-tier">{{ (det.tier ~ ' · ' ~ det.tier_label) if loc_detected else 'preview' }}</span><span class="src">routed</span></div>
     <div class="lv-reason" id="reason" style="{{ '' if det.reason else 'display:none' }}">{{ det.reason }}</div>
     <div class="lv-ctrls">
       <div><label>Surface policy</label>
@@ -134,6 +140,7 @@
       <div class="q-card">
         <div class="q-label" style="margin-bottom:9px">Copy agent · proposes → the Gate verifies</div>
         <button class="q-btn ink" id="ai-go"><i class="ph ph-sparkle"></i> Write with AI + Gate-check</button>
+        <label class="comp-tog" id="comp-tog" title="Needs a resolved company (Tier 2)"><input type="checkbox" id="ai-comp"> <span>Tier 3 · competitor-aware</span> <i class="comp-hint" id="comp-hint"></i></label>
         <div id="ai-out" style="margin-top:13px"><span class="q-muted" style="font-size:12.5px">Pick an angle, then run the agent. Every line it writes is checked against the sources + surface policy.</span></div>
       </div>
     </div>
@@ -155,8 +162,9 @@
              hnoco:"We see a {industry} operator in {region}.",
              sub:"Down to the building. Most of your competitors already run us — want the same edge?"};
 
-  function fresh(d, mode){ return {ip:d.ip, company:d.company, city:d.city, region:d.region,
-    industry:d.industry||DEF_IND, indDetected:!!d.resolved_industry, reason:d.reason||'', mode:mode}; }
+  function fresh(d, mode){ var cf=d.confidence||{}; return {ip:d.ip, company:d.company, city:d.city, region:d.region,
+    industry:d.industry||DEF_IND, indDetected:!!d.resolved_industry, reason:d.reason||'', mode:mode,
+    tier:d.tier, tierLabel:d.tier_label, indConf:cf.industry||'none', competitive:!!d.competitive_eligible}; }
   var S = fresh(DET, {{ 'true' if loc_detected else 'false' }} ? 'detected' : 'preview');
   if(!{{ 'true' if loc_detected else 'false' }}) S.mode = 'preview';
   var policy = 'allude';
@@ -195,7 +203,11 @@
     document.getElementById('b-loc').textContent = (S.city?S.city+', ':'')+(S.region||'—');
     var indDefault = !S.indDetected && S.mode!=='preview';
     document.getElementById('b-ind').textContent = ind.label + (indDefault?' · default':'');
-    document.getElementById('b-ind-src').textContent = S.indDetected?'PDL':(S.mode==='preview'?'manual':'default');
+    document.getElementById('b-ind-src').textContent = S.indDetected?('PDL · '+S.indConf):(S.mode==='preview'?'manual':'default');
+    document.getElementById('b-tier').textContent = (S.mode==='preview') ? 'preview' : ((S.tier!=null?S.tier+' · ':'')+(S.tierLabel||'—'));
+    var ct=document.getElementById('comp-tog'), cb=document.getElementById('ai-comp'), ch=document.getElementById('comp-hint');
+    if(S.competitive){ ct.classList.remove('off'); cb.disabled=false; ch.textContent=''; }
+    else { ct.classList.add('off'); cb.disabled=true; cb.checked=false; ch.textContent='· needs a resolved company (Tier 2)'; }
     var rsn=document.getElementById('reason'); if(S.reason){rsn.style.display='block';rsn.textContent=S.reason;}else rsn.style.display='none';
     document.getElementById('reset').style.display = S.mode==='detected'?'none':'inline';
     [].forEach.call(document.querySelectorAll('#seg-policy button'),function(b){b.classList.toggle('on',b.getAttribute('data-p')===policy);});
@@ -205,7 +217,8 @@
       if(r.label==='Region / state') v = S.region||'—';
       else if(r.label==='Company') v = S.company||'—';
       else if(r.label==='Industry') v = ind.label+((ind.naics&&ind.naics!=='—')?' (NAICS '+ind.naics+')':'');
-      return {label:r.label, value:v, drives:r.drives, policy:r.policy};
+      var cf = (r.label==='Industry' && !S.indDetected) ? null : r.conf;   // hide stale conf on a manual pick
+      return {label:r.label, value:v, drives:r.drives, policy:r.policy, conf:cf};
     });
     var produced = [
       {label:'→ Copy', value:ind.key+'/'+angleKey+' · '+policy, drives:'the headline + sub', policy:'say'},
@@ -214,7 +227,9 @@
     var groups=[['Your request (constant)',REQ],['Captured from the IP',capRows],['Produced — shown to the visitor',produced]];
     var html='';
     groups.forEach(function(g){ if(!g[1].length) return; html+="<tr class='grp'><td colspan='4'>"+g[0]+"</td></tr>";
-      g[1].forEach(function(r){ var pc=polCell(r.policy); html+="<tr><td class='sig'>"+r.label+"</td><td class='val'>"+(r.value||'—')+"</td><td class='drv'>"+(r.drives||'')+"</td><td><span class='pol "+pc.c+"'>"+pc.t+"</span></td></tr>"; }); });
+      g[1].forEach(function(r){ var pc=polCell(r.policy);
+        var cf=(r.conf&&r.conf!=='none')?" <span class='cf "+r.conf+"'>"+r.conf+"</span>":"";
+        html+="<tr><td class='sig'>"+r.label+"</td><td class='val'>"+(r.value||'—')+cf+"</td><td class='drv'>"+(r.drives||'')+"</td><td><span class='pol "+pc.c+"'>"+pc.t+"</span></td></tr>"; }); });
     document.getElementById('cap-body').innerHTML = html;
   }
 
@@ -250,13 +265,17 @@
   }
   // creative: the gated AI copy agent (proposes → the Gate verifies)
   function runAI(){
-    document.getElementById('ai-out').innerHTML="<span class='q-muted' style='font-size:12.5px'>Agent writing… Gate verifying…</span>";
-    var q='industry='+encodeURIComponent(S.industry)+'&region='+encodeURIComponent(S.region||'')+'&company='+encodeURIComponent(S.company||'')+'&city='+encodeURIComponent(S.city||'')+'&angle='+encodeURIComponent(angleKey)+'&policy='+policy;
+    var comp = document.getElementById('ai-comp').checked && !!S.competitive;
+    document.getElementById('ai-out').innerHTML="<span class='q-muted' style='font-size:12.5px'>"+(comp?'Researching competitors → writing → Gate verifying…':'Agent writing… Gate verifying…')+"</span>";
+    var q='industry='+encodeURIComponent(S.industry)+'&region='+encodeURIComponent(S.region||'')+'&company='+encodeURIComponent(S.company||'')+'&city='+encodeURIComponent(S.city||'')+'&angle='+encodeURIComponent(angleKey)+'&policy='+policy+(comp?'&competitive=true':'');
     fetch('/api/demo/aicopy?'+q).then(function(r){return r.json();}).then(function(d){
       function v(o,blk){return "<div class='ai-v "+(o.ok?'ok':'no')+"'><i class='ic ph "+(o.ok?'ph-check-circle':'ph-prohibit')+"'></i><span class='t'>“"+o.line+"”<span class='r'>"+(blk?'blocked — ':'')+o.reason+"</span></span></div>";}
       var checks=(d.checks||[]).map(function(x){return v(x,false);}).join('');
+      var briefHtml='';
+      if(d.competitive && d.brief){ briefHtml="<div class='q-label' style='margin:13px 0 3px'>Competitor agent · provable differentiators ("+d.brief.source+")</div><ul style='margin:0 0 0 16px;padding:0;font-size:12.5px;color:var(--slate);line-height:1.55'>"+(d.brief.differentiators||[]).map(function(x){return "<li>"+x+"</li>";}).join('')+"</ul>"; }
       document.getElementById('ai-out').innerHTML =
-        "<div class='ai-line'>"+d.headline+"</div><div class='q-muted' style='font-size:13px;line-height:1.5'>"+d.sub+"</div>"
+        briefHtml
+        +"<div class='ai-line'>"+d.headline+"</div><div class='q-muted' style='font-size:13px;line-height:1.5'>"+d.sub+"</div>"
         +"<div class='q-label' style='margin:13px 0 3px'>Gate verdicts — what it wrote</div>"+checks
         +"<div class='q-label' style='margin:13px 0 3px'>…and a line the Gate blocks</div>"+(d.blocked_example?v(d.blocked_example,true):'')
         +"<div class='ai-note'>"+(d.source==='ai'?'✨ ':'')+d.note+"</div>"

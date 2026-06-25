@@ -136,6 +136,19 @@ def _looks_like_isp(*names: str) -> bool:
     return any(h in s for h in _ISP_HINTS)
 
 
+# commercial VPN / proxy / Tor providers — the org behind a *consumer* VPN exit. Distinguishes
+# a real corporate netblock (employee on the company VPN) from a privacy-VPN exit node.
+_VPN_HINTS = ("nordvpn", "expressvpn", "mullvad", "surfshark", "proton vpn", "protonvpn",
+              "private internet access", "cyberghost", "ipvanish", "tunnelbear", "windscribe",
+              "vyprvpn", "purevpn", "strongvpn", "hotspot shield", "torguard", "perfect privacy",
+              "hide.me", "mysterium", "datacamp limited", "m247", "tor exit", "tor network", "vpn")
+
+
+def _looks_like_vpn(*names: str) -> bool:
+    s = " ".join(n.lower() for n in names if n)
+    return any(h in s for h in _VPN_HINTS)
+
+
 def _industry_to_bucket(industry: str | None) -> str | None:
     if not industry:
         return None
@@ -179,13 +192,21 @@ def reverse_ip(ip: str) -> dict:
     if not d:
         return {}
     is_isp = _looks_like_isp(d.get("org"), d.get("isp"), d.get("asname"))
+    looks_vpn = _looks_like_vpn(d.get("org"), d.get("isp"), d.get("asname"))
+    mobile, proxy, hosting = bool(d.get("mobile")), bool(d.get("proxy")), bool(d.get("hosting"))
+    org = (d.get("org") or d.get("asname") or "").strip()
+    # corporate-VPN exception: the proxy flag is set, but the org looks like a real company
+    # (not a commercial-VPN provider, not hosting, not a consumer ISP) → an employee egressing
+    # via the company netblock. A genuine B2B signal — but capped at medium confidence downstream.
+    corp_via_vpn = bool(proxy and org and not looks_vpn and not hosting and not is_isp and not mobile)
+    is_corporate = bool(org) and not (mobile or hosting or is_isp) and (not proxy or corp_via_vpn)
     return {"region": d.get("regionName"), "city": d.get("city"), "country": d.get("country"),
             "zip": d.get("zip"), "lat": d.get("lat"), "lon": d.get("lon"),
             "timezone": d.get("timezone"), "asn": d.get("as"),
-            "company": (d.get("org") or d.get("asname") or "").strip(), "isp": d.get("isp"),
-            "org": d.get("org"), "asname": d.get("asname"), "mobile": bool(d.get("mobile")),
-            "proxy": bool(d.get("proxy")), "hosting": bool(d.get("hosting")), "is_isp": is_isp,
-            "is_corporate": not (d.get("mobile") or d.get("proxy") or d.get("hosting") or is_isp)}
+            "company": org, "isp": d.get("isp"),
+            "org": d.get("org"), "asname": d.get("asname"), "mobile": mobile,
+            "proxy": proxy, "hosting": hosting, "is_isp": is_isp, "looks_vpn": looks_vpn,
+            "corp_via_vpn": corp_via_vpn, "is_corporate": is_corporate}
 
 
 def _pdl_company_industry(name: str) -> str | None:
@@ -225,6 +246,71 @@ def _daypart(tz: str | None) -> str | None:
             else "afternoon" if h < 17 else "evening")
 
 
+# personalization tiers — the routing outcome (see /static/mockups/decision-tree.html).
+# 0 neutral · 1 location-aware neutral · 2 firmographic · (3 = 2 + competitive, engaged by angle)
+TIER_LABELS = {0: "neutral", 1: "location-aware", 2: "firmographic", 3: "firmographic + competitive"}
+
+
+def _classify(rv: dict, company: str | None, industry: str | None) -> dict:
+    """Deterministic router: real ip-api flags + whether PDL resolved an industry → network type,
+    per-field confidence (location / company / industry), personalization tier, honest reason.
+    No LLM, no network — pure and reproducible, so the routing is itself provable."""
+    if not rv:
+        return {"network_type": "private / unreachable", "tier": 0, "tier_label": TIER_LABELS[0],
+                "confidence": {"location": "none", "company": "none", "industry": "none"},
+                "competitive_eligible": False,
+                "reason": "local / private / unreachable IP — pick a location or try a public IP"}
+    mobile, proxy, hosting = rv.get("mobile"), rv.get("proxy"), rv.get("hosting")
+    is_isp, corp_vpn, is_corp = rv.get("is_isp"), rv.get("corp_via_vpn"), rv.get("is_corporate")
+    isp = rv.get("isp") or rv.get("org") or "the provider"
+
+    if corp_vpn:   net = "corporate (via VPN)"
+    elif is_corp:  net = "corporate"
+    elif mobile:   net = "mobile"
+    elif proxy:    net = "VPN / proxy"
+    elif hosting:  net = "hosting / cloud"
+    elif is_isp:   net = "consumer ISP"
+    else:          net = "residential"
+
+    # per-field confidence — each inference hop loses confidence
+    loc = ("high" if net in ("corporate", "consumer ISP", "residential", "corporate (via VPN)")
+           else "medium" if net == "mobile" else "low")   # VPN/proxy/hosting → datacenter geo
+    comp = ("high" if (is_corp and not corp_vpn and company)
+            else "medium" if (corp_vpn and company) else "none")
+    ind_c = ("high" if (industry and comp == "high") else "medium" if (industry and comp == "medium")
+             else "low" if (company and not industry) else "none")
+
+    # tier: industry resolved → firmographic; geo-only → location-aware; nothing usable → neutral
+    if company and industry:                                          tier = 2
+    elif loc in ("high", "medium") and net not in ("hosting / cloud", "VPN / proxy"): tier = 1
+    else:                                                             tier = 0
+    competitive = tier == 2
+
+    if net == "corporate (via VPN)":
+        reason = (f"corporate VPN ({rv.get('org')}) — employee exiting via the company netblock; "
+                  "a B2B signal, but capped at medium confidence")
+    elif net == "corporate":
+        reason = ("" if industry else
+                  f"corporate IP ({rv.get('org')}) resolved, but PDL returned no industry — neutral copy, no sector guessed")
+    elif mobile:
+        reason = f"mobile network ({rv.get('isp')}) — no company; location is carrier-gateway coarse"
+    elif proxy:
+        reason = ("commercial VPN / proxy — the IP describes the exit node, not the visitor; "
+                  "pivot to behavioral / first-party signals, don't fabricate firmographics")
+    elif hosting:
+        reason = f"hosting / cloud IP ({rv.get('isp')}) — not a human office (bot / scraper / VPN exit)"
+    elif is_isp:
+        reason = (f"consumer ISP ({isp}) — that's the provider, not a company. Reverse-IP only IDs a "
+                  "business on a corporate office IP; try a company's IP or a de-anon vendor.")
+    elif not company:
+        reason = f"residential ISP ({rv.get('isp')}) — no company resolved"
+    else:
+        reason = ""
+    return {"network_type": net, "tier": tier, "tier_label": TIER_LABELS[tier],
+            "confidence": {"location": loc, "company": comp, "industry": ind_c},
+            "competitive_eligible": competitive, "reason": reason}
+
+
 def resolve_ip(ip: str) -> dict:
     """Resolve ANY IP → EVERY signal captured + the derivation cascade. Used for the visitor's
     own IP (default) and an entered IP (override). Returns a `captured` list (signal → value →
@@ -235,34 +321,20 @@ def resolve_ip(ip: str) -> dict:
     industry_raw = _pdl_company_industry(company) if company else None
     industry = _industry_to_bucket(industry_raw)
     daypart = _daypart(rv.get("timezone"))
-    nettype = ("corporate" if rv.get("is_corporate") else "mobile" if rv.get("mobile")
-               else "VPN / proxy" if rv.get("proxy") else "hosting / cloud" if rv.get("hosting")
-               else "consumer ISP" if rv.get("is_isp") else "residential")
-    reason = ""
-    if not rv:
-        reason = "local / private / unreachable IP — pick a location or try a public IP"
-    elif rv.get("mobile"):
-        reason = f"mobile network ({rv.get('isp')}) — no company resolved"
-    elif rv.get("proxy"):
-        reason = "VPN / proxy detected — no company resolved"
-    elif rv.get("hosting"):
-        reason = f"hosting / cloud IP ({rv.get('isp')}) — not a corporate office"
-    elif rv.get("is_isp"):
-        reason = f"consumer ISP ({rv.get('isp') or rv.get('org')}) — that's the provider, not a company. Reverse-IP only IDs a business on a corporate office IP; try a company's IP or a de-anon vendor."
-    elif not company:
-        reason = f"residential ISP ({rv.get('isp')}) — no company resolved"
+    cls = _classify(rv, company, industry)        # deterministic router → type / confidence / tier
+    nettype, reason, conf = cls["network_type"], cls["reason"], cls["confidence"]
 
     cap: list[dict] = []
 
-    def add(label, value, drives, policy, group):
+    def add(label, value, drives, policy, group, conf=None):
         cap.append({"label": label, "value": value if value not in (None, "") else "—",
-                    "drives": drives, "policy": policy, "group": group})
+                    "drives": drives, "policy": policy, "group": group, "conf": conf})
 
     if rv:
         coords = (f"{rv.get('lat')}, {rv.get('lon')}" if rv.get("lat") is not None else None)
         ind_label = (BY_KEY[industry]["label"] + f" (NAICS {BY_KEY[industry]['naics']})") if industry else (industry_raw or None)
         add("Country", rv.get("country"), "—", "allude", "geo")
-        add("Region / state", rv.get("region"), "region copy + image region", "allude", "geo")
+        add("Region / state", rv.get("region"), "region copy + image region", "allude", "geo", conf["location"])
         add("City", rv.get("city"), "headline (Say mode)", "allude", "geo")
         add("Postal", rv.get("zip"), "—", "allude", "geo")
         add("Coordinates", coords, "—", "allude", "geo")
@@ -270,13 +342,17 @@ def resolve_ip(ip: str) -> dict:
         add("ASN", rv.get("asn"), "→ org / company", "allude", "net")
         add("ISP / org", rv.get("org") or rv.get("isp"), "→ company", "allude", "net")
         add("Network type", nettype, "gates company resolution", "observed", "net")
-        add("Company", company, "→ industry", "allude", "resolved")
-        add("Industry", ind_label, "copy template + backdrop", "allude", "resolved")
+        add("Personalization tier", f"{cls['tier']} · {cls['tier_label']}", "which copy path runs", "observed", "net")
+        add("Company", company, "→ industry", "allude", "resolved", conf["company"])
+        add("Industry", ind_label, "copy template + backdrop", "allude", "resolved", conf["industry"])
         add("Daypart", daypart, "tone / dark-mode (available)", "observed", "resolved")
     return {"ip": ip, "region": rv.get("region"), "city": rv.get("city"), "company": company,
             "industry": industry, "industry_raw": industry_raw, "isp": rv.get("isp"),
             "daypart": daypart, "resolved_company": bool(company),
-            "resolved_industry": bool(industry), "reason": reason, "captured": cap}
+            "resolved_industry": bool(industry), "reason": reason, "captured": cap,
+            "network_type": nettype, "tier": cls["tier"], "tier_label": cls["tier_label"],
+            "confidence": conf, "competitive_eligible": cls["competitive_eligible"],
+            "corp_via_vpn": bool(rv.get("corp_via_vpn"))}
 
 
 def detect(request) -> dict:
