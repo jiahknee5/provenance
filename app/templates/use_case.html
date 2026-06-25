@@ -11,13 +11,12 @@
   <link rel="icon" type="image/svg+xml" href="/static/brand/apt-favicon.svg">
   <style>
     body{overflow-x:hidden}
-    .sc-top{height:52px;display:flex;align-items:center;gap:16px;padding:0 20px;border-bottom:1px solid var(--hairline);background:var(--glass-bg,var(--surface));backdrop-filter:var(--glass-blur);position:sticky;top:0;z-index:30}
-    .sc-top .brand{display:flex;align-items:center;gap:8px;font-family:var(--font-display);font-weight:600;font-size:15px;color:var(--ink);text-decoration:none}
+    .sc-top{height:52px;display:flex;align-items:center;gap:16px;padding:0 20px;border-bottom:1px solid var(--hairline);background:var(--glass-bg,var(--surface));backdrop-filter:var(--glass-blur);position:sticky;top:0;z-index:30;overflow-x:auto}
+    .sc-top .brand{display:flex;align-items:center;gap:8px;font-family:var(--font-display);font-weight:600;font-size:15px;color:var(--ink);text-decoration:none;flex:none}
     .sc-top .brand .av{width:21px;height:21px;border-radius:6px;background:var(--ink);color:var(--on-ink,#fff);display:grid;place-items:center;font-size:11px}
     .sc-top .brand .sep{color:var(--muted);font-weight:500}
-    .sc-top a{font-size:13px;color:var(--muted);font-weight:500;text-decoration:none} .sc-top a:hover{color:var(--ink)}
-    .sc-top a.on{color:var(--ink);font-weight:600} .sc-top .ucn{display:flex;gap:14px}
-    /* use-case header: title + tabs + controls */
+    .sc-top a{font-size:13px;color:var(--muted);font-weight:500;text-decoration:none;flex:none} .sc-top a:hover{color:var(--ink)}
+    .sc-top a.on{color:var(--ink);font-weight:600} .sc-top .ucn{display:flex;gap:13px}
     .uc-head{max-width:1180px;margin:0 auto;padding:22px 28px 0}
     .uc-htop{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
     .uc-htop .ttl{font-family:var(--font-display);font-weight:600;font-size:17px;color:var(--ink)}
@@ -29,38 +28,35 @@
     .uc-form select{appearance:none;font:12.5px var(--font-ui);background:var(--surface);border:1px solid var(--border,#d7dde6);border-radius:8px;padding:7px 10px;color:var(--ink)}
     .uc-form button{font:600 12.5px var(--font-ui);color:#fff;background:var(--ink);border:0;border-radius:8px;padding:8px 13px;cursor:pointer}
     .uc-form .reset{font-size:12px;color:var(--muted);text-decoration:none}
-    /* hero (observability) */
-    .uc-hero{position:relative;min-height:46vh;display:flex;align-items:flex-end;overflow:hidden;background:#14161a;margin-top:18px}
+    .uc-hero{position:relative;min-height:42vh;display:flex;align-items:flex-end;overflow:hidden;background:#14161a;margin-top:18px}
     .uc-bg{position:absolute;inset:0;background-size:cover;background-position:center}
     .uc-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,12,16,.86) 0%,rgba(10,12,16,.55) 50%,rgba(10,12,16,.2) 100%)}
-    .uc-hwrap{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:34px 28px;width:100%}
-    .uc-mark{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+    .uc-hwrap{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:30px 28px;width:100%}
+    .uc-mark{display:flex;align-items:center;gap:10px;margin-bottom:12px}
     .uc-mark .wm{font-family:var(--font-display);font-weight:700;font-size:18px;color:#fff}
     .uc-pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:#fff;background:rgba(61,220,132,.22);border:1px solid rgba(61,220,132,.5);border-radius:20px;padding:3px 11px}
     .uc-eye{font-size:12.5px;font-weight:600;color:#fff;opacity:.9;margin-bottom:9px}
-    .uc-h1{font-family:var(--font-display);font-weight:600;font-size:clamp(26px,3.6vw,40px);line-height:1.07;letter-spacing:-.02em;color:#fff;margin:0;max-width:20ch}
-    .uc-sub{font-size:16px;color:#fff;opacity:.92;margin:12px 0 0;max-width:48ch;line-height:1.4}
+    .uc-h1{font-family:var(--font-display);font-weight:600;font-size:clamp(25px,3.4vw,38px);line-height:1.08;letter-spacing:-.02em;color:#fff;margin:0;max-width:21ch}
+    .uc-sub{font-size:15.5px;color:#fff;opacity:.92;margin:11px 0 0;max-width:50ch;line-height:1.4}
     .uc-attr{position:absolute;right:12px;bottom:9px;z-index:2;font-size:10px;color:#fff;background:rgba(0,0,0,.45);border-radius:6px;padding:3px 9px}.uc-attr a{color:#fff}
-    .uc-body{max-width:1180px;margin:0 auto;padding:26px 28px 70px}
+    .uc-body{max-width:1180px;margin:0 auto;padding:24px 28px 70px}
     h2.uc-sh{font-family:var(--font-display);font-weight:600;font-size:16px;color:var(--ink);margin:0 0 4px}
-    .uc-story{font-size:14px;color:var(--slate,#475569);line-height:1.6;max-width:78ch}
-    /* PRODUCTION — gated vs ungated comparison */
+    .uc-story{font-size:14px;color:var(--slate,#475569);line-height:1.6;max-width:80ch}
     .cmp{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:4px 0 26px}
     @media(max-width:820px){.cmp{grid-template-columns:1fr}}
     .cmp-card{border:1px solid var(--hairline);border-radius:14px;overflow:hidden;background:var(--surface);box-shadow:var(--carve)}
-    .cmp-card .mini{position:relative;min-height:210px;display:flex;align-items:flex-end;background:#14161a}
+    .cmp-card .mini{position:relative;min-height:198px;display:flex;align-items:flex-end;background:#14161a}
     .cmp-card .mb{position:absolute;inset:0;background-size:cover;background-position:center}
-    .cmp-card .mb::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(8,10,14,.92),rgba(8,10,14,.4))}
-    .cmp-card.blk .mb::after{background:linear-gradient(0deg,rgba(60,12,20,.92),rgba(60,12,20,.45))}
-    .cmp-card .mw{position:relative;z-index:2;padding:18px 18px 16px}
-    .cmp-card .me{font-size:11px;color:#fff;opacity:.85;margin-bottom:6px}
-    .cmp-card .mh{font-family:var(--font-display);font-weight:600;font-size:20px;line-height:1.12;color:#fff;margin:0}
+    .cmp-card .mb::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(8,10,14,.9),rgba(8,10,14,.42))}
+    .cmp-card.blk .mb::after{background:linear-gradient(0deg,rgba(60,12,20,.9),rgba(60,12,20,.45))}
+    .cmp-card .mw{position:relative;z-index:2;padding:18px}
+    .cmp-card .me{font-size:11px;color:#fff;opacity:.86;margin-bottom:6px}
+    .cmp-card .mh{font-family:var(--font-display);font-weight:600;font-size:19px;line-height:1.14;color:#fff;margin:0}
     .cmp-card .ms{font-size:13px;color:#fff;opacity:.9;margin:8px 0 0;line-height:1.4}
     .cmp-card .badge{display:flex;align-items:center;gap:7px;padding:10px 16px;font-size:12.5px;font-weight:700}
     .cmp-card.ok .badge{color:var(--g,#0a8a4f);background:var(--gbg,#e7f6ee)}
     .cmp-card.blk .badge{color:var(--r,#c0354b);background:var(--rbg,#fcebed)}
     .cmp-card .desc{padding:11px 16px 16px;font-size:13px;color:var(--slate,#475569);line-height:1.5;border-top:1px solid var(--hairline)}
-    /* OBSERVABILITY panels */
     .obs{display:grid;grid-template-columns:1.25fr 1fr;gap:18px;align-items:start;margin-top:4px}
     @media(max-width:900px){.obs{grid-template-columns:1fr}}
     .obs-sec{border:1px solid var(--hairline);border-radius:13px;background:var(--surface);box-shadow:var(--carve);overflow:hidden;margin-bottom:18px}
@@ -69,10 +65,8 @@
     .mode.det{color:var(--g,#0a8a4f);background:var(--gbg,#e7f6ee)} .mode.prev{color:var(--a,#1d4ed8);background:var(--abg,#e8efff)}
     .row{display:flex;gap:8px;padding:8px 15px;border-bottom:1px solid var(--hairline);font-size:12.5px;align-items:baseline}
     .row:last-child{border-bottom:0}
-    .row .k{color:var(--muted);min-width:118px;flex:none} .row .v{color:var(--ink);font-weight:500;min-width:0;word-break:break-word}
-    .row .drv{margin-left:auto;font-size:10.5px;color:var(--label,#94a3b8);flex:none;text-align:right}
-    .pol{font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:4px;padding:1px 5px}
-    .pol.allude{color:var(--a,#1d4ed8);background:var(--abg,#e8efff)} .pol.say,.pol.observed{color:var(--slate,#475569);background:var(--chip,#eef2f7)}
+    .row .k{color:var(--muted);min-width:120px;flex:none} .row .v{color:var(--ink);font-weight:500;min-width:0;word-break:break-word}
+    .row .meta{margin-left:auto;font-size:10.5px;color:var(--label,#94a3b8);flex:none;text-align:right;max-width:48%}
     .conf{font-size:9.5px;font-weight:700;text-transform:uppercase;border-radius:4px;padding:1px 5px;margin-left:6px}
     .conf.high{color:var(--g,#0a8a4f);background:var(--gbg,#e7f6ee)} .conf.medium{color:#9a6a00;background:#fdf3df} .conf.low,.conf.none{color:var(--muted);background:var(--chip,#eef2f7)}
     .gate-line{display:flex;align-items:flex-start;gap:8px;padding:9px 15px;border-bottom:1px solid var(--hairline);font-size:12.5px}
@@ -83,6 +77,18 @@
     .trace .step{display:flex;gap:11px;padding:10px 15px;border-bottom:1px solid var(--hairline)} .trace .step:last-child{border-bottom:0}
     .trace .n{width:21px;height:21px;border-radius:6px;background:var(--ink);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;flex:none}
     .trace .nm{font-weight:600;color:var(--ink);font-size:12.5px} .trace .dt{color:var(--muted);font-size:12px;margin-top:1px}
+    /* PRODUCTION — full-page landing, exactly as an end visitor sees it */
+    .fp-bar{max-width:1180px;margin:14px auto 0;padding:0 28px;display:flex;align-items:center;gap:13px;flex-wrap:wrap}
+    .fp-bar .lbl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--label,#94a3b8)}
+    .fp-tog{display:inline-flex;gap:3px;background:var(--chip,#f1f5f9);border-radius:9px;padding:3px}
+    .fp-tog a{font-size:12.5px;font-weight:600;color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:7px;display:inline-flex;align-items:center;gap:6px}
+    .fp-tog a.g.on{background:var(--gbg,#e7f6ee);color:var(--g,#0a8a4f)} .fp-tog a.b.on{background:var(--rbg,#fcebed);color:var(--r,#c0354b)}
+    .fp-desc{font-size:12.5px;color:var(--muted);max-width:60ch;line-height:1.45}
+    .fp-hero{position:relative;min-height:78vh;display:flex;align-items:center;overflow:hidden;background:#14161a;margin-top:14px}
+    .fp-banner{position:absolute;top:0;left:0;right:0;z-index:5;background:rgba(192,53,75,.96);color:#fff;font-size:12.5px;font-weight:600;padding:9px 28px;display:flex;align-items:center;gap:8px}
+    .fp-cta{display:inline-flex;align-items:center;gap:8px;color:#fff;font-weight:600;font-size:15px;border-radius:11px;padding:13px 22px;text-decoration:none}
+    .fp-cta.ghost{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);margin-left:8px}
+    .fp-foot{max-width:1180px;margin:0 auto;padding:18px 28px 60px;font-size:13px;color:var(--muted)}
   </style>
 </head>
 <body>
@@ -101,98 +107,88 @@
         <a href="/showcase/{{ slug }}/production" class="{{ 'on' if view != 'observability' else '' }}"><i class="ph ph-browser"></i> Production</a>
         <a href="/showcase/{{ slug }}/observability" class="{{ 'on' if view == 'observability' else '' }}"><i class="ph ph-pulse"></i> Observability</a>
       </span>
+      {% if show_controls %}
       <form class="uc-form" method="get" action="/showcase/{{ slug }}/{{ 'observability' if view == 'observability' else 'production' }}">
         <select name="industry">{% for i in industries %}<option value="{{ i.key }}" {{ 'selected' if i.key == active_industry else '' }}>{{ i.label }}</option>{% endfor %}</select>
         <select name="region"><option value="">— region —</option>{% for s in states %}<option value="{{ s }}" {{ 'selected' if s == active_region else '' }}>{{ s }}</option>{% endfor %}</select>
         <button type="submit">Preview</button>
         <a class="reset" href="/showcase/{{ slug }}/{{ 'observability' if view == 'observability' else 'production' }}">Reset</a>
       </form>
+      {% endif %}
     </div>
   </header>
 
+  {% macro mini(card) %}
+    <div class="mini"><div class="mb" style="{{ 'background-image:url(\'' ~ card.image ~ '\')' if card.image else 'background:' ~ (card.accent or '#2a2e36') }}"></div>
+      <div class="mw"><div class="me">{{ demo.brand }} · {{ card.eyebrow }}</div><h3 class="mh">{{ card.headline }}</h3><p class="ms">{{ card.sub }}</p></div></div>
+  {% endmacro %}
+
   {% if view == 'observability' %}
-  <!-- the live personalized page being observed -->
   <section class="uc-hero">
-    <div class="uc-bg" style="background-image:url('{{ scene.image.url }}')"></div>
+    {% if hero.image %}<div class="uc-bg" style="background-image:url('{{ hero.image }}')"></div>
+    {% else %}<div class="uc-bg" style="background:linear-gradient(120deg,{{ hero.accent or '#23262e' }},#14161a)"></div>{% endif %}
     <div class="uc-hwrap">
       <div class="uc-mark"><span class="wm">{{ demo.brand }}</span><span class="uc-pill"><i class="ph ph-seal-check"></i> gated · ships</span></div>
       <div class="uc-eye">{{ hero.eyebrow }}</div>
       <h1 class="uc-h1">{{ hero.headline }}</h1>
       <p class="uc-sub">{{ hero.sub }}</p>
     </div>
-    <div class="uc-attr">backdrop: {{ scene.image.id }} · <a href="{{ scene.image.landing }}" target="_blank" rel="noopener">{{ scene.image.creator }}</a> · {{ scene.image.license }}</div>
+    {% if hero.attr %}<div class="uc-attr">backdrop: {{ hero.attr.id }} · <a href="{{ hero.attr.landing }}" target="_blank" rel="noopener">{{ hero.attr.creator }}</a> · {{ hero.attr.license }}</div>{% endif %}
   </section>
   <div class="uc-body">
     <h2 class="uc-sh">Observability — every input, decision, and source behind this page</h2>
     <p class="uc-story" style="margin-bottom:18px">{{ demo.what_apt_does }}</p>
     <div class="obs">
       <div>
+        {% for sec in sections %}
         <div class="obs-sec">
-          <div class="h"><i class="ph ph-traffic-signal"></i> Inputs — signals captured
-            <span class="mode {{ 'det' if loc_detected else 'prev' }}">{{ 'Detected' if loc_detected else 'Preview' }}</span></div>
-          {% for r in det.captured %}
-          <div class="row"><span class="k">{{ r.label }}</span><span class="v">{{ r.value }}{% if r.conf %}<span class="conf {{ r.conf }}">{{ r.conf }}</span>{% endif %}</span><span class="drv"><span class="pol {{ r.policy }}">{{ r.policy }}</span> {{ r.drives }}</span></div>
+          <div class="h"><i class="ph {{ sec.icon }}"></i> {{ sec.title }}{% if sec.mode is defined %}<span class="mode {{ 'det' if sec.mode else 'prev' }}">{{ 'Detected' if sec.mode else 'Preview' }}</span>{% endif %}</div>
+          {% for r in sec.rows %}
+          <div class="row"><span class="k">{{ r.k }}</span><span class="v">{{ r.v }}{% if r.conf %}<span class="conf {{ r.conf }}">{{ r.conf }}</span>{% endif %}</span>{% if r.meta %}<span class="meta">{{ r.meta }}</span>{% endif %}</div>
           {% endfor %}
-          {% for r in det.request_signals %}
-          <div class="row"><span class="k">{{ r.label }}</span><span class="v">{{ r.value }}</span><span class="drv"><span class="pol {{ r.policy }}">{{ r.policy }}</span> {{ r.drives }}</span></div>
-          {% endfor %}
-          {% if not det.captured %}<div class="row"><span class="v" style="color:var(--muted)">Local / private IP — pick a sector + region above, or pass ?ip= a public address to see the full capture.</span></div>{% endif %}
         </div>
-        <div class="obs-sec">
-          <div class="h"><i class="ph ph-git-fork"></i> Routing decision — deterministic, no LLM</div>
-          <div class="row"><span class="k">Network type</span><span class="v">{{ det.network_type }}</span></div>
-          <div class="row"><span class="k">Personalization tier</span><span class="v">{{ det.tier }} · {{ det.tier_label }}</span></div>
-          <div class="row"><span class="k">Confidence</span><span class="v">location <span class="conf {{ det.confidence.location }}">{{ det.confidence.location }}</span> · company <span class="conf {{ det.confidence.company }}">{{ det.confidence.company }}</span> · industry <span class="conf {{ det.confidence.industry }}">{{ det.confidence.industry }}</span></span></div>
-          {% if det.reason %}<div class="row"><span class="k">Why</span><span class="v" style="font-weight:400;color:var(--muted)">{{ det.reason }}</span></div>{% endif %}
-        </div>
+        {% endfor %}
       </div>
       <div>
         <div class="obs-sec">
-          <div class="h"><i class="ph ph-sparkle"></i> Copy agent → the Gate verifies <span class="mode prev">{{ ai.source }}</span></div>
-          <div class="gate-line"><span class="gv {{ 'ok' if ai.ships else 'block' }}">{{ 'ships' if ai.ships else 'blocked' }}</span><div class="tx"><div class="ln">{{ ai.headline }}</div><div class="why">proposed hero — {{ 'cleared every line' if ai.ships else 'a line was blocked' }}</div></div></div>
-          {% for c in gated_checks %}<div class="gate-line"><span class="gv ok">ships</span><div class="tx"><div class="ln">{{ c.line }}</div><div class="why">gated version — {{ c.reason }}</div></div></div>{% endfor %}
-          <div class="gate-line"><span class="gv block">blocked</span><div class="tx"><div class="ln">{{ hero_say.headline }}</div><div class="why">ungated version — recites company / precise location (say policy); the surface policy holds it</div></div></div>
-          <div class="gate-line"><span class="gv block">blocked</span><div class="tx"><div class="ln">{{ ai.blocked_example.line }}</div><div class="why">{{ ai.blocked_example.reason }}</div></div></div>
-        </div>
-        <div class="obs-sec">
-          <div class="h"><i class="ph ph-seal-check"></i> Provenance — what touched the page</div>
-          {% for r in scene.receipt %}<div class="row"><span class="k">{{ r.signal }}</span><span class="v" style="font-weight:400">{{ r.role }}</span><span class="drv"><span class="pol {{ r.policy }}">{{ r.policy }}</span> {{ r.source }}</span></div>{% endfor %}
+          <div class="h"><i class="ph ph-sparkle"></i> Gate — what ships, what's blocked</div>
+          {% for g in gate %}<div class="gate-line"><span class="gv {{ g.verdict }}">{{ 'ships' if g.verdict == 'ok' else 'blocked' }}</span><div class="tx"><div class="ln">{{ g.line }}</div><div class="why">{{ g.why }}</div></div></div>{% endfor %}
         </div>
         <div class="obs-sec trace">
           <div class="h"><i class="ph ph-flow-arrow"></i> Trace — the pipeline path</div>
-          <div class="step"><span class="n">1</span><div><div class="nm">Resolve</div><div class="dt">IP → region {{ scene.region }}{{ ', company ' ~ det.company if det.company else ', no company resolved' }}</div></div></div>
-          <div class="step"><span class="n">2</span><div><div class="nm">Classify</div><div class="dt">network {{ det.network_type }} · tier {{ det.tier }} · {{ det.tier_label }}</div></div></div>
-          <div class="step"><span class="n">3</span><div><div class="nm">Enrich</div><div class="dt">industry → {{ scene.industry_label }} (NAICS {{ scene.naics }})</div></div></div>
-          <div class="step"><span class="n">4</span><div><div class="nm">Gate</div><div class="dt">gated copy clears; ungated (recites company/city) is blocked</div></div></div>
-          <div class="step"><span class="n">5</span><div><div class="nm">Personalize</div><div class="dt">template {{ scene.industry }}/allude · region {{ scene.region }} · backdrop {{ scene.image.id }}</div></div></div>
-          <div class="step"><span class="n">6</span><div><div class="nm">Receipt</div><div class="dt">{{ scene.receipt|length }} signals, each bound to a source + surface policy</div></div></div>
+          {% for s in trace %}<div class="step"><span class="n">{{ s.n }}</span><div><div class="nm">{{ s.name }}</div><div class="dt">{{ s.detail }}</div></div></div>{% endfor %}
         </div>
       </div>
     </div>
   </div>
 
   {% else %}
-  <!-- PRODUCTION: the gated version (ships) vs the ungated version (blocked) -->
-  <div class="uc-body">
-    <h2 class="uc-sh">Production — what ships, and what the Gate blocks</h2>
-    <p class="uc-story" style="margin-bottom:16px">Two versions of the same personalized page for this visitor. Only the gated one ships.</p>
-    <div class="cmp">
-      <div class="cmp-card ok">
-        <div class="mini"><div class="mb" style="background-image:url('{{ scene.image.url }}')"></div>
-          <div class="mw"><div class="me">{{ demo.brand }} · {{ hero.eyebrow }}</div><h3 class="mh">{{ hero.headline }}</h3><p class="ms">{{ hero.sub }}</p></div></div>
-        <div class="badge"><i class="ph ph-seal-check"></i> Gated · ships</div>
-        <div class="desc">What ships. Involuntary signals (company, precise location) only <b>shape</b> the copy — region and sector framing — and are never recited. Every line is provable, so the Gate clears it.</div>
-      </div>
-      <div class="cmp-card blk">
-        <div class="mini"><div class="mb" style="background-image:url('{{ scene.image.url }}')"></div>
-          <div class="mw"><div class="me">{{ demo.brand }} · {{ hero_say.eyebrow }}</div><h3 class="mh">{{ hero_say.headline }}</h3><p class="ms">{{ hero_say.sub }}</p></div></div>
-        <div class="badge"><i class="ph ph-prohibit"></i> Ungated · blocked</div>
-        <div class="desc">What the Gate blocks. Recites the company and precise location pulled from the IP — an overclaim that crosses the creepiness ceiling. Shown for contrast; it never reaches production.</div>
-      </div>
-    </div>
-    <h2 class="uc-sh">What apt is doing</h2>
-    <p class="uc-story">{{ demo.what_apt_does }} <a href="/showcase/{{ slug }}/observability" style="color:var(--a,#1d4ed8);font-weight:600">See the full trace →</a></p>
+  {% set card = production[version] %}
+  {% set qs = ('&industry=' ~ active_industry if active_industry else '') ~ ('&region=' ~ active_region if active_region else '') %}
+  <div class="fp-bar">
+    <span class="lbl">End-visitor view</span>
+    <span class="fp-tog">
+      <a class="g {{ 'on' if version == 'gated' else '' }}" href="/showcase/{{ slug }}/production?v=gated{{ qs }}"><i class="ph ph-seal-check"></i> Gated · ships</a>
+      <a class="b {{ 'on' if version == 'ungated' else '' }}" href="/showcase/{{ slug }}/production?v=ungated{{ qs }}"><i class="ph ph-prohibit"></i> Ungated · blocked</a>
+    </span>
+    <span class="fp-desc">{{ card.desc }}</span>
   </div>
+  <!-- the actual page an end visitor sees, full-bleed -->
+  <section class="fp-hero">
+    {% if version == 'ungated' %}<div class="fp-banner"><i class="ph ph-warning"></i> Ungated — the Gate blocks this in production (recites involuntary data). Shown for contrast only.</div>{% endif %}
+    {% if card.image %}<div class="uc-bg" style="background-image:url('{{ card.image }}')"></div>
+    {% else %}<div class="uc-bg" style="background:linear-gradient(120deg,{{ card.accent or demo.accent }},#14161a)"></div>{% endif %}
+    <div class="uc-hwrap" style="padding-top:64px;padding-bottom:56px">
+      <div class="uc-mark"><span class="wm">{{ demo.brand }}</span>
+        <span class="uc-pill" style="{{ 'background:rgba(192,53,75,.22);border-color:rgba(192,53,75,.5)' if version == 'ungated' else '' }}"><i class="ph {{ 'ph-prohibit' if version == 'ungated' else 'ph-seal-check' }}"></i> personalized live by apt</span></div>
+      <div class="uc-eye">{{ card.eyebrow }}</div>
+      <h1 class="uc-h1" style="font-size:clamp(32px,5vw,56px);max-width:19ch">{{ card.headline }}</h1>
+      <p class="uc-sub" style="font-size:19px;max-width:46ch">{{ card.sub }}</p>
+      <div style="margin-top:24px"><a class="fp-cta" style="background:{{ card.accent or demo.accent }}" href="#">{{ card.cta }} <i class="ph ph-arrow-right"></i></a><a class="fp-cta ghost" href="/showcase/{{ slug }}/observability">See the receipt</a></div>
+    </div>
+    {% if card.attr %}<div class="uc-attr">backdrop: {{ card.attr.id }} · <a href="{{ card.attr.landing }}" target="_blank" rel="noopener">{{ card.attr.creator }}</a> · {{ card.attr.license }}</div>{% endif %}
+  </section>
+  <div class="fp-foot">This is exactly what an end visitor sees. <a href="/showcase/{{ slug }}/observability" style="color:var(--a,#1d4ed8);font-weight:600">See every input, decision, and source → Observability</a></div>
   {% endif %}
 </body>
 </html>

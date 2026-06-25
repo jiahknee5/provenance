@@ -329,9 +329,8 @@ USE_CASES: tuple[UseCase, ...] = (
               "aversion, reciprocity — that surfaces only claims it can prove. Held claims are "
               "dropped. The receipt makes a bold closing claim safe to make.",
         signals=("CRM history", "on-site behaviour", "persuasion principle", "Gate-checked"),
-        maps_to="Scenarios B & C · /api/persuasion/plan",
-        links=(("Existing-customer scenario", "/demo?scenario=B"),
-               ("Clicked-lead scenario", "/demo?scenario=C"))),
+        maps_to="Use case 3 · live demo site",
+        links=(("Open the live demo", "/showcase/known"),)),
     UseCase(
         customer="Long-running A/B", domain="reinforcement learning",
         title="The bandit that can't win by lying",
@@ -339,6 +338,6 @@ USE_CASES: tuple[UseCase, ...] = (
               "can only ever pull Gate-cleared arms, so it provably can't select a lie. Its lift is "
               "measured against a random control slice, not asserted.",
         signals=("Thompson sampling", "real clicks", "measured lift", "truth-bounded"),
-        maps_to="/optimizer · /demo/monitor",
-        links=(("Optimizer", "/optimizer"), ("KPI control tower", "/demo/monitor"))),
+        maps_to="Use case 4 · live demo site",
+        links=(("Open the live demo", "/showcase/optimizer"),)),
 )
