@@ -384,6 +384,17 @@ def test_archive_moves_noncore_surfaces_off_the_nav():
     assert 'href="/inspector"' not in sidebar
 
 
+def test_integrations_show_base_vs_connect():
+    """Landing + Help show the built-in enrichment base vs the connectable stack (data + value each)."""
+    assert "/help/integrations" in c.get("/").text           # landing links to the detail
+    t = c.get("/help/integrations")
+    assert t.status_code == 200
+    assert "Built in" in t.text and "Connect your stack" in t.text
+    assert "People Data Labs" in t.text and "Reverse-IP" in t.text   # the wired base
+    assert "HubSpot" in t.text and "Clay" in t.text and "Vector" in t.text  # connectable
+    assert "Adds:" in t.text and "Value:" in t.text          # the per-integration data + value
+
+
 def test_graph_page_embeds_the_exhibit():
     r = c.get("/graph")
     assert r.status_code == 200

@@ -1160,6 +1160,124 @@
   ]
  },
  {
+  "slug": "integrations",
+  "title": "Integrations — the data base, and what you can add",
+  "category": "Trust & provenance",
+  "summary": "The enrichment apt runs on out of the box, and the stack you can connect — with the exact data and value each one adds. Every fact still carries its source.",
+  "read_min": 4,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "apt ships with a <b>built-in enrichment base</b> — the real, mostly-free sources it calls today. On top, you connect the GTM stack you already run. The base is what makes the demo work with no setup; the connectors deepen coverage. Either way, every value the AI uses carries its source (see <a href=\"/help/surface-policies\">Policies</a> + the <a href=\"/help/the-gate\">Gate</a>)."
+   },
+   {
+    "type": "h",
+    "text": "Built in — the base (live today)"
+   },
+   {
+    "type": "kv",
+    "title": "Runs out of the box",
+    "rows": [
+     [
+      "People Data Labs",
+      "<b>Adds:</b> name, title, seniority, company, industry, skills, work history (email&rarr;person; domain&rarr;company). <b>Value:</b> turns a bare email or domain into a verified profile, live."
+     ],
+     [
+      "Reverse-IP (ip-api)",
+      "<b>Adds:</b> company, location, and network type from a visitor's IP. <b>Value:</b> firmographic personalization for anonymous B2B traffic — no form needed."
+     ],
+     [
+      "Public web",
+      "<b>Adds:</b> public profile (Gravatar), recent company news (RSS), domain / MX class. <b>Value:</b> free, low-risk context on any email or domain."
+     ],
+     [
+      "Google sign-in",
+      "<b>Adds:</b> a verified email + basic profile (OAuth). <b>Value:</b> deterministic identity to load the right record."
+     ]
+    ]
+   },
+   {
+    "type": "h",
+    "text": "Connect your stack — what each adds"
+   },
+   {
+    "type": "kv",
+    "title": "First-party / CRM",
+    "rows": [
+     [
+      "HubSpot",
+      "<b>Adds:</b> the full first-party record — lifecycle stage, email & behavior engagement, deal history. <b>Value:</b> your source of truth, and where segments live."
+     ],
+     [
+      "Salesforce",
+      "<b>Adds:</b> accounts, opportunities, activity history. <b>Value:</b> CRM ground truth for SFDC shops."
+     ],
+     [
+      "Segment",
+      "<b>Adds:</b> a unified event + identity stream (CDP). <b>Value:</b> one identity across your whole stack."
+     ],
+     [
+      "Snowflake / warehouse",
+      "<b>Adds:</b> your own first-party data via reverse-ETL. <b>Value:</b> ground claims in your warehouse, not a vendor's guess."
+     ]
+    ]
+   },
+   {
+    "type": "kv",
+    "title": "Enrichment & contact data",
+    "rows": [
+     [
+      "Clay",
+      "<b>Adds:</b> waterfall enrichment across many providers (batch / async). <b>Value:</b> bulk gap-fill + GTM data orchestration. <i>Note: not a real-time API — it writes back on a schedule.</i>"
+     ],
+     [
+      "Clearbit / HubSpot Breeze",
+      "<b>Adds:</b> firmographics + reverse-IP company. <b>Value:</b> company enrichment on form-fill or an anonymous visit."
+     ],
+     [
+      "ZoomInfo",
+      "<b>Adds:</b> direct dials, verified contacts, org charts. <b>Value:</b> deep B2B contact + company coverage."
+     ],
+     [
+      "Apollo.io",
+      "<b>Adds:</b> a contact database + intent + sequences. <b>Value:</b> prospecting and outbound data."
+     ],
+     [
+      "LinkedIn Sales Navigator",
+      "<b>Adds:</b> the professional graph — roles, tenure, org context. <b>Value:</b> enrich the people graph."
+     ]
+    ]
+   },
+   {
+    "type": "kv",
+    "title": "Intent & de-anonymization",
+    "rows": [
+     [
+      "6sense / Demandbase",
+      "<b>Adds:</b> account intent, buying stage, surging accounts. <b>Value:</b> prioritize the accounts in-market now."
+     ],
+     [
+      "Bombora",
+      "<b>Adds:</b> third-party topic-surge intent. <b>Value:</b> see who's researching your category."
+     ],
+     [
+      "Vector / RB2B",
+      "<b>Adds:</b> person-level website de-anonymization (named visitors, even on residential IPs). <b>Value:</b> turn anonymous traffic into people without a form."
+     ]
+    ]
+   },
+   {
+    "type": "note",
+    "html": "Built-in sources are wired today; connectors are the stack you bring. Whatever the source, the <a href=\"/help/the-gate\">Gate</a> only ships a claim it can trace back to one — so adding data widens what you <i>can</i> prove, never what you can fake."
+   }
+  ],
+  "related": [
+   "sources-and-cost",
+   "surface-policies",
+   "the-gate"
+  ]
+ },
+ {
   "slug": "enrichment-touchpoints",
   "title": "Enrichment & touchpoints",
   "category": "Trust & provenance",
