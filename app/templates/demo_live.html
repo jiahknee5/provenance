@@ -17,6 +17,11 @@
     .lv-hero{position:relative;min-height:74vh;display:flex;align-items:center;overflow:hidden;background:#1a1c20}
     .lv-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:opacity .4s var(--ease)}
     .lv-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(12,14,18,.82) 0%,rgba(12,14,18,.55) 42%,rgba(12,14,18,.2) 100%)}
+    .lv-hero.tone-calm .lv-bg::after{background:linear-gradient(90deg,rgba(8,10,14,.9) 0%,rgba(8,10,14,.66) 46%,rgba(8,10,14,.36) 100%)}
+    .lv-cta{transition:background .25s var(--ease)}
+    .ai-flag{display:none;align-items:center;gap:6px;font-size:11px;font-weight:600;color:#fff;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:3px 11px;margin-bottom:13px;width:max-content;max-width:100%}
+    .ai-flag.on{display:inline-flex} .ai-flag.writing .ph{animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
     .lv-hwrap{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:48px 28px;width:100%}
     .lv-blocked{display:none;align-items:center;gap:8px;background:rgba(192,53,75,.92);color:#fff;font-size:12px;font-weight:600;border-radius:8px;padding:7px 12px;margin-bottom:14px;width:max-content;max-width:100%}
     .lv-eye{font-size:13px;font-weight:600;letter-spacing:.03em;color:#fff;opacity:.92;margin-bottom:14px}
@@ -89,6 +94,7 @@
     <div class="lv-bg" id="bg" style="background-image:url('{{ scene.image.url }}')"></div>
     <div class="lv-hwrap">
       <div class="lv-blocked" id="blocked"><i class="ph ph-prohibit"></i> Ungated — recites involuntary data. The Gate blocks this in production; shown for contrast.</div>
+      <div class="ai-flag" id="ai-flag"></div>
       <div class="lv-eye" id="eye">{{ scene.eyebrow }}</div>
       <h1 class="lv-h1" id="h1">{{ scene.headline }}</h1>
       <p class="lv-sub" id="sub">{{ scene.sub }}</p>
@@ -174,6 +180,7 @@
   var GALLERY = {{ gallery|tojson }};
   var ANGLEBY = {}; ANGLES.forEach(function(a){ ANGLEBY[a.key]=a; });
   var angleKey = 'default'; var imgIdx = 0;
+  var aiCopy = null, aiTimer = null, lastAISig = null;   // the copy agent's live, Gate-cleared output
   function angleCopy(ind, region){
     var a = ANGLEBY[angleKey]; if(!a || a.key==='default' || !a.headline) return null;
     function f(s){ return (s||'').replace(/\{industry\}/g, ind.label.toLowerCase()).replace(/\{region\}/g, region||'your region'); }
@@ -188,11 +195,25 @@
     var ind = BYKEY[S.industry]||IND[0]; var say = policy==='say';
     var gal = GALLERY[S.industry] || [ind.image]; if(imgIdx>=gal.length) imgIdx=0; var img = gal[imgIdx]||ind.image;
     var ac = say ? null : angleCopy(ind, S.region);
+    var eyeTxt = say ? SAY.eyebrow : (ac?ac.eyebrow:fA(ind.eyebrow));
+    var h1Txt  = say ? fS(S.company?SAY.hco:SAY.hnoco) : (ac?ac.headline:fA(ind.headline));
+    var subTxt = say ? fS(SAY.sub) : (ac?ac.sub:fA(ind.sub));
+    // the copy agent's output ships to the hero — but only the lines that CLEARED the Gate;
+    // a blocked line falls back to the provable template. Agent proposes, Gate disposes.
+    var aiOn = false;
+    if(!say && aiCopy && aiCopy.sig===aiSig()){ if(aiCopy.headline){h1Txt=aiCopy.headline;aiOn=true;} if(aiCopy.sub){subTxt=aiCopy.sub;aiOn=true;} }
     document.getElementById('bg').style.backgroundImage = "url('"+img.url+"')";
-    document.getElementById('eye').textContent = say ? SAY.eyebrow : (ac?ac.eyebrow:fA(ind.eyebrow));
-    document.getElementById('h1').textContent  = say ? fS(S.company?SAY.hco:SAY.hnoco) : (ac?ac.headline:fA(ind.headline));
-    document.getElementById('sub').textContent = say ? fS(SAY.sub) : (ac?ac.sub:fA(ind.sub));
-    document.getElementById('cta').firstChild.textContent = ind.cta + ' ';
+    document.getElementById('eye').textContent = eyeTxt;
+    document.getElementById('h1').textContent  = h1Txt;
+    document.getElementById('sub').textContent = subTxt;
+    // the design agent drives the page: industry accent → the CTA, daypart tone → hero overlay
+    var cta=document.getElementById('cta'); cta.firstChild.textContent = ind.cta + ' ';
+    cta.style.background = ind.accent; cta.style.color = '#fff';
+    var calm = (DET.daypart==='evening' || DET.daypart==='late night');
+    document.querySelector('.lv-hero').classList.toggle('tone-calm', calm);
+    var fl=document.getElementById('ai-flag');
+    if(!say && aiOn && aiCopy && aiCopy.source==='ai'){ fl.className='ai-flag on'; fl.innerHTML="<i class='ph ph-sparkle'></i> hero written by the AI copy agent · Gate-cleared"; }
+    else { fl.className='ai-flag'; fl.innerHTML=''; }
     document.getElementById('attr').innerHTML = "image: "+img.id+" · "+(img.landing?("<a href='"+img.landing+"' target='_blank' rel='noopener'>"+img.creator+"</a>"):img.creator)+" · "+img.license;
     renderCreative(ind, gal);
     document.getElementById('blocked').style.display = say ? 'flex' : 'none';
@@ -231,6 +252,16 @@
         var cf=(r.conf&&r.conf!=='none')?" <span class='cf "+r.conf+"'>"+r.conf+"</span>":"";
         html+="<tr><td class='sig'>"+r.label+"</td><td class='val'>"+(r.value||'—')+cf+"</td><td class='drv'>"+(r.drives||'')+"</td><td><span class='pol "+pc.c+"'>"+pc.t+"</span></td></tr>"; }); });
     document.getElementById('cap-body').innerHTML = html;
+    maybeAutoAI();
+  }
+
+  // the copy agent runs automatically when the scene changes (debounced + deduped, allude only)
+  function aiSig(){ return [S.industry,S.region||'',S.company||'',angleKey,policy,
+    (document.getElementById('ai-comp').checked && S.competitive)?'c':''].join('|'); }
+  function maybeAutoAI(){
+    if(policy==='say') return;                 // say is the deterministic contrast arm — no AI
+    var sig=aiSig(); if(sig===lastAISig) return;
+    lastAISig=sig; clearTimeout(aiTimer); aiTimer=setTimeout(runAI,350);
   }
 
   function lookup(ip){
@@ -255,10 +286,10 @@
   function renderCreative(ind, gal){
     var dp=DET.daypart, tone=(dp==='evening'||dp==='late night')?'calm, low-light':'bright, high-energy', rows=[];
     if(S.company) rows.push({f:'company resolved from IP', c:'firmographic-tailored — but allude (never recited)'});
-    rows.push({f:'industry = '+ind.label, c:'backdrop + '+ind.accent+' accent'});
-    rows.push({f:'region = '+(S.region||'—'), c:'region-first framing'});
-    rows.push({f:'daypart = '+(dp||'—'), c:tone+' tone'});
-    rows.push({f:'creative angle = '+((ANGLEBY[angleKey]||{label:'default'}).label), c:'the copy framing'});
+    rows.push({f:'industry = '+ind.label, c:"backdrop + <span style=\"display:inline-block;width:9px;height:9px;border-radius:2px;vertical-align:middle;background:"+ind.accent+"\"></span> "+ind.accent+" accent → applied to the CTA"});
+    rows.push({f:'region = '+(S.region||'—'), c:'region-first framing in the copy'});
+    rows.push({f:'daypart = '+(dp||'—'), c:tone+' tone → applied to the hero overlay'});
+    rows.push({f:'creative angle = '+((ANGLEBY[angleKey]||{label:'default'}).label), c:'the copy agent’s framing'});
     document.getElementById('design-card').innerHTML = rows.map(function(r){return "<div class='dr-row'><span class='f'>"+r.f+"</span><span class='c'>"+r.c+"</span></div>";}).join('');
     document.getElementById('img-pick').innerHTML = gal.map(function(im,i){return "<div class='th"+(i===imgIdx?' on':'')+"' data-i='"+i+"' title='"+im.creator+" · "+im.license+"' style=\"background-image:url('"+im.url+"')\"></div>";}).join('');
     [].forEach.call(document.querySelectorAll('#img-pick .th'),function(t){ t.addEventListener('click',function(){ imgIdx=parseInt(t.getAttribute('data-i'),10); render(); }); });
@@ -266,24 +297,30 @@
   // creative: the gated AI copy agent (proposes → the Gate verifies)
   function runAI(){
     var comp = document.getElementById('ai-comp').checked && !!S.competitive;
+    var sig = aiSig(); lastAISig = sig;
+    if(policy!=='say'){ var fw=document.getElementById('ai-flag'); fw.className='ai-flag on writing'; fw.innerHTML="<i class='ph ph-circle-notch'></i> copy agent writing…"; }
     document.getElementById('ai-out').innerHTML="<span class='q-muted' style='font-size:12.5px'>"+(comp?'Researching competitors → writing → Gate verifying…':'Agent writing… Gate verifying…')+"</span>";
     var q='industry='+encodeURIComponent(S.industry)+'&region='+encodeURIComponent(S.region||'')+'&company='+encodeURIComponent(S.company||'')+'&city='+encodeURIComponent(S.city||'')+'&angle='+encodeURIComponent(angleKey)+'&policy='+policy+(comp?'&competitive=true':'');
     fetch('/api/demo/aicopy?'+q).then(function(r){return r.json();}).then(function(d){
       function v(o,blk){return "<div class='ai-v "+(o.ok?'ok':'no')+"'><i class='ic ph "+(o.ok?'ph-check-circle':'ph-prohibit')+"'></i><span class='t'>“"+o.line+"”<span class='r'>"+(blk?'blocked — ':'')+o.reason+"</span></span></div>";}
-      var checks=(d.checks||[]).map(function(x){return v(x,false);}).join('');
+      var ck=d.checks||[];
+      // only Gate-CLEARED lines ship to the hero; a blocked line keeps the provable template
+      aiCopy = {sig:sig, source:d.source, headline:(ck[0]&&ck[0].ok)?d.headline:null, sub:(ck[1]&&ck[1].ok)?d.sub:null};
+      var shipped=(aiCopy.headline?1:0)+(aiCopy.sub?1:0);
+      var checks=ck.map(function(x){return v(x,false);}).join('');
       var briefHtml='';
       if(d.competitive && d.brief){ briefHtml="<div class='q-label' style='margin:13px 0 3px'>Competitor agent · provable differentiators ("+d.brief.source+")</div><ul style='margin:0 0 0 16px;padding:0;font-size:12.5px;color:var(--slate);line-height:1.55'>"+(d.brief.differentiators||[]).map(function(x){return "<li>"+x+"</li>";}).join('')+"</ul>"; }
       document.getElementById('ai-out').innerHTML =
         briefHtml
         +"<div class='ai-line'>"+d.headline+"</div><div class='q-muted' style='font-size:13px;line-height:1.5'>"+d.sub+"</div>"
-        +"<div class='q-label' style='margin:13px 0 3px'>Gate verdicts — what it wrote</div>"+checks
+        +"<div class='q-label' style='margin:13px 0 3px'>Gate verdicts — "+shipped+"/2 cleared & shipped to the hero</div>"+checks
         +"<div class='q-label' style='margin:13px 0 3px'>…and a line the Gate blocks</div>"+(d.blocked_example?v(d.blocked_example,true):'')
-        +"<div class='ai-note'>"+(d.source==='ai'?'✨ ':'')+d.note+"</div>"
-        +"<button class='q-btn outline' id='ai-apply' style='margin-top:11px'><i class='ph ph-arrow-up'></i> Use this copy</button>";
-      var ap=document.getElementById('ai-apply'); if(ap) ap.addEventListener('click',function(){document.getElementById('h1').textContent=d.headline;document.getElementById('sub').textContent=d.sub;});
-    }).catch(function(){document.getElementById('ai-out').innerHTML="<span class='q-muted'>agent unavailable</span>";});
+        +"<div class='ai-note'>"+(d.source==='ai'?'✨ ':'')+d.note+"</div>";
+      render();   // re-render the hero with the Gate-cleared AI copy applied
+    }).catch(function(){document.getElementById('ai-out').innerHTML="<span class='q-muted'>agent unavailable — showing the deterministic copy</span>"; var fc=document.getElementById('ai-flag'); fc.className='ai-flag'; fc.innerHTML='';});
   }
   document.getElementById('ai-go').addEventListener('click', runAI);
+  document.getElementById('ai-comp').addEventListener('change', render);
   document.getElementById('sel-angle').addEventListener('change', function(e){ angleKey=e.target.value; render(); });
   render();
 </script>
