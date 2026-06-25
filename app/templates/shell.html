@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz@0,16..72;1,16..72&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="/static/quiet.css">
+  <link rel="icon" type="image/svg+xml" href="/static/brand/apt-favicon.svg">
 </head>
 <body>
 <a class="q-skip" href="#q-main">Skip to content</a>
@@ -15,7 +16,7 @@
 <div class="q-app">
   <!-- sidebar -->
   <aside class="q-side">
-    <div class="q-ws"><span class="av">a</span>apt<i class="ph ph-caret-up-down ch"></i></div>
+    <div class="q-ws"><span class="av"><img src="/static/brand/apt-mark-dark.svg" alt="" width="15" height="15"></span>apt<i class="ph ph-caret-up-down ch"></i></div>
     <nav class="q-nav">
       <a class="q-ni {{ 'on' if p in ['/workspace','/'] else '' }}" href="/workspace"><i class="ph ph-house"></i>Home</a>
       <a class="q-ni {{ 'on' if p.startswith('/records') or p=='/workspace' else '' }}" href="/records"><i class="ph ph-table"></i>Records</a>

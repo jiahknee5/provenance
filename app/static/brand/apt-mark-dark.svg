@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="apt mark">
+  <title>apt — the proof seal (on dark)</title>
+  <!-- outer seal ring -->
+  <circle cx="60" cy="60" r="46" fill="none" stroke="#F4EFE5" stroke-width="4.5"/>
+  <!-- engraved hairline -->
+  <circle cx="60" cy="60" r="37.5" fill="none" stroke="#C79A55" stroke-width="1.4"/>
+  <!-- registration ticks -->
+  <g stroke="#C79A55" stroke-width="1.4" stroke-linecap="round">
+    <line x1="60" y1="10.5" x2="60" y2="16.5"/>
+    <line x1="60" y1="103.5" x2="60" y2="109.5"/>
+    <line x1="10.5" y1="60" x2="16.5" y2="60"/>
+    <line x1="103.5" y1="60" x2="109.5" y2="60"/>
+  </g>
+  <!-- the proof dot (glows brass on dark) -->
+  <circle cx="60" cy="60" r="13" fill="#C79A55"/>
+</svg>
