@@ -65,10 +65,15 @@ def _model(request: Request, slug: str, industry: str, region: str, ip: str, per
     if d.kind == "firmographic":
         det, octx = _resolve(request, slug, industry, region, ip, persona)
         return SH.build_view(slug, det=det, octx=octx), "use_case_rich.html"
+    # known / optimizer are persona-driven (identity / segment), with an optional reverse-IP
+    # firmographic overlay so the same live IP input as /demo/live still resolves real context.
+    overlay = SC.resolve_ip(ip) if ip else {}
     if d.kind == "known":
         c = ctx()
-        return SH.build_view(slug, gate=c.gate, library=c.library), "use_case.html"
-    return SH.build_view(slug), "use_case.html"
+        return SH.build_view(slug, gate=c.gate, library=c.library, persona=persona,
+                             overlay=overlay, ip=ip, industry=industry, region=region), "use_case_rich.html"
+    return SH.build_view(slug, persona=persona, overlay=overlay, ip=ip,
+                         industry=industry, region=region), "use_case_rich.html"
 
 
 @app.get("/showcase", response_class=HTMLResponse)

@@ -135,7 +135,7 @@
   <section class="o-hero">
     <div class="uc-bg" style="background-image:url('{{ img.url }}')"></div>
     <div class="uc-hwrap" style="padding:26px 28px">
-      <div class="uc-mark"><span class="wm">{{ demo.brand }}</span><span class="uc-pill"><i class="ph ph-seal-check"></i> gated · ships</span></div>
+      <div class="uc-mark"><span class="wm">{{ site or demo.brand }}</span><span class="uc-pill"><i class="ph ph-seal-check"></i> gated · ships</span></div>
       <div class="uc-eye">{{ hs.eyebrow }}</div><h1 class="uc-h1" style="font-size:clamp(24px,3.4vw,34px)">{{ hs.headline }}</h1>
     </div>
   </section>
@@ -187,10 +187,10 @@
 
   {% if version == 'ungated' %}
   <section class="fp-hero">
-    <div class="fp-banner"><i class="ph ph-warning"></i> Ungated — the Gate blocks this in production (recites involuntary data). Shown for contrast only; the recite version would do this in every block.</div>
+    <div class="fp-banner"><i class="ph ph-warning"></i> Ungated — the Gate blocks this in production ({{ ungated_note or 'recites involuntary data' }}). Shown for contrast only; the recite version would do this in every block.</div>
     <div class="uc-bg" style="background-image:url('{{ ungated_hero.image }}')"></div>
     <div class="uc-hwrap">
-      <div class="uc-mark"><span class="wm">{{ demo.brand }}</span><span class="uc-pill" style="background:rgba(192,53,75,.22);border-color:rgba(192,53,75,.5)"><i class="ph ph-prohibit"></i> personalized live by apt</span></div>
+      <div class="uc-mark"><span class="wm">{{ site or demo.brand }}</span><span class="uc-pill" style="background:rgba(192,53,75,.22);border-color:rgba(192,53,75,.5)"><i class="ph ph-prohibit"></i> personalized live by apt</span></div>
       <div class="uc-eye">{{ ungated_hero.eyebrow }}</div><h1 class="uc-h1">{{ ungated_hero.headline }}</h1><p class="uc-sub">{{ ungated_hero.sub }}</p>
       <div style="margin-top:24px"><a class="fp-cta" style="background:{{ demo.accent }}" href="#">{{ ungated_hero.cta }} <i class="ph ph-arrow-right"></i></a></div>
     </div>
@@ -204,7 +204,7 @@
   <section class="fp-hero">
     <div class="uc-bg" style="background-image:url('{{ img.url }}')"></div>
     <div class="uc-hwrap">
-      <div class="uc-mark"><span class="wm">{{ demo.brand }}</span><span class="uc-pill"><i class="ph ph-seal-check"></i> personalized live by apt</span></div>
+      <div class="uc-mark"><span class="wm">{{ site or demo.brand }}</span><span class="uc-pill"><i class="ph ph-seal-check"></i> personalized live by apt</span></div>
       <div class="uc-eye">{{ b.eyebrow }}</div><h1 class="uc-h1">{{ b.headline }}</h1><p class="uc-sub">{{ b.sub }}</p>
       <div style="margin-top:24px"><a class="fp-cta" style="background:{{ demo.accent }}" href="#">{{ b.cta }} <i class="ph ph-arrow-right"></i></a><a class="fp-cta ghost" href="/showcase/{{ slug }}/observability">See the receipt</a></div>
     </div>

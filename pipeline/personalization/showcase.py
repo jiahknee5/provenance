@@ -110,12 +110,21 @@ def _fill_say(t: str, *, company, city, industry_label, region) -> str:
              .replace("{industry}", (industry_label or "your").lower()).replace("{region}", region or SC.GENERIC_REGION))
 
 
-def _vm(demo, *, gated, ungated, hero, sections, gate, trace,
-        show_controls=False, active_industry="", active_region="", loc_detected=False) -> dict:
-    return {"demo": demo, "production": {"gated": gated, "ungated": ungated}, "hero": hero,
-            "sections": sections, "gate": gate, "trace": trace, "show_controls": show_controls,
-            "active_industry": active_industry, "active_region": active_region,
-            "loc_detected": loc_detected, "demos": [DEMOS[s] for s in ORDER]}
+def _rich_vm(demo, *, site, img, sections, impact, ungated_hero, obs_sections, gate, trace,
+             personas, active_persona, active_ip="", active_industry="", active_region="",
+             ungated_note="recites involuntary data", ip_label="or an IP") -> dict:
+    """The normalized rich view-model — the same shape `use_case_rich.html` renders for every kind."""
+    return {"demo": demo, "kind": demo.kind, "site": site, "img": img, "sections": sections,
+            "impact": impact, "ungated_hero": ungated_hero, "obs_sections": obs_sections,
+            "gate": gate, "trace": trace, "personas": personas, "active_persona": active_persona,
+            "active_ip": active_ip, "active_industry": active_industry, "active_region": active_region,
+            "examples": SC.EXAMPLE_ACCOUNTS, "loc_detected": True, "ungated_note": ungated_note,
+            "ip_label": ip_label, "demos": [DEMOS[s] for s in ORDER]}
+
+
+def _impact(sections, signals, *, lift_label, lift_note) -> dict:
+    return {"blocks": len(sections), "signals": signals, "recited": 0,
+            "lift_label": lift_label, "lift_note": lift_note}
 
 
 # --- kind: firmographic (UC1, UC2) — rich, multi-section, persona-driven -----
@@ -143,9 +152,39 @@ PERSONAS: dict[str, list[dict]] = {
     ],
 }
 
+# UC3 personas are *known accounts* — the resolving signal is identity (email / magic-link),
+# not an IP. Each drives a different lifecycle, role, persuasion strategy, and held-PII recite.
+PERSONAS["known"] = [
+    {"key": "cfo_idn", "label": "CFO · hospital network · returning", "sub": "abandoned mid-evaluation",
+     "name": "Maya Chen", "company": "Northwind Health", "role": "cfo", "size": "idn", "region": "West",
+     "industry": "healthcare", "use_case": "lower total cost of ownership", "urgency": "high",
+     "signals": {"returning": True, "abandoned": True}, "income": "$190K", "behavior": "abandoned application (step 3)"},
+    {"key": "ciso_idn", "label": "CISO · health system · evaluating", "sub": "technical buyer · first visit",
+     "name": "Dev Okafor", "company": "Cedar Ridge Health", "role": "it_security", "size": "idn", "region": "South",
+     "industry": "healthcare", "use_case": "pass security review", "urgency": "medium",
+     "signals": {}, "income": "$240K", "behavior": "downloaded the SOC 2 packet"},
+    {"key": "clinops_comm", "label": "Clin-ops lead · community clinic · urgent", "sub": "renewal window closing",
+     "name": "Rosa Vega", "company": "Brightside Clinics", "role": "clinops", "size": "community", "region": "West",
+     "industry": "healthcare", "use_case": "cut length of stay", "urgency": "high",
+     "signals": {}, "income": "$120K", "behavior": "opened 4 renewal emails, no reply"},
+]
+
+# UC4 personas are *segments* — the bandit learns a winning arm per segment over real traffic.
+# Each maps to one of the three live /demo scenarios (its arms, learned winner, and blocked lie).
+PERSONAS["optimizer"] = [
+    {"key": "anon", "label": "Segment · new anonymous viewer", "sub": "cold IP signals", "sid": "A"},
+    {"key": "customer", "label": "Segment · existing customer", "sub": "CRM + behaviour", "sid": "B"},
+    {"key": "lead", "label": "Segment · emailed lead", "sub": "magic-link click", "sid": "C"},
+]
+
 
 def persona(slug: str, key: str) -> dict | None:
     return next((p for p in PERSONAS.get(slug, []) if p["key"] == key), None)
+
+
+def _persona_or_first(slug: str, key: str) -> dict:
+    ps = PERSONAS.get(slug, [])
+    return next((p for p in ps if p["key"] == key), ps[0]) if ps else {}
 
 
 def _firmo_sections(slug: str, cx: dict) -> list[dict]:
@@ -269,110 +308,236 @@ def _build_firmographic(slug: str, det: dict, octx: dict) -> dict:
         {"n": 5, "name": "Gate", "detail": "every block provable; the recite version blocked"},
         {"n": 6, "name": "Receipt", "detail": f"{len(scene['receipt'])} sources bound · 0 recited"}]
 
-    return {"demo": d, "kind": "firmographic", "img": img, "sections": sections, "impact": impact,
+    return {"demo": d, "kind": "firmographic", "site": d.brand, "img": img, "sections": sections, "impact": impact,
             "signals_used": signals_used, "ungated_hero": ungated_hero, "personas": PERSONAS.get(slug, []),
             "examples": SC.EXAMPLE_ACCOUNTS, "active_persona": octx.get("persona", ""), "active_ip": octx.get("ip", ""),
             "ctx": cx, "det": det, "loc_detected": detected, "active_industry": ind, "active_region": region or "",
+            "ungated_note": "recites company / precise location", "ip_label": "or an IP",
             "obs_sections": obs_sections, "gate": gate, "trace": trace, "demos": [DEMOS[s] for s in ORDER]}
 
 
-# --- kind: known customer (UC3) ---------------------------------------------
-def _build_known(slug: str, gate_obj, library) -> dict:
-    from pipeline.personalization import persuasion
-    d = DEMOS[slug]
-    r = Recipient(recipient_id="kc1", token="kc", name="Maya Chen", email="maya.chen@northwind.org",
-                  company="Northwind Health", role="cfo", company_size="community", region="West",
-                  use_case="lower total cost of ownership", urgency="high", segment="cfo__core")
-    plan = persuasion.build_plan(gate_obj, library, r, signals={"returning": True, "abandoned": True})
+# --- kind: known customer (UC3) — rich, multi-section, account-driven --------
+_KNOWN_SITE = "Helix Health"
+_ROLE_PEER = {"cfo": "Finance leaders at health systems", "it_security": "Security leaders at health networks",
+              "clinops": "Clinical-ops leaders at care organizations", "quality": "Quality leaders at care orgs"}
+
+
+def _known_sections(p: dict, r: Recipient, plan, *, region: str, company, city) -> list[dict]:
+    """The same 5-block landing as firmographic, but driven by identity + the Gate-bounded plan."""
+    first = r.name.split()[0]
     strat = plan.strategy.replace("_", " ")
     lead = plan.claims[0]["text"] if plan.claims else "verified, independently sourced results"
-    first = r.name.split()[0]
-    gated_card = {"eyebrow": f"{strat} · welcome back, {first}", "headline": plan.headline,
-                  "sub": "You left mid-evaluation — so we resume with proof, not pressure. "
-                         "Every line here is sourced; anything we can't prove is held back.", "cta": plan.cta,
-                  "image": None, "accent": d.accent, "badge": "Gated · ships", "kind": "ok",
-                  "desc": f"Closes with a principle ({strat}) using only provable claims; any held claim is dropped. "
-                          "Sensitive PII steers the angle but is never recited."}
-    ungated_card = {"eyebrow": "CRM + a broker income append", "image": None, "accent": "#7a2230",
-                    "headline": f"On a $190K income, {r.company} is an easy yes, {first}.",
-                    "sub": "We modeled your household income and saw three abandoned sessions this week.",
-                    "cta": "Pay in full", "badge": "Ungated · blocked", "kind": "block",
-                    "desc": "Recites purchased income + behavior and makes an unprovable closing claim — "
-                            "the surface policy holds it; it never ships."}
-    inputs = [{"k": "Email match", "v": r.email, "meta": "declared · identity"},
-              {"k": "CRM lifecycle", "v": "customer · returning", "meta": "first-party · welcome-back"},
-              {"k": "Behavior", "v": "abandoned application (step 3)", "meta": "first-party · resume / re-engage"},
-              {"k": "Role", "v": "CFO (PDL)", "meta": "enrich · proof depth"},
-              {"k": "Modeled income", "v": "$190K band", "meta": "broker · HOLD — steers, never recited"}]
+    returning = bool(p["signals"].get("returning") or p["signals"].get("abandoned"))
+    peer = _ROLE_PEER.get(r.role, "Leaders at health organizations")
+    reg = region or "your region"
+    hero_p = {"eyebrow": f"{strat} · welcome back, {first}" if returning else f"{strat} · for {first}",
+              "headline": plan.headline,
+              "sub": (f"You paused mid-evaluation — so we resume with proof, not pressure. " if returning
+                      else f"You came in on {r.use_case} — so we lead with proof, not pressure. ")
+                     + "Every line here is sourced; anything we can't prove is held back.",
+              "cta": plan.cta}
+    hero_g = {"eyebrow": "Sign in", "headline": f"Welcome to {_KNOWN_SITE}.",
+              "sub": "The clinical platform for modern care teams.", "cta": "Sign in"}
+    proof_p = {"headline": f"{peer} like you already run on {_KNOWN_SITE}.",
+               "sub": f"Teams across {reg} trust the same proof you're reading — each line carries its source.",
+               "chips": [f"a {r.company_size} health org", f"{reg} care teams", "every claim sourced"]}
+    proof_g = {"headline": "Trusted by care teams.", "sub": "Across health systems.", "chips": ["—", "—", "—"]}
+    feat_p = {"headline": f"Built to {r.use_case}.", "sub": lead}
+    feat_g = {"headline": "A clinical platform.", "sub": "For care teams of every size."}
+    if returning:
+        offer_p = {"headline": "Pick up where you left off.",
+                   "sub": f"You stopped at {p['behavior']} — here's the sourced answer waiting for you, {first}.", "cta": plan.cta}
+    else:
+        offer_p = {"headline": "A tailored, sourced assessment — yours to keep.",
+                   "sub": f"Built around {r.use_case}; every figure links to where it came from.", "cta": plan.cta}
+    offer_g = {"headline": "Get started.", "sub": "Request a demo.", "cta": "Request a demo"}
+    cat_p = {"headline": "Every claim here carries its source.",
+             "sub": f"Held claims are dropped, not softened — we surfaced {len(plan.claims)} we can prove and "
+                    f"withheld {len(plan.dropped) or 'every line'} we can't."}
+    cat_g = {"headline": f"Why {_KNOWN_SITE}.", "sub": "Evidence-based care technology."}
+    return [
+        {"id": "hero", "label": "Hero", "tag": "identity · lifecycle · strategy", "p": hero_p, "g": hero_g},
+        {"id": "proof", "label": "Peer proof", "tag": "role · company size", "p": proof_p, "g": proof_g},
+        {"id": "features", "label": "What you get", "tag": "use case · provable claim", "p": feat_p, "g": feat_g},
+        {"id": "offer", "label": "Offer", "tag": "on-site behavior", "p": offer_p, "g": offer_g},
+        {"id": "category", "label": "Why us", "tag": "provable · held claims dropped", "p": cat_p, "g": cat_g},
+    ]
+
+
+def _build_known(slug: str, gate_obj, library, persona_key: str, overlay: dict,
+                 ip: str, industry: str, region: str) -> dict:
+    from pipeline.personalization import persuasion
+    d = DEMOS[slug]
+    p = _persona_or_first(slug, persona_key)
+    first = p["name"].split()[0]
+    region_eff = region or overlay.get("region") or p["region"]
+    company_ov, city_ov = overlay.get("company"), overlay.get("city")
+    ind_key = industry or overlay.get("industry") or p["industry"]
+    img = SC.image_for(ind_key)
+    r = Recipient(recipient_id="kc_" + p["key"], token="kc", name=p["name"],
+                  email=f"{first.lower()}@{p['company'].split()[0].lower()}.org", company=p["company"],
+                  role=p["role"], company_size=p["size"], region=region_eff,
+                  use_case=p["use_case"], urgency=p["urgency"], segment=Recipient.make_segment(p["role"], p["size"]))
+    plan = persuasion.build_plan(gate_obj, library, r, signals=p["signals"])
+    strat = plan.strategy.replace("_", " ")
+    returning = bool(p["signals"].get("returning") or p["signals"].get("abandoned"))
+    sections = _known_sections(p, r, plan, region=region_eff, company=company_ov, city=city_ov)
+
+    ungated_hero = {"eyebrow": "CRM + a broker income append",
+                    "headline": f"On a {p['income']} income, {r.company} is an easy yes, {first}.",
+                    "sub": f"We modeled your household income and saw {p['behavior']} this week.",
+                    "cta": "Pay in full", "image": img["url"], "attr": img}
+
+    impact = _impact(sections, len([s for s in sections]),  # 5 blocks, signals counted below
+                     lift_label="2–4× reactivation vs a generic welcome-back" if returning
+                     else "1.5–3× lead→opportunity vs a generic page",
+                     lift_note="illustrative benchmark for identity-matched, proof-led pages — not a measured result on this page")
+    n_sig = 4 + (1 if company_ov else 0)
+    impact["signals"] = n_sig
+
+    inputs = [{"k": "Email match", "v": r.email, "conf": "declared", "meta": "declared · identity"},
+              {"k": "CRM lifecycle", "v": ("customer · returning" if returning else "active evaluation"),
+               "meta": "first-party · " + ("welcome-back" if returning else "nurture")},
+              {"k": "Behavior", "v": p["behavior"], "meta": "first-party · resume / re-engage"},
+              {"k": "Role", "v": f"{p['role'].upper().replace('_',' ')} (PDL)", "meta": "enrich · proof depth"},
+              {"k": "Modeled income", "v": f"{p['income']} band", "meta": "broker · HOLD — steers, never recited"}]
+    if company_ov:
+        inputs.insert(1, {"k": "Company (reverse-IP)", "v": f"{company_ov}" + (f" · {city_ov}" if city_ov else ""),
+                          "conf": "high", "meta": "bought · local framing"})
     decision = [{"k": "Strategy", "v": strat}, {"k": "Principle", "v": plan.principle}, {"k": "Rationale", "v": plan.rationale}]
+    assembly = [{"k": s["label"], "v": s["p"]["headline"], "meta": "from " + s["tag"]} for s in sections]
     prov = [{"k": c["claim_id"], "v": c["text"], "meta": c["source"]} for c in plan.claims]
-    sections = [{"title": "Inputs — known-customer signals", "icon": "ph-identification-card", "rows": inputs},
-                {"title": "Decision — persuasion strategy", "icon": "ph-strategy", "rows": decision},
-                {"title": "Provenance — claims surfaced", "icon": "ph-seal-check", "rows": prov}]
+    obs_sections = [
+        {"title": "Inputs — known-customer signals", "icon": "ph-identification-card", "mode": True, "rows": inputs},
+        {"title": "Decision — persuasion strategy", "icon": "ph-strategy", "rows": decision},
+        {"title": "Page assembly — block ← signal", "icon": "ph-stack", "rows": assembly},
+        {"title": "Provenance — claims surfaced", "icon": "ph-seal-check", "rows": prov}]
     gate = [{"verdict": "ok", "line": c["text"], "why": f"{c['claim_id']} — cleared ({c['source']})"} for c in plan.claims]
     gate += [{"verdict": "block", "line": f"claim {cid}", "why": "blocked by legal hold — dropped from the plan"} for cid in plan.dropped]
-    gate += [{"verdict": "block", "line": ungated_card["headline"], "why": "recites purchased income (broker · HOLD) — overclaim"}]
-    trace = [{"n": 1, "name": "Resolve", "detail": f"email / magic-link → {r.name}, CFO at {r.company}"},
-             {"n": 2, "name": "Enrich", "detail": "CRM lifecycle + behavior + PDL role; broker income (HOLD)"},
+    gate += [{"verdict": "block", "line": ungated_hero["headline"], "why": "recites purchased income (broker · HOLD) — overclaim"}]
+    trace = [{"n": 1, "name": "Resolve", "detail": f"email / magic-link → {r.name}, {r.role.upper().replace('_',' ')} at {r.company}"},
+             {"n": 2, "name": "Enrich", "detail": "CRM lifecycle + behavior + PDL role; broker income (HOLD)"
+                      + (f"; reverse-IP → {company_ov}" if company_ov else "")},
              {"n": 3, "name": "Select", "detail": f"persuasion strategy → {strat}"},
              {"n": 4, "name": "Gate", "detail": f"{len(plan.claims)} claims cleared · {len(plan.dropped)} held/dropped"},
-             {"n": 5, "name": "Personalize", "detail": "headline + provable claims; PII held (steers, never shown)"},
+             {"n": 5, "name": "Assemble", "detail": f"{len(sections)} blocks personalized; PII held (steers, never shown)"},
              {"n": 6, "name": "Receipt", "detail": f"{len(plan.claims)} claims, each bound to a source"}]
-    hero_vm = {"eyebrow": gated_card["eyebrow"], "headline": plan.headline, "sub": gated_card["sub"], "image": None, "accent": d.accent}
-    return _vm(d, gated=gated_card, ungated=ungated_card, hero=hero_vm, sections=sections, gate=gate, trace=trace)
+    return _rich_vm(d, site=_KNOWN_SITE, img=img, sections=sections, impact=impact, ungated_hero=ungated_hero,
+                    obs_sections=obs_sections, gate=gate, trace=trace, personas=PERSONAS["known"],
+                    active_persona=p["key"], active_ip=ip, active_industry=industry or "", active_region=region or "",
+                    ungated_note="recites purchased income (HOLD)")
 
 
-# --- kind: optimizer / RL (UC4) ---------------------------------------------
-def _build_optimizer(slug: str) -> dict:
+# --- kind: optimizer / RL (UC4) — rich, segment-driven, on the real bandit ---
+_OPT_SITE = "Helix Health"
+
+
+def _opt_sections(scen, sc: dict, win_var, blk_var, *, fill) -> list[dict]:
+    """The 5-block landing, where the served hero IS the bandit's learned winner for this segment."""
+    share = int(sc.get("winner_share", 0) * 100)
+    sigs = ", ".join(du.signal for du in win_var.data_used) if win_var else "the segment's signals"
+    hero_p = {"eyebrow": f"{sc['label']} · learned winner ({share}% of pulls)",
+              "headline": "The version that wins — and that we can prove.",
+              "sub": fill(f"The bandit converged on “{win_var.label}”: {win_var.headline}") if win_var
+                     else "The bandit converged on the best Gate-cleared arm.",
+              "cta": fill(win_var.cta) if win_var else "Get started"}
+    hero_g = {"eyebrow": "Control slice", "headline": fill(f"{_OPT_SITE} — see the platform."),
+              "sub": "What a random, un-optimized visitor sees — the baseline the lift is measured against.", "cta": "Get started"}
+    proof_p = {"headline": "Learned from real outcomes — not a guess.",
+               "sub": f"{share}% of pulls converged on “{win_var.label}”, beating a random control." if win_var
+                      else f"{share}% of pulls converged on the winner, beating a random control.",
+               "chips": [f"{a['label']} · {a['posterior_mean']}" for a in sc["arms"]]}
+    proof_g = {"headline": "An A/B test, running.", "sub": "Results pending.", "chips": ["—", "—", "—"]}
+    feat_p = {"headline": "Why this version won.",
+              "sub": (fill(win_var.sub) + f" It leads with {sigs}.") if win_var else "It led with the segment's strongest provable signal."}
+    feat_g = {"headline": "A standard hero.", "sub": "No signals applied, no learning."}
+    offer_p = {"headline": "Served to this segment now.",
+               "sub": "The bandit serves only Gate-cleared arms — and updates online from real clicks.",
+               "cta": fill(win_var.cta) if win_var else "Get started"}
+    offer_g = {"headline": "Get started.", "sub": "One CTA for everyone.", "cta": "Get started"}
+    cat_p = {"headline": "It can't win by lying.",
+             "sub": (f"The highest-engagement arm of all — “{blk_var.label}” — is an overclaim, so it never enters "
+                     "the action pool. Lift is measured against a random control, not asserted.") if blk_var
+                    else "The planted lie never enters the action pool; lift is measured, not asserted."}
+    cat_g = {"headline": "Why optimize.", "sub": "Find what converts."}
+    return [
+        {"id": "hero", "label": "Hero", "tag": "segment · learned winner", "p": hero_p, "g": hero_g},
+        {"id": "proof", "label": "Peer proof", "tag": "posteriors · real outcomes", "p": proof_p, "g": proof_g},
+        {"id": "features", "label": "What you get", "tag": "winning arm's signals", "p": feat_p, "g": feat_g},
+        {"id": "offer", "label": "Offer", "tag": "served online · Gate-cleared", "p": offer_p, "g": offer_g},
+        {"id": "category", "label": "Why us", "tag": "truth-bounded · measured lift", "p": cat_p, "g": cat_g},
+    ]
+
+
+def _build_optimizer(slug: str, persona_key: str, overlay: dict,
+                     ip: str, industry: str, region: str) -> dict:
+    from pipeline.personalization import demo_scenarios as DS
     from pipeline.personalization import demo_sim
     d = DEMOS[slug]
+    p = _persona_or_first(slug, persona_key)
+    sid = p["sid"]
+    scen = DS.scenario(sid)
     m = demo_sim.build()
-    sc = m["scenarios"][0]
+    sc = next((x for x in m["scenarios"] if x["id"] == sid), m["scenarios"][0])
     arms = sc["arms"]
-    winner = next((a for a in arms if a.get("winner")), arms[0])
+    win_id = sc.get("learned_winner") or sc.get("winner")
+    winner = next((a for a in arms if a["id"] == win_id), arms[0])
+    win_var = next((v for v in scen.variants if v.id == win_id), None)
     blk = sc.get("blocked_arm")
-    gated_card = {"eyebrow": f"{sc['label']} · the variant the bandit learned", "image": None, "accent": d.accent,
-                  "headline": "The version that wins — and that we can prove.",
-                  "sub": f"The bandit converged to the best Gate-cleared arm: “{winner['label']}”.",
-                  "cta": "Start free", "badge": "Gated · ships", "kind": "ok",
-                  "desc": "The end visitor is served the bandit's learned winner — drawn only from Gate-cleared arms, "
-                          "learned from real outcomes, with lift measured against a random control."}
-    ungated_card = {"eyebrow": "The arm that would win on engagement", "image": None, "accent": "#7a2230",
-                    "headline": f"“{blk['label'] if blk else 'the ungated arm'}” would win the click — and never ships.",
-                    "sub": "The highest-engagement variant of all, but it crosses the line the Gate holds.",
-                    "cta": "Show me", "badge": "Ungated · blocked", "kind": "block",
-                    "desc": f"The arm with the highest CTR is an overclaim — so it never enters the action pool, and "
-                            f"the bandit is structurally unable to select it (selected {blk['selections'] if blk else 0}× across all segments)."}
-    arm_rows = [{"k": a["label"], "v": f"posterior {a['posterior_mean']}",
-                 "meta": "learned winner" if a.get("winner") else f"{a.get('selections', '')} pulls"} for a in arms]
+    blk_var = DS.blocked_variant(scen)
+    ind_key = industry or overlay.get("industry") or "technology"
+    img = SC.image_for(ind_key)
+    fill = lambda s: (s or "").replace("{brand}", _OPT_SITE)  # noqa: E731
+    share = int(sc.get("winner_share", 0) * 100)
+    n_blk = blk["selections"] if blk else 0
+    sections = _opt_sections(scen, sc, win_var, blk_var, fill=fill)
+
+    ungated_hero = {"eyebrow": "The arm that would win on engagement",
+                    "headline": fill(blk_var.headline) if blk_var else "The arm that would win the click — and never ships.",
+                    "sub": fill(blk_var.sub) if blk_var else "The highest-engagement variant, but it crosses the line the Gate holds.",
+                    "cta": fill(blk_var.cta) if blk_var else "Show me", "image": img["url"], "attr": img}
+
+    impact = _impact(sections, (len(win_var.data_used) if win_var else 1) + 1,
+                     lift_label=f"{share}% of pulls on the proven winner",
+                     lift_note="share of pulls the bandit converged on the Gate-cleared winner; lift is measured vs a random control, not asserted")
+
+    arm_rows = [{"k": a["label"], "v": f"posterior {a['posterior_mean']}", "conf": "high" if a["id"] == win_id else None,
+                 "meta": "learned winner" if a["id"] == win_id else f"{a.get('selections', 0)} pulls"} for a in arms]
+    arm_rows.append({"k": (blk_var.label if blk_var else "the ungated arm"), "v": "excluded from the action pool",
+                     "meta": f"selected {n_blk}× — the planted lie"})
     decision = [{"k": "Algorithm", "v": "Thompson sampling, per segment"},
-                {"k": "Learned winner", "v": winner["label"]},
+                {"k": "Learned winner", "v": (win_var.label if win_var else winner["label"])},
                 {"k": "Converged", "v": "yes" if sc.get("converged") else "approaching"}]
-    metrics = [{"k": "Planted lie selected", "v": f"{blk['selections'] if blk else 0}× — structurally excluded"},
-               {"k": "Winner share of pulls", "v": f"{int(sc.get('winner_share', 0) * 100)}%"}]
-    sections = [{"title": "Arms — per-segment posteriors", "icon": "ph-chart-bar", "rows": arm_rows},
-                {"title": "Decision — the bandit", "icon": "ph-strategy", "rows": decision},
-                {"title": "Metrics — truth-bounded", "icon": "ph-gauge", "rows": metrics}]
+    assembly = [{"k": s["label"], "v": s["p"]["headline"], "meta": "from " + s["tag"]} for s in sections]
+    prov = ([{"k": du.signal, "v": du.role, "meta": f"{du.policy} · {du.source_label}"} for du in win_var.data_used]
+            if win_var else [{"k": "—", "v": "the winner's signals", "meta": "Gate-cleared"}])
+    obs_sections = [
+        {"title": "Arms — per-segment posteriors", "icon": "ph-chart-bar", "mode": True, "rows": arm_rows},
+        {"title": "Decision — the bandit", "icon": "ph-strategy", "rows": decision},
+        {"title": "Page assembly — block ← signal", "icon": "ph-stack", "rows": assembly},
+        {"title": "Provenance — what the winner may say", "icon": "ph-seal-check", "rows": prov}]
     gate = [{"verdict": "ok", "line": a["label"], "why": f"Gate-cleared arm · posterior {a['posterior_mean']}"} for a in arms]
-    if blk:
-        gate.append({"verdict": "block", "line": blk["label"],
-                     "why": f"unprovable 'guaranteed' claim — excluded from the action pool; selected {blk['selections']}×"})
-    trace = [{"n": 1, "name": "Generate", "detail": "per-segment A/B variants + the planted lie"},
+    gate.append({"verdict": "block", "line": (blk_var.label if blk_var else "the ungated arm"),
+                 "why": f"unprovable overclaim — excluded from the action pool; selected {n_blk}×"})
+    trace = [{"n": 1, "name": "Generate", "detail": f"{sc['label']} — per-segment A/B variants + the planted lie"},
              {"n": 2, "name": "Gate", "detail": "every variant verified; the lie is blocked"},
              {"n": 3, "name": "Action pool", "detail": "only Gate-cleared arms enter — the lie excluded by construction"},
-             {"n": 4, "name": "Learn", "detail": "Thompson sampling over real outcomes → per-segment winner"},
-             {"n": 5, "name": "Serve", "detail": "the learned winner; lift measured vs a random control"},
+             {"n": 4, "name": "Learn", "detail": f"Thompson sampling over real outcomes → “{win_var.label if win_var else winner['label']}”"},
+             {"n": 5, "name": "Serve", "detail": f"the learned winner ({share}% of pulls); lift measured vs a random control"},
              {"n": 6, "name": "Drift", "detail": "a source change / legal hold re-verifies + pauses affected arms"}]
-    hero_vm = {"eyebrow": gated_card["eyebrow"], "headline": gated_card["headline"], "sub": gated_card["sub"], "image": None, "accent": d.accent}
-    return _vm(d, gated=gated_card, ungated=ungated_card, hero=hero_vm, sections=sections, gate=gate, trace=trace)
+    return _rich_vm(d, site=_OPT_SITE, img=img, sections=sections, impact=impact, ungated_hero=ungated_hero,
+                    obs_sections=obs_sections, gate=gate, trace=trace, personas=PERSONAS["optimizer"],
+                    active_persona=p["key"], active_ip=ip, active_industry=industry or "", active_region=region or "",
+                    ungated_note="an unprovable overclaim — structurally excluded")
 
 
 def build_view(slug: str, *, det: dict | None = None, octx: dict | None = None,
-               gate=None, library=None) -> dict:
-    """Dispatch to the right engine and return the normalized view-model."""
+               gate=None, library=None, persona: str = "", overlay: dict | None = None,
+               ip: str = "", industry: str = "", region: str = "") -> dict:
+    """Dispatch to the right engine and return the normalized rich view-model."""
     kind = DEMOS[slug].kind
     if kind == "firmographic":
         return _build_firmographic(slug, det or {}, octx or {})
     if kind == "known":
-        return _build_known(slug, gate, library)
-    return _build_optimizer(slug)
+        return _build_known(slug, gate, library, persona, overlay or {}, ip, industry, region)
+    return _build_optimizer(slug, persona, overlay or {}, ip, industry, region)
