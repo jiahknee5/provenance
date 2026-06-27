@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Review queue{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Review queue</h1>
+  <p class="muted">Advisory reviews for AMBER claims — dispatch is not blocked unless a non-advisory review is rejected.</p>
+  {% if reviews %}
+  <table class="record-table">
+    <thead><tr><th>ID</th><th>Object</th><th>Type</th><th>Advisory</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% for r in reviews %}
+      <tr>
+        <td>{{ r.review_id }}</td>
+        <td>{{ r.object_type }} / {{ r.object_id }}</td>
+        <td>{{ r.review_type }}</td>
+        <td>{{ "yes" if r.advisory else "no" }}</td>
+        <td>
+          <form method="post" action="/api/reviews/{{ r.review_id }}" style="display:inline"
+                onsubmit="event.preventDefault(); fetch(this.action,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({decision:'approved'})}).then(()=>location.reload())">
+            <button type="submit">Approve</button>
+          </form>
+          <form method="post" style="display:inline"
+                onsubmit="event.preventDefault(); fetch('/api/reviews/{{ r.review_id }}',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({decision:'rejected'})}).then(()=>location.reload())">
+            <button type="submit">Reject</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>No pending reviews.</p>
+  {% endif %}
+</section>
+{% endblock %}

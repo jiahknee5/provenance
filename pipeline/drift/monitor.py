@@ -13,6 +13,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 
 from pipeline.common import observe
+from pipeline.domain.adapters import drift as domain_drift
 from pipeline.common.config import RUNS_DIR
 from pipeline.common.schemas import ClaimVerdict, Verdict
 from pipeline.common.store import ActionPool
@@ -80,6 +81,8 @@ class DriftMonitor:
                             + ", ".join(f"{c} {before[c]}→{after[c]}" for c in affected),
                      decision={"recomputed_count": recomputed, "recomputed_ids": recomputed_ids,
                                "before": before, "after": after})
+        for cid in affected:
+            domain_drift.emit_drift_reverification(cid, before[cid], after[cid])
         paused, unblocked = self._mutate_pools(pools, affected, before, after)
         observe.emit("drift", "OUTPUT", node="drift", detail=f"paused {len(paused)} · unblocked {len(unblocked)}",
                      output={"paused_variants": paused, "unblocked_variants": unblocked})

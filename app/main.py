@@ -99,3 +99,4 @@ from app import policies as _policies  # noqa: E402,F401
 from app import graph as _graph  # noqa: E402,F401
 from app import help as _help  # noqa: E402,F401
 from app import archive as _archive  # noqa: E402,F401
+from app import reviews as _reviews  # noqa: E402,F401
