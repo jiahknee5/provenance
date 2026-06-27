@@ -1,109 +1,104 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Provenance — SRE &amp; Specialist Multi-Arm Bandit Command Center</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% extends "shell.html" %}
+{% block title %}apt — Optimizer · Bandit dashboard{% endblock %}
+{% block crumb %}<i class="ph ph-trend-up"></i> Optimizer / Bandit dashboard{% endblock %}
+{% block content %}
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css">
-  
+
   <style>
     :root {
-      --bg: #070911;
-      --panel: #0f1322;
-      --panel-glass: rgba(18, 23, 40, 0.8);
-      --panel-header: #151a2f;
-      --border: #1f2742;
-      --border-glow: #3b82f6;
-      --ink: #f8fafc;
-      --muted: #8e9ebb;
-      --accent-blue: #3b82f6;
-      --accent-cyan: #06b6d4;
-      --accent-green: #10b981;
-      --accent-red: #f43f5e;
-      --accent-amber: #f59e0b;
-      --accent-purple: #8b5cf6;
-      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
+      --bg: #FFFFFF;
+      --panel: #FFFFFF;
+      --panel-glass: #FFFFFF;
+      --panel-header: #FCFCFD;
+      --border: #E5E9EF;
+      --border-strong: #C9D2DC;
+      --fill: #F1F3F5;
+      --ink: #1A1C20;
+      --slate: #2E353D;
+      --muted: #6B7480;
+      --label: #9AA6B4;
+      --accent-blue: #2E6FF5;
+      --accent-cyan: #2E6FF5;
+      --accent-green: #1E8A53;
+      --accent-red: #C0354B;
+      --accent-amber: #B5731B;
+      --accent-explore: #B5731B;
+      --accent-ink: #1B1E23;
+      --success-bg: #EAF7EF;
+      --warn-bg: #FEF4E8;
+      --danger-bg: #FDEBEE;
+      --info-bg: #EAF1FE;
+      --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+      --shadow-card: 0 1px 2px rgba(16,24,40,.04), 0 1px 3px rgba(16,24,40,.03);
+      --shadow-pop: 0 1px 2px rgba(16,24,40,.04), 0 24px 60px -28px rgba(16,24,40,.18);
+      --ease: cubic-bezier(.2,0,0,1);
+      --t: .28s;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background-color: var(--bg);
-      background-image: 
-        radial-gradient(circle at 15% 10%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 85% 90%, rgba(139, 92, 246, 0.08) 0%, transparent 40%);
-      color: var(--ink);
+    .bandit-page, .bandit-page * { box-sizing: border-box; }
+    .bandit-page {
+      color: var(--slate);
       font-family: var(--font-sans);
       line-height: 1.5;
-      padding: 24px;
-      min-height: 100vh;
+      letter-spacing: -.01em;
+      max-width: 1560px;
     }
 
     /* Top Header & Mode Switcher */
-    header.top-header {
+    .bandit-topbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 24px;
-      padding: 16px 24px;
-      background: var(--panel-glass);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      margin-bottom: 18px;
       flex-wrap: wrap;
-      gap: 16px;
+      gap: 12px;
     }
 
     .brand-title h1 {
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
+      font-size: 30px;
+      line-height: 1.1;
+      font-weight: 600;
+      letter-spacing: -.025em;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 9px;
+      color: var(--ink);
     }
 
     .brand-title h1 span.grad {
-      background: linear-gradient(135deg, #60a5fa, #c084fc);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: var(--slate);
     }
 
-    .brand-title p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .brand-title p { font-size: 14px; color: var(--muted); margin-top: 5px; }
 
     .view-switcher {
       display: flex;
-      background: rgba(0,0,0,0.4);
-      padding: 4px;
-      border-radius: 12px;
-      border: 1px solid #334155;
+      background: var(--fill);
+      padding: 3px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
     }
 
     .mode-btn {
-      padding: 8px 16px;
+      padding: 7px 13px;
       border-radius: 8px;
       border: none;
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all var(--t) var(--ease);
       background: transparent;
-      color: #94a3b8;
+      color: var(--muted);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
     }
 
     .mode-btn.active {
-      background: var(--accent-blue);
-      color: #ffffff;
-      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+      background: var(--panel);
+      color: var(--ink);
+      box-shadow: var(--shadow-card);
     }
 
     .header-actions { display: flex; align-items: center; gap: 12px; }
@@ -113,17 +108,17 @@
       align-items: center;
       gap: 8px;
       padding: 6px 14px;
-      border-radius: 20px;
+      border-radius: 7px;
       font-size: 12px;
-      font-weight: 600;
-      background: rgba(16, 185, 129, 0.12);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      color: #34d399;
+      font-weight: 500;
+      background: var(--success-bg);
+      border: 1px solid transparent;
+      color: var(--accent-green);
     }
 
     .status-badge::before {
       content: ""; width: 8px; height: 8px; border-radius: 50%;
-      background: #10b981; box-shadow: 0 0 10px #10b981; animation: pulse 1.5s infinite;
+      background: var(--accent-green); animation: pulse 1.8s var(--ease) infinite;
     }
 
     @keyframes pulse {
@@ -136,73 +131,120 @@
     .dashboard-grid {
       display: grid;
       grid-template-columns: 330px 1fr 390px;
-      gap: 24px;
+      gap: 16px;
       align-items: start;
     }
 
     @media (max-width: 1400px) { .dashboard-grid { grid-template-columns: 1fr; } }
 
     .card {
-      background: var(--panel-glass);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 14px;
       overflow: hidden;
-      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+      box-shadow: var(--shadow-card);
       display: flex;
       flex-direction: column;
-      transition: all 0.3s ease;
+      transition: border-color var(--t) var(--ease), box-shadow var(--t) var(--ease);
     }
     body.specialist-mode .card {
-      border-color: rgba(139, 92, 246, 0.5);
-      box-shadow: 0 0 35px rgba(139, 92, 246, 0.15);
+      border-color: var(--border-strong);
     }
 
     .card-header {
-      background: var(--panel-header); padding: 16px 20px; border-bottom: 1px solid var(--border);
+      background: var(--panel-header); padding: 12px 16px; border-bottom: 1px solid var(--border);
       display: flex; justify-content: space-between; align-items: center;
     }
 
     .card-header h2 {
-      font-size: 13px; font-weight: 700; color: var(--ink); text-transform: uppercase;
-      letter-spacing: 0.8px; display: flex; align-items: center; gap: 8px;
+      font-size: 14px; font-weight: 600; color: var(--ink); text-transform: none;
+      letter-spacing: -.01em; display: flex; align-items: center; gap: 8px;
     }
 
-    .card-content { padding: 20px; }
+    .card-content { padding: 16px; }
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: var(--label);
+      margin: 0 0 10px;
+    }
 
     /* Tooltip styling */
     .tip {
       display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px;
-      border-radius: 50%; background: rgba(255, 255, 255, 0.08); border: 1px solid var(--muted);
+      border-radius: 50%; background: var(--fill); border: 1px solid var(--border);
       color: var(--muted); font-size: 11px; font-weight: 700; cursor: help; position: relative; transition: all 0.2s;
     }
-    .tip:hover { background: var(--accent-blue); color: white; border-color: var(--accent-blue); box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+    .tip:hover { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
     .tip[data-tooltip]::after {
       content: attr(data-tooltip); position: absolute; bottom: calc(100% + 8px); left: 50%;
       transform: translateX(-50%) translateY(4px); width: 240px; padding: 10px 14px; border-radius: 8px;
-      background: #0b0f19; border: 1px solid #334155; color: #e2e8f0; font-size: 12px; font-weight: 400;
+      background: var(--panel); border: 1px solid var(--border); color: var(--slate); font-size: 12px; font-weight: 400;
       line-height: 1.4; text-transform: none; letter-spacing: normal; pointer-events: none; opacity: 0;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 10px 25px rgba(0,0,0,0.8); z-index: 1000;
+      transition: all 0.2s var(--ease); box-shadow: var(--shadow-pop); z-index: 1000;
     }
     .tip:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .help-tip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: help;
+      position: relative;
+      transition: all var(--t) var(--ease);
+      text-decoration: none;
+      text-transform: none;
+      letter-spacing: 0;
+      flex: none;
+    }
+    .help-tip:hover { background: var(--info-bg); color: var(--accent-blue); border-color: transparent; text-decoration: none; }
+    .help-tip[data-tooltip]::after {
+      content: attr(data-tooltip) " Click for examples.";
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      width: 280px;
+      padding: 10px 12px;
+      border-radius: 9px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--slate);
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 1.45;
+      pointer-events: none;
+      opacity: 0;
+      box-shadow: var(--shadow-pop);
+      z-index: 1000;
+    }
+    .help-tip:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     /* Buttons */
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
-      padding: 12px 16px; border-radius: 10px; border: none; font-size: 13px; font-weight: 600;
-      cursor: pointer; transition: all 0.2s ease; font-family: var(--font-sans); margin-bottom: 12px;
+      padding: 9px 13px; border-radius: 10px; border: 1px solid transparent; font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all var(--t) var(--ease); font-family: var(--font-sans); margin-bottom: 10px;
     }
-    .btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3); }
-    .btn-primary:hover { background: linear-gradient(135deg, #60a5fa, #3b82f6); box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5); transform: translateY(-1px); }
-    .btn-inject { background: linear-gradient(135deg, #10b981, #059669); color: white; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3); }
-    .btn-inject:hover { background: linear-gradient(135deg, #34d399, #10b981); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5); transform: translateY(-1px); }
-    .btn-tutorial { background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: white; box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3); }
-    .btn-tutorial:hover { background: linear-gradient(135deg, #a78bfa, #8b5cf6); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5); transform: translateY(-1px); }
-    .btn-outline { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); color: var(--ink); }
-    .btn-outline:hover { background: rgba(255, 255, 255, 0.08); border-color: #475569; }
-    .btn-danger { background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.3); color: #fb7185; }
-    .btn-danger:hover { background: rgba(244, 63, 94, 0.2); }
+    .btn-primary { background: var(--accent-blue); color: white; }
+    .btn-primary:hover { filter: brightness(1.07); transform: translateY(-1px); }
+    .btn-inject { background: var(--accent-ink); color: white; }
+    .btn-inject:hover { background: #000000; transform: translateY(-1px); }
+    .btn-tutorial { background: var(--panel); color: var(--slate); border-color: var(--border-strong); }
+    .btn-tutorial:hover { background: var(--fill); border-color: var(--muted); }
+    .btn-outline { background: var(--panel); border: 1px solid var(--border-strong); color: var(--slate); }
+    .btn-outline:hover { background: var(--fill); border-color: var(--muted); }
+    .btn-danger { background: var(--danger-bg); border: 1px solid transparent; color: var(--accent-red); }
+    .btn-danger:hover { border-color: rgba(192, 53, 75, 0.28); }
     .btn-sm { padding: 6px 12px; font-size: 11px; width: auto; margin-bottom: 0; border-radius: 6px; }
 
     /* Controls styling */
@@ -211,76 +253,76 @@
 
     .switch-box {
       display: flex; align-items: center; justify-content: space-between; padding: 12px 14px;
-      background: rgba(0, 0, 0, 0.25); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px;
+      background: var(--panel-header); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px;
     }
     .switch { position: relative; display: inline-block; width: 48px; height: 26px; }
     .switch input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #1e293b; transition: .3s; border-radius: 26px; border: 1px solid #334155; }
-    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: #f8fafc; transition: .3s; border-radius: 50%; }
-    input:checked + .slider { background-color: var(--accent-green); border-color: #059669; box-shadow: 0 0 12px rgba(16, 185, 129, 0.4); }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-strong); transition: .16s cubic-bezier(.3,0,.1,1); border-radius: 26px; border: 1px solid var(--border-strong); }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: #FBFCFE; transition: .16s cubic-bezier(.3,0,.1,1); border-radius: 50%; box-shadow: var(--shadow-card); }
+    input:checked + .slider { background-color: var(--accent-blue); border-color: var(--accent-blue); }
     input:checked + .slider:before { transform: translateX(22px); }
 
     /* KPI Stats Grid */
     .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
-    .kpi-card { background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; }
-    .kpi-value { font-size: 20px; font-weight: 800; font-family: var(--font-mono); margin-top: 4px; }
-    .kpi-title { font-size: 11px; color: var(--muted); font-weight: 600; }
+    .kpi-card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; }
+    .kpi-value { font-size: 24px; font-weight: 600; font-family: var(--font-sans); margin-top: 4px; color: var(--ink); letter-spacing: -.02em; }
+    .kpi-title { font-size: 11px; color: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
 
     /* EE Meter */
-    .ee-meter-card { background: rgba(0, 0, 0, 0.25); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-top: 16px; }
+    .ee-meter-card { background: var(--panel-header); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-top: 16px; }
     .ee-header { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
-    .ee-bar-bg { height: 10px; background: #1e293b; border-radius: 6px; overflow: hidden; display: flex; }
+    .ee-bar-bg { height: 10px; background: var(--fill); border-radius: 6px; overflow: hidden; display: flex; border: 1px solid var(--border); }
     .ee-exploit { height: 100%; background: var(--accent-blue); transition: width 0.4s ease; }
-    .ee-explore { height: 100%; background: var(--accent-purple); transition: width 0.4s ease; }
+    .ee-explore { height: 100%; background: var(--accent-explore); transition: width 0.4s ease; }
 
     /* Alert Banners */
     .alert-banner {
       padding: 12px 16px; border-radius: 10px; font-size: 12px; font-weight: 600; margin-bottom: 16px;
       display: flex; align-items: center; justify-content: space-between;
     }
-    .alert-normal { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #6ee7b7; }
-    .alert-warn { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); color: #fcd34d; }
+    .alert-normal { background: var(--success-bg); border: 1px solid transparent; color: var(--accent-green); }
+    .alert-warn { background: var(--warn-bg); border: 1px solid transparent; color: var(--accent-amber); }
 
     /* Micro Segment Filter Tabs */
     .segment-subtext { font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
     .tabs { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px; }
-    .tab { padding: 10px 16px; font-size: 13px; font-weight: 600; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: 10px; color: var(--muted); cursor: pointer; white-space: nowrap; transition: all 0.2s; }
-    .tab:hover { background: rgba(255, 255, 255, 0.06); color: var(--ink); }
-    .tab.active { background: rgba(59, 130, 246, 0.15); border-color: var(--accent-blue); color: #60a5fa; box-shadow: 0 0 16px rgba(59, 130, 246, 0.25); }
+    .tab { padding: 9px 13px; font-size: 13px; font-weight: 500; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; color: var(--muted); cursor: pointer; white-space: nowrap; transition: all var(--t) var(--ease); }
+    .tab:hover { background: var(--fill); color: var(--ink); }
+    .tab.active { background: var(--info-bg); border-color: transparent; color: var(--accent-blue); }
 
     /* Canvas plot */
-    .chart-container { position: relative; width: 100%; height: 320px; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+    .chart-container { position: relative; width: 100%; height: 320px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
     canvas { width: 100%; height: 100%; }
 
     /* Variant Performance Cards */
     .variants-container { display: flex; flex-direction: column; gap: 16px; }
-    .variant-card { background: rgba(255, 255, 255, 0.015); border: 1px solid var(--border); border-radius: 14px; padding: 18px 22px; position: relative; transition: all 0.25s; }
-    .variant-card.winning { border-color: #059669; background: linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, rgba(0,0,0,0) 100%); box-shadow: 0 0 24px rgba(16, 185, 129, 0.12); }
-    .variant-card.masked { opacity: 0.45; border-style: dashed; border-color: rgba(244, 63, 94, 0.4); background: rgba(244, 63, 94, 0.02); }
-    .variant-card.archived { opacity: 0.6; border-style: dotted; border-color: #475569; background: rgba(0,0,0,0.4); }
+    .variant-card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px 22px; position: relative; transition: all 0.25s; }
+    .variant-card.winning { border-color: rgba(30, 138, 83, 0.35); background: var(--success-bg); }
+    .variant-card.masked { opacity: 0.62; border-style: dashed; border-color: rgba(192, 53, 75, 0.35); background: var(--danger-bg); }
+    .variant-card.archived { opacity: 0.68; border-style: dotted; border-color: var(--border-strong); background: var(--panel-header); }
 
     .badge-float { position: absolute; top: 18px; right: 22px; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 6px; letter-spacing: 0.6px; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
-    .winning-badge { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
-    .masked-badge { background: rgba(244, 63, 94, 0.15); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.4); }
-    .archived-badge { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; border: 1px solid #64748b; }
-    .confidence-pill { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid #3b82f6; font-family: var(--font-mono); }
+    .winning-badge { background: var(--success-bg); color: var(--accent-green); border: 1px solid transparent; }
+    .masked-badge { background: var(--danger-bg); color: var(--accent-red); border: 1px solid transparent; }
+    .archived-badge { background: var(--fill); color: var(--muted); border: 1px solid var(--border); }
+    .confidence-pill { background: var(--info-bg); color: var(--accent-blue); border: 1px solid transparent; font-family: var(--font-mono); }
 
     .variant-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; padding-right: 180px; }
     .variant-name { font-size: 16px; font-weight: 700; }
-    .variant-code { font-family: var(--font-mono); font-size: 12px; padding: 2px 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.06); }
-    .variant-card.variant-A .variant-name { color: #60a5fa; }
-    .variant-card.variant-B .variant-name { color: #c084fc; }
-    .variant-card.variant-LIE .variant-name { color: #fb7185; }
+    .variant-code { font-family: var(--font-mono); font-size: 12px; padding: 2px 8px; border-radius: 4px; background: var(--fill); color: var(--muted); }
+    .variant-card.variant-A .variant-name { color: var(--accent-blue); }
+    .variant-card.variant-B .variant-name { color: var(--accent-amber); }
+    .variant-card.variant-LIE .variant-name { color: var(--accent-red); }
 
-    .variant-copy { font-size: 13px; color: #cbd5e1; margin-bottom: 14px; white-space: pre-line; background: rgba(0,0,0,0.25); padding: 12px 14px; border-radius: 8px; border-left: 3px solid #334155; font-family: var(--font-mono); }
+    .variant-copy { font-size: 13px; color: var(--slate); margin-bottom: 14px; white-space: pre-line; background: var(--panel-header); padding: 12px 14px; border-radius: 8px; border-left: 3px solid var(--border-strong); font-family: var(--font-mono); }
 
     .claim-pill-list { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
     .claim-label { font-size: 11px; color: var(--muted); font-weight: 600; margin-right: 4px; }
-    .claim-pill { font-size: 11px; font-family: var(--font-mono); background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); padding: 3px 8px; border-radius: 6px; color: #94a3b8; }
-    .claim-pill.verified { border-color: rgba(16, 185, 129, 0.35); color: #6ee7b7; background: rgba(16, 185, 129, 0.08); }
-    .claim-pill.unverified { border-color: rgba(244, 63, 94, 0.35); color: #fda4af; background: rgba(244, 63, 94, 0.08); }
+    .claim-pill { font-size: 11px; font-family: var(--font-mono); background: var(--panel); border: 1px solid var(--border); padding: 3px 8px; border-radius: 6px; color: var(--muted); }
+    .claim-pill.verified { border-color: transparent; color: var(--accent-green); background: var(--success-bg); }
+    .claim-pill.unverified { border-color: transparent; color: var(--accent-red); background: var(--danger-bg); }
 
-    .metrics-ribbon { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 14px; margin-bottom: 12px; }
+    .metrics-ribbon { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; border-top: 1px solid var(--border); padding-top: 14px; margin-bottom: 12px; }
     @media (max-width: 1100px) { .metrics-ribbon { grid-template-columns: repeat(3, 1fr); } }
     .metric-stat { display: flex; flex-direction: column; gap: 2px; }
     .metric-stat dt { font-size: 10px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 4px; text-transform: uppercase; }
@@ -288,48 +330,48 @@
 
     /* Under Hood Accordion & Arm Controls */
     .arm-actions-footer { display: flex; gap: 10px; margin-top: 12px; }
-    .btn-under-hood { flex: 1; padding: 8px 14px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 8px; color: #60a5fa; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; }
-    .btn-under-hood:hover { background: rgba(59, 130, 246, 0.15); border-color: #3b82f6; }
+    .btn-under-hood { flex: 1; padding: 8px 14px; background: var(--info-bg); border: 1px solid transparent; border-radius: 8px; color: var(--accent-blue); font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; }
+    .btn-under-hood:hover { border-color: rgba(46, 111, 245, 0.28); }
     
-    .hood-content { margin-top: 12px; padding: 14px; background: #090e17; border: 1px solid #1e293b; border-radius: 8px; font-size: 12px; animation: fadeIn 0.2s ease; }
+    .hood-content { margin-top: 12px; padding: 14px; background: var(--panel-header); border: 1px solid var(--border); border-radius: 8px; font-size: 12px; animation: fadeIn 0.2s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
     .hood-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; font-family: var(--font-mono); }
-    .hood-math { border-top: 1px dashed #334155; padding-top: 10px; color: #cbd5e1; line-height: 1.5; }
+    .hood-math { border-top: 1px dashed var(--border-strong); padding-top: 10px; color: var(--slate); line-height: 1.5; }
 
     /* Live Feed Ticker */
     .event-feed { height: 600px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 6px; }
     .event-feed::-webkit-scrollbar { width: 5px; }
-    .event-feed::-webkit-scrollbar-thumb { background: #334155; border-radius: 5px; }
-    .feed-card { background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 12px; animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    .event-feed::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 5px; }
+    .feed-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 12px; animation: popIn 0.3s var(--ease); }
     @keyframes popIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     .feed-header { display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; margin-bottom: 6px; }
-    .feed-seg { font-weight: 700; color: #e2e8f0; }
+    .feed-seg { font-weight: 700; color: var(--ink); }
     .feed-action { display: flex; justify-content: space-between; align-items: center; }
     .reason-pill { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; }
-    .reason-pill.exploit { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
-    .reason-pill.explore { background: rgba(139, 92, 246, 0.15); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.3); }
+    .reason-pill.exploit { background: var(--info-bg); color: var(--accent-blue); border: 1px solid transparent; }
+    .reason-pill.explore { background: var(--warn-bg); color: var(--accent-amber); border: 1px solid transparent; }
     .outcome-tag { font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; }
-    .outcome-tag.click { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-    .outcome-tag.no-click { background: rgba(255, 255, 255, 0.05); color: #94a3b8; }
-    .outcome-tag.unsub { background: rgba(244, 63, 94, 0.2); color: #fb7185; }
+    .outcome-tag.click { background: var(--success-bg); color: var(--accent-green); }
+    .outcome-tag.no-click { background: var(--fill); color: var(--muted); }
+    .outcome-tag.unsub { background: var(--danger-bg); color: var(--accent-red); }
 
     /* Modal Overlay */
-    .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
-    .modal-box { background: #0f172a; border: 1px solid #3b82f6; border-radius: 16px; width: 100%; max-width: 520px; padding: 24px; box-shadow: 0 25px 50px rgba(0,0,0,0.9); font-family: var(--font-sans); color: #f8fafc; }
-    .modal-box h3 { font-size: 18px; font-weight: 800; color: #60a5fa; margin-bottom: 6px; }
-    .modal-box p { font-size: 12px; color: #94a3b8; margin-bottom: 20px; }
+    .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(16,24,40,.28); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+    .modal-box { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; width: 100%; max-width: 520px; padding: 24px; box-shadow: var(--shadow-pop); font-family: var(--font-sans); color: var(--slate); }
+    .modal-box h3 { font-size: 18px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+    .modal-box p { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
     .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-size: 12px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px; }
-    .form-group input, .form-group textarea { width: 100%; padding: 10px 14px; background: #070911; border: 1px solid #334155; border-radius: 8px; color: white; font-family: var(--font-mono); font-size: 13px; outline: none; }
-    .form-group input:focus, .form-group textarea:focus { border-color: #3b82f6; box-shadow: 0 0 10px rgba(59,130,246,0.3); }
+    .form-group label { display: block; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--label); margin-bottom: 6px; }
+    .form-group input, .form-group textarea { width: 100%; padding: 10px 12px; background: var(--panel); border: 1px solid var(--border-strong); border-radius: 9px; color: var(--ink); font-family: var(--font-mono); font-size: 13px; outline: none; }
+    .form-group input:focus, .form-group textarea:focus { border-color: var(--accent-blue); }
     .modal-btns { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
 
     /* Driver.js Custom Dark Theme Overrides */
-    .driver-popover.driverjs-theme { background-color: #0f172a !important; color: #f8fafc !important; border: 1px solid #3b82f6 !important; box-shadow: 0 25px 50px rgba(0,0,0,0.9) !important; border-radius: 16px !important; padding: 20px !important; font-family: var(--font-sans) !important; }
-    .driver-popover.driverjs-theme .driver-popover-title { font-size: 16px !important; font-weight: 800 !important; color: #60a5fa !important; margin-bottom: 8px !important; }
-    .driver-popover.driverjs-theme .driver-popover-description { color: #cbd5e1 !important; font-size: 13px !important; line-height: 1.6 !important; }
-    .driver-popover.driverjs-theme button { background: linear-gradient(135deg, #3b82f6, #2563eb) !important; color: white !important; border: none !important; border-radius: 8px !important; padding: 8px 14px !important; font-size: 12px !important; font-weight: 600 !important; }
-    .driver-popover.driverjs-theme button:hover { background: linear-gradient(135deg, #60a5fa, #3b82f6) !important; }
+    .driver-popover.driverjs-theme { background-color: var(--panel) !important; color: var(--slate) !important; border: 1px solid var(--border) !important; box-shadow: var(--shadow-pop) !important; border-radius: 14px !important; padding: 20px !important; font-family: var(--font-sans) !important; }
+    .driver-popover.driverjs-theme .driver-popover-title { font-size: 16px !important; font-weight: 600 !important; color: var(--ink) !important; margin-bottom: 8px !important; }
+    .driver-popover.driverjs-theme .driver-popover-description { color: var(--slate) !important; font-size: 13px !important; line-height: 1.6 !important; }
+    .driver-popover.driverjs-theme button { background: var(--accent-blue) !important; color: white !important; border: none !important; border-radius: 8px !important; padding: 8px 14px !important; font-size: 12px !important; font-weight: 600 !important; }
+    .driver-popover.driverjs-theme button:hover { filter: brightness(1.07) !important; }
 
     /* Tab Panes */
     .tab-content {
@@ -359,7 +401,7 @@
       font-size: 11px;
       font-family: var(--font-mono);
       margin-top: 10px;
-      background: rgba(0, 0, 0, 0.2);
+      background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 8px;
       overflow: hidden;
@@ -377,10 +419,10 @@
       font-size: 9px;
     }
     .matrix-table tr:hover {
-      background: rgba(255, 255, 255, 0.02);
+      background: var(--panel-header);
     }
     .matrix-self {
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--fill);
       color: var(--muted);
     }
     
@@ -408,7 +450,7 @@
       overflow-y: auto;
       font-family: var(--font-mono);
       font-size: 10px;
-      background: rgba(0, 0, 0, 0.3);
+      background: var(--panel-header);
       border: 1px solid var(--border);
       border-radius: 10px;
       padding: 12px;
@@ -417,53 +459,61 @@
       gap: 6px;
     }
     .spec-math-log::-webkit-scrollbar { width: 4px; }
-    .spec-math-log::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    .spec-math-log::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+
+    input[type="range"] { accent-color: var(--accent-blue); }
+    :where(button, input, textarea, .tab, .mode-btn, .btn-under-hood):focus-visible {
+      outline: 2px solid var(--accent-blue);
+      outline-offset: 2px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+    }
   </style>
-</head>
-<body>
+  <div class="bandit-page">
+    <div class="q-pagehead bandit-topbar">
+      <div class="brand-title">
+        <span class="q-pill b" style="margin-bottom:10px"><span class="d"></span>Optimizer</span>
+        <h1>Bandit dashboard</h1>
+        <p><b style="color:var(--slate)">Proves:</b> Thompson sampling can optimize copy while the Gate keeps unverified claims out of the action pool.</p>
+      </div>
 
-  <header class="top-header">
-    <div class="brand-title">
-      <h1><span>◈</span> Provenance <span class="grad">SRE &amp; Bandit Command</span></h1>
-      <p>Live Production Monitoring · Thompson Sampling Convergence &amp; Arm Management</p>
+      <div class="sp" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <a class="q-btn ghost" href="/optimizer"><i class="ph ph-arrow-left"></i> Optimizer</a>
+        <a class="q-btn outline" href="/optimizer/bandit-dashboard/learn-more"><i class="ph ph-question"></i> Learn more</a>
+        <div class="view-switcher" aria-label="Dashboard mode">
+          <button id="mode-btn-sre" class="mode-btn active" onclick="switchMode('sre')"><i class="ph ph-gauge"></i> Prod SRE</button>
+          <button id="mode-btn-spec" class="mode-btn" onclick="switchMode('specialist')"><i class="ph ph-function"></i> Specialist</button>
+        </div>
+        <button id="btn-open-tutorial" class="q-btn outline" type="button"><i class="ph ph-info"></i> Engineer tour</button>
+        <div id="simulation-badge" class="q-pill g"><span class="d"></span>Prod stream active</div>
+      </div>
     </div>
-
-    <!-- SRE vs Specialist View Switcher -->
-    <div class="view-switcher">
-      <button id="mode-btn-sre" class="mode-btn active" onclick="switchMode('sre')">🛡️ Prod SRE View</button>
-      <button id="mode-btn-spec" class="mode-btn" onclick="switchMode('specialist')">🔬 Bandit Specialist Deep-Dive</button>
-    </div>
-
-    <div class="header-actions">
-      <button id="btn-open-tutorial" class="btn btn-tutorial btn-sm">💡 Engineer Tour</button>
-      <div id="simulation-badge" class="status-badge">Prod Stream Active</div>
-    </div>
-  </header>
 
   <div class="dashboard-grid">
     
     <!-- Left Column: Controls & Intuitive Explanations -->
     <aside class="card">
       <div class="card-header">
-        <h2>⚙️ Intervention &amp; Controls</h2>
+        <h2><i class="ph ph-sliders-horizontal"></i> Intervention controls <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#interventions" data-tooltip="Use this pane to add copy arms, pause traffic, speed up simulation, reset learning, and control Gate masking.">?</a></h2>
       </div>
       <div class="card-content">
-        <button id="btn-inject" class="btn btn-inject" onclick="openInjectModal()">+ Inject Candidate Copy Arm</button>
-        <button id="btn-pause" class="btn btn-primary">⏸️ Pause Live Stream</button>
-        <button id="btn-batch" class="btn btn-outline">⏩ Fast-Forward (+100 Sends)</button>
-        <button id="btn-reset" class="btn btn-danger">🔄 Reset AI Memory</button>
+        <button id="btn-inject" class="btn btn-inject" onclick="openInjectModal()"><i class="ph ph-plus"></i> Inject candidate arm</button>
+        <button id="btn-pause" class="btn btn-primary"><i class="ph ph-pause"></i> Pause live stream</button>
+        <button id="btn-batch" class="btn btn-outline"><i class="ph ph-fast-forward"></i> Fast-forward 100 sends</button>
+        <button id="btn-reset" class="btn btn-danger"><i class="ph ph-arrow-clockwise"></i> Reset memory</button>
 
         <div class="control-group" style="margin-top: 20px;">
           <label for="sim-speed">
             <span>Traffic Stream Pace</span>
-            <span id="pace-text" style="font-family: var(--font-mono); color: #60a5fa;">800ms</span>
+            <span id="pace-text" style="font-family: var(--font-mono); color: var(--accent-blue);">800ms</span>
           </label>
           <input type="range" id="sim-speed" min="100" max="2500" value="800" style="width: 100%;">
         </div>
 
         <div class="switch-box">
           <div>
-            <div style="font-size: 13px; font-weight: 700; color: #f1f5f9;">Lawful Gate Masking</div>
+            <div style="font-size: 13px; font-weight: 700; color: var(--ink);">Lawful Gate Masking</div>
             <div style="font-size: 11px; color: var(--muted); margin-top: 2px;">Veto unverified claims</div>
           </div>
           <label class="switch">
@@ -475,7 +525,7 @@
         <!-- SRE View Panel -->
         <div id="panel-sre-stats">
           <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
-          <h2>📈 Production Traffic Pulse</h2>
+          <h2 class="section-label">Production traffic <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#traffic-pulse" data-tooltip="These counters tell you whether the experiment is producing meetings without burning the outreach list.">?</a></h2>
           <div class="kpi-grid">
             <div class="kpi-card">
               <div class="kpi-title">Outreach Sends</div>
@@ -499,11 +549,11 @@
         <!-- Specialist View Panel -->
         <div id="panel-spec-stats" style="display: none;">
           <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
-          <h2>🔬 Convergence Diagnostics</h2>
+          <h2 class="section-label">Convergence diagnostics <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#specialist-diagnostics" data-tooltip="Use these when you need the statistical explanation behind the visible winner.">?</a></h2>
           <div class="kpi-grid">
             <div class="kpi-card">
               <div class="kpi-title">Est. Regret <span class="tip" data-tooltip="Cumulative loss of clicks incurred while exploring suboptimal copy arms. Formula: R_T = sum (theta* - theta_t).">?</span></div>
-              <div id="kpi-regret" class="kpi-value" style="color: var(--accent-purple);">0.0</div>
+              <div id="kpi-regret" class="kpi-value" style="color: var(--accent-amber);">0.0</div>
             </div>
             <div class="kpi-card">
               <div class="kpi-title">Policy Entropy <span class="tip" data-tooltip="Shannon entropy of action probabilities. Approaches 0 as the bandit converges to exploitation.">?</span></div>
@@ -515,10 +565,10 @@
             </div>
             <div class="kpi-card">
               <div class="kpi-title">Active Arm Pool</div>
-              <div id="kpi-pool" class="kpi-value" style="color: #93c5fd;">3</div>
+              <div id="kpi-pool" class="kpi-value" style="color: var(--accent-blue);">3</div>
             </div>
           </div>
-          <div style="margin-top: 14px; font-size: 11px; color: #94a3b8; line-height: 1.5; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border: 1px dashed #334155;">
+          <div style="margin-top: 14px; font-size: 11px; color: var(--muted); line-height: 1.5; background: var(--panel-header); padding: 10px; border-radius: 8px; border: 1px dashed var(--border-strong);">
             <strong>Specialist Note:</strong> Posterior win probabilities $P(\theta_i > \max_{j \neq i} \theta_j)$ are computed dynamically via 1,000 Monte Carlo draws per tick. Exact 95% Credible Intervals reflect quantiles $[Q_{2.5}, Q_{97.5}]$.
           </div>
         </div>
@@ -526,16 +576,16 @@
         <!-- Exploration vs Exploitation Ratio Card -->
         <div class="ee-meter-card" id="ee-ratio-box">
           <div class="ee-header">
-            <span>Exploit Winner vs Explore Underdog</span>
-            <span class="tip" data-tooltip="Thompson sampling automatically balances sending proven winning copy (Exploitation) against testing challenger copy (Exploration).">?</span>
+            <span>Exploit winner vs explore underdog</span>
+            <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#explore-exploit" data-tooltip="This meter shows whether the bandit is mostly using the current winner or still testing uncertain challengers.">?</a>
           </div>
           <div class="ee-bar-bg">
             <div id="ee-exploit-bar" class="ee-exploit" style="width: 50%;"></div>
             <div id="ee-explore-bar" class="ee-explore" style="width: 50%;"></div>
           </div>
           <div style="display: flex; justify-content: space-between; font-size: 11px; margin-top: 6px; font-family: var(--font-mono);">
-            <span style="color: var(--accent-blue);">⚡ Exploit: <span id="ee-exploit-pct">50%</span></span>
-            <span style="color: var(--accent-purple);">🧭 Explore: <span id="ee-explore-pct">50%</span></span>
+            <span style="color: var(--accent-blue);">Exploit: <span id="ee-exploit-pct">50%</span></span>
+            <span style="color: var(--accent-explore);">Explore: <span id="ee-explore-pct">50%</span></span>
           </div>
         </div>
       </div>
@@ -544,12 +594,12 @@
     <!-- Center Column: Intuitive Curves & Copy Arms -->
     <main class="card">
       <div class="card-header">
-        <h2 id="center-header-title">📊 Live Belief Curves &amp; Statistical Confidence</h2>
+        <h2 id="center-header-title"><i class="ph ph-chart-line-up"></i> Live belief curves &amp; statistical confidence <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#belief-curves" data-tooltip="The curves are the bandit's current belief about each copy arm's meeting-booking rate. Tall narrow curves mean confidence; wide curves mean uncertainty.">?</a></h2>
       </div>
       <div class="card-content">
         <div id="sre-alert-banner" class="alert-banner alert-normal">
-          <span>🟢 SRE Health Normal — List Rep SLA Protected (Unsub Rate &lt; 0.50%)</span>
-          <span style="font-family: var(--font-mono);">Gate Mask Active</span>
+          <span>SRE health normal - list reputation protected (unsub rate &lt; 0.50%)</span>
+          <span style="font-family: var(--font-mono);">Gate mask active</span>
         </div>
 
         <!-- Segment Filter Tabs -->
@@ -562,15 +612,15 @@
 
         <!-- Cumulative Regret Trace (Visible in Specialist Mode) -->
         <div id="regret-canvas-container" style="display: none; margin-top: 24px; border-top: 1px dashed var(--border); padding-top: 20px;">
-          <h2 style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; color: #94a3b8;">📈 Cumulative Regret Trace ($R_T$)</h2>
+          <h2 style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; color: var(--label);">Cumulative regret trace ($R_T$)</h2>
           <div class="chart-container" style="height: 180px;">
             <canvas id="regret-canvas"></canvas>
           </div>
         </div>
 
-        <h2 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.8px; margin: 24px 0 14px 0; color: #94a3b8; display: flex; align-items: center; gap: 8px;">
-          <span>📝 Candidate Copy Arms Under Experimentation</span>
-          <span class="tip" data-tooltip="Every copy version available. Notice live Monte Carlo confidence scores P(Best) and Bayesian 95% credible bounds.">?</span>
+        <h2 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.8px; margin: 24px 0 14px 0; color: var(--label); display: flex; align-items: center; gap: 8px;">
+          <span>Candidate copy arms under experimentation</span>
+          <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#copy-arms" data-tooltip="Each arm is one message angle, with claim tags, observed results, Bayesian belief, P(Best), and archive controls.">?</a>
         </h2>
         
         <div class="variants-container" id="variants-list"></div>
@@ -580,7 +630,7 @@
     <!-- Right Column: Watchable Live Decision Stream OR Specialist Tables -->
     <section class="card" id="right-col-box">
       <div class="card-header">
-        <h2 id="right-header-title">⚡ Real-Time Decision Stream</h2>
+        <h2 id="right-header-title"><i class="ph ph-activity"></i> Real-time decision stream <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#decision-stream" data-tooltip="This stream explains each pull: segment, selected arm, whether it was exploit or explore, and the outcome.">?</a></h2>
       </div>
       <div class="card-content">
         <div id="panel-sre-feed">
@@ -588,20 +638,20 @@
         </div>
 
         <div id="panel-spec-tables" style="display: none;">
-          <h2 style="font-size: 11px; text-transform: uppercase; color: #94a3b8; margin-bottom: 8px;">🧮 Head-to-Head Win Probability Matrix</h2>
+          <h2 style="font-size: 11px; text-transform: uppercase; color: var(--label); margin-bottom: 8px;">Head-to-head win probability matrix <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#win-matrix" data-tooltip="Pairwise probabilities answer: if these two arms went head-to-head, which one probably wins?">?</a></h2>
           <p style="font-size: 11px; color: var(--muted); margin-bottom: 10px;">Pairwise superiority P(θ_row > θ_col) derived from 1,000 Monte Carlo draws.</p>
           <table class="matrix-table">
             <thead><tr id="matrix-header-row"><th>Arm</th></tr></thead>
             <tbody id="matrix-body"></tbody>
           </table>
 
-          <h2 style="font-size: 11px; text-transform: uppercase; margin: 24px 0 10px 0; color: #94a3b8;">📐 Posterior Parameter Estimation</h2>
+          <h2 style="font-size: 11px; text-transform: uppercase; margin: 24px 0 10px 0; color: var(--label);">Posterior parameter estimation <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#posterior-table" data-tooltip="This table exposes the raw Beta distribution math behind the visual belief curves.">?</a></h2>
           <table class="spec-math-table">
             <thead><tr><th>Arm</th><th>Mean (CTR)</th><th>Mode</th><th>Variance</th><th>KL Div</th></tr></thead>
             <tbody id="spec-math-body"></tbody>
           </table>
 
-          <h2 style="font-size: 11px; text-transform: uppercase; margin: 24px 0 10px 0; color: #94a3b8;">🔬 Specialist Posterior Drift Log</h2>
+          <h2 style="font-size: 11px; text-transform: uppercase; margin: 24px 0 10px 0; color: var(--label);">Specialist posterior drift log <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#drift-log" data-tooltip="The log shows how each new outcome changes estimated CTR, KL divergence, and P(Best).">?</a></h2>
           <div class="spec-math-log" id="spec-math-log-feed"></div>
         </div>
       </div>
@@ -612,7 +662,7 @@
     <!-- INJECT COPY ARM MODAL -->
   <div id="inject-modal" class="modal-backdrop">
     <div class="modal-box">
-      <h3>🚀 Inject Candidate Copy Arm</h3>
+      <h3>Inject candidate copy arm</h3>
       <p>Hot-load new email copy into active Thompson Sampling trials. The AI will immediately begin exploring its uncertainty curve.</p>
       <form id="inject-form" onsubmit="handleInject(event)">
         <div class="form-group">
@@ -643,7 +693,7 @@
         </div>
         <div class="modal-btns">
           <button type="button" class="btn btn-outline btn-sm" onclick="closeInjectModal()">Cancel</button>
-          <button type="submit" class="btn btn-inject btn-sm">🚀 Launch Trial Arm</button>
+          <button type="submit" class="btn btn-inject btn-sm">Launch trial arm</button>
         </div>
       </form>
     </div>
@@ -726,19 +776,19 @@
 
     let armsDefinition = {
       'cfo': [
-        { id: 'A', label: 'Angle A: ROI Proof', code: 'roi_tco_cut', copy: 'Hi {name},\n\nWe cut hospital Total Cost of Ownership by 22% with verified cloud analytics.\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_tco_reduction', 'c_roi_verified'], latentCTR: 0.24, unsubRate: 0.004, color: '#3b82f6' },
-        { id: 'B', label: 'Angle B: Transparent Pricing', code: 'zero_impl_fee', copy: 'Hi {name},\n\nEnjoy transparent subscription billing with zero implementation fees.\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_billing_transparency', 'c_setup_waived'], latentCTR: 0.11, unsubRate: 0.003, color: '#8b5cf6' },
-        { id: 'LIE', label: 'Planted Lie: Guaranteed 80% Cut', code: 'lie_guaranteed_cash', copy: 'Hi {name},\n\nSave 85% on billing instantly plus a guaranteed $10k cash bonus on day one!\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_fake_guaranteed_payback'], latentCTR: 0.44, unsubRate: 0.09, color: '#f43f5e' }
+        { id: 'A', label: 'Angle A: ROI Proof', code: 'roi_tco_cut', copy: 'Hi {name},\n\nWe cut hospital Total Cost of Ownership by 22% with verified cloud analytics.\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_tco_reduction', 'c_roi_verified'], latentCTR: 0.24, unsubRate: 0.004, color: '#2E6FF5' },
+        { id: 'B', label: 'Angle B: Transparent Pricing', code: 'zero_impl_fee', copy: 'Hi {name},\n\nEnjoy transparent subscription billing with zero implementation fees.\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_billing_transparency', 'c_setup_waived'], latentCTR: 0.11, unsubRate: 0.003, color: '#B5731B' },
+        { id: 'LIE', label: 'Planted Lie: Guaranteed 80% Cut', code: 'lie_guaranteed_cash', copy: 'Hi {name},\n\nSave 85% on billing instantly plus a guaranteed $10k cash bonus on day one!\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_fake_guaranteed_payback'], latentCTR: 0.44, unsubRate: 0.09, color: '#C0354B' }
       ],
       'clinops': [
-        { id: 'A', label: 'Angle A: Outcomes & LOS', code: 'los_reduction', copy: 'Hi {name},\n\nCut inpatient Length of Stay using verified clinical cohort analytics.\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_los_reduction', 'c_clinical_cohorts'], latentCTR: 0.22, unsubRate: 0.004, color: '#3b82f6' },
-        { id: 'B', label: 'Angle B: Dataset Processing Speed', code: 'speed_4hr_claims', copy: 'Hi {name},\n\nIngest and resolve complex medical claims datasets in under four hours.\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_workflow_speed', 'c_claims_ingest'], latentCTR: 0.14, unsubRate: 0.003, color: '#8b5cf6' },
-        { id: 'LIE', label: 'Planted Lie: Zero Medical Errors', code: 'lie_zero_errors', copy: 'Hi {name},\n\nInstantly eliminate 100% of diagnostic billing errors overnight!\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_fake_zero_errors'], latentCTR: 0.39, unsubRate: 0.08, color: '#f43f5e' }
+        { id: 'A', label: 'Angle A: Outcomes & LOS', code: 'los_reduction', copy: 'Hi {name},\n\nCut inpatient Length of Stay using verified clinical cohort analytics.\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_los_reduction', 'c_clinical_cohorts'], latentCTR: 0.22, unsubRate: 0.004, color: '#2E6FF5' },
+        { id: 'B', label: 'Angle B: Dataset Processing Speed', code: 'speed_4hr_claims', copy: 'Hi {name},\n\nIngest and resolve complex medical claims datasets in under four hours.\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_workflow_speed', 'c_claims_ingest'], latentCTR: 0.14, unsubRate: 0.003, color: '#B5731B' },
+        { id: 'LIE', label: 'Planted Lie: Zero Medical Errors', code: 'lie_zero_errors', copy: 'Hi {name},\n\nInstantly eliminate 100% of diagnostic billing errors overnight!\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_fake_zero_errors'], latentCTR: 0.39, unsubRate: 0.08, color: '#C0354B' }
       ],
       'it_security': [
-        { id: 'A', label: 'Angle A: Automated SOC2 / HIPAA', code: 'soc2_hipaa_auto', copy: 'Hi {name},\n\nAutomate SOC 2 Type II and HIPAA compliance mapping out of the box.\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_soc2_auto', 'c_hipaa_compliant'], latentCTR: 0.26, unsubRate: 0.004, color: '#3b82f6' },
-        { id: 'B', label: 'Angle B: EHR Out-of-box Integration', code: 'ehr_30_systems', copy: 'Hi {name},\n\nIntegrates seamlessly with over 30 enterprise EHR systems on day one.\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_ehr_integration', 'c_zero_trust_keys'], latentCTR: 0.16, unsubRate: 0.003, color: '#8b5cf6' },
-        { id: 'LIE', label: 'Planted Lie: NSA Certified Agent', code: 'lie_nsa_certified', copy: 'Hi {name},\n\nDeploy a 100% unhackable security agent certified by NSA defense standards!\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_fake_nsa_endorsement'], latentCTR: 0.46, unsubRate: 0.10, color: '#f43f5e' }
+        { id: 'A', label: 'Angle A: Automated SOC2 / HIPAA', code: 'soc2_hipaa_auto', copy: 'Hi {name},\n\nAutomate SOC 2 Type II and HIPAA compliance mapping out of the box.\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_soc2_auto', 'c_hipaa_compliant'], latentCTR: 0.26, unsubRate: 0.004, color: '#2E6FF5' },
+        { id: 'B', label: 'Angle B: EHR Out-of-box Integration', code: 'ehr_30_systems', copy: 'Hi {name},\n\nIntegrates seamlessly with over 30 enterprise EHR systems on day one.\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_ehr_integration', 'c_zero_trust_keys'], latentCTR: 0.16, unsubRate: 0.003, color: '#B5731B' },
+        { id: 'LIE', label: 'Planted Lie: NSA Certified Agent', code: 'lie_nsa_certified', copy: 'Hi {name},\n\nDeploy a 100% unhackable security agent certified by NSA defense standards!\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_fake_nsa_endorsement'], latentCTR: 0.46, unsubRate: 0.10, color: '#C0354B' }
       ]
     };
 
@@ -953,8 +1003,8 @@
         if (pSreFeed) pSreFeed.style.display = 'block';
         if (pSpecTables) pSpecTables.style.display = 'none';
 
-        document.getElementById('center-header-title').textContent = '📊 Live Belief Curves & Statistical Confidence';
-        document.getElementById('right-header-title').textContent = '⚡ Real-Time Decision Stream';
+        document.getElementById('center-header-title').innerHTML = '<i class="ph ph-chart-line-up"></i> Live belief curves & statistical confidence <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#belief-curves" data-tooltip="The curves show the current belief about each copy arm meeting-booking rate. Tall narrow curves mean confidence; wide curves mean uncertainty.">?</a>';
+        document.getElementById('right-header-title').innerHTML = '<i class="ph ph-activity"></i> Real-time decision stream <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#decision-stream" data-tooltip="This stream explains each pull: segment, selected arm, whether it was exploit or explore, and the outcome.">?</a>';
       } else {
         if (pSreStats) pSreStats.style.display = 'none';
         if (pSpecStats) pSpecStats.style.display = 'block';
@@ -962,8 +1012,8 @@
         if (pSreFeed) pSreFeed.style.display = 'none';
         if (pSpecTables) pSpecTables.style.display = 'block';
 
-        document.getElementById('center-header-title').textContent = '📊 Live Belief Curves, Statistical Confidence & Regret Mechanics';
-        document.getElementById('right-header-title').textContent = '🔬 Specialist Posterior Convergence & Diagnostics';
+        document.getElementById('center-header-title').innerHTML = '<i class="ph ph-chart-line-up"></i> Live belief curves, confidence & regret mechanics <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#regret-trace" data-tooltip="The regret trace shows the cost of exploration compared with always choosing the best honest arm.">?</a>';
+        document.getElementById('right-header-title').innerHTML = '<i class="ph ph-function"></i> Specialist posterior diagnostics <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#specialist-diagnostics" data-tooltip="Use these tables when you need to understand why the bandit believes one arm is better than another.">?</a>';
         setTimeout(() => {
           drawRegretCanvas();
           renderSpecialistTables();
@@ -987,13 +1037,13 @@
       ctx.clearRect(0, 0, w, h);
 
       // Draw grid lines
-      ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1;
+      ctx.strokeStyle = '#E5E9EF'; ctx.lineWidth = 1;
       for (let y = 20; y < h - 25; y += 30) {
         ctx.beginPath(); ctx.moveTo(45, y); ctx.lineTo(w - 15, y); ctx.stroke();
       }
 
       if (regretHistory.length === 0) {
-        ctx.fillStyle = '#64748b'; ctx.font = '12px var(--font-sans)'; ctx.textAlign = 'center';
+        ctx.fillStyle = '#6B7480'; ctx.font = '12px var(--font-sans)'; ctx.textAlign = 'center';
         ctx.fillText('Waiting for stream data to plot regret curve...', w/2, h/2);
         return;
       }
@@ -1007,7 +1057,7 @@
       const scaleY = (val) => (h - 25) - (val / maxRegret) * (h - 45);
 
       // Draw Y axis labels
-      ctx.fillStyle = '#8e9ebb'; ctx.font = '9px var(--font-mono)'; ctx.textAlign = 'right';
+      ctx.fillStyle = '#6B7480'; ctx.font = '9px var(--font-mono)'; ctx.textAlign = 'right';
       ctx.fillText(maxRegret.toFixed(1), 38, 20);
       ctx.fillText((maxRegret / 2).toFixed(1), 38, (h - 25)/2 + 5);
       ctx.fillText('0.0', 38, h - 22);
@@ -1020,9 +1070,9 @@
       // Draw line
       ctx.beginPath();
       ctx.lineWidth = 2.5;
-      ctx.strokeStyle = '#8b5cf6'; // purple glow
-      ctx.shadowColor = 'rgba(139, 92, 246, 0.4)';
-      ctx.shadowBlur = 8;
+      ctx.strokeStyle = '#B5731B';
+      ctx.shadowColor = 'rgba(181, 115, 27, 0.18)';
+      ctx.shadowBlur = 6;
 
       regretHistory.forEach((pt, idx) => {
         const px = scaleX(pt.sends);
@@ -1045,13 +1095,13 @@
       ctx.lineTo(scaleX(regretHistory[regretHistory.length - 1].sends), h - 25);
       ctx.closePath();
       const grad = ctx.createLinearGradient(0, 20, 0, h - 25);
-      grad.addColorStop(0, 'rgba(139, 92, 246, 0.15)');
-      grad.addColorStop(1, 'rgba(139, 92, 246, 0)');
+      grad.addColorStop(0, 'rgba(181, 115, 27, 0.12)');
+      grad.addColorStop(1, 'rgba(181, 115, 27, 0)');
       ctx.fillStyle = grad;
       ctx.fill();
 
       // Draw axis lines
-      ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
+      ctx.strokeStyle = '#C9D2DC'; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(45, 15); ctx.lineTo(45, h - 25); ctx.lineTo(w - 15, h - 25); ctx.stroke();
     }
 
@@ -1087,8 +1137,8 @@
               const val = superiorityMatrix[a1.id]?.[a2.id] || 0;
               const pct = (val * 100).toFixed(1);
               let tdStyle = '';
-              if (val > 0.7) tdStyle = 'background: rgba(16, 185, 129, 0.15); color: #34d399; font-weight: bold;';
-              else if (val < 0.3) tdStyle = 'color: #f43f5e;';
+              if (val > 0.7) tdStyle = 'background: #EAF7EF; color: #1E8A53; font-weight: bold;';
+              else if (val < 0.3) tdStyle = 'color: #C0354B;';
               rowHtml += `<td style="${tdStyle}">${pct}%</td>`;
             }
           });
@@ -1135,7 +1185,7 @@
       if (!feed) return;
       const entry = document.createElement('div');
       entry.style.marginBottom = '6px';
-      entry.style.borderBottom = '1px solid rgba(255,255,255,0.03)';
+      entry.style.borderBottom = '1px solid #E5E9EF';
       entry.style.paddingBottom = '4px';
       
       const time = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit' });
@@ -1143,8 +1193,8 @@
       
       entry.innerHTML = `
         <span style="color: var(--muted); font-size: 10px;">[${time}]</span> 
-        <strong style="color: #c084fc;">${segLabel}</strong>: 
-        Arm <strong style="color: #60a5fa;">${armId}</strong> pulled. 
+        <strong style="color: #2E353D;">${segLabel}</strong>:
+        Arm <strong style="color: #2E6FF5;">${armId}</strong> pulled.
         KL: <span style="color: var(--accent-cyan);">${klDiv.toFixed(2)}</span>, 
         Est CTR: <span style="color: var(--accent-green);">${(mean*100).toFixed(1)}%</span>, 
         P(Best): <span style="color: var(--accent-amber);">${(pBest*100).toFixed(1)}%</span>
@@ -1217,10 +1267,10 @@
       const alertEl = document.getElementById('sre-alert-banner');
       if (uRate > 0.005) {
         alertEl.className = 'alert-banner alert-warn';
-        alertEl.innerHTML = `<span>⚠️ SLA WARNING — List Burn Spiking (${(uRate*100).toFixed(2)}% vs 0.50% SLA limit)</span><span>Inspect Arms</span>`;
+        alertEl.innerHTML = `<span>SLA warning - list burn spiking (${(uRate*100).toFixed(2)}% vs 0.50% SLA limit)</span><span>Inspect arms</span>`;
       } else {
         alertEl.className = 'alert-banner alert-normal';
-        alertEl.innerHTML = `<span>🟢 SRE Health Normal — List Rep SLA Protected (Unsub Rate ${(uRate*100).toFixed(2)}%)</span><span>Gate Mask Active</span>`;
+        alertEl.innerHTML = `<span>SRE health normal - list reputation protected (unsub rate ${(uRate*100).toFixed(2)}%)</span><span>Gate mask active</span>`;
       }
     }
 
@@ -1232,17 +1282,17 @@
 
       const rollFormatted = rolledSampleVal ? `${(rolledSampleVal*100).toFixed(1)}%` : '';
       const eePill = isExploiting 
-        ? `<span class="reason-pill exploit">⚡ EXPLOIT WINNER (${rollFormatted})</span>`
-        : `<span class="reason-pill explore">🧭 EXPLORE CHALLENGER (${rollFormatted})</span>`;
+        ? `<span class="reason-pill exploit">Exploit winner (${rollFormatted})</span>`
+        : `<span class="reason-pill explore">Explore challenger (${rollFormatted})</span>`;
 
       let outTag = `<span class="outcome-tag no-click">No Click</span>`;
       if (outcome === 'click') outTag = `<span class="outcome-tag click">+1 Meeting Booked</span>`;
-      else if (outcome === 'unsub') outTag = `<span class="outcome-tag unsub">⚠️ Unsubscribed (-3x)</span>`;
+      else if (outcome === 'unsub') outTag = `<span class="outcome-tag unsub">Unsubscribed (-3x)</span>`;
 
       card.innerHTML = `
         <div class="feed-header"><span class="feed-seg">${seg.label}</span><span>${time}</span></div>
         <div class="feed-action">
-          <div><span style="color: #cbd5e1;">Copy Arm: <strong style="color: ${arm.color};">${arm.id}</strong></span><div style="margin-top: 4px;">${eePill}</div></div>
+          <div><span style="color: #2E353D;">Copy Arm: <strong style="color: ${arm.color};">${arm.id}</strong></span><div style="margin-top: 4px;">${eePill}</div></div>
           <div>${outTag}</div>
         </div>
       `;
@@ -1263,10 +1313,10 @@
         const w = rect.width, h = rect.height;
         ctx.clearRect(0, 0, w, h);
 
-        ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1;
+        ctx.strokeStyle = '#E5E9EF'; ctx.lineWidth = 1;
         for (let y = 30; y < h - 30; y += 45) { ctx.beginPath(); ctx.moveTo(40, y); ctx.lineTo(w - 30, y); ctx.stroke(); }
 
-        ctx.fillStyle = '#64748b'; ctx.font = '11px var(--font-mono)';
+        ctx.fillStyle = '#6B7480'; ctx.font = '11px var(--font-mono)';
         for (let x = 0; x <= 10; x++) { ctx.fillText((x*10) + '%', 40 + (x/10)*(w-70) - 10, h - 12); }
 
         const prefix = selectedSegmentId.split('__')[0];
@@ -1324,23 +1374,23 @@
                 ctx.strokeStyle = arm.color + '88'; ctx.lineWidth = 1.5; ctx.setLineDash([2, 3]);
                 ctx.beginPath(); ctx.moveTo(dotX, 10); ctx.lineTo(dotX, dotY); ctx.stroke(); ctx.setLineDash([]);
 
-                ctx.fillStyle = liveDrawState.isExploiting ? '#3b82f6' : '#8b5cf6';
+                ctx.fillStyle = liveDrawState.isExploiting ? '#2E6FF5' : '#B5731B';
                 ctx.font = 'bold 11px var(--font-sans)';
-                const badgeTxt = liveDrawState.isExploiting ? `⚡ EXPLOITING WINNER (${(theta*100).toFixed(1)}%)` : `🧭 EXPLORING CHALLENGER (${(theta*100).toFixed(1)}%)`;
+                const badgeTxt = liveDrawState.isExploiting ? `EXPLOITING WINNER (${(theta*100).toFixed(1)}%)` : `EXPLORING CHALLENGER (${(theta*100).toFixed(1)}%)`;
                 ctx.fillText(badgeTxt, Math.max(40, dotX - 70), 18);
 
                 ctx.strokeStyle = arm.color; ctx.lineWidth = 2;
                 ctx.beginPath(); ctx.arc(dotX, dotY, 9, 0, Math.PI*2); ctx.stroke();
               }
 
-              ctx.fillStyle = '#ffffff';
+              ctx.fillStyle = '#FFFFFF';
               ctx.beginPath(); ctx.arc(dotX, dotY, 5, 0, Math.PI*2); ctx.fill();
               ctx.strokeStyle = arm.color; ctx.lineWidth = 2.5; ctx.stroke();
             }
           });
         }
 
-        ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
+        ctx.strokeStyle = '#C9D2DC'; ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(40, 30); ctx.lineTo(40, h - 35); ctx.lineTo(w - 30, h - 35); ctx.stroke();
       });
     }
@@ -1365,7 +1415,7 @@
       e.preventDefault();
       const prefix = selectedSegmentId.split('__')[0];
       const newId = 'C_' + Math.floor(Math.random()*1000);
-      const colorList = ['#06b6d4', '#ec4899', '#eab308', '#a855f7'];
+      const colorList = ['#2E6FF5', '#1E8A53', '#B5731B', '#6B7480'];
       const pickedColor = colorList[armsDefinition[prefix].length % colorList.length];
 
       const newArm = {
@@ -1429,16 +1479,16 @@
 
         const claimsHtml = arm.claims.map(c => `<span class="claim-pill ${arm.id === 'LIE' ? 'unverified' : 'verified'}">[[${c}]]</span>`).join('');
 
-        let statusBadge = isWinner ? `<span class="badge-float winning-badge">🏆 Learned Leader</span>` : '';
-        if (isMasked) statusBadge = `<span class="badge-float masked-badge">🚫 Vetoed by Gate</span>`;
-        if (isArchived) statusBadge = `<span class="badge-float archived-badge">📦 Archived (Data Saved)</span>`;
+        let statusBadge = isWinner ? `<span class="badge-float winning-badge">Learned leader</span>` : '';
+        if (isMasked) statusBadge = `<span class="badge-float masked-badge">Vetoed by Gate</span>`;
+        if (isArchived) statusBadge = `<span class="badge-float archived-badge">Archived - data saved</span>`;
 
         card.innerHTML = `
           ${statusBadge}
           <div class="variant-header">
             <span class="variant-name">${arm.label}</span>
             <span class="variant-code">${arm.code}</span>
-            ${!isMasked && !isArchived ? `<span class="badge-float confidence-pill" style="right: 170px; top: 18px;">🔥 P(Best): ${pBestPct}%</span>` : ''}
+            ${!isMasked && !isArchived ? `<span class="badge-float confidence-pill" style="right: 170px; top: 18px;">P(Best): ${pBestPct}%</span>` : ''}
           </div>
           <div class="variant-copy">${arm.copy.replace('{name}', 'Alex').replace('{company}', 'Gauntlet Health')}</div>
           <div class="claim-pill-list"><span class="claim-label">Verified Claims:</span>${claimsHtml}</div>
@@ -1448,30 +1498,30 @@
             <div class="metric-stat"><dt>Clicks</dt><dd style="color: var(--accent-green);">${s.clicks}</dd></div>
             <div class="metric-stat"><dt>Belief</dt><dd style="color: var(--accent-blue);">Beta(${s.alpha}, ${s.beta})</dd></div>
             <div class="metric-stat"><dt>Est. CTR</dt><dd style="color: var(--accent-cyan);">${(mean*100).toFixed(1)}%</dd></div>
-            <div class="metric-stat" style="grid-column: span 2;"><dt>95% Credible Interval <span class="tip" data-tooltip="Exact Bayesian 95% interval derived from 1,000 live Monte Carlo draws.">?</span></dt><dd style="color: #c084fc;">${ciFormatted}</dd></div>
+            <div class="metric-stat" style="grid-column: span 2;"><dt>95% Credible Interval <span class="tip" data-tooltip="Exact Bayesian 95% interval derived from 1,000 live Monte Carlo draws.">?</span></dt><dd style="color: var(--accent-amber);">${ciFormatted}</dd></div>
           </div>
 
           <div class="arm-actions-footer">
             <button class="btn-under-hood ${idx === 0 ? 'first-under-hood-btn' : ''}" onclick="toggleHood('${arm.id}')">
-              <span>🔍 Inspect Under the Hood Math &amp; Monte Carlo Diagnostics</span><span>▼</span>
+              <span>Inspect math &amp; Monte Carlo diagnostics</span><span>▼</span>
             </button>
             ${!isMasked ? `
               <button class="btn ${isArchived ? 'btn-primary' : 'btn-outline'}" style="width: auto; margin-bottom: 0; padding: 8px 16px; font-size: 11px;" onclick="toggleArchive('${arm.id}')">
-                ${isArchived ? '♻️ Restore to Trials' : '📦 Archive Copy'}
+                ${isArchived ? 'Restore to trials' : 'Archive copy'}
               </button>
             ` : ''}
           </div>
           
           <div id="hood-${arm.id}" class="hood-content" style="display: ${currentMode === 'specialist' ? 'block' : 'none'};">
             <div class="hood-grid">
-              <div><strong style="color:#93c5fd;">Alpha Hits (α):</strong> ${s.alpha}</div>
-              <div><strong style="color:#fda4af;">Beta Misses (β):</strong> ${s.beta}</div>
-              <div><strong style="color:#c4b5fd;">Win Confidence P(θ > others):</strong> ${pBestPct}%</div>
-              <div><strong style="color:#6ee7b7;">Monte Carlo CI Bound:</strong> ${ciFormatted}</div>
+              <div><strong style="color:#2E6FF5;">Alpha Hits (α):</strong> ${s.alpha}</div>
+              <div><strong style="color:#C0354B;">Beta Misses (β):</strong> ${s.beta}</div>
+              <div><strong style="color:#B5731B;">Win Confidence P(θ > others):</strong> ${pBestPct}%</div>
+              <div><strong style="color:#1E8A53;">Monte Carlo CI Bound:</strong> ${ciFormatted}</div>
             </div>
             <div class="hood-math">
               <code>θ_i ~ Beta(α=${s.alpha}, β=${s.beta})</code><br>
-              <span style="color:#94a3b8; margin-top:6px; display:block;">
+              <span style="color:#6B7480; margin-top:6px; display:block;">
                 <strong>Specialist Diagnostic:</strong> In Specialist mode, observe how this arm accumulates regret whenever sampled if $\theta_i < \theta^*$. The 95% Bayesian Credible Interval represents exact $[Q_{0.025}, Q_{0.975}]$ limits across 1,000 live draws. Archiving this arm preserves $N=${s.sends}$ and $\alpha=${s.alpha}$ while setting action-mask $M_i=0$.
               </span>
             </div>
@@ -1545,10 +1595,10 @@
           clearInterval(simTimer);
           simTimer = null;
           isSimRunning = false;
-          pauseBtn.textContent = '▶️ Resume Live Stream';
+          pauseBtn.innerHTML = '<i class="ph ph-play"></i> Resume Live Stream';
         } else {
           startSim();
-          pauseBtn.textContent = '⏸️ Pause Live Stream';
+          pauseBtn.innerHTML = '<i class="ph ph-pause"></i> Pause Live Stream';
         }
       };
 
@@ -1595,10 +1645,10 @@
       const driverObj = window.driver.js.driver({
         showProgress: true, animate: true, popoverClass: 'driverjs-theme',
         steps: [
-          { element: '.view-switcher', popover: { title: '🛡️ SRE vs Specialist Tabs', description: 'Switch between operational reliability views and deep-dive statistical diagnostic workbenches.', side: 'bottom' } },
-          { element: '#btn-inject', popover: { title: '🚀 Inject Candidate Copy', description: 'Hot-load brand new challenger email copy directly into running Thompson Sampling trials with zero downtime.', side: 'right' } },
-          { element: '#posterior-canvas-box', popover: { title: '📊 Live Monte Carlo Sampling', description: 'Watch live random dots sample from each Beta distribution. Wider curves mean higher exploration potential.', side: 'bottom' } },
-          { element: '#variants-list', popover: { title: '🔥 Statistical Confidence Scoring', description: 'Each copy displays exact P(Best) superiority probabilities and 95% Bayesian Credible Intervals. You can archive underperforming copy anytime while keeping all its data!', side: 'top' } }
+          { element: '.view-switcher', popover: { title: 'SRE vs specialist views', description: 'Switch between operational reliability views and statistical diagnostic workbenches.', side: 'bottom' } },
+          { element: '#btn-inject', popover: { title: 'Inject candidate copy', description: 'Add challenger email copy directly into the running Thompson sampling trial.', side: 'right' } },
+          { element: '#posterior-canvas-box', popover: { title: 'Live Monte Carlo sampling', description: 'Watch sampled dots move across each Beta distribution. Wider curves mean higher exploration potential.', side: 'bottom' } },
+          { element: '#variants-list', popover: { title: 'Statistical confidence scoring', description: 'Each copy displays P(Best), 95% Bayesian credible intervals, and archive controls that preserve historical data.', side: 'top' } }
         ]
       });
       driverObj.drive();
@@ -1629,5 +1679,5 @@
     setupSyncControls();
     window.addEventListener('resize', () => { drawCanvas(); drawRegretCanvas(); });
   </script>
-</body>
-</html>
+</div>
+{% endblock %}
