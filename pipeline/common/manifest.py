@@ -16,6 +16,7 @@ from pipeline.common.config import RUNS_DIR
 @dataclass
 class RunManifest:
     seed: int = config.SEED
+    schema_version: int = config.SCHEMA_VERSION
     profile: str = config.INFERENCE_PROFILE
     ollama_judges: list[str] = field(default_factory=lambda: list(config.OLLAMA_JUDGE_MODELS))
     claude_model: str = config.CLAUDE_JUDGE_MODEL
@@ -26,6 +27,12 @@ class RunManifest:
 
     def save(self, name: str = "run_manifest") -> None:
         (RUNS_DIR / f"{name}.json").write_text(json.dumps(asdict(self), indent=2))
+        # also stamp the demo-level manifest for migration tooling
+        config.MANIFEST_PATH.write_text(json.dumps({
+            "schema_version": self.schema_version,
+            "seed": self.seed,
+            "profile": self.profile,
+        }, indent=2))
 
     @classmethod
     def load(cls, name: str = "run_manifest") -> "RunManifest":
