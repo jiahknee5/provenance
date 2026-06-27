@@ -48,6 +48,12 @@ def form(request: Request):
     })
 
 
+@app.get("/bandit-dashboard", response_class=HTMLResponse)
+def bandit_dashboard(request: Request):
+    return templates.TemplateResponse(request, "bandit_dashboard.html", {})
+
+
+
 @app.post("/submit", response_class=HTMLResponse)
 def submit(request: Request,
            name: str = Form(...), email: str = Form(...), company: str = Form(...),
