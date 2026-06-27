@@ -16,6 +16,11 @@ data/demo/*.sqlite
 data/demo/*.sqlite-*
 data/demo/ledgers/
 eval-results/
+data/demo/streams/
+data/demo/manifest.json
 # verification artifacts (root-level QA/demo screenshots — never committed)
 .playwright-mcp/
 /*.png
+# tooling / QA scratch (reproducible, never source)
+.codegraph/
+.prove-it/
