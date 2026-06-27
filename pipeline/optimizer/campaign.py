@@ -12,6 +12,8 @@ import random
 from collections import defaultdict
 
 from pipeline.common import observe
+from pipeline.domain.adapters import campaign as domain_campaign
+from pipeline.domain import decision_trace as dt
 from pipeline.common.config import RUNS_DIR
 from pipeline.common.db import connect
 from pipeline.common.schemas import Recipient
@@ -52,6 +54,12 @@ def run_campaign(channel: str, campaign: str, recipients: list[Recipient],
                         "n": len(recipients), "warm_started": bool(posteriors.params),
                         "active_arms": {seg: pool.active(seg) for seg in sorted(pool.segments)}})
 
+    from pipeline.generation.variants import build_variants
+    from pipeline.domain.models.asset import Asset
+    from pipeline.domain.stores.asset_store import AssetStore
+    variant_map = {v.variant_id: v for vs in build_variants(channel).values() for v in vs}
+    asset_store = AssetStore()
+
     counts: dict = defaultdict(lambda: defaultdict(lambda: [0, 0]))  # seg -> arm -> [sel, clk]
     regret_cum, cum, lie_selections = [], 0.0, 0
     events = []
@@ -61,6 +69,18 @@ def run_campaign(channel: str, campaign: str, recipients: list[Recipient],
         arm = bandit.select(seg)
         if arm is None:
             continue
+        domain_campaign.emit_asset_selection(
+            r.recipient_id, seg, arm, channel, campaign,
+        )
+        v = variant_map.get(arm)
+        if v:
+            asset_store.save(Asset.from_variant(v))
+            dt.record_trace(
+                "asset_selection", "selected",
+                claim_refs=list(v.claim_ids),
+                asset_ref=arm,
+                subject_id=r.recipient_id,
+            )
         rew = oracle.reward(seg, arm, rng)
         bandit.update(seg, arm, rew)
         counts[seg][arm][0] += 1
