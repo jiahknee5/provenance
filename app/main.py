@@ -50,7 +50,7 @@ def form(request: Request):
 
 @app.get("/bandit-dashboard", response_class=HTMLResponse)
 def bandit_dashboard(request: Request):
-    return templates.TemplateResponse(request, "bandit_dashboard.html", {})
+    return RedirectResponse("/optimizer/bandit-dashboard", status_code=307)
 
 
 

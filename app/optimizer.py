@@ -24,6 +24,16 @@ def optimizer(request: Request):
         "scenarios": m["scenarios"], "note": m["note"]})
 
 
+@app.get("/optimizer/bandit-dashboard", response_class=HTMLResponse)
+def optimizer_bandit_dashboard(request: Request):
+    return templates.TemplateResponse(request, "bandit_dashboard.html", {})
+
+
+@app.get("/optimizer/bandit-dashboard/learn-more", response_class=HTMLResponse)
+def optimizer_bandit_learn_more(request: Request):
+    return templates.TemplateResponse(request, "bandit_dashboard_learn_more.html", {})
+
+
 @app.get("/api/optimizer/live")
 def optimizer_live() -> JSONResponse:
     """Live posteriors moving from REAL /site traffic — the online counterpart to the
