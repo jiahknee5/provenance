@@ -12,6 +12,11 @@
 - `pipeline/assurance/*` — adversarial traps + reliability harness.
 - `pipeline/enrichment/*`, `pipeline/personalization/*`, `pipeline/customer/*`, `pipeline/common/*`.
 - The provenance ledger (profiles + fact receipts), the observe stream.
+- **`pipeline/domain/*`** — canonical event-sourced domain (`SCHEMA_VERSION=2`). Domain streams are the **source of truth**; SQLite read models are projector-backed disposable projections. `observe.emit` remains debug-only. See [`docs/domain-design/as-built-mapping.md`](../domain-design/as-built-mapping.md).
+
+**Observability split:**
+- `pipeline/common/observe.py` — operator debug spine (INPUT/TOOL/DECISION/OUTPUT graph for Observatory).
+- `pipeline/domain/emit.py` — business audit events (`claim_verified`, `asset_selection_recorded`, …) per the event catalog.
 
 **Build (the product/UI layer):**
 - `app/templates/base.html` → the Quiet-Workspace **shell** (sidebar + topbar + ⌘K). One token set in `app/static/atlas.css` `:root`.

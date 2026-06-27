@@ -1,5 +1,7 @@
 # Context Map
 
+> North-star target. See [as-built-mapping.md](as-built-mapping.md) for runtime status.
+
 ```mermaid
 flowchart LR
     subgraph Ingestion["Ingestion & Identity Context"]

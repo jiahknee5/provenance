@@ -1,5 +1,7 @@
 ### Canonical artifact set
 
+> North-star target. See [as-built-mapping.md](as-built-mapping.md) for runtime status.
+
 The repository artifact set is composed of separate markdown files:
 
 - `01-context-map.md`

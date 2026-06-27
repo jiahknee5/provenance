@@ -1,5 +1,7 @@
 # Field / Purpose and Complete Domain Data Model
 
+> North-star target. See [as-built-mapping.md](as-built-mapping.md) for runtime status.
+
 ## Overview
 
 This document consolidates the current canonical entities, their field-purpose definitions, and the full domain data model after the recent event-catalog, stream, identity-resolution, and optimizer naming updates.

@@ -1,5 +1,7 @@
 # Sequence Diagram
 
+> North-star target. See [as-built-mapping.md](as-built-mapping.md) for runtime status.
+
 ```mermaid
 sequenceDiagram
     autonumber

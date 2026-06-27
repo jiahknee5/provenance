@@ -1,5 +1,7 @@
 # Gate Mismatch Circuit Breaker
 
+> North-star target. See [as-built-mapping.md](as-built-mapping.md) for runtime status.
+
 ```mermaid
 flowchart TD
     S1[Subject emotional state]

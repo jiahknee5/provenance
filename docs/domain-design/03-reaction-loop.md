@@ -1,5 +1,7 @@
 # Emotional Reaction Cycle
 
+> North-star target. See [as-built-mapping.md](as-built-mapping.md) for runtime status.
+
 ```mermaid
 flowchart LR
     A1[Asset Served<br/>emotion-tagged variant]
