@@ -3,6 +3,16 @@
 {% block crumb %}<i class="ph ph-trend-up"></i> Optimizer / Bandit dashboard{% endblock %}
 {% block content %}
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']]
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 
   <style>
     :root {
@@ -130,18 +140,29 @@
     /* Grid Layout */
     .dashboard-grid {
       display: grid;
-      grid-template-columns: 330px 1fr 390px;
+      grid-template-columns: minmax(280px, 0.9fr) minmax(380px, 1.1fr) minmax(320px, 1fr);
       gap: 16px;
       align-items: start;
     }
+    .dashboard-grid > * { min-width: 0; }
 
-    @media (max-width: 1400px) { .dashboard-grid { grid-template-columns: 1fr; } }
+    .dashboard-grid > aside { grid-column: 1; grid-row: 1; }
+    .dashboard-grid > main { grid-column: 2 / -1; grid-row: 1 / span 2; }
+    #right-col-box { grid-column: 1; grid-row: 2; }
+
+    @media (max-width: 1240px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .dashboard-grid > aside { grid-column: 1; grid-row: 1; }
+      #right-col-box { grid-column: 1; grid-row: 2; }
+      .dashboard-grid > main { grid-column: 1; grid-row: 3; }
+    }
 
     .card {
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 14px;
-      overflow: hidden;
+      overflow: visible;
+      position: relative;
       box-shadow: var(--shadow-card);
       display: flex;
       flex-direction: column;
@@ -150,10 +171,14 @@
     body.specialist-mode .card {
       border-color: var(--border-strong);
     }
+    .card:has(.tip:hover), .card:has(.tip:focus-visible),
+    .card:has(.help-tip:hover), .card:has(.help-tip:focus-visible),
+    .card:has(.claim-pill:hover), .card:has(.claim-pill:focus-visible) { z-index: 50; }
 
     .card-header {
       background: var(--panel-header); padding: 12px 16px; border-bottom: 1px solid var(--border);
       display: flex; justify-content: space-between; align-items: center;
+      border-radius: 14px 14px 0 0;
     }
 
     .card-header h2 {
@@ -186,6 +211,36 @@
       transition: all 0.2s var(--ease); box-shadow: var(--shadow-pop); z-index: 1000;
     }
     .tip:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .tip:has(.tip-popover)::after { content: none; }
+    .tip-popover {
+      position: absolute;
+      bottom: calc(100% + 10px);
+      width: calc(200% + 12px);
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--slate);
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 1.45;
+      text-align: left;
+      text-transform: none;
+      letter-spacing: normal;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity .2s var(--ease), transform .2s var(--ease);
+      box-shadow: var(--shadow-pop);
+      z-index: 1000;
+    }
+    .kpi-card:nth-child(odd) .tip-popover { left: 0; }
+    .kpi-card:nth-child(even) .tip-popover { right: 0; }
+    .tip:hover .tip-popover, .tip:focus-visible .tip-popover {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .tip-popover mjx-container { margin: 7px 0 2px !important; overflow-x: auto; overflow-y: hidden; }
     .help-tip {
       display: inline-flex;
       align-items: center;
@@ -211,9 +266,8 @@
       content: attr(data-tooltip) " Click for examples.";
       position: absolute;
       bottom: calc(100% + 8px);
-      left: 50%;
-      transform: translateX(-50%) translateY(4px);
-      width: 280px;
+      right: 0;
+      width: min(280px, calc(100vw - 48px));
       padding: 10px 12px;
       border-radius: 9px;
       background: var(--panel);
@@ -224,10 +278,11 @@
       line-height: 1.45;
       pointer-events: none;
       opacity: 0;
+      transform: translateY(4px);
       box-shadow: var(--shadow-pop);
       z-index: 1000;
     }
-    .help-tip:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .help-tip:hover::after, .help-tip:focus-visible::after { opacity: 1; transform: translateY(0); }
 
     /* Buttons */
     .btn {
@@ -318,9 +373,32 @@
 
     .claim-pill-list { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
     .claim-label { font-size: 11px; color: var(--muted); font-weight: 600; margin-right: 4px; }
-    .claim-pill { font-size: 11px; font-family: var(--font-mono); background: var(--panel); border: 1px solid var(--border); padding: 3px 8px; border-radius: 6px; color: var(--muted); }
+    .claim-pill { position: relative; font-size: 11px; font-family: var(--font-mono); background: var(--panel); border: 1px solid var(--border); padding: 3px 8px; border-radius: 6px; color: var(--muted); cursor: help; }
     .claim-pill.verified { border-color: transparent; color: var(--accent-green); background: var(--success-bg); }
     .claim-pill.unverified { border-color: transparent; color: var(--accent-red); background: var(--danger-bg); }
+    .claim-tooltip {
+      position: absolute;
+      left: 0;
+      bottom: calc(100% + 8px);
+      width: min(300px, calc(100vw - 64px));
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: var(--panel);
+      color: var(--slate);
+      box-shadow: var(--shadow-pop);
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 1.45;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity .2s var(--ease), transform .2s var(--ease);
+      z-index: 1000;
+    }
+    .claim-tooltip strong { display: block; margin-bottom: 3px; color: var(--ink); font-size: 11px; }
+    .claim-pill:hover .claim-tooltip, .claim-pill:focus-visible .claim-tooltip { opacity: 1; transform: translateY(0); }
 
     .metrics-ribbon { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; border-top: 1px solid var(--border); padding-top: 14px; margin-bottom: 12px; }
     @media (max-width: 1100px) { .metrics-ribbon { grid-template-columns: repeat(3, 1fr); } }
@@ -425,6 +503,16 @@
       background: var(--fill);
       color: var(--muted);
     }
+    .specialist-table-scroll {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      overscroll-behavior-inline: contain;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-strong) transparent;
+    }
+    .specialist-table-scroll .matrix-table { min-width: 260px; }
+    .specialist-table-scroll .spec-math-table { min-width: 560px; }
     
     .spec-math-table {
       width: 100%;
@@ -486,7 +574,7 @@
           <button id="mode-btn-spec" class="mode-btn" onclick="switchMode('specialist')"><i class="ph ph-function"></i> Specialist</button>
         </div>
         <button id="btn-open-tutorial" class="q-btn outline" type="button"><i class="ph ph-info"></i> Engineer tour</button>
-        <div id="simulation-badge" class="q-pill g"><span class="d"></span>Prod stream active</div>
+        <div id="simulation-badge" class="q-pill g"><span class="d"></span>demo simulation</div>
       </div>
     </div>
 
@@ -552,15 +640,15 @@
           <h2 class="section-label">Convergence diagnostics <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#specialist-diagnostics" data-tooltip="Use these when you need the statistical explanation behind the visible winner.">?</a></h2>
           <div class="kpi-grid">
             <div class="kpi-card">
-              <div class="kpi-title">Est. Regret <span class="tip" data-tooltip="Cumulative loss of clicks incurred while exploring suboptimal copy arms. Formula: R_T = sum (theta* - theta_t).">?</span></div>
+              <div class="kpi-title">Est. Regret <span class="tip" tabindex="0" aria-label="Explain estimated regret">?<span class="tip-popover" role="tooltip">Cumulative expected reward lost by selecting an arm below the best simulated arm. \[R_T=\sum_{t=1}^{T}\max\!\left(0,\theta^*-\theta_{a_t}\right)\]</span></span></div>
               <div id="kpi-regret" class="kpi-value" style="color: var(--accent-amber);">0.0</div>
             </div>
             <div class="kpi-card">
-              <div class="kpi-title">Policy Entropy <span class="tip" data-tooltip="Shannon entropy of action probabilities. Approaches 0 as the bandit converges to exploitation.">?</span></div>
+              <div class="kpi-title">Policy Entropy <span class="tip" tabindex="0" aria-label="Explain policy entropy">?<span class="tip-popover" role="tooltip">Uncertainty across active arms' probabilities of being best. It approaches zero as one arm dominates. \[H(\mathbf p)=-\sum_{i=1}^{K}p_i\log p_i\]</span></span></div>
               <div id="kpi-entropy" class="kpi-value" style="color: var(--accent-cyan);">1.09</div>
             </div>
             <div class="kpi-card">
-              <div class="kpi-title">Avg KL Div <span class="tip" data-tooltip="Average Posterior KL Divergence relative to Beta(1,1) prior. Higher values mean higher certainty.">?</span></div>
+              <div class="kpi-title">Avg KL Div <span class="tip" tabindex="0" aria-label="Explain average KL divergence">?<span class="tip-popover" role="tooltip">Average information change from the initial \(\operatorname{Beta}(1,1)\) prior. Higher values mean more learning, not necessarily better CTR. \[D_{\mathrm{KL}}^{\mathrm{avg}}=K^{-1}\sum_{i=1}^{K}D_{\mathrm{KL}}(p_i\,\|\,p_0)\]</span></span></div>
               <div id="kpi-avg-kl" class="kpi-value" style="color: var(--accent-green);">0.00</div>
             </div>
             <div class="kpi-card">
@@ -569,7 +657,7 @@
             </div>
           </div>
           <div style="margin-top: 14px; font-size: 11px; color: var(--muted); line-height: 1.5; background: var(--panel-header); padding: 10px; border-radius: 8px; border: 1px dashed var(--border-strong);">
-            <strong>Specialist Note:</strong> Posterior win probabilities $P(\theta_i > \max_{j \neq i} \theta_j)$ are computed dynamically via 1,000 Monte Carlo draws per tick. Exact 95% Credible Intervals reflect quantiles $[Q_{2.5}, Q_{97.5}]$.
+            <strong>Specialist Note:</strong> Posterior win probabilities \(P(\theta_i > \max_{j \neq i}\theta_j)\) are computed dynamically from 1,000 Monte Carlo draws per tick. The 95% credible interval approximates \([Q_{0.025},Q_{0.975}]\).
           </div>
         </div>
 
@@ -612,7 +700,7 @@
 
         <!-- Cumulative Regret Trace (Visible in Specialist Mode) -->
         <div id="regret-canvas-container" style="display: none; margin-top: 24px; border-top: 1px dashed var(--border); padding-top: 20px;">
-          <h2 style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; color: var(--label);">Cumulative regret trace ($R_T$)</h2>
+          <h2 style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; color: var(--label);">Cumulative regret trace \(R_T\)</h2>
           <div class="chart-container" style="height: 180px;">
             <canvas id="regret-canvas"></canvas>
           </div>
@@ -639,17 +727,21 @@
 
         <div id="panel-spec-tables" style="display: none;">
           <h2 style="font-size: 11px; text-transform: uppercase; color: var(--label); margin-bottom: 8px;">Head-to-head win probability matrix <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#win-matrix" data-tooltip="Pairwise probabilities answer: if these two arms went head-to-head, which one probably wins?">?</a></h2>
-          <p style="font-size: 11px; color: var(--muted); margin-bottom: 10px;">Pairwise superiority P(θ_row > θ_col) derived from 1,000 Monte Carlo draws.</p>
-          <table class="matrix-table">
-            <thead><tr id="matrix-header-row"><th>Arm</th></tr></thead>
-            <tbody id="matrix-body"></tbody>
-          </table>
+          <p style="font-size: 11px; color: var(--muted); margin-bottom: 10px;">Pairwise superiority \(P(\theta_{\mathrm{row}} > \theta_{\mathrm{col}})\) derived from 1,000 Monte Carlo draws.</p>
+          <div class="specialist-table-scroll" tabindex="0" aria-label="Scrollable head-to-head probability matrix">
+            <table class="matrix-table">
+              <thead><tr id="matrix-header-row"><th>Arm</th></tr></thead>
+              <tbody id="matrix-body"></tbody>
+            </table>
+          </div>
 
           <h2 style="font-size: 11px; text-transform: uppercase; margin: 24px 0 10px 0; color: var(--label);">Posterior parameter estimation <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#posterior-table" data-tooltip="This table exposes the raw Beta distribution math behind the visual belief curves.">?</a></h2>
-          <table class="spec-math-table">
-            <thead><tr><th>Arm</th><th>Mean (CTR)</th><th>Mode</th><th>Variance</th><th>KL Div</th></tr></thead>
-            <tbody id="spec-math-body"></tbody>
-          </table>
+          <div class="specialist-table-scroll" tabindex="0" aria-label="Scrollable posterior parameter table">
+            <table class="spec-math-table">
+              <thead><tr><th>Arm</th><th>Mean (CTR)</th><th>Mode</th><th>Variance</th><th>KL Div</th></tr></thead>
+              <tbody id="spec-math-body"></tbody>
+            </table>
+          </div>
 
           <h2 style="font-size: 11px; text-transform: uppercase; margin: 24px 0 10px 0; color: var(--label);">Specialist posterior drift log <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#drift-log" data-tooltip="The log shows how each new outcome changes estimated CTR, KL divergence, and P(Best).">?</a></h2>
           <div class="spec-math-log" id="spec-math-log-feed"></div>
@@ -773,6 +865,35 @@
       { id: 'clinops__core', label: 'ClinOps (Core Tier)', desc: 'Hospital clinical operators focusing on patient flow.' },
       { id: 'it_security__ent', label: 'IT Security (Enterprise)', desc: 'Chief Information Security Officers requiring compliance.' }
     ];
+
+    const claimDescriptions = {
+      c_tco_reduction: 'Evidence-backed claim that the solution reduces hospital total cost of ownership by 22%.',
+      c_roi_verified: 'ROI claim supported by the verified cloud-analytics evidence set.',
+      c_billing_transparency: 'Evidence-backed claim that subscription pricing and billing are disclosed transparently.',
+      c_setup_waived: 'Evidence-backed claim that the offer waives implementation fees.',
+      c_los_reduction: 'Evidence-backed claim that clinical cohort analytics can reduce inpatient length of stay.',
+      c_clinical_cohorts: 'Evidence confirms support for verified clinical cohort analytics.',
+      c_workflow_speed: 'Evidence-backed claim that the workflow can complete the stated processing task in under four hours.',
+      c_claims_ingest: 'Evidence confirms ingestion and resolution support for complex medical claims datasets.',
+      c_soc2_auto: 'Evidence-backed claim for automated SOC 2 Type II compliance mapping.',
+      c_hipaa_compliant: 'Evidence confirms support for HIPAA compliance mapping in the stated product scope.',
+      c_ehr_integration: 'Evidence-backed claim for out-of-box integration with more than 30 enterprise EHR systems.',
+      c_zero_trust_keys: 'Evidence confirms zero-trust key controls used by the integration.',
+      c_fake_guaranteed_payback: 'Unverified guarantee of instant savings and cash payback. Gate masking blocks this claim.',
+      c_fake_zero_errors: 'Unverified claim that the product eliminates all diagnostic billing errors. Gate masking blocks it.',
+      c_fake_nsa_endorsement: 'Unverified NSA certification and unhackable-product claim. Gate masking blocks it.'
+    };
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[char]);
+    }
+
+    function typesetMath(root) {
+      if (!window.MathJax?.typesetPromise) return;
+      window.MathJax.typesetPromise([root]).catch(() => {});
+    }
 
     let armsDefinition = {
       'cfo': [
@@ -1296,7 +1417,7 @@
           <div>${outTag}</div>
         </div>
       `;
-      feed.appendChild(card);
+      feed.insertBefore(card, feed.firstChild);
     }
 
     function drawCanvas() {
@@ -1355,9 +1476,9 @@
 
           const tx = 40 + arm.latentCTR * (w - 70);
           ctx.setLineDash([3, 4]); ctx.strokeStyle = arm.color + '99'; ctx.lineWidth = 1.5;
-          ctx.beginPath(); ctx.moveTo(tx, 30); ctx.lineTo(tx, h - 35); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(tx, 48); ctx.lineTo(tx, h - 35); ctx.stroke();
           ctx.setLineDash([]);
-          ctx.fillStyle = arm.color; ctx.fillText('Truth ' + Math.round(arm.latentCTR*100) + '%', tx - 22, 24);
+          ctx.fillStyle = arm.color; ctx.fillText('Truth ' + Math.round(arm.latentCTR*100) + '%', tx - 22, 42);
         });
 
         if (liveDrawState && liveDrawState.segmentId === selectedSegmentId) {
@@ -1398,6 +1519,7 @@
     function toggleHood(armId) {
       const el = document.getElementById('hood-' + armId);
       el.style.display = el.style.display === 'none' ? 'block' : 'none';
+      if (el.style.display === 'block') typesetMath(el);
     }
 
     function toggleArchive(armId) {
@@ -1477,7 +1599,12 @@
         const card = document.createElement('div');
         card.className = `variant-card variant-${arm.id} ${isWinner ? 'winning' : ''} ${isMasked ? 'masked' : ''} ${isArchived ? 'archived' : ''}`;
 
-        const claimsHtml = arm.claims.map(c => `<span class="claim-pill ${arm.id === 'LIE' ? 'unverified' : 'verified'}">[[${c}]]</span>`).join('');
+        const claimsHtml = arm.claims.map(c => {
+          const isVerified = arm.id !== 'LIE' && Object.hasOwn(claimDescriptions, c);
+          const description = claimDescriptions[c] || 'No evidence description is registered for this injected claim tag. Review it before production use.';
+          const status = isVerified ? 'Verified claim' : 'Evidence review required';
+          return `<span class="claim-pill ${isVerified ? 'verified' : 'unverified'}" tabindex="0">[[${escapeHtml(c)}]]<span class="claim-tooltip" role="tooltip"><strong>${status}</strong>${description}</span></span>`;
+        }).join('');
 
         let statusBadge = isWinner ? `<span class="badge-float winning-badge">Learned leader</span>` : '';
         if (isMasked) statusBadge = `<span class="badge-float masked-badge">Vetoed by Gate</span>`;
@@ -1498,7 +1625,7 @@
             <div class="metric-stat"><dt>Clicks</dt><dd style="color: var(--accent-green);">${s.clicks}</dd></div>
             <div class="metric-stat"><dt>Belief</dt><dd style="color: var(--accent-blue);">Beta(${s.alpha}, ${s.beta})</dd></div>
             <div class="metric-stat"><dt>Est. CTR</dt><dd style="color: var(--accent-cyan);">${(mean*100).toFixed(1)}%</dd></div>
-            <div class="metric-stat" style="grid-column: span 2;"><dt>95% Credible Interval <span class="tip" data-tooltip="Exact Bayesian 95% interval derived from 1,000 live Monte Carlo draws.">?</span></dt><dd style="color: var(--accent-amber);">${ciFormatted}</dd></div>
+            <div class="metric-stat" style="grid-column: span 2;"><dt>95% Credible Interval <span class="tip" data-tooltip="Monte Carlo approximation of the Bayesian 95% interval from 1,000 live posterior draws.">?</span></dt><dd style="color: var(--accent-amber);">${ciFormatted}</dd></div>
           </div>
 
           <div class="arm-actions-footer">
@@ -1516,19 +1643,20 @@
             <div class="hood-grid">
               <div><strong style="color:#2E6FF5;">Alpha Hits (α):</strong> ${s.alpha}</div>
               <div><strong style="color:#C0354B;">Beta Misses (β):</strong> ${s.beta}</div>
-              <div><strong style="color:#B5731B;">Win Confidence P(θ > others):</strong> ${pBestPct}%</div>
+              <div><strong style="color:#B5731B;">Win Confidence \\(P(\\theta_i>\\theta_{j\\ne i})\\):</strong> ${pBestPct}%</div>
               <div><strong style="color:#1E8A53;">Monte Carlo CI Bound:</strong> ${ciFormatted}</div>
             </div>
             <div class="hood-math">
-              <code>θ_i ~ Beta(α=${s.alpha}, β=${s.beta})</code><br>
+              <span>\\(\\theta_i\\sim\\operatorname{Beta}(\\alpha=${s.alpha},\\beta=${s.beta})\\)</span><br>
               <span style="color:#6B7480; margin-top:6px; display:block;">
-                <strong>Specialist Diagnostic:</strong> In Specialist mode, observe how this arm accumulates regret whenever sampled if $\theta_i < \theta^*$. The 95% Bayesian Credible Interval represents exact $[Q_{0.025}, Q_{0.975}]$ limits across 1,000 live draws. Archiving this arm preserves $N=${s.sends}$ and $\alpha=${s.alpha}$ while setting action-mask $M_i=0$.
+                <strong>Specialist Diagnostic:</strong> This arm accumulates regret whenever sampled with \\(\\theta_i<\\theta^*\\). The 95% Bayesian credible interval approximates \\([Q_{0.025},Q_{0.975}]\\) from 1,000 live draws. Archiving preserves \\(N=${s.sends}\\) and \\(\\alpha=${s.alpha}\\) while setting action mask \\(M_i=0\\).
               </span>
             </div>
           </div>
         `;
         list.appendChild(card);
       });
+      if (currentMode === 'specialist') typesetMath(list);
     }
 
     function selectSegment(segmentId) {
