@@ -4,6 +4,8 @@ stages:
 
 default:
   image: python:3.11-slim
+  tags:
+    - provenance-pm
   cache:
     key:
       files:
