@@ -1,12 +1,14 @@
-# Current Implementation vs Domain Design Review
+# Current Implementation vs Domain Design Review (archived)
+
+> **Superseded by:** [`../implementation-gap.md`](../implementation-gap.md) and [`runtime-mapping.md`](runtime-mapping.md). Kept for historical context only.
 
 Review date: 2026-06-25 (updated after domain bridge implementation)
 
-Canonical design source: `docs/domain-design/`
+Canonical design source: `docs/domain-design/proposed/`
 
 Implementation source: current Python/FastAPI demo in `pipeline/`, `app/`, `scripts/`, and `tests/`
 
-Runtime traceability: [`as-built-mapping.md`](as-built-mapping.md)
+Runtime traceability: [`runtime-mapping.md`](runtime-mapping.md)
 
 ## Post-implementation maturity (domain bridge)
 

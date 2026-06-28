@@ -1,6 +1,6 @@
 ### Artifact replacement without canonical sync
 
-> North-star governance. See [as-built-mapping.md](as-built-mapping.md) for runtime status.
+> North-star governance. See [../implemented/runtime-mapping.md](../implemented/runtime-mapping.md) for runtime status.
 
 **Failure mode:** Diagrams are updated ad hoc in thread discussions, but the repository artifact set remains stale or incomplete.
 

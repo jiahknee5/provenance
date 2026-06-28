@@ -1,6 +1,6 @@
 # Emotional Reaction Cycle
 
-> North-star target. See [as-built-mapping.md](as-built-mapping.md) for runtime status.
+> North-star target. See [../implemented/runtime-mapping.md](../implemented/runtime-mapping.md) for runtime status and [../implementation-gap.md](../implementation-gap.md) for remaining work.
 
 ```mermaid
 flowchart LR

@@ -1,9 +1,8 @@
-# As-Built ↔ North-Star Mapping
+# Runtime mapping (implemented ↔ proposed)
 
-> **North-star target:** [`docs/domain-design/`](.) describes the canonical event-sourced domain.
-> This document is the **runtime status** layer — what exists in code today, with explicit maturity labels.
-
-Review companion: [`implementation-fit-review.md`](implementation-fit-review.md) (2026-06-25).
+> **North-star target:** [`../proposed/`](../proposed/)  
+> **Gap analysis:** [`../implementation-gap.md`](../implementation-gap.md)  
+> This document maps proposed entities to code with explicit maturity labels.
 
 ## Maturity labels
 
@@ -16,7 +15,7 @@ Review companion: [`implementation-fit-review.md`](implementation-fit-review.md)
 
 ## Scope boundaries (demo by design)
 
-Per [`docs/05-build/DECISIONS.md`](../05-build/DECISIONS.md):
+Per [`docs/05-build/DECISIONS.md`](../../05-build/DECISIONS.md):
 
 - **Contextual bandit**, not RL — Thompson sampling, no sequential credit assignment (R1).
 - **Seeded replay**, not live inference — deterministic trace for Observatory (R5).
@@ -70,7 +69,7 @@ Per [`docs/05-build/DECISIONS.md`](../05-build/DECISIONS.md):
 | Purpose | Operator node graph, UI/Observatory | Business audit, catalog replay |
 | Vocabulary | INPUT, TOOL, DECISION, OUTPUT, DRIFT… | Catalog snake_case names |
 | Default | No-op unless recorder | Always-on recorder + projector on emit |
-| Envelope | seq, lane, node, phase | Full `Event-Envelope.csv` fields |
+| Envelope | seq, lane, node, phase | Full [`Event-Envelope.csv`](../proposed/provenance_event_catalog/Event-Envelope.csv) fields |
 
 ## Implementation anchors
 

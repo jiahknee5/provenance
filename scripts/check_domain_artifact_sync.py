@@ -7,13 +7,13 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CATALOG = ROOT / "docs/domain-design/provenance_event_catalog"
+CATALOG = ROOT / "docs/domain-design/proposed/provenance_event_catalog"
 REQUIRED_COMPANIONS = [
-    ROOT / "docs/domain-design/01-context-map.md",
-    ROOT / "docs/domain-design/02-aggregate-model.md",
-    ROOT / "docs/domain-design/04-sequence-diagram.md",
-    ROOT / "docs/domain-design/06-field-purpose-and-domain-data-model.md",
-    ROOT / "docs/domain-design/as-built-mapping.md",
+    ROOT / "docs/domain-design/proposed/01-context-map.md",
+    ROOT / "docs/domain-design/proposed/02-aggregate-model.md",
+    ROOT / "docs/domain-design/proposed/04-sequence-diagram.md",
+    ROOT / "docs/domain-design/proposed/06-field-purpose-and-domain-data-model.md",
+    ROOT / "docs/domain-design/implemented/runtime-mapping.md",
 ]
 
 
@@ -39,7 +39,7 @@ def _git_diff_paths() -> set[str]:
 def main() -> int:
     changed = _git_diff_paths()
     catalog_changed = any(
-        p.startswith("docs/domain-design/provenance_event_catalog/")
+        p.startswith("docs/domain-design/proposed/provenance_event_catalog/")
         for p in changed
     )
     if not catalog_changed:

@@ -1,4 +1,4 @@
-"""Canonical event envelope — matches docs/domain-design/provenance_event_catalog/Event-Envelope.csv."""
+"""Canonical event envelope — matches docs/domain-design/proposed/provenance_event_catalog/Event-Envelope.csv."""
 from __future__ import annotations
 
 from enum import Enum
