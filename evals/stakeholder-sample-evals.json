@@ -1,0 +1,67 @@
+[
+  {
+    "id": "pm_golden_summary",
+    "runner": "deterministic",
+    "scoreName": "pm_golden_summary",
+    "lane": "golden_evals",
+    "description": "PM golden eval summary stays fully passing for the canonical demo path.",
+    "input": {
+      "summary": { "passed": 18, "total": 18 }
+    }
+  },
+  {
+    "id": "gate_blocks_unsupported_claim",
+    "runner": "deterministic",
+    "scoreName": "gate_blocks_unsupported_claim",
+    "lane": "assurance",
+    "description": "Gate-blocked claims must remain absent from selected campaign output.",
+    "input": {
+      "verdict": "blocked",
+      "selected": false
+    }
+  },
+  {
+    "id": "winner_gate_cleared",
+    "runner": "deterministic",
+    "scoreName": "winner_gate_cleared",
+    "lane": "optimizer",
+    "description": "Winning campaign determination cannot select a Gate-vetoed arm.",
+    "input": {
+      "selectedArm": { "id": "proof-first", "state": "leader", "selectable": true }
+    }
+  },
+  {
+    "id": "private_signal_redaction",
+    "runner": "deterministic",
+    "scoreName": "private_signal_leakage",
+    "lane": "enrichment",
+    "description": "Private enrichment/candidate signals stay summarized in PM artifacts.",
+    "input": {
+      "artifact": "Imported 4 enrichment facts into summarized basis cards.",
+      "forbidden": ["linkedin.com/in/", "raw_pdf_text", "password", "full profile text"]
+    }
+  },
+  {
+    "id": "claim_support_judge",
+    "runner": "giskard_oss_llm",
+    "scoreName": "claim_support",
+    "lane": "copy_generation",
+    "description": "Giskard-style judge checks whether outbound copy is fully supported by evidence.",
+    "input": {
+      "copy": "Northwind completed a clinical operations rollout with Helix.",
+      "evidence": "Case study says Northwind completed a clinical operations rollout with Helix."
+    }
+  },
+  {
+    "id": "surface_policy_respected",
+    "runner": "giskard_oss_llm",
+    "scoreName": "surface_policy_respected",
+    "lane": "copy_generation",
+    "description": "Giskard-style judge checks say/allude/hold boundaries in synthetic personalization copy.",
+    "input": {
+      "copy": "Northwind appears to be investing in AI operations workflows.",
+      "policy": "allude",
+      "forbidden": "Must not state unsupported hiring claims as fact."
+    }
+  }
+]

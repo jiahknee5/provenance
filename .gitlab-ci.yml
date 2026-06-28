@@ -33,6 +33,30 @@ demo_artifacts:
       - data/demo/observe/
     expire_in: 1 week
 
+eval_monitoring:
+  stage: verify
+  allow_failure: true
+  variables:
+    EVAL_MODE: "deterministic"
+    EVAL_LLM_ENABLED: "false"
+    EVAL_LLM_MAX_CALLS: "0"
+    EVAL_SAMPLE_LIMIT: "10"
+    OPENROUTER_MODEL: "google/gemini-2.5-flash-lite"
+    LANGFUSE_EXPORT: "false"
+    CI_FAIL_ON_EVAL: "false"
+  script:
+    - python -m scripts.eval_monitoring
+  artifacts:
+    when: always
+    paths:
+      - eval-results/
+    expire_in: 1 week
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: manual
+      allow_failure: true
+    - when: never
+
 deploy_vps:
   stage: deploy
   image: alpine:3.20

@@ -5,6 +5,7 @@ __pycache__/
 *.pyc
 *.pyo
 .pytest_cache/
+.codegraph/
 # generated demo artifacts (reproducible from scripts + seed)
 data/demo/cache/
 data/demo/runs/
@@ -14,6 +15,7 @@ data/demo/users.jsonl
 data/demo/*.sqlite
 data/demo/*.sqlite-*
 data/demo/ledgers/
+eval-results/
 # verification artifacts (root-level QA/demo screenshots — never committed)
 .playwright-mcp/
 /*.png
