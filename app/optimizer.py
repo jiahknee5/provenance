@@ -43,6 +43,24 @@ def optimizer_live() -> JSONResponse:
     return JSONResponse(c.live.snapshot())
 
 
+@app.get("/api/optimizer/dashboard")
+def optimizer_dashboard() -> JSONResponse:
+    """Dashboard-shaped view of the real online optimizer.
+
+    The HTML dashboard has a separate demo trigger, but its default mode should observe the
+    same live optimizer that serves /site traffic instead of running a second client-only
+    simulation.
+    """
+    c = ctx()
+    settled = c.live.settle()
+    return JSONResponse({
+        "mode": "live",
+        "settled": settled,
+        "snapshot": c.live.snapshot(),
+        "lift": c.live.lift_report(),
+    })
+
+
 @app.post("/api/optimizer/live/settle")
 def optimizer_live_settle() -> JSONResponse:
     """Resolve impressions with no click as reward-0 (the bandit's negative evidence)."""

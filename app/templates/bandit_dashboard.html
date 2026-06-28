@@ -246,6 +246,14 @@
     .btn-danger { background: var(--danger-bg); border: 1px solid transparent; color: var(--accent-red); }
     .btn-danger:hover { border-color: rgba(192, 53, 75, 0.28); }
     .btn-sm { padding: 6px 12px; font-size: 11px; width: auto; margin-bottom: 0; border-radius: 6px; }
+    .btn:disabled, .switch input:disabled + .slider, input[type="range"]:disabled {
+      opacity: .55; cursor: not-allowed; transform: none; filter: none;
+    }
+    .run-mode-note {
+      font-size: 11px; color: var(--muted); line-height: 1.45; margin: 2px 0 14px;
+      border: 1px dashed var(--border-strong); background: var(--panel-header);
+      border-radius: 9px; padding: 9px 10px;
+    }
 
     /* Controls styling */
     .control-group { margin-bottom: 18px; }
@@ -481,12 +489,16 @@
       <div class="sp" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <a class="q-btn ghost" href="/optimizer"><i class="ph ph-arrow-left"></i> Optimizer</a>
         <a class="q-btn outline" href="/optimizer/bandit-dashboard/learn-more"><i class="ph ph-question"></i> Learn more</a>
+        <div class="view-switcher" aria-label="Run source">
+          <button id="run-btn-live" class="mode-btn active" type="button"><i class="ph ph-broadcast"></i> Live optimizer</button>
+          <button id="run-btn-demo" class="mode-btn" type="button"><i class="ph ph-play-circle"></i> Run demo</button>
+        </div>
         <div class="view-switcher" aria-label="Dashboard mode">
           <button id="mode-btn-sre" class="mode-btn active" onclick="switchMode('sre')"><i class="ph ph-gauge"></i> Prod SRE</button>
           <button id="mode-btn-spec" class="mode-btn" onclick="switchMode('specialist')"><i class="ph ph-function"></i> Specialist</button>
         </div>
         <button id="btn-open-tutorial" class="q-btn outline" type="button"><i class="ph ph-info"></i> Engineer tour</button>
-        <div id="simulation-badge" class="q-pill g"><span class="d"></span>Prod stream active</div>
+        <div id="simulation-badge" class="q-pill g"><span class="d"></span>live optimizer</div>
       </div>
     </div>
 
@@ -498,6 +510,9 @@
         <h2><i class="ph ph-sliders-horizontal"></i> Intervention controls <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#interventions" data-tooltip="Use this pane to add copy arms, pause traffic, speed up simulation, reset learning, and control Gate masking.">?</a></h2>
       </div>
       <div class="card-content">
+        <div id="run-mode-note" class="run-mode-note">
+          Live mode polls the real optimizer used by /site traffic. Use “Run demo” when you want the local simulated stream.
+        </div>
         <button id="btn-inject" class="btn btn-inject" onclick="openInjectModal()"><i class="ph ph-plus"></i> Inject candidate arm</button>
         <button id="btn-pause" class="btn btn-primary"><i class="ph ph-pause"></i> Pause live stream</button>
         <button id="btn-batch" class="btn btn-outline"><i class="ph ph-fast-forward"></i> Fast-forward 100 sends</button>
@@ -797,6 +812,8 @@
     let selectedSegmentId = 'cfo__core';
     let currentMode = 'sre'; // 'sre' vs 'specialist'
     let simTimer = null;
+    let livePollTimer = null;
+    let runMode = new URLSearchParams(window.location.search).get('mode') === 'demo' ? 'demo' : 'live';
     let isSimRunning = true;
     let liveDrawState = null;
     let confidenceScores = {}; // armId -> { pBest: 0.92, ci: [0.18, 0.26] }
@@ -812,6 +829,157 @@
           posteriors[seg.id][arm.id] = { alpha: 1, beta: 1, sends: 0, clicks: 0, unsubs: 0, status: 'active' };
         });
       });
+    }
+
+    function segmentLabel(segmentId) {
+      const known = segments.find(s => s.id === segmentId);
+      return known ? known.label : segmentId.replace(/__/g, ' / ').replace(/_/g, ' ');
+    }
+
+    function syncRunModeControls() {
+      const isDemo = runMode === 'demo';
+      const liveBtn = document.getElementById('run-btn-live');
+      const demoBtn = document.getElementById('run-btn-demo');
+      if (liveBtn) liveBtn.className = `mode-btn ${!isDemo ? 'active' : ''}`;
+      if (demoBtn) demoBtn.className = `mode-btn ${isDemo ? 'active' : ''}`;
+
+      const badge = document.getElementById('simulation-badge');
+      if (badge) badge.innerHTML = `<span class="d"></span>${isDemo ? 'demo simulation' : 'live optimizer'}`;
+
+      const note = document.getElementById('run-mode-note');
+      if (note) {
+        note.textContent = isDemo
+          ? 'Demo mode runs a local simulated stream so operators can test controls without changing real optimizer state.'
+          : 'Live mode polls the real optimizer used by /site traffic. Use “Run demo” when you want the local simulated stream.';
+      }
+
+      ['btn-inject', 'btn-pause', 'btn-batch', 'btn-reset', 'sim-speed'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = !isDemo;
+      });
+      const gate = document.getElementById('gate-active');
+      if (gate) {
+        gate.disabled = !isDemo;
+        if (!isDemo) gate.checked = true;
+      }
+    }
+
+    function setRunMode(nextMode) {
+      runMode = nextMode === 'demo' ? 'demo' : 'live';
+      const url = new URL(window.location.href);
+      if (runMode === 'demo') url.searchParams.set('mode', 'demo');
+      else url.searchParams.delete('mode');
+      window.history.replaceState({}, '', url);
+
+      clearInterval(simTimer);
+      clearInterval(livePollTimer);
+      simTimer = null;
+      livePollTimer = null;
+      liveDrawState = null;
+      syncRunModeControls();
+
+      if (runMode === 'demo') {
+        isSimRunning = true;
+        startSim();
+        drawCanvas(); renderArms(); renderSpecialistTables(); updateKPIs();
+      } else {
+        isSimRunning = false;
+        loadLiveDashboard();
+        startLivePolling();
+      }
+    }
+
+    function showLiveFeedCard(message, detail = '') {
+      const feed = document.getElementById('event-feed-list');
+      if (!feed || runMode !== 'live') return;
+      feed.innerHTML = `
+        <div class="feed-card">
+          <div class="feed-header"><span class="feed-seg">Live optimizer</span><span>real run</span></div>
+          <div class="feed-action">
+            <div><span style="color:#2E353D;">${escapeHtml(message)}</span><div style="margin-top:4px;color:var(--muted);font-size:11px;">${escapeHtml(detail)}</div></div>
+            <div><span class="outcome-tag click">Polling</span></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function applyLiveDashboardData(payload) {
+      const snapshot = payload.snapshot || {};
+      const liveSegments = snapshot.segments || {};
+      const segmentIds = Object.keys(liveSegments);
+
+      segmentIds.forEach(segmentId => {
+        if (!segments.some(s => s.id === segmentId)) {
+          segments.push({ id: segmentId, label: segmentLabel(segmentId), desc: 'Live optimizer segment.' });
+        }
+        posteriors[segmentId] = posteriors[segmentId] || {};
+        const prefix = segmentId.split('__')[0];
+        armsDefinition[prefix] = armsDefinition[prefix] || [];
+        const liveArms = liveSegments[segmentId].arms || {};
+        Object.entries(liveArms).forEach(([armId, arm]) => {
+          if (!armsDefinition[prefix].some(a => a.id === armId)) {
+            armsDefinition[prefix].push({
+              id: armId,
+              label: `Live arm ${armId}`,
+              code: arm.variant_id || armId,
+              copy: 'Live optimizer arm served by the backend action pool.',
+              claims: [],
+              latentCTR: arm.posterior_mean || 0.01,
+              unsubRate: 0,
+              color: ['#2E6FF5', '#B5731B', '#1E8A53', '#6B7480'][armsDefinition[prefix].length % 4],
+            });
+          }
+          posteriors[segmentId][armId] = {
+            alpha: arm.alpha,
+            beta: arm.beta,
+            sends: arm.impressions,
+            clicks: arm.clicks,
+            unsubs: 0,
+            pending: arm.pending,
+            status: 'active',
+          };
+        });
+      });
+
+      if (segmentIds.length && !segmentIds.includes(selectedSegmentId)) selectedSegmentId = segmentIds[0];
+
+      globalStats.sends = segmentIds.reduce((sum, segmentId) => {
+        const arms = liveSegments[segmentId].arms || {};
+        return sum + Object.values(arms).reduce((n, arm) => n + (arm.impressions || 0), 0);
+      }, 0);
+      globalStats.clicks = snapshot.live_clicks || 0;
+      globalStats.unsubs = 0;
+      globalStats.blockedLies = 0;
+
+      buildTabs();
+      computeConfidence(selectedSegmentId);
+      drawCanvas();
+      drawRegretCanvas();
+      renderArms();
+      renderSpecialistTables();
+      updateKPIs();
+
+      const lift = payload.lift || {};
+      const liftText = lift.lift === null || lift.lift === undefined
+        ? lift.note || 'Need resolved impressions in both bandit and control slices.'
+        : `Measured lift ${(lift.lift * 100).toFixed(1)} pts (${lift.relative_lift_pct ?? 'n/a'}% relative).`;
+      showLiveFeedCard('Real optimizer telemetry loaded.', `${globalStats.sends} impressions · ${globalStats.clicks} clicks · ${liftText}`);
+    }
+
+    async function loadLiveDashboard() {
+      if (runMode !== 'live') return;
+      try {
+        const response = await fetch('/api/optimizer/dashboard', { headers: { 'accept': 'application/json' } });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        applyLiveDashboardData(await response.json());
+      } catch (err) {
+        showLiveFeedCard('Live optimizer telemetry unavailable.', String(err && err.message ? err.message : err));
+      }
+    }
+
+    function startLivePolling() {
+      clearInterval(livePollTimer);
+      livePollTimer = setInterval(loadLiveDashboard, 5000);
     }
 
     // --- MONTE CARLO CONFIDENCE & CREDIBLE INTERVAL ENGINE ---
@@ -963,6 +1131,7 @@
 
       appendFeed(segmentId, chosenArm, outcome, isExploiting, armStats, rolledSamples[chosenArmId]);
       updateKPIs();
+      computeConfidence(segmentId);
 
       // Math feed append
       const updatedMean = armStats.alpha / (armStats.alpha + armStats.beta);
@@ -971,7 +1140,6 @@
       appendSpecialistMathLog(segmentId, chosenArmId, updatedMean, klDiv, pBest);
 
       if (segmentId === selectedSegmentId) {
-        computeConfidence(segmentId);
         drawCanvas();
         drawRegretCanvas();
         renderArms();
@@ -1169,7 +1337,7 @@
 
           specMathBody.innerHTML += `
             <tr>
-              <td style="font-weight: 700; color: ${arm.color}">${arm.label} (${arm.id})</td>
+              <td style="font-weight: 700; color: ${arm.color}">${escapeHtml(arm.label)} (${escapeHtml(arm.id)})</td>
               <td>${(mean*100).toFixed(2)}%</td>
               <td>${(modeVal*100).toFixed(2)}%</td>
               <td>${variance.toFixed(5)}</td>
@@ -1482,15 +1650,16 @@
         let statusBadge = isWinner ? `<span class="badge-float winning-badge">Learned leader</span>` : '';
         if (isMasked) statusBadge = `<span class="badge-float masked-badge">Vetoed by Gate</span>`;
         if (isArchived) statusBadge = `<span class="badge-float archived-badge">Archived - data saved</span>`;
+        const safeCopy = escapeHtml(arm.copy.replace('{name}', 'Alex').replace('{company}', 'Gauntlet Health')).replace(/\n/g, '<br>');
 
         card.innerHTML = `
           ${statusBadge}
           <div class="variant-header">
-            <span class="variant-name">${arm.label}</span>
-            <span class="variant-code">${arm.code}</span>
+            <span class="variant-name">${escapeHtml(arm.label)}</span>
+            <span class="variant-code">${escapeHtml(arm.code)}</span>
             ${!isMasked && !isArchived ? `<span class="badge-float confidence-pill" style="right: 170px; top: 18px;">P(Best): ${pBestPct}%</span>` : ''}
           </div>
-          <div class="variant-copy">${arm.copy.replace('{name}', 'Alex').replace('{company}', 'Gauntlet Health')}</div>
+          <div class="variant-copy">${safeCopy}</div>
           <div class="claim-pill-list"><span class="claim-label">Verified Claims:</span>${claimsHtml}</div>
           
           <div class="metrics-ribbon">
@@ -1589,6 +1758,11 @@
     }
 
     function setupSyncControls() {
+      const liveRunBtn = document.getElementById('run-btn-live');
+      if (liveRunBtn) liveRunBtn.onclick = () => setRunMode('live');
+      const demoRunBtn = document.getElementById('run-btn-demo');
+      if (demoRunBtn) demoRunBtn.onclick = () => setRunMode('demo');
+
       const pauseBtn = document.getElementById('btn-pause');
       if (pauseBtn) pauseBtn.onclick = () => {
         if (isSimRunning) {
@@ -1670,13 +1844,20 @@
     initPosteriors();
     buildTabs();
     computeConfidence(selectedSegmentId);
-    startSim();
     drawCanvas();
     drawRegretCanvas();
     renderArms();
     renderSpecialistTables();
     updateKPIs();
     setupSyncControls();
+    syncRunModeControls();
+    if (runMode === 'demo') {
+      startSim();
+    } else {
+      isSimRunning = false;
+      loadLiveDashboard();
+      startLivePolling();
+    }
     window.addEventListener('resize', () => { drawCanvas(); drawRegretCanvas(); });
   </script>
 </div>

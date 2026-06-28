@@ -1,0 +1,56 @@
+....................................................................F... [ 36%]
+....F.......F........................................................... [ 73%]
+...................................................                      [100%]
+=================================== FAILURES ===================================
+______________________ test_creative_agents_and_the_gate _______________________
+
+    def test_creative_agents_and_the_gate():
+        from pipeline.personalization import creative as CR
+        a = CR.angle_copy("mining", "peer", "Arizona")
+        assert a == CR.angle_copy("mining", "peer", "Arizona")          # deterministic angle
+        assert "mining" in a["headline"].lower()
+        # the Gate blocks the unprovable, clears the provable
+        assert CR.verify_copy(["The #1 platform for mining"], "industry=mining", None, "allude")[0]["ok"] is False
+        assert CR.verify_copy(["Acme Mining, welcome back"], "x", "Acme Mining", "allude")[0]["ok"] is False
+        assert CR.verify_copy(["Built for mining teams across Arizona"], "x", "Acme Mining", "allude")[0]["ok"] is True
+        d = CR.ai_copy(industry="mining", region="Arizona", company=None, city=None, angle="peer", policy="allude")
+>       assert d["source"] == "template" and d["headline"] and d["blocked_example"]["ok"] is False  # falls back, Gate visible
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert ('ai' == 'template'
+E         
+E         - template
+E         + ai)
+
+tests/test_full_suite.py:191: AssertionError
+_____________________ test_tier3_competitor_agent_is_gated _____________________
+
+    def test_tier3_competitor_agent_is_gated():
+        """Tier-3 competitive copy leads with provable differentiators; the creepy arm is blocked."""
+        from pipeline.personalization import creative as CR
+        b = CR.competitor_brief(industry="technology", region="Texas")
+>       assert b["differentiators"] and b["source"] == "template"          # deterministic offline
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert (['Complete transaction lineage captured at API layer, not inferred retroactively', 'Immutable audit trail of every dat...ith cryptographic verification', 'Real-time provenance metadata embedded in native platform architecture, not bolt-on'] and 'ai' == 'template'
+E         
+E         - template
+E         + ai)
+
+tests/test_full_suite.py:302: AssertionError
+____________________ test_integrations_show_base_vs_connect ____________________
+
+    def test_integrations_show_base_vs_connect():
+        """Landing + Help show the built-in enrichment base vs the connectable stack (data + value each)."""
+        assert "/help/integrations" in c.get("/").text           # landing links to the detail
+        t = c.get("/help/integrations")
+        assert t.status_code == 200
+        assert "Built in" in t.text and "Connect your stack" in t.text
+>       assert "People Data Labs" in t.text and "Reverse-IP" in t.text   # the wired base
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert ('People Data Labs' in '<!doctype html>\n<html lang="en">\n<head>\n  <meta charset="utf-8">\n  <meta name="viewport" content="width=device-wi...document.getElementById(\'cmdk-btn\');if(btn)btn.addEventListener(\'click\',open);\n})();\n</script>\n</body>\n</html>')
+E        +  where '<!doctype html>\n<html lang="en">\n<head>\n  <meta charset="utf-8">\n  <meta name="viewport" content="width=device-wi...document.getElementById(\'cmdk-btn\');if(btn)btn.addEventListener(\'click\',open);\n})();\n</script>\n</body>\n</html>' = <Response [200 OK]>.text
+
+tests/test_full_suite.py:408: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_full_suite.py::test_creative_agents_and_the_gate - Assertio...
+FAILED tests/test_full_suite.py::test_tier3_competitor_agent_is_gated - Asser...
+FAILED tests/test_full_suite.py::test_integrations_show_base_vs_connect - ass...
