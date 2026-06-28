@@ -31,6 +31,11 @@ Writes the append-only event ledger `data/demo/observe/*.jsonl` (one per lane), 
 graph (`topology.json`), the per-node input/decision/output evals (`node_evals.json`), the
 profile DB, and `meta.json` (P1–P5 + E1 verdicts). Byte-identical re-run in synthetic mode.
 
+Also (re)builds the domain event streams under `data/demo/streams/**`. These are **generated
+and gitignored** — a fresh checkout has none until you run this. Writes are append-only with
+no pre-clean, so re-running over an existing dir *appends duplicates*; to reproduce a clean
+seed-identical set, wipe first: `rm -rf data/demo/streams && .venv/bin/python -m scripts.trace`.
+
 ## Start the app (form + website + inspector + Observatory + enrichment catalog)
 ```bash
 PYTHONPATH=. .venv/bin/python -m uvicorn app.main:app --port 8099
