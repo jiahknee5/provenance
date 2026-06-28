@@ -28,6 +28,11 @@ def home(request: Request):
     return templates.TemplateResponse(request, "home.html", {})
 
 
+@app.get("/healthz")
+def healthz():
+    return {"ok": True}
+
+
 @app.get("/talk")
 def talk():
     """Internal enablement deck (GTM-is-engineering / trust-is-the-last-edge), served from static."""

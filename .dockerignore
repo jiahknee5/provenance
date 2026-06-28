@@ -5,6 +5,7 @@
 *.pyo
 .pytest_cache
 .playwright-mcp
+.cache
 data/
 *.png
 .DS_Store

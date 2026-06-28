@@ -16,6 +16,22 @@
     {% elif b.type == 'ol' %}<ol class="hol">{% for it in b['items'] %}<li>{{ it|safe }}</li>{% endfor %}</ol>
     {% elif b.type == 'note' %}<div class="hnote">{{ b.html|safe }}</div>
     {% elif b.type == 'kv' %}{% if b.title %}<div class="q-kvtitle">{{ b.title }}</div>{% endif %}<table class="q-kv"><tbody>{% for r in b.rows %}<tr><td>{{ r[0]|safe }}</td><td>{{ r[1]|safe }}</td></tr>{% endfor %}</tbody></table>
+    {% elif b.type == 'table' %}
+      {% if b.title %}<div class="q-kvtitle">{{ b.title }}</div>{% endif %}
+      <table class="q-kv">
+        <thead><tr>{% for col in b.cols %}<th>{{ col|safe }}</th>{% endfor %}</tr></thead>
+        <tbody>
+        {% for r in b.rows %}
+          <tr>
+          {% if b.cols|length == 3 and 'adds' in b.cols[1]|lower and 'matters' in b.cols[2]|lower %}
+            <td>{{ r[0]|safe }}</td><td><b>Adds:</b> {{ r[1]|safe }}</td><td><b>Value:</b> {{ r[2]|safe }}</td>
+          {% else %}
+            {% for cell in r %}<td>{{ cell|safe }}</td>{% endfor %}
+          {% endif %}
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
     {% elif b.type == 'code' %}<pre class="hcode">{{ b.text }}</pre>
     {% endif %}
   {% endfor %}

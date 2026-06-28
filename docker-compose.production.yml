@@ -1,0 +1,53 @@
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - ${APP_ROOT:-/opt/provenance-pm}/.env
+    environment:
+      PORT: ${PORT:-8000}
+      PROVENANCE_DB_PATH: ${PROVENANCE_DB_PATH:-/data/provenance.sqlite}
+      PROVENANCE_PROFILES_DB_PATH: ${PROVENANCE_PROFILES_DB_PATH:-/data/profiles.sqlite}
+      PROVENANCE_CUSTOMERS_DB_PATH: ${PROVENANCE_CUSTOMERS_DB_PATH:-/data/customers.sqlite}
+      PROVENANCE_SEED: ${PROVENANCE_SEED:-1729}
+      PROVENANCE_PROFILE: ${PROVENANCE_PROFILE:-deterministic}
+      PROVENANCE_ENRICH: ${PROVENANCE_ENRICH:-synthetic}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      CLAUDE_JUDGE_MODEL: ${CLAUDE_JUDGE_MODEL:-claude-haiku-4-5-20251001}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      PDL_API_KEY: ${PDL_API_KEY:-}
+    volumes:
+      - ${APP_ROOT:-/opt/provenance-pm}/data:/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import os, urllib.request; port=os.environ.get('PORT','8000'); urllib.request.urlopen(f'http://127.0.0.1:{port}/healthz', timeout=5).read()\"",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=${TRAEFIK_NETWORK:-dokploy-network}"
+      - "traefik.http.routers.provenance-pm-http.rule=Host(`${DOMAIN_REAL:-apt.af5.org}`)"
+      - "traefik.http.routers.provenance-pm-http.entrypoints=web"
+      - "traefik.http.routers.provenance-pm-http.middlewares=redirect-to-https@file"
+      - "traefik.http.routers.provenance-pm-http.service=provenance-pm"
+      - "traefik.http.routers.provenance-pm-https.rule=Host(`${DOMAIN_REAL:-apt.af5.org}`)"
+      - "traefik.http.routers.provenance-pm-https.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}"
+      - "traefik.http.routers.provenance-pm-https.tls=true"
+      - "traefik.http.routers.provenance-pm-https.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}"
+      - "traefik.http.routers.provenance-pm-https.service=provenance-pm"
+      - "traefik.http.services.provenance-pm.loadbalancer.server.port=${PORT:-8000}"
+    networks:
+      - dokploy
+
+networks:
+  dokploy:
+    external: true
+    name: ${TRAEFIK_NETWORK:-dokploy-network}
