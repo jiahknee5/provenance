@@ -108,16 +108,25 @@ def test_asset_lifecycle_events(domain_recorder):
     from pipeline.domain.models.asset import Asset, AssetStatus
 
     a = Asset(asset_id="cfo__core__email__A", segment="cfo", channel="email",
-              arm_label="A", status=AssetStatus.LIVE)
+              arm_label="A", status=AssetStatus.LIVE, emotional_vector="fear_PAS")
     domain_asset.emit_draft_created(a)
+    domain_asset.emit_emotional_vector_tagged(a)
     domain_asset.emit_validated(a, cleared=True, rules_version="r1")
+    domain_asset.emit_approved(a)
+    domain_asset.emit_publish_requested(
+        a.asset_id, recipient_id="r1", segment="cfo", channel="email", campaign="c1",
+    )
     domain_asset.emit_dispatched(a.asset_id, recipient_id="r1", segment="cfo",
                                  channel="email", campaign="c1")
     events = domain_recorder.read_stream(StreamType.ASSET, "asset_cfo__core__email__A")
     names = [e.event_name for e in events]
-    assert names == ["asset_draft_created", "asset_validated", "asset_dispatched"]
-    assert [e.stream_position for e in events] == [1, 2, 3]
-    assert events[1].payload["cleared"] is True
+    assert names == [
+        "asset_draft_created", "asset_emotional_vector_tagged", "asset_validated",
+        "asset_approved", "asset_publish_requested", "asset_dispatched",
+    ]
+    assert [e.stream_position for e in events] == [1, 2, 3, 4, 5, 6]
+    assert events[1].payload["emotional_vector"] == "fear_PAS"
+    assert events[2].payload["cleared"] is True
 
 
 def test_dispatch_failed_event(domain_recorder):
@@ -153,3 +162,28 @@ def test_catalog_closed():
     assert "claim_verified" in EVENT_NAMES
     with pytest.raises(ValueError):
         assert_known_event("not_a_real_event")
+
+
+def test_claim_extracted_on_library_seed(domain_recorder):
+    from pipeline.library.library import ClaimsLibrary
+
+    ClaimsLibrary.from_seed()
+    events = domain_recorder.read_stream(StreamType.LEAD, "lead_c_tco")
+    assert [e.event_name for e in events] == ["claim_extracted"]
+    assert events[0].payload["source_id"] == "s_casestudy"
+
+
+def test_claim_superseded_on_source_rebind(domain_recorder):
+    from pipeline.library.library import ClaimsLibrary
+
+    lib = ClaimsLibrary.from_seed()
+    c = lib.claims["c_tco"]
+    prior = c.source_version
+    lib.apply_source_change("s_casestudy", lib.source("s_casestudy").text + " Updated.")
+    lib.mark_verified("c_tco")
+    events = domain_recorder.read_stream(StreamType.LEAD, "lead_c_tco")
+    names = [e.event_name for e in events]
+    assert "claim_superseded" in names
+    superseded = next(e for e in events if e.event_name == "claim_superseded")
+    assert superseded.payload["prior_source_version"] == prior
+    assert superseded.payload["new_source_version"] != prior
