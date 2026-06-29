@@ -1,0 +1,1864 @@
+{% extends "shell.html" %}
+{% block title %}apt — Optimizer · Bandit dashboard{% endblock %}
+{% block crumb %}<i class="ph ph-trend-up"></i> Optimizer / Bandit dashboard{% endblock %}
+{% block content %}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css">
+
+  <style>
+    :root {
+      --bg: #FFFFFF;
+      --panel: #FFFFFF;
+      --panel-glass: #FFFFFF;
+      --panel-header: #FCFCFD;
+      --border: #E5E9EF;
+      --border-strong: #C9D2DC;
+      --fill: #F1F3F5;
+      --ink: #1A1C20;
+      --slate: #2E353D;
+      --muted: #6B7480;
+      --label: #9AA6B4;
+      --accent-blue: #2E6FF5;
+      --accent-cyan: #2E6FF5;
+      --accent-green: #1E8A53;
+      --accent-red: #C0354B;
+      --accent-amber: #B5731B;
+      --accent-explore: #B5731B;
+      --accent-ink: #1B1E23;
+      --success-bg: #EAF7EF;
+      --warn-bg: #FEF4E8;
+      --danger-bg: #FDEBEE;
+      --info-bg: #EAF1FE;
+      --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+      --shadow-card: 0 1px 2px rgba(16,24,40,.04), 0 1px 3px rgba(16,24,40,.03);
+      --shadow-pop: 0 1px 2px rgba(16,24,40,.04), 0 24px 60px -28px rgba(16,24,40,.18);
+      --ease: cubic-bezier(.2,0,0,1);
+      --t: .28s;
+    }
+
+    .bandit-page, .bandit-page * { box-sizing: border-box; }
+    .bandit-page {
+      color: var(--slate);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      letter-spacing: -.01em;
+      max-width: 1560px;
+    }
+
+    /* Top Header & Mode Switcher */
+    .bandit-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .brand-title h1 {
+      font-size: 30px;
+      line-height: 1.1;
+      font-weight: 600;
+      letter-spacing: -.025em;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--ink);
+    }
+
+    .brand-title h1 span.grad {
+      color: var(--slate);
+    }
+
+    .brand-title p { font-size: 14px; color: var(--muted); margin-top: 5px; }
+
+    .view-switcher {
+      display: flex;
+      background: var(--fill);
+      padding: 3px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .mode-btn {
+      padding: 7px 13px;
+      border-radius: 8px;
+      border: none;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--t) var(--ease);
+      background: transparent;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .mode-btn.active {
+      background: var(--panel);
+      color: var(--ink);
+      box-shadow: var(--shadow-card);
+    }
+
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--success-bg);
+      border: 1px solid transparent;
+      color: var(--accent-green);
+    }
+
+    .status-badge::before {
+      content: ""; width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent-green); animation: pulse 1.8s var(--ease) infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+
+    /* Grid Layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 330px 1fr 390px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    @media (max-width: 1400px) { .dashboard-grid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      transition: border-color var(--t) var(--ease), box-shadow var(--t) var(--ease);
+    }
+    body.specialist-mode .card {
+      border-color: var(--border-strong);
+    }
+
+    .card-header {
+      background: var(--panel-header); padding: 12px 16px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+
+    .card-header h2 {
+      font-size: 14px; font-weight: 600; color: var(--ink); text-transform: none;
+      letter-spacing: -.01em; display: flex; align-items: center; gap: 8px;
+    }
+
+    .card-content { padding: 16px; }
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: var(--label);
+      margin: 0 0 10px;
+    }
+
+    /* Tooltip styling */
+    .tip {
+      display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px;
+      border-radius: 50%; background: var(--fill); border: 1px solid var(--border);
+      color: var(--muted); font-size: 11px; font-weight: 700; cursor: help; position: relative; transition: all 0.2s;
+    }
+    .tip:hover { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
+    .tip[data-tooltip]::after {
+      content: attr(data-tooltip); position: absolute; bottom: calc(100% + 8px); left: 50%;
+      transform: translateX(-50%) translateY(4px); width: 240px; padding: 10px 14px; border-radius: 8px;
+      background: var(--panel); border: 1px solid var(--border); color: var(--slate); font-size: 12px; font-weight: 400;
+      line-height: 1.4; text-transform: none; letter-spacing: normal; pointer-events: none; opacity: 0;
+      transition: all 0.2s var(--ease); box-shadow: var(--shadow-pop); z-index: 1000;
+    }
+    .tip:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .help-tip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: help;
+      position: relative;
+      transition: all var(--t) var(--ease);
+      text-decoration: none;
+      text-transform: none;
+      letter-spacing: 0;
+      flex: none;
+    }
+    .help-tip:hover { background: var(--info-bg); color: var(--accent-blue); border-color: transparent; text-decoration: none; }
+    .help-tip[data-tooltip]::after {
+      content: attr(data-tooltip) " Click for examples.";
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      width: 280px;
+      padding: 10px 12px;
+      border-radius: 9px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--slate);
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 1.45;
+      pointer-events: none;
+      opacity: 0;
+      box-shadow: var(--shadow-pop);
+      z-index: 1000;
+    }
+    .help-tip:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+      padding: 9px 13px; border-radius: 10px; border: 1px solid transparent; font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all var(--t) var(--ease); font-family: var(--font-sans); margin-bottom: 10px;
+    }
+    .btn-primary { background: var(--accent-blue); color: white; }
+    .btn-primary:hover { filter: brightness(1.07); transform: translateY(-1px); }
+    .btn-inject { background: var(--accent-ink); color: white; }
+    .btn-inject:hover { background: #000000; transform: translateY(-1px); }
+    .btn-tutorial { background: var(--panel); color: var(--slate); border-color: var(--border-strong); }
+    .btn-tutorial:hover { background: var(--fill); border-color: var(--muted); }
+    .btn-outline { background: var(--panel); border: 1px solid var(--border-strong); color: var(--slate); }
+    .btn-outline:hover { background: var(--fill); border-color: var(--muted); }
+    .btn-danger { background: var(--danger-bg); border: 1px solid transparent; color: var(--accent-red); }
+    .btn-danger:hover { border-color: rgba(192, 53, 75, 0.28); }
+    .btn-sm { padding: 6px 12px; font-size: 11px; width: auto; margin-bottom: 0; border-radius: 6px; }
+    .btn:disabled, .switch input:disabled + .slider, input[type="range"]:disabled {
+      opacity: .55; cursor: not-allowed; transform: none; filter: none;
+    }
+    .run-mode-note {
+      font-size: 11px; color: var(--muted); line-height: 1.45; margin: 2px 0 14px;
+      border: 1px dashed var(--border-strong); background: var(--panel-header);
+      border-radius: 9px; padding: 9px 10px;
+    }
+
+    /* Controls styling */
+    .control-group { margin-bottom: 18px; }
+    .control-group label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 8px; font-weight: 600; }
+
+    .switch-box {
+      display: flex; align-items: center; justify-content: space-between; padding: 12px 14px;
+      background: var(--panel-header); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px;
+    }
+    .switch { position: relative; display: inline-block; width: 48px; height: 26px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-strong); transition: .16s cubic-bezier(.3,0,.1,1); border-radius: 26px; border: 1px solid var(--border-strong); }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: #FBFCFE; transition: .16s cubic-bezier(.3,0,.1,1); border-radius: 50%; box-shadow: var(--shadow-card); }
+    input:checked + .slider { background-color: var(--accent-blue); border-color: var(--accent-blue); }
+    input:checked + .slider:before { transform: translateX(22px); }
+
+    /* KPI Stats Grid */
+    .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+    .kpi-card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; }
+    .kpi-value { font-size: 24px; font-weight: 600; font-family: var(--font-sans); margin-top: 4px; color: var(--ink); letter-spacing: -.02em; }
+    .kpi-title { font-size: 11px; color: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+
+    /* EE Meter */
+    .ee-meter-card { background: var(--panel-header); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-top: 16px; }
+    .ee-header { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
+    .ee-bar-bg { height: 10px; background: var(--fill); border-radius: 6px; overflow: hidden; display: flex; border: 1px solid var(--border); }
+    .ee-exploit { height: 100%; background: var(--accent-blue); transition: width 0.4s ease; }
+    .ee-explore { height: 100%; background: var(--accent-explore); transition: width 0.4s ease; }
+
+    /* Alert Banners */
+    .alert-banner {
+      padding: 12px 16px; border-radius: 10px; font-size: 12px; font-weight: 600; margin-bottom: 16px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .alert-normal { background: var(--success-bg); border: 1px solid transparent; color: var(--accent-green); }
+    .alert-warn { background: var(--warn-bg); border: 1px solid transparent; color: var(--accent-amber); }
+
+    /* Micro Segment Filter Tabs */
+    .segment-subtext { font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px; }
+    .tab { padding: 9px 13px; font-size: 13px; font-weight: 500; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; color: var(--muted); cursor: pointer; white-space: nowrap; transition: all var(--t) var(--ease); }
+    .tab:hover { background: var(--fill); color: var(--ink); }
+    .tab.active { background: var(--info-bg); border-color: transparent; color: var(--accent-blue); }
+
+    /* Canvas plot */
+    .chart-container { position: relative; width: 100%; height: 320px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+    canvas { width: 100%; height: 100%; }
+
+    /* Variant Performance Cards */
+    .variants-container { display: flex; flex-direction: column; gap: 16px; }
+    .variant-card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px 22px; position: relative; transition: all 0.25s; }
+    .variant-card.winning { border-color: rgba(30, 138, 83, 0.35); background: var(--success-bg); }
+    .variant-card.masked { opacity: 0.62; border-style: dashed; border-color: rgba(192, 53, 75, 0.35); background: var(--danger-bg); }
+    .variant-card.archived { opacity: 0.68; border-style: dotted; border-color: var(--border-strong); background: var(--panel-header); }
+
+    .badge-float { position: absolute; top: 18px; right: 22px; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 6px; letter-spacing: 0.6px; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+    .winning-badge { background: var(--success-bg); color: var(--accent-green); border: 1px solid transparent; }
+    .masked-badge { background: var(--danger-bg); color: var(--accent-red); border: 1px solid transparent; }
+    .archived-badge { background: var(--fill); color: var(--muted); border: 1px solid var(--border); }
+    .confidence-pill { background: var(--info-bg); color: var(--accent-blue); border: 1px solid transparent; font-family: var(--font-mono); }
+
+    .variant-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; padding-right: 180px; }
+    .variant-name { font-size: 16px; font-weight: 700; }
+    .variant-code { font-family: var(--font-mono); font-size: 12px; padding: 2px 8px; border-radius: 4px; background: var(--fill); color: var(--muted); }
+    .variant-card.variant-A .variant-name { color: var(--accent-blue); }
+    .variant-card.variant-B .variant-name { color: var(--accent-amber); }
+    .variant-card.variant-LIE .variant-name { color: var(--accent-red); }
+
+    .variant-copy { font-size: 13px; color: var(--slate); margin-bottom: 14px; white-space: pre-line; background: var(--panel-header); padding: 12px 14px; border-radius: 8px; border-left: 3px solid var(--border-strong); font-family: var(--font-mono); }
+
+    .claim-pill-list { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .claim-label { font-size: 11px; color: var(--muted); font-weight: 600; margin-right: 4px; }
+    .claim-pill { font-size: 11px; font-family: var(--font-mono); background: var(--panel); border: 1px solid var(--border); padding: 3px 8px; border-radius: 6px; color: var(--muted); }
+    .claim-pill.verified { border-color: transparent; color: var(--accent-green); background: var(--success-bg); }
+    .claim-pill.unverified { border-color: transparent; color: var(--accent-red); background: var(--danger-bg); }
+
+    .metrics-ribbon { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; border-top: 1px solid var(--border); padding-top: 14px; margin-bottom: 12px; }
+    @media (max-width: 1100px) { .metrics-ribbon { grid-template-columns: repeat(3, 1fr); } }
+    .metric-stat { display: flex; flex-direction: column; gap: 2px; }
+    .metric-stat dt { font-size: 10px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 4px; text-transform: uppercase; }
+    .metric-stat dd { font-size: 14px; font-weight: 700; font-family: var(--font-mono); }
+
+    /* Under Hood Accordion & Arm Controls */
+    .arm-actions-footer { display: flex; gap: 10px; margin-top: 12px; }
+    .btn-under-hood { flex: 1; padding: 8px 14px; background: var(--info-bg); border: 1px solid transparent; border-radius: 8px; color: var(--accent-blue); font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; }
+    .btn-under-hood:hover { border-color: rgba(46, 111, 245, 0.28); }
+    
+    .hood-content { margin-top: 12px; padding: 14px; background: var(--panel-header); border: 1px solid var(--border); border-radius: 8px; font-size: 12px; animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+    .hood-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; font-family: var(--font-mono); }
+    .hood-math { border-top: 1px dashed var(--border-strong); padding-top: 10px; color: var(--slate); line-height: 1.5; }
+
+    /* Live Feed Ticker */
+    .event-feed { height: 600px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 6px; }
+    .event-feed::-webkit-scrollbar { width: 5px; }
+    .event-feed::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 5px; }
+    .feed-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 12px; animation: popIn 0.3s var(--ease); }
+    @keyframes popIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .feed-header { display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; margin-bottom: 6px; }
+    .feed-seg { font-weight: 700; color: var(--ink); }
+    .feed-action { display: flex; justify-content: space-between; align-items: center; }
+    .reason-pill { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; }
+    .reason-pill.exploit { background: var(--info-bg); color: var(--accent-blue); border: 1px solid transparent; }
+    .reason-pill.explore { background: var(--warn-bg); color: var(--accent-amber); border: 1px solid transparent; }
+    .outcome-tag { font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; }
+    .outcome-tag.click { background: var(--success-bg); color: var(--accent-green); }
+    .outcome-tag.no-click { background: var(--fill); color: var(--muted); }
+    .outcome-tag.unsub { background: var(--danger-bg); color: var(--accent-red); }
+
+    /* Modal Overlay */
+    .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(16,24,40,.28); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+    .modal-box { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; width: 100%; max-width: 520px; padding: 24px; box-shadow: var(--shadow-pop); font-family: var(--font-sans); color: var(--slate); }
+    .modal-box h3 { font-size: 18px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+    .modal-box p { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--label); margin-bottom: 6px; }
+    .form-group input, .form-group textarea { width: 100%; padding: 10px 12px; background: var(--panel); border: 1px solid var(--border-strong); border-radius: 9px; color: var(--ink); font-family: var(--font-mono); font-size: 13px; outline: none; }
+    .form-group input:focus, .form-group textarea:focus { border-color: var(--accent-blue); }
+    .modal-btns { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+
+    /* Driver.js Custom Dark Theme Overrides */
+    .driver-popover.driverjs-theme { background-color: var(--panel) !important; color: var(--slate) !important; border: 1px solid var(--border) !important; box-shadow: var(--shadow-pop) !important; border-radius: 14px !important; padding: 20px !important; font-family: var(--font-sans) !important; }
+    .driver-popover.driverjs-theme .driver-popover-title { font-size: 16px !important; font-weight: 600 !important; color: var(--ink) !important; margin-bottom: 8px !important; }
+    .driver-popover.driverjs-theme .driver-popover-description { color: var(--slate) !important; font-size: 13px !important; line-height: 1.6 !important; }
+    .driver-popover.driverjs-theme button { background: var(--accent-blue) !important; color: white !important; border: none !important; border-radius: 8px !important; padding: 8px 14px !important; font-size: 12px !important; font-weight: 600 !important; }
+    .driver-popover.driverjs-theme button:hover { filter: brightness(1.07) !important; }
+
+    /* Tab Panes */
+    .tab-content {
+      width: 100%;
+    }
+    
+    /* Specialist Widescreen Grid */
+    .specialist-grid {
+      display: grid;
+      grid-template-columns: 330px 1fr 410px;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 1400px) { .specialist-grid { grid-template-columns: 1fr; } }
+    
+    .stats-ribbon {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 768px) { .stats-ribbon { grid-template-columns: 1fr 1fr; } }
+    
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      margin-top: 10px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .matrix-table th, .matrix-table td {
+      padding: 8px 10px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .matrix-table th {
+      background: var(--panel-header);
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 9px;
+    }
+    .matrix-table tr:hover {
+      background: var(--panel-header);
+    }
+    .matrix-self {
+      background: var(--fill);
+      color: var(--muted);
+    }
+    
+    .spec-math-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      margin-top: 10px;
+    }
+    .spec-math-table th, .spec-math-table td {
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .spec-math-table th {
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 9px;
+    }
+    
+    .spec-math-log {
+      height: 200px;
+      overflow-y: auto;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      background: var(--panel-header);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .spec-math-log::-webkit-scrollbar { width: 4px; }
+    .spec-math-log::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+
+    input[type="range"] { accent-color: var(--accent-blue); }
+    :where(button, input, textarea, .tab, .mode-btn, .btn-under-hood):focus-visible {
+      outline: 2px solid var(--accent-blue);
+      outline-offset: 2px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+    }
+  </style>
+  <div class="bandit-page">
+    <div class="q-pagehead bandit-topbar">
+      <div class="brand-title">
+        <span class="q-pill b" style="margin-bottom:10px"><span class="d"></span>Optimizer</span>
+        <h1>Bandit dashboard</h1>
+        <p><b style="color:var(--slate)">Proves:</b> Thompson sampling can optimize copy while the Gate keeps unverified claims out of the action pool.</p>
+      </div>
+
+      <div class="sp" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <a class="q-btn ghost" href="/optimizer"><i class="ph ph-arrow-left"></i> Optimizer</a>
+        <a class="q-btn outline" href="/optimizer/bandit-dashboard/learn-more"><i class="ph ph-question"></i> Learn more</a>
+        <div class="view-switcher" aria-label="Run source">
+          <button id="run-btn-live" class="mode-btn active" type="button"><i class="ph ph-broadcast"></i> Live optimizer</button>
+          <button id="run-btn-demo" class="mode-btn" type="button"><i class="ph ph-play-circle"></i> Run demo</button>
+        </div>
+        <div class="view-switcher" aria-label="Dashboard mode">
+          <button id="mode-btn-sre" class="mode-btn active" onclick="switchMode('sre')"><i class="ph ph-gauge"></i> Prod SRE</button>
+          <button id="mode-btn-spec" class="mode-btn" onclick="switchMode('specialist')"><i class="ph ph-function"></i> Specialist</button>
+        </div>
+        <button id="btn-open-tutorial" class="q-btn outline" type="button"><i class="ph ph-info"></i> Engineer tour</button>
+        <div id="simulation-badge" class="q-pill g"><span class="d"></span>live optimizer</div>
+      </div>
+    </div>
+
+  <div class="dashboard-grid">
+    
+    <!-- Left Column: Controls & Intuitive Explanations -->
+    <aside class="card">
+      <div class="card-header">
+        <h2><i class="ph ph-sliders-horizontal"></i> Intervention controls <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#interventions" data-tooltip="Use this pane to add copy arms, pause traffic, speed up simulation, reset learning, and control Gate masking.">?</a></h2>
+      </div>
+      <div class="card-content">
+        <div id="run-mode-note" class="run-mode-note">
+          Live mode polls the real optimizer used by /site traffic. Use “Run demo” when you want the local simulated stream.
+        </div>
+        <button id="btn-inject" class="btn btn-inject" onclick="openInjectModal()"><i class="ph ph-plus"></i> Inject candidate arm</button>
+        <button id="btn-pause" class="btn btn-primary"><i class="ph ph-pause"></i> Pause live stream</button>
+        <button id="btn-batch" class="btn btn-outline"><i class="ph ph-fast-forward"></i> Fast-forward 100 sends</button>
+        <button id="btn-reset" class="btn btn-danger"><i class="ph ph-arrow-clockwise"></i> Reset memory</button>
+
+        <div class="control-group" style="margin-top: 20px;">
+          <label for="sim-speed">
+            <span>Traffic Stream Pace</span>
+            <span id="pace-text" style="font-family: var(--font-mono); color: var(--accent-blue);">800ms</span>
+          </label>
+          <input type="range" id="sim-speed" min="100" max="2500" value="800" style="width: 100%;">
+        </div>
+
+        <div class="switch-box">
+          <div>
+            <div style="font-size: 13px; font-weight: 700; color: var(--ink);">Lawful Gate Masking</div>
+            <div style="font-size: 11px; color: var(--muted); margin-top: 2px;">Veto unverified claims</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="gate-active" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <!-- SRE View Panel -->
+        <div id="panel-sre-stats">
+          <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+          <h2 class="section-label">Production traffic <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#traffic-pulse" data-tooltip="These counters tell you whether the experiment is producing meetings without burning the outreach list.">?</a></h2>
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-title">Outreach Sends</div>
+              <div id="kpi-sends" class="kpi-value">0</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-title">Meetings Booked</div>
+              <div id="kpi-clicks" class="kpi-value" style="color: var(--accent-green);">0</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-title">List Burn (Unsubs)</div>
+              <div id="kpi-unsubs" class="kpi-value" style="color: var(--accent-red);">0</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-title">Gate Veto Count</div>
+              <div id="kpi-blocked" class="kpi-value" style="color: var(--accent-amber);">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Specialist View Panel -->
+        <div id="panel-spec-stats" style="display: none;">
+          <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+          <h2 class="section-label">Convergence diagnostics <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#specialist-diagnostics" data-tooltip="Use these when you need the statistical explanation behind the visible winner.">?</a></h2>
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-title">Est. Regret <span class="tip" data-tooltip="Cumulative loss of clicks incurred while exploring suboptimal copy arms. Formula: R_T = sum (theta* - theta_t).">?</span></div>
+              <div id="kpi-regret" class="kpi-value" style="color: var(--accent-amber);">0.0</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-title">Policy Entropy <span class="tip" data-tooltip="Shannon entropy of action probabilities. Approaches 0 as the bandit converges to exploitation.">?</span></div>
+              <div id="kpi-entropy" class="kpi-value" style="color: var(--accent-cyan);">1.09</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-title">Avg KL Div <span class="tip" data-tooltip="Average Posterior KL Divergence relative to Beta(1,1) prior. Higher values mean higher certainty.">?</span></div>
+              <div id="kpi-avg-kl" class="kpi-value" style="color: var(--accent-green);">0.00</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-title">Active Arm Pool</div>
+              <div id="kpi-pool" class="kpi-value" style="color: var(--accent-blue);">3</div>
+            </div>
+          </div>
+          <div style="margin-top: 14px; font-size: 11px; color: var(--muted); line-height: 1.5; background: var(--panel-header); padding: 10px; border-radius: 8px; border: 1px dashed var(--border-strong);">
+            <strong>Specialist Note:</strong> Posterior win probabilities $P(\theta_i > \max_{j \neq i} \theta_j)$ are computed dynamically via 1,000 Monte Carlo draws per tick. Exact 95% Credible Intervals reflect quantiles $[Q_{2.5}, Q_{97.5}]$.
+          </div>
+        </div>
+
+        <!-- Exploration vs Exploitation Ratio Card -->
+        <div class="ee-meter-card" id="ee-ratio-box">
+          <div class="ee-header">
+            <span>Exploit winner vs explore underdog</span>
+            <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#explore-exploit" data-tooltip="This meter shows whether the bandit is mostly using the current winner or still testing uncertain challengers.">?</a>
+          </div>
+          <div class="ee-bar-bg">
+            <div id="ee-exploit-bar" class="ee-exploit" style="width: 50%;"></div>
+            <div id="ee-explore-bar" class="ee-explore" style="width: 50%;"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 11px; margin-top: 6px; font-family: var(--font-mono);">
+            <span style="color: var(--accent-blue);">Exploit: <span id="ee-exploit-pct">50%</span></span>
+            <span style="color: var(--accent-explore);">Explore: <span id="ee-explore-pct">50%</span></span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Center Column: Intuitive Curves & Copy Arms -->
+    <main class="card">
+      <div class="card-header">
+        <h2 id="center-header-title"><i class="ph ph-chart-line-up"></i> Live belief curves &amp; statistical confidence <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#belief-curves" data-tooltip="The curves are the bandit's current belief about each copy arm's meeting-booking rate. Tall narrow curves mean confidence; wide curves mean uncertainty.">?</a></h2>
+      </div>
+      <div class="card-content">
+        <div id="sre-alert-banner" class="alert-banner alert-normal">
+          <span>SRE health normal - list reputation protected (unsub rate &lt; 0.50%)</span>
+          <span style="font-family: var(--font-mono);">Gate mask active</span>
+        </div>
+
+        <!-- Segment Filter Tabs -->
+        <div class="tabs" id="segment-tabs"></div>
+
+        <!-- Canvas Chart -->
+        <div class="chart-container" id="posterior-canvas-box">
+          <canvas id="posterior-canvas"></canvas>
+        </div>
+
+        <!-- Cumulative Regret Trace (Visible in Specialist Mode) -->
+        <div id="regret-canvas-container" style="display: none; margin-top: 24px; border-top: 1px dashed var(--border); padding-top: 20px;">
+          <h2 style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; color: var(--label);">Cumulative regret trace ($R_T$)</h2>
+          <div class="chart-container" style="height: 180px;">
+            <canvas id="regret-canvas"></canvas>
+          </div>
+        </div>
+
+        <h2 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.8px; margin: 24px 0 14px 0; color: var(--label); display: flex; align-items: center; gap: 8px;">
+          <span>Candidate copy arms under experimentation</span>
+          <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#copy-arms" data-tooltip="Each arm is one message angle, with claim tags, observed results, Bayesian belief, P(Best), and archive controls.">?</a>
+        </h2>
+        
+        <div class="variants-container" id="variants-list"></div>
+      </div>
+    </main>
+
+    <!-- Right Column: Watchable Live Decision Stream OR Specialist Tables -->
+    <section class="card" id="right-col-box">
+      <div class="card-header">
+        <h2 id="right-header-title"><i class="ph ph-activity"></i> Real-time decision stream <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#decision-stream" data-tooltip="This stream explains each pull: segment, selected arm, whether it was exploit or explore, and the outcome.">?</a></h2>
+      </div>
+      <div class="card-content">
+        <div id="panel-sre-feed">
+          <div class="event-feed" id="event-feed-list"></div>
+        </div>
+
+        <div id="panel-spec-tables" style="display: none;">
+          <h2 style="font-size: 11px; text-transform: uppercase; color: var(--label); margin-bottom: 8px;">Head-to-head win probability matrix <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#win-matrix" data-tooltip="Pairwise probabilities answer: if these two arms went head-to-head, which one probably wins?">?</a></h2>
+          <p style="font-size: 11px; color: var(--muted); margin-bottom: 10px;">Pairwise superiority P(θ_row > θ_col) derived from 1,000 Monte Carlo draws.</p>
+          <table class="matrix-table">
+            <thead><tr id="matrix-header-row"><th>Arm</th></tr></thead>
+            <tbody id="matrix-body"></tbody>
+          </table>
+
+          <h2 style="font-size: 11px; text-transform: uppercase; margin: 24px 0 10px 0; color: var(--label);">Posterior parameter estimation <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#posterior-table" data-tooltip="This table exposes the raw Beta distribution math behind the visual belief curves.">?</a></h2>
+          <table class="spec-math-table">
+            <thead><tr><th>Arm</th><th>Mean (CTR)</th><th>Mode</th><th>Variance</th><th>KL Div</th></tr></thead>
+            <tbody id="spec-math-body"></tbody>
+          </table>
+
+          <h2 style="font-size: 11px; text-transform: uppercase; margin: 24px 0 10px 0; color: var(--label);">Specialist posterior drift log <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#drift-log" data-tooltip="The log shows how each new outcome changes estimated CTR, KL divergence, and P(Best).">?</a></h2>
+          <div class="spec-math-log" id="spec-math-log-feed"></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+    <!-- INJECT COPY ARM MODAL -->
+  <div id="inject-modal" class="modal-backdrop">
+    <div class="modal-box">
+      <h3>Inject candidate copy arm</h3>
+      <p>Hot-load new email copy into active Thompson Sampling trials. The AI will immediately begin exploring its uncertainty curve.</p>
+      <form id="inject-form" onsubmit="handleInject(event)">
+        <div class="form-group">
+          <label>Angle Label</label>
+          <input type="text" id="inj-label" placeholder="Angle C: AI SOC2 Concierge" required>
+        </div>
+        <div class="form-group">
+          <label>Internal Code</label>
+          <input type="text" id="inj-code" placeholder="soc2_concierge_auto" required>
+        </div>
+        <div class="form-group">
+          <label>Email Copy Body</label>
+          <textarea id="inj-copy" rows="4" required placeholder="Hi {name},\n\nWe automate compliance mapping...\n\nWorth a look for {company}? Book demo →"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Verified Claim Tags (Comma separated)</label>
+          <input type="text" id="inj-claims" placeholder="c_soc2_auto, c_hipaa_verified">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label>Simulated Ground Truth CTR</label>
+            <input type="number" step="0.01" id="inj-ctr" value="0.21" min="0.01" max="0.6">
+          </div>
+          <div class="form-group">
+            <label>Simulated Unsub Rate</label>
+            <input type="number" step="0.001" id="inj-unsub" value="0.004" min="0.001" max="0.1">
+          </div>
+        </div>
+        <div class="modal-btns">
+          <button type="button" class="btn btn-outline btn-sm" onclick="closeInjectModal()">Cancel</button>
+          <button type="submit" class="btn btn-inject btn-sm">Launch trial arm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
+  <script>
+    // --- MATHEMATICAL & STATISTICAL SAMPLERS ---
+
+    function lnGamma(z) {
+      const g = 7;
+      const p = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507381424447053, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+      if (z < 0.5) return Math.log(Math.PI) - Math.log(Math.sin(Math.PI * z)) - lnGamma(1 - z);
+      z -= 1; let x = p[0];
+      for (let i = 1; i < g + 2; i++) x += p[i] / (z + i);
+      const t = z + g + 0.5;
+      return Math.log(Math.sqrt(2 * Math.PI)) + Math.log(t) * (z + 0.5) - t + Math.log(x);
+    }
+
+    function betaPDF(x, a, b) {
+      if (x < 0 || x > 1) return 0;
+      if (x === 0) return a > 1 ? 0 : 9999;
+      if (x === 1) return b > 1 ? 0 : 9999;
+      const lnBeta = lnGamma(a) + lnGamma(b) - lnGamma(a + b);
+      return Math.exp((a - 1) * Math.log(x) + (b - 1) * Math.log(1 - x) - lnBeta);
+    }
+
+    function normalRandom() {
+      let u = 0, v = 0;
+      while(u === 0) u = Math.random();
+      while(v === 0) v = Math.random();
+      return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+    }
+
+    function randomGamma(alpha) {
+      if (alpha < 1) return randomGamma(alpha + 1) * Math.pow(Math.random(), 1 / alpha);
+      const d = alpha - 1 / 3, c = 1 / Math.sqrt(9 * d);
+      while (true) {
+        let x, v, u;
+        do { x = normalRandom(); v = 1 + c * x; } while (v <= 0);
+        v = v * v * v; u = Math.random();
+        if (u < 1 - 0.0331 * x * x * x * x) return d * v;
+        if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v;
+      }
+    }
+
+    function sampleBeta(a, b) {
+      const x = randomGamma(a), y = randomGamma(b);
+      return x / (x + y);
+    }
+
+    function digamma(x) {
+      if (x < 1e-5) return -Infinity;
+      let r = 0;
+      while (x < 7) {
+        r -= 1 / x;
+        x += 1;
+      }
+      x -= 1;
+      let val = Math.log(x) + 1 / (2 * x) - 1 / (12 * x * x) + 1 / (120 * x * x * x * x);
+      return val + r;
+    }
+
+    function lnBeta(a, b) {
+      return lnGamma(a) + lnGamma(b) - lnGamma(a + b);
+    }
+
+    function betaKLDivergence(a, b) {
+      return -lnBeta(a, b) + (a - 1) * digamma(a) + (b - 1) * digamma(b) - (a + b - 2) * digamma(a + b);
+    }
+
+    // --- PROVENANCE SUB-SEGMENTS & ARMS ---
+
+    const segments = [
+      { id: 'cfo__core', label: 'CFO (Core Tier)', desc: 'Cost-sensitive mid-market finance leads.' },
+      { id: 'cfo__ent', label: 'CFO (Enterprise IDN)', desc: 'Large healthcare system CFOs prioritizing scale.' },
+      { id: 'clinops__core', label: 'ClinOps (Core Tier)', desc: 'Hospital clinical operators focusing on patient flow.' },
+      { id: 'it_security__ent', label: 'IT Security (Enterprise)', desc: 'Chief Information Security Officers requiring compliance.' }
+    ];
+
+    let armsDefinition = {
+      'cfo': [
+        { id: 'A', label: 'Angle A: ROI Proof', code: 'roi_tco_cut', copy: 'Hi {name},\n\nWe cut hospital Total Cost of Ownership by 22% with verified cloud analytics.\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_tco_reduction', 'c_roi_verified'], latentCTR: 0.24, unsubRate: 0.004, color: '#2E6FF5' },
+        { id: 'B', label: 'Angle B: Transparent Pricing', code: 'zero_impl_fee', copy: 'Hi {name},\n\nEnjoy transparent subscription billing with zero implementation fees.\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_billing_transparency', 'c_setup_waived'], latentCTR: 0.11, unsubRate: 0.003, color: '#B5731B' },
+        { id: 'LIE', label: 'Planted Lie: Guaranteed 80% Cut', code: 'lie_guaranteed_cash', copy: 'Hi {name},\n\nSave 85% on billing instantly plus a guaranteed $10k cash bonus on day one!\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_fake_guaranteed_payback'], latentCTR: 0.44, unsubRate: 0.09, color: '#C0354B' }
+      ],
+      'clinops': [
+        { id: 'A', label: 'Angle A: Outcomes & LOS', code: 'los_reduction', copy: 'Hi {name},\n\nCut inpatient Length of Stay using verified clinical cohort analytics.\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_los_reduction', 'c_clinical_cohorts'], latentCTR: 0.22, unsubRate: 0.004, color: '#2E6FF5' },
+        { id: 'B', label: 'Angle B: Dataset Processing Speed', code: 'speed_4hr_claims', copy: 'Hi {name},\n\nIngest and resolve complex medical claims datasets in under four hours.\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_workflow_speed', 'c_claims_ingest'], latentCTR: 0.14, unsubRate: 0.003, color: '#B5731B' },
+        { id: 'LIE', label: 'Planted Lie: Zero Medical Errors', code: 'lie_zero_errors', copy: 'Hi {name},\n\nInstantly eliminate 100% of diagnostic billing errors overnight!\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_fake_zero_errors'], latentCTR: 0.39, unsubRate: 0.08, color: '#C0354B' }
+      ],
+      'it_security': [
+        { id: 'A', label: 'Angle A: Automated SOC2 / HIPAA', code: 'soc2_hipaa_auto', copy: 'Hi {name},\n\nAutomate SOC 2 Type II and HIPAA compliance mapping out of the box.\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_soc2_auto', 'c_hipaa_compliant'], latentCTR: 0.26, unsubRate: 0.004, color: '#2E6FF5' },
+        { id: 'B', label: 'Angle B: EHR Out-of-box Integration', code: 'ehr_30_systems', copy: 'Hi {name},\n\nIntegrates seamlessly with over 30 enterprise EHR systems on day one.\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_ehr_integration', 'c_zero_trust_keys'], latentCTR: 0.16, unsubRate: 0.003, color: '#B5731B' },
+        { id: 'LIE', label: 'Planted Lie: NSA Certified Agent', code: 'lie_nsa_certified', copy: 'Hi {name},\n\nDeploy a 100% unhackable security agent certified by NSA defense standards!\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_fake_nsa_endorsement'], latentCTR: 0.46, unsubRate: 0.10, color: '#C0354B' }
+      ]
+    };
+
+    let posteriors = {};
+    let globalStats = { sends: 0, clicks: 0, unsubs: 0, blockedLies: 0, exploitCount: 0, exploreCount: 0, cumulativeRegret: 0 };
+    let selectedSegmentId = 'cfo__core';
+    let currentMode = 'sre'; // 'sre' vs 'specialist'
+    let simTimer = null;
+    let livePollTimer = null;
+    let runMode = new URLSearchParams(window.location.search).get('mode') === 'demo' ? 'demo' : 'live';
+    let isSimRunning = true;
+    let liveDrawState = null;
+    let confidenceScores = {}; // armId -> { pBest: 0.92, ci: [0.18, 0.26] }
+    let superiorityMatrix = {};
+    let currentPolicyEntropy = 1.09;
+    let regretHistory = [];
+
+    function initPosteriors() {
+      segments.forEach(seg => {
+        posteriors[seg.id] = {};
+        const prefix = seg.id.split('__')[0];
+        armsDefinition[prefix].forEach(arm => {
+          posteriors[seg.id][arm.id] = { alpha: 1, beta: 1, sends: 0, clicks: 0, unsubs: 0, status: 'active' };
+        });
+      });
+    }
+
+    function segmentLabel(segmentId) {
+      const known = segments.find(s => s.id === segmentId);
+      return known ? known.label : segmentId.replace(/__/g, ' / ').replace(/_/g, ' ');
+    }
+
+    function syncRunModeControls() {
+      const isDemo = runMode === 'demo';
+      const liveBtn = document.getElementById('run-btn-live');
+      const demoBtn = document.getElementById('run-btn-demo');
+      if (liveBtn) liveBtn.className = `mode-btn ${!isDemo ? 'active' : ''}`;
+      if (demoBtn) demoBtn.className = `mode-btn ${isDemo ? 'active' : ''}`;
+
+      const badge = document.getElementById('simulation-badge');
+      if (badge) badge.innerHTML = `<span class="d"></span>${isDemo ? 'demo simulation' : 'live optimizer'}`;
+
+      const note = document.getElementById('run-mode-note');
+      if (note) {
+        note.textContent = isDemo
+          ? 'Demo mode runs a local simulated stream so operators can test controls without changing real optimizer state.'
+          : 'Live mode polls the real optimizer used by /site traffic. Use “Run demo” when you want the local simulated stream.';
+      }
+
+      ['btn-inject', 'btn-pause', 'btn-batch', 'btn-reset', 'sim-speed'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = !isDemo;
+      });
+      const gate = document.getElementById('gate-active');
+      if (gate) {
+        gate.disabled = !isDemo;
+        if (!isDemo) gate.checked = true;
+      }
+    }
+
+    function setRunMode(nextMode) {
+      runMode = nextMode === 'demo' ? 'demo' : 'live';
+      const url = new URL(window.location.href);
+      if (runMode === 'demo') url.searchParams.set('mode', 'demo');
+      else url.searchParams.delete('mode');
+      window.history.replaceState({}, '', url);
+
+      clearInterval(simTimer);
+      clearInterval(livePollTimer);
+      simTimer = null;
+      livePollTimer = null;
+      liveDrawState = null;
+      syncRunModeControls();
+
+      if (runMode === 'demo') {
+        isSimRunning = true;
+        startSim();
+        drawCanvas(); renderArms(); renderSpecialistTables(); updateKPIs();
+      } else {
+        isSimRunning = false;
+        loadLiveDashboard();
+        startLivePolling();
+      }
+    }
+
+    function showLiveFeedCard(message, detail = '') {
+      const feed = document.getElementById('event-feed-list');
+      if (!feed || runMode !== 'live') return;
+      feed.innerHTML = `
+        <div class="feed-card">
+          <div class="feed-header"><span class="feed-seg">Live optimizer</span><span>real run</span></div>
+          <div class="feed-action">
+            <div><span style="color:#2E353D;">${escapeHtml(message)}</span><div style="margin-top:4px;color:var(--muted);font-size:11px;">${escapeHtml(detail)}</div></div>
+            <div><span class="outcome-tag click">Polling</span></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function applyLiveDashboardData(payload) {
+      const snapshot = payload.snapshot || {};
+      const liveSegments = snapshot.segments || {};
+      const segmentIds = Object.keys(liveSegments);
+
+      segmentIds.forEach(segmentId => {
+        if (!segments.some(s => s.id === segmentId)) {
+          segments.push({ id: segmentId, label: segmentLabel(segmentId), desc: 'Live optimizer segment.' });
+        }
+        posteriors[segmentId] = posteriors[segmentId] || {};
+        const prefix = segmentId.split('__')[0];
+        armsDefinition[prefix] = armsDefinition[prefix] || [];
+        const liveArms = liveSegments[segmentId].arms || {};
+        Object.entries(liveArms).forEach(([armId, arm]) => {
+          if (!armsDefinition[prefix].some(a => a.id === armId)) {
+            armsDefinition[prefix].push({
+              id: armId,
+              label: `Live arm ${armId}`,
+              code: arm.variant_id || armId,
+              copy: 'Live optimizer arm served by the backend action pool.',
+              claims: [],
+              latentCTR: arm.posterior_mean || 0.01,
+              unsubRate: 0,
+              color: ['#2E6FF5', '#B5731B', '#1E8A53', '#6B7480'][armsDefinition[prefix].length % 4],
+            });
+          }
+          posteriors[segmentId][armId] = {
+            alpha: arm.alpha,
+            beta: arm.beta,
+            sends: arm.impressions,
+            clicks: arm.clicks,
+            unsubs: 0,
+            pending: arm.pending,
+            status: 'active',
+          };
+        });
+      });
+
+      if (segmentIds.length && !segmentIds.includes(selectedSegmentId)) selectedSegmentId = segmentIds[0];
+
+      globalStats.sends = segmentIds.reduce((sum, segmentId) => {
+        const arms = liveSegments[segmentId].arms || {};
+        return sum + Object.values(arms).reduce((n, arm) => n + (arm.impressions || 0), 0);
+      }, 0);
+      globalStats.clicks = snapshot.live_clicks || 0;
+      globalStats.unsubs = 0;
+      globalStats.blockedLies = 0;
+
+      buildTabs();
+      computeConfidence(selectedSegmentId);
+      drawCanvas();
+      drawRegretCanvas();
+      renderArms();
+      renderSpecialistTables();
+      updateKPIs();
+
+      const lift = payload.lift || {};
+      const liftText = lift.lift === null || lift.lift === undefined
+        ? lift.note || 'Need resolved impressions in both bandit and control slices.'
+        : `Measured lift ${(lift.lift * 100).toFixed(1)} pts (${lift.relative_lift_pct ?? 'n/a'}% relative).`;
+      showLiveFeedCard('Real optimizer telemetry loaded.', `${globalStats.sends} impressions · ${globalStats.clicks} clicks · ${liftText}`);
+    }
+
+    async function loadLiveDashboard() {
+      if (runMode !== 'live') return;
+      try {
+        const response = await fetch('/api/optimizer/dashboard', { headers: { 'accept': 'application/json' } });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        applyLiveDashboardData(await response.json());
+      } catch (err) {
+        showLiveFeedCard('Live optimizer telemetry unavailable.', String(err && err.message ? err.message : err));
+      }
+    }
+
+    function startLivePolling() {
+      clearInterval(livePollTimer);
+      livePollTimer = setInterval(loadLiveDashboard, 5000);
+    }
+
+    // --- MONTE CARLO CONFIDENCE & CREDIBLE INTERVAL ENGINE ---
+    function computeConfidence(segmentId) {
+      const prefix = segmentId.split('__')[0];
+      const allArms = armsDefinition[prefix];
+      const gateActive = document.getElementById('gate-active').checked;
+
+      const activeArms = allArms.filter(a => {
+        const s = posteriors[segmentId][a.id];
+        return !(gateActive && a.id === 'LIE') && (s && s.status !== 'archived');
+      });
+
+      if (activeArms.length === 0) return;
+
+      const nDraws = 1000;
+      let winCounts = {};
+      let armDraws = {};
+      let pairwiseWins = {};
+
+      activeArms.forEach(a => {
+        winCounts[a.id] = 0;
+        armDraws[a.id] = [];
+        pairwiseWins[a.id] = {};
+        activeArms.forEach(a2 => {
+          pairwiseWins[a.id][a2.id] = 0;
+        });
+      });
+
+      for (let i = 0; i < nDraws; i++) {
+        let maxTheta = -1, winId = null;
+        let drawnValues = {};
+        activeArms.forEach(a => {
+          const s = posteriors[segmentId][a.id];
+          const theta = sampleBeta(s.alpha, s.beta);
+          drawnValues[a.id] = theta;
+          armDraws[a.id].push(theta);
+          if (theta > maxTheta) { maxTheta = theta; winId = a.id; }
+        });
+        if (winId) winCounts[winId] += 1;
+
+        // Pairwise update
+        activeArms.forEach(a1 => {
+          activeArms.forEach(a2 => {
+            if (drawnValues[a1.id] > drawnValues[a2.id]) {
+              pairwiseWins[a1.id][a2.id] += 1;
+            }
+          });
+        });
+      }
+
+      superiorityMatrix = {};
+      activeArms.forEach(a => {
+        armDraws[a.id].sort((x,y) => x - y);
+        const lb95 = armDraws[a.id][25];
+        const ub95 = armDraws[a.id][975];
+        confidenceScores[a.id] = {
+          pBest: winCounts[a.id] / nDraws,
+          ci: [lb95, ub95]
+        };
+
+        superiorityMatrix[a.id] = {};
+        activeArms.forEach(a2 => {
+          superiorityMatrix[a.id][a2.id] = pairwiseWins[a.id][a2.id] / nDraws;
+        });
+      });
+
+      // Compute Policy Entropy
+      let entropy = 0;
+      activeArms.forEach(a => {
+        const p = confidenceScores[a.id]?.pBest || 0;
+        if (p > 0) entropy -= p * Math.log(p);
+      });
+      currentPolicyEntropy = entropy;
+    }
+
+    // --- SIMULATION TICK LOOP ---
+    function tickSimulation() {
+      const randomSeg = segments[Math.floor(Math.random() * segments.length)];
+      simulateSend(randomSeg.id);
+    }
+
+    function simulateSend(segmentId) {
+      const prefix = segmentId.split('__')[0];
+      const allArms = armsDefinition[prefix];
+      const gateActive = document.getElementById('gate-active').checked;
+
+      const validArms = allArms.filter(a => {
+        const s = posteriors[segmentId][a.id];
+        return !(gateActive && a.id === 'LIE') && (s && s.status !== 'archived');
+      });
+
+      if (validArms.length === 0) return;
+
+      if (gateActive && Math.random() < 0.28) globalStats.blockedLies += 1;
+
+      // Find optimal ground truth arm among active
+      let optimalTruth = -1;
+      validArms.forEach(a => { if (a.latentCTR > optimalTruth) optimalTruth = a.latentCTR; });
+
+      // Find proven leader
+      let leaderId = validArms[0].id, maxMean = -1;
+      validArms.forEach(a => {
+        const s = posteriors[segmentId][a.id];
+        const m = s.alpha / (s.alpha + s.beta);
+        if (m > maxMean) { maxMean = m; leaderId = a.id; }
+      });
+
+      // Thompson sampling roll
+      let chosenArmId = null, maxSample = -1, rolledSamples = {};
+      validArms.forEach(a => {
+        const s = posteriors[segmentId][a.id];
+        const samp = sampleBeta(s.alpha, s.beta);
+        rolledSamples[a.id] = samp;
+        if (samp > maxSample) { maxSample = samp; chosenArmId = a.id; }
+      });
+
+      const chosenArm = allArms.find(a => a.id === chosenArmId);
+      const armStats = posteriors[segmentId][chosenArmId];
+
+      const isExploiting = chosenArmId === leaderId;
+      if (isExploiting) globalStats.exploitCount += 1; else globalStats.exploreCount += 1;
+
+      // Track Regret
+      const regretInc = Math.max(0, optimalTruth - chosenArm.latentCTR);
+      globalStats.cumulativeRegret += regretInc;
+
+      // Regret history recording
+      if (globalStats.sends % 10 === 0 || regretHistory.length === 0) {
+        regretHistory.push({ sends: globalStats.sends, regret: globalStats.cumulativeRegret });
+        if (regretHistory.length > 100) regretHistory.shift();
+      }
+
+      liveDrawState = { segmentId, chosenArmId, isExploiting, samples: rolledSamples };
+
+      const roll = Math.random();
+      let outcome = 'no-click';
+      if (roll < chosenArm.unsubRate) outcome = 'unsub';
+      else if (roll < chosenArm.unsubRate + chosenArm.latentCTR) outcome = 'click';
+
+      globalStats.sends += 1; armStats.sends += 1;
+      if (outcome === 'click') {
+        globalStats.clicks += 1; armStats.clicks += 1; armStats.alpha += 1;
+      } else if (outcome === 'unsub') {
+        globalStats.unsubs += 1; armStats.unsubs += 1; armStats.beta += 3;
+      } else {
+        armStats.beta += 1;
+      }
+
+      appendFeed(segmentId, chosenArm, outcome, isExploiting, armStats, rolledSamples[chosenArmId]);
+      updateKPIs();
+      computeConfidence(segmentId);
+
+      // Math feed append
+      const updatedMean = armStats.alpha / (armStats.alpha + armStats.beta);
+      const klDiv = betaKLDivergence(armStats.alpha, armStats.beta);
+      const pBest = confidenceScores[chosenArmId]?.pBest || 0;
+      appendSpecialistMathLog(segmentId, chosenArmId, updatedMean, klDiv, pBest);
+
+      if (segmentId === selectedSegmentId) {
+        drawCanvas();
+        drawRegretCanvas();
+        renderArms();
+        renderSpecialistTables();
+      }
+    }
+
+    // --- TAB SWITCH & SPECIALIST VISUALIZATION CONTROLS ---
+
+    function switchMode(mode) {
+      currentMode = mode;
+      document.body.classList.toggle('specialist-mode', mode === 'specialist');
+      
+      const btnSre = document.getElementById('mode-btn-sre');
+      const btnSpec = document.getElementById('mode-btn-spec');
+      if (btnSre) btnSre.className = `mode-btn ${mode === 'sre' ? 'active' : ''}`;
+      if (btnSpec) btnSpec.className = `mode-btn ${mode === 'specialist' ? 'active' : ''}`;
+
+      const pSreStats = document.getElementById('panel-sre-stats');
+      const pSpecStats = document.getElementById('panel-spec-stats');
+      const regretContainer = document.getElementById('regret-canvas-container');
+      const pSreFeed = document.getElementById('panel-sre-feed');
+      const pSpecTables = document.getElementById('panel-spec-tables');
+
+      if (mode === 'sre') {
+        if (pSreStats) pSreStats.style.display = 'block';
+        if (pSpecStats) pSpecStats.style.display = 'none';
+        if (regretContainer) regretContainer.style.display = 'none';
+        if (pSreFeed) pSreFeed.style.display = 'block';
+        if (pSpecTables) pSpecTables.style.display = 'none';
+
+        document.getElementById('center-header-title').innerHTML = '<i class="ph ph-chart-line-up"></i> Live belief curves & statistical confidence <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#belief-curves" data-tooltip="The curves show the current belief about each copy arm meeting-booking rate. Tall narrow curves mean confidence; wide curves mean uncertainty.">?</a>';
+        document.getElementById('right-header-title').innerHTML = '<i class="ph ph-activity"></i> Real-time decision stream <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#decision-stream" data-tooltip="This stream explains each pull: segment, selected arm, whether it was exploit or explore, and the outcome.">?</a>';
+      } else {
+        if (pSreStats) pSreStats.style.display = 'none';
+        if (pSpecStats) pSpecStats.style.display = 'block';
+        if (regretContainer) regretContainer.style.display = 'block';
+        if (pSreFeed) pSreFeed.style.display = 'none';
+        if (pSpecTables) pSpecTables.style.display = 'block';
+
+        document.getElementById('center-header-title').innerHTML = '<i class="ph ph-chart-line-up"></i> Live belief curves, confidence & regret mechanics <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#regret-trace" data-tooltip="The regret trace shows the cost of exploration compared with always choosing the best honest arm.">?</a>';
+        document.getElementById('right-header-title').innerHTML = '<i class="ph ph-function"></i> Specialist posterior diagnostics <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#specialist-diagnostics" data-tooltip="Use these tables when you need to understand why the bandit believes one arm is better than another.">?</a>';
+        setTimeout(() => {
+          drawRegretCanvas();
+          renderSpecialistTables();
+        }, 10);
+      }
+      updateKPIs();
+      drawCanvas();
+      renderArms();
+    }
+
+    function drawRegretCanvas() {
+      const canvas = document.getElementById('regret-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+      canvas.width = rect.width * devicePixelRatio; canvas.height = rect.height * devicePixelRatio;
+      ctx.scale(devicePixelRatio, devicePixelRatio);
+
+      const w = rect.width, h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      // Draw grid lines
+      ctx.strokeStyle = '#E5E9EF'; ctx.lineWidth = 1;
+      for (let y = 20; y < h - 25; y += 30) {
+        ctx.beginPath(); ctx.moveTo(45, y); ctx.lineTo(w - 15, y); ctx.stroke();
+      }
+
+      if (regretHistory.length === 0) {
+        ctx.fillStyle = '#6B7480'; ctx.font = '12px var(--font-sans)'; ctx.textAlign = 'center';
+        ctx.fillText('Waiting for stream data to plot regret curve...', w/2, h/2);
+        return;
+      }
+
+      // Find max sends and max regret for scaling
+      const maxSends = Math.max(...regretHistory.map(d => d.sends), 1);
+      const minSends = Math.min(...regretHistory.map(d => d.sends), 0);
+      const maxRegret = Math.max(...regretHistory.map(d => d.regret), 0.1);
+
+      const scaleX = (val) => 45 + ((val - minSends) / Math.max(1, maxSends - minSends)) * (w - 60);
+      const scaleY = (val) => (h - 25) - (val / maxRegret) * (h - 45);
+
+      // Draw Y axis labels
+      ctx.fillStyle = '#6B7480'; ctx.font = '9px var(--font-mono)'; ctx.textAlign = 'right';
+      ctx.fillText(maxRegret.toFixed(1), 38, 20);
+      ctx.fillText((maxRegret / 2).toFixed(1), 38, (h - 25)/2 + 5);
+      ctx.fillText('0.0', 38, h - 22);
+
+      // Draw X axis label for current sends
+      ctx.textAlign = 'center';
+      ctx.fillText(minSends, 45, h - 8);
+      ctx.fillText(maxSends + ' Sends', w - 30, h - 8);
+
+      // Draw line
+      ctx.beginPath();
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = '#B5731B';
+      ctx.shadowColor = 'rgba(181, 115, 27, 0.18)';
+      ctx.shadowBlur = 6;
+
+      regretHistory.forEach((pt, idx) => {
+        const px = scaleX(pt.sends);
+        const py = scaleY(pt.regret);
+        if (idx === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      });
+      ctx.stroke();
+
+      // Reset shadow
+      ctx.shadowBlur = 0;
+
+      // Draw gradient area under the curve
+      ctx.beginPath();
+      regretHistory.forEach((pt, idx) => {
+        const px = scaleX(pt.sends);
+        const py = scaleY(pt.regret);
+        if (idx === 0) ctx.moveTo(px, h - 25);
+        ctx.lineTo(px, py);
+      });
+      ctx.lineTo(scaleX(regretHistory[regretHistory.length - 1].sends), h - 25);
+      ctx.closePath();
+      const grad = ctx.createLinearGradient(0, 20, 0, h - 25);
+      grad.addColorStop(0, 'rgba(181, 115, 27, 0.12)');
+      grad.addColorStop(1, 'rgba(181, 115, 27, 0)');
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Draw axis lines
+      ctx.strokeStyle = '#C9D2DC'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(45, 15); ctx.lineTo(45, h - 25); ctx.lineTo(w - 15, h - 25); ctx.stroke();
+    }
+
+    function renderSpecialistTables() {
+      const prefix = selectedSegmentId.split('__')[0];
+      const allArms = armsDefinition[prefix];
+      const gateActive = document.getElementById('gate-active').checked;
+      
+      const activeArms = allArms.filter(a => {
+        const s = posteriors[selectedSegmentId][a.id];
+        return !(gateActive && a.id === 'LIE') && (s && s.status !== 'archived');
+      });
+
+      // Render Matrix Header
+      const headerRow = document.getElementById('matrix-header-row');
+      if (headerRow) {
+        headerRow.innerHTML = '<th>Arm</th>';
+        activeArms.forEach(a => {
+          headerRow.innerHTML += `<th style="color: ${a.color}">${a.id}</th>`;
+        });
+      }
+
+      // Render Matrix Body
+      const matrixBody = document.getElementById('matrix-body');
+      if (matrixBody) {
+        matrixBody.innerHTML = '';
+        activeArms.forEach(a1 => {
+          let rowHtml = `<tr><td style="font-weight: 700; color: ${a1.color}">${a1.id}</td>`;
+          activeArms.forEach(a2 => {
+            if (a1.id === a2.id) {
+              rowHtml += `<td class="matrix-self">-</td>`;
+            } else {
+              const val = superiorityMatrix[a1.id]?.[a2.id] || 0;
+              const pct = (val * 100).toFixed(1);
+              let tdStyle = '';
+              if (val > 0.7) tdStyle = 'background: #EAF7EF; color: #1E8A53; font-weight: bold;';
+              else if (val < 0.3) tdStyle = 'color: #C0354B;';
+              rowHtml += `<td style="${tdStyle}">${pct}%</td>`;
+            }
+          });
+          rowHtml += '</tr>';
+          matrixBody.innerHTML += rowHtml;
+        });
+      }
+
+      // Render Parameter estimations
+      const specMathBody = document.getElementById('spec-math-body');
+      if (specMathBody) {
+        specMathBody.innerHTML = '';
+        activeArms.forEach(arm => {
+          const s = posteriors[selectedSegmentId][arm.id];
+          const mean = s.alpha / (s.alpha + s.beta);
+          
+          let modeVal;
+          if (s.alpha > 1 && s.beta > 1) {
+            modeVal = (s.alpha - 1) / (s.alpha + s.beta - 2);
+          } else if (s.alpha === s.beta) {
+            modeVal = 0.5;
+          } else {
+            modeVal = s.alpha > s.beta ? 1.0 : 0.0;
+          }
+
+          const variance = (s.alpha * s.beta) / (Math.pow(s.alpha + s.beta, 2) * (s.alpha + s.beta + 1));
+          const klDiv = betaKLDivergence(s.alpha, s.beta);
+
+          specMathBody.innerHTML += `
+            <tr>
+              <td style="font-weight: 700; color: ${arm.color}">${escapeHtml(arm.label)} (${escapeHtml(arm.id)})</td>
+              <td>${(mean*100).toFixed(2)}%</td>
+              <td>${(modeVal*100).toFixed(2)}%</td>
+              <td>${variance.toFixed(5)}</td>
+              <td style="color: var(--accent-cyan); font-weight: 600;">${klDiv.toFixed(3)}</td>
+            </tr>
+          `;
+        });
+      }
+    }
+
+    function appendSpecialistMathLog(segmentId, armId, mean, klDiv, pBest) {
+      const feed = document.getElementById('spec-math-log-feed');
+      if (!feed) return;
+      const entry = document.createElement('div');
+      entry.style.marginBottom = '6px';
+      entry.style.borderBottom = '1px solid #E5E9EF';
+      entry.style.paddingBottom = '4px';
+      
+      const time = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit' });
+      const segLabel = segments.find(s => s.id === segmentId)?.label || segmentId;
+      
+      entry.innerHTML = `
+        <span style="color: var(--muted); font-size: 10px;">[${time}]</span> 
+        <strong style="color: #2E353D;">${segLabel}</strong>:
+        Arm <strong style="color: #2E6FF5;">${armId}</strong> pulled.
+        KL: <span style="color: var(--accent-cyan);">${klDiv.toFixed(2)}</span>, 
+        Est CTR: <span style="color: var(--accent-green);">${(mean*100).toFixed(1)}%</span>, 
+        P(Best): <span style="color: var(--accent-amber);">${(pBest*100).toFixed(1)}%</span>
+      `;
+      
+      feed.insertBefore(entry, feed.firstChild);
+      while(feed.children.length > 50) feed.removeChild(feed.lastChild);
+    }
+
+    function updateKPIs() {
+      document.getElementById('kpi-sends').textContent = globalStats.sends;
+      document.getElementById('kpi-clicks').textContent = globalStats.clicks;
+      document.getElementById('kpi-unsubs').textContent = globalStats.unsubs;
+      document.getElementById('kpi-blocked').textContent = globalStats.blockedLies;
+
+      document.getElementById('kpi-regret').textContent = globalStats.cumulativeRegret.toFixed(1);
+      
+      const specRegret = document.getElementById('spec-kpi-regret');
+      if (specRegret) specRegret.textContent = globalStats.cumulativeRegret.toFixed(1);
+
+      const prefix = selectedSegmentId.split('__')[0];
+      const gateActive = document.getElementById('gate-active').checked;
+      
+      const activeArms = armsDefinition[prefix].filter(a => {
+        const s = posteriors[selectedSegmentId][a.id];
+        return !(gateActive && a.id === 'LIE') && (s && s.status !== 'archived');
+      });
+      const activeCount = activeArms.length;
+
+      document.getElementById('kpi-pool').textContent = activeCount;
+
+      let totalKl = 0;
+      armsDefinition[prefix].forEach(a => {
+        const s = posteriors[selectedSegmentId][a.id];
+        if (!(gateActive && a.id === 'LIE') && (s && s.status !== 'archived')) {
+          totalKl += betaKLDivergence(s.alpha, s.beta);
+        }
+      });
+      const avgKlEl = document.getElementById('kpi-avg-kl');
+      if (avgKlEl) avgKlEl.textContent = activeCount > 0 ? (totalKl / activeCount).toFixed(2) : '0.00';
+      const specActiveArms = document.getElementById('spec-kpi-active-arms');
+      if (specActiveArms) specActiveArms.textContent = activeCount;
+
+      const totEE = globalStats.exploitCount + globalStats.exploreCount;
+      const expPct = totEE > 0 ? Math.round((globalStats.exploitCount / totEE) * 100) : 50;
+      const exlPct = 100 - expPct;
+
+      document.getElementById('ee-exploit-bar').style.width = expPct + '%';
+      document.getElementById('ee-explore-bar').style.width = exlPct + '%';
+      document.getElementById('ee-exploit-pct').textContent = expPct + '%';
+      document.getElementById('ee-explore-pct').textContent = exlPct + '%';
+
+      // Update Entropy KPIs
+      document.getElementById('kpi-entropy').textContent = currentPolicyEntropy.toFixed(2);
+      const specEntropy = document.getElementById('spec-kpi-entropy');
+      if (specEntropy) specEntropy.textContent = currentPolicyEntropy.toFixed(2);
+
+      // Update Average KL Divergence
+      let sumKL = 0;
+      activeArms.forEach(arm => {
+        const s = posteriors[selectedSegmentId][arm.id];
+        if (s) sumKL += betaKLDivergence(s.alpha, s.beta);
+      });
+      const avgKL = activeCount > 0 ? (sumKL / activeCount) : 0;
+      const specAvgKL = document.getElementById('spec-kpi-avg-kl');
+      if (specAvgKL) specAvgKL.textContent = avgKL.toFixed(2);
+
+      // SLA Alert logic
+      const uRate = globalStats.sends > 0 ? (globalStats.unsubs / globalStats.sends) : 0;
+      const alertEl = document.getElementById('sre-alert-banner');
+      if (uRate > 0.005) {
+        alertEl.className = 'alert-banner alert-warn';
+        alertEl.innerHTML = `<span>SLA warning - list burn spiking (${(uRate*100).toFixed(2)}% vs 0.50% SLA limit)</span><span>Inspect arms</span>`;
+      } else {
+        alertEl.className = 'alert-banner alert-normal';
+        alertEl.innerHTML = `<span>SRE health normal - list reputation protected (unsub rate ${(uRate*100).toFixed(2)}%)</span><span>Gate mask active</span>`;
+      }
+    }
+
+    function appendFeed(segmentId, arm, outcome, isExploiting, armStats, rolledSampleVal) {
+      const feed = document.getElementById('event-feed-list');
+      const card = document.createElement('div'); card.className = 'feed-card';
+      const seg = segments.find(s => s.id === segmentId);
+      const time = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit' });
+
+      const rollFormatted = rolledSampleVal ? `${(rolledSampleVal*100).toFixed(1)}%` : '';
+      const eePill = isExploiting 
+        ? `<span class="reason-pill exploit">Exploit winner (${rollFormatted})</span>`
+        : `<span class="reason-pill explore">Explore challenger (${rollFormatted})</span>`;
+
+      let outTag = `<span class="outcome-tag no-click">No Click</span>`;
+      if (outcome === 'click') outTag = `<span class="outcome-tag click">+1 Meeting Booked</span>`;
+      else if (outcome === 'unsub') outTag = `<span class="outcome-tag unsub">Unsubscribed (-3x)</span>`;
+
+      card.innerHTML = `
+        <div class="feed-header"><span class="feed-seg">${seg.label}</span><span>${time}</span></div>
+        <div class="feed-action">
+          <div><span style="color: #2E353D;">Copy Arm: <strong style="color: ${arm.color};">${arm.id}</strong></span><div style="margin-top: 4px;">${eePill}</div></div>
+          <div>${outTag}</div>
+        </div>
+      `;
+      feed.appendChild(card);
+    }
+
+    function drawCanvas() {
+      const canvasIds = ['posterior-canvas', 'spec-posterior-canvas'];
+      canvasIds.forEach(id => {
+        const canvas = document.getElementById(id);
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const rect = canvas.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+        canvas.width = rect.width * devicePixelRatio; canvas.height = rect.height * devicePixelRatio;
+        ctx.scale(devicePixelRatio, devicePixelRatio);
+
+        const w = rect.width, h = rect.height;
+        ctx.clearRect(0, 0, w, h);
+
+        ctx.strokeStyle = '#E5E9EF'; ctx.lineWidth = 1;
+        for (let y = 30; y < h - 30; y += 45) { ctx.beginPath(); ctx.moveTo(40, y); ctx.lineTo(w - 30, y); ctx.stroke(); }
+
+        ctx.fillStyle = '#6B7480'; ctx.font = '11px var(--font-mono)';
+        for (let x = 0; x <= 10; x++) { ctx.fillText((x*10) + '%', 40 + (x/10)*(w-70) - 10, h - 12); }
+
+        const prefix = selectedSegmentId.split('__')[0];
+        const allArms = armsDefinition[prefix];
+        const gateActive = document.getElementById('gate-active').checked;
+
+        const validArms = allArms.filter(a => {
+          const s = posteriors[selectedSegmentId][a.id];
+          return !(gateActive && a.id === 'LIE') && (s && s.status !== 'archived');
+        });
+
+        let maxDensity = 1;
+        const curves = validArms.map(arm => {
+          const s = posteriors[selectedSegmentId][arm.id];
+          const pts = [];
+          for(let i=0; i<=200; i++) {
+            const val = betaPDF(i/200, s.alpha, s.beta);
+            pts.push({ x: i/200, val });
+            if (val > maxDensity) maxDensity = val;
+          }
+          return { arm, pts };
+        });
+
+        maxDensity = Math.min(maxDensity, 90);
+
+        curves.forEach(({ arm, pts }) => {
+          ctx.beginPath(); ctx.lineWidth = 2.5; ctx.strokeStyle = arm.color;
+          ctx.fillStyle = arm.color + '18';
+          pts.forEach((pt, idx) => {
+            const px = 40 + pt.x * (w - 70);
+            const py = (h - 35) - (pt.val / maxDensity) * (h - 65);
+            if (idx === 0) ctx.moveTo(px, h - 35); else ctx.lineTo(px, py);
+          });
+          ctx.lineTo(40 + 1 * (w - 70), h - 35);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+
+          const tx = 40 + arm.latentCTR * (w - 70);
+          ctx.setLineDash([3, 4]); ctx.strokeStyle = arm.color + '99'; ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.moveTo(tx, 30); ctx.lineTo(tx, h - 35); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = arm.color; ctx.fillText('Truth ' + Math.round(arm.latentCTR*100) + '%', tx - 22, 24);
+        });
+
+        if (liveDrawState && liveDrawState.segmentId === selectedSegmentId) {
+          validArms.forEach(arm => {
+            const theta = liveDrawState.samples[arm.id];
+            if (theta !== undefined) {
+              const s = posteriors[selectedSegmentId][arm.id];
+              const pdfVal = betaPDF(theta, s.alpha, s.beta);
+              const dotX = 40 + theta * (w - 70);
+              const dotY = (h - 35) - (Math.min(pdfVal, maxDensity) / maxDensity) * (h - 65);
+              const isWinner = arm.id === liveDrawState.chosenArmId;
+
+              if (isWinner) {
+                ctx.strokeStyle = arm.color + '88'; ctx.lineWidth = 1.5; ctx.setLineDash([2, 3]);
+                ctx.beginPath(); ctx.moveTo(dotX, 10); ctx.lineTo(dotX, dotY); ctx.stroke(); ctx.setLineDash([]);
+
+                ctx.fillStyle = liveDrawState.isExploiting ? '#2E6FF5' : '#B5731B';
+                ctx.font = 'bold 11px var(--font-sans)';
+                const badgeTxt = liveDrawState.isExploiting ? `EXPLOITING WINNER (${(theta*100).toFixed(1)}%)` : `EXPLORING CHALLENGER (${(theta*100).toFixed(1)}%)`;
+                ctx.fillText(badgeTxt, Math.max(40, dotX - 70), 18);
+
+                ctx.strokeStyle = arm.color; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(dotX, dotY, 9, 0, Math.PI*2); ctx.stroke();
+              }
+
+              ctx.fillStyle = '#FFFFFF';
+              ctx.beginPath(); ctx.arc(dotX, dotY, 5, 0, Math.PI*2); ctx.fill();
+              ctx.strokeStyle = arm.color; ctx.lineWidth = 2.5; ctx.stroke();
+            }
+          });
+        }
+
+        ctx.strokeStyle = '#C9D2DC'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(40, 30); ctx.lineTo(40, h - 35); ctx.lineTo(w - 30, h - 35); ctx.stroke();
+      });
+    }
+
+    function toggleHood(armId) {
+      const el = document.getElementById('hood-' + armId);
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function toggleArchive(armId) {
+      const s = posteriors[selectedSegmentId][armId];
+      s.status = s.status === 'archived' ? 'active' : 'archived';
+      computeConfidence(selectedSegmentId);
+      drawCanvas(); renderArms(); updateKPIs();
+    }
+
+    // --- ARM INJECTION HANDLERS ---
+    function openInjectModal() { document.getElementById('inject-modal').style.display = 'flex'; }
+    function closeInjectModal() { document.getElementById('inject-modal').style.display = 'none'; }
+    
+    function handleInject(e) {
+      e.preventDefault();
+      const prefix = selectedSegmentId.split('__')[0];
+      const newId = 'C_' + Math.floor(Math.random()*1000);
+      const colorList = ['#2E6FF5', '#1E8A53', '#B5731B', '#6B7480'];
+      const pickedColor = colorList[armsDefinition[prefix].length % colorList.length];
+
+      const newArm = {
+        id: newId,
+        label: document.getElementById('inj-label').value,
+        code: document.getElementById('inj-code').value,
+        copy: document.getElementById('inj-copy').value,
+        claims: document.getElementById('inj-claims').value.split(',').map(s=>s.trim()).filter(Boolean),
+        latentCTR: parseFloat(document.getElementById('inj-ctr').value),
+        unsubRate: parseFloat(document.getElementById('inj-unsub').value),
+        color: pickedColor
+      };
+
+      armsDefinition[prefix].push(newArm);
+      Object.keys(posteriors).forEach(segmentId => {
+        if (segmentId.split('__')[0] === prefix) {
+          posteriors[segmentId][newId] = { alpha: 1, beta: 1, sends: 0, clicks: 0, unsubs: 0, status: 'active' };
+        }
+      });
+
+      closeInjectModal();
+      document.getElementById('inject-form').reset();
+      computeConfidence(selectedSegmentId);
+      drawCanvas(); renderArms(); updateKPIs();
+    }
+
+    function renderArms() {
+      const list = document.getElementById('variants-list'); list.innerHTML = '';
+      const prefix = selectedSegmentId.split('__')[0];
+      const allArms = armsDefinition[prefix];
+      const gateActive = document.getElementById('gate-active').checked;
+
+      // Find active leader
+      let leaderId = null, bestP = -1;
+      allArms.forEach(a => {
+        const conf = confidenceScores[a.id];
+        if (conf && conf.pBest > bestP) { bestP = conf.pBest; leaderId = a.id; }
+      });
+
+      // Sort active at top, archived at bottom
+      const sortedArms = [...allArms].sort((x, y) => {
+        const sx = posteriors[selectedSegmentId][x.id]?.status || 'active';
+        const sy = posteriors[selectedSegmentId][y.id]?.status || 'active';
+        if (sx === sy) return 0;
+        return sx === 'active' ? -1 : 1;
+      });
+
+      sortedArms.forEach((arm, idx) => {
+        const s = posteriors[selectedSegmentId][arm.id];
+        const isMasked = gateActive && arm.id === 'LIE';
+        const isArchived = s.status === 'archived';
+        const isWinner = arm.id === leaderId && !isMasked && !isArchived;
+        const mean = s.alpha / (s.alpha + s.beta);
+
+        const conf = confidenceScores[arm.id] || { pBest: 0, ci: [mean, mean] };
+        const pBestPct = (conf.pBest * 100).toFixed(1);
+        const ciFormatted = `[${(conf.ci[0]*100).toFixed(1)}% — ${(conf.ci[1]*100).toFixed(1)}%]`;
+
+        const card = document.createElement('div');
+        card.className = `variant-card variant-${arm.id} ${isWinner ? 'winning' : ''} ${isMasked ? 'masked' : ''} ${isArchived ? 'archived' : ''}`;
+
+        const claimsHtml = arm.claims.map(c => `<span class="claim-pill ${arm.id === 'LIE' ? 'unverified' : 'verified'}">[[${c}]]</span>`).join('');
+
+        let statusBadge = isWinner ? `<span class="badge-float winning-badge">Learned leader</span>` : '';
+        if (isMasked) statusBadge = `<span class="badge-float masked-badge">Vetoed by Gate</span>`;
+        if (isArchived) statusBadge = `<span class="badge-float archived-badge">Archived - data saved</span>`;
+        const safeCopy = escapeHtml(arm.copy.replace('{name}', 'Alex').replace('{company}', 'Gauntlet Health')).replace(/\n/g, '<br>');
+
+        card.innerHTML = `
+          ${statusBadge}
+          <div class="variant-header">
+            <span class="variant-name">${escapeHtml(arm.label)}</span>
+            <span class="variant-code">${escapeHtml(arm.code)}</span>
+            ${!isMasked && !isArchived ? `<span class="badge-float confidence-pill" style="right: 170px; top: 18px;">P(Best): ${pBestPct}%</span>` : ''}
+          </div>
+          <div class="variant-copy">${safeCopy}</div>
+          <div class="claim-pill-list"><span class="claim-label">Verified Claims:</span>${claimsHtml}</div>
+          
+          <div class="metrics-ribbon">
+            <div class="metric-stat"><dt>Sends</dt><dd>${s.sends}</dd></div>
+            <div class="metric-stat"><dt>Clicks</dt><dd style="color: var(--accent-green);">${s.clicks}</dd></div>
+            <div class="metric-stat"><dt>Belief</dt><dd style="color: var(--accent-blue);">Beta(${s.alpha}, ${s.beta})</dd></div>
+            <div class="metric-stat"><dt>Est. CTR</dt><dd style="color: var(--accent-cyan);">${(mean*100).toFixed(1)}%</dd></div>
+            <div class="metric-stat" style="grid-column: span 2;"><dt>95% Credible Interval <span class="tip" data-tooltip="Exact Bayesian 95% interval derived from 1,000 live Monte Carlo draws.">?</span></dt><dd style="color: var(--accent-amber);">${ciFormatted}</dd></div>
+          </div>
+
+          <div class="arm-actions-footer">
+            <button class="btn-under-hood ${idx === 0 ? 'first-under-hood-btn' : ''}" onclick="toggleHood('${arm.id}')">
+              <span>Inspect math &amp; Monte Carlo diagnostics</span><span>▼</span>
+            </button>
+            ${!isMasked ? `
+              <button class="btn ${isArchived ? 'btn-primary' : 'btn-outline'}" style="width: auto; margin-bottom: 0; padding: 8px 16px; font-size: 11px;" onclick="toggleArchive('${arm.id}')">
+                ${isArchived ? 'Restore to trials' : 'Archive copy'}
+              </button>
+            ` : ''}
+          </div>
+          
+          <div id="hood-${arm.id}" class="hood-content" style="display: ${currentMode === 'specialist' ? 'block' : 'none'};">
+            <div class="hood-grid">
+              <div><strong style="color:#2E6FF5;">Alpha Hits (α):</strong> ${s.alpha}</div>
+              <div><strong style="color:#C0354B;">Beta Misses (β):</strong> ${s.beta}</div>
+              <div><strong style="color:#B5731B;">Win Confidence P(θ > others):</strong> ${pBestPct}%</div>
+              <div><strong style="color:#1E8A53;">Monte Carlo CI Bound:</strong> ${ciFormatted}</div>
+            </div>
+            <div class="hood-math">
+              <code>θ_i ~ Beta(α=${s.alpha}, β=${s.beta})</code><br>
+              <span style="color:#6B7480; margin-top:6px; display:block;">
+                <strong>Specialist Diagnostic:</strong> In Specialist mode, observe how this arm accumulates regret whenever sampled if $\theta_i < \theta^*$. The 95% Bayesian Credible Interval represents exact $[Q_{0.025}, Q_{0.975}]$ limits across 1,000 live draws. Archiving this arm preserves $N=${s.sends}$ and $\alpha=${s.alpha}$ while setting action-mask $M_i=0$.
+              </span>
+            </div>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    function selectSegment(segmentId) {
+      selectedSegmentId = segmentId;
+      
+      // Update active state in SRE segment tabs
+      const sreTabs = document.getElementById('segment-tabs');
+      if (sreTabs) {
+        Array.from(sreTabs.children).forEach(t => {
+          t.classList.toggle('active', t.getAttribute('data-seg-id') === segmentId);
+        });
+      }
+
+      // Update active state in Spec segment tabs
+      const specTabs = document.getElementById('spec-segment-tabs');
+      if (specTabs) {
+        Array.from(specTabs.children).forEach(t => {
+          t.classList.toggle('active', t.getAttribute('data-seg-id') === segmentId);
+        });
+      }
+
+      computeConfidence(selectedSegmentId);
+      drawCanvas();
+      drawRegretCanvas();
+      renderArms();
+      renderSpecialistTables();
+      updateKPIs();
+    }
+
+    function buildTabs() {
+      // Build SRE tabs
+      const sreBox = document.getElementById('segment-tabs');
+      if (sreBox) {
+        sreBox.innerHTML = '';
+        segments.forEach(seg => {
+          const b = document.createElement('button'); b.type = 'button';
+          b.className = `tab ${seg.id === selectedSegmentId ? 'active' : ''}`;
+          b.textContent = seg.label;
+          b.setAttribute('data-seg-id', seg.id);
+          b.onclick = () => selectSegment(seg.id);
+          sreBox.appendChild(b);
+        });
+      }
+
+      // Build Spec tabs
+      const specBox = document.getElementById('spec-segment-tabs');
+      if (specBox) {
+        specBox.innerHTML = '';
+        segments.forEach(seg => {
+          const b = document.createElement('button'); b.type = 'button';
+          b.className = `tab ${seg.id === selectedSegmentId ? 'active' : ''}`;
+          b.textContent = seg.label;
+          b.setAttribute('data-seg-id', seg.id);
+          b.onclick = () => selectSegment(seg.id);
+          specBox.appendChild(b);
+        });
+      }
+    }
+
+    function setupSyncControls() {
+      const liveRunBtn = document.getElementById('run-btn-live');
+      if (liveRunBtn) liveRunBtn.onclick = () => setRunMode('live');
+      const demoRunBtn = document.getElementById('run-btn-demo');
+      if (demoRunBtn) demoRunBtn.onclick = () => setRunMode('demo');
+
+      const pauseBtn = document.getElementById('btn-pause');
+      if (pauseBtn) pauseBtn.onclick = () => {
+        if (isSimRunning) {
+          clearInterval(simTimer);
+          simTimer = null;
+          isSimRunning = false;
+          pauseBtn.innerHTML = '<i class="ph ph-play"></i> Resume Live Stream';
+        } else {
+          startSim();
+          pauseBtn.innerHTML = '<i class="ph ph-pause"></i> Pause Live Stream';
+        }
+      };
+
+      const speedInput = document.getElementById('sim-speed');
+      if (speedInput) {
+        const updateSpeed = () => {
+          const speedVal = parseInt(speedInput.value, 10);
+          document.getElementById('pace-text').textContent = `${speedVal}ms`;
+          adjustSpeed(speedVal);
+        };
+        speedInput.oninput = updateSpeed;
+        speedInput.onchange = updateSpeed;
+      }
+
+      const batchBtn = document.getElementById('btn-batch');
+      if (batchBtn) batchBtn.onclick = () => { for(let i=0; i<100; i++) tickSimulation(); };
+
+      const resetBtn = document.getElementById('btn-reset');
+      if (resetBtn) resetBtn.onclick = () => {
+        initPosteriors();
+        globalStats = { sends: 0, clicks: 0, unsubs: 0, blockedLies: 0, exploitCount: 0, exploreCount: 0, cumulativeRegret: 0 };
+        regretHistory = [];
+        document.getElementById('event-feed-list').innerHTML = '';
+        const specMathLog = document.getElementById('spec-math-log-feed');
+        if (specMathLog) specMathLog.innerHTML = '';
+        computeConfidence(selectedSegmentId);
+        drawCanvas();
+        drawRegretCanvas();
+        renderArms();
+        renderSpecialistTables();
+        updateKPIs();
+      };
+    }
+
+    function adjustSpeed(speedVal) {
+      if (isSimRunning) {
+        clearInterval(simTimer);
+        simTimer = setInterval(tickSimulation, speedVal);
+      }
+    }
+
+    // --- DRIVER.JS TOUR ---
+    document.getElementById('btn-open-tutorial').onclick = () => {
+      const driverObj = window.driver.js.driver({
+        showProgress: true, animate: true, popoverClass: 'driverjs-theme',
+        steps: [
+          { element: '.view-switcher', popover: { title: 'SRE vs specialist views', description: 'Switch between operational reliability views and statistical diagnostic workbenches.', side: 'bottom' } },
+          { element: '#btn-inject', popover: { title: 'Inject candidate copy', description: 'Add challenger email copy directly into the running Thompson sampling trial.', side: 'right' } },
+          { element: '#posterior-canvas-box', popover: { title: 'Live Monte Carlo sampling', description: 'Watch sampled dots move across each Beta distribution. Wider curves mean higher exploration potential.', side: 'bottom' } },
+          { element: '#variants-list', popover: { title: 'Statistical confidence scoring', description: 'Each copy displays P(Best), 95% Bayesian credible intervals, and archive controls that preserve historical data.', side: 'top' } }
+        ]
+      });
+      driverObj.drive();
+    };
+
+    document.getElementById('gate-active').onchange = () => {
+      computeConfidence(selectedSegmentId);
+      drawCanvas();
+      renderArms();
+      renderSpecialistTables();
+    };
+
+    function startSim() {
+      clearInterval(simTimer);
+      simTimer = setInterval(tickSimulation, parseInt(document.getElementById('sim-speed').value, 10));
+      isSimRunning = true;
+    }
+
+    initPosteriors();
+    buildTabs();
+    computeConfidence(selectedSegmentId);
+    drawCanvas();
+    drawRegretCanvas();
+    renderArms();
+    renderSpecialistTables();
+    updateKPIs();
+    setupSyncControls();
+    syncRunModeControls();
+    if (runMode === 'demo') {
+      startSim();
+    } else {
+      isSimRunning = false;
+      loadLiveDashboard();
+      startLivePolling();
+    }
+    window.addEventListener('resize', () => { drawCanvas(); drawRegretCanvas(); });
+  </script>
+</div>
+{% endblock %}

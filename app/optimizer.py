@@ -24,6 +24,16 @@ def optimizer(request: Request):
         "scenarios": m["scenarios"], "note": m["note"]})
 
 
+@app.get("/optimizer/bandit-dashboard", response_class=HTMLResponse)
+def optimizer_bandit_dashboard(request: Request):
+    return templates.TemplateResponse(request, "bandit_dashboard.html", {})
+
+
+@app.get("/optimizer/bandit-dashboard/learn-more", response_class=HTMLResponse)
+def optimizer_bandit_learn_more(request: Request):
+    return templates.TemplateResponse(request, "bandit_dashboard_learn_more.html", {})
+
+
 @app.get("/api/optimizer/live")
 def optimizer_live() -> JSONResponse:
     """Live posteriors moving from REAL /site traffic — the online counterpart to the
@@ -31,6 +41,24 @@ def optimizer_live() -> JSONResponse:
     c = ctx()
     c.live.settle()
     return JSONResponse(c.live.snapshot())
+
+
+@app.get("/api/optimizer/dashboard")
+def optimizer_dashboard() -> JSONResponse:
+    """Dashboard-shaped view of the real online optimizer.
+
+    The HTML dashboard has a separate demo trigger, but its default mode should observe the
+    same live optimizer that serves /site traffic instead of running a second client-only
+    simulation.
+    """
+    c = ctx()
+    settled = c.live.settle()
+    return JSONResponse({
+        "mode": "live",
+        "settled": settled,
+        "snapshot": c.live.snapshot(),
+        "lift": c.live.lift_report(),
+    })
 
 
 @app.post("/api/optimizer/live/settle")

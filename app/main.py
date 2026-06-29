@@ -53,6 +53,12 @@ def form(request: Request):
     })
 
 
+@app.get("/bandit-dashboard", response_class=HTMLResponse)
+def bandit_dashboard(request: Request):
+    return RedirectResponse("/optimizer/bandit-dashboard", status_code=307)
+
+
+
 @app.post("/submit", response_class=HTMLResponse)
 def submit(request: Request,
            name: str = Form(...), email: str = Form(...), company: str = Form(...),
@@ -99,3 +105,4 @@ from app import policies as _policies  # noqa: E402,F401
 from app import graph as _graph  # noqa: E402,F401
 from app import help as _help  # noqa: E402,F401
 from app import archive as _archive  # noqa: E402,F401
+from app import reviews as _reviews  # noqa: E402,F401

@@ -33,6 +33,7 @@ from typing import Optional
 from pipeline.common.config import DB_PATH
 from pipeline.common.db import connect, init_db
 from pipeline.common.store import ActionPool, PosteriorStore
+from pipeline.domain.stores.review_store import check_dispatch
 from pipeline.optimizer.bandit import ThompsonBandit
 
 WARM_FROM_CAMPAIGN = "web"          # the deterministic demo's website campaign
@@ -108,9 +109,17 @@ class LiveOptimizer:
         if not active:
             return None, "bandit"
         hf = LIVE_HOLDOUT if holdout_frac is None else holdout_frac
-        if hf > 0 and r.random() < hf:
-            return r.choice(active), "control"
-        return self.select(segment, rng=r), "bandit"
+        is_control = hf > 0 and r.random() < hf
+        if is_control:
+            arm = r.choice(active)
+            policy = "control"
+        else:
+            arm = self.select(segment, rng=r)
+            policy = "bandit"
+        if arm and check_dispatch(arm) == "suppress":
+            safe = [a for a in active if check_dispatch(a) == "allow"]
+            arm = r.choice(safe) if safe else None
+        return arm, policy
 
     @staticmethod
     def arm_label(variant_id: str) -> str:

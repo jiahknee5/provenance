@@ -23,6 +23,7 @@ from collections import defaultdict
 from datetime import datetime, timezone
 
 from pipeline.common import observe, topology
+from pipeline.domain.emit import end_domain_run, start_domain_run
 from pipeline.common.config import (OBSERVE_DIR, RUNS_DIR, DATA_DIR, INFERENCE_PROFILE,
                                     SEED, ENRICH_MODE)
 from pipeline.common.schemas import Recipient
@@ -236,9 +237,13 @@ def _append_history(meta: dict, golden: dict) -> None:
 
 def main() -> dict:
     observe.start_run("provenance-demo", topology.PHASES)
+    start_domain_run("provenance-demo")
     summary = run_all()
     enrich_demo = run_enrichment_demo()
     observe.end_run(summary)
+    end_domain_run()
+    from pipeline.domain.projectors import replay_all
+    replay_all()
 
     # golden evals (node-level fresh captures + workflow-level scored from the ledger)
     golden = run_golden(_read_ledger())

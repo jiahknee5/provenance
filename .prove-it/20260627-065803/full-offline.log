@@ -1,0 +1,20 @@
+........................................................................ [ 36%]
+............F........................................................... [ 73%]
+...................................................                      [100%]
+=================================== FAILURES ===================================
+____________________ test_integrations_show_base_vs_connect ____________________
+
+    def test_integrations_show_base_vs_connect():
+        """Landing + Help show the built-in enrichment base vs the connectable stack (data + value each)."""
+        assert "/help/integrations" in c.get("/").text           # landing links to the detail
+        t = c.get("/help/integrations")
+        assert t.status_code == 200
+        assert "Built in" in t.text and "Connect your stack" in t.text
+>       assert "People Data Labs" in t.text and "Reverse-IP" in t.text   # the wired base
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert ('People Data Labs' in '<!doctype html>\n<html lang="en">\n<head>\n  <meta charset="utf-8">\n  <meta name="viewport" content="width=device-wi...document.getElementById(\'cmdk-btn\');if(btn)btn.addEventListener(\'click\',open);\n})();\n</script>\n</body>\n</html>')
+E        +  where '<!doctype html>\n<html lang="en">\n<head>\n  <meta charset="utf-8">\n  <meta name="viewport" content="width=device-wi...document.getElementById(\'cmdk-btn\');if(btn)btn.addEventListener(\'click\',open);\n})();\n</script>\n</body>\n</html>' = <Response [200 OK]>.text
+
+tests/test_full_suite.py:408: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_full_suite.py::test_integrations_show_base_vs_connect - ass...

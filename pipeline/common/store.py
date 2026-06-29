@@ -21,13 +21,14 @@ class ActionPool:
     def __init__(self, campaign: str, channel: str):
         self.campaign = campaign
         self.channel = channel
-        self.segments: dict[str, list[str]] = {}   # segment -> cleared variant_ids
-        self.paused: set[str] = set()               # drift-invalidated variant_ids
+        self.segments: dict[str, list[str]] = {}   # segment -> cleared asset_ids
+        self.paused: set[str] = set()               # drift-invalidated asset_ids
 
-    def add(self, segment: str, variant_id: str) -> None:
+    def add(self, segment: str, variant_id: str, asset_id: str | None = None) -> None:
+        aid = asset_id or variant_id
         self.segments.setdefault(segment, [])
-        if variant_id not in self.segments[segment]:
-            self.segments[segment].append(variant_id)
+        if aid not in self.segments[segment]:
+            self.segments[segment].append(aid)
 
     def pause(self, variant_ids: Iterable[str]) -> None:
         self.paused.update(variant_ids)
@@ -42,6 +43,9 @@ class ActionPool:
     def all_variant_ids(self) -> set[str]:
         return {v for vs in self.segments.values() for v in vs}
 
+    def all_asset_ids(self) -> set[str]:
+        return self.all_variant_ids()
+
     # --- persistence ---
     def _path(self) -> Path:
         return RUNS_DIR / f"pool_{self.campaign}_{self.channel}.json"
@@ -49,7 +53,8 @@ class ActionPool:
     def save(self) -> None:
         self._path().write_text(json.dumps(
             {"campaign": self.campaign, "channel": self.channel,
-             "segments": self.segments, "paused": sorted(self.paused)}, indent=2))
+             "segments": self.segments, "paused": sorted(self.paused),
+             "schema_version": 2}, indent=2))
 
     @classmethod
     def load(cls, campaign: str, channel: str) -> "ActionPool":

@@ -1,0 +1,172 @@
+{% extends "shell.html" %}
+{% block title %}apt — Bandit dashboard guide{% endblock %}
+{% block crumb %}<i class="ph ph-trend-up"></i> Optimizer / Bandit guide{% endblock %}
+{% block content %}
+<style>
+  .guide-wrap{max-width:980px}
+  .guide-grid{display:grid;grid-template-columns:240px 1fr;gap:20px;align-items:start}
+  .guide-nav{position:sticky;top:72px;border:1px solid var(--hairline);border-radius:var(--r-card);background:var(--surface);padding:10px;box-shadow:var(--shadow-card)}
+  .guide-nav a{display:block;padding:7px 9px;border-radius:8px;color:var(--muted);font-size:13px}
+  .guide-nav a:hover{background:var(--fill);color:var(--ink);text-decoration:none}
+  .guide-section{border:1px solid var(--hairline);border-radius:var(--r-card);background:var(--surface);padding:18px;margin-bottom:14px;box-shadow:var(--shadow-card)}
+  .guide-section h2{font-size:20px;margin-bottom:8px}
+  .guide-section h3{font-size:15px;margin:16px 0 6px}
+  .guide-section p,.guide-section li{color:var(--slate);font-size:14px}
+  .guide-section ul{margin:8px 0 0 18px;padding:0}
+  .scenario{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+  .scenario .box{border:1px solid var(--hairline);border-radius:12px;background:var(--fill2);padding:13px}
+  .mini-chart{height:90px;border:1px solid var(--hairline);border-radius:10px;background:#fff;position:relative;overflow:hidden;margin:10px 0}
+  .curve{position:absolute;bottom:18px;width:32%;height:54px;border:2px solid var(--signal);border-bottom:0;border-radius:50% 50% 0 0}
+  .curve.a{left:18%;height:56px}.curve.b{left:48%;height:28px;border-color:var(--a);opacity:.8}.curve.wide{width:50%;height:34px;left:34%;border-color:var(--a)}
+  .axis{position:absolute;left:12px;right:12px;bottom:18px;border-bottom:1px solid var(--hairline)}
+  .guide-callout{border-left:3px solid var(--signal);background:var(--bbg);padding:10px 12px;border-radius:9px;margin-top:10px;color:var(--slate);font-size:13px}
+  @media(max-width:900px){.guide-grid,.scenario{grid-template-columns:1fr}.guide-nav{position:static}}
+</style>
+
+<div class="guide-wrap">
+  <div class="q-pagehead">
+    <div>
+      <span class="q-pill b" style="margin-bottom:10px"><span class="d"></span>Bandit guide</span>
+      <h1>How to use the bandit dashboard</h1>
+      <p class="q-muted" style="margin:5px 0 0"><b style="color:var(--slate)">Goal:</b> understand which verified email angle to send per segment without letting unsafe claims win.</p>
+    </div>
+    <div class="sp">
+      <a class="q-btn outline" href="/optimizer/bandit-dashboard"><i class="ph ph-gauge"></i> Back to dashboard</a>
+      <a class="q-btn ghost" href="/optimizer"><i class="ph ph-arrow-left"></i> Optimizer</a>
+    </div>
+  </div>
+
+  <div class="guide-grid">
+    <nav class="guide-nav">
+      <a href="#what-is-bandit">What is a bandit?</a>
+      <a href="#interventions">Interventions</a>
+      <a href="#traffic-pulse">Traffic pulse</a>
+      <a href="#belief-curves">Belief curves</a>
+      <a href="#explore-exploit">Explore vs exploit</a>
+      <a href="#copy-arms">Copy arms</a>
+      <a href="#decision-stream">Decision stream</a>
+      <a href="#specialist-diagnostics">Specialist diagnostics</a>
+      <a href="#scenarios">Scenarios and actions</a>
+    </nav>
+
+    <div>
+      <section class="guide-section" id="what-is-bandit">
+        <h2>What is a multi-arm bandit in this project?</h2>
+        <p>A multi-arm bandit is an experiment that learns while it serves traffic. In Provenance, each arm is an email copy angle for a healthcare audience segment. The reward is a meeting booked, and unsubscribes count as negative evidence.</p>
+        <p>The important Provenance-specific constraint is the Gate: an arm with unverified or unsafe claims can be visible in the dashboard, but it should not be selectable when Gate masking is on. That is the difference between optimizing conversion and optimizing conversion inside the truth boundary.</p>
+      </section>
+
+      <section class="guide-section" id="interventions">
+        <h2>Intervention controls</h2>
+        <p>Use this pane when you want to change the experiment rather than just observe it.</p>
+        <ul>
+          <li><b>Inject candidate arm:</b> adds a new copy angle to the selected segment family and starts it with an uninformative Beta(1,1) prior.</li>
+          <li><b>Pause live stream:</b> freezes simulated sends so you can inspect the current posterior state.</li>
+          <li><b>Fast-forward 100 sends:</b> stress-tests convergence and shows whether a winner becomes stable with more evidence.</li>
+          <li><b>Reset memory:</b> clears posteriors, counters, regret history, and feed logs.</li>
+          <li><b>Lawful Gate Masking:</b> removes planted lie arms from the action pool while still showing why they were blocked.</li>
+        </ul>
+        <div class="guide-callout">Action rule: if an unsafe arm has high latent CTR, leave Gate masking on. The dashboard should prove the lie is tempting but unreachable.</div>
+      </section>
+
+      <section class="guide-section" id="traffic-pulse">
+        <h2>Production traffic pulse</h2>
+        <p>These KPIs answer the operational question: is the optimizer producing meetings without harming the list?</p>
+        <ul>
+          <li><b>Outreach sends:</b> total simulated attempts.</li>
+          <li><b>Meetings booked:</b> successful rewards.</li>
+          <li><b>List burn:</b> unsubscribes; this is weighted more harshly than a no-click.</li>
+          <li><b>Gate veto count:</b> times the system prevented an unverified claim from entering serving decisions.</li>
+        </ul>
+      </section>
+
+      <section class="guide-section" id="belief-curves">
+        <h2>Live belief curves and statistical confidence</h2>
+        <p>Each curve is a Beta distribution: the bandit's current belief about one copy arm's true meeting-booking rate. The x-axis is possible CTR. The curve's shape tells you confidence.</p>
+        <ul>
+          <li><b>Wide curve:</b> not enough data yet. The arm may still be good or bad.</li>
+          <li><b>Tall narrow curve:</b> enough evidence has accumulated. The model is more certain.</li>
+          <li><b>Curve shifted right:</b> the arm is believed to have higher CTR.</li>
+          <li><b>Overlapping curves:</b> no clear winner yet; exploration should continue.</li>
+        </ul>
+        <div class="scenario">
+          <div class="box">
+            <h3>Stable winner</h3>
+            <div class="mini-chart"><span class="axis"></span><span class="curve a"></span><span class="curve b"></span></div>
+            <p>Angle A is narrow and right-shifted. Angle B is lower. Action: keep serving A, archive B only if it remains weak after enough sends.</p>
+          </div>
+          <div class="box">
+            <h3>Uncertain challenger</h3>
+            <div class="mini-chart"><span class="axis"></span><span class="curve a"></span><span class="curve wide"></span></div>
+            <p>Angle B is wide and overlaps A. Action: do not archive yet. Let the bandit explore until the credible interval tightens.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="guide-section" id="explore-exploit">
+        <h2>Exploit winner vs explore underdog</h2>
+        <p>Exploit means the selected arm was already the current leader. Explore means Thompson sampling picked a less-proven arm because its uncertainty still leaves room for upside.</p>
+        <p>Early in an experiment, exploration should be common. Later, exploitation should dominate. If exploration stays high forever, the arms may be too similar, traffic may be too low, or outcomes may be noisy.</p>
+      </section>
+
+      <section class="guide-section" id="copy-arms">
+        <h2>Candidate copy arms</h2>
+        <p>Each card shows the operational and statistical state of a copy angle.</p>
+        <ul>
+          <li><b>Claim tags:</b> the evidence-backed claims the message relies on.</li>
+          <li><b>Belief Beta(alpha, beta):</b> alpha grows with meetings; beta grows with misses and more sharply with unsubscribes.</li>
+          <li><b>P(Best):</b> Monte Carlo estimate of how often this arm beats the others.</li>
+          <li><b>95% credible interval:</b> the plausible range for this arm's CTR based on current evidence.</li>
+          <li><b>Archive copy:</b> removes the arm from future pulls without deleting its history.</li>
+        </ul>
+      </section>
+
+      <section class="guide-section" id="decision-stream">
+        <h2>Real-time decision stream</h2>
+        <p>The stream lets you audit individual choices. It records the segment, selected arm, whether the pull was exploit or explore, and the outcome.</p>
+        <p>Use it when a curve changes suddenly. For example, a run of unsubscribes should push beta up, lower estimated CTR, and may trigger a list-burn warning.</p>
+      </section>
+
+      <section class="guide-section" id="specialist-diagnostics">
+        <h2>Specialist diagnostics</h2>
+        <p>Specialist mode is for debugging convergence rather than operating the experiment day to day.</p>
+        <ul>
+          <li><b>Estimated regret:</b> cumulative opportunity cost of exploration compared with always selecting the best honest arm.</li>
+          <li><b>Policy entropy:</b> how spread out the action probabilities are. Lower entropy means convergence.</li>
+          <li><b>Average KL divergence:</b> how far posteriors have moved from the starting prior. Higher means the model has learned more.</li>
+          <li><b>Active arm pool:</b> number of arms eligible after Gate and archive masking.</li>
+        </ul>
+      </section>
+
+      <section class="guide-section" id="win-matrix">
+        <h2>Head-to-head win probability matrix</h2>
+        <p>This table answers pairwise questions like: what is the probability Angle A beats Angle B if we sample from their current beliefs? A value above 70% is strong directional evidence. A value near 50% means the arms are statistically close.</p>
+      </section>
+
+      <section class="guide-section" id="posterior-table">
+        <h2>Posterior parameter table</h2>
+        <p>This table is the numeric companion to the belief curves. Mean is the expected CTR, mode is the most likely CTR when defined, variance is uncertainty, and KL divergence is learning progress from the starting prior.</p>
+      </section>
+
+      <section class="guide-section" id="drift-log">
+        <h2>Posterior drift log</h2>
+        <p>The log shows how each pull changes the model. If an arm gets a meeting, its alpha increases and the curve shifts right. If it misses or causes an unsubscribe, beta increases and the curve shifts left or narrows around a weaker estimate.</p>
+      </section>
+
+      <section class="guide-section" id="scenarios">
+        <h2>Scenario examples and actions</h2>
+        <h3>Scenario 1: CFO ROI proof is clearly winning</h3>
+        <p>The ROI Proof arm has high P(Best), a narrow credible interval, and most pulls are exploitation. Action: keep it active, consider archiving weak challengers, and promote the winning angle into production copy review.</p>
+        <h3>Scenario 2: Transparent pricing has few sends and a wide interval</h3>
+        <p>The arm looks worse on mean CTR, but the interval is wide and overlaps the leader. Action: do not archive yet. Let the bandit explore or fast-forward more sends before deciding.</p>
+        <h3>Scenario 3: Planted lie has the highest latent CTR</h3>
+        <p>The lie would be attractive to an unconstrained optimizer, but Gate masking keeps it out of the active pool. Action: keep Gate masking on and use the veto count as evidence that the truth boundary is working.</p>
+        <h3>Scenario 4: List burn spikes</h3>
+        <p>Unsubscribes rise above the SLA threshold. Action: pause the stream, inspect the decision feed for the arm causing unsubscribes, archive that arm if the pattern is concentrated, and review its claim/copy tone.</p>
+        <h3>Scenario 5: Entropy remains high after many sends</h3>
+        <p>The bandit is not converging. Action: check whether arms are too similar, segment definitions are too broad, or reward data is too sparse. Add clearer challenger copy or split the segment.</p>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,7 @@
+traced 761 events across 7 lanes · P1-P5 5/5 pass · golden 17/17 · lifecycle ✓ · enrich=synthetic · $0 offline
+  ✓ P1: constrained bandit selected the lie 0× (twin 734×) across 1000 sends
+  ✓ P2: c_tco: amber→red the instant the MLR hold flipped
+  ✓ P3: re-verified exactly ['c_tco'] (== affected ['c_tco']), no over/under-invalidation
+  ✓ P4: same claim_id → same verdict on email & website; 0 red claims rendered
+  ✓ P5: Gate catch 100% > single-judge 24% at 0% false-reject (baseline 0%)
+  ✓ E1: fact-gate blocked 100% of un-shippable facts (disallowed/stale/PHI/non-consent) at 0% false-block; 0 blocked fact(s) withheld from copy
