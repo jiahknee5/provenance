@@ -9,6 +9,7 @@ the claim Gate — enrichment adds the personal layer on top, it does not replac
 from __future__ import annotations
 
 from pipeline.common import observe
+from pipeline.domain.adapters import enrichment as domain_enrichment
 from pipeline.enrichment import connectors as conn
 from pipeline.enrichment.gate import EnrichmentGate
 from pipeline.enrichment.schemas import FactVerdict, Profile, ProfileFact
@@ -37,6 +38,10 @@ def synthesize(recipient, facts: list[ProfileFact]) -> Profile:
 def enrich(recipient, gate: EnrichmentGate | None = None,
            store: ProfileStore | None = None, mode: str | None = None) -> Profile:
     gate = gate or EnrichmentGate()
+    enrich_mode = mode or conn.config.ENRICH_MODE
+    domain_enrichment.emit_enrichment_requested(
+        recipient.recipient_id, company=recipient.company, consent=recipient.consent, mode=enrich_mode,
+    )
     observe.emit("enrichment", "INPUT", node="enrich_connectors",
                  detail=f"enrich {recipient.recipient_id} ({recipient.company}, consent={recipient.consent})",
                  input={"recipient_id": recipient.recipient_id, "company": recipient.company,
@@ -52,6 +57,13 @@ def enrich(recipient, gate: EnrichmentGate | None = None,
             facts.append(gate.evaluate(raw, recipient))
 
     profile = synthesize(recipient, facts)
+    domain_enrichment.emit_enrichment_received(
+        recipient.recipient_id,
+        fact_count=len(facts),
+        usable=len(profile.usable_facts),
+        blocked=len(profile.blocked_facts),
+        signals=profile.signals,
+    )
     observe.emit("enrichment", "OUTPUT", node="enrich_synth", tool="synthesizer",
                  detail=f"{len(profile.usable_facts)} usable · {len(profile.blocked_facts)} blocked · "
                         f"signals: {', '.join(profile.signals) or 'none'}",
@@ -59,6 +71,10 @@ def enrich(recipient, gate: EnrichmentGate | None = None,
                          "signals": profile.signals})
     if store is not None:
         store.save(profile)
+        observe.emit("enrichment", "OUTPUT", node="profile_db",
+                     tool="profiles.sqlite (profiles + fact receipts)",
+                     detail=f"persisted profile for {recipient.recipient_id}",
+                     output=store.summary())
     return profile
 
 

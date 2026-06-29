@@ -27,11 +27,11 @@ Per [`docs/05-build/DECISIONS.md`](../../05-build/DECISIONS.md):
 
 | Canonical entity | Maturity | As-built module(s) | Field / behavior notes |
 |---|---|---|---|
-| `Claim` | partial | `ClaimNode`, `ClaimVerdict` in `pipeline/common/schemas.py` | `text`≈`claim_value`; `status` uses `ClaimStatus` not canonical lifecycle; no `supersedes_claim_id` events yet |
+| `Claim` | partial | `ClaimNode`, `ClaimVerdict` in `pipeline/common/schemas.py` | `claim_extracted` at library ingest; `claim_superseded` on source rebind; `ClaimStatus` not canonical lifecycle |
 | `Evidence` | partial | `SourceDoc`, spans, `RawFact`, `ProfileFact` | No standalone `evidence_id` + immutable event linkage |
 | `Gate` | partial | `pipeline/gate/gate.py` | Verdict cascade implemented; domain events via `pipeline/domain/adapters/gate.py` |
 | `Policy` | partial | `RulesEngine`, `EnrichmentGate`, `surface` policy | YAML rules, not `Policy` aggregate |
-| `Optimizer` | partial | `ThompsonBandit`, `PosteriorStore`, `run_campaign`, `LiveOptimizer` | Metadata implicit in code/artifacts |
+| `Optimizer` | partial | `ThompsonBandit`, `PosteriorStore`, `run_campaign`, `LiveOptimizer` | Metadata implicit in code/artifacts; campaign replay lets emotional safety override a selected arm before publish |
 | `BanditPolicy` | partial | `ThompsonBandit` | Code-level strategy, not persisted object |
 | `Profile` | implemented | `pipeline/domain/models/profile.py`, `pipeline/domain/stores/profile_store.py` | Namespaced aggregate; `CustomerStore` / enrichment `ProfileStore` delegate here |
 | `IdentityCandidate` | partial | `pipeline/domain/identity.py` + funnel stitching | Resolver emits catalog identity events |
@@ -41,7 +41,7 @@ Per [`docs/05-build/DECISIONS.md`](../../05-build/DECISIONS.md):
 | `SegmentDefinition` | partial | `ROLE_ANGLES`, cohort `segments.py` | No ruleset version aggregate |
 | `SegmentAssignment` | partial | Recipient `segment`, customer `Stage`, cohort tiers | Implicit membership |
 | `Event` envelope | partial | `pipeline/domain/envelope.py`, `emit.py` | Canonical shape; parallel to observe |
-| `EmotionalSignal` | partial | `pipeline/domain/emotional.py` | Rule-based stub, no ML |
+| `EmotionalSignal` | partial | `pipeline/domain/emotional.py`, `pipeline/optimizer/campaign.py` | Rule-based text inference wired through campaign replay; no live ML/dwell-scroll pipeline |
 | `EmotionalVectorTag` | partial | `Variant.emotional_vector` | Populated in `pipeline/generation/variants.py` |
 
 ## Event catalog mapping (behavior → canonical name)
@@ -55,15 +55,17 @@ Per [`docs/05-build/DECISIONS.md`](../../05-build/DECISIONS.md):
 | Rules engine decision | `policy_evaluated` | `domain/adapters/gate.py` |
 | Drift re-verify | `claim_marked_stale`, `claim_reverification_requested` | `domain/adapters/drift.py` |
 | Recipient segment assignment | `segment_evaluated`, `segment_assignment_updated` | `domain/adapters/segment.py` (at `scripts.pipeline`) |
-| Asset create + gate clearance | `asset_draft_created`, `asset_validated` | `domain/adapters/asset.py` (at `build_action_pool`) |
+| Asset create + gate clearance | `asset_draft_created`, `asset_emotional_vector_tagged`, `asset_validated`, `asset_approved` | `domain/adapters/asset.py` (at `build_action_pool`) |
 | Per-recipient bandit select | `asset_selection_recorded` | `domain/adapters/campaign.py` (inside recipient loop) |
-| Per-recipient serve / no-arm | `asset_dispatched`, `dispatch_failed` | `domain/adapters/asset.py` (at `run_campaign`) |
+| Per-recipient serve / no-arm | `asset_publish_requested`, `asset_dispatched`, `dispatch_failed` | `domain/adapters/asset.py` (at `run_campaign`) |
 | Segment winner summary | (observe DECISION only) | Not duplicated as domain event |
 | Funnel touchpoint | `evidence_captured`, `form_submitted`, etc. | `domain/adapters/funnel.py` |
+| Enrichment touchpoint | `enrichment_requested`, `enrichment_received` | `domain/adapters/enrichment.py` (at `enrich()`) |
+| Claim library ingest | `claim_extracted`, `claim_superseded` | `domain/adapters/claim.py` (at `ClaimsLibrary.from_seed/load`, `mark_verified`) |
 | Identity resolve | `identity_resolution_requested`, `identity_resolved`, `identity_conflicted` | `pipeline/domain/identity.py` |
 | Review queue | `review_requested`, `review_approved`, `review_rejected`, `review_escalated` | `pipeline/domain/review.py` |
 | Explainability | `decision_trace_recorded`, `decision_overridden` | `pipeline/domain/decision_trace.py` |
-| Emotional mismatch | `emotional_mismatch_blocked`, `emotional_reroute_applied` | `pipeline/domain/emotional.py` |
+| Emotional mismatch | `text_sentiment_scored`, `emotional_signal_detected`, `emotional_segment_assignment_updated`, `emotional_mismatch_blocked`, `emotional_reroute_applied` | `pipeline/domain/emotional.py`; invoked from `pipeline/optimizer/campaign.py` before publish |
 
 ## Observe vs domain streams
 
@@ -82,6 +84,7 @@ Per [`docs/05-build/DECISIONS.md`](../../05-build/DECISIONS.md):
 | Core schemas | `pipeline/common/schemas.py` |
 | Gate | `pipeline/gate/gate.py` |
 | Optimizer | `pipeline/optimizer/campaign.py`, `live.py` |
+| Emotional safety | `pipeline/domain/emotional.py`, `pipeline/optimizer/campaign.py` |
 | Drift | `pipeline/drift/monitor.py` |
 | Customer / funnel | `pipeline/customer/funnel.py` |
 | Review API | `app/reviews.py` |

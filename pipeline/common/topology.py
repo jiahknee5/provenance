@@ -98,6 +98,14 @@ NODES = [
         "code": "pipeline/gate/gate.py", "property": "P2,P4",
     },
     {
+        "id": "segment", "lane": "optimizer", "label": "Segment", "col": 5, "row": 0,
+        "tools": ["role×size ruleset", "8 micro-segments (role × tier)"],
+        "input": "a recipient cohort (role + company_size from the form)",
+        "decision": "assign each recipient a role__tier micro-segment",
+        "output": "per-recipient segment that scopes the action pool + Thompson bandit",
+        "code": "pipeline/generation/recipients.py", "property": None,
+    },
+    {
         "id": "pool", "lane": "optimizer", "label": "Action pool", "col": 6, "row": 0,
         "tools": ["ActionPool (Gate-cleared arms only)", "pause/unblock on drift"],
         "input": "Gate verdicts over the candidate variants",
@@ -211,19 +219,29 @@ NODES = [
 ]
 
 EDGES = [
-    ("library", "decompose"), ("library", "retrieve"),
-    ("decompose", "retrieve"), ("retrieve", "nli"), ("retrieve", "rules"),
-    ("rules", "ledger"), ("nli", "ensemble"), ("ensemble", "calibrate"),
-    ("calibrate", "ledger"),
-    ("ledger", "pool"), ("ledger", "twin"), ("ledger", "website"), ("ledger", "assurance"),
+    # claims library feeds gate, drift, assurance traps, and personalize claim bodies
+    ("library", "decompose"), ("library", "retrieve"), ("library", "drift"),
+    ("library", "assurance"), ("library", "personalize"),
+    # gate cascade: retrieve → rules (veto) → nli → ensemble → calibrate → ledger
+    ("decompose", "ledger"),
+    ("retrieve", "rules"), ("retrieve", "nli"),
+    ("rules", "ledger"),
+    ("nli", "ensemble"), ("ensemble", "calibrate"), ("calibrate", "ledger"),
+    # optimizer: gate-cleared arms + per-segment routing
+    ("ledger", "pool"), ("segment", "pool"), ("segment", "bandit"),
     ("pool", "bandit"), ("bandit", "oracle"), ("oracle", "bandit"),
-    ("library", "drift"), ("drift", "pool"), ("drift", "ledger"),
+    # unconstrained twin: same segment routing + same oracle reward loop, but draws arms
+    # straight from the ledger (lie included) — it bypasses the pool's truth boundary
+    ("ledger", "twin"), ("segment", "twin"), ("twin", "oracle"), ("oracle", "twin"),
+    # drift agent: legal-hold flip → surgical re-Gate (cache-miss) → pause/unblock pool arms,
+    # so the next campaign's bandit re-pulls from the mutated boundary
+    ("drift", "ledger"), ("drift", "pool"),
+    # channels
     ("bandit", "website"),
     # enrichment lane (data-provenance)
     ("enrich_connectors", "enrich_gate"), ("enrich_gate", "enrich_synth"),
-    ("enrich_synth", "profile_db"), ("profile_db", "pool"), ("profile_db", "personalize"),
-    ("bandit", "personalize"), ("personalize", "website"),
-    ("drift", "enrich_gate"), ("enrich_gate", "fact_audit"),
+    ("enrich_synth", "profile_db"), ("profile_db", "personalize"),
+    ("personalize", "website"), ("enrich_gate", "fact_audit"),
 ]
 
 # the 5 headline properties + E1 (enrichment), attached to the nodes that prove them

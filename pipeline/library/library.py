@@ -14,6 +14,7 @@ from typing import Optional
 
 from pipeline.common.config import CLAIMS_DIR
 from pipeline.common.schemas import ClaimNode, ClaimStatus, SourceDoc
+from pipeline.domain.adapters import claim as domain_claim
 from pipeline.library import seed_data
 
 
@@ -49,8 +50,11 @@ class ClaimsLibrary:
                 span=(start, start + len(c["evidence"])), source_version=src.source_version,
                 status=ClaimStatus.IN_DATE, numeric=c["numeric"], numeric_unit=c["numeric_unit"],
                 segments=c["segments"], rule_tags=c["rule_tags"],
+                supersedes_claim_id=c.get("supersedes_claim_id"),
             ))
-        return cls(sources, claims)
+        lib = cls(sources, claims)
+        domain_claim.emit_library_ingested(lib)
+        return lib
 
     # ---- queries -----------------------------------------------------------
     def claims_in_date(self) -> list[ClaimNode]:
@@ -115,7 +119,17 @@ class ClaimsLibrary:
     def mark_verified(self, claim_id: str) -> None:
         """After a re-Gate, the claim now depends on the current source version."""
         c = self.claims[claim_id]
-        c.source_version = self.sources[c.source_id].source_version
+        prior = c.source_version
+        new = self.sources[c.source_id].source_version
+        c.source_version = new
+        if prior != new:
+            domain_claim.emit_claim_superseded(
+                claim_id,
+                supersedes_claim_id=claim_id,
+                prior_source_version=prior,
+                new_source_version=new,
+                reason="source_rebind",
+            )
 
     # ---- persistence -------------------------------------------------------
     def save(self) -> None:
@@ -130,4 +144,6 @@ class ClaimsLibrary:
         raw = json.loads((CLAIMS_DIR / "library.json").read_text())
         sources = [SourceDoc(**s) for s in raw["sources"].values()]
         claims = [ClaimNode(**c) for c in raw["claims"].values()]
-        return cls(sources, claims)
+        lib = cls(sources, claims)
+        domain_claim.emit_library_ingested(lib)
+        return lib

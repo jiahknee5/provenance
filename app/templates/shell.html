@@ -16,9 +16,8 @@
 <div class="q-app">
   <!-- sidebar -->
   <aside class="q-side">
-    <div class="q-ws"><span class="av"><img src="/static/brand/apt-mark-dark.svg" alt="" width="15" height="15"></span>apt<i class="ph ph-caret-up-down ch"></i></div>
+    <a class="q-ws" href="/" style="text-decoration:none;color:inherit"><span class="av"><img src="/static/brand/apt-mark-dark.svg" alt="" width="15" height="15"></span>apt</a>
     <nav class="q-nav">
-      <a class="q-ni {{ 'on' if p in ['/workspace','/'] else '' }}" href="/workspace"><i class="ph ph-house"></i>Home</a>
       <a class="q-ni {{ 'on' if p.startswith('/records') or p=='/workspace' else '' }}" href="/records"><i class="ph ph-table"></i>Records</a>
       <a class="q-ni {{ 'on' if p.startswith('/composer') else '' }}" href="/composer"><i class="ph ph-pen-nib"></i>Composer</a>
       <a class="q-ni {{ 'on' if p.startswith('/optimizer') else '' }}" href="/optimizer"><i class="ph ph-trend-up"></i>Optimizer</a>
@@ -29,9 +28,11 @@
       <a class="q-ni {{ 'on' if p.startswith('/assurance') else '' }}" href="/assurance"><i class="ph ph-shield-check"></i>Assurance</a>
       <a class="q-ni {{ 'on' if p.startswith('/policies') else '' }}" href="/policies"><i class="ph ph-scroll"></i>Policies</a>
       <a class="q-ni {{ 'on' if p.startswith('/graph') else '' }}" href="/graph"><i class="ph ph-tree-structure"></i>Agent graph</a>
+      <a class="q-ni {{ 'on' if p.startswith('/observatory') else '' }}" href="/observatory"><i class="ph ph-graph"></i>Observatory</a>
       <a class="q-ni {{ 'on' if p.startswith('/sources') else '' }}" href="/sources"><i class="ph ph-database"></i>Sources</a>
       <div class="q-sect q-label">Showcase</div>
       <a class="q-ni {{ 'on' if p.startswith('/demo') else '' }}" href="/demo"><i class="ph ph-monitor-play"></i>Live demo</a>
+      <a class="q-ni {{ 'on' if p == '/demo/flows' else '' }}" href="/demo/flows" style="padding-left:30px;font-size:12.5px"><i class="ph ph-caret-right" style="font-size:11px"></i>Demo flows</a>
       <a class="q-ni {{ 'on' if p == '/showcase' else '' }}" href="/showcase"><i class="ph ph-squares-four"></i>Use cases</a>
       <a class="q-ni {{ 'on' if p == '/showcase/gauntletai' else '' }}" href="/showcase/gauntletai" style="padding-left:30px;font-size:12.5px"><i class="ph ph-caret-right" style="font-size:11px"></i>1 · GauntletAI</a>
       <a class="q-ni {{ 'on' if p == '/showcase/skyfi' else '' }}" href="/showcase/skyfi" style="padding-left:30px;font-size:12.5px"><i class="ph ph-caret-right" style="font-size:11px"></i>2 · SkyFi</a>
@@ -84,7 +85,8 @@
       <a class="qi" data-label="optimizer reinforcement learning bandit a/b test lie use case 4" href="/showcase/optimizer"><i class="ph ph-caret-right"></i>4 · Optimizer (RL)<span class="hint">go</span></a>
       <a class="qi" data-label="lab personalize tiers creepy super-personalization" href="/personalize"><i class="ph ph-magic-wand"></i>Personalize<span class="hint">archive</span></a>
       <a class="qi" data-label="lab inspector claim ledger regret" href="/inspector"><i class="ph ph-magnifying-glass-plus"></i>Inspector<span class="hint">archive</span></a>
-      <a class="qi" data-label="lab observatory pipeline run node graph" href="/observatory"><i class="ph ph-graph"></i>Observatory<span class="hint">archive</span></a>
+      <a class="qi" data-label="observatory pipeline trace node graph drift downstream" href="/observatory"><i class="ph ph-graph"></i>Observatory<span class="hint">go</span></a>
+      <a class="qi" data-label="demo flows presenter b2b b2c drift assurance email deliverability giskard" href="/demo/flows"><i class="ph ph-path"></i>Demo flows<span class="hint">go</span></a>
       <a class="qi" data-label="lab funnel customer journey paths" href="/funnel"><i class="ph ph-funnel"></i>Funnel<span class="hint">archive</span></a>
       <a class="qi" data-label="lab cohort gallery seed users landings" href="/admin/landings"><i class="ph ph-users-three"></i>Cohort<span class="hint">archive</span></a>
       <a class="qi" data-label="lab google sign-in oauth dossier" href="/google"><i class="ph ph-google-logo"></i>Google sign-in<span class="hint">archive</span></a>

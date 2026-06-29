@@ -26,8 +26,6 @@ ARCHIVE = [
     {"group": "Demo & lab views", "note": "Focused exhibits built to show one idea.", "items": [
         {"name": "Inspector", "route": "/inspector", "by": "Assurance",
          "desc": "Claim-ledger lights, the regret contrast (constrained vs unconstrained twin), the blocked-lie panel, and the drift log — from a recorded run."},
-        {"name": "Observatory", "route": "/observatory", "by": "Agent graph",
-         "desc": "The pipeline run as a node graph — each stage’s input, output, and decision."},
         {"name": "Google sign-in", "route": "/google", "by": None,
          "desc": "What a Google login actually gives, in honest tiers, building a personalized page from the verified email."},
         {"name": "Lead form", "route": "/lead", "by": None,

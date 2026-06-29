@@ -53,6 +53,50 @@ def emit_validated(asset: Asset, *, cleared: bool, rules_version: str = "",
     )
 
 
+def emit_emotional_vector_tagged(asset: Asset, *, ctx: Optional[DomainContext] = None) -> Optional[str]:
+    vector = asset.emotional_vector or "neutral"
+    return emit_domain(
+        "asset_emotional_vector_tagged",
+        stream_id=f"asset_{asset.asset_id}",
+        stream_type=StreamType.ASSET,
+        subject_ref=_subject(asset.asset_id),
+        payload={**_asset_payload(asset), "emotional_vector": vector},
+        ctx=ctx,
+    )
+
+
+def emit_approved(asset: Asset, *, approved_by: str = "gate_auto",
+                ctx: Optional[DomainContext] = None) -> Optional[str]:
+    return emit_domain(
+        "asset_approved",
+        stream_id=f"asset_{asset.asset_id}",
+        stream_type=StreamType.ASSET,
+        subject_ref=_subject(asset.asset_id),
+        payload={**_asset_payload(asset), "status": "approved", "approved_by": approved_by},
+        actor=GATE_ACTOR,
+        ctx=ctx,
+    )
+
+
+def emit_publish_requested(asset_id: str, *, recipient_id: str, segment: str, channel: str,
+                           campaign: str, ctx: Optional[DomainContext] = None) -> Optional[str]:
+    return emit_domain(
+        "asset_publish_requested",
+        stream_id=f"asset_{asset_id}",
+        stream_type=StreamType.ASSET,
+        subject_ref=_subject(asset_id),
+        payload={
+            "asset_id": asset_id,
+            "recipient_id": recipient_id,
+            "segment": segment,
+            "channel": channel,
+            "campaign": campaign,
+        },
+        source={"channel": channel, "system": "optimizer"},
+        ctx=ctx,
+    )
+
+
 def emit_dispatched(asset_id: str, *, recipient_id: str, segment: str, channel: str,
                     campaign: str, ctx: Optional[DomainContext] = None) -> Optional[str]:
     return emit_domain(

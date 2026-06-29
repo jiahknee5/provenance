@@ -28,7 +28,7 @@ GOOGLE_USERINFO = "https://openidconnect.googleapis.com/v1/userinfo"
 
 
 def _auth_url(request: Request) -> str:
-    redirect = str(request.base_url).rstrip("/") + "/google/callback"
+    redirect = config.public_base(request) + "/google/callback"
     return GOOGLE_AUTH + "?" + urllib.parse.urlencode({
         "client_id": config.GOOGLE_CLIENT_ID, "redirect_uri": redirect,
         "response_type": "code", "scope": "openid email profile",
@@ -64,7 +64,7 @@ def google_callback(request: Request, code: str = "", error: str = ""):
     if code and config.google_oauth_ready():
         try:
             import httpx
-            redirect = str(request.base_url).rstrip("/") + "/google/callback"
+            redirect = config.public_base(request) + "/google/callback"
             with httpx.Client(timeout=10) as c:
                 tok = c.post(GOOGLE_TOKEN, data={
                     "code": code, "client_id": config.GOOGLE_CLIENT_ID,

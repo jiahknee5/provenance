@@ -72,6 +72,8 @@ class ClaimNode(BaseModel):
     segments: list[str] = Field(default_factory=list)
     # compliance category tags the rules engine keys on (e.g. "roi_outcome", "superlative")
     rule_tags: list[str] = Field(default_factory=list)
+    # optional lineage when a newer library revision replaces an older claim binding
+    supersedes_claim_id: Optional[str] = None
 
 
 # --------------------------------------------------------------------------- #

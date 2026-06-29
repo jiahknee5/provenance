@@ -170,13 +170,13 @@ def _inject_overlay(doc: str, overlay: str, placement: str) -> str:
     variants visibly map to different parts of the cloned page. Best-effort on arbitrary
     markup with a safe fallback to the top of <body>; never raises.
 
-      banner → just below the site's own header/hero (after </header>|</h1>|</nav>)
+      banner → just below the site's own header/nav (after </header>|</nav>|</h1>)
       cta    → right before the first prominent call-to-action link/button or <form>
       hero / theme / fallback → immediately after <body>
     """
     placement = (placement or "hero").lower()
     if placement == "banner":
-        for pat in (r"</header>", r"</h1>", r"</nav>"):
+        for pat in (r"</header>", r"</nav>", r"</h1>"):
             m = re.search(pat, doc, flags=re.I)
             if m:
                 return doc[:m.end()] + overlay + doc[m.end():]

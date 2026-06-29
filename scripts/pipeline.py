@@ -75,6 +75,13 @@ def run_all() -> dict:
     recips = recipients.generate(1000)
     recipients.save(recips)
     domain_segment.emit_segment_assignments(recips)
+    seg_counts: dict[str, int] = {}
+    for r in recips:
+        seg_counts[r.segment] = seg_counts.get(r.segment, 0) + 1
+    observe.emit("optimizer", "OUTPUT", node="segment",
+                 tool="role×size ruleset (role_x_size_v1)",
+                 detail=f"{len(recips)} recipients → {len(seg_counts)} segments",
+                 output={"segments": seg_counts})
     lib.save()
     observe.emit("library", "OUTPUT", node="library",
                  tool="claim→evidence graph · content-hash versioning",
@@ -133,15 +140,21 @@ def run_all() -> dict:
     summary = {
         "recipients": len(recips), "segments": len({r.segment for r in recips}),
         "campaign1": {"lie_selections": t1["selections_of_lie"], "final_regret": t1["final_regret"],
-                      "winner_is_lie_anywhere": t1["winner_is_lie_anywhere"]},
+                      "winner_is_lie_anywhere": t1["winner_is_lie_anywhere"],
+                      "emotional_reroutes": t1["emotional_loop"]["reroutes"],
+                      "emotional_blocks": t1["emotional_loop"]["blocks"]},
         "twin_unconstrained": {"lie_selections": t1u["selections_of_lie"],
                                "segments_won_by_lie": sum(1 for s in t1u["per_segment"].values()
                                                           if s["winner_is_lie"])},
         "drift": {"affected": drift.affected_claims, "recomputed": drift.recomputed_ids,
                   "c_tco": f"{drift.before['c_tco']} -> {drift.after['c_tco']}",
                   "paused": drift.paused_variants},
-        "campaign2": {"lie_selections": t2["selections_of_lie"], "final_regret": t2["final_regret"]},
-        "website": {"lie_selections": tw["selections_of_lie"]},
+        "campaign2": {"lie_selections": t2["selections_of_lie"], "final_regret": t2["final_regret"],
+                      "emotional_reroutes": t2["emotional_loop"]["reroutes"],
+                      "emotional_blocks": t2["emotional_loop"]["blocks"]},
+        "website": {"lie_selections": tw["selections_of_lie"],
+                    "emotional_reroutes": tw["emotional_loop"]["reroutes"],
+                    "emotional_blocks": tw["emotional_loop"]["blocks"]},
         "assurance": {"gate_catch": assurance["gate"]["catch_rate"],
                       "baseline_catch": assurance["baseline"]["catch_rate"],
                       "false_reject": assurance["gate"]["false_reject"],

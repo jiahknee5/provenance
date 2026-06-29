@@ -15,9 +15,16 @@ from pipeline.common import observe
 from pipeline.domain.adapters import asset as domain_asset
 from pipeline.domain.adapters import campaign as domain_campaign
 from pipeline.domain import decision_trace as dt
+from pipeline.domain.emotional import (
+    DispatchDecision,
+    EmotionalSafetyPolicy,
+    infer_signal_from_text,
+    pick_reroute_variant,
+)
+from pipeline.domain.models.profile import IdentitySlice, Profile, ProfileClass
 from pipeline.common.config import RUNS_DIR
 from pipeline.common.db import connect
-from pipeline.common.schemas import Recipient
+from pipeline.common.schemas import Recipient, Variant
 from pipeline.common.store import ActionPool, PosteriorStore
 from pipeline.optimizer import oracle
 from pipeline.optimizer.bandit import ThompsonBandit
@@ -34,11 +41,54 @@ def _downsample(xs: list[float], k: int = 200) -> list[float]:
     return [round(xs[int(i * step)], 3) for i in range(k)]
 
 
+def _profile_from_recipient(r: Recipient) -> Profile:
+    return Profile(
+        profile_id=r.recipient_id,
+        profile_class=ProfileClass.RECIPIENT,
+        identity=IdentitySlice(
+            recipient_id=r.recipient_id,
+            email=r.email,
+            name=r.name,
+            magic_token=r.token,
+            consent=r.consent,
+            stage="lead",
+        ),
+        segment=r.segment,
+        signals={"urgency": r.urgency, "use_case": r.use_case, "source": "campaign_replay"},
+        created_at=r.created_at,
+    )
+
+
+def _signal_text(r: Recipient) -> str:
+    if r.urgency == "high":
+        return f"{r.use_case}; urgent risk and stress surfaced in campaign behavior"
+    if r.urgency == "medium":
+        return f"{r.use_case}; evaluating options with ordinary urgency"
+    return f"{r.use_case}; calm exploratory browsing"
+
+
+def _candidate_variants(
+    pool: ActionPool,
+    variant_map: dict[str, Variant],
+    segment: str,
+    selected_arm: str,
+) -> list[Variant]:
+    return [
+        variant_map[arm]
+        for arm in pool.active(segment)
+        if arm != selected_arm and arm in variant_map
+    ]
+
+
 def run_campaign(channel: str, campaign: str, recipients: list[Recipient],
                  pool: ActionPool, posteriors: PosteriorStore,
-                 constrained: bool = True, seed: int = 0, log_db: bool = True) -> dict:
+                 constrained: bool = True, seed: int = 0, log_db: bool = True,
+                 emotional_loop: bool = True, emotional_track_cap: int = 3) -> dict:
     rng = random.Random(seed)
     bandit = ThompsonBandit(pool, posteriors, rng)
+    emotional_enabled = emotional_loop and constrained
+    emotional_policy = EmotionalSafetyPolicy(track_cap=emotional_track_cap)
+    emotional_track_counts: dict[tuple[str, str], int] = defaultdict(int)
 
     # node identity for the observability lane: the unconstrained twin and the website
     # channel are distinct nodes from the email optimizer, though they share this driver.
@@ -63,24 +113,95 @@ def run_campaign(channel: str, campaign: str, recipients: list[Recipient],
 
     counts: dict = defaultdict(lambda: defaultdict(lambda: [0, 0]))  # seg -> arm -> [sel, clk]
     regret_cum, cum, lie_selections = [], 0.0, 0
+    emotional_stats = {
+        "enabled": emotional_enabled,
+        "signals_evaluated": 0,
+        "reroutes": 0,
+        "blocks": 0,
+        "safe_reroute_misses": 0,
+    }
     events = []
 
     for r in recipients:
         seg = r.segment
-        arm = bandit.select(seg)
-        if arm is None:
+        selected_arm = bandit.select(seg)
+        if selected_arm is None:
             domain_asset.emit_dispatch_failed(
                 recipient_id=r.recipient_id, segment=seg, channel=channel,
                 campaign=campaign, reason="no_cleared_arm",
             )
             continue
+        arm = selected_arm
         domain_campaign.emit_asset_selection(
             r.recipient_id, seg, arm, channel, campaign,
+        )
+        v = variant_map.get(arm)
+        if v and emotional_enabled:
+            profile = _profile_from_recipient(r)
+            signal = infer_signal_from_text(_signal_text(r), source="text")
+            vector = getattr(v, "emotional_vector", "") or "neutral"
+            track_key = (r.recipient_id, vector)
+            emotional_track_counts[track_key] += 1
+            decision, target_vector = emotional_policy.evaluate(
+                profile,
+                v,
+                session_track_count=emotional_track_counts[track_key],
+                signals=[signal],
+            )
+            emotional_stats["signals_evaluated"] += 1
+            if decision == DispatchDecision.BLOCK:
+                emotional_stats["blocks"] += 1
+                domain_asset.emit_dispatch_failed(
+                    recipient_id=r.recipient_id, segment=seg, channel=channel,
+                    campaign=campaign, reason="emotional_mismatch_blocked",
+                )
+                observe.emit(
+                    _lane, "DECISION", node=_node, claim_id=seg,
+                    detail=f"{seg}: blocked {arm.split('__')[-1]} for emotional mismatch",
+                    decision={"recipient_id": r.recipient_id, "selected_arm": arm,
+                              "emotional_vector": vector, "outcome": "blocked"},
+                )
+                if selected_arm.endswith("__LIE"):
+                    lie_selections += 1
+                continue
+            if decision == DispatchDecision.REROUTE:
+                rerouted = pick_reroute_variant(
+                    _candidate_variants(pool, variant_map, seg, selected_arm),
+                    target_vector,
+                )
+                if rerouted is None:
+                    emotional_stats["safe_reroute_misses"] += 1
+                    domain_asset.emit_dispatch_failed(
+                        recipient_id=r.recipient_id, segment=seg, channel=channel,
+                        campaign=campaign, reason="no_safe_emotional_reroute",
+                    )
+                    if selected_arm.endswith("__LIE"):
+                        lie_selections += 1
+                    continue
+                emotional_stats["reroutes"] += 1
+                observe.emit(
+                    _lane, "DECISION", node=_node, claim_id=seg,
+                    detail=f"{seg}: rerouted {arm.split('__')[-1]} -> {rerouted.arm_label}",
+                    decision={"recipient_id": r.recipient_id, "selected_arm": arm,
+                              "dispatched_arm": rerouted.variant_id,
+                              "target_vector": target_vector},
+                )
+                dt.record_trace(
+                    "emotional_reroute",
+                    "rerouted",
+                    asset_ref=rerouted.variant_id,
+                    explanation=f"emotional safety rerouted {arm} to {rerouted.variant_id}",
+                    subject_id=r.recipient_id,
+                )
+                arm = rerouted.variant_id
+                v = rerouted
+
+        domain_asset.emit_publish_requested(
+            arm, recipient_id=r.recipient_id, segment=seg, channel=channel, campaign=campaign,
         )
         domain_asset.emit_dispatched(
             arm, recipient_id=r.recipient_id, segment=seg, channel=channel, campaign=campaign,
         )
-        v = variant_map.get(arm)
         if v:
             asset_store.save(Asset.from_variant(v))
             dt.record_trace(
@@ -93,7 +214,7 @@ def run_campaign(channel: str, campaign: str, recipients: list[Recipient],
         bandit.update(seg, arm, rew)
         counts[seg][arm][0] += 1
         counts[seg][arm][1] += 1 if rew == 1 else 0
-        if arm.endswith("__LIE"):
+        if selected_arm.endswith("__LIE"):
             lie_selections += 1
         cum += _optimal_ctr(seg, pool) - oracle.latent_ctr(seg, arm)
         regret_cum.append(cum)
@@ -139,6 +260,7 @@ def run_campaign(channel: str, campaign: str, recipients: list[Recipient],
         "final_regret": round(cum, 2), "regret_curve": _downsample(regret_cum),
         "per_segment": per_segment,
         "winner_is_lie_anywhere": any(s["winner_is_lie"] for s in per_segment.values()),
+        "emotional_loop": emotional_stats,
     }
     observe.emit(_lane, "OUTPUT", node=_node,
                  detail=f"{campaign}/{channel}: lie selected {lie_selections}× · final regret {round(cum, 2)}",
