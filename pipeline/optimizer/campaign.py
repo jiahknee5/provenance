@@ -12,6 +12,7 @@ import random
 from collections import defaultdict
 
 from pipeline.common import observe
+from pipeline.domain.adapters import asset as domain_asset
 from pipeline.domain.adapters import campaign as domain_campaign
 from pipeline.domain import decision_trace as dt
 from pipeline.common.config import RUNS_DIR
@@ -68,9 +69,16 @@ def run_campaign(channel: str, campaign: str, recipients: list[Recipient],
         seg = r.segment
         arm = bandit.select(seg)
         if arm is None:
+            domain_asset.emit_dispatch_failed(
+                recipient_id=r.recipient_id, segment=seg, channel=channel,
+                campaign=campaign, reason="no_cleared_arm",
+            )
             continue
         domain_campaign.emit_asset_selection(
             r.recipient_id, seg, arm, channel, campaign,
+        )
+        domain_asset.emit_dispatched(
+            arm, recipient_id=r.recipient_id, segment=seg, channel=channel, campaign=campaign,
         )
         v = variant_map.get(arm)
         if v:

@@ -2,30 +2,32 @@ stages:
   - verify
   - deploy
 
+variables:
+  UV_CACHE_DIR: .cache/uv/
+
 default:
-  image: python:3.11-slim
+  image: ghcr.io/astral-sh/uv:python3.11-bookworm-slim
   tags:
     - provenance-pm
   cache:
     key:
       files:
-        - requirements.txt
+        - uv.lock
     paths:
-      - .cache/pip/
+      - .cache/uv/
   before_script:
-    - python -m pip install --upgrade pip
-    - python -m pip install --cache-dir .cache/pip -r requirements.txt
+    - uv sync --frozen
 
 test:
   stage: verify
   script:
-    - python -m pytest -q
+    - uv run pytest -q
 
 demo_artifacts:
   stage: verify
   script:
-    - python -m scripts.pipeline
-    - python -m scripts.trace
+    - uv run python -m scripts.pipeline
+    - uv run python -m scripts.trace
   artifacts:
     when: always
     paths:
@@ -45,7 +47,7 @@ eval_monitoring:
     LANGFUSE_EXPORT: "false"
     CI_FAIL_ON_EVAL: "false"
   script:
-    - python -m scripts.eval_monitoring
+    - uv run python -m scripts.eval_monitoring
   artifacts:
     when: always
     paths:

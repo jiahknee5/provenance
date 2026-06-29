@@ -37,9 +37,8 @@ provenance/
 
 ```bash
 # from repo root
-cd ~/projects/lyso
-python3 -m venv .venv && source .venv/bin/activate     # pipeline work
-pip install -r provenance/pipeline/requirements.txt    # (create as deps land)
+cd ~/projects/lyso/provenance
+uv sync                                                 # pipeline work (.venv on py3.11 from uv.lock)
 # web app
 cd provenance/app && npm install && npm run dev         # Owner C
 ```

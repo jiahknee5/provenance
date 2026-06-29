@@ -19,6 +19,7 @@ from pipeline.common.store import PosteriorStore
 from pipeline.drift.monitor import DriftMonitor
 from pipeline.gate.gate import Gate
 from pipeline.gate.rules import RulesEngine
+from pipeline.domain.adapters import segment as domain_segment
 from pipeline.generation import recipients
 from pipeline.generation.variants import build_action_pool, build_variants
 from pipeline.library.library import ClaimsLibrary
@@ -73,6 +74,7 @@ def run_all() -> dict:
     gate = Gate(lib, rules)
     recips = recipients.generate(1000)
     recipients.save(recips)
+    domain_segment.emit_segment_assignments(recips)
     lib.save()
     observe.emit("library", "OUTPUT", node="library",
                  tool="claim→evidence graph · content-hash versioning",

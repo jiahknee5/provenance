@@ -3,6 +3,31 @@ name = "provenance-demo"
 version = "0.1.0"
 description = "Provenance — end-to-end demo of the 5-module claim-verification system across email + website"
 requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "jinja2",
+    "python-multipart",
+    "pydantic",
+    "numpy",
+    "pyyaml",
+    "httpx",
+    "rank-bm25",
+    "segno",
+    "anthropic",  # optional LLM layer (Gate + /demo/live copy agent); inert without ANTHROPIC_API_KEY
+]
+
+[project.optional-dependencies]
+# Real-model upgrades — demo runs end-to-end without these (deterministic offline defaults).
+rich = [
+    "transformers",      # NLI entailment; ~1.6GB deberta-v3-large-mnli on first use
+    "torch",
+    "sentencepiece",
+    "sentence-transformers",  # dense retrieval, augments BM25 default
+]
+
+[dependency-groups]
+dev = ["pytest"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

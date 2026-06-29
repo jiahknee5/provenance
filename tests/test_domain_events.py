@@ -103,6 +103,52 @@ def test_gate_red_unsupported_contradicts_even_with_rule_flag(domain_recorder):
     assert "policy_evaluated" not in names
 
 
+def test_asset_lifecycle_events(domain_recorder):
+    from pipeline.domain.adapters import asset as domain_asset
+    from pipeline.domain.models.asset import Asset, AssetStatus
+
+    a = Asset(asset_id="cfo__core__email__A", segment="cfo", channel="email",
+              arm_label="A", status=AssetStatus.LIVE)
+    domain_asset.emit_draft_created(a)
+    domain_asset.emit_validated(a, cleared=True, rules_version="r1")
+    domain_asset.emit_dispatched(a.asset_id, recipient_id="r1", segment="cfo",
+                                 channel="email", campaign="c1")
+    events = domain_recorder.read_stream(StreamType.ASSET, "asset_cfo__core__email__A")
+    names = [e.event_name for e in events]
+    assert names == ["asset_draft_created", "asset_validated", "asset_dispatched"]
+    assert [e.stream_position for e in events] == [1, 2, 3]
+    assert events[1].payload["cleared"] is True
+
+
+def test_dispatch_failed_event(domain_recorder):
+    from pipeline.domain.adapters import asset as domain_asset
+
+    domain_asset.emit_dispatch_failed(recipient_id="r9", segment="cfo", channel="email",
+                                      campaign="c1", reason="no_cleared_arm")
+    events = domain_recorder.read_stream(StreamType.ASSET, "asset_dispatch_c1_cfo")
+    assert [e.event_name for e in events] == ["dispatch_failed"]
+    assert events[0].payload["reason"] == "no_cleared_arm"
+
+
+def test_segment_assignment_events(domain_recorder):
+    from pipeline.domain.adapters import segment as domain_segment
+
+    domain_segment.emit_segment_assignment("r0001", "cfo__ent", role="cfo", size="idn")
+    events = domain_recorder.read_stream(StreamType.LEAD, "lead_r0001")
+    assert [e.event_name for e in events] == ["segment_evaluated", "segment_assignment_updated"]
+    assert events[0].payload["segment"] == "cfo__ent"
+    assert events[1].payload["previous_segment"] is None
+
+
+def test_segment_assignment_skips_update_when_unchanged(domain_recorder):
+    from pipeline.domain.adapters import segment as domain_segment
+
+    domain_segment.emit_segment_assignment("r0002", "cfo__core", role="cfo", size="community",
+                                           previous_segment="cfo__core")
+    events = domain_recorder.read_stream(StreamType.LEAD, "lead_r0002")
+    assert [e.event_name for e in events] == ["segment_evaluated"]
+
+
 def test_catalog_closed():
     assert "claim_verified" in EVENT_NAMES
     with pytest.raises(ValueError):

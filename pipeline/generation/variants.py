@@ -96,6 +96,7 @@ def build_action_pool(gate, channel: str, campaign: str, constrained: bool = Tru
     constrained=False keeps blocked variants in the pool — the unconstrained twin used to prove
     the bandit *would* pick the lie if allowed. Returns (ActionPool, clearance_report)."""
     from pipeline.common.store import ActionPool
+    from pipeline.domain.adapters import asset as domain_asset
     from pipeline.domain.models.asset import Asset, AssetStatus
     from pipeline.domain.stores.asset_store import AssetStore
 
@@ -110,9 +111,13 @@ def build_action_pool(gate, channel: str, campaign: str, constrained: bool = Tru
             cleared = claims_cleared and msg["ok"]
             if cleared or not constrained:
                 pool.add(seg, v.variant_id)
-            asset_store.save(Asset.from_variant(
+            asset = Asset.from_variant(
                 v, status=AssetStatus.LIVE if cleared else AssetStatus.DRAFT,
-            ))
+            )
+            domain_asset.emit_draft_created(asset)
+            if cleared:
+                domain_asset.emit_validated(asset, cleared=True)
+            asset_store.save(asset)
             report.append({
                 "variant_id": v.variant_id, "segment": seg, "arm": v.arm_label,
                 "planted_lie": v.planted_lie, "cleared": cleared,

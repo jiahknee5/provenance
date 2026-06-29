@@ -1,0 +1,25 @@
+# Local e2e: build the image, run the app on http://localhost:8000.
+# Demo artifacts are baked at build time (see Dockerfile), so first load is populated.
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      PORT: 8000
+      PROVENANCE_DB_PATH: /data/provenance.sqlite
+      PROVENANCE_PROFILES_DB_PATH: /data/profiles.sqlite
+      PROVENANCE_CUSTOMERS_DB_PATH: /data/customers.sqlite
+      PROVENANCE_SEED: 1729
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    volumes:
+      - provenance-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=5).read()\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+volumes:
+  provenance-data:

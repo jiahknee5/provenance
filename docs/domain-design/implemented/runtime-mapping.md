@@ -54,7 +54,10 @@ Per [`docs/05-build/DECISIONS.md`](../../05-build/DECISIONS.md):
 | Gate RED (compliance veto) | `policy_evaluated` + `dispatch_suppressed` | Same |
 | Rules engine decision | `policy_evaluated` | `domain/adapters/gate.py` |
 | Drift re-verify | `claim_marked_stale`, `claim_reverification_requested` | `domain/adapters/drift.py` |
+| Recipient segment assignment | `segment_evaluated`, `segment_assignment_updated` | `domain/adapters/segment.py` (at `scripts.pipeline`) |
+| Asset create + gate clearance | `asset_draft_created`, `asset_validated` | `domain/adapters/asset.py` (at `build_action_pool`) |
 | Per-recipient bandit select | `asset_selection_recorded` | `domain/adapters/campaign.py` (inside recipient loop) |
+| Per-recipient serve / no-arm | `asset_dispatched`, `dispatch_failed` | `domain/adapters/asset.py` (at `run_campaign`) |
 | Segment winner summary | (observe DECISION only) | Not duplicated as domain event |
 | Funnel touchpoint | `evidence_captured`, `form_submitted`, etc. | `domain/adapters/funnel.py` |
 | Identity resolve | `identity_resolution_requested`, `identity_resolved`, `identity_conflicted` | `pipeline/domain/identity.py` |

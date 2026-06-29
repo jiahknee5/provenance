@@ -15,9 +15,9 @@ This document lists what the proposed architecture describes but the runtime has
 | Claim / Evidence | **Partial** | Demo schemas (`ClaimNode`, `SourceDoc`); no canonical lifecycle events for supersede/extract |
 | Policy / Optimizer / BanditPolicy | **Partial** | YAML rules + code-level Thompson; no persisted aggregates |
 | Identity | **Partial** | Resolver + events exist; no durable candidate store |
-| Segmentation | **Partial** | Implicit segment strings; no `SegmentDefinition` / `SegmentAssignment` aggregates |
+| Segmentation | **Partial** | `segment_evaluated` / `segment_assignment_updated` emitted; still implicit strings, no `SegmentDefinition` / `SegmentAssignment` aggregates |
 | Emotional safety | **Partial** | Rule-based stub; no ML cohort assignment or full reaction loop |
-| Asset lifecycle | **Partial** | Model + store exist; many catalog asset events not emitted |
+| Asset lifecycle | **Partial** | Model + store + draft/validated/dispatched/dispatch_failed emitted; approval + emotional-tag events still absent |
 | Review | **Implemented** | Queue + API; advisory AMBER contract preserved |
 | Observe vs domain | **By design** | Both coexist; observe is debug-only (R12) |
 
@@ -61,17 +61,13 @@ Events defined in [`proposed/provenance_event_catalog/Event-Catalog.csv`](propos
 
 ### Segmentation
 
-- `segment_evaluated`, `segment_assignment_updated`
 - `emotional_signal_detected`, `emotional_segment_assignment_updated`
+- Emitted: `segment_evaluated`, `segment_assignment_updated` (at recipient assignment in `scripts.pipeline`)
 
 ### Asset lifecycle
 
-- `asset_draft_created`, `asset_emotional_vector_tagged`, `asset_validated`, `asset_approved`, `asset_publish_requested`
-- `asset_dispatched`, `dispatch_failed` — serving happens without these domain events
-
-### Dispatch
-
-- Full publish/dispatch lifecycle events beyond `dispatch_suppressed` and selection
+- `asset_emotional_vector_tagged`, `asset_approved`, `asset_publish_requested` — no human approval / publish workflow yet
+- Emitted: `asset_draft_created`, `asset_validated` (at `build_action_pool`); `asset_dispatched`, `dispatch_failed` (at `run_campaign`)
 
 ## Flow gaps (vs proposed diagrams)
 
@@ -85,7 +81,7 @@ Events defined in [`proposed/provenance_event_catalog/Event-Catalog.csv`](propos
 | Optimizer select + decision trace | **Implemented** — selection + trace recording |
 | Gate + policy + review | **Partial** — Gate adapter + review queue; not all branches in sequence |
 | Emotional mismatch reroute | **Partial** — rule-based blocker exists; full reroute loop not wired to optimizer |
-| Asset lifecycle + delivery | **Partial** — demo dispatch works; catalog asset events mostly absent |
+| Asset lifecycle + delivery | **Partial** — draft/validated/dispatched/failed + suppressed emit; approval/publish workflow absent |
 
 ### [`proposed/03-reaction-loop.md`](proposed/03-reaction-loop.md)
 
@@ -107,7 +103,7 @@ Per [`docs/05-build/DECISIONS.md`](../05-build/DECISIONS.md):
 
 ## Recommended next steps (priority order)
 
-1. **Emit remaining high-value catalog events** at existing decision points (asset lifecycle, segment evaluation) before adding new aggregates.
+1. **Emit remaining high-value catalog events** at existing decision points before adding new aggregates. Asset lifecycle (`asset_draft_created`/`asset_validated`/`asset_dispatched`/`dispatch_failed`) and segment evaluation (`segment_evaluated`/`segment_assignment_updated`) **done**; remaining: `claim_extracted`/`claim_superseded`, emotional signals, asset approval/publish.
 2. **Claim lifecycle** — add `claim_extracted` / `claim_superseded` adapters when library ingestion is event-sourced.
 3. **Segmentation aggregates** — only if product needs auditable membership history; today implicit segments suffice for demo.
 4. **Emotional reaction loop** — close the loop (behavior capture → signal → segment → reroute) only when emotional safety becomes a runtime requirement, not diagram completeness.
