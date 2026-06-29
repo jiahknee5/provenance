@@ -107,13 +107,6 @@
 </section>
 
 <main>
-  <div class="personal">
-    <h3>Personalized for you{% if d.tier >= 4 %} — stitched from {{ d.layers|length }} data layers: {{ d.layers|join(' · ') }}{% endif %}</h3>
-    {% for l in d.personal_lines %}
-    <div class="pl"><span class="s {{ l.surface }}">{{ l.surface }}</span><span class="txt">{{ l.text }}</span><span class="frm">{{ l.from }}</span></div>
-    {% endfor %}
-  </div>
-
   <div class="grid">
     {% for s in d.sections %}<div class="sec reveal"><h2>{{ s.title }}</h2><p>{{ s.body }}</p></div>{% endfor %}
   </div>
@@ -133,5 +126,11 @@
 </main>
 <div class="foot">Demo · tier {{ d.tier }} = {{ d.tier_meta.uses }} · surface: {{ d.tier_meta.policy }}.
   UI inferred from this person's data; synthetic where noted. Core sources: HubSpot (first-party) + LinkedIn (public).</div>
+<div class="personal">
+  <h3>Personalized for you{% if d.tier >= 4 %} — stitched from {{ d.layers|length }} data layers: {{ d.layers|join(' · ') }}{% endif %}</h3>
+  {% for l in d.personal_lines %}
+  <div class="pl"><span class="s {{ l.surface }}">{{ l.surface }}</span><span class="txt">{{ l.text }}</span><span class="frm">{{ l.from }}</span></div>
+  {% endfor %}
+</div>
 </body>
 </html>
