@@ -29,9 +29,9 @@ TPL = pathlib.Path(__file__).resolve().parents[1] / "app" / "templates"
 
 # Surfaces on the Quiet-Workspace shell.
 SHELL_PAGES = ["workspace", "records", "records_new", "composer", "optimizer", "agent",
-               "assurance", "sources", "demo", "demo_monitor"]
+               "assurance", "sources", "demo", "demo_monitor", "demo_flows"]
 SHELL_ROUTES = ["/workspace", "/records", "/records/new", "/composer", "/optimizer", "/agent",
-                "/assurance", "/sources", "/demo", "/demo/monitor"]
+                "/assurance", "/sources", "/demo", "/demo/monitor", "/demo/flows"]
 # All legacy/lab routes (now light) — param routes filled with valid demo values.
 TOKEN = __import__("pipeline.personalization.cohort", fromlist=["x"]).magic_token(
     __import__("pipeline.personalization.cohort", fromlist=["x"]).COHORT[1])

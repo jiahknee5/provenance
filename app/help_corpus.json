@@ -2134,5 +2134,37 @@
     "html": "The full swarm playbook (all 7 dimensions, every source and verdict) is persisted in the repo at <code>docs/research/copy-personalization-research.md</code>. For how these findings became enforced code, see <a href=\"/help/copy-that-drives-action\">Copy that drives action</a> and the <a href=\"/guide\">engineering writeup</a>."
    }
   ]
+ },
+ {
+  "slug": "demo-alignment",
+  "title": "Demo alignment",
+  "category": "Live demo",
+  "summary": "Presenter flow map — all ten demo stories, routes, and changelog.",
+  "read_min": 3,
+  "blocks": [
+   {
+    "type": "p",
+    "html": "The <a href=\"/demo/flows\">Demo flows</a> hub links every presenter storyline. Full changelog lives in <span class=\"q-mono\">docs/demo-alignment.md</span> in the repo."
+   },
+   {
+    "type": "h",
+    "text": "Quick routes"
+   },
+   {
+    "type": "ul",
+    "items": [
+     "<b>B2B</b> — <a href=\"/showcase/gauntletai/production\">GauntletAI production</a>",
+     "<b>B2C</b> — <a href=\"/showcase/known/production\">Known customer</a>",
+     "<b>Drift watch</b> — <a href=\"/assurance#drift-watch\">Assurance</a> + <a href=\"/observatory\">Observatory</a> (run <span class=\"q-mono\">python -m scripts.trace</span> first)",
+     "<b>Assurance lab</b> — <a href=\"/assurance\">/assurance</a> (false-reject vs missed-bad contrast)",
+     "<b>Email / deliverability / infra / scale</b> — main app + <a href=\"http://localhost:5173/\" target=\"_blank\" rel=\"noopener\">micro-nav</a> anchors"
+    ]
+   },
+   {
+    "type": "note",
+    "html": "Set <span class=\"q-mono\">PROVENANCE_MN_URL</span> if the micro-nav runs on a host other than localhost:5173."
+   }
+  ],
+  "related": ["overview", "five-properties", "whats-new"]
  }
 ]

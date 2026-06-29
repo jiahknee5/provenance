@@ -234,7 +234,7 @@
 
   <p class="cap" style="margin-top:14px">The bandit&rsquo;s reward projects onto the <b style="color:var(--slate)">Business KPIs</b> shown at the top of this page — fill = progress to target. (Same KPI-tree component as the <a href="/demo/monitor" style="color:var(--signal)">live-demo control tower</a>.)</p>
 
-  <div style="margin-top:18px"><span class="q-label">Drift watch <span class="q-sim" style="margin-left:6px">illustrative source</span></span>
+  <div style="margin-top:18px"><span class="q-label" id="drift-watch">Drift watch <span class="q-sim" style="margin-left:6px">illustrative source</span></span>
     <p class="q-muted" style="margin:6px 0 10px;font-size:12.5px">{{ h.drift.fresh }}/{{ h.drift.ttl_facts }} TTL-governed facts fresh · {{ h.drift.paused }} paused. On a source change, Drift re-verifies <b style="color:var(--slate)">exactly</b> the affected claims and pauses only the dependent variant (<b style="color:var(--slate)">P3</b> — surgical, not whole-corpus).</p>
     <div class="q-panel"><table class="q-table">
       <thead><tr><th>Fact</th><th>Source</th><th>Used by</th><th>Status</th></tr></thead>
