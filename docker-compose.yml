@@ -12,7 +12,10 @@ services:
       PROVENANCE_CUSTOMERS_DB_PATH: /data/customers.sqlite
       PROVENANCE_SEED: 1729
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    # ponytail: bind-mount source + --reload for live edits; drop both for a prod-like bake test
+    command: sh -c "uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
     volumes:
+      - .:/app
       - provenance-data:/data
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=5).read()\""]
