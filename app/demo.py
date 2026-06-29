@@ -6,6 +6,7 @@ target KPIs while monitoring provenance, drift, and hallucination.
                                  the live-cloned site, each with its DATA USED provenance.
   GET /demo/variant?url=&scenario=&v=  — one variant's cloned+injected page (served into an iframe).
   GET /demo/monitor            — the KPI control tower (simulated RL + health rails).
+  GET /demo/flows              — the demo-alignment hub (all ten presenter flows).
   GET /api/demo/monitor        — the monitor data as JSON.
 
 The monitor reads the baked data/demo/observe/demo_monitor.json when present, else computes
@@ -25,6 +26,36 @@ from pipeline.personalization import demo_sim
 from pipeline.personalization import creative as CR
 from pipeline.personalization import scene as SC
 from pipeline.personalization.cloner import DEFAULT_URL, brand_from_url, clone, normalize_url
+
+DEMO_FLOWS = [
+    {"id": "b2b", "pillar": "Provable", "title": "B2B firmographic",
+     "desc": "Reverse-IP and persona presets drive industry-aware copy with Gate receipts.",
+     "main": "/showcase/gauntletai/production", "obs": "/showcase/gauntletai/observability"},
+    {"id": "b2c", "pillar": "Provable", "title": "B2C known customer",
+     "desc": "Email match + CRM history close the sale — magic link, persuasion strategies, held facts.",
+     "main": "/showcase/known/production", "obs": "/showcase/known/observability"},
+    {"id": "drift", "pillar": "Watched", "title": "Drift watch",
+     "desc": "Source TTL changes surgically re-verify claims and pause dependent variants — trace the downstream path in Observatory.",
+     "main": "/assurance#drift-watch", "obs": "/observatory"},
+    {"id": "assurance", "pillar": "Watched", "title": "Assurance lab",
+     "desc": "Trap catch-rate vs single judge — false positives (clean blocked) and false negatives (bad missed) side by side.",
+     "main": "/assurance", "obs": "/api/observe/golden"},
+    {"id": "email", "pillar": "Provable", "title": "Email engine",
+     "desc": "Gate-cleared copy compiled into outbound email — blocked and review claims withheld.",
+     "main": "/composer", "mn": "#email-engine"},
+    {"id": "deliverability", "pillar": "Watched", "title": "Deliverability",
+     "desc": "Open pixels and click tracking with proxy-aware diagnostics (Gmail, Apple Mail privacy paths).",
+     "main": "/demo/monitor", "mn": "#deliverability"},
+    {"id": "infra", "pillar": "Quiet", "title": "Infrastructure",
+     "desc": "Per-event infrastructure classification — image proxies, mail clients, bots.",
+     "main": "/sources", "mn": "#infrastructure"},
+    {"id": "scale", "pillar": "Optimizing", "title": "Scaling",
+     "desc": "Tenant-keyed Gate + warm-started bandit — multi-segment optimizer without reward-hacking.",
+     "main": "/optimizer", "mn": "#scaling"},
+    {"id": "giskard", "pillar": "Watched", "title": "Giskard tie-in",
+     "desc": "Stakeholder-authored risk definitions → OSS scenario checks → Langfuse scores (planning slice).",
+     "main": "/assurance", "mn": "#giskard"},
+]
 
 
 def _monitor_data() -> dict:
@@ -145,3 +176,9 @@ def api_demo_scene(region: str = "", industry: str = "", company: str = "",
     return JSONResponse(SC.build_scene(region or None, industry or SC.DEFAULT_INDUSTRY,
                                        detected=False, company=company or None,
                                        city=city or None, policy=policy))
+
+
+@app.get("/demo/flows", response_class=HTMLResponse)
+def demo_flows(request: Request):
+    """Presenter hub — all ten demo flows with main-app and micro-nav links."""
+    return templates.TemplateResponse(request, "demo_flows.html", {"flows": DEMO_FLOWS})

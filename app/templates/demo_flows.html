@@ -1,0 +1,39 @@
+{% extends "shell.html" %}
+{% block title %}apt — Demo flows{% endblock %}
+{% block crumb %}<i class="ph ph-path"></i> Demo flows{% endblock %}
+{% block content %}
+<style>
+  .df-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:18px}
+  .df-card{display:flex;flex-direction:column;gap:10px;padding:18px 20px;min-height:168px}
+  .df-card h2{font-family:var(--font-display);font-size:17px;font-weight:600;margin:0;color:var(--ink)}
+  .df-card p{font-size:13px;color:var(--muted);line-height:1.55;margin:0;flex:1}
+  .df-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .df-links a{font-size:12.5px;font-weight:600;color:var(--signal);text-decoration:none}
+  .df-links a.mn{color:var(--a)}
+</style>
+
+<div class="q-pagehead"><div>
+  <span class="q-pill v" style="margin-bottom:10px"><span class="d"></span>Showcase</span>
+  <h1>Demo flows</h1>
+  <p class="q-muted" style="margin:5px 0 0"><b style="color:var(--slate)">Proves:</b> every presenter storyline has a live route — main app for runtime truth, micro-nav for email/deliverability/infra/scale.</p>
+</div>
+  <a class="q-btn outline" href="/showcase"><i class="ph ph-squares-four"></i> Use cases</a>
+</div>
+
+<div class="df-grid q-reveal">
+  {% for f in flows %}
+  <article class="q-card df-card">
+    <span class="q-pill {{ 'g' if f.pillar == 'Provable' else ('a' if f.pillar == 'Watched' else ('v' if f.pillar == 'Optimizing' else '')) }}"><span class="d"></span>{{ f.pillar }}</span>
+    <h2>{{ f.title }}</h2>
+    <p>{{ f.desc }}</p>
+    <div class="df-links">
+      <a href="{{ f.main }}"><i class="ph ph-arrow-right"></i> Main app</a>
+      {% if f.obs %}<a href="{{ f.obs }}"><i class="ph ph-graph"></i> Trace / API</a>{% endif %}
+      {% if f.mn %}<a class="mn" href="{{ MN_DEMO_URL }}{{ f.mn }}" target="_blank" rel="noopener"><i class="ph ph-app-window"></i> Micro-nav</a>{% endif %}
+    </div>
+  </article>
+  {% endfor %}
+</div>
+
+<p class="q-muted" style="margin-top:22px;font-size:12.5px">Run <span class="q-mono">python -m scripts.trace</span> before Drift watch / Observatory demos. Changelog: <a href="/help/demo-alignment" style="color:var(--signal)">demo alignment</a>.</p>
+{% endblock %}
