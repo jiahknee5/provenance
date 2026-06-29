@@ -20,7 +20,7 @@
   <a class="q-btn outline" href="/showcase"><i class="ph ph-squares-four"></i> Use cases</a>
 </div>
 
-<div class="df-grid q-reveal">
+<div class="df-grid">
   {% for f in flows %}
   <article class="q-card df-card">
     <span class="q-pill {{ 'g' if f.pillar == 'Provable' else ('a' if f.pillar == 'Watched' else ('v' if f.pillar == 'Optimizing' else '')) }}"><span class="d"></span>{{ f.pillar }}</span>

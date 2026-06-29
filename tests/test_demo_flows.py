@@ -12,11 +12,20 @@ c = TestClient(app)
 
 
 def test_demo_flows_page_renders():
-    t = c.get("/demo/flows").text
-    assert c.get("/demo/flows").status_code == 200
+    r = c.get("/demo/flows")
+    t = r.text
+    assert r.status_code == 200
     assert "Demo flows" in t
+    assert t.count('class="q-card df-card"') == len(DEMO_FLOWS)
     for flow in DEMO_FLOWS:
         assert flow["title"] in t
+        assert flow["main"].split("#")[0] in t
+
+
+def test_demo_flows_use_cases_links_showcase():
+    t = c.get("/demo/flows").text
+    assert 'href="/showcase"' in t
+    assert re.search(r'href="/showcase"[^>]*>.*?Use cases', t, re.S)
 
 
 def test_demo_flow_main_routes_resolve():
