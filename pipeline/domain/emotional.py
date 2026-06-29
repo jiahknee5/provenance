@@ -42,6 +42,7 @@ class DispatchDecision(str, Enum):
 FEAR_KEYWORDS = ("afraid", "worried", "anxious", "scared", "stress", "urgent", "risk")
 RELIEF_VECTORS = ("relief_BAB", "neutral", "relief")
 FEAR_VECTORS = ("fear_PAS", "fear")
+HIGH_ANXIETY_COHORT = "High_Neuroticism_Fear_PAS"
 
 
 def infer_signal_from_text(text: str, source: str = "text") -> EmotionalSignal:
@@ -56,6 +57,43 @@ def infer_signal_from_text(text: str, source: str = "text") -> EmotionalSignal:
         source=source,
         emotional_valence=valence,
         arousal_intensity=arousal,
+    )
+
+
+def emit_text_sentiment_scored(
+    profile_id: str,
+    signal: EmotionalSignal,
+    *,
+    ctx: Optional[DomainContext] = None,
+) -> None:
+    emit_domain(
+        "text_sentiment_scored",
+        stream_id=f"lead_{profile_id}",
+        stream_type=StreamType.LEAD,
+        subject_ref=SubjectRef(type="profile", id=profile_id),
+        payload=signal.model_dump(),
+        ctx=ctx,
+    )
+
+
+def emit_emotional_segment_assignment(
+    profile_id: str,
+    *,
+    emotional_cohort: str,
+    previous_cohort: Optional[str] = None,
+    ctx: Optional[DomainContext] = None,
+) -> None:
+    emit_domain(
+        "emotional_segment_assignment_updated",
+        stream_id=f"lead_{profile_id}",
+        stream_type=StreamType.LEAD,
+        subject_ref=SubjectRef(type="profile", id=profile_id),
+        payload={
+            "profile_id": profile_id,
+            "emotional_cohort": emotional_cohort,
+            "previous_cohort": previous_cohort,
+        },
+        ctx=ctx,
     )
 
 
@@ -84,12 +122,21 @@ class EmotionalSafetyPolicy:
         fear_asset = any(vector.startswith(f) for f in FEAR_VECTORS)
 
         for sig in sigs:
+            if sig.source == "text":
+                emit_text_sentiment_scored(profile.profile_id, sig, ctx=ctx)
             emit_domain(
                 "emotional_signal_detected",
                 stream_id=f"lead_{profile.profile_id}",
                 stream_type=StreamType.LEAD,
                 subject_ref=SubjectRef(type="profile", id=profile.profile_id),
                 payload=sig.model_dump(),
+                ctx=ctx,
+            )
+
+        if high_anxiety:
+            emit_emotional_segment_assignment(
+                profile.profile_id,
+                emotional_cohort=HIGH_ANXIETY_COHORT,
                 ctx=ctx,
             )
 

@@ -50,3 +50,8 @@ def test_reroute_selects_relief(domain_recorder):
     assert decision == DispatchDecision.REROUTE
     picked = pick_reroute_variant([fear, relief])
     assert picked.variant_id == "v_relief"
+    lead_events = stream_mod.active_recorder().read_stream(StreamType.LEAD, "lead_p1")
+    names = [e.event_name for e in lead_events]
+    assert "text_sentiment_scored" in names
+    assert "emotional_signal_detected" in names
+    assert "emotional_segment_assignment_updated" in names
