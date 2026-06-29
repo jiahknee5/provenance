@@ -42,6 +42,18 @@ SEED = int(os.environ.get("PROVENANCE_SEED", "1729"))
 SCHEMA_VERSION = 2
 MANIFEST_PATH = DATA_DIR / "manifest.json"
 
+# ---- public base URL (absolute links: QR codes, magic-links, OAuth redirect) ----
+# Prod sits behind a reverse proxy that reports 127.0.0.1, which would otherwise leak into
+# generated links. Defaults to the deployed origin; set PROVENANCE_PUBLIC_URL="" for local
+# dev so links fall back to the request's own host (e.g. http://localhost:8000).
+PUBLIC_URL = os.environ.get("PROVENANCE_PUBLIC_URL", "https://provenance.af5.org").rstrip("/")
+
+
+def public_base(request) -> str:
+    """Absolute origin for generated links/QR/redirects: configured PUBLIC_URL wins (prod),
+    else the request's own host (local dev, when PROVENANCE_PUBLIC_URL is empty)."""
+    return PUBLIC_URL or str(request.base_url).rstrip("/")
+
 # ---- inference profile -----------------------------------------------------
 # "deterministic" (default): lexical/numeric NLI + heuristic judge + rules. Offline,
 #   reproducible, no key — what the test suite and a $0 demo run on.

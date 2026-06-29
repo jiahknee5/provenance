@@ -16,9 +16,8 @@
 <div class="q-app">
   <!-- sidebar -->
   <aside class="q-side">
-    <div class="q-ws"><span class="av"><img src="/static/brand/apt-mark-dark.svg" alt="" width="15" height="15"></span>apt</div>
+    <a class="q-ws" href="/" style="text-decoration:none;color:inherit"><span class="av"><img src="/static/brand/apt-mark-dark.svg" alt="" width="15" height="15"></span>apt</a>
     <nav class="q-nav">
-      <a class="q-ni {{ 'on' if p in ['/workspace','/'] else '' }}" href="/workspace"><i class="ph ph-house"></i>Home</a>
       <a class="q-ni {{ 'on' if p.startswith('/records') or p=='/workspace' else '' }}" href="/records"><i class="ph ph-table"></i>Records</a>
       <a class="q-ni {{ 'on' if p.startswith('/composer') else '' }}" href="/composer"><i class="ph ph-pen-nib"></i>Composer</a>
       <a class="q-ni {{ 'on' if p.startswith('/optimizer') else '' }}" href="/optimizer"><i class="ph ph-trend-up"></i>Optimizer</a>

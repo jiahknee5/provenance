@@ -12,6 +12,7 @@ from fastapi import Request
 from fastapi.responses import HTMLResponse
 
 from app.server import app, templates
+from pipeline.common import config
 from pipeline.personalization import cohort, landing, segments
 
 
@@ -24,7 +25,7 @@ def lp(request: Request, email: str = "", tier: int = 2, token: str = ""):
     if person:
         return templates.TemplateResponse(request, "landing.html",
                                           {"d": landing.build_landing(cohort.view(person), tier)})
-    base = str(request.base_url).rstrip("/")
+    base = config.public_base(request)
     return templates.TemplateResponse(request, "lp_entry.html", {
         "qr": _qr_svg(base + "/lp"), "lp_url": base + "/lp",
         "emails": [p["email"] for p in cohort.COHORT], "bad": bool(email)})
@@ -56,7 +57,7 @@ def admin_landing(request: Request, pid: str, tier: int = 2):
     p = cohort.BY_ID.get(pid)
     if not p:
         return HTMLResponse("<h2>Unknown user.</h2>", status_code=404)
-    base = str(request.base_url).rstrip("/")
+    base = config.public_base(request)
     magic_link = f"{base}/lp?token={cohort.magic_token(p)}"
     return templates.TemplateResponse(request, "admin_landing.html", {
         "d": landing.build_landing(cohort.view(p), tier),
