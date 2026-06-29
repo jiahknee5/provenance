@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import re
+import shutil
 import subprocess
 
+import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -26,6 +28,9 @@ def test_optimizer_bandit_dashboard_scripts_parse():
 
     scripts = re.findall(r"<script(?:\s[^>]*)?>([\s\S]*?)</script>", response.text)
     assert scripts
+
+    if shutil.which("node") is None:
+        pytest.skip("node not installed; skipping inline-script syntax check")
 
     for idx, script in enumerate(scripts):
         subprocess.run(
