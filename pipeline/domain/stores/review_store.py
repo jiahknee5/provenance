@@ -58,6 +58,13 @@ class ReviewStore:
         ctx: Optional[DomainContext] = None,
     ) -> Review:
         rid = _review_id(object_type, object_id)
+        # The id is deterministic on (object_type, object_id): re-requesting an existing
+        # review must NOT reset a reviewer's decision (APPROVED/REJECTED) back to QUEUED.
+        existing = self._conn.execute(
+            "SELECT payload FROM reviews WHERE review_id=?", (rid,)
+        ).fetchone()
+        if existing:
+            return Review.model_validate_json(existing["payload"])
         review = Review(
             review_id=rid,
             object_type=object_type,
@@ -68,8 +75,7 @@ class ReviewStore:
             requested_at=_now(),
         )
         self._conn.execute(
-            "INSERT INTO reviews (review_id, payload, created_at) VALUES (?,?,?) "
-            "ON CONFLICT(review_id) DO UPDATE SET payload=excluded.payload",
+            "INSERT INTO reviews (review_id, payload, created_at) VALUES (?,?,?)",
             (rid, review.model_dump_json(), review.requested_at),
         )
         self._conn.commit()

@@ -71,10 +71,11 @@ class Gate:
 
         cached = self.verdict_cache.get(cid, sv, rules_version)
         if cached is not None:
+            # Cache hit: each unique claim is Gated — and emits its domain verdict — exactly
+            # once, on the compute path below. Re-emitting here would append duplicate
+            # claim_verified/policy_evaluated envelopes per recipient/render.
             observe.emit("gate", "CACHE_HIT", node="ledger", detail=f"{cid} → {cached.verdict.value} (served from cache)",
                          decision={"verdict": cached.verdict.value, "cached": True}, claim_id=cid)
-            domain_gate.emit_claim_verdict(cached, rules_version=rules_version,
-                                           advisory_review=cached.verdict == Verdict.AMBER)
             return cached
 
         self.compute_calls += 1
@@ -117,7 +118,7 @@ class Gate:
             observe.emit("gate", "OUTPUT", node="ledger", detail=f"{cid} → RED (compliance veto, cascade short-circuit)",
                          claim_id=cid, decision={"verdict": "red", "via": "rule"},
                          output={"confidence": 0.02, "flags": rule_out.flags})
-            domain_gate.emit_claim_verdict(cv, rules_version=rules_version)
+            domain_gate.emit_claim_verdict(cv, rules_version=rules_version, policy_veto=True)
             return cv
 
         nli = self.nli.score(claim_text, evidence)

@@ -82,11 +82,25 @@ def test_gate_red_policy_veto(domain_recorder):
         source_id="s1", confidence=0.02, rule_flags=["mlr_hold_tco"],
         reasons=["blocked by compliance rule"], rules_version="r1",
     )
-    domain_gate.emit_claim_verdict(cv, rules_version="r1")
+    domain_gate.emit_claim_verdict(cv, rules_version="r1", policy_veto=True)
     lead = domain_recorder.read_stream(StreamType.LEAD, "lead_c_x")
     assert any(e.event_name == "policy_evaluated" for e in lead)
     asset = domain_recorder.read_stream(StreamType.ASSET, "asset_c_x")
     assert any(e.event_name == "dispatch_suppressed" for e in asset)
+
+
+def test_gate_red_unsupported_contradicts_even_with_rule_flag(domain_recorder):
+    # An unsupported RED that merely carries an AMBER-disclaimer flag must NOT be mislabeled
+    # a policy veto: without the explicit policy_veto signal it is claim_contradicted.
+    cv = ClaimVerdict(
+        claim_id="c_lie", text="guaranteed 60% fewer readmissions", span=(0, 0),
+        verdict=Verdict.RED, source_id="s1", confidence=0.02, rule_flags=["mlr_disclaimer"],
+        reasons=["not entailed by any approved source"], rules_version="r1",
+    )
+    domain_gate.emit_claim_verdict(cv, rules_version="r1")
+    names = [e.event_name for e in domain_recorder.read_stream(StreamType.LEAD, "lead_c_lie")]
+    assert "claim_contradicted" in names
+    assert "policy_evaluated" not in names
 
 
 def test_catalog_closed():

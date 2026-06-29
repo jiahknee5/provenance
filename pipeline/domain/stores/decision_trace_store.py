@@ -32,10 +32,14 @@ class DecisionTraceStore:
     def __init__(self, conn=None):
         self._conn = conn or connect()
         init_traces_table(self._conn)
+        # Seed a monotonic sequence ONCE, not a full-table COUNT(*) per record() (which made
+        # recording K traces O(K^2) during replay/migration).
+        row = self._conn.execute("SELECT COUNT(*) AS n FROM decision_traces").fetchone()
+        self._seq = row["n"] if row else 0
 
     def _trace_id(self, decision_type: str, subject_id: str) -> str:
-        row = self._conn.execute("SELECT COUNT(*) AS n FROM decision_traces").fetchone()
-        seq = row["n"] if row else 0
+        seq = self._seq
+        self._seq += 1
         raw = f"{decision_type}|{subject_id}|{seq}"
         return "dt_" + hashlib.sha256(raw.encode()).hexdigest()[:14]
 

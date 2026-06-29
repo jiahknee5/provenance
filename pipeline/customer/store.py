@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from pipeline.common.config import CUSTOMERS_DB_PATH
+from pipeline.common.config import PROFILES_DB_PATH
 from pipeline.customer.schemas import Customer, SurfacePolicy
 from pipeline.domain.models.profile import Profile
 from pipeline.domain.stores.profile_store import ProfileStore
@@ -16,7 +16,11 @@ from pipeline.domain.stores.profile_store import ProfileStore
 
 class CustomerStore:
     def __init__(self, path=None):
-        self.path = str(path or CUSTOMERS_DB_PATH)
+        # The unified profiles_v2 store lives at PROFILES_DB_PATH — the same file the funnel
+        # and identity resolver write through ProfileStore(). CUSTOMERS_DB_PATH is the legacy
+        # v1 customers DB (a migration source), NOT the v2 aggregate; reading it here split
+        # the customer across two files and broke magic-link/identity resolution.
+        self.path = str(path or PROFILES_DB_PATH)
         self._profiles = ProfileStore(path=self.path)
 
     def save(self, cust: Customer) -> None:

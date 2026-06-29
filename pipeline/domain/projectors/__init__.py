@@ -35,6 +35,11 @@ class LeadProjector:
     def apply(self, event: EventEnvelope) -> None:
         if not _idempotent(event.event_id):
             return
+        # The LEAD stream also carries Gate claim/policy events whose subject is a claim_id,
+        # not a profile. Only lead-lifecycle events (subject type 'profile') project here;
+        # otherwise we'd write junk Profile rows keyed by claim id into profiles_v2.
+        if event.subject_ref.type != "profile":
+            return
         pid = event.subject_ref.id
         profile = self.store.get(pid) or Profile(
             profile_id=pid,

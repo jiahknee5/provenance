@@ -23,8 +23,15 @@ def emit_claim_verdict(
     rules_version: str,
     ctx: Optional[DomainContext] = None,
     advisory_review: bool = False,
+    policy_veto: bool = False,
 ) -> None:
-    """Map a ClaimVerdict to the appropriate catalog event(s)."""
+    """Map a ClaimVerdict to the appropriate catalog event(s).
+
+    policy_veto: the RED was forced by a compliance rule (emit policy_evaluated +
+    dispatch_suppressed); otherwise an unsupported RED emits claim_contradicted. The
+    caller (the Gate) knows which path produced the verdict — don't re-derive it here
+    from rule_flags, which are also set for non-veto AMBER disclaimers.
+    """
     subj = _claim_subject(cv.claim_id)
     stream_id = f"lead_{cv.claim_id}"
     base_payload: dict[str, Any] = {
@@ -86,11 +93,7 @@ def emit_claim_verdict(
         return
 
     # RED
-    is_policy_veto = bool(cv.rule_flags) or any(
-        "compliance" in r.lower() or "hold" in r.lower() or "blocked" in r.lower()
-        for r in cv.reasons
-    )
-    if is_policy_veto:
+    if policy_veto:
         eid = emit_domain(
             "policy_evaluated",
             stream_id=stream_id,

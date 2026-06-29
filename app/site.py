@@ -16,6 +16,7 @@ from app.context import ctx
 from app.server import app, templates
 from pipeline.common.db import connect
 from pipeline.common.schemas import MessageLedger, Verdict
+from pipeline.domain.stores.review_store import check_dispatch
 from pipeline.enrichment.engine import enrich, personalize
 from pipeline.enrichment.store import ProfileStore
 from pipeline.generation import recipients as rec
@@ -70,8 +71,14 @@ def site(request: Request, token: str):
         c.live.record_impression(r.recipient_id, r.segment, served, policy=policy)
         arm = c.live.arm_label(served)
     else:
+        # assign() returns None when the live pool is empty OR every arm is dispatch-
+        # suppressed. The static winner fallback must NOT bypass that suppression: a
+        # creative whose non-advisory review was rejected/queued stays unservable.
         arm = c.winner(r.segment)
     variant = _variant_for(r.segment, arm)
+    if not served and check_dispatch(variant.variant_id) == "suppress":
+        return HTMLResponse("<h2>This page is being updated. Please check back shortly.</h2>",
+                            status_code=503)
     data = render_site_data(c.gate, c.library, r, variant)
     # touchpoint T5: load the gated profile (enrich on demand for the seeded recipients)
     store = ProfileStore()
