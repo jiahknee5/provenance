@@ -89,7 +89,6 @@ def test_gate_red_policy_veto(domain_recorder):
     assert any(e.event_name == "dispatch_suppressed" for e in asset)
 
 
-<<<<<<< HEAD
 def test_gate_red_unsupported_contradicts_even_with_rule_flag(domain_recorder):
     # An unsupported RED that merely carries an AMBER-disclaimer flag must NOT be mislabeled
     # a policy veto: without the explicit policy_veto signal it is claim_contradicted.
@@ -102,7 +101,8 @@ def test_gate_red_unsupported_contradicts_even_with_rule_flag(domain_recorder):
     names = [e.event_name for e in domain_recorder.read_stream(StreamType.LEAD, "lead_c_lie")]
     assert "claim_contradicted" in names
     assert "policy_evaluated" not in names
-=======
+
+
 def test_asset_lifecycle_events(domain_recorder):
     from pipeline.domain.adapters import asset as domain_asset
     from pipeline.domain.models.asset import Asset, AssetStatus
@@ -128,7 +128,6 @@ def test_dispatch_failed_event(domain_recorder):
     events = domain_recorder.read_stream(StreamType.ASSET, "asset_dispatch_c1_cfo")
     assert [e.event_name for e in events] == ["dispatch_failed"]
     assert events[0].payload["reason"] == "no_cleared_arm"
->>>>>>> 4c6580dd (Emit asset lifecycle domain events)
 
 
 def test_catalog_closed():
