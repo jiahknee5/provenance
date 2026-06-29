@@ -58,7 +58,19 @@ Source/rule change → `claim_marked_stale`, `claim_reverification_requested`.
 
 ### Emotional (`emotional.py`)
 
-Rule-based keyword detection (not ML). On mismatch → `emotional_mismatch_blocked`, optional `emotional_reroute_applied`.
+Rule-based keyword detection (not ML). Emits `text_sentiment_scored`, `emotional_signal_detected`, `emotional_segment_assignment_updated` when signals are evaluated. On mismatch → `emotional_mismatch_blocked`, optional `emotional_reroute_applied`.
+
+### Claim library (`adapters/claim.py`)
+
+`ClaimsLibrary.from_seed()` / `load()` → `claim_extracted` per claim. `mark_verified()` after source drift → `claim_superseded`.
+
+### Enrichment (`adapters/enrichment.py`)
+
+`enrich()` → `enrichment_requested`, `enrichment_received` on the lead stream.
+
+### Asset lifecycle (`adapters/asset.py`)
+
+`build_action_pool` → `asset_draft_created`, `asset_emotional_vector_tagged`, `asset_validated`, `asset_approved`. `run_campaign` → `asset_publish_requested` before `asset_dispatched`.
 
 ### Decision trace (`decision_trace.py`)
 
@@ -70,7 +82,7 @@ Queue CRUD via `app/reviews.py` API. Lifecycle: `review_requested`, `review_appr
 
 ## Events not yet emitted at runtime
 
-Many catalog events in [`../proposed/provenance_event_catalog/Event-Catalog.csv`](../proposed/provenance_event_catalog/Event-Catalog.csv) have no adapter yet — see [`../implementation-gap.md`](../implementation-gap.md).
+Remaining gaps (reaction-loop wiring, human approval, persisted aggregates) — see [`../implementation-gap.md`](../implementation-gap.md).
 
 ## Observe vs domain
 
