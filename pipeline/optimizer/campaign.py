@@ -77,6 +77,9 @@ def run_campaign(channel: str, campaign: str, recipients: list[Recipient],
         domain_campaign.emit_asset_selection(
             r.recipient_id, seg, arm, channel, campaign,
         )
+        domain_asset.emit_publish_requested(
+            arm, recipient_id=r.recipient_id, segment=seg, channel=channel, campaign=campaign,
+        )
         domain_asset.emit_dispatched(
             arm, recipient_id=r.recipient_id, segment=seg, channel=channel, campaign=campaign,
         )

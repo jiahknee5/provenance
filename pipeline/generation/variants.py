@@ -116,8 +116,10 @@ def build_action_pool(gate, channel: str, campaign: str, constrained: bool = Tru
                 v, status=AssetStatus.LIVE if cleared else AssetStatus.DRAFT,
             )
             domain_asset.emit_draft_created(asset)
+            domain_asset.emit_emotional_vector_tagged(asset)
             if cleared:
                 domain_asset.emit_validated(asset, cleared=True)
+                domain_asset.emit_approved(asset)
             asset_store.save(asset)
             report.append({
                 "variant_id": v.variant_id, "segment": seg, "arm": v.arm_label,
