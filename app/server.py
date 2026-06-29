@@ -9,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from pipeline.common.db import init_db
+from pipeline.domain.emit import begin_request_ctx, reset_request_ctx
 
 APP_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(APP_DIR / "templates"))
@@ -28,3 +29,15 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Provenance — Helix Analytics demo", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=str(APP_DIR / "static")), name="static")
+
+
+@app.middleware("http")
+async def _scope_domain_ctx(request, call_next):
+    # Give each request its own domain-emission context so concurrent visitors never share a
+    # correlation_id or cross-link causation chains. anyio copies this contextvar into the
+    # sync-endpoint threadpool, so emits inside the route see the request's context.
+    token = begin_request_ctx(request.url.path)
+    try:
+        return await call_next(request)
+    finally:
+        reset_request_ctx(token)

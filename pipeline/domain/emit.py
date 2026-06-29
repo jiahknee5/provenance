@@ -1,7 +1,9 @@
 """Domain event emission — no-op unless a DomainRecorder is active."""
 from __future__ import annotations
 
+import contextvars
 import hashlib
+import itertools
 from dataclasses import dataclass
 from typing import Any, Optional
 
@@ -21,7 +23,11 @@ from pipeline.domain import streams as stream_mod
 SYSTEM_ACTOR = ActorRef(type="system", id="provenance")
 GATE_ACTOR = ActorRef(type="Gate", id="gate")
 
-_DEFAULT_CTX: Optional[DomainContext] = None
+# Request/task-scoped, NOT a module global: under the multi-threaded server two concurrent
+# visitors must not share one correlation_id or cross-link each other's causation chains.
+_CTX_VAR: "contextvars.ContextVar[Optional[DomainContext]]" = contextvars.ContextVar(
+    "domain_ctx", default=None
+)
 
 
 @dataclass
@@ -39,17 +45,30 @@ def new_correlation_id(label: str = "") -> str:
 
 
 def start_domain_run(run_id: str, correlation_id: Optional[str] = None) -> stream_mod.DomainRecorder:
-    global _DEFAULT_CTX  # noqa: PLW0603
     cid = correlation_id or new_correlation_id(run_id)
     stream_mod._REC = stream_mod.DomainRecorder(run_id)  # noqa: SLF001
-    _DEFAULT_CTX = DomainContext(correlation_id=cid)
+    _CTX_VAR.set(DomainContext(correlation_id=cid))
     return stream_mod._REC
 
 
 def end_domain_run() -> None:
-    global _DEFAULT_CTX  # noqa: PLW0603
     stream_mod._REC = None  # noqa: SLF001
-    _DEFAULT_CTX = None
+    _CTX_VAR.set(None)
+
+
+_REQ_SEQ = itertools.count(1)  # process-monotonic; next() is atomic under the GIL
+
+
+def begin_request_ctx(label: str = "") -> "contextvars.Token":
+    """Scope a fresh domain context (own correlation_id) to the current request/task.
+    Returns a token to pass to reset_request_ctx() when the request ends. The seq suffix
+    keeps concurrent same-path requests from colliding on one correlation_id."""
+    cid = new_correlation_id(f"{label}|{next(_REQ_SEQ)}")
+    return _CTX_VAR.set(DomainContext(correlation_id=cid))
+
+
+def reset_request_ctx(token: "contextvars.Token") -> None:
+    _CTX_VAR.reset(token)
 
 
 def active() -> bool:
@@ -59,9 +78,11 @@ def active() -> bool:
 def _resolve_ctx(ctx: Optional[DomainContext]) -> DomainContext:
     if ctx is not None:
         return ctx
-    if _DEFAULT_CTX is not None:
-        return _DEFAULT_CTX
-    return DomainContext(correlation_id=new_correlation_id("fallback"))
+    cur = _CTX_VAR.get()
+    if cur is None:
+        cur = DomainContext(correlation_id=new_correlation_id("runtime"))
+        _CTX_VAR.set(cur)
+    return cur
 
 
 def emit_domain(
@@ -84,7 +105,9 @@ def emit_domain(
     """Emit a canonical domain event. Returns event_id or None on failure."""
     rec = stream_mod._REC
     if rec is None:
-        start_domain_run("runtime")
+        # Create the shared recorder without touching the per-request ctx (start_domain_run
+        # would overwrite the correlation_id the request middleware scoped).
+        stream_mod._REC = stream_mod.DomainRecorder("runtime")  # noqa: SLF001
         rec = stream_mod._REC
     if rec is None:
         return None
@@ -125,8 +148,6 @@ def emit_domain(
 
 
 def set_causation(event_id: Optional[str], ctx: Optional[DomainContext] = None) -> None:
-    global _DEFAULT_CTX  # noqa: PLW0603
-    if ctx is None and _DEFAULT_CTX is not None:
-        _DEFAULT_CTX.causation_id = event_id
-    elif ctx is not None:
-        ctx.causation_id = event_id
+    target = ctx if ctx is not None else _CTX_VAR.get()
+    if target is not None:
+        target.causation_id = event_id

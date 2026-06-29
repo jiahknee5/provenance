@@ -5,6 +5,7 @@ import sqlite3
 from typing import Optional
 
 from pipeline.common.config import DB_PATH, SCHEMA_VERSION
+from pipeline.common.db import connect
 from pipeline.common.schema_meta import set_schema_version
 from pipeline.domain.models.asset import Asset
 
@@ -26,9 +27,7 @@ class AssetStore:
         self._init()
 
     def _conn(self) -> sqlite3.Connection:
-        c = sqlite3.connect(self.path)
-        c.row_factory = sqlite3.Row
-        return c
+        return connect(self.path)
 
     def _init(self) -> None:
         c = self._conn()
