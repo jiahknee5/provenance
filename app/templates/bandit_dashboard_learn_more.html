@@ -3,7 +3,7 @@
 {% block crumb %}<i class="ph ph-trend-up"></i> Optimizer / Bandit guide{% endblock %}
 {% block content %}
 <style>
-  .guide-wrap{max-width:980px}
+  .guide-wrap{max-width:980px;--guide-mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
   .guide-grid{display:grid;grid-template-columns:240px 1fr;gap:20px;align-items:start}
   .guide-nav{position:sticky;top:72px;border:1px solid var(--hairline);border-radius:var(--r-card);background:var(--surface);padding:10px;box-shadow:var(--shadow-card)}
   .guide-nav a{display:block;padding:7px 9px;border-radius:8px;color:var(--muted);font-size:13px}
@@ -12,7 +12,8 @@
   .guide-section h2{font-size:20px;margin-bottom:8px}
   .guide-section h3{font-size:15px;margin:16px 0 6px}
   .guide-section p,.guide-section li{color:var(--slate);font-size:14px}
-  .guide-section ul{margin:8px 0 0 18px;padding:0}
+  .guide-section ul,.guide-section ol{margin:8px 0 0 18px;padding:0}
+  .guide-section ol li+li{margin-top:6px}
   .scenario{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
   .scenario .box{border:1px solid var(--hairline);border-radius:12px;background:var(--fill2);padding:13px}
   .mini-chart{height:90px;border:1px solid var(--hairline);border-radius:10px;background:#fff;position:relative;overflow:hidden;margin:10px 0}
@@ -20,8 +21,54 @@
   .curve.a{left:18%;height:56px}.curve.b{left:48%;height:28px;border-color:var(--a);opacity:.8}.curve.wide{width:50%;height:34px;left:34%;border-color:var(--a)}
   .axis{position:absolute;left:12px;right:12px;bottom:18px;border-bottom:1px solid var(--hairline)}
   .guide-callout{border-left:3px solid var(--signal);background:var(--bbg);padding:10px 12px;border-radius:9px;margin-top:10px;color:var(--slate);font-size:13px}
-  @media(max-width:900px){.guide-grid,.scenario{grid-template-columns:1fr}.guide-nav{position:static}}
+  .arm-example{border:1px solid #b8ddc8;border-radius:14px;background:#eef9f3;padding:15px;margin:12px 0 16px}
+  .arm-example-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .arm-example-name{font-size:16px;font-weight:700;color:#2e6ff5}.arm-example-code{font-family:var(--guide-mono);color:var(--muted);background:#f5f7f9;padding:3px 7px;border-radius:6px}
+  .arm-example-rank{margin-left:auto;font-family:var(--guide-mono);font-weight:700;color:#2e6ff5;background:#e8f0ff;padding:5px 9px;border-radius:7px}.arm-example-leader{font-size:11px;font-weight:700;letter-spacing:.06em;color:#1e8a53;text-transform:uppercase}
+  .arm-example-copy{background:#fff;border-left:3px solid #cad5e2;border-radius:9px;padding:10px 12px;font-family:var(--guide-mono);font-size:12px;color:var(--slate);margin-bottom:12px}
+  .arm-example-metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;border-top:1px solid #d9e8e0;padding-top:12px}
+  .arm-example-metric span{display:block;color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase}.arm-example-metric b{display:block;margin-top:3px;font-family:var(--guide-mono);font-size:14px;color:var(--ink)}
+  .arm-example-math{margin-top:12px;background:#fff;border:1px solid var(--hairline);border-radius:9px;padding:10px 12px;font-family:var(--guide-mono);font-size:12px;line-height:1.7}
+  .stat-explain{display:grid;grid-template-columns:150px 1fr;gap:8px 14px;margin-top:12px}.stat-explain dt{font-family:var(--guide-mono);font-weight:700;color:var(--ink)}.stat-explain dd{margin:0 0 8px;color:var(--slate);font-size:14px}
+  .ui-excerpt{border:1px solid var(--hairline);border-radius:12px;background:#f8fafc;padding:13px;margin:10px 0 14px;box-shadow:inset 0 1px 0 #fff}
+  .ui-excerpt-title{display:block;margin-bottom:9px;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  .ui-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.ui-row+.ui-row{margin-top:8px}
+  .ui-chip{display:inline-flex;align-items:center;padding:4px 8px;border:1px solid #d5dde7;border-radius:7px;background:#fff;color:var(--slate);font:600 11px/1.2 var(--guide-mono)}
+  .ui-chip.blue{border-color:#c7d8ff;background:#edf3ff;color:#2e6ff5}.ui-chip.green{border-color:#b8ddc8;background:#eef9f3;color:#1e8a53}.ui-chip.amber{border-color:#ead2ad;background:#fff8ed;color:#a86510}.ui-chip.red{border-color:#efc1c9;background:#fff1f3;color:#c0354b}
+  .ui-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.ui-kpi{border:1px solid var(--hairline);border-radius:9px;background:#fff;padding:9px}.ui-kpi span{display:block;color:var(--muted);font-size:9px;font-weight:700;text-transform:uppercase}.ui-kpi b{display:block;margin-top:3px;font:700 16px/1.2 var(--guide-mono);color:var(--ink)}
+  .ui-meter{display:grid;grid-template-columns:72% 28%;height:9px;border-radius:99px;overflow:hidden;background:#e7ebf0}.ui-meter span:first-child{background:#2e6ff5}.ui-meter span:last-child{background:#b5731b}
+  .ui-feed{border-left:3px solid #2e6ff5;background:#fff;border-radius:8px;padding:9px 11px;font-size:12px}.ui-feed code{color:#2e6ff5}
+  .ui-table{width:100%;border-collapse:collapse;background:#fff;font-size:11px}.ui-table th,.ui-table td{padding:7px 8px;border:1px solid var(--hairline);text-align:right}.ui-table th:first-child,.ui-table td:first-child{text-align:left}.ui-table th{color:var(--muted);font-size:9px;text-transform:uppercase}
+  .ui-log{background:#19212b;color:#dbe5ef;border-radius:9px;padding:10px 12px;font:11px/1.7 var(--guide-mono)}.ui-log .ok{color:#6dd49b}.ui-log .warn{color:#efb45f}
+  .guide-section a.external-ref{font-weight:600;text-decoration:underline;text-underline-offset:2px}
+  .context-details{margin-top:14px;border:1px solid var(--hairline);border-radius:11px;background:#fbfcfe;overflow:hidden}
+  .context-details summary{display:flex;align-items:center;gap:8px;padding:11px 13px;cursor:pointer;color:var(--ink);font-size:13px;font-weight:700;list-style:none}
+  .context-details summary::-webkit-details-marker{display:none}
+  .context-details summary::before{content:'+';display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:6px;background:var(--info-bg);color:var(--signal);font:700 14px/1 var(--guide-mono)}
+  .context-details[open] summary::before{content:'−'}
+  .context-details[open] summary{border-bottom:1px solid var(--hairline)}
+  .context-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:13px}
+  .context-intro{grid-column:1/-1;border-left:3px solid var(--signal);border-radius:8px;background:var(--info-bg);padding:11px 12px;color:var(--slate);font-size:14px;line-height:1.55}
+  .context-intro b{color:var(--ink)}
+  .audience-context{border-radius:9px;padding:12px;background:#fff;border:1px solid var(--hairline)}
+  .audience-context h3{margin:0 0 7px;font-size:13px}.audience-context p{margin:0}.audience-context p+p{margin-top:7px}
+  .audience-context.engineer h3{color:#2e6ff5}.audience-context.operator h3{color:#1e8a53}
+  .number-guide{display:grid;gap:9px;margin:12px 0 16px}
+  .number-guide-row{display:grid;grid-template-columns:130px 1fr;gap:12px;border:1px solid var(--hairline);border-radius:10px;background:#fff;padding:11px 12px}
+  .number-guide-value{font:700 13px/1.35 var(--guide-mono);color:var(--signal)}
+  .number-guide-copy{color:var(--slate);font-size:14px;line-height:1.55}.number-guide-copy b{color:var(--ink)}
+  @media(max-width:900px){.guide-grid,.scenario,.context-grid,.number-guide-row{grid-template-columns:1fr}.guide-nav{position:static}.arm-example-metrics,.ui-kpis{grid-template-columns:repeat(2,1fr)}.stat-explain{grid-template-columns:1fr}.stat-explain dd{margin-bottom:12px}}
 </style>
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['\\(', '\\)']],
+      displayMath: [['\\[', '\\]']]
+    },
+    options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+  };
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 
 <div class="guide-wrap">
   <div class="q-pagehead">
@@ -46,49 +93,78 @@
       <a href="#copy-arms">Copy arms</a>
       <a href="#decision-stream">Decision stream</a>
       <a href="#specialist-diagnostics">Specialist diagnostics</a>
+      <a href="#win-matrix">Win matrix</a>
+      <a href="#posterior-table">Posterior table</a>
+      <a href="#drift-log">Drift log</a>
       <a href="#scenarios">Scenarios and actions</a>
     </nav>
 
     <div>
       <section class="guide-section" id="what-is-bandit">
         <h2>What is a multi-arm bandit in this project?</h2>
-        <p>A multi-arm bandit is an experiment that learns while it serves traffic. In Provenance, each arm is an email copy angle for a healthcare audience segment. The reward is a meeting booked, and unsubscribes count as negative evidence.</p>
-        <p>The important Provenance-specific constraint is the Gate: an arm with unverified or unsafe claims can be visible in the dashboard, but it should not be selectable when Gate masking is on. That is the difference between optimizing conversion and optimizing conversion inside the truth boundary.</p>
+        <div class="ui-excerpt">
+          <span class="ui-excerpt-title">One decision tick</span>
+          <div class="ui-row"><span class="ui-chip">Segment: CFO Core</span><span class="ui-chip blue">Arm A sample: 24.1%</span><span class="ui-chip amber">Arm B sample: 18.8%</span></div>
+          <div class="ui-row"><span class="ui-chip green">Selected: Arm A</span><span class="ui-chip">Outcome: meeting booked</span><span class="ui-chip red">LIE: Gate masked</span></div>
+        </div>
+        <p>A multi-armed bandit repeatedly chooses one action from a set and learns only from the action it chose. Here, an <b>arm</b> is an email angle, the <b>context</b> is the audience segment, and the <b>reward</b> is a booked meeting. Unlike a fixed A/B test, the traffic allocation changes after every observation.</p>
+        <p>Each tick samples one plausible CTR, \(\theta_i\), from every eligible arm's current posterior and selects \(\arg\max_i \theta_i\). This randomized policy naturally sends more traffic to strong arms while still testing uncertain ones. The <a class="external-ref" href="https://web.stanford.edu/~bvr/pubs/TS_Tutorial_FnT.pdf" target="_blank" rel="noopener">Stanford Thompson Sampling tutorial</a> provides the algorithmic background.</p>
+        <p>The Gate is a hard eligibility filter applied before optimization. Unsafe arms can remain visible for auditability but cannot enter the candidate set. Treat this like an allowlist boundary: policy decides what may compete; the bandit optimizes only inside that set.</p>
+        <details class="context-details"><summary>Additional context</summary><div class="context-grid">
+          <div class="context-intro"><b>How to read this section:</b> one decision tick works like a feature-flag service choosing a variant for one request. The values 24.1% and 18.8% are temporary random samples from each arm's current belief, not measured conversion rates. Arm A is selected because 24.1% is the larger sample. Only Arm A's outcome updates after the send.</div>
+          <div class="audience-context engineer"><h3>For software engineers</h3><p>Think of the bandit as a stateful request router. Its state is one posterior per segment and arm. For each request it filters ineligible arms, samples a score from each remaining posterior, routes to the highest sample, records the outcome, and updates only that arm.</p><p>The important difference from a normal load balancer is feedback: every routing result changes future routing probabilities.</p></div>
+          <div class="audience-context operator"><h3>For conversion administrators</h3><p>Think of each arm as a campaign creative competing for the next send. Traffic is not split evenly forever. Copy that appears effective receives more opportunities, while uncertain copy still receives enough traffic to prove or disprove its potential.</p><p>The Gate ensures that conversion performance cannot promote claims that are not approved.</p></div>
+        </div></details>
       </section>
 
       <section class="guide-section" id="interventions">
         <h2>Intervention controls</h2>
-        <p>Use this pane when you want to change the experiment rather than just observe it.</p>
-        <ul>
-          <li><b>Inject candidate arm:</b> adds a new copy angle to the selected segment family and starts it with an uninformative Beta(1,1) prior.</li>
-          <li><b>Pause live stream:</b> freezes simulated sends so you can inspect the current posterior state.</li>
-          <li><b>Fast-forward 100 sends:</b> stress-tests convergence and shows whether a winner becomes stable with more evidence.</li>
-          <li><b>Reset memory:</b> clears posteriors, counters, regret history, and feed logs.</li>
-          <li><b>Lawful Gate Masking:</b> removes planted lie arms from the action pool while still showing why they were blocked.</li>
-        </ul>
-        <div class="guide-callout">Action rule: if an unsafe arm has high latent CTR, leave Gate masking on. The dashboard should prove the lie is tempting but unreachable.</div>
+        <div class="ui-excerpt">
+          <span class="ui-excerpt-title">Intervention controls</span>
+          <div class="ui-row"><span class="ui-chip blue">+ Inject candidate arm</span><span class="ui-chip">Pause live stream</span><span class="ui-chip">Fast-forward 100 sends</span><span class="ui-chip red">Reset memory</span></div>
+          <div class="ui-row"><span class="ui-chip">Pace: 800ms</span><span class="ui-chip green">Lawful Gate Masking: ON</span></div>
+        </div>
+        <p>These controls mutate experiment state. <b>Inject</b> creates a new arm with a \(\operatorname{Beta}(1,1)\) prior, so it begins maximally uncertain and will receive exploratory traffic. <b>Pause</b> stops new observations without changing stored state. <b>Fast-forward</b> executes 100 normal decision/update cycles synchronously; it is a convergence test, not synthetic aggregation.</p>
+        <p><b>Pace</b> changes only wall-clock timing, not the random process or posterior math. <b>Reset</b> is destructive to in-memory evidence: counters, posterior parameters, regret, and logs return to initialization. <b>Gate masking</b> changes the eligible action set before sampling; turning it off intentionally allows planted unsafe arms to compete.</p>
+        <div class="guide-callout">Engineering check: after any intervention, distinguish policy changes from evidence changes. Pausing and pace changes preserve evidence; injection changes the arm set; reset deletes evidence; Gate masking changes eligibility.</div>
+        <details class="context-details"><summary>Additional context</summary><div class="context-grid">
+          <div class="context-intro"><b>How to read this section:</b> separate controls that change time from controls that change learning. Pause and pace change when ticks run. Inject changes which messages exist. Gate masking changes which messages are allowed to compete. Reset erases what the simulator has learned.</div>
+          <div class="audience-context engineer"><h3>For software engineers</h3><p>Classify each control by side effect. Pace and pause affect scheduling. Inject changes configuration and initializes state. Gate masking changes the selection predicate. Reset replaces all experiment state with defaults.</p><p>When debugging, log the control action and compare state before and after it. A timing control should never mutate posterior parameters.</p></div>
+          <div class="audience-context operator"><h3>For conversion administrators</h3><p>Pause before investigating a surprising result so new sends do not move the numbers while you inspect them. Use fast-forward only to observe how the demo behaves with more traffic; it is not a substitute for real campaign evidence.</p><p>Adding a new message creates an unproven challenger. Expect early volatility while the system learns where it belongs.</p></div>
+        </div></details>
       </section>
 
       <section class="guide-section" id="traffic-pulse">
         <h2>Production traffic pulse</h2>
-        <p>These KPIs answer the operational question: is the optimizer producing meetings without harming the list?</p>
-        <ul>
-          <li><b>Outreach sends:</b> total simulated attempts.</li>
-          <li><b>Meetings booked:</b> successful rewards.</li>
-          <li><b>List burn:</b> unsubscribes; this is weighted more harshly than a no-click.</li>
-          <li><b>Gate veto count:</b> times the system prevented an unverified claim from entering serving decisions.</li>
-        </ul>
+        <div class="ui-excerpt"><span class="ui-excerpt-title">Production traffic</span><div class="ui-kpis"><div class="ui-kpi"><span>Outreach sends</span><b>248</b></div><div class="ui-kpi"><span>Meetings booked</span><b>47</b></div><div class="ui-kpi"><span>List burn</span><b>1</b></div><div class="ui-kpi"><span>Gate veto count</span><b>69</b></div></div></div>
+        <p><b>Sends</b> is the global denominator across all segments and arms. <b>Meetings booked</b> is the global positive-reward count; \(47/248 = 19.0\%\) is a useful aggregate health check, but it should not be used to rank arms because traffic is adaptively allocated and segments differ.</p>
+        <p><b>List burn</b> counts unsubscribes. The alert rate is \(r_{\text{unsub}}=N_{\text{unsub}}/N_{\text{sends}}\), with a warning above \(0.50\%\). At the posterior level, an unsubscribe adds three \(\beta\) pseudo-counts, encoding that reputational harm costs more than an ordinary miss.</p>
+        <p><b>Gate veto count</b> is an observability metric, not a denominator in CTR. It shows how often the demo exercised its safety boundary. A high count can mean the control is working under adversarial pressure; it does not by itself indicate degraded campaign performance.</p>
+        <details class="context-details"><summary>Additional context</summary><div class="context-grid">
+          <div class="context-intro"><b>How to read this section:</b> these four numbers summarize system activity, not which message is winning. In the example, 47 meetings from 248 sends gives a 19.0% aggregate result. One unsubscribe gives 0.40% list burn, below the 0.50% warning threshold. The 69 vetoes are blocked unsafe opportunities and are not included as sends.</div>
+          <div class="audience-context engineer"><h3>For software engineers</h3><p>These are service-level counters, not model parameters. Use them for monitoring and alerting. Arm-level sends and outcomes drive posterior updates; global totals summarize system throughput and harm.</p><p>A useful invariant is that global sends equal the sum of sends across all segments and arms.</p></div>
+          <div class="audience-context operator"><h3>For conversion administrators</h3><p>Read meetings and unsubscribes together. A campaign with strong bookings but unacceptable list burn is not healthy. Also check absolute counts: one unsubscribe in a tiny sample can create a large temporary rate.</p><p>Gate vetoes show prevented risk, not lost conversions from approved copy.</p></div>
+        </div></details>
       </section>
 
       <section class="guide-section" id="belief-curves">
         <h2>Live belief curves and statistical confidence</h2>
+        <div class="ui-excerpt">
+          <span class="ui-excerpt-title">Posterior chart excerpt</span>
+          <div class="ui-row"><span class="ui-chip blue">Arm A: narrow curve, mean 24%</span><span class="ui-chip amber">Arm B: wide curve, mean 15%</span></div>
+          <div class="ui-row"><span class="ui-chip">○ current Thompson sample</span><span class="ui-chip green">◎ selected sample</span><span class="ui-chip">┊ simulated truth</span></div>
+        </div>
         <p>Each curve is a Beta distribution: the bandit's current belief about one copy arm's true meeting-booking rate. The x-axis is possible CTR. The curve's shape tells you confidence.</p>
         <ul>
           <li><b>Wide curve:</b> not enough data yet. The arm may still be good or bad.</li>
           <li><b>Tall narrow curve:</b> enough evidence has accumulated. The model is more certain.</li>
           <li><b>Curve shifted right:</b> the arm is believed to have higher CTR.</li>
           <li><b>Overlapping curves:</b> no clear winner yet; exploration should continue.</li>
+          <li><b>Hollow circle:</b> one Thompson sample drawn from that arm's curve for the current decision. The sample changes on every simulated send.</li>
+          <li><b>Circle with an outer ring:</b> the winning sample. The bandit serves the arm whose sampled CTR is highest; the label above it explains whether that choice exploits the current leader or explores a challenger.</li>
+          <li><b>Truth and dashed line:</b> the arm's fixed underlying CTR in this demo simulation. It generates the simulated outcomes and lets you compare the model's belief with reality. In a production experiment, this value is unknown and must be learned from observed results.</li>
         </ul>
+        <p>The y-axis is probability <em>density</em>, not probability. A taller peak does not mean a higher CTR; horizontal position indicates CTR, while narrowness indicates concentration. The <a class="external-ref" href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda366h.htm" target="_blank" rel="noopener">NIST Beta distribution reference</a> covers the density and shape parameters.</p>
         <div class="scenario">
           <div class="box">
             <h3>Stable winner</h3>
@@ -101,12 +177,24 @@
             <p>Angle B is wide and overlaps A. Action: do not archive yet. Let the bandit explore until the credible interval tightens.</p>
           </div>
         </div>
+        <details class="context-details"><summary>Additional context</summary><div class="context-grid">
+          <div class="context-intro"><b>How to read this section:</b> read each curve from left to right for expected performance and from wide to narrow for confidence. A curve centered near 24% says “values around 24% are plausible.” A wide curve says many other values are also plausible. The moving circle is one sampled value used for the current decision.</div>
+          <div class="audience-context engineer"><h3>For software engineers</h3><p>A curve is a serialized uncertainty state rendered as a density. The area under each curve is one; height alone is not a score. Horizontal position represents plausible CTR values, and width represents how uncertain the model remains.</p><p>The dashed truth line exists only because this is a simulator. Treat it like test-fixture data that production code would never receive.</p></div>
+          <div class="audience-context operator"><h3>For conversion administrators</h3><p>Use the curve to answer two separate questions: “Where is this message likely to perform?” and “How sure are we?” A right-shifted but very wide curve may still be too uncertain for a campaign decision.</p><p>Do not archive a challenger merely because its current peak is lower when its range still overlaps the leader.</p></div>
+        </div></details>
       </section>
 
       <section class="guide-section" id="explore-exploit">
         <h2>Exploit winner vs explore underdog</h2>
-        <p>Exploit means the selected arm was already the current leader. Explore means Thompson sampling picked a less-proven arm because its uncertainty still leaves room for upside.</p>
-        <p>Early in an experiment, exploration should be common. Later, exploitation should dominate. If exploration stays high forever, the arms may be too similar, traffic may be too low, or outcomes may be noisy.</p>
+        <div class="ui-excerpt"><span class="ui-excerpt-title">Decision mix</span><div class="ui-meter"><span></span><span></span></div><div class="ui-row" style="justify-content:space-between;margin-top:7px"><span class="ui-chip blue">Exploit: 72%</span><span class="ui-chip amber">Explore: 28%</span></div></div>
+        <p>The meter classifies historical decisions, not a configured exploration rate. A pull is <b>exploit</b> when the sampled winner is also the arm with the highest posterior mean at that tick. It is <b>explore</b> when uncertainty gives another arm the highest random Thompson sample.</p>
+        <p>Thompson sampling has no fixed epsilon. Exploration emerges from posterior overlap: wide distributions occasionally produce high draws. As evidence accumulates, weak-arm distributions narrow and their chance of winning a draw falls.</p>
+        <p>Persistent exploration is not automatically a bug. It can indicate statistically similar arms, sparse traffic, a non-stationary reward process, or noisy outcomes. Investigate posterior overlap and segment quality before forcing exploitation.</p>
+        <details class="context-details"><summary>Additional context</summary><div class="context-grid">
+          <div class="context-intro"><b>How to read this section:</b> 72% exploit means 72 of every 100 historical decisions selected the arm that already had the highest estimated mean at that moment. The other 28 selected a challenger because its random sample was highest. This describes what happened; it is not a configured 72/28 traffic split.</div>
+          <div class="audience-context engineer"><h3>For software engineers</h3><p>There is no hard-coded exploration percentage. Random posterior samples implement the policy. As uncertainty contracts, the probability that a weak arm produces the maximum sample naturally decreases.</p><p>If exploration never declines, inspect reward ingestion, segment keys, posterior persistence, and whether resets are occurring unexpectedly.</p></div>
+          <div class="audience-context operator"><h3>For conversion administrators</h3><p>Exploration is the cost of learning. It intentionally sends some traffic to copy that is not the current leader so the system can detect a better option.</p><p>A high explore share is acceptable early. Later, it should be explained by close-performing messages, limited data, or recent creative changes.</p></div>
+        </div></details>
       </section>
 
       <section class="guide-section" id="copy-arms">
@@ -114,57 +202,234 @@
         <p>Each card shows the operational and statistical state of a copy angle.</p>
         <ul>
           <li><b>Claim tags:</b> the evidence-backed claims the message relies on.</li>
-          <li><b>Belief Beta(alpha, beta):</b> alpha grows with meetings; beta grows with misses and more sharply with unsubscribes.</li>
-          <li><b>P(Best):</b> Monte Carlo estimate of how often this arm beats the others.</li>
+          <li><b>Belief \(\operatorname{Beta}(\alpha,\beta)\):</b> \(\alpha\) grows with meetings; \(\beta\) grows with misses and more sharply with unsubscribes.</li>
+          <li><b>\(P(\text{Best})\):</b> Monte Carlo estimate of how often this arm beats the others.</li>
           <li><b>95% credible interval:</b> the plausible range for this arm's CTR based on current evidence.</li>
           <li><b>Archive copy:</b> removes the arm from future pulls without deleting its history.</li>
         </ul>
+        <h3>Worked example</h3>
+        <p>Start with the excerpt as an engineer would see it in the dashboard, then separate observed state from inferred state.</p>
+        <div class="arm-example" aria-label="Example candidate arm statistics">
+          <div class="arm-example-head">
+            <span class="arm-example-name">Angle A: ROI Proof</span>
+            <span class="arm-example-code">roi_tco_cut</span>
+            <span class="arm-example-rank">\(P(\text{Best})=84.5\%\)</span>
+            <span class="arm-example-leader">Learned leader</span>
+          </div>
+          <div class="arm-example-copy">We cut hospital Total Cost of Ownership by 22%...<br>Worth a 20-minute look?</div>
+          <div class="arm-example-metrics">
+            <div class="arm-example-metric"><span>Sends</span><b>3</b></div>
+            <div class="arm-example-metric"><span>Clicks</span><b>1</b></div>
+            <div class="arm-example-metric"><span>Belief</span><b>\(\operatorname{Beta}(2,3)\)</b></div>
+            <div class="arm-example-metric"><span>Est. CTR</span><b>40.0%</b></div>
+            <div class="arm-example-metric"><span>95% credible interval</span><b>[6.7%, 80.3%]</b></div>
+          </div>
+          <div class="arm-example-math">\(\alpha_{\text{hits}}=2\) &nbsp; \(\beta_{\text{misses}}=3\)<br>\(\theta_A\sim\operatorname{Beta}(\alpha=2,\beta=3)\) &nbsp; \(N=3\) &nbsp; archive: \(M_A=0\)</div>
+        </div>
+
+        <h3>1. Separate copy metadata from experiment data</h3>
+        <dl class="stat-explain">
+          <dt>22%</dt><dd>A verified claim embedded in the email body. It is product evidence, not observed conversion data and not an input to the posterior update.</dd>
+          <dt>20 minutes</dt><dd>The proposed meeting duration in the CTA. It also has no statistical role.</dd>
+          <dt>3 sends</dt><dd>The number of times this arm was selected for the current segment. This is the arm-local sample count, also shown as \(N=3\).</dd>
+          <dt>1 click</dt><dd>One send produced the positive reward event. The UI says click, while the experiment interprets it as a booked-meeting success.</dd>
+        </dl>
+
+        <h3>2. Reconstruct the posterior</h3>
+        <p>The model starts each arm with a uniform \(\operatorname{Beta}(1,1)\) prior over its unknown conversion probability \(\theta_A\). Beta is conjugate to the Bernoulli likelihood, so ordinary binary outcomes update its two shape parameters as pseudo-counts:</p>
+        <div class="guide-callout">\[
+          \alpha = 1 + N_{\text{success}} = 1 + 1 = 2, \qquad
+          \beta = 1 + N_{\text{miss}} = 1 + 2 = 3
+        \]
+        \[\theta_A\mid\mathcal{D}\sim\operatorname{Beta}(2,3)\]</div>
+        <p>The raw observed rate is \(1/3=33.3\%\). The displayed estimate is the posterior mean:</p>
+        <div class="guide-callout">\[
+          \mathbb{E}[\theta_A\mid\mathcal{D}]
+          = \frac{\alpha}{\alpha+\beta}
+          = \frac{2}{2+3}
+          = 40.0\%
+        \]</div>
+        <p>The difference is prior smoothing. With only three observations, the two prior pseudo-counts still have substantial influence. As traffic grows, the likelihood dominates and the posterior mean approaches the empirical rate.</p>
+        <p><b>Implementation nuance:</b> an unsubscribe applies \(\beta\leftarrow\beta+3\) instead of \(\beta\leftarrow\beta+1\). That is a deliberate utility penalty equivalent to three negative pseudo-observations. Once weighted outcomes are used, interpret \(\operatorname{Beta}(\alpha,\beta)\) as a decision model, not a literal posterior from only independent Bernoulli trials.</p>
+
+        <h3>3. Read absolute uncertainty</h3>
+        <p>\([6.7\%,80.3\%]\) approximates the central 95% posterior credible interval. The dashboard takes 1,000 samples from \(\operatorname{Beta}(2,3)\), sorts them, and uses draws near \(Q_{0.025}\) and \(Q_{0.975}\). Conditional on the model, roughly 95% of posterior probability lies between those bounds:</p>
+        <div class="guide-callout">\[P\!\left(Q_{0.025}\leq\theta_A\leq Q_{0.975}\mid\mathcal{D}\right)\approx0.95\]</div>
+        <p>This is not a frequentist confidence interval and does not mean 95% of future clicks land in that range. It describes uncertainty about the single latent CTR parameter. The interval is extremely wide because three sends contain little information.</p>
+
+        <h3>4. Read relative ranking</h3>
+        <p>\(P(\text{Best}_A)=84.5\%\) answers a different question from estimated CTR. For each of 1,000 Monte Carlo rounds, the dashboard draws one \(\theta_i\) from every eligible arm and records which draw is largest. Angle A won about \(845/1000\) rounds.</p>
+        <div class="guide-callout">\[P(\text{Best}_A)\approx P\!\left(\theta_A&gt;\max_{j\neq A}\theta_j\right)\]</div>
+        <p>This probability depends on the competing arms and the current Gate/archive mask. It can change even if Angle A receives no new data, because another arm changed or left the pool. At \(\hat p=0.845\) and \(R=1000\) draws, the Monte Carlo standard error is approximately</p>
+        <div class="guide-callout">\[\operatorname{SE}(\hat p)=\sqrt{\frac{\hat p(1-\hat p)}{R}}\approx 0.011\]</div>
+        <p>That is roughly 1.1 percentage points, so small refresh-to-refresh changes are simulation noise.</p>
+
+        <h3>5. Read policy state</h3>
+        <dl class="stat-explain">
+          <dt>Learned leader</dt><dd>The eligible arm with the highest current \(P(\text{Best})\), not a declaration that learning is complete. Wide intervals can coexist with a leader when competitors are even less promising.</dd>
+          <dt>\(M_A=0\)</dt><dd>Archiving sets this arm's action mask to zero. Thompson sampling stops selecting it, but \(N\), \(\alpha\), \(\beta\), and historical outcomes remain intact for auditability or restoration.</dd>
+        </dl>
+        <div class="guide-callout">Operational rule: use estimated CTR and its credible interval to assess one arm's absolute performance; use \(P(\text{Best})\) to compare the active pool; use sends and interval width to judge whether the ranking has enough evidence to act on.</div>
+        <details class="context-details"><summary>Additional context</summary><div class="context-grid">
+          <div class="context-intro"><b>How to read this section:</b> the card moves from facts to estimates. “3 sends” and “1 click” are observed facts. \(\operatorname{Beta}(2,3)\), 40.0% estimated CTR, the credible interval, and \(P(\text{Best})\) are computed from those facts plus the prior. Read the facts first so you know how much evidence supports the estimates.</div>
+          <div class="audience-context engineer"><h3>For software engineers</h3><p>The arm card combines three data domains: immutable creative metadata, mutable counters, and derived statistics. Debug them separately. A claim-tag problem is configuration; a send-count problem is event ingestion; a confidence problem is model computation.</p><p>Archiving should be reversible and must preserve historical state. It changes eligibility, not evidence.</p></div>
+          <div class="audience-context operator"><h3>For conversion administrators</h3><p>Start with message identity and approved claims, then check volume, estimated CTR, uncertainty, and relative rank. Never treat the “Learned leader” label as automatic permission to launch broadly.</p><p>A decision-ready arm needs enough sends, acceptable list health, a credible advantage, and approved copy.</p></div>
+        </div></details>
       </section>
 
       <section class="guide-section" id="decision-stream">
         <h2>Real-time decision stream</h2>
-        <p>The stream lets you audit individual choices. It records the segment, selected arm, whether the pull was exploit or explore, and the outcome.</p>
-        <p>Use it when a curve changes suddenly. For example, a run of unsubscribes should push beta up, lower estimated CTR, and may trigger a list-burn warning.</p>
+        <div class="ui-excerpt">
+          <span class="ui-excerpt-title">Newest decision</span>
+          <div class="ui-feed"><b>CFO (Core Tier)</b> <span style="float:right">00:41:08</span><br>Copy Arm: <code>A</code> &nbsp; <span class="ui-chip amber">Explore · sample 31.6%</span> &nbsp; <span class="ui-chip green">Meeting booked</span></div>
+        </div>
+        <p>The feed is an append-only audit view displayed newest-first. Each row records the segment, selected arm, decision classification, sampled \(\theta_i\), timestamp, and observed outcome. The sampled percentage is the random Thompson draw that won this tick; it is not the arm's estimated CTR.</p>
+        <p>Follow one row through the state transition: selection increments sends; a meeting applies \(\alpha\leftarrow\alpha+1\); an ordinary miss applies \(\beta\leftarrow\beta+1\); an unsubscribe applies \(\beta\leftarrow\beta+3\). The dashboard then recomputes confidence and redraws the posterior for the affected segment.</p>
+        <p>Use the feed to explain discontinuities. If an arm's estimated CTR drops sharply, inspect recent outcomes rather than assuming a rendering defect. Repeated unsubscribes should produce a faster leftward update than repeated ordinary misses because of the weighted penalty.</p>
+        <details class="context-details"><summary>Additional context</summary><div class="context-grid">
+          <div class="context-intro"><b>How to read this section:</b> read one feed row as a cause-and-effect record. The example says the CFO Core segment received Arm A because its sampled value was 31.6%; the choice was classified as exploration; the recipient booked a meeting. That success increases Arm A's \(\alpha\) before the next decision.</div>
+          <div class="audience-context engineer"><h3>For software engineers</h3><p>Treat each feed row as an event in an event-sourced system: decision inputs, chosen action, outcome, and timestamp. Given the prior state and this event, you should be able to reconstruct the next posterior state.</p><p>The feed is capped at 50 rows, so it is a debugging window rather than a durable audit log. Production would persist these events outside the browser.</p></div>
+          <div class="audience-context operator"><h3>For conversion administrators</h3><p>Use the feed to connect aggregate movement to individual sends. If list burn rises, look for which message and audience produced unsubscribes. If a challenger jumps in rank, look for a recent run of meetings.</p><p>One event is evidence, not a trend. Look for repeated outcomes before changing campaign policy.</p></div>
+        </div></details>
       </section>
 
       <section class="guide-section" id="specialist-diagnostics">
         <h2>Specialist diagnostics</h2>
-        <p>Specialist mode is for debugging convergence rather than operating the experiment day to day.</p>
-        <ul>
-          <li><b>Estimated regret:</b> cumulative opportunity cost of exploration compared with always selecting the best honest arm.</li>
-          <li><b>Policy entropy:</b> how spread out the action probabilities are. Lower entropy means convergence.</li>
-          <li><b>Average KL divergence:</b> how far posteriors have moved from the starting prior. Higher means the model has learned more.</li>
-          <li><b>Active arm pool:</b> number of arms eligible after Gate and archive masking.</li>
-        </ul>
+        <div class="ui-excerpt"><span class="ui-excerpt-title">Convergence diagnostics</span><div class="ui-kpis"><div class="ui-kpi"><span>Est. regret</span><b>1.7</b></div><div class="ui-kpi"><span>Policy entropy</span><b>0.42</b></div><div class="ui-kpi"><span>Avg KL div</span><b>1.86</b></div><div class="ui-kpi"><span>Active arm pool</span><b>2</b></div></div></div>
+        <h3>Interpret the example values</h3>
+        <div class="number-guide">
+          <div class="number-guide-row">
+            <div class="number-guide-value">Est. regret<br>1.7</div>
+            <div class="number-guide-copy"><b>Plain meaning:</b> across the simulation so far, exploratory choices cost about 1.7 expected meetings compared with an impossible oracle that always knew the best safe arm. This is a cumulative expected count, not 1.7% and not 1.7 observed lost meetings. <b>How to judge it:</b> regret normally increases because it accumulates. Watch how quickly it grows per additional send; a flattening curve means fewer costly choices.</div>
+          </div>
+          <div class="number-guide-row">
+            <div class="number-guide-value">Policy entropy<br>0.42</div>
+            <div class="number-guide-copy"><b>Plain meaning:</b> the model has a preference, but meaningful uncertainty remains about which of the two active arms is best. With two arms, entropy ranges from \(0\) for a nearly certain leader to \(\log 2\approx0.693\) for a 50/50 ranking. The value 0.42 is about 61% of that maximum uncertainty. <b>How to judge it:</b> lower means a clearer ranking; it does not mean higher conversion performance.</div>
+          </div>
+          <div class="number-guide-row">
+            <div class="number-guide-value">Avg KL div<br>1.86</div>
+            <div class="number-guide-copy"><b>Plain meaning:</b> on average, the active arms' beliefs have moved noticeably away from their original flat \(\operatorname{Beta}(1,1)\) priors. The unit is nats. There is no universal “good” cutoff for 1.86. <b>How to judge it:</b> compare it with earlier values from the same experiment and arm pool. Rising KL means the model is learning something, but that something may be that an arm performs poorly.</div>
+          </div>
+          <div class="number-guide-row">
+            <div class="number-guide-value">Active arm pool<br>2</div>
+            <div class="number-guide-copy"><b>Plain meaning:</b> exactly two arms are currently eligible for selection after Gate masking and archiving. In this demo, that commonly means approved Arms A and B are competing while the planted lie is excluded. <b>Why it matters:</b> pool size changes the maximum possible entropy and the meaning of \(P(\text{Best})\). Compare entropy or ranking values only when you know which arms were active.</div>
+          </div>
+        </div>
+        <div class="guide-callout"><b>Combined reading:</b> the system has learned substantially from its starting point (KL 1.86), currently leans toward one of two eligible arms but is not fully settled (entropy 0.42), and has paid about 1.7 expected meetings to explore. These values describe learning behavior. Check estimated CTR, credible intervals, meetings, and list burn before making a campaign decision.</div>
+        <p><b>Estimated regret</b> accumulates the simulated opportunity cost of each choice:</p>
+        <div class="guide-callout">\[R_T=\sum_{t=1}^{T}\max\!\left(0,\theta^*-\theta_{a_t}\right)\]</div>
+        <p>A value of \(R_T=1.7\) means 1.7 expected successes were forgone across the run. This is available only because the demo knows each arm's hidden truth, \(\theta_i\); production cannot compute true regret directly.</p>
+        <p><b>Policy entropy</b> is computed over each active arm's \(P(\text{Best})\):</p>
+        <div class="guide-callout">\[H(\mathbf p)=-\sum_{i=1}^{K}p_i\log p_i\]</div>
+        <p>It measures how diffuse the current ranking is. For two arms, entropy approaches \(0\) when one dominates and peaks at \(\log 2\approx0.693\) when both are equally likely to be best. Entropy depends on pool size, \(K\), so compare it only with the same eligible-arm count.</p>
+        <p><b>Average KL divergence</b> measures how far each posterior has moved from its \(\operatorname{Beta}(1,1)\) prior, then averages across active arms:</p>
+        <div class="guide-callout">\[D_{\mathrm{KL}}^{\mathrm{avg}}=K^{-1}\sum_{i=1}^{K}D_{\mathrm{KL}}\!\left(p_i(\theta)\,\|\,p_{0}(\theta)\right)\]</div>
+        <p>Higher means more belief change, not necessarily better performance. KL is asymmetric and measured in nats here. SciPy's <a class="external-ref" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.entropy.html" target="_blank" rel="noopener">entropy and relative-entropy reference</a> gives the definitions.</p>
+        <p><b>Active arm pool</b> is the count after archive and Gate masks. It is the denominator for competition and changes the interpretation of entropy and \(P(\text{Best})\).</p>
+        <details class="context-details"><summary>Additional context</summary><div class="context-grid">
+          <div class="context-intro"><b>How to read this section:</b> these diagnostics answer different questions. Regret asks “what did exploration cost in the simulator?” Entropy asks “how undecided is the policy?” KL divergence asks “how much has the model changed from its starting belief?” Active pool asks “how many messages are currently competing?” None of them is a conversion rate.</div>
+          <div class="audience-context engineer"><h3>For software engineers</h3><p>These metrics diagnose the learning process rather than campaign success. Regret requires simulator truth. Entropy summarizes routing uncertainty. KL divergence summarizes model movement from initialization. Pool size supplies the comparison context.</p><p>Alert on impossible combinations, not arbitrary values: for example, an active pool of zero means selection cannot proceed, while high KL with zero sends suggests corrupted state.</p></div>
+          <div class="audience-context operator"><h3>For conversion administrators</h3><p>Use entropy to ask whether the system has a clear preference, not whether the campaign is good. Use KL to ask whether it has learned much, not whether performance improved.</p><p>A confidently learned poor result is still poor. Always pair diagnostics with estimated CTR, credible intervals, meetings, and list burn.</p></div>
+        </div></details>
       </section>
 
       <section class="guide-section" id="win-matrix">
         <h2>Head-to-head win probability matrix</h2>
-        <p>This table answers pairwise questions like: what is the probability Angle A beats Angle B if we sample from their current beliefs? A value above 70% is strong directional evidence. A value near 50% means the arms are statistically close.</p>
+        <div class="ui-excerpt"><span class="ui-excerpt-title">Pairwise superiority P(row &gt; column)</span><table class="ui-table"><thead><tr><th>Arm</th><th>A</th><th>B</th></tr></thead><tbody><tr><td>A</td><td>—</td><td style="background:#eef9f3;color:#1e8a53;font-weight:700">78.4%</td></tr><tr><td>B</td><td style="color:#c0354b">21.6%</td><td>—</td></tr></tbody></table></div>
+        <p>Each Monte Carlo round draws one plausible CTR from every active posterior. Cell \((A,B)=78.4\%\) estimates \(P(\theta_A&gt;\theta_B)\): A's draw exceeded B's in roughly 784 of 1,000 rounds. With continuous Beta distributions, ties have probability zero, so</p>
+        <div class="guide-callout">\[P(\theta_A&gt;\theta_B)+P(\theta_B&gt;\theta_A)=1\]</div>
+        <p>The diagonal is undefined because comparing an arm with itself has no decision value. This matrix answers pairwise superiority, while \(P(\text{Best})\) asks whether an arm beats <em>all</em> competitors simultaneously. With three or more arms, \(P(\theta_A&gt;\theta_B)\) can be high while A's \(P(\text{Best})\) remains modest because arm C often wins.</p>
+        <p>Treat 70% highlighting as a dashboard heuristic, not a universal statistical threshold. Use the interval width, business cost, and sample volume when deciding whether the evidence is actionable.</p>
+        <details class="context-details"><summary>Additional context</summary><div class="context-grid">
+          <div class="context-intro"><b>How to read this section:</b> choose a row, then read across. The A-to-B cell at 78.4% means a plausible CTR sampled for A exceeded a plausible CTR sampled for B in about 784 of 1,000 comparisons. The reverse cell is 21.6%. This compares uncertainty-aware possibilities, not just the two displayed means.</div>
+          <div class="audience-context engineer"><h3>For software engineers</h3><p>The matrix is computed from the same 1,000 synchronized Monte Carlo rounds used for ranking. For every draw, compare each ordered pair and increment the corresponding cell.</p><p>Useful invariants: the diagonal is empty, every off-diagonal value lies in \([0,1]\), and opposite cells sum to approximately one.</p></div>
+          <div class="audience-context operator"><h3>For conversion administrators</h3><p>Read across a row as “How often does this message beat each alternative?” A green cell means directional evidence, not guaranteed future performance.</p><p>Use pairwise comparisons when deciding between two specific creatives. Use \(P(\text{Best})\) when deciding which creative leads the entire active set.</p></div>
+        </div></details>
       </section>
 
       <section class="guide-section" id="posterior-table">
         <h2>Posterior parameter table</h2>
-        <p>This table is the numeric companion to the belief curves. Mean is the expected CTR, mode is the most likely CTR when defined, variance is uncertainty, and KL divergence is learning progress from the starting prior.</p>
+        <div class="ui-excerpt"><span class="ui-excerpt-title">Posterior parameter estimation</span><table class="ui-table"><thead><tr><th>Arm</th><th>Mean</th><th>Mode</th><th>Variance</th><th>KL div</th></tr></thead><tbody><tr><td>Angle A</td><td>40.00%</td><td>33.33%</td><td>0.04000</td><td>0.235</td></tr><tr><td>Angle B</td><td>20.00%</td><td>0.00%</td><td>0.02667</td><td>0.636</td></tr></tbody></table></div>
+        <h3>Interpret the example values</h3>
+        <div class="number-guide">
+          <div class="number-guide-row">
+            <div class="number-guide-value">Mean<br>A: 40.00%<br>B: 20.00%</div>
+            <div class="number-guide-copy"><b>Plain meaning:</b> the model's current average estimate for A is twice B's estimate. This makes A the stronger candidate on expected CTR. <b>Action:</b> allow A to receive more traffic, but do not promote or archive from the means alone. These estimates may still be based on very few sends, and their credible intervals may overlap substantially.</div>
+          </div>
+          <div class="number-guide-row">
+            <div class="number-guide-value">Mode<br>A: 33.33%<br>B: 0.00%</div>
+            <div class="number-guide-copy"><b>Plain meaning:</b> A's belief curve peaks near 33.33%. B's curve peaks at the zero boundary, usually because B has no recorded successes yet and its posterior is strongly right-skewed. <b>Action:</b> do not read B's 0.00% mode as “B can never convert.” Its 20.00% mean shows that non-zero CTR values remain plausible. Use the full interval and additional sends before eliminating it.</div>
+          </div>
+          <div class="number-guide-row">
+            <div class="number-guide-value">Variance<br>A: 0.04000<br>B: 0.02667</div>
+            <div class="number-guide-copy"><b>Plain meaning:</b> variance measures uncertainty in probability-squared units, so it is not a percentage. The easier interpretation is standard deviation: \(\sqrt{0.04000}=0.20\) for A and \(\sqrt{0.02667}\approx0.163\) for B. Both beliefs are still broad. B's lower variance does not make B better; it means B is somewhat more concentrated around its lower estimate. <b>Action:</b> collect more evidence rather than treating either point estimate as stable.</div>
+          </div>
+          <div class="number-guide-row">
+            <div class="number-guide-value">KL divergence<br>A: 0.235<br>B: 0.636</div>
+            <div class="number-guide-copy"><b>Plain meaning:</b> B has moved farther from the original flat prior than A. That does not mean B is performing better. In this example, the model has learned more strongly that B is likely weak. <b>Action:</b> use KL to judge how much learning occurred, then use mean, credible interval, and business outcomes to judge whether that learning is favorable.</div>
+          </div>
+        </div>
+        <div class="guide-callout"><b>Combined reading:</b> A currently looks more promising, but both arms remain uncertain. Keep A favored and continue collecting evidence. Keep B eligible if its credible interval still overlaps A or its sample size is small. Consider archiving B only when it has adequate traffic, persistently lower estimates, a low \(P(\text{Best})\), and no strategic reason to continue testing it.</div>
+
+        <h3>Turn the table into an action</h3>
+        <ol>
+          <li><b>Check volume first:</b> confirm sends and outcomes are large enough to support interpretation. Sparse rows produce unstable means and boundary modes.</li>
+          <li><b>Use mean for direction:</b> identify which arm currently has the higher expected CTR.</li>
+          <li><b>Use variance and the credible interval for confidence:</b> determine whether the apparent gap is stable or still dominated by uncertainty.</li>
+          <li><b>Use \(P(\text{Best})\) and the win matrix for comparison:</b> verify that the preferred arm usually beats the alternatives across posterior draws.</li>
+          <li><b>Check business constraints:</b> review unsubscribes, approved claims, audience fit, and the cost of sending weak copy.</li>
+          <li><b>Choose the least destructive action:</b> continue learning when evidence is weak, favor the leader when evidence is directional, and archive only when evidence and business context agree.</li>
+        </ol>
+        <p><b>Mean</b> is the expected CTR under the posterior and the estimate used to identify the current mean leader. <b>Mode</b> is the peak location when both parameters exceed one:</p>
+        <div class="guide-callout">\[
+          \mathbb{E}[\theta]=\frac{\alpha}{\alpha+\beta},
+          \qquad
+          \operatorname{mode}(\theta)=\frac{\alpha-1}{\alpha+\beta-2}
+        \]</div>
+        <p>Mean and mode differ for skewed distributions.</p>
+        <p><b>Variance</b> measures posterior spread:</p>
+        <div class="guide-callout">\[\operatorname{Var}(\theta)=\frac{\alpha\beta}{(\alpha+\beta)^2(\alpha+\beta+1)}\]</div>
+        <p>Lower variance means the posterior is more concentrated, but compare variance alongside the mean because probabilities near zero or one naturally have different scale.</p>
+        <p><b>KL divergence</b> quantifies information gained relative to the uniform prior. It does not encode direction: a confidently poor arm can have higher KL than a promising but uncertain arm. The table is the numeric representation of the same distributions drawn in the belief chart.</p>
+        <details class="context-details"><summary>Additional context</summary><div class="context-grid">
+          <div class="context-intro"><b>How to read this section:</b> mean is the average of the whole belief curve; mode is the curve's highest point; variance is how spread out the curve is; KL divergence is how different the curve is from the original flat prior. For Angle A, mean 40.0% and mode 33.3% differ because the distribution is skewed rather than symmetric.</div>
+          <div class="audience-context engineer"><h3>For software engineers</h3><p>This table is a deterministic projection of \(\alpha\) and \(\beta\). Mean, mode, and variance should be reproducible from those two parameters. KL should be reproducible from the posterior and the configured prior.</p><p>When the chart and table disagree, verify that both use the same segment, active-arm filter, and posterior snapshot.</p></div>
+          <div class="audience-context operator"><h3>For conversion administrators</h3><p>Mean is the easiest planning estimate. Mode is the single most likely point, but can be unstable with little data. Variance tells you how cautiously to interpret either point.</p><p>Prefer a slightly lower estimate with tight uncertainty over a dramatic estimate supported by only a few sends when making a high-cost rollout decision.</p></div>
+        </div></details>
       </section>
 
       <section class="guide-section" id="drift-log">
         <h2>Posterior drift log</h2>
-        <p>The log shows how each pull changes the model. If an arm gets a meeting, its alpha increases and the curve shifts right. If it misses or causes an unsubscribe, beta increases and the curve shifts left or narrows around a weaker estimate.</p>
+        <div class="ui-excerpt"><span class="ui-excerpt-title">Specialist posterior drift log</span><div class="ui-log">[00:41:08] CFO Core: Arm <span class="ok">A</span> pulled. KL: 0.24, Est CTR: <span class="ok">40.0%</span>, P(Best): <span class="warn">84.5%</span><br>[00:41:05] CFO Core: Arm B pulled. KL: 0.64, Est CTR: 20.0%, P(Best): 15.5%</div></div>
+        <p>Each entry is a compact state snapshot after a pull: timestamp, segment, arm, KL divergence, updated posterior mean, and \(P(\text{Best})\). Read adjacent entries as transitions, not independent events.</p>
+        <p>One success increments \(\alpha\), usually moving the mean right. One miss increments \(\beta\), moving it left. Either outcome generally reduces \(\operatorname{Var}(\theta)\) as effective evidence increases. An unsubscribe increments \(\beta\) by three, so both the mean and \(D_{\mathrm{KL}}\) can move more sharply.</p>
+        <p>\(P(\text{Best})\) may move even when the displayed arm was not selected because all arms are re-compared after relevant segment updates. The log retains only the newest 50 entries, so it is an operational debugging buffer rather than durable experiment storage.</p>
+        <details class="context-details"><summary>Additional context</summary><div class="context-grid">
+          <div class="context-intro"><b>How to read this section:</b> compare successive rows for the same segment and arm. If estimated CTR moves from 25% to 33.3% after a meeting, the log confirms the update direction. If \(P(\text{Best})\) moves slightly without new evidence for that arm, the change may come from another arm or Monte Carlo randomness.</div>
+          <div class="audience-context engineer"><h3>For software engineers</h3><p>Use the drift log to verify update ordering: record outcome, mutate posterior, recompute derived statistics, then render. Logging before recomputation produces stale P(Best) values and confusing traces.</p><p>Because Monte Carlo estimates are random, repeated computations on unchanged state can differ slightly. Large changes should correspond to evidence or eligibility changes.</p></div>
+          <div class="audience-context operator"><h3>For conversion administrators</h3><p>The log explains why a number moved. A meeting should generally improve that arm's estimated CTR; a miss should reduce it; an unsubscribe should reduce it more sharply.</p><p>Small P(Best) changes can be simulation noise. Focus on sustained direction and the outcomes that caused it.</p></div>
+        </div></details>
       </section>
 
       <section class="guide-section" id="scenarios">
         <h2>Scenario examples and actions</h2>
+        <div class="ui-excerpt"><span class="ui-excerpt-title">Operator triage excerpt</span><div class="ui-row"><span class="ui-chip green">SRE health normal</span><span class="ui-chip blue">A: P(Best) 91%</span><span class="ui-chip amber">Entropy 0.30</span></div><div class="ui-row"><span class="ui-chip red">Alternate state: list burn 0.81%</span><span class="ui-chip">Gate mask active</span></div></div>
+        <p>Scenarios combine several signals. Avoid making operational decisions from one KPI: first confirm eligibility, then inspect outcome quality, posterior uncertainty, and convergence.</p>
         <h3>Scenario 1: CFO ROI proof is clearly winning</h3>
-        <p>The ROI Proof arm has high P(Best), a narrow credible interval, and most pulls are exploitation. Action: keep it active, consider archiving weak challengers, and promote the winning angle into production copy review.</p>
+        <p><b>Evidence:</b> high \(P(\text{Best})\), a narrow credible interval, low entropy, and mostly exploit pulls. <b>Action:</b> keep it active and consider archiving weak challengers only after checking their send counts. Promotion still requires copy and claim review; statistical rank does not validate message truth.</p>
         <h3>Scenario 2: Transparent pricing has few sends and a wide interval</h3>
-        <p>The arm looks worse on mean CTR, but the interval is wide and overlaps the leader. Action: do not archive yet. Let the bandit explore or fast-forward more sends before deciding.</p>
+        <p><b>Evidence:</b> lower posterior mean, low N, and substantial interval overlap. <b>Action:</b> do not archive based on point estimate alone. Continue normal exploration or fast-forward the demo, then reassess whether uncertainty actually contracts.</p>
         <h3>Scenario 3: Planted lie has the highest latent CTR</h3>
-        <p>The lie would be attractive to an unconstrained optimizer, but Gate masking keeps it out of the active pool. Action: keep Gate masking on and use the veto count as evidence that the truth boundary is working.</p>
+        <p><b>Evidence:</b> the unsafe arm's simulated truth is high, but it is marked Gate-vetoed and absent from sampling. <b>Action:</b> keep masking enabled. This demonstrates separation of concerns: evidence policy controls eligibility, while the optimizer controls allocation.</p>
         <h3>Scenario 4: List burn spikes</h3>
-        <p>Unsubscribes rise above the SLA threshold. Action: pause the stream, inspect the decision feed for the arm causing unsubscribes, archive that arm if the pattern is concentrated, and review its claim/copy tone.</p>
+        <p><b>Evidence:</b> global unsubscribe rate exceeds 0.50%, with recent unsubscribe outcomes concentrated in the feed. <b>Action:</b> pause, identify the contributing segment and arm, inspect absolute counts as well as rate, then archive the arm if the harm is concentrated. A one-event spike at tiny N needs different treatment from sustained burn.</p>
         <h3>Scenario 5: Entropy remains high after many sends</h3>
-        <p>The bandit is not converging. Action: check whether arms are too similar, segment definitions are too broad, or reward data is too sparse. Add clearer challenger copy or split the segment.</p>
+        <p><b>Evidence:</b> \(P(\text{Best})\) remains diffuse and posterior curves overlap despite substantial traffic. <b>Action:</b> check reward latency, non-stationarity, broad segments, and near-identical arms. More traffic does not fix a misspecified reward or mixed population; consider splitting the segment or redesigning the challenger.</p>
+        <details class="context-details"><summary>Additional context</summary><div class="context-grid">
+          <div class="context-intro"><b>How to read this section:</b> each scenario follows the same sequence: identify the signal, check whether enough evidence supports it, inspect safety and business constraints, then choose an action. The examples are decision templates, not automatic rules. A high \(P(\text{Best})\) can justify more traffic only when claims are approved and list health remains acceptable.</div>
+          <div class="audience-context engineer"><h3>For software engineers</h3><p>Use a fixed triage order: validate event ingestion, validate segment and arm keys, confirm Gate/archive masks, reconstruct posterior updates, then inspect Monte Carlo output. This separates data defects from expected statistical uncertainty.</p><p>Capture the state snapshot before applying a corrective action so the behavior is reproducible.</p></div>
+          <div class="audience-context operator"><h3>For conversion administrators</h3><p>Use a fixed decision order: confirm the copy is eligible, check list health, check sample size and uncertainty, compare alternatives, then decide whether to continue, pause, archive, or promote.</p><p>Document both the evidence and the business threshold behind the action. “Highest CTR” alone is not a complete campaign decision.</p></div>
+        </div></details>
       </section>
     </div>
   </div>

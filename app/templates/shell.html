@@ -22,6 +22,8 @@
       <a class="q-ni {{ 'on' if p.startswith('/records') or p=='/workspace' else '' }}" href="/records"><i class="ph ph-table"></i>Records</a>
       <a class="q-ni {{ 'on' if p.startswith('/composer') else '' }}" href="/composer"><i class="ph ph-pen-nib"></i>Composer</a>
       <a class="q-ni {{ 'on' if p.startswith('/optimizer') else '' }}" href="/optimizer"><i class="ph ph-trend-up"></i>Optimizer</a>
+      <a class="q-ni {{ 'on' if p == '/optimizer/bandit-dashboard' else '' }}" href="/optimizer/bandit-dashboard" style="padding-left:30px;font-size:12.5px"><i class="ph ph-caret-right" style="font-size:11px"></i>Bandit dashboard</a>
+      <a class="q-ni {{ 'on' if p == '/optimizer/bandit-dashboard/learn-more' else '' }}" href="/optimizer/bandit-dashboard/learn-more" style="padding-left:30px;font-size:12.5px"><i class="ph ph-caret-right" style="font-size:11px"></i>Bandit guide</a>
       <a class="q-ni {{ 'on' if p.startswith('/agent') else '' }}" href="/agent"><i class="ph ph-sparkle"></i>Agent</a>
       <div class="q-sect q-label">Trust</div>
       <a class="q-ni {{ 'on' if p.startswith('/assurance') else '' }}" href="/assurance"><i class="ph ph-shield-check"></i>Assurance</a>
@@ -64,6 +66,8 @@
       <a class="qi" data-label="records people companies deals table" href="/records"><i class="ph ph-table"></i>Records<span class="hint">go</span></a>
       <a class="qi" data-label="composer message copy outreach gate write" href="/composer"><i class="ph ph-pen-nib"></i>Composer<span class="hint">go</span></a>
       <a class="qi" data-label="optimizer bandit experiment variant winner lift" href="/optimizer"><i class="ph ph-trend-up"></i>Optimizer<span class="hint">go</span></a>
+      <a class="qi" data-label="optimizer bandit dashboard live belief curves decision stream specialist guide" href="/optimizer/bandit-dashboard"><i class="ph ph-gauge"></i>Bandit dashboard<span class="hint">go</span></a>
+      <a class="qi" data-label="optimizer bandit guide learn more interpretation scenarios actions" href="/optimizer/bandit-dashboard/learn-more"><i class="ph ph-question"></i>Bandit guide<span class="hint">go</span></a>
       <a class="qi" data-label="agent navigator ask deterministic" href="/agent"><i class="ph ph-sparkle"></i>Agent<span class="hint">go</span></a>
       <a class="qi" data-label="assurance trust drift watch monitor traps" href="/assurance"><i class="ph ph-shield-check"></i>Assurance<span class="hint">go</span></a>
       <a class="qi" data-label="policies surface say allude hold company product personal what the llm can say" href="/policies"><i class="ph ph-scroll"></i>Policies<span class="hint">go</span></a>

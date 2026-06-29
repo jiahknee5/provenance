@@ -48,3 +48,18 @@ def test_optimizer_dashboard_api_combines_live_snapshot_and_lift():
     assert data["lift"]["tenant"] == "helix"
     assert data["lift"]["channel"] == "website"
     assert "by_policy" in data["lift"]
+
+
+def test_optimizer_sidebar_includes_bandit_subtabs():
+    client = TestClient(app)
+
+    dashboard = client.get("/optimizer/bandit-dashboard")
+    assert dashboard.status_code == 200
+    assert 'href="/optimizer/bandit-dashboard"' in dashboard.text
+    assert 'href="/optimizer/bandit-dashboard/learn-more"' in dashboard.text
+    assert ">Bandit dashboard</a>" in dashboard.text
+    assert ">Bandit guide</a>" in dashboard.text
+
+    guide = client.get("/optimizer/bandit-dashboard/learn-more")
+    assert guide.status_code == 200
+    assert 'href="/optimizer/bandit-dashboard/learn-more"' in guide.text
