@@ -75,6 +75,13 @@ def run_all() -> dict:
     recips = recipients.generate(1000)
     recipients.save(recips)
     domain_segment.emit_segment_assignments(recips)
+    seg_counts: dict[str, int] = {}
+    for r in recips:
+        seg_counts[r.segment] = seg_counts.get(r.segment, 0) + 1
+    observe.emit("optimizer", "OUTPUT", node="segment",
+                 tool="role×size ruleset (role_x_size_v1)",
+                 detail=f"{len(recips)} recipients → {len(seg_counts)} segments",
+                 output={"segments": seg_counts})
     lib.save()
     observe.emit("library", "OUTPUT", node="library",
                  tool="claim→evidence graph · content-hash versioning",

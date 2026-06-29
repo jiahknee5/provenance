@@ -59,6 +59,10 @@ def enrich(recipient, gate: EnrichmentGate | None = None,
                          "signals": profile.signals})
     if store is not None:
         store.save(profile)
+        observe.emit("enrichment", "OUTPUT", node="profile_db",
+                     tool="profiles.sqlite (profiles + fact receipts)",
+                     detail=f"persisted profile for {recipient.recipient_id}",
+                     output=store.summary())
     return profile
 
 

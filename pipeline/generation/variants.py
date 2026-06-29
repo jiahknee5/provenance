@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from typing import Optional
 
+from pipeline.common import observe
 from pipeline.common.schemas import Variant
 from pipeline.generation.recipients import ALL_SEGMENTS
 from pipeline.library import seed_data
@@ -127,4 +128,12 @@ def build_action_pool(gate, channel: str, campaign: str, constrained: bool = Tru
                 "verdicts": [{"claim_id": cv.claim_id, "verdict": cv.verdict.value,
                               "flags": cv.rule_flags} for cv in verdicts],
             })
+    admitted = sum(1 for r in report if r["in_pool"])
+    blocked = len(report) - admitted
+    observe.emit("optimizer", "OUTPUT", node="pool",
+                 tool="ActionPool (Gate-cleared arms only)",
+                 detail=f"{channel}/{campaign}: {admitted} admitted · {blocked} blocked "
+                        f"({'verified arms only' if constrained else 'lie kept in pool'})",
+                 decision={"constrained": constrained, "admitted": admitted, "blocked": blocked},
+                 output={"segments": pool.segments, "paused": sorted(pool.paused)})
     return pool, report
