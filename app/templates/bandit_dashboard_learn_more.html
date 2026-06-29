@@ -121,10 +121,10 @@
         <h2>Intervention controls</h2>
         <div class="ui-excerpt">
           <span class="ui-excerpt-title">Intervention controls</span>
-          <div class="ui-row"><span class="ui-chip blue">+ Inject candidate arm</span><span class="ui-chip">Pause live stream</span><span class="ui-chip">Fast-forward 100 sends</span><span class="ui-chip red">Reset memory</span></div>
-          <div class="ui-row"><span class="ui-chip">Pace: 800ms</span><span class="ui-chip green">Lawful Gate Masking: ON</span></div>
+          <div class="ui-row"><span class="ui-chip blue">+ Inject candidate arm</span><span class="ui-chip">Pause simulation</span><span class="ui-chip">Fast-forward 1,000 sends</span><span class="ui-chip red">Reset memory</span></div>
+          <div class="ui-row"><span class="ui-chip">Pace: 300ms</span><span class="ui-chip green">Lawful Gate Masking: ON</span></div>
         </div>
-        <p>These controls mutate experiment state. <b>Inject</b> creates a new arm with a \(\operatorname{Beta}(1,1)\) prior, so it begins maximally uncertain and will receive exploratory traffic. <b>Pause</b> stops new observations without changing stored state. <b>Fast-forward</b> executes 100 normal decision/update cycles synchronously; it is a convergence test, not synthetic aggregation.</p>
+        <p>These controls mutate experiment state. <b>Inject</b> creates a new arm with a \(\operatorname{Beta}(1,1)\) prior, so it begins maximally uncertain and will receive exploratory traffic. <b>Pause</b> stops new observations without changing stored state. <b>Fast-forward</b> sends the current state to the backend, executes exactly 1,000 normal decision/update cycles, and applies the returned state atomically; it is a convergence test, not synthetic aggregation.</p>
         <p><b>Pace</b> changes only wall-clock timing, not the random process or posterior math. <b>Reset</b> is destructive to in-memory evidence: counters, posterior parameters, regret, and logs return to initialization. <b>Gate masking</b> changes the eligible action set before sampling; turning it off intentionally allows planted unsafe arms to compete.</p>
         <div class="guide-callout">Engineering check: after any intervention, distinguish policy changes from evidence changes. Pausing and pace changes preserve evidence; injection changes the arm set; reset deletes evidence; Gate masking changes eligibility.</div>
         <details class="context-details"><summary>Additional context</summary><div class="context-grid">
@@ -135,7 +135,7 @@
       </section>
 
       <section class="guide-section" id="traffic-pulse">
-        <h2>Production traffic pulse</h2>
+        <h2>Simulation traffic pulse</h2>
         <div class="ui-excerpt"><span class="ui-excerpt-title">Production traffic</span><div class="ui-kpis"><div class="ui-kpi"><span>Outreach sends</span><b>248</b></div><div class="ui-kpi"><span>Meetings booked</span><b>47</b></div><div class="ui-kpi"><span>List burn</span><b>1</b></div><div class="ui-kpi"><span>Gate veto count</span><b>69</b></div></div></div>
         <p><b>Sends</b> is the global denominator across all segments and arms. <b>Meetings booked</b> is the global positive-reward count; \(47/248 = 19.0\%\) is a useful aggregate health check, but it should not be used to rank arms because traffic is adaptively allocated and segments differ.</p>
         <p><b>List burn</b> counts unsubscribes. The alert rate is \(r_{\text{unsub}}=N_{\text{unsub}}/N_{\text{sends}}\), with a warning above \(0.50\%\). At the posterior level, an unsubscribe adds three \(\beta\) pseudo-counts, encoding that reputational harm costs more than an ordinary miss.</p>

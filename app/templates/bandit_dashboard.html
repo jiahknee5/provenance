@@ -577,16 +577,12 @@
       <div class="sp" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <a class="q-btn ghost" href="/optimizer"><i class="ph ph-arrow-left"></i> Optimizer</a>
         <a class="q-btn outline" href="/optimizer/bandit-dashboard/learn-more"><i class="ph ph-question"></i> Learn more</a>
-        <div class="view-switcher" aria-label="Run source">
-          <button id="run-btn-live" class="mode-btn active" type="button"><i class="ph ph-broadcast"></i> Live optimizer</button>
-          <button id="run-btn-demo" class="mode-btn" type="button"><i class="ph ph-play-circle"></i> Run demo</button>
-        </div>
         <div class="view-switcher" aria-label="Dashboard mode">
           <button id="mode-btn-sre" class="mode-btn active" onclick="switchMode('sre')"><i class="ph ph-gauge"></i> Prod SRE</button>
           <button id="mode-btn-spec" class="mode-btn" onclick="switchMode('specialist')"><i class="ph ph-function"></i> Specialist</button>
         </div>
         <button id="btn-open-tutorial" class="q-btn outline" type="button"><i class="ph ph-info"></i> Engineer tour</button>
-        <div id="simulation-badge" class="q-pill g"><span class="d"></span>live optimizer</div>
+        <div id="simulation-badge" class="q-pill g"><span class="d"></span>demo simulation</div>
       </div>
     </div>
 
@@ -599,19 +595,19 @@
       </div>
       <div class="card-content">
         <div id="run-mode-note" class="run-mode-note">
-          Live mode polls the real optimizer used by /site traffic. Use “Run demo” when you want the local simulated stream.
+          Interactive simulation. Controls update demo state only and do not affect deployed traffic.
         </div>
         <button id="btn-inject" class="btn btn-inject" onclick="openInjectModal()"><i class="ph ph-plus"></i> Inject candidate arm</button>
-        <button id="btn-pause" class="btn btn-primary"><i class="ph ph-pause"></i> Pause live stream</button>
-        <button id="btn-batch" class="btn btn-outline"><i class="ph ph-fast-forward"></i> Fast-forward 100 sends</button>
+        <button id="btn-pause" class="btn btn-primary"><i class="ph ph-pause"></i> Pause simulation</button>
+        <button id="btn-batch" class="btn btn-outline"><i class="ph ph-fast-forward"></i> Fast-forward 1,000 sends</button>
         <button id="btn-reset" class="btn btn-danger"><i class="ph ph-arrow-clockwise"></i> Reset memory</button>
 
         <div class="control-group" style="margin-top: 20px;">
           <label for="sim-speed">
             <span>Traffic Stream Pace</span>
-            <span id="pace-text" style="font-family: var(--font-mono); color: var(--accent-blue);">800ms</span>
+            <span id="pace-text" style="font-family: var(--font-mono); color: var(--accent-blue);">300ms</span>
           </label>
-          <input type="range" id="sim-speed" min="100" max="2500" value="800" style="width: 100%;">
+          <input type="range" id="sim-speed" min="100" max="2500" value="300" style="width: 100%;">
         </div>
 
         <div class="switch-box">
@@ -628,7 +624,7 @@
         <!-- SRE View Panel -->
         <div id="panel-sre-stats">
           <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
-          <h2 class="section-label">Production traffic <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#traffic-pulse" data-tooltip="These counters tell you whether the experiment is producing meetings without burning the outreach list.">?</a></h2>
+          <h2 class="section-label">Simulation traffic <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#traffic-pulse" data-tooltip="These counters tell you whether the experiment is producing meetings without burning the outreach list.">?</a></h2>
           <div class="kpi-grid">
             <div class="kpi-card">
               <div class="kpi-title">Outreach Sends</div>
@@ -875,28 +871,26 @@
     // --- PROVENANCE SUB-SEGMENTS & ARMS ---
 
     const segments = [
-      { id: 'cfo__core', label: 'CFO (Core Tier)', desc: 'Cost-sensitive mid-market finance leads.' },
-      { id: 'cfo__ent', label: 'CFO (Enterprise IDN)', desc: 'Large healthcare system CFOs prioritizing scale.' },
-      { id: 'clinops__core', label: 'ClinOps (Core Tier)', desc: 'Hospital clinical operators focusing on patient flow.' },
-      { id: 'it_security__ent', label: 'IT Security (Enterprise)', desc: 'Chief Information Security Officers requiring compliance.' }
+      { id: 'anonymous__new', label: 'New anonymous viewer', desc: 'First Gauntlet AI visit with browser and request context only.' },
+      { id: 'customer__matched', label: 'Existing customer (email match)', desc: 'Known visitor matched to first-party CRM history.' },
+      { id: 'lead__clicked', label: 'Emailed lead who clicked', desc: 'Identified recruiting lead returning through a tracked email link.' }
     ];
 
     const claimDescriptions = {
-      c_tco_reduction: 'Evidence-backed claim that the solution reduces hospital total cost of ownership by 22%.',
-      c_roi_verified: 'ROI claim supported by the verified cloud-analytics evidence set.',
-      c_billing_transparency: 'Evidence-backed claim that subscription pricing and billing are disclosed transparently.',
-      c_setup_waived: 'Evidence-backed claim that the offer waives implementation fees.',
-      c_los_reduction: 'Evidence-backed claim that clinical cohort analytics can reduce inpatient length of stay.',
-      c_clinical_cohorts: 'Evidence confirms support for verified clinical cohort analytics.',
-      c_workflow_speed: 'Evidence-backed claim that the workflow can complete the stated processing task in under four hours.',
-      c_claims_ingest: 'Evidence confirms ingestion and resolution support for complex medical claims datasets.',
-      c_soc2_auto: 'Evidence-backed claim for automated SOC 2 Type II compliance mapping.',
-      c_hipaa_compliant: 'Evidence confirms support for HIPAA compliance mapping in the stated product scope.',
-      c_ehr_integration: 'Evidence-backed claim for out-of-box integration with more than 30 enterprise EHR systems.',
-      c_zero_trust_keys: 'Evidence confirms zero-trust key controls used by the integration.',
-      c_fake_guaranteed_payback: 'Unverified guarantee of instant savings and cash payback. Gate masking blocks this claim.',
-      c_fake_zero_errors: 'Unverified claim that the product eliminates all diagnostic billing errors. Gate masking blocks it.',
-      c_fake_nsa_endorsement: 'Unverified NSA certification and unhackable-product claim. Gate masking blocks it.'
+      c_observed_daypart: 'Observed request context supports adapting the page to the visitor\'s current daypart.',
+      c_observed_city: 'Observed IP context supports city-level framing without naming the person.',
+      c_reverse_ip_company: 'Bought reverse-IP data supports employer-level wording, but not personal identification.',
+      c_company_industry: 'Company enrichment supports tailoring the recruiting proof to the employer\'s industry.',
+      c_device_fingerprint: 'Restricted device-fingerprint recognition is a hold fact and is blocked from copy.',
+      c_crm_customer: 'First-party CRM history confirms that this visitor is an existing Gauntlet AI customer.',
+      c_last_viewed: 'First-party behavior records the visitor\'s last viewed program or page.',
+      c_declared_name: 'The visitor directly supplied their name, so it may be used in the greeting.',
+      c_price_interest: 'First-party pricing-page visits support leading with affordability without exposing private attributes.',
+      c_modeled_income: 'Modeled income is a hold fact: it may steer policy but cannot be recited in copy.',
+      c_clicked_link: 'The first-party email event records which recruiting link the lead clicked.',
+      c_declared_interest: 'The lead explicitly stated their AI-engineering interest, allowing direct continuity.',
+      c_abandoned_step: 'First-party form state confirms where the lead stopped and supports a resume prompt.',
+      c_cross_site_browsing: 'Bought cross-site browsing is a hold fact and cannot be surfaced to the visitor.'
     };
 
     function escapeHtml(value) {
@@ -911,30 +905,28 @@
     }
 
     let armsDefinition = {
-      'cfo': [
-        { id: 'A', label: 'Angle A: ROI Proof', code: 'roi_tco_cut', copy: 'Hi {name},\n\nWe cut hospital Total Cost of Ownership by 22% with verified cloud analytics.\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_tco_reduction', 'c_roi_verified'], latentCTR: 0.24, unsubRate: 0.004, color: '#2E6FF5' },
-        { id: 'B', label: 'Angle B: Transparent Pricing', code: 'zero_impl_fee', copy: 'Hi {name},\n\nEnjoy transparent subscription billing with zero implementation fees.\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_billing_transparency', 'c_setup_waived'], latentCTR: 0.11, unsubRate: 0.003, color: '#B5731B' },
-        { id: 'LIE', label: 'Planted Lie: Guaranteed 80% Cut', code: 'lie_guaranteed_cash', copy: 'Hi {name},\n\nSave 85% on billing instantly plus a guaranteed $10k cash bonus on day one!\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_fake_guaranteed_payback'], latentCTR: 0.44, unsubRate: 0.09, color: '#C0354B' }
+      'anonymous': [
+        { id: 'A', label: 'A1: Daypart adaptive theme', code: 'daypart_theme', copy: 'Late nights are when the big decisions get made.\n\nGauntlet AI — right here whenever you are, even at 11:47 PM.\n\nTake a look →', claims: ['c_observed_daypart', 'c_observed_city'], latentCTR: 0.24, unsubRate: 0.004, color: '#2E6FF5' },
+        { id: 'B', label: 'A2: B2B peer-logo hero', code: 'b2b_peer_hero', copy: 'Teams at firms like yours already use Gauntlet AI.\n\nThe version of Gauntlet AI built for whole engineering teams, not just individuals.\n\nSee it for teams →', claims: ['c_reverse_ip_company', 'c_company_industry'], latentCTR: 0.11, unsubRate: 0.003, color: '#B5731B' },
+        { id: 'LIE', label: 'Ax: Recognize-return (blocked)', code: 'blocked_device_return', copy: 'Welcome back — third look this week?\n\nWe recognized your device even with cookies cleared.\n\nPick up where you left off →', claims: ['c_device_fingerprint'], latentCTR: 0.44, unsubRate: 0.09, color: '#C0354B' }
       ],
-      'clinops': [
-        { id: 'A', label: 'Angle A: Outcomes & LOS', code: 'los_reduction', copy: 'Hi {name},\n\nCut inpatient Length of Stay using verified clinical cohort analytics.\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_los_reduction', 'c_clinical_cohorts'], latentCTR: 0.22, unsubRate: 0.004, color: '#2E6FF5' },
-        { id: 'B', label: 'Angle B: Dataset Processing Speed', code: 'speed_4hr_claims', copy: 'Hi {name},\n\nIngest and resolve complex medical claims datasets in under four hours.\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_workflow_speed', 'c_claims_ingest'], latentCTR: 0.14, unsubRate: 0.003, color: '#B5731B' },
-        { id: 'LIE', label: 'Planted Lie: Zero Medical Errors', code: 'lie_zero_errors', copy: 'Hi {name},\n\nInstantly eliminate 100% of diagnostic billing errors overnight!\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_fake_zero_errors'], latentCTR: 0.39, unsubRate: 0.08, color: '#C0354B' }
+      'customer': [
+        { id: 'A', label: 'B1: Welcome-back resume', code: 'welcome_back_resume', copy: 'Welcome back to Gauntlet AI, Maya.\n\nPick up right where you left off.\n\nContinue →', claims: ['c_crm_customer', 'c_last_viewed'], latentCTR: 0.22, unsubRate: 0.004, color: '#2E6FF5' },
+        { id: 'B', label: 'B2: Tailored-offer module', code: 'tailored_offer', copy: 'Maya, a Gauntlet AI offer picked for you.\n\nA few ways to make the program fit your budget.\n\nSee your offer →', claims: ['c_declared_name', 'c_price_interest'], latentCTR: 0.14, unsubRate: 0.003, color: '#B5731B' },
+        { id: 'LIE', label: 'Bx: Income-recite (blocked)', code: 'blocked_income_recite', copy: 'On a $190K income, Gauntlet AI is an easy yes, Maya.\n\nWe modeled your household income and net worth.\n\nPay in full →', claims: ['c_modeled_income'], latentCTR: 0.39, unsubRate: 0.08, color: '#C0354B' }
       ],
-      'it_security': [
-        { id: 'A', label: 'Angle A: Automated SOC2 / HIPAA', code: 'soc2_hipaa_auto', copy: 'Hi {name},\n\nAutomate SOC 2 Type II and HIPAA compliance mapping out of the box.\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_soc2_auto', 'c_hipaa_compliant'], latentCTR: 0.26, unsubRate: 0.004, color: '#2E6FF5' },
-        { id: 'B', label: 'Angle B: EHR Out-of-box Integration', code: 'ehr_30_systems', copy: 'Hi {name},\n\nIntegrates seamlessly with over 30 enterprise EHR systems on day one.\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_ehr_integration', 'c_zero_trust_keys'], latentCTR: 0.16, unsubRate: 0.003, color: '#B5731B' },
-        { id: 'LIE', label: 'Planted Lie: NSA Certified Agent', code: 'lie_nsa_certified', copy: 'Hi {name},\n\nDeploy a 100% unhackable security agent certified by NSA defense standards!\n\nWorth a 20-minute look for {company}? Book a demo →', claims: ['c_fake_nsa_endorsement'], latentCTR: 0.46, unsubRate: 0.10, color: '#C0354B' }
+      'lead': [
+        { id: 'A', label: 'C1: Click-continuity', code: 'click_continuity', copy: 'More of what you just clicked, Darnell.\n\nRight where you left off on Gauntlet AI.\n\nKeep going →', claims: ['c_clicked_link', 'c_declared_interest'], latentCTR: 0.26, unsubRate: 0.004, color: '#2E6FF5' },
+        { id: 'B', label: 'C2: Resume / abandoned', code: 'resume_abandoned', copy: 'You left something on Gauntlet AI — finish in two minutes.\n\nWe saved your application progress.\n\nFinish up →', claims: ['c_abandoned_step'], latentCTR: 0.16, unsubRate: 0.003, color: '#B5731B' },
+        { id: 'LIE', label: 'Cx: Comparison-call-out (blocked)', code: 'blocked_comparison_callout', copy: 'We saw you comparing Gauntlet AI with two other sites.\n\nBought cross-site browsing says you are shopping around.\n\nSee the comparison →', claims: ['c_cross_site_browsing'], latentCTR: 0.46, unsubRate: 0.10, color: '#C0354B' }
       ]
     };
 
     let posteriors = {};
     let globalStats = { sends: 0, clicks: 0, unsubs: 0, blockedLies: 0, exploitCount: 0, exploreCount: 0, cumulativeRegret: 0 };
-    let selectedSegmentId = 'cfo__core';
+    let selectedSegmentId = 'anonymous__new';
     let currentMode = 'sre'; // 'sre' vs 'specialist'
     let simTimer = null;
-    let livePollTimer = null;
-    let runMode = new URLSearchParams(window.location.search).get('mode') === 'demo' ? 'demo' : 'live';
     let isSimRunning = true;
     let liveDrawState = null;
     let confidenceScores = {}; // armId -> { pBest: 0.92, ci: [0.18, 0.26] }
@@ -1777,7 +1769,7 @@
         let statusBadge = isWinner ? `<span class="badge-float winning-badge">Learned leader</span>` : '';
         if (isMasked) statusBadge = `<span class="badge-float masked-badge">Vetoed by Gate</span>`;
         if (isArchived) statusBadge = `<span class="badge-float archived-badge">Archived - data saved</span>`;
-        const safeCopy = escapeHtml(arm.copy.replace('{name}', 'Alex').replace('{company}', 'Gauntlet Health')).replace(/\n/g, '<br>');
+        const safeCopy = escapeHtml(arm.copy.replace('{name}', 'Alex').replace('{company}', 'Gauntlet AI').replaceAll('{brand}', 'Gauntlet AI')).replace(/\n/g, '<br>');
 
         card.innerHTML = `
           ${statusBadge}
@@ -1886,21 +1878,16 @@
     }
 
     function setupSyncControls() {
-      const liveRunBtn = document.getElementById('run-btn-live');
-      if (liveRunBtn) liveRunBtn.onclick = () => setRunMode('live');
-      const demoRunBtn = document.getElementById('run-btn-demo');
-      if (demoRunBtn) demoRunBtn.onclick = () => setRunMode('demo');
-
       const pauseBtn = document.getElementById('btn-pause');
       if (pauseBtn) pauseBtn.onclick = () => {
         if (isSimRunning) {
           clearInterval(simTimer);
           simTimer = null;
           isSimRunning = false;
-          pauseBtn.innerHTML = '<i class="ph ph-play"></i> Resume Live Stream';
+          pauseBtn.innerHTML = '<i class="ph ph-play"></i> Resume simulation';
         } else {
           startSim();
-          pauseBtn.innerHTML = '<i class="ph ph-pause"></i> Pause Live Stream';
+          pauseBtn.innerHTML = '<i class="ph ph-pause"></i> Pause simulation';
         }
       };
 
@@ -1916,7 +1903,51 @@
       }
 
       const batchBtn = document.getElementById('btn-batch');
-      if (batchBtn) batchBtn.onclick = () => { for(let i=0; i<100; i++) tickSimulation(); };
+      if (batchBtn) batchBtn.onclick = async () => {
+        const wasRunning = isSimRunning;
+        clearInterval(simTimer);
+        simTimer = null;
+        isSimRunning = false;
+        batchBtn.disabled = true;
+        batchBtn.innerHTML = '<i class="ph ph-spinner"></i> Processing 1,000 sends...';
+        try {
+          const response = await fetch('/api/optimizer/demo/fast-forward', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              posteriors,
+              arms: armsDefinition,
+              segment_ids: segments.map(segment => segment.id),
+              gate_active: document.getElementById('gate-active').checked,
+              global_stats: globalStats,
+            }),
+          });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const payload = await response.json();
+          if (payload.sends_processed !== 1000) throw new Error('Backend did not process exactly 1,000 sends.');
+          posteriors = payload.posteriors;
+          globalStats = payload.global_stats;
+          document.getElementById('event-feed-list').innerHTML = '';
+          payload.recent_events.forEach(event => {
+            const prefix = event.segment_id.split('__')[0];
+            const arm = (armsDefinition[prefix] || []).find(candidate => candidate.id === event.arm_id);
+            if (arm) appendFeed(event.segment_id, arm, event.outcome, event.is_exploiting,
+              posteriors[event.segment_id][event.arm_id], event.sample);
+          });
+          computeConfidence(selectedSegmentId);
+          drawCanvas();
+          drawRegretCanvas();
+          renderArms();
+          renderSpecialistTables();
+          updateKPIs();
+        } catch (error) {
+          window.alert(`Fast-forward failed: ${error.message || error}`);
+        } finally {
+          batchBtn.disabled = false;
+          batchBtn.innerHTML = '<i class="ph ph-fast-forward"></i> Fast-forward 1,000 sends';
+          if (wasRunning) startSim();
+        }
+      };
 
       const resetBtn = document.getElementById('btn-reset');
       if (resetBtn) resetBtn.onclick = () => {
@@ -1978,14 +2009,7 @@
     renderSpecialistTables();
     updateKPIs();
     setupSyncControls();
-    syncRunModeControls();
-    if (runMode === 'demo') {
-      startSim();
-    } else {
-      isSimRunning = false;
-      loadLiveDashboard();
-      startLivePolling();
-    }
+    startSim();
     window.addEventListener('resize', () => { drawCanvas(); drawRegretCanvas(); });
   </script>
 </div>

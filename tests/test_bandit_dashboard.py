@@ -11,10 +11,16 @@ from app.main import app
 def test_optimizer_bandit_dashboard_scripts_parse():
     response = TestClient(app).get("/optimizer/bandit-dashboard")
     assert response.status_code == 200
-    assert "/api/optimizer/dashboard" in response.text
-    assert "Live optimizer" in response.text
-    assert "Run demo" in response.text
-    assert "runMode = new URLSearchParams" in response.text
+    assert 'id="run-btn-live"' not in response.text
+    assert 'id="run-btn-demo"' not in response.text
+    assert "Fast-forward 1,000 sends" in response.text
+    assert "/api/optimizer/demo/fast-forward" in response.text
+    assert 'id="sim-speed" min="100" max="2500" value="300"' in response.text
+    assert "New anonymous viewer" in response.text
+    assert "A1: Daypart adaptive theme" in response.text
+    assert "Teams at firms like yours already use Gauntlet AI." in response.text
+    assert "Ax: Recognize-return (blocked)" in response.text
+    assert "hospital Total Cost of Ownership" not in response.text
 
     scripts = re.findall(r"<script(?:\s[^>]*)?>([\s\S]*?)</script>", response.text)
     assert scripts
@@ -27,6 +33,40 @@ def test_optimizer_bandit_dashboard_scripts_parse():
             check=True,
             capture_output=True,
         ), f"inline script {idx} failed to parse"
+
+
+def test_demo_fast_forward_processes_exactly_1000_sends():
+    payload = {
+        "segment_ids": ["cfo__core"],
+        "gate_active": True,
+        "seed": 7,
+        "arms": {
+            "cfo": [
+                {"id": "A", "latentCTR": 0.24, "unsubRate": 0.004},
+                {"id": "B", "latentCTR": 0.11, "unsubRate": 0.003},
+                {"id": "LIE", "latentCTR": 0.44, "unsubRate": 0.09},
+            ]
+        },
+        "posteriors": {
+            "cfo__core": {
+                arm: {"alpha": 1, "beta": 1, "sends": 0, "clicks": 0,
+                      "unsubs": 0, "status": "active"}
+                for arm in ("A", "B", "LIE")
+            }
+        },
+        "global_stats": {
+            "sends": 0, "clicks": 0, "unsubs": 0, "blockedLies": 0,
+            "exploitCount": 0, "exploreCount": 0, "cumulativeRegret": 0,
+        },
+    }
+
+    response = TestClient(app).post("/api/optimizer/demo/fast-forward", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["sends_processed"] == 1000
+    assert data["global_stats"]["sends"] == 1000
+    assert sum(arm["sends"] for arm in data["posteriors"]["cfo__core"].values()) == 1000
+    assert data["posteriors"]["cfo__core"]["LIE"]["sends"] == 0
 
 
 def test_legacy_bandit_dashboard_redirects_to_optimizer_tab():
