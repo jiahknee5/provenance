@@ -12,7 +12,10 @@
     --weight: {{ d.design.weight }}; --tracking: {{ d.design.tracking }};
   }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);
+  /* ONE continuous gradient spans the whole page; the hero is transparent over it, so the
+     hero and the claims below read as a single unified surface (no seam between sections) */
+  body{margin:0;color:var(--ink);
+       background:linear-gradient(180deg,var(--accent) 0,var(--accent2) 600px,var(--bg) 1000px) no-repeat,var(--bg);
        font:16px/1.62 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
   body.voice-refined h1,body.voice-refined .eyebrow{font-family:Georgia,"Times New Roman",serif}
   a{color:inherit}
@@ -33,6 +36,7 @@
   .motif-grid .hero::before{background-image:linear-gradient(#ffffff1c 1px,transparent 1px),linear-gradient(90deg,#ffffff1c 1px,transparent 1px);background-size:34px 34px;inset:0;opacity:.4}
   .motif-dots .hero::before{background-image:radial-gradient(#ffffff3a 1.5px,transparent 1.6px);background-size:22px 22px;inset:0;opacity:.5}
   .hwrap{position:relative;max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1.3fr .9fr;gap:30px;align-items:center}
+  .hwrap-grid{position:relative;max-width:1000px;margin:0 auto;align-items:center}
   @media(max-width:760px){.hwrap{grid-template-columns:1fr}}
   .eyebrow{display:inline-block;font-size:12px;{% if d.design.eyebrow_caps %}text-transform:uppercase;letter-spacing:.18em;{% endif %}opacity:.92;background:#ffffff22;border:1px solid #ffffff33;border-radius:999px;padding:4px 11px}
   h1.display{font-size:clamp(34px,6vw,62px);font-weight:var(--weight);letter-spacing:var(--tracking);line-height:1.04;margin:14px 0 12px}
@@ -52,12 +56,12 @@
             border-radius:16px;padding:16px 18px;margin:-78px 0 30px;position:relative;
             box-shadow:0 18px 50px #0000001f}
   .personal h3{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--mut)}
-  .pl{display:flex;gap:10px;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--line)}
+  .pl{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--line)}
   .pl:last-child{border:none}
   .pl .s{font-size:9px;text-transform:uppercase;letter-spacing:.05em;font-weight:800;border-radius:5px;padding:2px 7px;white-space:nowrap}
   .s.say{background:#1f9d5722;color:#1f9d57}.s.allude{background:#c47f1222;color:#c47f12}
   .s.inferred{background:#3b5bdb22;color:#2e6ff5}.s.creepy{background:#d23b3b22;color:#e0524a}
-  .pl .txt{flex:1}.pl .frm{font-size:11px;color:var(--mut);opacity:.8;white-space:nowrap}
+  .pl .txt{flex:1 1 200px;min-width:0}.pl .frm{font-size:11px;color:var(--mut);opacity:.8;white-space:nowrap;margin-left:auto}
   .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
   .sec{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;transition:transform .18s,border-color .18s}
   .sec:hover{transform:translateY(-3px);border-color:var(--accent)}
@@ -104,33 +108,41 @@
       <div class="lab">{{ d.design.stat_label }}</div>
     </div>
   </div>
+  <div class="hwrap-grid">
+    <div class="grid">
+      {% for s in d.sections %}<div class="sec reveal"><h2>{{ s.title }}</h2><p>{{ s.body }}</p></div>{% endfor %}
+    </div>
+  
+    <div class="proof">
+      {% if d.design.proof == 'stats' %}
+      <div class="stats3">
+        <div class="st"><div class="n">600+</div><div class="l">graduates hired</div></div>
+        <div class="st"><div class="n">+$38K</div><div class="l">median salary lift</div></div>
+        <div class="st"><div class="n">92%</div><div class="l">finish the cohort</div></div>
+      </div>
+      {% else %}
+      <div class="quote">"I came in unsure I belonged — six months later I'm an AI engineer."
+        <div class="who">— a recent {{ d.archetype.label|lower }} graduate</div></div>
+      {% endif %}
+    </div>
+  </div>
 </section>
 
 <main>
-  <div class="grid">
-    {% for s in d.sections %}<div class="sec reveal"><h2>{{ s.title }}</h2><p>{{ s.body }}</p></div>{% endfor %}
-  </div>
 
-  <div class="proof">
-    {% if d.design.proof == 'stats' %}
-    <div class="stats3">
-      <div class="st"><div class="n">600+</div><div class="l">graduates hired</div></div>
-      <div class="st"><div class="n">+$38K</div><div class="l">median salary lift</div></div>
-      <div class="st"><div class="n">92%</div><div class="l">finish the cohort</div></div>
-    </div>
-    {% else %}
-    <div class="quote">"I came in unsure I belonged — six months later I'm an AI engineer."
-      <div class="who">— a recent {{ d.archetype.label|lower }} graduate</div></div>
-    {% endif %}
+  </br>
+  <div class="foot">Demo · tier {{ d.tier }} = {{ d.tier_meta.uses }} · surface: {{ d.tier_meta.policy }}.
+    UI inferred from this person's data; synthetic where noted. Core sources: HubSpot (first-party) + LinkedIn (public).</div>
+  </br>
+  </br>
+  <div class="personal">
+    <h3>Personalized for you{% if d.tier >= 4 %} — stitched from {{ d.layers|length }} data layers: {{ d.layers|join(' · ') }}{% endif %}</h3>
+    {% for l in d.personal_lines %}
+    <div class="pl"><span class="s {{ l.surface }}">{{ l.surface }}</span><span class="txt">{{ l.text }}</span><span class="frm">{{ l.from }}</span></div>
+    {% endfor %}
   </div>
 </main>
-<div class="foot">Demo · tier {{ d.tier }} = {{ d.tier_meta.uses }} · surface: {{ d.tier_meta.policy }}.
-  UI inferred from this person's data; synthetic where noted. Core sources: HubSpot (first-party) + LinkedIn (public).</div>
-<div class="personal">
-  <h3>Personalized for you{% if d.tier >= 4 %} — stitched from {{ d.layers|length }} data layers: {{ d.layers|join(' · ') }}{% endif %}</h3>
-  {% for l in d.personal_lines %}
-  <div class="pl"><span class="s {{ l.surface }}">{{ l.surface }}</span><span class="txt">{{ l.text }}</span><span class="frm">{{ l.from }}</span></div>
-  {% endfor %}
-</div>
+
+
 </body>
 </html>

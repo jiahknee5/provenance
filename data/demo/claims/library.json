@@ -48,7 +48,8 @@
       ],
       "rule_tags": [
         "roi_outcome"
-      ]
+      ],
+      "supersedes_claim_id": null
     },
     "c_los": {
       "claim_id": "c_los",
@@ -69,7 +70,8 @@
       ],
       "rule_tags": [
         "clinical_outcome"
-      ]
+      ],
+      "supersedes_claim_id": null
     },
     "c_deployed": {
       "claim_id": "c_deployed",
@@ -87,7 +89,8 @@
       "segments": [],
       "rule_tags": [
         "proof"
-      ]
+      ],
+      "supersedes_claim_id": null
     },
     "c_speed": {
       "claim_id": "c_speed",
@@ -108,7 +111,8 @@
       ],
       "rule_tags": [
         "performance"
-      ]
+      ],
+      "supersedes_claim_id": null
     },
     "c_ehr": {
       "claim_id": "c_ehr",
@@ -128,7 +132,8 @@
       ],
       "rule_tags": [
         "integration"
-      ]
+      ],
+      "supersedes_claim_id": null
     },
     "c_soc2": {
       "claim_id": "c_soc2",
@@ -148,7 +153,8 @@
       ],
       "rule_tags": [
         "security"
-      ]
+      ],
+      "supersedes_claim_id": null
     },
     "c_price": {
       "claim_id": "c_price",
@@ -168,7 +174,8 @@
       ],
       "rule_tags": [
         "pricing"
-      ]
+      ],
+      "supersedes_claim_id": null
     },
     "c_nofee": {
       "claim_id": "c_nofee",
@@ -188,7 +195,8 @@
       ],
       "rule_tags": [
         "pricing"
-      ]
+      ],
+      "supersedes_claim_id": null
     },
     "c_hipaa": {
       "claim_id": "c_hipaa",
@@ -206,7 +214,8 @@
       "segments": [],
       "rule_tags": [
         "security"
-      ]
+      ],
+      "supersedes_claim_id": null
     },
     "c_encrypt": {
       "claim_id": "c_encrypt",
@@ -226,7 +235,8 @@
       ],
       "rule_tags": [
         "security"
-      ]
+      ],
+      "supersedes_claim_id": null
     }
   },
   "library_version": "lib_f4ca2d098c44"
