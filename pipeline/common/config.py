@@ -38,6 +38,10 @@ for _d in (DATA_DIR, SOURCES_DIR, CLAIMS_DIR, LEDGERS_DIR, RUNS_DIR, CACHE_DIR, 
 # ---- global seed -----------------------------------------------------------
 SEED = int(os.environ.get("PROVENANCE_SEED", "1729"))
 
+# ---- schema version (v2 = canonical domain aggregates) -----------------------
+SCHEMA_VERSION = 2
+MANIFEST_PATH = DATA_DIR / "manifest.json"
+
 # ---- inference profile -----------------------------------------------------
 # "deterministic" (default): lexical/numeric NLI + heuristic judge + rules. Offline,
 #   reproducible, no key — what the test suite and a $0 demo run on.

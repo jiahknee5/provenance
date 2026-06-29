@@ -14,6 +14,10 @@ import hashlib
 from datetime import datetime, timedelta, timezone
 
 from pipeline.common import observe
+from pipeline.domain.adapters import funnel as domain_funnel
+from pipeline.domain.identity import IdentityResolver, candidate_from_customer
+from pipeline.domain.models.profile import Profile
+from pipeline.domain.stores.profile_store import ProfileStore
 from pipeline.customer import surface
 from pipeline.customer.schemas import (Customer, CustomerFact, Stage, SurfacePolicy,
                                        TouchpointEvent)
@@ -46,6 +50,10 @@ def _fact(c: Customer, key, value, source, sensitive=False, basis="", channel=""
         sensitive=sensitive, surface_policy=sp, reasons=reasons)
 
 
+def _persist(c: Customer) -> None:
+    ProfileStore().upsert(Profile.from_customer(c))
+
+
 def _event(c: Customer, source, stage, detail, payload=None, facts=()):
     for f in facts:
         c.upsert_fact(f)
@@ -56,6 +64,8 @@ def _event(c: Customer, source, stage, detail, payload=None, facts=()):
         c.stage = stage
     observe.emit("funnel", "OUTPUT", node=source, detail=f"{c.customer_id}: {detail}",
                  output={"stage": stage.value, "facts": [f.key for f in facts]})
+    domain_funnel.emit_evidence_captured(c, ev)
+    _persist(c)
     return ev
 
 
@@ -72,8 +82,11 @@ def repolicy(c: Customer) -> None:
 # --------------------------------------------------------------------------- #
 def new_visitor(visitor_id: str) -> Customer:
     cid = "c_" + hashlib.sha256(visitor_id.encode()).hexdigest()[:10]
-    return Customer(customer_id=cid, visitor_id=visitor_id, stage=Stage.ANONYMOUS,
-                    created_at=_BASE.isoformat())
+    c = Customer(customer_id=cid, visitor_id=visitor_id, stage=Stage.ANONYMOUS,
+                 created_at=_BASE.isoformat())
+    domain_funnel.emit_visitor_identified(c)
+    _persist(c)
+    return c
 
 
 def ad_click(c: Customer, campaign: str, creative: str = "") -> Customer:
@@ -94,6 +107,13 @@ def web_signup(c: Customer, name: str, email: str, goal: str = "", background: s
     _event(c, "web_form", Stage.LEAD, f"signed up for more info ({email})",
            {"name": name, "email": email, "consent": consent}, facts)
     repolicy(c)   # consent now unlocks prior anonymous facts
+    domain_funnel.emit_form_submitted(c)
+    resolver = IdentityResolver()
+    resolver.resolve(
+        [candidate_from_customer(c.customer_id, c.visitor_id, email, name, "web_form")],
+        profile_id=c.customer_id,
+    )
+    _persist(c)
     return c
 
 

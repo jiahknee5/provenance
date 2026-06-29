@@ -120,6 +120,7 @@ class Variant(BaseModel):
     claim_ids: list[str] = Field(default_factory=list)  # approved claims it asserts
     planted_lie: bool = False       # demo trap: an unverifiable high-CTR variant
     headline: str = ""
+    emotional_vector: str = "neutral"  # e.g. fear_PAS, relief_BAB — canonical emotional tag
 
     def render(self, recipient: "Recipient", claim_text: dict[str, str]) -> str:
         """Slot-fill personalization + inline the *approved* claim text verbatim."""

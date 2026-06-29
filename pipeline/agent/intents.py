@@ -7,6 +7,7 @@ Every cell in table.rows is {"v":str,"pill":cls|None}.
 """
 from __future__ import annotations
 
+from pipeline.domain.decision_trace import explain_decision
 from pipeline.personalization import cohort as C
 from pipeline.personalization import demo_scenarios as DS
 from pipeline.personalization import demo_sim
@@ -23,12 +24,15 @@ INTENTS = [
     {"id": "drift", "q": "Is anything drifting?", "icon": "ph-waves"},
     {"id": "assurance", "q": "Can I trust the personalization?", "icon": "ph-shield-check"},
     {"id": "records", "q": "Show me the hottest records", "icon": "ph-table"},
+    {"id": "explain_decision", "q": "Explain a decision trace", "icon": "ph-file-text"},
 ]
 _FOLLOW = [{"q": i["q"], "label": i["q"]} for i in INTENTS]
 
 
 def route(query: str) -> str:
     q = (query or "").lower()
+    if any(w in q for w in ("trace", "decision trace")) or "explain decision" in q:
+        return "explain_decision"
     if any(w in q for w in ("win", "winner", "why", "best variant", "optimiz", "bandit")):
         return "why_won"
     if any(w in q for w in ("kpi", "metric", "target", "track", "lift", "conversion")):
@@ -154,14 +158,47 @@ def _records(m: dict) -> dict:
     }
 
 
+def _explain_decision(m: dict, trace_id: str = "") -> dict:
+    tid = trace_id or "dt_unknown"
+    result = explain_decision(tid)
+    if not result.get("found"):
+        return {
+            "title": "Decision trace",
+            "summary": f"No trace found for `{tid}`.",
+            "cards": [], "table": None, "provenance": [],
+            "note": "Traces are recorded when the domain recorder is active.",
+            "followups": _FOLLOW,
+        }
+    t = result["trace"]
+    return {
+        "title": "Decision trace",
+        "summary": f"**{t['decision_type']}** → {t['outcome']}",
+        "cards": [
+            {"k": "Trace ID", "v": t["decision_trace_id"], "sub": t["explanation"][:80], "tone": ""},
+            {"k": "Claims", "v": len(t["claim_refs"]), "sub": ", ".join(t["claim_refs"][:3]), "tone": "g"},
+        ],
+        "table": {"cols": ["Field", "Value"], "rows": [
+            [_cell("asset"), _cell(t.get("asset_ref", "—"))],
+            [_cell("rules"), _cell(", ".join(t.get("rule_refs", [])) or "—")],
+        ]},
+        "provenance": [{"signal": c, "source": "gate", "policy": "verified"}
+                       for c in t.get("claim_refs", [])],
+        "note": None,
+        "followups": _FOLLOW,
+    }
+
+
 _HANDLERS = {"why_won": _why_won, "kpis": _kpis, "drift": _drift,
              "assurance": _assurance, "records": _records}
 
 
-def run(query: str) -> dict:
+def run(query: str, **kwargs) -> dict:
     intent = route(query)
     m = demo_sim.build()
-    res = _HANDLERS[intent](m)
+    if intent == "explain_decision":
+        res = _explain_decision(m, trace_id=kwargs.get("trace_id", ""))
+    else:
+        res = _HANDLERS[intent](m)
     res["intent"] = intent
     res["query"] = query
     return res

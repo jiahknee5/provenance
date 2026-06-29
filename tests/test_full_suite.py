@@ -319,10 +319,10 @@ def test_demo_live_lists_use_cases():
     assert "Where apt is used" in t
     for cust in ("gauntletai.com", "skyfi.com", "Known customer", "Long-running A/B"):
         assert cust in t, f"use case missing: {cust}"
-    # the use-case section's links resolve (truncate query strings the way the app does)
+    # each use-case card now opens its live Showcase demo; every link resolves
     sec = t.split("Where apt is used", 1)[1]
     links = {h.split("?")[0] for h in re.findall(r'href="(/[^"#]*)', sec)}
-    assert {"/demo", "/optimizer", "/demo/monitor"} <= links
+    assert {"/showcase/gauntletai", "/showcase/skyfi", "/showcase/known", "/showcase/optimizer"} <= links
     for href in links:
         assert _is_registered(href), f"use-case link -> dead route {href}"
 
@@ -407,7 +407,16 @@ def test_integrations_show_base_vs_connect():
     assert "Built in" in t.text and "Connect your stack" in t.text
     assert "People Data Labs" in t.text and "Reverse-IP" in t.text   # the wired base
     assert "HubSpot" in t.text and "Clay" in t.text and "Vector" in t.text  # connectable
-    assert "Adds:" in t.text and "Value:" in t.text          # the per-integration data + value
+    assert "What it adds" in t.text and "Why it matters" in t.text   # per-integration data + value, as table columns
+
+
+def test_version_tag_and_whats_new_in_foot():
+    """The bottom-left carries a version/build tag + a What's new link to the changelog."""
+    shell = c.get("/workspace").text
+    assert 'class="q-ver"' in shell and "v0.9" in shell          # version/build tag
+    assert 'href="/help/whats-new"' in shell                     # What's new link
+    wn = c.get("/help/whats-new")
+    assert wn.status_code == 200 and "apt" in wn.text and "v0.9" in wn.text  # the changelog renders
 
 
 def test_graph_page_embeds_the_exhibit():

@@ -26,6 +26,7 @@ from app.charts import (confusion_pair, grouped_bars, lift_bars, operating_point
                         tile_grid, wilson_ci)
 from app.server import app, templates
 from pipeline.common.config import DATA_DIR, OBSERVE_DIR, RUNS_DIR
+from pipeline.domain.stores.review_store import ReviewStore
 from pipeline.personalization import demo_scenarios as DS
 from pipeline.personalization import demo_sim
 
@@ -233,6 +234,7 @@ def assurance(request: Request):
         # illustrative-fence metadata
         "sim_note": m["note"], "sim_seed": m["seed"], "sim_rounds": m["rounds"],
         "drift_rows": drift_rows,
+        "review_pending": len(ReviewStore().list_pending()),
     })
 
 

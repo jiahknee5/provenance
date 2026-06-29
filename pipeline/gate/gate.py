@@ -20,6 +20,9 @@ from pipeline.common import observe
 from pipeline.common.cache import LLMCache, VerdictCache
 from pipeline.common.schemas import (ClaimVerdict, MessageLedger, Recipient, Variant,
                                      Verdict)
+from pipeline.domain.adapters import gate as domain_gate
+from pipeline.domain import decision_trace as dt
+from pipeline.domain.stores.review_store import ReviewStore
 from pipeline.gate.calibrate import IsotonicCalibrator
 from pipeline.gate.decompose import Decomposer
 from pipeline.gate.ensemble import EnsembleResult, JudgeEnsemble
@@ -70,6 +73,8 @@ class Gate:
         if cached is not None:
             observe.emit("gate", "CACHE_HIT", node="ledger", detail=f"{cid} → {cached.verdict.value} (served from cache)",
                          decision={"verdict": cached.verdict.value, "cached": True}, claim_id=cid)
+            domain_gate.emit_claim_verdict(cached, rules_version=rules_version,
+                                           advisory_review=cached.verdict == Verdict.AMBER)
             return cached
 
         self.compute_calls += 1
@@ -95,6 +100,12 @@ class Gate:
                      input={"rule_tags": claim.rule_tags if claim else []},
                      decision={"verdict": rule_out.verdict.value if rule_out.verdict else None,
                                "flags": rule_out.flags}, output={"reasons": rule_out.reasons})
+        domain_gate.emit_rules_policy(
+            cid, rules_version,
+            claim.rule_tags if claim else [],
+            rule_out.verdict.value if rule_out.verdict else None,
+            rule_out.flags, rule_out.reasons,
+        )
         if rule_out.verdict == Verdict.RED:
             cv = ClaimVerdict(claim_id=cid, text=claim_text,
                               span=claim.span if claim else (0, 0), verdict=Verdict.RED,
@@ -106,6 +117,7 @@ class Gate:
             observe.emit("gate", "OUTPUT", node="ledger", detail=f"{cid} → RED (compliance veto, cascade short-circuit)",
                          claim_id=cid, decision={"verdict": "red", "via": "rule"},
                          output={"confidence": 0.02, "flags": rule_out.flags})
+            domain_gate.emit_claim_verdict(cv, rules_version=rules_version)
             return cv
 
         nli = self.nli.score(claim_text, evidence)
@@ -152,6 +164,8 @@ class Gate:
                      claim_id=cid, decision={"verdict": final.value, "entail_verdict": entail_verdict.value,
                                              "rule_verdict": rule_out.verdict.value if rule_out.verdict else None},
                      output={"confidence": round(confidence, 4), "flags": rule_out.flags, "reasons": reasons})
+        domain_gate.emit_claim_verdict(cv, rules_version=rules_version,
+                                       advisory_review=final == Verdict.AMBER)
         return cv
 
     @staticmethod
@@ -179,6 +193,13 @@ class Gate:
     def variant_cleared(self, variant: Variant) -> bool:
         return all(v.verdict != Verdict.RED for v in self.verify_variant(variant))
 
+    def verify_asset(self, asset) -> list:
+        """Canonical asset verification — wraps verify_variant."""
+        from pipeline.domain.models.asset import Asset
+        if isinstance(asset, Asset):
+            return self.verify_variant(asset.to_variant())
+        return self.verify_variant(asset)
+
     # ---- message-level verification (per recipient, per channel) -----------
     def verify_message(self, recipient: Recipient, variant: Variant, channel: str) -> MessageLedger:
         body = variant.render(recipient, self.library.claim_text_map())
@@ -186,6 +207,12 @@ class Gate:
             body += f"\nHelix Analytics {seed_data.PLANTED_LIE_TEXT}."
         decomposed = self.decomposer.decompose(body)
         claims = [self.verify_claim(d.text, d.claim) for d in decomposed]
-        return MessageLedger(recipient_id=recipient.recipient_id, channel=channel,
-                             variant_id=variant.variant_id, segment=variant.segment,
-                             html=body, claims=claims, generated_at=_now())
+        ledger = MessageLedger(recipient_id=recipient.recipient_id, channel=channel,
+                               variant_id=variant.variant_id, segment=variant.segment,
+                               html=body, claims=claims, generated_at=_now())
+        dt.from_message_ledger(ledger)
+        rs = ReviewStore()
+        for cv in claims:
+            if cv.verdict == Verdict.AMBER:
+                rs.request_review("claim", cv.claim_id, advisory=True)
+        return ledger

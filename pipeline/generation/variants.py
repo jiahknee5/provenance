@@ -15,27 +15,27 @@ from pipeline.generation.recipients import ALL_SEGMENTS
 from pipeline.library import seed_data
 from pipeline.personalization import creative as CR
 
-# role -> [(arm, angle, headline, claim_ids)]
+# role -> [(arm, angle, headline, claim_ids, emotional_vector)]
 ROLE_ANGLES: dict[str, list[tuple]] = {
     "clinops": [
-        ("A", "outcomes", "Cut length of stay with verified analytics", ["c_los", "c_speed", "c_deployed"]),
-        ("B", "speed", "Process a full claims dataset in under four hours", ["c_speed", "c_los", "c_deployed"]),
+        ("A", "outcomes", "Cut length of stay with verified analytics", ["c_los", "c_speed", "c_deployed"], "neutral"),
+        ("B", "speed", "Process a full claims dataset in under four hours", ["c_speed", "c_los", "c_deployed"], "neutral"),
     ],
     "cfo": [
-        ("A", "roi", "A verified cut in total cost of ownership", ["c_tco", "c_deployed", "c_price"]),
-        ("B", "pricing", "Transparent pricing, no implementation fee", ["c_price", "c_nofee", "c_deployed"]),
+        ("A", "roi", "A verified cut in total cost of ownership", ["c_tco", "c_deployed", "c_price"], "fear_PAS"),
+        ("B", "pricing", "Transparent pricing, no implementation fee", ["c_price", "c_nofee", "c_deployed"], "relief_BAB"),
     ],
     "it_security": [
-        ("A", "security", "SOC 2 Type II, HIPAA, encrypted end to end", ["c_soc2", "c_hipaa", "c_encrypt"]),
-        ("B", "integration", "Integrates with 30 EHR systems out of the box", ["c_ehr", "c_speed", "c_soc2"]),
+        ("A", "security", "SOC 2 Type II, HIPAA, encrypted end to end", ["c_soc2", "c_hipaa", "c_encrypt"], "neutral"),
+        ("B", "integration", "Integrates with 30 EHR systems out of the box", ["c_ehr", "c_speed", "c_soc2"], "neutral"),
     ],
     "quality": [
-        ("A", "outcomes", "Improve outcomes with verified reporting", ["c_los", "c_deployed", "c_hipaa"]),
-        ("B", "proof", "Deployed across 12 systems, HIPAA compliant", ["c_deployed", "c_hipaa", "c_los"]),
+        ("A", "outcomes", "Improve outcomes with verified reporting", ["c_los", "c_deployed", "c_hipaa"], "neutral"),
+        ("B", "proof", "Deployed across 12 systems, HIPAA compliant", ["c_deployed", "c_hipaa", "c_los"], "neutral"),
     ],
 }
 # the planted lie: one honest hook + an unverifiable guaranteed-outcome claim
-LIE_ANGLE = ("LIE", "lie", "Guaranteed 60% fewer readmissions — risk-free", ["c_deployed"])
+LIE_ANGLE = ("LIE", "lie", "Guaranteed 60% fewer readmissions — risk-free", ["c_deployed"], "fear_PAS")
 
 CHANNEL_TEMPLATES = {
     "email": ("Hi {name},\n\n{headline}.\n{claims}\n\n"
@@ -66,16 +66,26 @@ def build_variants(channel: str = "email") -> dict[str, list[Variant]]:
     for seg in ALL_SEGMENTS:
         role = _role_of(seg)
         variants = []
-        for arm, angle, headline, claim_ids in ROLE_ANGLES[role] + [LIE_ANGLE]:
+        for arm, angle, headline, claim_ids, emotional_vector in ROLE_ANGLES[role] + [LIE_ANGLE]:
             claims_clause = _join_claims(claim_ids)
             template = tmpl.format(name="{name}", company="{company}",
                                    headline=headline, claims=claims_clause)
             variants.append(Variant(
                 variant_id=f"{seg}__{channel}__{arm}", segment=seg, channel=channel,
                 arm_label=arm, template=template, claim_ids=claim_ids,
-                planted_lie=(arm == "LIE"), headline=headline))
+                planted_lie=(arm == "LIE"), headline=headline,
+                emotional_vector=emotional_vector))
         out[seg] = variants
     return out
+
+
+def build_assets(channel: str = "email") -> dict[str, list]:
+    """Canonical Asset list per segment (wraps build_variants)."""
+    from pipeline.domain.models.asset import Asset, AssetStatus
+    return {
+        seg: [Asset.from_variant(v, status=AssetStatus.VALIDATED) for v in vs]
+        for seg, vs in build_variants(channel).items()
+    }
 
 
 def build_action_pool(gate, channel: str, campaign: str, constrained: bool = True):
@@ -86,8 +96,11 @@ def build_action_pool(gate, channel: str, campaign: str, constrained: bool = Tru
     constrained=False keeps blocked variants in the pool — the unconstrained twin used to prove
     the bandit *would* pick the lie if allowed. Returns (ActionPool, clearance_report)."""
     from pipeline.common.store import ActionPool
+    from pipeline.domain.models.asset import Asset, AssetStatus
+    from pipeline.domain.stores.asset_store import AssetStore
 
     pool = ActionPool(campaign, channel)
+    asset_store = AssetStore()
     report: list[dict] = []
     for seg, variants in build_variants(channel).items():
         for v in variants:
@@ -97,6 +110,9 @@ def build_action_pool(gate, channel: str, campaign: str, constrained: bool = Tru
             cleared = claims_cleared and msg["ok"]
             if cleared or not constrained:
                 pool.add(seg, v.variant_id)
+            asset_store.save(Asset.from_variant(
+                v, status=AssetStatus.LIVE if cleared else AssetStatus.DRAFT,
+            ))
             report.append({
                 "variant_id": v.variant_id, "segment": seg, "arm": v.arm_label,
                 "planted_lie": v.planted_lie, "cleared": cleared,

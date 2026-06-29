@@ -194,8 +194,15 @@ def _inject_overlay(doc: str, overlay: str, placement: str) -> str:
     return overlay + doc
 
 
+from pipeline.domain.stores.review_store import check_dispatch
+
+
 def clone(url: str, scenario_id: str, v: Variant, cache: LLMCache | None = None) -> dict:
     """Return {html, cloned: bool, source_url, note}. `html` is a full page ready to serve."""
+    if not v.blocked and check_dispatch(f"demo_{scenario_id}_{v.id}") == "suppress":
+        return {"html": _fallback_page(scenario_id, v, normalize_url(url),
+                                      "dispatch suppressed by review gate"),
+                "cloned": False, "source_url": normalize_url(url), "note": "review_blocked"}
     url = normalize_url(url)
     res = fetch_raw(url, cache)
     if not res["ok"]:
