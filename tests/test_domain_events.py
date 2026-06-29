@@ -130,6 +130,25 @@ def test_dispatch_failed_event(domain_recorder):
     assert events[0].payload["reason"] == "no_cleared_arm"
 
 
+def test_segment_assignment_events(domain_recorder):
+    from pipeline.domain.adapters import segment as domain_segment
+
+    domain_segment.emit_segment_assignment("r0001", "cfo__ent", role="cfo", size="idn")
+    events = domain_recorder.read_stream(StreamType.LEAD, "lead_r0001")
+    assert [e.event_name for e in events] == ["segment_evaluated", "segment_assignment_updated"]
+    assert events[0].payload["segment"] == "cfo__ent"
+    assert events[1].payload["previous_segment"] is None
+
+
+def test_segment_assignment_skips_update_when_unchanged(domain_recorder):
+    from pipeline.domain.adapters import segment as domain_segment
+
+    domain_segment.emit_segment_assignment("r0002", "cfo__core", role="cfo", size="community",
+                                           previous_segment="cfo__core")
+    events = domain_recorder.read_stream(StreamType.LEAD, "lead_r0002")
+    assert [e.event_name for e in events] == ["segment_evaluated"]
+
+
 def test_catalog_closed():
     assert "claim_verified" in EVENT_NAMES
     with pytest.raises(ValueError):
