@@ -4,9 +4,7 @@ Everything runs **offline and deterministically** (no API key). Python 3.11 venv
 
 ## Setup (once)
 ```bash
-cd ~/projects/lyso/provenance
-/Users/johnny/.local/bin/python3.11 -m venv .venv
-.venv/bin/python -m pip install -r requirements.txt
+uv sync          # creates .venv on Python 3.11 (pinned via .python-version) from uv.lock
 ```
 
 ## Run the eval harness (the 5 headline properties + E1 + per-module)
@@ -56,7 +54,7 @@ PROVENANCE_ENRICH=live PYTHONPATH=. .venv/bin/python -m uvicorn app.main:app --p
 ## Optional: the "rich" inference profile (real models)
 The default is deterministic + offline. To upgrade the verifier with real models:
 ```bash
-.venv/bin/python -m pip install -r requirements-optional.txt      # transformers/torch, anthropic
+uv sync --extra rich                                              # transformers/torch
 PROVENANCE_PROFILE=rich .venv/bin/python -m scripts.pipeline       # DeBERTa NLI + Ollama judges
 # Claude judge also engages if ANTHROPIC_API_KEY is set in the env / a .env
 ```
