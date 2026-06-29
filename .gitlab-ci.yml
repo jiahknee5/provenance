@@ -2,12 +2,13 @@ stages:
   - verify
   - deploy
 
+variables:
+  UV_CACHE_DIR: .cache/uv/
+
 default:
   image: ghcr.io/astral-sh/uv:python3.11-bookworm-slim
   tags:
     - provenance-pm
-  variables:
-    UV_CACHE_DIR: .cache/uv/
   cache:
     key:
       files:
