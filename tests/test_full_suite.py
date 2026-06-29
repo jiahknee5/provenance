@@ -597,7 +597,7 @@ def test_home_is_attio_landing_featuring_the_demo():
     html = c.get("/").text
     assert 'class="q-display"' in html and 'class="q-hero"' in html  # the big attio hero
     assert 'href="/showcase"' in html  # showcase entry in nav
-    assert 'class="q-flow"' in html and 'class="q-step"' in html  # end-to-end platform walkthrough
+    assert 'class="q-flow"' in html and 'class="q-step ' in html  # steps use compound utility classes
     assert 'href="/demo"' in html and 'href="/workspace"' in html  # demo is the front door
     assert "prove every move" in html.lower()
 
