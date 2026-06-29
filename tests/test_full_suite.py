@@ -178,8 +178,10 @@ def test_isp_is_classified_not_a_company():
     assert SC._looks_like_isp("Apple Inc") is False  # a real corporate org is not an ISP
 
 
-def test_creative_agents_and_the_gate():
+def test_creative_agents_and_the_gate(monkeypatch):
+    from pipeline.common import config
     from pipeline.personalization import creative as CR
+    monkeypatch.setattr(config, "ANTHROPIC_API_KEY", "")  # force the deterministic offline path
     a = CR.angle_copy("mining", "peer", "Arizona")
     assert a == CR.angle_copy("mining", "peer", "Arizona")          # deterministic angle
     assert "mining" in a["headline"].lower()
@@ -295,9 +297,11 @@ def test_gate_blocks_comparative_and_competitor_claims():
     assert CR.verify_copy(["Every claim ships with its source and policy"], "x", None, "allude", competitors=hints)[0]["ok"] is True
 
 
-def test_tier3_competitor_agent_is_gated():
+def test_tier3_competitor_agent_is_gated(monkeypatch):
     """Tier-3 competitive copy leads with provable differentiators; the creepy arm is blocked."""
+    from pipeline.common import config
     from pipeline.personalization import creative as CR
+    monkeypatch.setattr(config, "ANTHROPIC_API_KEY", "")  # force the deterministic offline path
     b = CR.competitor_brief(industry="technology", region="Texas")
     assert b["differentiators"] and b["source"] == "template"          # deterministic offline
     d = CR.ai_copy(industry="technology", region="Texas", company="Acme Inc", city=None,
