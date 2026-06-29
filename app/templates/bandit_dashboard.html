@@ -721,6 +721,7 @@
           <span>Candidate copy arms under experimentation</span>
           <a class="help-tip" href="/optimizer/bandit-dashboard/learn-more#copy-arms" data-tooltip="Each arm is one message angle, with claim tags, observed results, Bayesian belief, P(Best), and archive controls.">?</a>
         </h2>
+        <p class="segment-subtext">Each segment compares a useful first-party email, a highly enriched email built from public or purchased professional data, and a Gate-blocked invasive email. The simulation measures whether added personalization improves response or instead increases unsubscribes and damages trust.</p>
         
         <div class="variants-container" id="variants-list"></div>
       </div>
@@ -871,26 +872,25 @@
     // --- PROVENANCE SUB-SEGMENTS & ARMS ---
 
     const segments = [
-      { id: 'anonymous__new', label: 'New anonymous viewer', desc: 'First Gauntlet AI visit with browser and request context only.' },
-      { id: 'customer__matched', label: 'Existing customer (email match)', desc: 'Known visitor matched to first-party CRM history.' },
-      { id: 'lead__clicked', label: 'Emailed lead who clicked', desc: 'Identified recruiting lead returning through a tracked email link.' }
+      { id: 'cost__sensitive', label: 'Cost sensitive Engineer', desc: 'Signed-up engineers whose first-party behavior indicates price and schedule concerns.' },
+      { id: 'reward__driven', label: 'Reward Driven Engineer', desc: 'Engineers motivated by stronger projects, compensation, and career progression.' },
+      { id: 'displacement__fear', label: 'AI Displacement Fear Engineer', desc: 'Engineers seeking practical AI skills as their role and market change.' }
     ];
 
     const claimDescriptions = {
-      c_observed_daypart: 'Observed request context supports adapting the page to the visitor\'s current daypart.',
-      c_observed_city: 'Observed IP context supports city-level framing without naming the person.',
-      c_reverse_ip_company: 'Bought reverse-IP data supports employer-level wording, but not personal identification.',
-      c_company_industry: 'Company enrichment supports tailoring the recruiting proof to the employer\'s industry.',
-      c_device_fingerprint: 'Restricted device-fingerprint recognition is a hold fact and is blocked from copy.',
-      c_crm_customer: 'First-party CRM history confirms that this visitor is an existing Gauntlet AI customer.',
-      c_last_viewed: 'First-party behavior records the visitor\'s last viewed program or page.',
-      c_declared_name: 'The visitor directly supplied their name, so it may be used in the greeting.',
-      c_price_interest: 'First-party pricing-page visits support leading with affordability without exposing private attributes.',
-      c_modeled_income: 'Modeled income is a hold fact: it may steer policy but cannot be recited in copy.',
-      c_clicked_link: 'The first-party email event records which recruiting link the lead clicked.',
-      c_declared_interest: 'The lead explicitly stated their AI-engineering interest, allowing direct continuity.',
-      c_abandoned_step: 'First-party form state confirms where the lead stopped and supports a resume prompt.',
-      c_cross_site_browsing: 'Bought cross-site browsing is a hold fact and cannot be surfaced to the visitor.'
+      c_gauntlet_signup: 'First-party Gauntlet AI signup data confirms program interest and permission to continue the conversation.',
+      c_pricing_visits: 'HubSpot page history shows repeated pricing or financing visits and supports a value-focused message.',
+      c_public_role: 'Public professional profiles identify the recipient\'s current engineering role.',
+      c_public_stack: 'Public GitHub and professional-profile data indicate technologies the engineer already uses.',
+      c_meta_learning: 'A purchased Meta audience segment indicates interest in technical learning; it may guide the angle but is not recited.',
+      c_declared_goal: 'The engineer directly stated a career or compensation goal during signup.',
+      c_course_engagement: 'First-party course and email engagement indicates which Gauntlet AI outcomes interested the engineer.',
+      c_public_company: 'Public employer information provides non-sensitive company and industry context.',
+      c_public_ai_hiring: 'Public job listings show that the engineer\'s employer or market is investing in AI roles.',
+      c_google_ai_interest: 'A purchased Google audience segment indicates general AI-career interest; it may guide targeting but is not recited.',
+      c_property_income: 'Purchased property and modeled-income data are restricted hold facts and cannot be recited in email copy.',
+      c_social_anxiety: 'Inferred anxiety from personal social posts is sensitive profiling and is blocked from copy.',
+      c_private_browsing: 'Cross-site searches and browsing history are restricted hold facts and cannot be surfaced to the recipient.'
     };
 
     function escapeHtml(value) {
@@ -905,26 +905,26 @@
     }
 
     let armsDefinition = {
-      'anonymous': [
-        { id: 'A', label: 'A1: Daypart adaptive theme', code: 'daypart_theme', copy: 'Late nights are when the big decisions get made.\n\nGauntlet AI — right here whenever you are, even at 11:47 PM.\n\nTake a look →', claims: ['c_observed_daypart', 'c_observed_city'], latentCTR: 0.24, unsubRate: 0.004, color: '#2E6FF5' },
-        { id: 'B', label: 'A2: B2B peer-logo hero', code: 'b2b_peer_hero', copy: 'Teams at firms like yours already use Gauntlet AI.\n\nThe version of Gauntlet AI built for whole engineering teams, not just individuals.\n\nSee it for teams →', claims: ['c_reverse_ip_company', 'c_company_industry'], latentCTR: 0.11, unsubRate: 0.003, color: '#B5731B' },
-        { id: 'LIE', label: 'Ax: Recognize-return (blocked)', code: 'blocked_device_return', copy: 'Welcome back — third look this week?\n\nWe recognized your device even with cookies cleared.\n\nPick up where you left off →', claims: ['c_device_fingerprint'], latentCTR: 0.44, unsubRate: 0.09, color: '#C0354B' }
+      'cost': [
+        { id: 'A', label: 'Low personalization: Flexible ROI', code: 'cost_first_party', copy: 'Subject: Build AI skills without leaving your job\n\nHi Maya,\n\nYou asked about Gauntlet AI after reviewing tuition. The part-time program helps working engineers ship production AI projects without pausing their income.\n\nSee the schedule and financing options →', claims: ['c_gauntlet_signup', 'c_pricing_visits'], latentCTR: 0.25, unsubRate: 0.004, color: '#2E6FF5' },
+        { id: 'B', label: 'High personalization: Stack-to-AI plan', code: 'cost_enriched', copy: 'Subject: Maya, turn your QA and Python experience into an AI portfolio\n\nHi Maya,\n\nYour public QA background and Python projects already cover the foundation. Gauntlet AI can help you add production agents in 10 weeks through evening sessions, with financing available.\n\nSee your suggested learning path →', claims: ['c_public_role', 'c_public_stack', 'c_meta_learning'], latentCTR: 0.15, unsubRate: 0.022, color: '#B5731B' },
+        { id: 'LIE', label: 'Creepy personalization: Financial surveillance', code: 'cost_creepy_blocked', copy: 'Subject: Your home value says tuition should be manageable\n\nHi Maya,\n\nWe found your property record and modeled household income, so we know you can finance Gauntlet AI without disrupting your monthly budget.\n\nChoose a payment plan →', claims: ['c_property_income'], latentCTR: 0.04, unsubRate: 0.18, color: '#C0354B' }
       ],
-      'customer': [
-        { id: 'A', label: 'B1: Welcome-back resume', code: 'welcome_back_resume', copy: 'Welcome back to Gauntlet AI, Maya.\n\nPick up right where you left off.\n\nContinue →', claims: ['c_crm_customer', 'c_last_viewed'], latentCTR: 0.22, unsubRate: 0.004, color: '#2E6FF5' },
-        { id: 'B', label: 'B2: Tailored-offer module', code: 'tailored_offer', copy: 'Maya, a Gauntlet AI offer picked for you.\n\nA few ways to make the program fit your budget.\n\nSee your offer →', claims: ['c_declared_name', 'c_price_interest'], latentCTR: 0.14, unsubRate: 0.003, color: '#B5731B' },
-        { id: 'LIE', label: 'Bx: Income-recite (blocked)', code: 'blocked_income_recite', copy: 'On a $190K income, Gauntlet AI is an easy yes, Maya.\n\nWe modeled your household income and net worth.\n\nPay in full →', claims: ['c_modeled_income'], latentCTR: 0.39, unsubRate: 0.08, color: '#C0354B' }
+      'reward': [
+        { id: 'A', label: 'Low personalization: Career upside', code: 'reward_first_party', copy: 'Subject: Ship the AI work that gets noticed\n\nHi Darnell,\n\nYou told Gauntlet AI you want stronger career outcomes. Build and defend production AI systems in a 10-week program, then leave with projects that demonstrate more than another certificate.\n\nReview the project curriculum →', claims: ['c_gauntlet_signup', 'c_declared_goal'], latentCTR: 0.27, unsubRate: 0.004, color: '#2E6FF5' },
+        { id: 'B', label: 'High personalization: Promotion narrative', code: 'reward_enriched', copy: 'Subject: Darnell, add AI delivery to your product leadership story\n\nHi Darnell,\n\nYour public product work shows years of shipping cross-functional software. Gauntlet AI adds the missing proof: working agents, evaluation pipelines, and an AI system you can discuss in your next promotion or interview.\n\nSee the portfolio you would build →', claims: ['c_public_role', 'c_public_stack', 'c_course_engagement'], latentCTR: 0.17, unsubRate: 0.019, color: '#B5731B' },
+        { id: 'LIE', label: 'Creepy personalization: Salary pressure', code: 'reward_creepy_blocked', copy: 'Subject: Your peers are probably earning more than you\n\nHi Darnell,\n\nWe combined your job history, estimated salary, and career posts. You appear underpaid for your tenure, so Gauntlet AI may be your fastest route to a higher offer.\n\nFix the compensation gap →', claims: ['c_property_income', 'c_social_anxiety'], latentCTR: 0.05, unsubRate: 0.16, color: '#C0354B' }
       ],
-      'lead': [
-        { id: 'A', label: 'C1: Click-continuity', code: 'click_continuity', copy: 'More of what you just clicked, Darnell.\n\nRight where you left off on Gauntlet AI.\n\nKeep going →', claims: ['c_clicked_link', 'c_declared_interest'], latentCTR: 0.26, unsubRate: 0.004, color: '#2E6FF5' },
-        { id: 'B', label: 'C2: Resume / abandoned', code: 'resume_abandoned', copy: 'You left something on Gauntlet AI — finish in two minutes.\n\nWe saved your application progress.\n\nFinish up →', claims: ['c_abandoned_step'], latentCTR: 0.16, unsubRate: 0.003, color: '#B5731B' },
-        { id: 'LIE', label: 'Cx: Comparison-call-out (blocked)', code: 'blocked_comparison_callout', copy: 'We saw you comparing Gauntlet AI with two other sites.\n\nBought cross-site browsing says you are shopping around.\n\nSee the comparison →', claims: ['c_cross_site_browsing'], latentCTR: 0.46, unsubRate: 0.10, color: '#C0354B' }
+      'displacement': [
+        { id: 'A', label: 'Low personalization: Practical resilience', code: 'displacement_first_party', copy: 'Subject: Move from using AI tools to building them\n\nHi Priya,\n\nYou signed up to learn more about AI engineering. Gauntlet AI gives software engineers repeated practice building, evaluating, and deploying AI systems so they can contribute as roles evolve.\n\nSee what engineers build in 10 weeks →', claims: ['c_gauntlet_signup', 'c_course_engagement'], latentCTR: 0.23, unsubRate: 0.005, color: '#2E6FF5' },
+        { id: 'B', label: 'High personalization: Market-change proof', code: 'displacement_enriched', copy: 'Subject: Priya, your market is hiring engineers who can ship AI\n\nHi Priya,\n\nPublic listings around your software role increasingly ask for agents, RAG, and evaluation experience. Gauntlet AI turns your existing engineering foundation into deployed AI work you can show, not just skills you can list.\n\nCompare your experience with the curriculum →', claims: ['c_public_role', 'c_public_ai_hiring', 'c_google_ai_interest'], latentCTR: 0.14, unsubRate: 0.026, color: '#B5731B' },
+        { id: 'LIE', label: 'Creepy personalization: Fear exploitation', code: 'displacement_creepy_blocked', copy: 'Subject: Your searches suggest you think AI may replace you\n\nHi Priya,\n\nWe combined your private browsing, layoff searches, and anxious social posts. Your current role looks exposed, so you should enroll in Gauntlet AI before your employer automates it.\n\nProtect your career now →', claims: ['c_private_browsing', 'c_social_anxiety'], latentCTR: 0.03, unsubRate: 0.22, color: '#C0354B' }
       ]
     };
 
     let posteriors = {};
     let globalStats = { sends: 0, clicks: 0, unsubs: 0, blockedLies: 0, exploitCount: 0, exploreCount: 0, cumulativeRegret: 0 };
-    let selectedSegmentId = 'anonymous__new';
+    let selectedSegmentId = 'cost__sensitive';
     let currentMode = 'sre'; // 'sre' vs 'specialist'
     let simTimer = null;
     let isSimRunning = true;

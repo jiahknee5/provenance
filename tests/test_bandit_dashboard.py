@@ -16,10 +16,12 @@ def test_optimizer_bandit_dashboard_scripts_parse():
     assert "Fast-forward 1,000 sends" in response.text
     assert "/api/optimizer/demo/fast-forward" in response.text
     assert 'id="sim-speed" min="100" max="2500" value="300"' in response.text
-    assert "New anonymous viewer" in response.text
-    assert "A1: Daypart adaptive theme" in response.text
-    assert "Teams at firms like yours already use Gauntlet AI." in response.text
-    assert "Ax: Recognize-return (blocked)" in response.text
+    assert "Cost sensitive Engineer" in response.text
+    assert "Reward Driven Engineer" in response.text
+    assert "AI Displacement Fear Engineer" in response.text
+    assert "Low personalization: Flexible ROI" in response.text
+    assert "High personalization: Stack-to-AI plan" in response.text
+    assert "Creepy personalization: Financial surveillance" in response.text
     assert "hospital Total Cost of Ownership" not in response.text
 
     scripts = re.findall(r"<script(?:\s[^>]*)?>([\s\S]*?)</script>", response.text)
