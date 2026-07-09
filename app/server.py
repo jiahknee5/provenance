@@ -17,7 +17,11 @@ templates = Jinja2Templates(directory=str(APP_DIR / "templates"))
 # the changelog itself lives in the /help/whats-new article. Exposed to every template as globals.
 APP_VERSION = "0.9"
 APP_BUILT = "Jun 2026"
-templates.env.globals.update(APP_VERSION=APP_VERSION, APP_BUILT=APP_BUILT)
+templates.env.globals.update(
+    APP_VERSION=APP_VERSION,
+    APP_BUILT=APP_BUILT,
+    static_prefix="/static",
+)
 
 
 @asynccontextmanager

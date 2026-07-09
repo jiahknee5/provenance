@@ -35,6 +35,7 @@ MOUNTS: dict[str, dict[str, str]] = {
         "dev": "/dev",
         "ad": "/gauntlet/ad",
         "ad_lp": "/gauntlet/ad-lp",
+        "static": "/static",
     },
     "portal": {
         "page": "/gauntletapt",
@@ -43,6 +44,7 @@ MOUNTS: dict[str, dict[str, str]] = {
         "dev": "/gauntletapt/dev",
         "ad": "/gauntletapt/ad",
         "ad_lp": "/gauntletapt/ad-lp",
+        "static": "/gauntletapt/static",
     },
 }
 
@@ -154,6 +156,7 @@ def _render_dev(request: Request, m: dict[str, str]) -> HTMLResponse:
         "toggle_known": f"{dev}{qs}{sep}as=known",
         "entry_links_raw": entry_links(m),
         "sample_email": GS.sample_login_email(),
+        "static_prefix": m["static"],
         "g": m})
 
 

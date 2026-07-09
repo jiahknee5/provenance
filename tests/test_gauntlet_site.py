@@ -277,6 +277,10 @@ def test_portal_mount_serves_and_links_stay_under_prefix():
     assert 'href="/dev' not in t
     d = c.get("/gauntletapt/dev?as=anon").text
     assert "Entry point" in d and 'href="/gauntletapt' in d
+    assert 'href="/gauntletapt/static/atlas.css"' in d
+    assert 'href="/static/atlas.css"' not in d
+    legacy_dev = c.get("/dev?as=anon").text
+    assert 'href="/static/atlas.css"' in legacy_dev
     c.post("/gauntletapt/login", data={"email": GS.sample_login_email(), "next": "/gauntletapt"})
     assert "Welcome back, Maya" in c.get("/gauntletapt").text
     c.get("/gauntletapt/logout")
