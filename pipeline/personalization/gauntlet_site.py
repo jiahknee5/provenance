@@ -1576,11 +1576,17 @@ def _branches(options: list[str], taken: str | None) -> list[dict]:
     return [{"label": o, "taken": o == taken} for o in options]
 
 
+def _kv(k: str, v, pol: str | None = None, fired: bool = False) -> dict:
+    """One drill-down row: label → value, optional policy tag, optional 'fired' marker."""
+    return {"k": k, "v": v if v not in (None, "") else "—", "pol": pol, "fired": fired}
+
+
 def process_map(page: dict) -> dict:
     """The /dev process diagram: {inputs, stages}. Each stage carries the data it reads,
-    the rule, EVERY branch it could take (the taken one flagged), the output, and an
-    anchor into the detail panel below. Skipped stages stay visible, marked skipped —
-    the full decision space is always on screen."""
+    the rule, EVERY branch it could take (the taken one flagged), the output, an anchor
+    into the detail panel below, and a `detail` drill-down — the full evidence behind
+    the decision. Skipped stages stay visible, marked skipped — the full decision space
+    is always on screen."""
     P = page
     entry, det, ident, ad = P["entry"], P["det"], P["identity"], P.get("ad_variant")
     sig = {s["label"]: s["value"] for s in entry["signals"]}
@@ -1606,25 +1612,58 @@ def process_map(page: dict) -> dict:
     stages: list[dict] = []
 
     def stage(id_, title, link, reads, rule, branches, output, why,
-              skipped=False, skip_reason=""):
+              skipped=False, skip_reason="", detail=None):
         stages.append({"id": id_, "title": title, "link": link, "reads": reads,
                        "rule": rule, "branches": branches, "output": output, "why": why,
-                       "skipped": skipped, "skip_reason": skip_reason})
+                       "skipped": skipped, "skip_reason": skip_reason,
+                       "detail": detail or []})
 
     # 1 · entry channel
+    entry_detail = [_kv(s["label"], s["value"]) for s in entry["signals"]]
+    entry_detail += [
+        _kv("rule · ad", "utm_medium ∈ {paid, cpc, ppc, display}", fired=entry["channel"] == "ad"),
+        _kv("rule · email", "utm_medium=email (+ optional e= magic token)", fired=entry["channel"] == "email"),
+        _kv("rule · search", "?ref ∈ {google, bing, ddg} or a search-engine Referer", fired=entry["channel"] == "search"),
+        _kv("rule · direct", "nothing matched — the click says nothing", fired=entry["channel"] == "direct"),
+    ]
     stage("entry", "Entry classify", "#sec-entry",
           [f"utm_medium={sig.get('utm_medium', '—')}", f"utm_campaign={sig.get('utm_campaign', '—')}",
            f"ref={sig.get('ref', '—')}", f"Referer={'search engine' if entry['channel'] == 'search' and not entry['ref'] else (entry['referer'] and 'set') or '—'}",
            f"e token={'present' if entry['token'] else '—'}"],
           entry["rule"],
           _branches(["ad", "email", "search", "direct"], entry["channel"]),
-          f"channel = {entry['channel_label']}", entry["why"])
+          f"channel = {entry['channel_label']}", entry["why"],
+          detail=entry_detail)
 
     # 2 · ad variant (only meaningful on a paid click)
     is_ad = entry["channel"] == "ad"
     intent = _campaign_intent(entry.get("utm_campaign"))
     ad_taken = ("catalogued variant" if ad else
                 ("campaign keyword intent" if intent else "no match") if is_ad else None)
+    if ad:
+        vp = ad["page"]
+        overridden = [k for k in ("hero_eyebrow", "h1_pre", "sub", "cta_primary", "cta_secondary",
+                                  "compare_emphasis", "order", "prove_intro", "challenger_body",
+                                  "cta_heading", "stat_highlight") if vp.get(k) not in (None, "", False)]
+        ad_detail = [
+            _kv("Variant", f"{ad['id']} ({ad['variant_id']}) · campaign {ad['utm_campaign']}"),
+            _kv("X targeting", f"{ad['x_targeting_type']} — {ad['x_targeting_example']}"),
+            _kv("Audience fit", f"{ad['audience_fit_label']} → route {ad['audience']}"),
+            _kv("Ad · trigger", ad["ad"]["trigger"]),
+            _kv("Ad · body", ad["ad"]["body"]),
+            _kv("Ad · proof", ad["ad"]["proof"]),
+            _kv("Slots overridden", ", ".join(overridden)),
+        ]
+        if ad.get("hold_note"):
+            ad_detail.append(_kv("Hold note", ad["hold_note"], pol="hold"))
+    else:
+        ad_detail = [
+            _kv("Catalog", f"{len(AD_VARIANTS)} X.com variants across {len(AD_CATEGORIES)} targeting categories"),
+            _kv("Lookup order", "utm_content (v01–v12) first, then utm_campaign"),
+            _kv("Keyword fallback", "campaign name keywords → companies / individuals intent"),
+        ]
+        if is_ad and intent:
+            ad_detail.append(_kv("Matched intent", f"utm_campaign={entry['utm_campaign']} → {intent}", fired=True))
     stage("advariant", "Ad variant resolve", "#sec-entry",
           [f"utm_campaign={sig.get('utm_campaign', '—')}", f"utm_content={sig.get('utm_content', '—')}"],
           "AD_BY_VARIANT_ID / AD_BY_CAMPAIGN lookup, else keyword intent",
@@ -1632,34 +1671,83 @@ def process_map(page: dict) -> dict:
           (f"{ad['id']} · {ad['x_targeting_type']}" if ad
            else (f"intent = {intent}" if is_ad and intent else "generic ad framing" if is_ad else "—")),
           "a catalogued X variant message-matches every copy slot to the ad promise",
-          skipped=not is_ad, skip_reason="not a paid click — no ad promise to match")
+          skipped=not is_ad, skip_reason="not a paid click — no ad promise to match",
+          detail=ad_detail)
 
     # 3 · IP resolve → network type
     firmo = " · ".join(x for x in (
         f"company={det.get('company')}" if det.get("company") else "",
         f"region={det.get('region')}" if det.get("region") else "",
         f"industry={_ind_label(det)}" if _ind_label(det) else "") if x) or "no firmographics"
+    ip_detail = ([_kv(c["label"], f"{c['value']} → drives {c['drives']}", pol=c.get("policy"))
+                  for c in det.get("captured", [])]
+                 or [_kv("Captured", "nothing — private / unreachable IP resolves no signals")])
+    ip_detail += [_kv(c["label"], c["value"], pol=c.get("policy"))
+                  for c in det.get("request_signals", [])]
+    if det.get("reason"):
+        ip_detail.append(_kv("Router reason", det["reason"]))
     stage("ip", "IP resolve + classify", "#sec-tier",
           [f"ip={det.get('ip') or '—'}" + (" (?ip= override)" if P.get("ip_forced") else ""),
            f"isp={det.get('isp') or '—'}"],
           "reverse-IP (ip-api) → network flags → deterministic router (scene._classify)",
           _branches(NETWORK_BRANCHES, det.get("network_type") or "private / unreachable"),
-          firmo, det.get("reason") or "network flags decide how much the IP is allowed to imply")
+          firmo, det.get("reason") or "network flags decide how much the IP is allowed to imply",
+          detail=ip_detail)
 
     # 4 · tier route
     conf = P["confidence"]
+    tier_detail = [
+        _kv("Confidence · location", conf["location"]),
+        _kv("Confidence · company", conf["company"]),
+        _kv("Confidence · industry", conf["industry"]),
+        _kv("tier 0 · neutral", "nothing usable — real-site default ships", fired=P["tier"] == 0),
+        _kv("tier 1 · location-aware", "geo confidence high/medium, not hosting/VPN", fired=P["tier"] == 1),
+        _kv("tier 2 · firmographic", "company + industry resolved", fired=P["tier"] == 2),
+        _kv("tier 3 · firmographic + competitive", "tier 2 + competitive angle engaged", fired=P["tier"] == 3),
+        _kv("Competitive eligible", "yes" if det.get("competitive_eligible") else "no"),
+    ]
     stage("tier", "Tier route", "#sec-tier",
           [f"confidence: location={conf['location']} · company={conf['company']} · industry={conf['industry']}"],
           "industry resolved → 2 · geo only → 1 · nothing usable → 0",
           _branches([f"{k} · {v}" for k, v in SC.TIER_LABELS.items()],
                     f"{P['tier']} · {P['tier_label']}"),
           f"tier {P['tier']} · {P['tier_label']}",
-          "the tier gates which copy path runs — never what we recite")
+          "the tier gates which copy path runs — never what we recite",
+          detail=tier_detail)
 
     # 5 · identity
     id_taken = ("cohort CRM" if ident and ident["kind"] == "cohort"
                 else "work-email resolved" if ident and ident["kind"] == "resolved"
                 else "anonymous")
+    if ident and ident["kind"] == "cohort":
+        v = ident["view"]
+        id_detail = [
+            _kv("Identified via", f"{ident['via']} → {ident['email']}", pol="say"),
+            _kv("Name", v["name"], pol="say"),
+            _kv("Vector — de-anon", f"{v['linkedin']['title']} · {v['linkedin']['company']} · {v['linkedin']['location']}", pol="allude"),
+            _kv("HubSpot — behavior", f"{v['hubspot']['lifecycle']} · score {v['hubspot']['lead_score']} · {v['hubspot']['visits']} visits · pages {', '.join(v['hubspot']['top_pages'])}", pol="allude"),
+            _kv("Clay — enrichment", f"{v['linkedin']['seniority']} · {v['linkedin']['tenure']}y · {v['linkedin']['industry']}", pol="allude"),
+        ]
+        if v["declared"].get("goal"):
+            id_detail.append(_kv("Declared goal", f"\u201c{v['declared']['goal']}\u201d", pol="say"))
+        if v["hubspot"].get("abandoned"):
+            id_detail.append(_kv("Abandoned action", v["hubspot"]["abandoned"], pol="allude"))
+        if v["deep"].get("income_band"):
+            id_detail.append(_kv("Modeled income", v["deep"]["income_band"], pol="hold"))
+    elif ident and ident["kind"] == "resolved":
+        r = ident["resolved"]
+        id_detail = [
+            _kv("Identified via", f"login → {ident['email']}", pol="say"),
+            _kv("Domain → company", f"{r.get('company') or '—'} · tier {r.get('tier', 0)} ({r.get('tier_label', '—')})"),
+        ]
+        if r.get("reason"):
+            id_detail.append(_kv("Why", r["reason"]))
+    else:
+        id_detail = [
+            _kv("Cookie", "not set — no login this session"),
+            _kv("Magic token", "absent — not an identified email click"),
+            _kv("What would unlock", f"log in as {sample_login_email()} (cohort CRM) or any work email (domain resolution)"),
+        ]
     stage("identity", "Identity", "#sec-crm",
           [f"cookie={'set' if ident and ident.get('via') == 'login' else '—'}",
            f"magic token={'present' if entry['token'] else '—'}"],
@@ -1667,10 +1755,24 @@ def process_map(page: dict) -> dict:
           _branches(["cohort CRM", "work-email resolved", "anonymous"], id_taken),
           (f"{ident['email']} via {ident['via']}" if ident else "anonymous"),
           ("they identified themselves — say-level facts unlock; enrichment stays allude/hold"
-           if ident else "no identity offered — nothing personal may be said"))
+           if ident else "no identity offered — nothing personal may be said"),
+          detail=id_detail)
 
     # 6 · segments → archetype (cohort only)
     is_cohort = bool(ident and ident["kind"] == "cohort")
+    if is_cohort:
+        arch = ident["archetype"]
+        arch_detail = [_kv(f"{d['label']} ({d['source']})",
+                           "; ".join(f"{s['label']} — {', '.join(s['evidence'])}" for s in d["segments"]) or "—",
+                           pol="allude")
+                       for fam, d in ident["segments"].items()]
+        arch_detail += [
+            _kv("Archetype picked", f"{arch['label']} — {arch['reason']}", fired=True),
+            _kv("Drives", f"sections {' → '.join(arch['sections'])} · CTA \u201c{arch['cta']}\u201d"),
+        ]
+    else:
+        arch_detail = [_kv(a["label"], f"for {a['for']} — CTA \u201c{a['cta']}\u201d")
+                       for a in SEG.ARCHETYPES.values()]
     stage("archetype", "Segments → archetype", "#sec-crm",
           ([f"{fam}: " + ", ".join(s["label"] for s in d["segments"])
             for fam, d in ident["segments"].items()] if is_cohort else ["(no CRM record)"]),
@@ -1680,26 +1782,60 @@ def process_map(page: dict) -> dict:
           (f"archetype = {ident['archetype']['label']}" if is_cohort else "—"),
           ("behavioral + enriched segments choose emphasis and section order — never recited"
            if is_cohort else ""),
-          skipped=not is_cohort, skip_reason="no CRM record — no segments to derive")
+          skipped=not is_cohort, skip_reason="no CRM record — no segments to derive",
+          detail=arch_detail)
 
-    # 7 · audience route
+    # 7 · audience route — the precedence chain, each rung with its evidence
+    fired_rung = ("ad variant" if ad else
+                  "campaign intent" if intent else
+                  "CRM record" if is_cohort else
+                  "work-email domain" if ident and ident["kind"] == "resolved" and ident["resolved"].get("company") else
+                  "network type")
+    aud_detail = [
+        _kv("1 · ad variant", f"{ad['id']} → {ad['audience']}" if ad else "no catalogued ad variant",
+            fired=fired_rung == "ad variant"),
+        _kv("2 · campaign intent", f"utm_campaign={entry['utm_campaign']} → {intent}" if intent
+            else "no campaign keyword match", fired=fired_rung == "campaign intent"),
+        _kv("3 · CRM record",
+            (f"seniority={ident['view']['linkedin'].get('seniority')} · goal \u201c{ident['view']['declared'].get('goal') or '—'}\u201d"
+             if is_cohort else "no CRM record"), fired=fired_rung == "CRM record"),
+        _kv("4 · work-email domain",
+            (f"→ {ident['resolved']['company']}" if ident and ident["kind"] == "resolved"
+             and ident["resolved"].get("company") else "no resolved work email"),
+            fired=fired_rung == "work-email domain"),
+        _kv("5 · network type", det.get("network_type") or "private / unreachable",
+            fired=fired_rung == "network type"),
+    ]
     stage("audience", "Audience route", "#sec-order",
           [P["audience_rule"]],
           "precedence: ad variant > campaign intent > CRM > work-email domain > network type",
           _branches(["companies", "individuals", "neutral"], P["audience"]),
           f"audience = {P['audience']}",
-          "companies → Hire/Catalyst emphasis; individuals → Challenger emphasis")
+          "companies → Hire/Catalyst emphasis; individuals → Challenger emphasis",
+          detail=aud_detail)
 
     # 8 · objection prioritize (includes the narrower track route)
     pri = P["objections"]["prioritized"]
+    route = P["audience_route"]
+    eligible = [o for o in OBJECTION_CATALOG if _objection_applies(o, route)]
+    obj_detail = [_kv("Catalog", f"{len(OBJECTION_CATALOG)} objections · route {ROUTE_LABELS.get(route, route)} "
+                                 f"filters to {len(eligible)} eligible")]
+    for r in pri:
+        obj_detail.append(_kv(f"#{r['rank']} {r['objection_id']} (score {r['score']})",
+                              f"\u201c{r['text']}\u201d · signals: {', '.join(r['signal_source'])}",
+                              pol="allude", fired=True))
+    for a in P["objections"]["assignments"]:
+        obj_detail.append(_kv(f"slot ← #{a['rank']}", f"{a['slot']} ← {a['objection_id']}"))
+    for b in P["objections"]["blocked"]:
+        obj_detail.append(_kv(f"blocked · {b['objection_id']}", f"\u201c{b['blocked_say']}\u201d", pol="hold"))
     stage("objections", "Objection prioritize", "#sec-objections",
-          [f"track route = {ROUTE_LABELS.get(P['audience_route'], P['audience_route'])}"]
+          [f"track route = {ROUTE_LABELS.get(route, route)}"]
           + ([f"#{r['rank']} {r['objection_id']} (score {r['score']})" for r in pri] or ["no signals matched"]),
           "score OBJECTION_CATALOG signals → rank top 3–5 → weave into copy slots",
-          _branches(list(ROUTE_LABELS.values()),
-                    ROUTE_LABELS.get(P["audience_route"], P["audience_route"])),
+          _branches(list(ROUTE_LABELS.values()), ROUTE_LABELS.get(route, route)),
           (f"{len(pri)} objections ranked" if pri else "no objections matched"),
-          "sales psychology meets them where they are — every reframe uses only site claims")
+          "sales psychology meets them where they are — every reframe uses only site claims",
+          detail=obj_detail)
 
     # 9 · surface policy gate — per-slot say / allude / hold
     diff = P["copy_diff"]
@@ -1708,6 +1844,11 @@ def process_map(page: dict) -> dict:
     n_allude = sum(1 for d in changed if d["policy"] == "allude")
     n_blocked = (sum(1 for d in diff if d.get("blocked_say"))
                  + len(P["objections"]["blocked"]))
+    pol_detail = [_kv(d["label"], f"{'personalized' if d['changed'] else 'generic'} · source: {d['source']}",
+                      pol=d["policy"] if d["changed"] else None, fired=d["changed"])
+                  for d in diff]
+    pol_detail += [_kv(f"blocked · {d['slot']}", f"\u201c{d['blocked_say']}\u201d", pol="hold")
+                   for d in diff if d.get("blocked_say")]
     stage("policy", "Surface policy gate", "#sec-slots",
           [f"{d['slot']}: {d['policy']}" for d in changed] or ["(all slots generic)"],
           "say = recite · allude = shape only · hold = never ships",
@@ -1715,16 +1856,26 @@ def process_map(page: dict) -> dict:
            {"label": f"allude — shaped ({n_allude})", "taken": n_allude > 0},
            {"label": f"hold — blocked ({n_blocked})", "taken": n_blocked > 0}],
           f"{len(changed)} of {len(diff)} slots personalized · {n_blocked} say variants blocked",
-          "every personalized slot carries its source + policy; blocked recites appear only on /dev")
+          "every personalized slot carries its source + policy; blocked recites appear only on /dev",
+          detail=pol_detail)
 
     # 10 · compose
+    compose_detail = [
+        _kv(f"order · {aud}", " → ".join(order), fired=P["audience"] == aud and P["order"] == order)
+        for aud, order in ORDER_BY_AUDIENCE.items()
+    ]
+    if ad and ad["page"].get("order"):
+        compose_detail.append(_kv(f"order · ad override ({ad['id']})",
+                                  " → ".join(ad["page"]["order"]),
+                                  fired=P["order"] == ad["page"]["order"]))
     stage("compose", "Compose page", "#sec-order",
           [f"audience = {P['audience']}"
            + (f" · ad variant order override ({ad['id']})" if ad and ad["page"].get("order") else "")],
           "ORDER_BY_AUDIENCE, unless the ad variant overrides",
           [],
           " → ".join(P["order"]),
-          "same sections, same facts — only emphasis and order move")
+          "same sections, same facts — only emphasis and order move",
+          detail=compose_detail)
 
     # 11 · hero image
     hi = P["hero_image"]
@@ -1741,17 +1892,32 @@ def process_map(page: dict) -> dict:
         hi_reads.append(f"rule={sel['rule_fired'][:48]}")
     if ir.get("drives_action"):
         hi_reads.append(f"drives_action={ir['drives_action']}")
-    blocked = ir.get("guardrails_blocked") or []
-    if blocked:
-        hi_reads.append(f"guardrails_blocked={len(blocked)}")
+    g_blocked = ir.get("guardrails_blocked") or []
+    if g_blocked:
+        hi_reads.append(f"guardrails_blocked={len(g_blocked)}")
+    img_detail = []
+    if sel.get("rule_fired"):
+        img_detail.append(_kv("Intent rule fired", sel["rule_fired"], fired=True))
+    img_detail += [_kv(k.replace("_", " ").capitalize(),
+                       " → ".join(ir[k]) if k == "fallback_chain"
+                       else (ir[k][:220] + "…" if k == "prompt" and len(str(ir[k])) > 220
+                             else ir[k]))
+                   for k in ("intent_id", "secondary_intent_id", "conversion_goal", "drives_action",
+                             "prompt", "model", "vendor", "cache_key", "license",
+                             "fallback_chain", "generated_at")
+                   if ir.get(k) not in (None, "", [])]
+    img_detail += [_kv("Guardrail applied", g, pol="hold") for g in g_blocked]
+    if not img_detail:
+        img_detail = [_kv("Receipt", "gradient fallback — no cache hit, no API key, no gallery match")]
     stage("heroimg", "Hero image resolve", "#sec-hero-image",
           hi_reads,
           "select_image_intent → build_structured_prompt → guardrails → cache → API → gallery → gradient",
           _branches(["generated", "pending", "gallery", "gradient"], src),
           f"source = {src} · intent = {ir.get('intent_id', '—')}",
           (f"intent {ir.get('intent_id')} ({ir.get('conversion_goal', '—')}) drives hero CTA; "
-           f"{len(blocked)} guardrail(s) applied" if blocked else
-           "structured prompt assembled from signals — page shell renders instantly"))
+           f"{len(g_blocked)} guardrail(s) applied" if g_blocked else
+           "structured prompt assembled from signals — page shell renders instantly"),
+          detail=img_detail)
 
     return {"inputs": inputs, "stages": stages}
 
