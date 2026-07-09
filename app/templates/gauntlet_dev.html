@@ -150,6 +150,7 @@
     <a href="{{ toggle_anon }}" class="{{ 'on' if as_state == 'anon' else '' }}">Anonymous</a>
     <a href="{{ toggle_known }}" class="{{ 'on' if as_state != 'anon' else '' }}">Known ({{ P.identity.email if P.identity else sample_email }})</a>
   </span>
+  <a href="{{ g.dev_business }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}" style="font-size:13px;font-weight:600;text-decoration:none;color:var(--brand);margin-left:8px">Marketing view →</a>
 </div>
 <p class="sub" style="color:var(--muted);font-size:14px;max-width:80ch;margin:4px 0 0">
   The replica is rebuilt deterministically from (query params + login cookie). This page rebuilds the

@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+{% block title %}Marketing view — Gauntlet personalization · apt{% endblock %}
+{% block content %}
+<style>
+  main{max-width:960px}
+  .gb-head{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+  .gb-head h1{font-size:26px;margin:0;line-height:1.25}
+  .gb-head .links{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .gb-head .links a{font-size:13px;font-weight:600;text-decoration:none;color:var(--brand)}
+  .gb-tog{display:inline-flex;gap:3px;background:#F1F3F5;border-radius:9px;padding:3px}
+  .gb-tog a{font-size:13px;font-weight:600;color:var(--muted);padding:6px 14px;border-radius:7px;text-decoration:none}
+  .gb-tog a.on{background:#fff;color:var(--ink);box-shadow:var(--shadow)}
+  .gb-lead{font-size:15px;line-height:1.6;color:var(--ink);background:linear-gradient(135deg,#f8fafc 0%,#eef2ff 100%);border:1px solid var(--line);border-radius:13px;padding:18px 20px;margin:16px 0}
+  .gb-lead .kicker{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--brand);margin-bottom:8px}
+  .sec{border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:var(--shadow);overflow:hidden;margin-bottom:18px}
+  .sec .h{padding:12px 16px;border-bottom:1px solid var(--line);font-size:14px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px}
+  .sec .h .tag{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:5px;padding:2px 8px;background:#F1F3F5;color:var(--muted)}
+  .sec .b{padding:14px 16px;font-size:14px;line-height:1.55;color:var(--ink)}
+  .sec .b p{margin:0 0 10px}.sec .b p:last-child{margin:0}
+  .bul{margin:0;padding:0 16px 14px 32px;font-size:14px;line-height:1.55}
+  .bul li{margin:6px 0}
+  .journey{display:flex;flex-direction:column;gap:0}
+  .j-step{display:grid;grid-template-columns:28px 1fr;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);position:relative}
+  .j-step:last-child{border-bottom:0}
+  .j-step .dot{width:28px;height:28px;border-radius:50%;background:var(--ink);color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center;flex:none}
+  .j-step .ph{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .j-step .ttl{font-weight:700;font-size:14px;margin:2px 0 4px}
+  .j-step .det{font-size:13px;color:#475569;line-height:1.5}
+  .j-step .sig{margin-top:6px}
+  .chip{display:inline-block;font-size:11px;font-weight:600;color:#475569;background:#F1F3F5;border-radius:6px;padding:2px 8px;margin:2px 4px 0 0}
+  .barrier{display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);font-size:13px}
+  .barrier:last-child{border-bottom:0}
+  .barrier .rk{width:26px;height:26px;border-radius:7px;background:var(--ink);color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center;flex:none}
+  .barrier .q{font-weight:600;color:var(--ink)}
+  .barrier .resp{font-size:12.5px;color:#475569;margin-top:4px}
+  .slot-row{padding:12px 16px;border-bottom:1px solid var(--line);font-size:13px}
+  .slot-row:last-child{border-bottom:0}
+  .slot-row .lbl{font-weight:700;margin-bottom:6px}
+  .slot-row .pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+  @media(max-width:700px){.slot-row .pair{grid-template-columns:1fr}}
+  .slot-row .box{border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:12.5px;line-height:1.45}
+  .slot-row .box .cap{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;color:var(--muted)}
+  .slot-row .box.pers{background:#f4fbf7;border-color:#bfe6cf}
+  .slot-row .box.pers .cap{color:#0a8a4f}
+  .action-box{background:#fffbeb;border:1px solid #fde68a;border-radius:13px;padding:16px 18px;margin-bottom:18px}
+  .action-box .cap{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#b45309;margin-bottom:8px}
+  .action-box ul{margin:0;padding-left:20px;font-size:14px;line-height:1.55}
+  .action-box li{margin:6px 0}
+  .impact{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:14px 16px}
+  @media(max-width:640px){.impact{grid-template-columns:1fr}}
+  .impact .n{font-size:28px;font-weight:800;color:var(--ink);line-height:1}
+  .impact .l{font-size:12px;color:var(--muted);margin-top:4px}
+  .crm-kv{display:flex;gap:10px;padding:9px 16px;border-bottom:1px solid var(--line);font-size:13px}
+  .crm-kv:last-child{border-bottom:0}
+  .crm-kv .k{color:var(--muted);min-width:140px;flex:none}
+  .crm-kv .v{font-weight:500}
+  .priv-col{padding:10px 16px;border-bottom:1px solid var(--line);font-size:13px}
+  .priv-col:last-child{border-bottom:0}
+  .priv-col .cap{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+  .priv-col.said .cap{color:#0a8a4f}.priv-col.steer .cap{color:#1d4ed8}.priv-col.hold .cap{color:#c0354b}
+  .priv-col ul{margin:0;padding-left:18px;line-height:1.5}
+  .tech details{border-top:1px solid var(--line)}
+  .tech summary{padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted)}
+  .tech .inner{padding:0 16px 14px;font-size:12.5px;color:#475569;line-height:1.5}
+  .tech code{font-size:11.5px;background:#F6F8FA;padding:1px 5px;border-radius:4px}
+  .gb-entries{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 0 4px}
+  .gb-entries .lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .gb-entries a{font-size:12.5px;font-weight:600;border:1px solid var(--line);border-radius:8px;padding:6px 12px;text-decoration:none;background:#fff}
+  .hi-thumb{max-width:100%;max-height:160px;border-radius:8px;border:1px solid var(--line);margin-top:8px}
+</style>
+
+{% set P = page %}
+{% set B = biz %}
+<div class="gb-head">
+  <h1>Marketing view — personalization for <a href="{{ g.page }}{{ qs }}" style="text-decoration:none">{{ g.page }}</a></h1>
+  <div class="links">
+    <span class="gb-tog">
+      <a href="{{ toggle_anon }}" class="{{ 'on' if as_state == 'anon' else '' }}">Anonymous</a>
+      <a href="{{ toggle_known }}" class="{{ 'on' if as_state != 'anon' else '' }}">Known lead</a>
+    </span>
+    <a href="{{ g.dev }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}">Technical view →</a>
+  </div>
+</div>
+<p style="color:var(--muted);font-size:14px;max-width:72ch;margin:0 0 4px">
+  Written for a Director of Marketing — how arrival, segment, objections, and CRM shape what this visitor sees. Same visitor state as the engineering /dev page.</p>
+
+<div class="gb-entries">
+  <span class="lbl">Simulate an entry</span>
+  {% for label, url in entry_links_raw %}<a href="{{ url }}">{{ label }} →</a>{% endfor %}
+</div>
+
+<div class="gb-lead">
+  <div class="kicker">For this visitor, we…</div>
+  {{ B.executive_summary }}
+</div>
+
+<div class="action-box">
+  <div class="cap">Recommended action for your team</div>
+  <ul>{% for a in B.recommended_actions %}<li>{{ a }}</li>{% endfor %}</ul>
+</div>
+
+<div class="sec">
+  <div class="h">Decision summary <span class="tag">executive</span></div>
+  <ul class="bul">{% for b in B.decision_bullets %}<li>{{ b }}</li>{% endfor %}</ul>
+</div>
+
+<div class="sec">
+  <div class="h">Impact at scale</div>
+  <div class="b"><p><b>{{ B.impact.headline }}</b> — {{ B.impact.sub }}</p></div>
+  <div class="impact">
+    <div><div class="n">{{ B.impact.variants }}</div><div class="l">X ad variants catalogued</div></div>
+    <div><div class="n">{{ B.impact.targeting_types }}</div><div class="l">targeting types covered</div></div>
+    <div><div class="n">{{ B.impact.copy_slots }}+</div><div class="l">personalizable copy slots</div></div>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="h">Visitor journey <span class="tag">entry → segment → experience</span></div>
+  <div class="journey">
+    {% for s in B.visitor_journey %}
+    <div class="j-step">
+      <span class="dot">{{ loop.index }}</span>
+      <div>
+        <div class="ph">{{ s.phase }}</div>
+        <div class="ttl">{{ s.headline }}</div>
+        <div class="det">{{ s.detail }}</div>
+        {% if s.signals %}<div class="sig">{% for sig in s.signals %}<span class="chip">{{ sig.label }}: {{ sig.value }}</span>{% endfor %}</div>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% if B.campaign %}
+<div class="sec">
+  <div class="h">Campaign context <span class="tag">{{ B.campaign.targeting_type }}</span></div>
+  <div class="b">
+    <p><b>Segment:</b> {{ B.campaign.targeting_type }} — {{ B.campaign.targeting_example }}
+      {% if B.campaign.audience_fit %}({{ B.campaign.audience_fit }} fit){% endif %}</p>
+    <p><b>Ad hook:</b> “{{ B.campaign.ad_hook }}”</p>
+    <p><b>Ad body:</b> {{ B.campaign.ad_body }}</p>
+    <p><b>Social proof in ad:</b> {{ B.campaign.ad_proof }}</p>
+    <p><b>Landing headline (message match):</b> “{{ B.campaign.landing_headline }}”</p>
+    <p style="color:#475569;font-size:13px">{{ B.campaign.message_match_strategy }}</p>
+  </div>
+</div>
+{% endif %}
+
+<div class="sec">
+  <div class="h">Conversion barriers addressed <span class="tag">{{ B.barriers|length }} ranked</span></div>
+  {% if B.barriers %}
+  {% for b in B.barriers %}
+  <div class="barrier">
+    <span class="rk">{{ b.rank }}</span>
+    <div>
+      <div class="q">“{{ b.barrier }}”</div>
+      <div class="resp"><b>Why now:</b> {{ b.why_now }}</div>
+      <div class="resp"><b>How copy responds:</b> {{ b.copy_response }} {% if b.slot != '—' %}({{ b.slot }}){% endif %}</div>
+    </div>
+  </div>
+  {% endfor %}
+  {% else %}
+  <div class="b" style="color:var(--muted)">No ranked objections for this segment — generic proof and CTAs ship.</div>
+  {% endif %}
+</div>
+
+<div class="sec">
+  <div class="h">Personalized experience <span class="tag">what they see vs everyone else</span></div>
+  <div class="crm-kv"><span class="k">Hero headline</span><span class="v">“{{ B.experience.hero_headline }}”</span></div>
+  {% if B.experience.hero_eyebrow %}<div class="crm-kv"><span class="k">Eyebrow</span><span class="v">{{ B.experience.hero_eyebrow }}</span></div>{% endif %}
+  <div class="crm-kv"><span class="k">Hero sub</span><span class="v">{{ B.experience.hero_sub }}</span></div>
+  <div class="crm-kv"><span class="k">Primary CTA</span><span class="v">{{ B.experience.cta_primary }}</span></div>
+  <div class="crm-kv"><span class="k">Final CTA</span><span class="v">{{ B.experience.final_cta_heading }} — {{ B.experience.final_cta_sub }}</span></div>
+  <div class="crm-kv"><span class="k">Comparison emphasis</span><span class="v">{{ B.experience.compare_emphasis }} column highlighted</span></div>
+  <div class="crm-kv"><span class="k">Section order</span><span class="v">{{ B.experience.section_order|join(' → ') }}</span></div>
+  {% if B.experience.visual.intent_summary %}
+  <div class="b" style="border-top:1px solid var(--line);padding-top:12px">
+    <p><b>Visual strategy:</b> {{ B.experience.visual.intent_summary }}</p>
+    <p style="font-size:13px;color:#475569">Mood: {{ B.experience.visual.mood }} · Technique: {{ B.experience.visual.technique }} · Drives: {{ B.experience.visual.drives_action }}</p>
+    {% if B.experience.hero_image_url %}<img class="hi-thumb" src="{{ B.experience.hero_image_url }}" alt="Hero background">{% endif %}
+  </div>
+  {% endif %}
+  {% for s in B.experience.slots %}
+  <div class="slot-row">
+    <div class="lbl">{{ s.label }}</div>
+    <div class="pair">
+      <div class="box"><div class="cap">Everyone else</div>{{ s.generic }}</div>
+      <div class="box pers"><div class="cap">This visitor</div>{{ s.personalized }}</div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:6px">{{ s.response }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+{% if B.lead %}
+<div class="sec">
+  <div class="h">Lead intelligence <span class="tag">sales handoff</span></div>
+  {% if B.lead.kind == 'crm' %}
+  <div class="crm-kv"><span class="k">Contact</span><span class="v">{{ B.lead.name }} · {{ B.lead.email }}</span></div>
+  <div class="crm-kv"><span class="k">Lifecycle</span><span class="v">{{ B.lead.lifecycle }} · score {{ B.lead.lead_score }} · {{ B.lead.visits }} visits</span></div>
+  {% if B.lead.declared_goal %}<div class="crm-kv"><span class="k">Declared intent</span><span class="v">“{{ B.lead.declared_goal }}”</span></div>{% endif %}
+  {% if B.lead.abandoned %}<div class="crm-kv"><span class="k">Behavior</span><span class="v">Abandoned: {{ B.lead.abandoned }}</span></div>{% endif %}
+  <div class="crm-kv"><span class="k">Archetype</span><span class="v">{{ B.lead.archetype }} — {{ B.lead.archetype_reason }}</span></div>
+  <div class="crm-kv"><span class="k">Recommended CTA</span><span class="v">{{ B.lead.recommended_cta }}</span></div>
+  {% if B.lead.segments %}<div class="crm-kv"><span class="k">Segments</span><span class="v">{% for s in B.lead.segments %}<span class="chip">{{ s }}</span>{% endfor %}</span></div>{% endif %}
+  {% else %}
+  <div class="crm-kv"><span class="k">Email</span><span class="v">{{ B.lead.email }}</span></div>
+  {% if B.lead.company %}<div class="crm-kv"><span class="k">Company</span><span class="v">{{ B.lead.company }}</span></div>{% endif %}
+  {% endif %}
+  <div class="b" style="border-top:1px solid var(--line);font-size:13px;color:#475569">{{ B.lead.sales_handoff }}</div>
+</div>
+{% else %}
+<div class="sec">
+  <div class="h">Lead intelligence</div>
+  <div class="b" style="color:var(--muted)">Anonymous visitor — log in on <a href="{{ g.page }}{{ qs }}">{{ g.page }}</a> or toggle <b>Known lead</b> above to see CRM-driven personalization.</div>
+</div>
+{% endif %}
+
+<div class="sec">
+  <div class="h">What we deliberately don't say <span class="tag">brand safety</span></div>
+  <div class="b" style="padding-bottom:10px">{{ B.privacy.trust_frame }}</div>
+  <div class="priv-col said"><div class="cap">Say out loud</div><ul>{% for x in B.privacy.said %}<li>{{ x }}</li>{% endfor %}</ul></div>
+  <div class="priv-col steer"><div class="cap">Use to steer (never quote)</div><ul>{% for x in B.privacy.steered %}<li>{{ x }}</li>{% endfor %}</ul></div>
+  <div class="priv-col hold"><div class="cap">Held back entirely</div><ul>{% for x in B.privacy.held %}<li>{{ x }}</li>{% endfor %}</ul></div>
+</div>
+
+<div class="sec tech">
+  <details>
+    <summary>Technical details (for ops & engineering)</summary>
+    <div class="inner">
+      <p>Tier routing: <code>{{ B.technical.tier_label }}</code> · Audience route: <code>{{ B.technical.audience_route }}</code> ·
+        {{ B.technical.personalized_count }} of {{ B.technical.total_slots }} slots personalized.</p>
+      <p>Pipeline stages: {{ B.technical.trace_stages|join(' → ') }}</p>
+      <p><a href="{{ g.dev }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}">Open full technical /dev view →</a></p>
+    </div>
+  </details>
+</div>
+{% endblock %}

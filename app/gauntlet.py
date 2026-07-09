@@ -7,9 +7,11 @@
                            via first-party domain resolution)
   GET  /gauntlet/logout  — clears the cookie
   GET  /dev              — the decisioning companion
+  GET  /dev/business     — marketing/sales narrative (same state as /dev)
 
   Portal mount (johnnycchung.com/gauntletapt via Vercel rewrite):
-  GET  /gauntletapt, /gauntletapt/login, /gauntletapt/logout, /gauntletapt/dev
+  GET  /gauntletapt, /gauntletapt/login, /gauntletapt/logout, /gauntletapt/dev,
+       /gauntletapt/dev/business
 
 State lives entirely in (query params + one cookie), so both pages are rebuilt
 deterministically per request — CONSTITUTION reproducibility, no server-side sessions.
@@ -22,6 +24,7 @@ from fastapi import Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 
 from app.server import app, templates
+from pipeline.personalization import gauntlet_dev_business as GDB
 from pipeline.personalization import gauntlet_site as GS
 from pipeline.personalization import image_gen as IG
 
@@ -34,6 +37,7 @@ MOUNTS: dict[str, dict[str, str]] = {
         "login": "/gauntlet/login",
         "logout": "/gauntlet/logout",
         "dev": "/dev",
+        "dev_business": "/dev/business",
         "ad": "/gauntlet/ad",
         "ad_lp": "/gauntlet/ad-lp",
         "static": "/static",
@@ -44,6 +48,7 @@ MOUNTS: dict[str, dict[str, str]] = {
         "login": "/gauntletapt/login",
         "logout": "/gauntletapt/logout",
         "dev": "/gauntletapt/dev",
+        "dev_business": "/gauntletapt/dev/business",
         "ad": "/gauntletapt/ad",
         "ad_lp": "/gauntletapt/ad-lp",
         "static": "/gauntletapt/static",
@@ -155,7 +160,8 @@ def _render_ad(request: Request, m: dict[str, str]) -> HTMLResponse:
     })
 
 
-def _render_dev(request: Request, m: dict[str, str]) -> HTMLResponse:
+def _dev_email_and_page(request: Request, m: dict[str, str]) -> tuple[str, str | None, dict, str]:
+    """Shared state for /dev and /dev/business — same query params + cookie."""
     as_state = request.query_params.get("as", "")
     cookie = _cookie_email(request)
     if as_state == "anon":
@@ -166,13 +172,38 @@ def _render_dev(request: Request, m: dict[str, str]) -> HTMLResponse:
         email = cookie or None
     page = _page_with_mount_urls(GS.build_page(request, email=email), m)
     qs = _qs(request, drop=("as",))
-    dev = m["dev"]
+    resolved = as_state or ("known" if email else "anon")
+    return resolved, email, page, qs
+
+
+def _dev_toggles(dev_path: str, qs: str, as_state: str) -> tuple[str, str]:
     sep = "&" if qs else "?"
+    return f"{dev_path}{qs}{sep}as=anon", f"{dev_path}{qs}{sep}as=known"
+
+
+def _render_dev(request: Request, m: dict[str, str]) -> HTMLResponse:
+    as_state, email, page, qs = _dev_email_and_page(request, m)
+    toggle_anon, toggle_known = _dev_toggles(m["dev"], qs, as_state)
     return templates.TemplateResponse(request, "gauntlet_dev.html", {
         "page": page, "pmap": GS.process_map(page),
-        "as_state": as_state or ("known" if email else "anon"),
-        "qs": qs, "toggle_anon": f"{dev}{qs}{sep}as=anon",
-        "toggle_known": f"{dev}{qs}{sep}as=known",
+        "as_state": as_state,
+        "qs": qs, "toggle_anon": toggle_anon,
+        "toggle_known": toggle_known,
+        "entry_links_raw": entry_links(m),
+        "sample_email": GS.sample_login_email(),
+        "static_prefix": m["static"],
+        "g": m})
+
+
+def _render_dev_business(request: Request, m: dict[str, str]) -> HTMLResponse:
+    as_state, email, page, qs = _dev_email_and_page(request, m)
+    biz_path = m["dev_business"]
+    toggle_anon, toggle_known = _dev_toggles(biz_path, qs, as_state)
+    return templates.TemplateResponse(request, "gauntlet_dev_business.html", {
+        "page": page, "biz": GDB.build_business_dev_view(page),
+        "as_state": as_state,
+        "qs": qs, "toggle_anon": toggle_anon,
+        "toggle_known": toggle_known,
         "entry_links_raw": entry_links(m),
         "sample_email": GS.sample_login_email(),
         "static_prefix": m["static"],
@@ -194,6 +225,7 @@ def _hero_image_json(request: Request, m: dict[str, str]) -> dict:
 
 def _register_mount(m: dict[str, str]) -> None:
     page, login, logout, dev = m["page"], m["login"], m["logout"], m["dev"]
+    dev_business = m["dev_business"]
     ad, ad_lp = m["ad"], m["ad_lp"]
     hero_api = m["hero_api"]
     cookie_path = _cookie_path(m)
@@ -228,6 +260,10 @@ def _register_mount(m: dict[str, str]) -> None:
     def gauntlet_dev(request: Request) -> HTMLResponse:
         return _render_dev(request, m)
 
+    @app.get(dev_business, response_class=HTMLResponse)
+    def gauntlet_dev_business(request: Request) -> HTMLResponse:
+        return _render_dev_business(request, m)
+
     @app.get(hero_api)
     def gauntlet_hero_image(request: Request) -> JSONResponse:
         return JSONResponse(_hero_image_json(request, m))
@@ -248,3 +284,9 @@ for _mount in MOUNTS.values():
 @app.get("/ad-lp", response_class=HTMLResponse)
 def ad_lp_root(request: Request) -> HTMLResponse:
     return _render_ad_lp(request, MOUNTS["legacy"])
+
+
+# Legacy alias — /gauntlet/dev/business mirrors /dev/business (same handler).
+@app.get("/gauntlet/dev/business", response_class=HTMLResponse)
+def gauntlet_dev_business_legacy_alias(request: Request) -> HTMLResponse:
+    return _render_dev_business(request, MOUNTS["legacy"])

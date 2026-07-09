@@ -473,3 +473,64 @@ def test_objection_trace_stage():
     trace = next(t for t in page["trace"] if t["stage"] == "Objection prioritize")
     assert "ld_budget_committed" in str(trace["signals"]) or trace["output"]
     assert page["objections"]["assignments"]
+
+
+# --------------------------------------------------------------------------- #
+# 8 · Marketing /dev/business view
+# --------------------------------------------------------------------------- #
+KEYWORD_QS = ("?utm_source=x&utm_medium=paid&utm_campaign=x-keyword-ai-hiring&utm_content=v09")
+
+
+def test_dev_business_routes_return_200():
+    for path in ("/dev/business", "/gauntlet/dev/business", "/gauntletapt/dev/business"):
+        r = c.get(f"{path}?as=anon")
+        assert r.status_code == 200, path
+
+
+def test_dev_business_uses_marketing_sections_not_engineering_jargon():
+    t = c.get(f"/gauntletapt/dev/business{KEYWORD_QS}&as=anon").text
+    for want in ("For this visitor, we", "Visitor journey", "Conversion barriers addressed",
+                 "Personalized experience", "Recommended action for your team",
+                 "Decision summary", "What we deliberately don't say"):
+        assert want in t, f"missing marketing section: {want}"
+    assert "tier 0" not in t.lower()
+    assert "disposition" not in t.lower()
+    assert "Signal ledger" not in t
+
+
+def test_dev_business_same_state_as_dev_for_same_params():
+    qs = KEYWORD_QS + "&as=anon"
+    dev = c.get(f"/dev{qs}").text
+    biz = c.get(f"/dev/business{qs}").text
+    assert "Observe in 45 Minutes" in dev and "Observe in 45 Minutes" in biz
+    assert "Keyword targeting" in biz
+    assert "x-keyword-ai-hiring" in dev and "x-keyword-ai-hiring" in biz
+
+
+def test_dev_business_build_view_keyword_ad_executive_summary():
+    from pipeline.personalization import gauntlet_dev_business as GDB
+
+    page = GS.build_page(_Req({
+        "utm_source": "x", "utm_medium": "paid",
+        "utm_campaign": "x-keyword-ai-hiring", "utm_content": "v09",
+    }))
+    biz = GDB.build_business_dev_view(page)
+    assert "For this visitor" in biz["executive_summary"]
+    assert "Keyword targeting" in biz["executive_summary"] or "keyword" in biz["executive_summary"].lower()
+    assert biz["campaign"]["landing_headline"] == "Stop Interviewing for Skills You Can't Observe in 45 Minutes" \
+        or "Observe in 45 Minutes" in biz["campaign"]["landing_headline"]
+    assert len(biz["decision_bullets"]) == 5
+    assert biz["impact"]["variants"] == 12
+
+
+def test_dev_and_business_cross_link():
+    t = c.get("/dev?as=anon").text
+    assert "Marketing view →" in t and 'href="/dev/business' in t
+    b = c.get("/gauntletapt/dev/business?as=anon").text
+    assert "Technical view →" in b and 'href="/gauntletapt/dev' in b
+
+
+def test_portal_dev_business_links_stay_under_prefix():
+    t = c.get("/gauntletapt/dev/business?as=anon").text
+    assert 'href="/gauntletapt/dev/business' in t
+    assert 'href="/dev/business' not in t
