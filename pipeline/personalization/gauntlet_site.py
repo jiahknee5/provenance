@@ -1474,8 +1474,10 @@ def build_page(request, email: str | None = None, overrides: dict | None = None)
       "the structure is identical before and after login; personalization never adds or removes a claim")
 
     hero_image = IG.resolve_hero_image({
-        "entry": entry, "det": det, "ad_variant": ad_variant, "audience": audience,
-        "audience_route": aud_route, "objections": {"prioritized": prioritized},
+        "entry": entry, "det": det, "identity": ident, "ad_variant": ad_variant,
+        "audience": audience, "audience_route": aud_route, "tier": tier,
+        "objections": {"prioritized": prioritized},
+        "sections": {"hero": hero, "compare": {"emphasis": compare_emphasis}},
     }, generate=False)
     img_receipt = hero_image.get("receipt") or {}
     img_sigs, img_out, img_why = IG.hero_image_trace(img_receipt)
@@ -1557,6 +1559,184 @@ def _ledger(entry: dict, det: dict, ident: dict | None) -> list[dict]:
         for c in ident["resolved"].get("captured", []):
             add(c["label"], c["value"], "declared", "work-email domain → PDL", c["policy"])
     return rows
+
+
+# --------------------------------------------------------------------------- #
+# Process map for /dev — the pipeline as a diagram: every decision, every branch,
+# every piece of data each stage reads. Pure function of the built page dict, so
+# the diagram can never drift from what actually ran.
+# --------------------------------------------------------------------------- #
+NETWORK_BRANCHES = ["corporate", "corporate (via VPN)", "consumer ISP", "residential",
+                    "mobile", "VPN / proxy", "hosting / cloud", "private / unreachable"]
+ROUTE_LABELS = {"b2b_hire": "b2b hire", "b2b_upskill": "b2b upskill",
+                "individual": "individual", "neutral": "neutral"}
+
+
+def _branches(options: list[str], taken: str | None) -> list[dict]:
+    return [{"label": o, "taken": o == taken} for o in options]
+
+
+def process_map(page: dict) -> dict:
+    """The /dev process diagram: {inputs, stages}. Each stage carries the data it reads,
+    the rule, EVERY branch it could take (the taken one flagged), the output, and an
+    anchor into the detail panel below. Skipped stages stay visible, marked skipped —
+    the full decision space is always on screen."""
+    P = page
+    entry, det, ident, ad = P["entry"], P["det"], P["identity"], P.get("ad_variant")
+    sig = {s["label"]: s["value"] for s in entry["signals"]}
+
+    # -- data in: everything the pipeline can read, before any decision -------
+    inputs = [
+        {"label": "Query string",
+         "value": ", ".join(f"{s['label']}={s['value']}" for s in entry["signals"]
+                            if s["value"] != "—" and s["label"] != "Referer header") or "(empty)",
+         "feeds": "entry classify · ad variant · IP override"},
+        {"label": "Referer header",
+         "value": entry["referer"] or "(none)",
+         "feeds": "entry classify (search detection)"},
+        {"label": "Client IP + headers",
+         "value": (det.get("ip") or "private / unreachable")
+                  + (" · ?ip= override" if P.get("ip_forced") else ""),
+         "feeds": "IP resolve · tier route"},
+        {"label": "Login cookie / magic token",
+         "value": (ident["email"] + f" (via {ident['via']})") if ident else "(none — anonymous)",
+         "feeds": "identity · CRM · segments"},
+    ]
+
+    stages: list[dict] = []
+
+    def stage(id_, title, link, reads, rule, branches, output, why,
+              skipped=False, skip_reason=""):
+        stages.append({"id": id_, "title": title, "link": link, "reads": reads,
+                       "rule": rule, "branches": branches, "output": output, "why": why,
+                       "skipped": skipped, "skip_reason": skip_reason})
+
+    # 1 · entry channel
+    stage("entry", "Entry classify", "#sec-entry",
+          [f"utm_medium={sig.get('utm_medium', '—')}", f"utm_campaign={sig.get('utm_campaign', '—')}",
+           f"ref={sig.get('ref', '—')}", f"Referer={'search engine' if entry['channel'] == 'search' and not entry['ref'] else (entry['referer'] and 'set') or '—'}",
+           f"e token={'present' if entry['token'] else '—'}"],
+          entry["rule"],
+          _branches(["ad", "email", "search", "direct"], entry["channel"]),
+          f"channel = {entry['channel_label']}", entry["why"])
+
+    # 2 · ad variant (only meaningful on a paid click)
+    is_ad = entry["channel"] == "ad"
+    intent = _campaign_intent(entry.get("utm_campaign"))
+    ad_taken = ("catalogued variant" if ad else
+                ("campaign keyword intent" if intent else "no match") if is_ad else None)
+    stage("advariant", "Ad variant resolve", "#sec-entry",
+          [f"utm_campaign={sig.get('utm_campaign', '—')}", f"utm_content={sig.get('utm_content', '—')}"],
+          "AD_BY_VARIANT_ID / AD_BY_CAMPAIGN lookup, else keyword intent",
+          _branches(["catalogued variant", "campaign keyword intent", "no match"], ad_taken),
+          (f"{ad['id']} · {ad['x_targeting_type']}" if ad
+           else (f"intent = {intent}" if is_ad and intent else "generic ad framing" if is_ad else "—")),
+          "a catalogued X variant message-matches every copy slot to the ad promise",
+          skipped=not is_ad, skip_reason="not a paid click — no ad promise to match")
+
+    # 3 · IP resolve → network type
+    firmo = " · ".join(x for x in (
+        f"company={det.get('company')}" if det.get("company") else "",
+        f"region={det.get('region')}" if det.get("region") else "",
+        f"industry={_ind_label(det)}" if _ind_label(det) else "") if x) or "no firmographics"
+    stage("ip", "IP resolve + classify", "#sec-tier",
+          [f"ip={det.get('ip') or '—'}" + (" (?ip= override)" if P.get("ip_forced") else ""),
+           f"isp={det.get('isp') or '—'}"],
+          "reverse-IP (ip-api) → network flags → deterministic router (scene._classify)",
+          _branches(NETWORK_BRANCHES, det.get("network_type") or "private / unreachable"),
+          firmo, det.get("reason") or "network flags decide how much the IP is allowed to imply")
+
+    # 4 · tier route
+    conf = P["confidence"]
+    stage("tier", "Tier route", "#sec-tier",
+          [f"confidence: location={conf['location']} · company={conf['company']} · industry={conf['industry']}"],
+          "industry resolved → 2 · geo only → 1 · nothing usable → 0",
+          _branches([f"{k} · {v}" for k, v in SC.TIER_LABELS.items()],
+                    f"{P['tier']} · {P['tier_label']}"),
+          f"tier {P['tier']} · {P['tier_label']}",
+          "the tier gates which copy path runs — never what we recite")
+
+    # 5 · identity
+    id_taken = ("cohort CRM" if ident and ident["kind"] == "cohort"
+                else "work-email resolved" if ident and ident["kind"] == "resolved"
+                else "anonymous")
+    stage("identity", "Identity", "#sec-crm",
+          [f"cookie={'set' if ident and ident.get('via') == 'login' else '—'}",
+           f"magic token={'present' if entry['token'] else '—'}"],
+          "cohort.match(email) / by_token(e), else resolve_email() first-party domain",
+          _branches(["cohort CRM", "work-email resolved", "anonymous"], id_taken),
+          (f"{ident['email']} via {ident['via']}" if ident else "anonymous"),
+          ("they identified themselves — say-level facts unlock; enrichment stays allude/hold"
+           if ident else "no identity offered — nothing personal may be said"))
+
+    # 6 · segments → archetype (cohort only)
+    is_cohort = bool(ident and ident["kind"] == "cohort")
+    stage("archetype", "Segments → archetype", "#sec-crm",
+          ([f"{fam}: " + ", ".join(s["label"] for s in d["segments"])
+            for fam, d in ident["segments"].items()] if is_cohort else ["(no CRM record)"]),
+          "segments.derive() → pick_archetype()",
+          _branches([a["label"] for a in SEG.ARCHETYPES.values()],
+                    ident["archetype"]["label"] if is_cohort else None),
+          (f"archetype = {ident['archetype']['label']}" if is_cohort else "—"),
+          ("behavioral + enriched segments choose emphasis and section order — never recited"
+           if is_cohort else ""),
+          skipped=not is_cohort, skip_reason="no CRM record — no segments to derive")
+
+    # 7 · audience route
+    stage("audience", "Audience route", "#sec-order",
+          [P["audience_rule"]],
+          "precedence: ad variant > campaign intent > CRM > work-email domain > network type",
+          _branches(["companies", "individuals", "neutral"], P["audience"]),
+          f"audience = {P['audience']}",
+          "companies → Hire/Catalyst emphasis; individuals → Challenger emphasis")
+
+    # 8 · objection prioritize (includes the narrower track route)
+    pri = P["objections"]["prioritized"]
+    stage("objections", "Objection prioritize", "#sec-objections",
+          [f"track route = {ROUTE_LABELS.get(P['audience_route'], P['audience_route'])}"]
+          + ([f"#{r['rank']} {r['objection_id']} (score {r['score']})" for r in pri] or ["no signals matched"]),
+          "score OBJECTION_CATALOG signals → rank top 3–5 → weave into copy slots",
+          _branches(list(ROUTE_LABELS.values()),
+                    ROUTE_LABELS.get(P["audience_route"], P["audience_route"])),
+          (f"{len(pri)} objections ranked" if pri else "no objections matched"),
+          "sales psychology meets them where they are — every reframe uses only site claims")
+
+    # 9 · surface policy gate — per-slot say / allude / hold
+    diff = P["copy_diff"]
+    changed = [d for d in diff if d["changed"]]
+    n_say = sum(1 for d in changed if d["policy"] == "say")
+    n_allude = sum(1 for d in changed if d["policy"] == "allude")
+    n_blocked = (sum(1 for d in diff if d.get("blocked_say"))
+                 + len(P["objections"]["blocked"]))
+    stage("policy", "Surface policy gate", "#sec-slots",
+          [f"{d['slot']}: {d['policy']}" for d in changed] or ["(all slots generic)"],
+          "say = recite · allude = shape only · hold = never ships",
+          [{"label": f"say — recited ({n_say})", "taken": n_say > 0},
+           {"label": f"allude — shaped ({n_allude})", "taken": n_allude > 0},
+           {"label": f"hold — blocked ({n_blocked})", "taken": n_blocked > 0}],
+          f"{len(changed)} of {len(diff)} slots personalized · {n_blocked} say variants blocked",
+          "every personalized slot carries its source + policy; blocked recites appear only on /dev")
+
+    # 10 · compose
+    stage("compose", "Compose page", "#sec-order",
+          [f"audience = {P['audience']}"
+           + (f" · ad variant order override ({ad['id']})" if ad and ad["page"].get("order") else "")],
+          "ORDER_BY_AUDIENCE, unless the ad variant overrides",
+          [],
+          " → ".join(P["order"]),
+          "same sections, same facts — only emphasis and order move")
+
+    # 11 · hero image
+    src = (P["hero_image"].get("receipt") or {}).get("source", "gradient")
+    stage("heroimg", "Hero image resolve", "#sec-hero-image",
+          [f"status={P['hero_image'].get('status', 'ready')}",
+           f"fallback={P['hero_image'].get('fallback', '—')}"],
+          "disk cache → (async API if keyed) → scene.image_for gallery → CSS gradient",
+          _branches(["generated", "pending", "gallery", "gradient"], src),
+          f"source = {src}",
+          "the page shell renders instantly; only a keyed cache miss goes async")
+
+    return {"inputs": inputs, "stages": stages}
 
 
 def sample_login_email() -> str:

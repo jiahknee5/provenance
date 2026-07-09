@@ -20,6 +20,7 @@ from typing import Any
 import httpx
 
 from pipeline.personalization import gauntlet_site as GS
+from pipeline.personalization import image_intents as II
 from pipeline.personalization import scene as SC
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -39,14 +40,34 @@ GEMINI_VENDOR = "google-gemini"
 # Patterns that must never appear in prompts (hold / PII surface policy).
 _FORBIDDEN_PROMPT = re.compile(
     r"(@|\b\d{3}-\d{2}-\d{4}\b|\$\d|\bincome\b|\bmodeled\b|"
-    r"\bde-anonymized\b|\babandoned\b|\bstep \d of \d\b)",
+    r"\bde-anonymized\b|\babandoned\b|\bstep \d of \d\b|"
+    r"\bwelcome back\b|\byour team at\b|\bwe see your\b)",
     re.I,
 )
 
 _PII_WORDS = (
     "gmail.com", "yahoo.com", "welcome back", "your team at", "we see your",
     "income band", "magic token", "hubspot", "vector", "clay",
+    "gender", "male", "female", "non-binary",
 )
+
+# Hold-tier facts — strip from prompts and log in receipt.
+_HOLD_STRIP_PATTERNS: list[tuple[re.Pattern[str], str]] = [
+    (re.compile(r"\b[A-Z][a-z]+\s+[A-Z][a-z]+\b"), "visitor_name"),
+    (re.compile(r"\bat\s+[A-Z][A-Za-z0-9&.\- ]{2,40}\b"), "employer_name"),
+    (re.compile(r"\b(income|salary|compensation)\s*(band|range|level)?\b", re.I), "income"),
+    (re.compile(r"\b(age|aged)\s*\d{1,2}[-–]\d{1,2}\b", re.I), "age"),
+    (re.compile(r"\b(male|female|man|woman|non-?binary)\b", re.I), "gender"),
+    (re.compile(r"\b\d{5}(-\d{4})?\b"), "zip_code"),
+]
+
+_GLOBAL_MUST_AVOID = [
+    "NO faces of real people or identifiable individuals",
+    "NO company logos or brand marks",
+    "NO text, words, letters, or numbers in the image",
+    "NO visitor names, employer names, or PII",
+    "NO surveillance, creepy, or behavioral-tracking imagery",
+]
 
 
 def _api_key() -> str:
@@ -64,64 +85,135 @@ def _model() -> str:
 def build_image_ctx(page: dict) -> dict:
     """Deterministic image context from a build_page() result — no PII fields."""
     prioritized = (page.get("objections") or {}).get("prioritized") or []
-    top = prioritized[0]["objection_id"] if prioritized else None
+    top_objections = [p["objection_id"] for p in prioritized[:3]]
+    top = top_objections[0] if top_objections else None
     ad = page.get("ad_variant")
     det = page.get("det") or {}
+    ident = page.get("identity")
+    hero = (page.get("sections") or {}).get("hero") or {}
+    archetype_id = None
+    if ident and ident.get("kind") == "cohort" and ident.get("archetype"):
+        archetype_id = ident["archetype"].get("id")
     return {
         "channel": page["entry"]["channel"],
         "ad_variant_id": ad["id"] if ad else None,
+        "ad_variant": ad,
         "audience": page.get("audience", "neutral"),
         "audience_route": page.get("audience_route", "neutral"),
         "industry": det.get("industry") or "general",
         "region": det.get("region"),
+        "tier": page.get("tier", 0),
         "top_objection": top,
+        "top_objections": top_objections,
+        "cta_primary": hero.get("cta_primary"),
+        "compare_emphasis": (page.get("sections") or {}).get("compare", {}).get("emphasis"),
+        "archetype_id": archetype_id,
+        # hold-tier source fields — used only for guardrail stripping, never emitted
+        "_hold": {
+            "company": det.get("company"),
+            "city": det.get("city"),
+            "visitor_name": (ident.get("first") if ident else None),
+            "income_band": (
+                ident["view"]["deep"].get("income_band")
+                if ident and ident.get("kind") == "cohort"
+                and ident.get("view", {}).get("deep") else None
+            ),
+        },
     }
 
 
-def build_image_prompt(ctx: dict) -> str:
-    """Deterministic text-to-image prompt — industry/peer framing only, no PII."""
-    lines = [
-        "Cinematic wide hero backdrop for an AI engineering talent program marketing site.",
-        "Dark moody atmosphere, warm gold accent lighting, abstract technology textures.",
-        "No text, no logos, no readable faces, no company names, no maps.",
+def select_image_intent(ctx: dict) -> II.ImageIntentSelection:
+    """Delegate to image_intents — exposed for tests and provenance."""
+    return II.select_image_intent(ctx)
+
+
+def _apply_guardrails(structured: II.StructuredPrompt, ctx: dict) -> II.StructuredPrompt:
+    """Strip hold-tier facts; enforce must_avoid; log what was blocked."""
+    out = dict(structured)
+    blocked: list[str] = list(out.get("guardrails_blocked") or [])
+    applied: list[str] = list(out.get("guardrails_applied") or [])
+
+    hold = ctx.get("_hold") or {}
+    layers = list(out.get("personalization_layers") or [])
+
+    # Tier 0: strip industry/region if not allude-safe (tier < 1 for region, tier < 2 for industry)
+    tier = ctx.get("tier", 0)
+    if tier < 2:
+        before = len(layers)
+        layers = [l for l in layers if l["layer"] != "industry"]
+        if len(layers) < before:
+            blocked.append("industry_layer_stripped:tier<2")
+            applied.append("tier_gate:industry_hold_below_tier_2")
+    if tier < 1:
+        before = len(layers)
+        layers = [l for l in layers if l["layer"] != "region_mood"]
+        if len(layers) < before:
+            blocked.append("region_layer_stripped:tier<1")
+            applied.append("tier_gate:region_hold_below_tier_1")
+
+    out["personalization_layers"] = layers
+
+    # Build text blob for hold/PII scan
+    text_parts = [
+        out.get("composition", ""),
+        out.get("visual_metaphor", ""),
+        " ".join(l["value"] for l in layers),
     ]
-    if ctx.get("ad_variant_id"):
-        av = next((v for v in GS.AD_VARIANTS if v["id"] == ctx["ad_variant_id"]), None)
-        if av:
-            lines.append(
-                f"Visual mood aligned with {av['x_targeting_type']} ad targeting — "
-                f"{av['audience_fit_label']} audience, abstract only.")
-    route = ctx.get("audience_route", "neutral")
-    route_mood = {
-        "b2b_hire": "Corporate engineering hiring — team capability under production pressure.",
-        "b2b_upskill": "Enterprise team upskilling — collaborative learning energy.",
-        "individual": "Individual engineer career leap — focused determination.",
-        "neutral": "Balanced B2B and individual engineering audience.",
-    }
-    lines.append(route_mood.get(route, route_mood["neutral"]))
-    ind_key = ctx.get("industry") or "general"
-    if ind_key != "general":
-        label = SC.BY_KEY.get(ind_key, {}).get("label", ind_key)
-        lines.append(f"Subtle {label.lower()} sector atmosphere — environmental cues only.")
-    if ctx.get("region"):
-        lines.append(f"Regional tone suggesting {ctx['region']} — no landmarks or addresses.")
-    if ctx.get("top_objection"):
-        obj = GS.OBJECTION_BY_ID.get(ctx["top_objection"])
-        if obj:
-            lines.append(
-                f"Mood subtly addresses the concern: {obj['text']} — abstract, not literal.")
-    prompt = " ".join(lines)
-    _assert_prompt_safe(prompt)
-    return prompt
+    for key, label in (
+        ("company", "company_name"),
+        ("city", "exact_city"),
+        ("visitor_name", "visitor_name"),
+        ("income_band", "income"),
+    ):
+        val = hold.get(key)
+        if val and str(val).strip() not in ("—", "", None):
+            text_parts.append(str(val))
+            blocked.append(f"hold_source_present:{label}")
+    blob = " ".join(text_parts)
+
+    for pat, label in _HOLD_STRIP_PATTERNS:
+        if pat.search(blob):
+            blocked.append(f"pattern_blocked:{label}")
+            applied.append(f"strip_pattern:{label}")
+
+    # Enforce global must_avoid
+    must_avoid = list(dict.fromkeys((out.get("must_avoid") or []) + _GLOBAL_MUST_AVOID))
+    out["must_avoid"] = must_avoid
+    applied.extend(["must_avoid_enforced", "no_text_in_image", "no_pii", "no_logos", "no_faces"])
+
+    out["guardrails_blocked"] = list(dict.fromkeys(blocked))
+    out["guardrails_applied"] = list(dict.fromkeys(applied))
+    out["full_prompt"] = II.assemble_full_prompt(out)
+    _assert_prompt_safe(out["full_prompt"])
+    return out
+
+
+def build_image_prompt(ctx: dict) -> II.StructuredPrompt:
+    """Structured, action-driven prompt with provenance fields."""
+    selection = II.select_image_intent(ctx)
+    structured = II.build_structured_prompt(ctx, selection)
+    return _apply_guardrails(structured, ctx)
+
+
+def prompt_text(structured: II.StructuredPrompt | dict) -> str:
+    """API-ready prompt string from a StructuredPrompt."""
+    if isinstance(structured, dict) and structured.get("full_prompt"):
+        return structured["full_prompt"]
+    return II.assemble_full_prompt(structured)
 
 
 def _assert_prompt_safe(prompt: str) -> None:
-    low = prompt.lower()
-    if _FORBIDDEN_PROMPT.search(prompt):
+    # Scan only the descriptive body — must_avoid instructions are meta-guardrails.
+    body = prompt.split("Must avoid:")[0]
+    low = body.lower()
+    if _FORBIDDEN_PROMPT.search(body):
         raise ValueError("prompt contains forbidden hold/PII patterns")
     for w in _PII_WORDS:
         if w in low:
             raise ValueError(f"prompt contains forbidden token: {w}")
+    for pat, label in _HOLD_STRIP_PATTERNS:
+        if label in ("income", "age", "gender", "zip_code") and pat.search(body):
+            raise ValueError(f"prompt contains hold-tier pattern: {label}")
 
 
 def image_cache_key(prompt: str, model: str | None = None) -> str:
@@ -180,7 +272,30 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
 
-def _gradient_receipt(*, prompt: str, cache_key: str, model: str, fallback_chain: list[str]) -> dict:
+def _receipt_extras(structured: II.StructuredPrompt) -> dict[str, Any]:
+    """Provenance fields stored alongside generation receipt."""
+    return {
+        "intent_id": structured.get("intent_id"),
+        "secondary_intent_id": structured.get("secondary_intent_id"),
+        "conversion_goal": structured.get("conversion_goal"),
+        "sales_technique": structured.get("sales_technique"),
+        "personalization_layers": structured.get("personalization_layers"),
+        "composition": structured.get("composition"),
+        "visual_metaphor": structured.get("visual_metaphor"),
+        "mood": structured.get("mood"),
+        "accent_color": structured.get("accent_color"),
+        "must_include": structured.get("must_include"),
+        "must_avoid": structured.get("must_avoid"),
+        "drives_action": structured.get("drives_action"),
+        "pairs_with_objection": structured.get("pairs_with_objection"),
+        "guardrails_applied": structured.get("guardrails_applied"),
+        "guardrails_blocked": structured.get("guardrails_blocked"),
+        "intent_selection": structured.get("selection"),
+    }
+
+
+def _gradient_receipt(*, structured: II.StructuredPrompt, prompt: str, cache_key: str,
+                      model: str, fallback_chain: list[str]) -> dict:
     return {
         "url": None,
         "source": "gradient",
@@ -191,16 +306,17 @@ def _gradient_receipt(*, prompt: str, cache_key: str, model: str, fallback_chain
         "generated_at": None,
         "license": "CSS gradient fallback (instant, no network)",
         "fallback_chain": fallback_chain,
+        **_receipt_extras(structured),
     }
 
 
-def _gallery_receipt(ctx: dict, *, prompt: str, cache_key: str, model: str,
-                     fallback_chain: list[str]) -> dict:
+def _gallery_receipt(ctx: dict, *, structured: II.StructuredPrompt, prompt: str,
+                     cache_key: str, model: str, fallback_chain: list[str]) -> dict:
     ind = ctx.get("industry") or "general"
     img = SC.image_for(ind)
     if ind == "general" or img.get("id") == "neutral-wash":
-        return _gradient_receipt(prompt=prompt, cache_key=cache_key, model=model,
-                                 fallback_chain=fallback_chain + ["gradient"])
+        return _gradient_receipt(structured=structured, prompt=prompt, cache_key=cache_key,
+                                 model=model, fallback_chain=fallback_chain + ["gradient"])
     return {
         "url": img["url"],
         "source": "gallery",
@@ -212,6 +328,7 @@ def _gallery_receipt(ctx: dict, *, prompt: str, cache_key: str, model: str,
         "license": f"{img.get('license', 'CC')} · {img.get('creator', 'unknown')}",
         "gallery_id": img.get("id"),
         "fallback_chain": fallback_chain,
+        **_receipt_extras(structured),
     }
 
 
@@ -299,7 +416,8 @@ def _call_image_api(prompt: str) -> dict | None:
     return _call_openai_image_api(prompt, url=url, key=key, model=_model())
 
 
-def _generate_and_cache(ctx: dict, prompt: str, cache_key: str, model: str) -> dict:
+def _generate_and_cache(ctx: dict, structured: II.StructuredPrompt, prompt: str,
+                        cache_key: str, model: str) -> dict:
     chain = ["cache"]
     api_result = _call_image_api(prompt)
     if api_result:
@@ -319,6 +437,7 @@ def _generate_and_cache(ctx: dict, prompt: str, cache_key: str, model: str) -> d
             "generated_at": _now_iso(),
             "license": "AI-generated (synthetic demo — disclosed on /dev)",
             "fallback_chain": chain + ["api"],
+            **_receipt_extras(structured),
         }
         manifest = _read_manifest()
         manifest[cache_key] = {k: v for k, v in receipt.items() if k != "url"}
@@ -326,13 +445,14 @@ def _generate_and_cache(ctx: dict, prompt: str, cache_key: str, model: str) -> d
         _write_manifest(manifest)
         return receipt
     chain.append("api_failed")
-    return _gallery_receipt(ctx, prompt=prompt, cache_key=cache_key, model=model,
-                            fallback_chain=chain + ["gallery"])
+    return _gallery_receipt(ctx, structured=structured, prompt=prompt, cache_key=cache_key,
+                            model=model, fallback_chain=chain + ["gallery"])
 
 
 def get_hero_image(ctx: dict, *, generate: bool = False) -> dict:
     """Resolve hero image receipt. generate=True may call the image API (server-side only)."""
-    prompt = build_image_prompt(ctx)
+    structured = build_image_prompt(ctx)
+    prompt = structured["full_prompt"]
     model = _model()
     cache_key = image_cache_key(prompt, model)
 
@@ -341,8 +461,8 @@ def get_hero_image(ctx: dict, *, generate: bool = False) -> dict:
         return dict(cached)
 
     if not _api_key():
-        return _gallery_receipt(ctx, prompt=prompt, cache_key=cache_key, model=model,
-                                fallback_chain=["cache_miss", "no_api_key", "gallery"])
+        return _gallery_receipt(ctx, structured=structured, prompt=prompt, cache_key=cache_key,
+                                model=model, fallback_chain=["cache_miss", "no_api_key", "gallery"])
 
     if not generate:
         return {
@@ -355,9 +475,10 @@ def get_hero_image(ctx: dict, *, generate: bool = False) -> dict:
             "generated_at": None,
             "license": None,
             "fallback_chain": ["cache_miss", "api_key_set", "await_async"],
+            **_receipt_extras(structured),
         }
 
-    return _generate_and_cache(ctx, prompt, cache_key, model)
+    return _generate_and_cache(ctx, structured, prompt, cache_key, model)
 
 
 def resolve_hero_image(page: dict, *, generate: bool = False) -> dict:
@@ -380,25 +501,37 @@ def hero_image_trace(receipt: dict) -> tuple[list[str], str, str]:
         f"cache_key={receipt.get('cache_key', '—')[:12]}…",
         f"model={receipt.get('model', '—')}",
     ]
+    if receipt.get("intent_id"):
+        sigs.append(f"intent={receipt['intent_id']}")
+        if receipt.get("secondary_intent_id"):
+            sigs.append(f"secondary={receipt['secondary_intent_id']}")
+    if receipt.get("drives_action"):
+        sigs.append(f"drives_action={receipt['drives_action']}")
+    sel = receipt.get("intent_selection") or {}
+    primary = sel.get("primary") or {}
+    if primary.get("why"):
+        sigs.append(f"why={primary['why'][:80]}")
     if receipt.get("gallery_id"):
         sigs.append(f"gallery_id={receipt['gallery_id']}")
     chain = receipt.get("fallback_chain") or []
     if chain:
         sigs.append("chain=" + " → ".join(chain))
     src = receipt.get("source", "gradient")
+    intent = receipt.get("intent_id", "—")
+    goal = receipt.get("conversion_goal", "—")
     if src == "generated":
-        out = f"generated · {receipt.get('vendor', VENDOR)}"
-        why = ("disk cache miss → API generated → cached for reproducibility; "
-               "prompt uses industry/route framing only (no PII)")
+        out = f"generated · {receipt.get('vendor', VENDOR)} · intent={intent}"
+        why = (f"disk cache miss → API generated → cached; intent {intent} ({goal}) "
+               "drives hero CTA; prompt uses structured layers only (no PII)")
     elif src == "gallery":
-        out = f"gallery · {receipt.get('gallery_id', 'curated')}"
-        why = "no cached/generated asset — curated CC library (scene.image_for), license disclosed"
+        out = f"gallery · {receipt.get('gallery_id', 'curated')} · intent={intent}"
+        why = "no cached/generated asset — curated CC library; intent selection still logged"
     elif src == "pending":
-        out = "pending async generation"
+        out = f"pending async · intent={intent}"
         why = "API key present but cache empty — page ships gradient; client fetch triggers gen"
     else:
-        out = "CSS gradient (instant fallback)"
-        why = "no image asset resolved — hero gradient matches gauntletai.com default"
+        out = f"CSS gradient · intent={intent}"
+        why = "no image asset resolved — hero gradient; intent selection logged for provenance"
     return sigs, out, why
 
 
@@ -411,6 +544,30 @@ def hero_image_ledger_rows(receipt: dict) -> list[dict]:
         "vendor": receipt.get("vendor") or "—",
         "policy": "say",
     }]
+    if receipt.get("intent_id"):
+        rows.append({
+            "label": "Image intent",
+            "value": receipt["intent_id"],
+            "source": "select_image_intent()",
+            "vendor": "image_intents",
+            "policy": "say",
+        })
+    if receipt.get("conversion_goal"):
+        rows.append({
+            "label": "Conversion goal",
+            "value": receipt["conversion_goal"],
+            "source": "intent template",
+            "vendor": receipt.get("intent_id", "—"),
+            "policy": "say",
+        })
+    if receipt.get("drives_action"):
+        rows.append({
+            "label": "Drives action",
+            "value": receipt["drives_action"],
+            "source": "CTA linkage",
+            "vendor": "build_structured_prompt()",
+            "policy": "say",
+        })
     if receipt.get("prompt"):
         rows.append({
             "label": "Image prompt",
@@ -453,3 +610,8 @@ def hero_image_ledger_rows(receipt: dict) -> list[dict]:
             "policy": "observed",
         })
     return rows
+
+
+def intent_catalog_for_dev() -> list[dict]:
+    """Full intent taxonomy for /dev panel."""
+    return II.INTENT_CATALOG

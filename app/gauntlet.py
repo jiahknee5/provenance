@@ -152,7 +152,8 @@ def _render_dev(request: Request, m: dict[str, str]) -> HTMLResponse:
     dev = m["dev"]
     sep = "&" if qs else "?"
     return templates.TemplateResponse(request, "gauntlet_dev.html", {
-        "page": page, "as_state": as_state or ("known" if email else "anon"),
+        "page": page, "pmap": GS.process_map(page),
+        "as_state": as_state or ("known" if email else "anon"),
         "qs": qs, "toggle_anon": f"{dev}{qs}{sep}as=anon",
         "toggle_known": f"{dev}{qs}{sep}as=known",
         "entry_links_raw": entry_links(m),

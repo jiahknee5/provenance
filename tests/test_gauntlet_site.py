@@ -197,6 +197,55 @@ def test_dev_rebuilds_the_same_state_as_the_entry_url():
     assert "Rewire Your Engineers" in d              # the shipped hero appears in the copy diff
 
 
+def test_process_map_covers_every_stage_with_data_and_branches():
+    page = GS.build_page(_Req({"utm_medium": "paid", "utm_campaign": "x-keyword-ai-hiring",
+                               "utm_content": "v09"}),
+                         email="maya.chen@gauntletai.com")
+    pm = GS.process_map(page)
+    assert len(pm["inputs"]) == 4                    # query · referer · IP · cookie
+    ids = [s["id"] for s in pm["stages"]]
+    assert ids == ["entry", "advariant", "ip", "tier", "identity", "archetype",
+                   "audience", "objections", "policy", "compose", "heroimg"]
+    for s in pm["stages"]:
+        assert s["reads"], f"stage {s['id']} reads no data"
+        assert s["output"], f"stage {s['id']} has no output"
+        assert s["link"].startswith("#sec-"), f"stage {s['id']} missing anchor"
+        if s["branches"] and not s["skipped"]:
+            assert sum(1 for b in s["branches"] if b["taken"]) >= 1, \
+                f"stage {s['id']} shows branches but none taken"
+    # branch decisions match the page state
+    entry = next(s for s in pm["stages"] if s["id"] == "entry")
+    assert next(b["label"] for b in entry["branches"] if b["taken"]) == "ad"
+    adv = next(s for s in pm["stages"] if s["id"] == "advariant")
+    assert not adv["skipped"] and "x-keyword" in adv["output"]
+    ident = next(s for s in pm["stages"] if s["id"] == "identity")
+    assert next(b["label"] for b in ident["branches"] if b["taken"]) == "cohort CRM"
+    arch = next(s for s in pm["stages"] if s["id"] == "archetype")
+    assert not arch["skipped"]
+
+
+def test_process_map_marks_skipped_stages_for_anonymous_direct():
+    page = GS.build_page(_Req())
+    pm = GS.process_map(page)
+    adv = next(s for s in pm["stages"] if s["id"] == "advariant")
+    arch = next(s for s in pm["stages"] if s["id"] == "archetype")
+    assert adv["skipped"] and adv["skip_reason"]
+    assert arch["skipped"] and arch["skip_reason"]
+    ident = next(s for s in pm["stages"] if s["id"] == "identity")
+    assert next(b["label"] for b in ident["branches"] if b["taken"]) == "anonymous"
+
+
+def test_dev_page_renders_the_process_map():
+    t = c.get("/dev?as=anon").text
+    assert "Process map" in t
+    for anchor in ("sec-entry", "sec-tier", "sec-crm", "sec-slots",
+                   "sec-hero-image", "sec-objections", "sec-order"):
+        assert f'id="{anchor}"' in t and f'href="#{anchor}"' in t, f"missing anchor: {anchor}"
+    # inputs strip shows the four data sources
+    for label in ("Query string", "Referer header", "Client IP", "Login cookie"):
+        assert label in t
+
+
 def test_showcase_card_publishes_the_entry_links():
     t = c.get("/showcase").text
     assert "GauntletAI replica" in t

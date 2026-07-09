@@ -69,6 +69,40 @@
   .obj-body .slot{font-size:11.5px;color:#475569;margin-top:4px}
   .obj-blocked{margin:0 15px 12px;border:1px solid #f2c6cd;background:#fcebed;border-radius:8px;padding:9px 11px;font-size:12.5px;color:#8c2434}
   .obj-blocked .cap{font-size:9.5px;font-weight:800;text-transform:uppercase;color:#c0354b;margin-bottom:4px}
+  /* ---- process map ---- */
+  .pm{border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:var(--shadow);overflow:hidden;margin-top:18px}
+  .pm .h{display:flex;align-items:center;gap:8px;padding:11px 15px;border-bottom:1px solid var(--line);font-size:13px;font-weight:700}
+  .pm .h .tag{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:5px;padding:2px 8px;background:#F1F3F5;color:var(--muted)}
+  .pm-inputs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:12px 15px;border-bottom:1px solid var(--line);background:#FAFBFC}
+  @media(max-width:920px){.pm-inputs{grid-template-columns:1fr 1fr}}
+  .pm-in{border:1px solid var(--line);border-radius:9px;background:#fff;padding:9px 11px;min-width:0}
+  .pm-in .cap{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .pm-in .val{font-size:12px;font-weight:600;color:var(--ink);margin-top:3px;word-break:break-word;font-family:ui-monospace,Menlo,monospace}
+  .pm-in .feeds{font-size:10.5px;color:var(--muted);margin-top:4px}
+  .pm-flow{padding:4px 0 10px;position:relative}
+  .pm-stage{display:grid;grid-template-columns:44px minmax(180px,.85fr) 1.4fr;gap:0 12px;padding:11px 15px 11px 0;position:relative}
+  @media(max-width:920px){.pm-stage{grid-template-columns:44px 1fr;row-gap:6px}.pm-stage .pm-right{grid-column:2}}
+  .pm-stage + .pm-stage{border-top:1px dashed var(--line)}
+  .pm-rail{position:relative;display:flex;justify-content:center}
+  .pm-rail::before{content:"";position:absolute;top:-12px;bottom:-12px;left:50%;width:2px;background:#E4E8EC}
+  .pm-stage:first-child .pm-rail::before{top:12px}
+  .pm-stage:last-child .pm-rail::before{bottom:auto;height:14px}
+  .pm-rail .n{position:relative;z-index:1;width:24px;height:24px;border-radius:7px;background:var(--ink);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;flex:none;margin-top:1px}
+  .pm-stage.skip .pm-rail .n{background:#C6CDD4}
+  .pm-stage.skip .pm-left,.pm-stage.skip .pm-right{opacity:.55}
+  .pm-left .nm{font-weight:700;font-size:13px}
+  .pm-left .nm a{color:inherit;text-decoration:none}
+  .pm-left .nm a:hover{color:var(--brand)}
+  .pm-left .rule{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.45}
+  .pm-left .skiptag{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border-radius:4px;padding:1px 6px;background:#F1F3F5;color:var(--muted);margin-left:6px}
+  .pm-reads{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:5px}
+  .pm-reads .chip{font-size:10.5px;font-weight:600;color:#475569;background:#F6F8FA;border:1px solid var(--line);border-radius:5px;padding:1px 7px;margin:0;font-family:ui-monospace,Menlo,monospace}
+  .pm-branch{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:5px}
+  .pm-branch .b{font-size:10.5px;font-weight:600;border-radius:6px;padding:2px 9px;border:1px solid var(--line);color:var(--muted);background:#fff}
+  .pm-branch .b.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .pm-out{font-size:12.5px;font-weight:600;color:var(--ink)}
+  .pm-out::before{content:"→ ";color:var(--muted);font-weight:400}
+  .pm-why{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.45}
 </style>
 
 {% set P = page %}
@@ -92,9 +126,41 @@
   <span class="chip">{{ sample_email }}</span>
 </div>
 
+<div class="pm">
+  <div class="h">⓪ Process map — data in → every decision → page out <span class="tag">this request</span></div>
+  <div class="pm-inputs">
+    {% for i in pmap.inputs %}
+    <div class="pm-in">
+      <div class="cap">{{ i.label }}</div>
+      <div class="val">{{ i.value }}</div>
+      <div class="feeds">feeds: {{ i.feeds }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="pm-flow">
+    {% for s in pmap.stages %}
+    <div class="pm-stage{{ ' skip' if s.skipped else '' }}">
+      <div class="pm-rail"><span class="n">{{ loop.index }}</span></div>
+      <div class="pm-left">
+        <div class="nm"><a href="{{ s.link }}">{{ s.title }}</a>{% if s.skipped %}<span class="skiptag">skipped</span>{% endif %}</div>
+        <div class="rule">{{ s.skip_reason if s.skipped else s.rule }}</div>
+      </div>
+      <div class="pm-right">
+        <div class="pm-reads">{% for r in s.reads %}<span class="chip">{{ r }}</span>{% endfor %}</div>
+        {% if s.branches %}
+        <div class="pm-branch">{% for b in s.branches %}<span class="b{{ ' on' if b.taken else '' }}">{{ b.label }}</span>{% endfor %}</div>
+        {% endif %}
+        <div class="pm-out">{{ s.output }}</div>
+        {% if s.why and not s.skipped %}<div class="pm-why">{{ s.why }}</div>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
 <div class="gd-grid">
   <div>
-    <div class="sec">
+    <div class="sec" id="sec-entry">
       <div class="h">① Entry point <span class="tag">{{ P.entry.channel_label }}</span></div>
       <div class="kv"><span class="k">Channel</span><span class="v">{{ P.entry.channel_label }}<span class="why">{{ P.entry.why }}</span></span></div>
       <div class="kv"><span class="k">Rule fired</span><span class="v"><code>{{ P.entry.rule }}</code></span></div>
@@ -103,7 +169,7 @@
       {% endfor %}
     </div>
 
-    <div class="sec">
+    <div class="sec" id="sec-tier">
       <div class="h">② Tier routing <span class="tag">tier {{ P.tier }} · {{ P.tier_label }}</span></div>
       <div class="kv"><span class="k">Network type</span><span class="v">{{ P.det.network_type or 'private / unreachable' }}</span></div>
       <div class="kv"><span class="k">IP</span><span class="v">{{ P.det.ip or '—' }}{% if P.ip_forced %} <span class="chip">?ip= override</span>{% endif %}</span></div>
@@ -112,7 +178,7 @@
       {% if P.det.reason %}<div class="kv"><span class="k">Why</span><span class="v" style="font-weight:400;color:var(--muted)">{{ P.det.reason }}</span></div>{% endif %}
     </div>
 
-    <div class="sec">
+    <div class="sec" id="sec-ledger">
       <div class="h">③ Signal ledger <span class="tag">{{ P.ledger|length }} signals</span></div>
       <table class="led">
         <tr><th>Signal</th><th>Value</th><th>Source · vendor</th><th>Policy → disposition</th></tr>
@@ -127,7 +193,7 @@
       </table>
     </div>
 
-    <div class="sec">
+    <div class="sec" id="sec-crm">
       <div class="h">④ CRM record {% if P.identity and P.identity.kind == 'cohort' %}<span class="tag">via {{ P.identity.via }}</span>{% endif %}</div>
       {% if P.identity and P.identity.kind == 'cohort' %}
       {% set v = P.identity.view %}
@@ -151,7 +217,7 @@
   </div>
 
   <div>
-    <div class="sec">
+    <div class="sec" id="sec-slots">
       <div class="h">⑤ Per-slot copy decision <span class="tag">{{ P.copy_diff|selectattr('changed')|list|length }} of {{ P.copy_diff|length }} personalized</span></div>
       {% for d in P.copy_diff %}
       <div class="diff">
@@ -171,13 +237,35 @@
       {% endfor %}
     </div>
 
-    <div class="sec">
+    <div class="sec" id="sec-hero-image">
       <div class="h">⑥ Hero image provenance <span class="tag">{{ P.hero_image.receipt.source|default('gradient') }}</span></div>
       {% set ir = P.hero_image.receipt %}
       <div class="kv"><span class="k">Load status</span><span class="v">{{ P.hero_image.status }} · fallback {{ P.hero_image.fallback }}<span class="why">page shell renders instantly; async fetch only when status=pending</span></span></div>
       <div class="kv"><span class="k">Source class</span><span class="v">{{ ir.source|default('gradient') }} <span class="pol say">say</span></span></div>
+      {% if ir.intent_id %}<div class="kv"><span class="k">Intent</span><span class="v"><b>{{ ir.intent_id }}</b>{% if ir.secondary_intent_id %} + {{ ir.secondary_intent_id }}{% endif %}<span class="why">{% if ir.intent_selection and ir.intent_selection.primary %}{{ ir.intent_selection.primary.why }}{% endif %}</span></span></div>{% endif %}
+      {% if ir.conversion_goal %}<div class="kv"><span class="k">Conversion goal</span><span class="v">{{ ir.conversion_goal }}</span></div>{% endif %}
+      {% if ir.sales_technique %}<div class="kv"><span class="k">Sales technique</span><span class="v">{{ ir.sales_technique }}</span></div>{% endif %}
+      {% if ir.drives_action %}<div class="kv"><span class="k">Drives action</span><span class="v"><b>{{ ir.drives_action }}</b>{% if ir.pairs_with_objection %} · pairs with <code>{{ ir.pairs_with_objection }}</code>{% endif %}<span class="why">links image intent to hero CTA: {{ P.sections.hero.cta_primary }}</span></span></div>{% endif %}
+      {% if ir.visual_metaphor %}<div class="kv"><span class="k">Visual metaphor</span><span class="v" style="font-weight:400">{{ ir.visual_metaphor }}</span></div>{% endif %}
+      {% if ir.personalization_layers %}
+      <div class="kv"><span class="k">Personalization layers</span><span class="v" style="font-weight:400">
+        <table style="width:100%;font-size:12px;border-collapse:collapse;margin-top:4px">
+          <tr style="border-bottom:1px solid #333"><th align="left">Layer</th><th align="left">Value</th><th align="left">Source</th><th align="left">Policy</th></tr>
+          {% for layer in ir.personalization_layers %}
+          <tr><td>{{ layer.layer }}</td><td>{{ layer.value[:80] }}{% if layer.value|length > 80 %}…{% endif %}</td><td>{{ layer.source }}</td><td><span class="pol {{ layer.disposition }}">{{ layer.disposition }}</span></td></tr>
+          {% endfor %}
+        </table>
+      </span></div>
+      {% endif %}
+      {% if ir.guardrails_applied or ir.guardrails_blocked %}
+      <div class="kv"><span class="k">Guardrails</span><span class="v" style="font-weight:400;font-size:12.5px">
+        {% if ir.guardrails_applied %}<div>✓ applied: {{ ir.guardrails_applied|join(', ') }}</div>{% endif %}
+        {% if ir.guardrails_blocked %}<div style="color:#f59e0b">⊘ blocked/stripped: {{ ir.guardrails_blocked|join(', ') }}</div>{% endif %}
+        {% if ir.must_avoid %}<div style="margin-top:6px;opacity:.85">must avoid: {{ ir.must_avoid[:3]|join('; ') }}…</div>{% endif %}
+      </span></div>
+      {% endif %}
       {% if ir.url or P.hero_image.url %}<div class="kv"><span class="k">URL</span><span class="v" style="font-size:12px;word-break:break-all">{{ P.hero_image.url or ir.url or '—' }}</span></div>{% endif %}
-      {% if ir.prompt %}<div class="kv"><span class="k">Prompt</span><span class="v" style="font-weight:400;font-size:12.5px">{{ ir.prompt }}</span></div>{% endif %}
+      {% if ir.prompt %}<div class="kv"><span class="k">Full prompt</span><span class="v" style="font-weight:400;font-size:12.5px">{{ ir.prompt }}</span></div>{% endif %}
       {% if ir.model %}<div class="kv"><span class="k">Model</span><span class="v">{{ ir.model }} · {{ ir.vendor|default('—') }}</span></div>{% endif %}
       {% if ir.cache_key %}<div class="kv"><span class="k">Cache key</span><span class="v" style="font-family:ui-monospace,Menlo,monospace;font-size:12px">{{ ir.cache_key }}</span></div>{% endif %}
       {% if ir.license %}<div class="kv"><span class="k">License</span><span class="v">{{ ir.license }}</span></div>{% endif %}
@@ -185,7 +273,7 @@
       {% if ir.generated_at %}<div class="kv"><span class="k">Generated at</span><span class="v">{{ ir.generated_at }}</span></div>{% endif %}
     </div>
 
-    <div class="sec">
+    <div class="sec" id="sec-objections">
       <div class="h">⑦ Objection checklist <span class="tag">{{ P.objections.prioritized|length }} ranked</span></div>
       {% if P.objections.prioritized %}
       {% for o in P.objections.prioritized %}
@@ -209,7 +297,7 @@
       {% endif %}
     </div>
 
-    <div class="sec">
+    <div class="sec" id="sec-trace">
       <div class="h">⑧ Trace — every stage, in order <span class="tag">deterministic</span></div>
       {% for t in P.trace %}
       <div class="trace-step">
@@ -225,7 +313,7 @@
       {% endfor %}
     </div>
 
-    <div class="sec">
+    <div class="sec" id="sec-order">
       <div class="h">Section order shipped</div>
       <div class="kv"><span class="k">Audience</span><span class="v">{{ P.audience }}</span></div>
       <div class="kv"><span class="k">Order</span><span class="v">{{ P.order|join(' → ') }}<span class="why">same sections, same facts for everyone — only emphasis and order move</span></span></div>

@@ -1,8 +1,7 @@
-"""Hero image generation — offline fallbacks, cache determinism, prompt safety, non-blocking page."""
+"""Hero image generation — intents, guardrails, cache determinism, non-blocking page."""
 from __future__ import annotations
 
 import json
-import os
 from unittest.mock import patch
 
 from starlette.testclient import TestClient
@@ -10,6 +9,7 @@ from starlette.testclient import TestClient
 from app.main import app
 from pipeline.personalization import gauntlet_site as GS
 from pipeline.personalization import image_gen as IG
+from pipeline.personalization import image_intents as II
 
 c = TestClient(app)
 
@@ -24,17 +24,147 @@ class _Req:
 
 def _ctx(**overrides):
     base = {
-        "channel": "direct",
+        "channel": "ad",
         "ad_variant_id": None,
         "audience": "neutral",
         "audience_route": "neutral",
         "industry": "general",
         "region": None,
+        "tier": 0,
         "top_objection": None,
+        "top_objections": [],
+        "cta_primary": "Hire Proven Talent",
+        "_hold": {},
     }
     base.update(overrides)
     return base
 
+
+def _make_page(params):
+    return GS.build_page(_Req(params))
+
+
+def _prompt_text(ctx):
+    return IG.prompt_text(IG.build_image_prompt(ctx))
+
+
+# --- Intent selection ---
+
+def test_keyword_ad_hire_objection_selects_message_match_and_peer_proof():
+    page = _make_page({
+        "utm_medium": "paid",
+        "utm_campaign": "x-keyword-ai-hiring",
+        "utm_content": "v09",
+    })
+    ctx = IG.build_image_ctx(page)
+    sel = IG.select_image_intent(ctx)
+    ids = [p["intent_id"] for p in sel["intents"]]
+    assert "message_match" in ids
+    assert "peer_proof" in ids
+    assert sel["primary"]["intent_id"] == "message_match"
+    assert "keyword" in sel["primary"]["why"].lower() or "ad" in sel["primary"]["why"].lower()
+
+
+def test_hr_event_ld_budget_selects_roi_clarity():
+    page = _make_page({
+        "utm_medium": "paid",
+        "utm_campaign": "x-event-hrtech",
+        "utm_content": "v07",
+    })
+    ctx = IG.build_image_ctx(page)
+    sel = IG.select_image_intent(ctx)
+    assert sel["primary"]["intent_id"] == "roi_clarity"
+
+
+def test_engineer_interest_challenger_route_selects_aspiration():
+    page = _make_page({
+        "utm_medium": "paid",
+        "utm_campaign": "x-interest-ai-ml",
+        "utm_content": "v11",
+    })
+    ctx = IG.build_image_ctx(page)
+    sel = IG.select_image_intent(ctx)
+    assert sel["primary"]["intent_id"] == "aspiration"
+
+
+def test_post_engager_selects_retarget_warm():
+    page = _make_page({
+        "utm_medium": "paid",
+        "utm_campaign": "x-engager-retarget",
+        "utm_content": "v08",
+    })
+    ctx = IG.build_image_ctx(page)
+    sel = IG.select_image_intent(ctx)
+    assert sel["primary"]["intent_id"] == "retarget_warm"
+
+
+def test_intent_selection_deterministic():
+    page = _make_page({"utm_medium": "paid", "utm_campaign": "x-keyword-ai-hiring", "utm_content": "v09"})
+    ctx = IG.build_image_ctx(page)
+    assert IG.select_image_intent(ctx) == IG.select_image_intent(ctx)
+
+
+# --- Structured prompt + guardrails ---
+
+def test_structured_prompt_has_provenance_fields():
+    page = _make_page({"utm_medium": "paid", "utm_campaign": "x-keyword-ai-hiring", "utm_content": "v09"})
+    structured = IG.build_image_prompt(IG.build_image_ctx(page))
+    assert structured["intent_id"] == "message_match"
+    assert structured["conversion_goal"]
+    assert structured["sales_technique"]
+    assert structured["personalization_layers"]
+    assert structured["full_prompt"]
+    assert structured["drives_action"] == "hire_cta"
+    assert structured["pairs_with_objection"] == "open_market_hire"
+    for item in structured["must_avoid"]:
+        assert "NO" in item
+
+
+def test_prompt_builder_excludes_pii_and_hold():
+    page = GS.build_page(_Req({"utm_medium": "email", "e": GS.sample_magic_token()}),
+                         email="maya.chen@gauntletai.com")
+    prompt = _prompt_text(IG.build_image_ctx(page))
+    low = prompt.lower()
+    assert "maya" not in low
+    assert "chen" not in low
+    assert "@" not in prompt
+    assert "cedar health" not in low
+    assert "income" not in low
+    assert "gauntletai.com" not in low
+
+
+def test_hold_facts_logged_in_receipt_not_in_prompt(monkeypatch):
+    monkeypatch.delenv("IMAGE_GEN_API_KEY", raising=False)
+    page = GS.build_page(_Req({"utm_medium": "email", "e": GS.sample_magic_token()}),
+                         email="maya.chen@gauntletai.com")
+    receipt = IG.get_hero_image(IG.build_image_ctx(page), generate=False)
+    prompt = receipt["prompt"].lower()
+    assert "maya" not in prompt
+    blocked = receipt.get("guardrails_blocked") or []
+    assert any("hold_source" in b or "visitor_name" in b for b in blocked)
+
+
+def test_tier_strips_industry_layer(monkeypatch):
+    monkeypatch.delenv("IMAGE_GEN_API_KEY", raising=False)
+    ctx = _ctx(industry="technology", tier=0, ad_variant_id="x-keyword",
+               top_objections=["open_market_hire"], audience_route="b2b_hire")
+    structured = IG.build_image_prompt(ctx)
+    layers = [l["layer"] for l in structured["personalization_layers"]]
+    assert "industry" not in layers
+    assert any("industry" in b for b in (structured.get("guardrails_blocked") or []))
+
+
+def test_must_avoid_enforced_in_every_prompt():
+    page = _make_page({"utm_medium": "paid", "utm_campaign": "x-keyword-ai-hiring", "utm_content": "v09"})
+    structured = IG.build_image_prompt(IG.build_image_ctx(page))
+    avoid_blob = " ".join(structured["must_avoid"]).lower()
+    assert "no text" in avoid_blob
+    assert "no faces" in avoid_blob
+    assert "company logos" in avoid_blob
+    assert "employer names" in avoid_blob
+
+
+# --- Offline / cache / API ---
 
 def test_offline_no_api_key_returns_gallery_or_gradient(monkeypatch):
     monkeypatch.delenv("IMAGE_GEN_API_KEY", raising=False)
@@ -42,6 +172,7 @@ def test_offline_no_api_key_returns_gallery_or_gradient(monkeypatch):
     receipt = IG.get_hero_image(_ctx(), generate=False)
     assert receipt["source"] in ("gallery", "gradient")
     assert receipt["source"] != "pending"
+    assert receipt.get("intent_id")
 
 
 def test_pending_when_api_key_set_but_not_cached(monkeypatch, tmp_path):
@@ -51,9 +182,12 @@ def test_pending_when_api_key_set_but_not_cached(monkeypatch, tmp_path):
     monkeypatch.setattr(IG, "MANIFEST", tmp_path / "manifest.json")
     receipt = IG.get_hero_image(_ctx(), generate=False)
     assert receipt["source"] == "pending"
+    assert receipt.get("intent_id") == "peer_proof"
     hero = IG.resolve_hero_image({"entry": {"channel": "direct"}, "det": {},
                                     "audience": "neutral", "audience_route": "neutral",
-                                    "objections": {"prioritized": []}}, generate=False)
+                                    "objections": {"prioritized": []},
+                                    "sections": {"hero": {"cta_primary": "Hire"}}},
+                                   generate=False)
     assert hero["status"] == "pending"
     assert hero["fallback"] == "gradient"
 
@@ -62,16 +196,18 @@ def test_cache_hit_same_url(monkeypatch, tmp_path):
     monkeypatch.setattr(IG, "CACHE_DIR", tmp_path)
     monkeypatch.setattr(IG, "IMAGE_DIR", tmp_path / "images")
     monkeypatch.setattr(IG, "MANIFEST", tmp_path / "manifest.json")
-    prompt = IG.build_image_prompt(_ctx(audience_route="b2b_hire", industry="technology"))
+    ctx = _ctx(audience_route="b2b_hire", industry="technology", tier=2)
+    prompt = _prompt_text(ctx)
     key = IG.image_cache_key(prompt)
     (tmp_path / "images").mkdir(parents=True)
     (tmp_path / "images" / f"{key}.png").write_bytes(b"\x89PNG\r\n")
     manifest = {key: {"source": "generated", "prompt": prompt, "model": IG._model(),
                       "vendor": IG.VENDOR, "cache_key": key, "ext": "png",
-                      "generated_at": "2026-07-09T00:00:00+00:00", "license": "test"}}
+                      "generated_at": "2026-07-09T00:00:00+00:00", "license": "test",
+                      "intent_id": "authority"}}
     (tmp_path / "manifest.json").write_text(json.dumps(manifest))
-    r1 = IG.get_hero_image(_ctx(audience_route="b2b_hire", industry="technology"))
-    r2 = IG.get_hero_image(_ctx(audience_route="b2b_hire", industry="technology"))
+    r1 = IG.get_hero_image(ctx)
+    r2 = IG.get_hero_image(ctx)
     assert r1["url"] == r2["url"]
     assert r1["url"] == f"/static/generated/{key}.png"
 
@@ -83,7 +219,7 @@ def test_api_mocked_generation_receipt(monkeypatch, tmp_path):
     monkeypatch.setattr(IG, "MANIFEST", tmp_path / "manifest.json")
     fake_png = b"\x89PNG\r\n\x01"
     monkeypatch.setattr(IG, "_call_image_api", lambda p: {"b64": __import__("base64").b64encode(fake_png).decode(), "ext": "png"})
-    ctx = _ctx(industry="technology", region="Texas")
+    ctx = _ctx(industry="technology", region="Texas", tier=2)
     receipt = IG.get_hero_image(ctx, generate=True)
     assert receipt["source"] == "generated"
     assert receipt["prompt"]
@@ -91,10 +227,12 @@ def test_api_mocked_generation_receipt(monkeypatch, tmp_path):
     assert receipt["vendor"]
     assert receipt["cache_key"]
     assert receipt["generated_at"]
+    assert receipt["intent_id"]
+    assert receipt["drives_action"]
     assert receipt["url"].startswith("/static/generated/")
 
 
-def test_page_html_returns_200_without_blocking(monkeypatch):
+def test_make_page_html_returns_200_without_blocking(monkeypatch):
     monkeypatch.setenv("IMAGE_GEN_API_KEY", "test-key")
     with patch.object(IG, "_call_image_api", side_effect=AssertionError("API must not run on page load")):
         r = c.get("/gauntlet?utm_source=x&utm_medium=paid&utm_campaign=x-keyword-ai-hiring&utm_content=v09")
@@ -102,36 +240,32 @@ def test_page_html_returns_200_without_blocking(monkeypatch):
     assert "gauntlet-hero" in r.text
 
 
-def test_prompt_builder_excludes_pii_and_hold():
-    page = GS.build_page(_Req({"utm_medium": "email", "e": GS.sample_magic_token()}),
-                         email="maya.chen@gauntletai.com")
-    ctx = IG.build_image_ctx(page)
-    prompt = IG.build_image_prompt(ctx)
-    low = prompt.lower()
-    assert "maya" not in low
-    assert "chen" not in low
-    assert "@" not in prompt
-    assert "cedar health" not in low
-    assert "income" not in low
-    assert "gauntletai.com" not in low
-
-
 def test_hero_image_api_offline(monkeypatch):
     monkeypatch.delenv("IMAGE_GEN_API_KEY", raising=False)
     monkeypatch.delenv("NANO_BANANA_API_KEY", raising=False)
-    r = c.get("/api/gauntlet/hero-image?utm_medium=paid")
+    r = c.get("/api/gauntlet/hero-image?utm_medium=paid&utm_campaign=x-keyword-ai-hiring&utm_content=v09")
     assert r.status_code == 200
     data = r.json()
     assert data["status"] == "ready"
     assert data["source"] in ("gallery", "gradient")
+    assert data["receipt"].get("intent_id")
 
 
 def test_dev_trace_includes_hero_image_stage():
-    page = GS.build_page(_Req({"utm_medium": "paid", "utm_campaign": "x-keyword-ai-hiring"}))
+    page = GS.build_page(_Req({"utm_medium": "paid", "utm_campaign": "x-keyword-ai-hiring", "utm_content": "v09"}))
     stages = [t["stage"] for t in page["trace"]]
     assert "Hero image resolve" in stages
     assert page.get("hero_image")
+    receipt = page["hero_image"]["receipt"]
+    assert receipt.get("intent_id") == "message_match"
 
+
+def test_dev_panel_shows_intent_provenance():
+    r = c.get("/dev?utm_medium=paid&utm_campaign=x-keyword-ai-hiring&utm_content=v09")
+    assert r.status_code == 200
+    assert "message_match" in r.text
+    assert "Drives action" in r.text
+    assert "Personalization layers" in r.text
 
 
 def test_gemini_api_mocked_generation_vendor(monkeypatch, tmp_path):
@@ -148,7 +282,8 @@ def test_gemini_api_mocked_generation_vendor(monkeypatch, tmp_path):
     fake_png = bytes([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x01])
 
     def _fake_gemini(prompt, *, url, key):
-        assert "Cinematic wide hero" in prompt
+        assert "Primary intent:" in prompt
+        assert "Must avoid:" in prompt
         return {
             "b64": base64.b64encode(fake_png).decode(),
             "ext": "png",
@@ -156,7 +291,8 @@ def test_gemini_api_mocked_generation_vendor(monkeypatch, tmp_path):
         }
 
     monkeypatch.setattr(IG, "_call_gemini_image_api", _fake_gemini)
-    receipt = IG.get_hero_image(_ctx(), generate=True)
+    receipt = IG.get_hero_image(_ctx(ad_variant_id="x-keyword", audience_route="b2b_hire",
+                                     top_objections=["open_market_hire"]), generate=True)
     assert receipt["source"] == "generated"
     assert receipt["vendor"] == "google-gemini"
 
@@ -175,3 +311,26 @@ def test_call_image_api_routes_to_gemini(monkeypatch):
     out = IG._call_image_api("safe abstract hero")
     assert out and out["vendor"] == IG.GEMINI_VENDOR
     assert called["url"] == IG.DEFAULT_GEMINI_API_URL
+
+
+def test_intent_taxonomy_complete():
+    expected = {"peer_proof", "loss_avoidance", "authority", "aspiration",
+                "roi_clarity", "retarget_warm", "message_match"}
+    assert set(II.INTENT_BY_ID) == expected
+
+
+def test_three_persona_example_prompts():
+    """Keyword CTO, HR event, Engineer interest — distinct intents and actions."""
+    cases = [
+        ({"utm_medium": "paid", "utm_campaign": "x-keyword-ai-hiring", "utm_content": "v09"},
+         "message_match", "hire_cta"),
+        ({"utm_medium": "paid", "utm_campaign": "x-event-hrtech", "utm_content": "v07"},
+         "roi_clarity", "catalyst_cta"),
+        ({"utm_medium": "paid", "utm_campaign": "x-interest-ai-ml", "utm_content": "v11"},
+         "aspiration", "challenger_cta"),
+    ]
+    for params, intent, action in cases:
+        structured = IG.build_image_prompt(IG.build_image_ctx(_make_page(params)))
+        assert structured["intent_id"] == intent, params
+        assert structured["drives_action"] == action, params
+        assert structured["full_prompt"]
