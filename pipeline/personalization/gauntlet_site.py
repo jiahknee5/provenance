@@ -96,87 +96,63 @@ def _campaign_intent(campaign: str) -> str | None:
 
 
 # --------------------------------------------------------------------------- #
-# X.com ad variants — 9 total = 3 audience segments × 3 copy angles each.
+# X.com ad variants — 12 total = one per real X Ads Manager targeting type.
 #
-# Segments (rows on /ad-lp):
-#   cto      — CTO / VP Engineering: hiring AI-native engineers, team transformation
-#   engineer — Individual senior engineer: Challenger program, career leap
-#   hr       — HR / L&D leader: Catalyst upskilling existing teams
+# Categories on /ad-lp:
+#   demographic — Location, Language, Device/platform/Wi-Fi, Age, Gender
+#   audience    — Conversation, Event, Post Engager, Keyword, Movies & TV,
+#                 Interest, Follower look-alikes
 #
-# Angles (columns on /ad-lp):
-#   cto:      hiring · transform · talent-gap
-#   engineer: challenger · career-leap · ship-proof
-#   hr:       catalyst · roi · velocity
-#
-# Each variant carries utm_campaign={segment}-{angle} and utm_content=v01–v09.
+# Each variant carries utm_campaign=x-{type-slug} and utm_content=v01–v12.
 # Copy follows docs/research/copy-personalization-research.md: 60–90 words, one idea,
 # soft CTA, loss framing where signal-derived, matched-peer social proof, one trigger.
+# Age/gender may target in X Ads but the landing page holds those facts — never recited.
 # --------------------------------------------------------------------------- #
-AD_SEGMENTS = {
-    "cto": {
-        "label": "CTO / VP Engineering",
-        "subtitle": "Hiring AI-native engineers · team transformation",
-        "handle": "GauntletAI",
-        "display": "Gauntlet AI",
-        "avatar": "CT",
-        "accent": "#3b82f6",
-    },
-    "engineer": {
-        "label": "Senior Engineer",
-        "subtitle": "Challenger program · career leap",
-        "handle": "GauntletAI",
-        "display": "Gauntlet AI",
-        "avatar": "SE",
-        "accent": "#10b981",
-    },
-    "hr": {
-        "label": "HR / L&D Leader",
-        "subtitle": "Catalyst upskilling · team velocity",
-        "handle": "GauntletAI",
-        "display": "Gauntlet AI",
-        "avatar": "LD",
-        "accent": "#a855f7",
-    },
+AD_CATEGORIES = (
+    {"key": "demographic", "label": "Demographic & delivery"},
+    {"key": "audience", "label": "Audience & intent"},
+)
+
+AUDIENCE_FIT = {
+    "CTO": {"label": "CTO / VP Engineering", "avatar": "CT", "accent": "#3b82f6"},
+    "Engineer": {"label": "Senior Engineer", "avatar": "SE", "accent": "#10b981"},
+    "HR/L&D": {"label": "HR / L&D Leader", "avatar": "LD", "accent": "#a855f7"},
+    "cross-audience": {"label": "Cross-audience", "avatar": "GA", "accent": "#64748b"},
 }
 
-AD_ANGLE_LABELS = {
-    "cto": ("Hiring signal", "Team transform", "Talent gap"),
-    "engineer": ("Challenger", "Career leap", "Ship proof"),
-    "hr": ("Catalyst upskill", "L&D ROI", "Team velocity"),
-}
-
-_ANGLE_ORDER = {
-    "cto": ("hiring", "transform", "talent-gap"),
-    "engineer": ("challenger", "career-leap", "ship-proof"),
-    "hr": ("catalyst", "roi", "velocity"),
-}
+_AUDIENCE_ROUTE = {"CTO": "companies", "Engineer": "individuals",
+                   "HR/L&D": "companies", "cross-audience": "neutral"}
 
 
-def _v(id_, variant_id, segment, angle, angle_label, audience, utm_campaign, *,
+def _v(id_, variant_id, category, audience_fit, x_targeting_type, x_targeting_example,
+       utm_campaign, *,
        trigger, body, proof, cta_label,
        h1_pre, h1_gold, sub, hero_eyebrow="",
        cta_primary, cta_secondary,
        compare_emphasis, order=None,
        prove_intro=None, challenger_body=None, challenger_hot=False,
-       cta_heading=None, cta_sub=None, stat_highlight=None):
+       cta_heading=None, cta_sub=None, stat_highlight=None,
+       hold_note=None):
     """Build one ad variant dict with paired ad mockup + landing-page overrides."""
-    seg = AD_SEGMENTS[segment]
+    fit = AUDIENCE_FIT[audience_fit]
     return {
         "id": id_,
         "variant_id": variant_id,
-        "segment": segment,
-        "segment_label": seg["label"],
-        "angle": angle,
-        "angle_label": angle_label,
-        "audience": audience,
+        "category": category,
+        "audience_fit": audience_fit,
+        "audience_fit_label": fit["label"],
+        "x_targeting_type": x_targeting_type,
+        "x_targeting_example": x_targeting_example,
+        "audience": _AUDIENCE_ROUTE[audience_fit],
         "utm_campaign": utm_campaign,
         "utm_source": "x",
         "utm_medium": "paid",
+        "hold_note": hold_note,
         "ad": {
-            "handle": seg["handle"],
-            "display": seg["display"],
-            "avatar": seg["avatar"],
-            "accent": seg["accent"],
+            "handle": "GauntletAI",
+            "display": "Gauntlet AI",
+            "avatar": fit["avatar"],
+            "accent": fit["accent"],
             "trigger": trigger,
             "body": body,
             "proof": proof,
@@ -184,7 +160,7 @@ def _v(id_, variant_id, segment, angle, angle_label, audience, utm_campaign, *,
             "text": f"{trigger} {body} {proof}",
         },
         "page": {
-            "hero_eyebrow": hero_eyebrow or f"From your X ad · {angle_label}",
+            "hero_eyebrow": hero_eyebrow or f"From your X ad · {x_targeting_type}",
             "h1_pre": h1_pre,
             "h1_gold": h1_gold,
             "sub": sub,
@@ -203,34 +179,131 @@ def _v(id_, variant_id, segment, angle, angle_label, audience, utm_campaign, *,
 
 
 AD_VARIANTS: list[dict] = [
-    # --- CTO / VP Eng (companies · Hire emphasis) ---
-    _v("cto-hiring", "v01", "cto", "hiring", "Hiring signal", "companies", "cto-hiring",
-       trigger="Saw your team posted three ML engineer roles last month.",
-       body=("Usually means you're hiring for skills you can only observe in a 45-minute loop — "
-             "while AI pilots sit idle."),
-       proof=("Most Series B CTOs tell us the last three AI hires took six months to ramp. "
-              "Gauntlet places engineers who've shipped 10+ production apps under 80-hour weeks."),
+    # --- Demographic & delivery (v01–v05) ---
+    _v("x-location", "v01", "demographic", "CTO",
+       "Location targeting", "SF Bay Area · Austin · Seattle metro",
+       "x-location-tech-hubs",
+       trigger="Bay Area and Austin CTOs tell us the same hiring story.",
+       body=("Three ML roles open for months while AI pilots sit idle — the bottleneck isn't "
+             "models, it's engineers who've already shipped under production pressure."),
+       proof=("Owner and Mainsail Partners hire from Gauntlet cohorts where 5,000+ applicants "
+              "compete and capability is observed across ten weeks, not a whiteboard loop."),
        cta_label="See how they prove it →",
-       hero_eyebrow="You clicked the hiring ad",
-       h1_pre="Stop Interviewing for Skills You ", h1_gold= "Can't Observe in 45 Minutes",
-       sub=("Gauntlet places engineers whose capability has already been observed across ten weeks "
-            "of production pressure — not a whiteboard loop. 5,000+ applicants per cohort; you watch them ship."),
+       hero_eyebrow="You clicked the location-targeted ad",
+       h1_pre="Tech Hubs Don't Have an AI Model Problem. ",
+       h1_gold="They Have a Talent Proof Problem.",
+       sub=("SF, Austin, Seattle — same pattern: pilots work, hiring stalls on skills you can't "
+            "observe in 45 minutes. Gauntlet places engineers whose capability has already been "
+            "proven across ten weeks of production pressure."),
        cta_primary="Hire Proven Talent", cta_secondary="See the Proof Model",
        compare_emphasis="gauntlet",
-       prove_intro=("Traditional interviews compress signal into hours. Gauntlet observes execution "
-                    "across weeks — the hire track shows you engineers who've already shipped under pressure."),
+       prove_intro=("Regional tech leaders hire from Gauntlet cohorts where execution is observed "
+                    "across weeks — not compressed into interview theater."),
        cta_heading="Your next AI hire shouldn't be a guess",
        cta_sub="Watch engineers prove it before you sign the offer.",
        stat_highlight=0),
-    _v("cto-transform", "v02", "cto", "transform", "Team transform", "companies", "cto-transform",
+    _v("x-language", "v02", "demographic", "cross-audience",
+       "Language targeting", "English (United States)",
+       "x-language-en-us",
+       trigger="Most AI pilots stall — and it's rarely the model.",
+       body=("The pattern we hear from engineering leaders: the technology works, but nobody on "
+             "the team can operate it under production load."),
+       proof=("Gauntlet transforms engineers into AI-first operators — hire proven talent or "
+              "upskill your existing team with Catalyst. 20,000+ applicants to date."),
+       cta_label="Worth a look? →",
+       hero_eyebrow="You clicked the language-targeted ad",
+       h1_pre="Your Fastest Path to Become ", h1_gold="AI-First",
+       sub=("Gauntlet transforms engineers into AI-first operators because most AI pilots "
+            "don't have a technology problem, they have a talent problem. Hire proven engineers "
+            "or upskill the team you already have."),
+       cta_primary="Hire Proven Talent", cta_secondary="Upskill Your Team",
+       compare_emphasis="catalyst",
+       prove_intro=("We can train your existing team to build AI-native or place engineers who've "
+                    "already proven it, week after week, under real production pressure."),
+       cta_heading="Go all-in on AI",
+       cta_sub="Most AI pilots stall. Gauntlet engineers ship.",
+       stat_highlight=2),
+    _v("x-device", "v03", "demographic", "CTO",
+       "Device, platform, & Wi-Fi targeting", "Desktop · Wi-Fi connected · Office hours",
+       "x-device-wifi-office",
+       trigger="B2B buyers research AI hiring solutions at their desk — not on the couch.",
+       body=("When you're evaluating talent programs during work hours, you need proof models "
+             "that survive scrutiny, not marketing decks."),
+       proof=("Gauntlet's Hire track places engineers observed across 80-hour weeks. Catalyst "
+              "rewires existing teams in six weeks. Both tied to production outcomes."),
+       cta_label="Open to the breakdown? →",
+       hero_eyebrow="You clicked the device-targeted ad",
+       h1_pre="Evaluate AI Talent Programs ", h1_gold="Like You Evaluate Vendors",
+       sub=("Desktop research deserves desktop proof — cohort demos, comparison tables, and "
+            "engineers who've shipped 10+ production apps under sustained pressure. No slide decks."),
+       cta_primary="Compare Hire vs Catalyst", cta_secondary="See the Proof Model",
+       compare_emphasis="catalyst",
+       order=["hero", "compare", "prove", "numbers", "challenger", "cta"],
+       prove_intro=("Side-by-side comparison: 10-week Hire track for net-new capability, "
+                    "6-week Catalyst for the team you already have. Same proof philosophy."),
+       cta_heading="Proof that survives due diligence",
+       cta_sub="Watch engineers ship before you commit budget.",
+       stat_highlight=1),
+    _v("x-age", "v04", "demographic", "Engineer",
+       "Age targeting", "28–45",
+       "x-age-senior-engineer",
+       trigger="Senior engineers who made the AI leap tell us the same thing.",
+       body=("The difference wasn't another cert — it was ten weeks of sustained observation "
+             "under real production pressure."),
+       proof=("One Challenger shipped 12 production systems in training. Traditional interviews "
+              "would have missed every signal that mattered."),
+       cta_label="Worth applying? →",
+       hero_eyebrow="You clicked the senior-engineer ad",
+       h1_pre="The Career Leap Experienced Engineers ", h1_gold="Regret Waiting On",
+       sub=("Gauntlet Challenger is a 10-week immersive cohort where you build RAG pipelines, agents, "
+            "and workflows — then demo them live under scrutiny. Prove the leap, don't pitch it."),
+       cta_primary="Apply to Challenger →", cta_secondary="See Alumni Outcomes",
+       compare_emphasis="gauntlet",
+       order=["hero", "challenger", "prove", "compare", "numbers", "cta"],
+       challenger_hot=True,
+       challenger_body=("Apply to train as a Gauntlet Challenger — 10 weeks, full-time, everything covered. "
+                        "5,000+ applicants per cohort. Standards rise every week."),
+       prove_intro=("You've shipped before — this is how we prove you can ship AI-native. Weekly live "
+                    "reviews, escalating complexity, sustained observation across ten weeks."),
+       cta_heading="Stop waiting for permission to go AI-first",
+       cta_sub="Ten weeks. Full-time. Everything covered. Prove it under pressure.",
+       stat_highlight=1,
+       hold_note="Age targets in X Ads (28–45) but landing page holds age — never recited (surface policy)"),
+    _v("x-gender", "v05", "demographic", "cross-audience",
+       "Gender targeting", "All genders (broad reach)",
+       "x-gender-all",
+       trigger="5,000+ engineers apply per Gauntlet cohort — selection is on execution, not demographics.",
+       body=("The Challenger program observes how you ship under production pressure across ten weeks. "
+             "Every week requires deployed code and working systems."),
+       proof=("Challengers who complete the program ship 10+ production apps. The credential means "
+              "something because the bar is real."),
+       cta_label="See how selection works →",
+       hero_eyebrow="You clicked the Gauntlet ad",
+       h1_pre="Prove You're an ", h1_gold="AI-First Engineer",
+       sub=("Gauntlet Challenger is a 10-week immersive cohort where capability is observed under "
+            "real production pressure — shipped code, deployed systems, live demos. The evaluation "
+            "is the program."),
+       cta_primary="Become a Challenger →", cta_secondary="Hire Proven Talent",
+       compare_emphasis="gauntlet",
+       challenger_hot=True,
+       prove_intro=("Production only. Weekly live reviews. Escalating complexity. "
+                    "By the end you've shown how you adapt — not just what you can do on a good day."),
+       cta_heading="Think this is you?",
+       cta_sub="Most engineers wait. Challengers ship.",
+       stat_highlight=0,
+       hold_note="Gender may target in X Ads but landing page holds gender — never recited (surface policy)"),
+    # --- Audience & intent (v06–v12) ---
+    _v("x-conversation", "v06", "audience", "CTO",
+       "Conversation targeting", "Threads about \"AI transformation\" · \"engineering velocity\"",
+       "x-conversation-ai-transform",
        trigger="Your Q3 note mentioned doubling the engineering org.",
        body=("When teams scale that fast, the bottleneck isn't models — it's engineers who can "
              "operate AI-first under production load."),
        proof=("Catalyst rewired Northwind's existing team in six weeks — engineers came back building "
               "RAG pipelines and agent workflows, not slide decks."),
        cta_label="Worth a look? →",
-       hero_eyebrow="You clicked the transformation ad",
-       h1_pre="Your Engineers Ship Features. ", h1_gold= "Catalyst Teaches Them to Ship AI.",
+       hero_eyebrow="You clicked the conversation-targeted ad",
+       h1_pre="Your Engineers Ship Features. ", h1_gold="Catalyst Teaches Them to Ship AI.",
        sub=("A 6-week immersive cohort for the team you already have — real AI systems: RAG pipelines, "
             "agents, workflows, MCP. Because most AI pilots don't have a technology problem, they have a talent problem."),
        cta_primary="Upskill Your Team", cta_secondary="Hire Instead",
@@ -240,35 +313,102 @@ AD_VARIANTS: list[dict] = [
        cta_heading="Rewire the team you already have",
        cta_sub="Six weeks. Full-time step-out. Engineers who come back as internal AI champions.",
        stat_highlight=1),
-    _v("cto-talent-gap", "v03", "cto", "talent-gap", "Talent gap", "companies", "cto-talent-gap",
-       trigger="87% of AI pilots stall — and it's rarely the model.",
-       body=("The pattern we hear from CTOs: the technology works, but nobody on the team can "
-             "operate it under production pressure."),
-       proof=("Gauntlet solves the talent side two ways — place proven engineers (Hire) or rewire "
-              "your existing team (Catalyst). Owner and Mainsail Partners already did."),
-       cta_label="Open to the breakdown? →",
-       hero_eyebrow="You clicked the talent-gap ad",
-       h1_pre="Most AI Pilots Stall on ", h1_gold= "Talent — Not Technology",
-       sub=("You don't have a model problem. You have a capability problem. Hire engineers who've "
-            "already proven it under ten weeks of pressure — or upskill the team you already trust with Catalyst."),
-       cta_primary="Fix the Talent Gap", cta_secondary="Compare Hire vs Catalyst",
+    _v("x-event", "v07", "audience", "HR/L&D",
+       "Event targeting", "HR Tech Conference · DevOps Days attendees",
+       "x-event-hrtech",
+       trigger="Your L&D budget buys courses. Catalyst buys engineers who come back different.",
+       body=("Six weeks, full-time step-out — your engineers build real RAG pipelines and agent "
+             "workflows, not slide decks."),
+       proof=("HR leaders at 200–500 person tech shops say upskilling wins when engineers ship "
+              "production AI systems tied to business ROI."),
+       cta_label="Worth sending the overview? →",
+       hero_eyebrow="You clicked the event-targeted ad",
+       h1_pre="Your L&D Budget Buys Courses. ", h1_gold="Catalyst Buys AI Champions.",
+       sub=("A 6-week immersive cohort for engineers you select — real AI systems, production-grade "
+            "capstone tied to business ROI. They come back as internal AI leads, not certificate holders."),
+       cta_primary="Upskill Your Team", cta_secondary="See Catalyst Details",
        compare_emphasis="catalyst",
-       order=["hero", "compare", "prove", "numbers", "challenger", "cta"],
-       prove_intro=("Two paths, same proof model: sustained observation under production pressure. "
-                    "Pick hire if you need net-new capability; pick Catalyst if your engineers are ready to rewire."),
-       cta_heading="The pilot works. The team doesn't — yet.",
-       cta_sub="Hire proven engineers or upskill the ones you already have.",
-       stat_highlight=2),
-    # --- Senior Engineer (individuals · Challenger emphasis) ---
-    _v("engineer-challenger", "v04", "engineer", "challenger", "Challenger", "individuals", "engineer-challenger",
+       prove_intro=("Catalyst rewires the team you already have — engineers step out full-time for six weeks "
+                    "and return building AI-native systems your org can actually deploy."),
+       cta_heading="Turn your L&D line item into AI capability",
+       cta_sub="Per-employee fee. Engineers you select. Champions you keep.",
+       stat_highlight=1),
+    _v("x-engager", "v08", "audience", "cross-audience",
+       "Post Engager targeting", "Engaged with @GauntletAI posts (last 30 days)",
+       "x-engager-retarget",
+       trigger="You liked our post about the Challenger selection rate — here's the full picture.",
+       body=("5,000+ engineers apply per cohort. Ten weeks, full-time, everything covered — "
+             "capability observed under 80-hour weeks, not interview composure."),
+       proof=("Challengers who complete the program ship 10+ production apps. Companies hire from "
+              "the same proof model on the Hire track."),
+       cta_label="Pick up where you left off →",
+       hero_eyebrow="Welcome back from X",
+       h1_pre="You Saw the Selection Rate. ", h1_gold="Here's the Proof Model.",
+       sub=("Whether you're hiring AI-native engineers or applying to Challenger yourself — "
+            "Gauntlet observes execution across weeks of production pressure. Same philosophy, "
+            "two delivery tracks."),
+       cta_primary="Hire Proven Talent", cta_secondary="Become a Challenger →",
+       compare_emphasis="gauntlet",
+       order=["hero", "prove", "compare", "challenger", "numbers", "cta"],
+       prove_intro=("You already know the bar is high — here's how we prove capability: sustained "
+                    "observation, weekly live reviews, escalating complexity across ten weeks."),
+       cta_heading="Ready for the next step?",
+       cta_sub="Hire proven engineers or prove you're one.",
+       stat_highlight=0),
+    _v("x-keyword", "v09", "audience", "CTO",
+       "Keyword targeting", "\"AI engineer hiring\" · \"ML team build\" · \"AI talent gap\"",
+       "x-keyword-ai-hiring",
+       trigger="Saw your team posted three ML engineer roles last month.",
+       body=("Usually means you're hiring for skills you can only observe in a 45-minute loop — "
+             "while AI pilots sit idle."),
+       proof=("Most Series B CTOs tell us the last three AI hires took six months to ramp. "
+              "Gauntlet places engineers who've shipped 10+ production apps under 80-hour weeks."),
+       cta_label="See how they prove it →",
+       hero_eyebrow="You clicked the keyword-targeted ad",
+       h1_pre="Stop Interviewing for Skills You ", h1_gold="Can't Observe in 45 Minutes",
+       sub=("Gauntlet places engineers whose capability has already been observed across ten weeks "
+            "of production pressure — not a whiteboard loop. 5,000+ applicants per cohort; you watch them ship."),
+       cta_primary="Hire Proven Talent", cta_secondary="See the Proof Model",
+       compare_emphasis="gauntlet",
+       prove_intro=("Traditional interviews compress signal into hours. Gauntlet observes execution "
+                    "across weeks — the hire track shows you engineers who've already shipped under pressure."),
+       cta_heading="Your next AI hire shouldn't be a guess",
+       cta_sub="Watch engineers prove it before you sign the offer.",
+       stat_highlight=0),
+    _v("x-movies", "v10", "audience", "Engineer",
+       "Movies & TV targeting", "Tech documentaries · startup culture · AI deep-dives",
+       "x-movies-tech-docs",
+       trigger="If you've watched every AI documentary and still haven't shipped one yourself —",
+       body=("The gap between watching and building is ten weeks of sustained production pressure. "
+             "That's what Challenger is for."),
+       proof=("Challengers ship 10+ production apps during training — RAG pipelines, agents, workflows. "
+              "Weekly live reviews under scrutiny, not tutorial follow-alongs."),
+       cta_label="Worth applying? →",
+       hero_eyebrow="You clicked the documentary-viewer ad",
+       h1_pre="Stop Watching AI Stories. ", h1_gold="Start Shipping AI Systems.",
+       sub=("Gauntlet Challenger is a 10-week immersive cohort where you build and deploy real AI systems — "
+            "not watch others do it. Every week requires shipped code and working demos."),
+       cta_primary="Become a Challenger →", cta_secondary="See How We Prove It",
+       compare_emphasis="gauntlet",
+       challenger_hot=True,
+       challenger_body=("Apply to train as a Gauntlet Challenger — 10 weeks, full-time, everything covered. "
+                        "Build the systems you've been reading about."),
+       prove_intro=("Production only. Weekly live reviews. By the end you've shipped what most engineers "
+                    "only talk about — agents, RAG, MCP integrations."),
+       cta_heading="Your turn to be in the documentary",
+       cta_sub="Ten weeks. Full-time. Everything covered.",
+       stat_highlight=0),
+    _v("x-interest", "v11", "audience", "Engineer",
+       "Interest targeting", "Enterprise software · AI/ML · Developer tools",
+       "x-interest-ai-ml",
        trigger="5,000+ engineers apply per Gauntlet cohort.",
        body=("Ten weeks, full-time, everything covered — you prove you can ship AI systems under "
              "80-hour weeks, not interview composure."),
        proof=("Challengers who complete the program ship 10+ production apps. The selection rate "
               "makes the credential mean something."),
        cta_label="Worth applying? →",
-       hero_eyebrow="You clicked the Challenger ad",
-       h1_pre="10 Weeks to Prove You're an ", h1_gold= "AI-First Engineer",
+       hero_eyebrow="You clicked the interest-targeted ad",
+       h1_pre="10 Weeks to Prove You're an ", h1_gold="AI-First Engineer",
        sub=("Train as a Gauntlet Challenger — full-time, everything covered. Every week requires "
             "shipped code and working systems. This isn't preparation for evaluation. It is the evaluation."),
        cta_primary="Become a Challenger →", cta_secondary="See How We Prove It",
@@ -279,98 +419,26 @@ AD_VARIANTS: list[dict] = [
        cta_heading="Think this is you?",
        cta_sub="Most engineers wait. Challengers ship.",
        stat_highlight=0),
-    _v("engineer-career-leap", "v05", "engineer", "career-leap", "Career leap", "individuals", "engineer-career-leap",
-       trigger="Senior engineers who made the AI leap tell us the same thing.",
-       body=("The difference wasn't another cert — it was ten weeks of sustained observation "
-             "under real production pressure."),
-       proof=("One Challenger shipped 12 production systems in training. Traditional interviews "
-              "would have missed every signal that mattered."),
-       cta_label="Open to the path? →",
-       hero_eyebrow="You clicked the career-leap ad",
-       h1_pre="The Career Leap Senior Engineers ", h1_gold= "Regret Waiting On",
-       sub=("Gauntlet Challenger is a 10-week immersive cohort where you build RAG pipelines, agents, "
-            "and workflows — then demo them live under scrutiny. Prove the leap, don't pitch it."),
-       cta_primary="Apply to Challenger →", cta_secondary="See Alumni Outcomes",
+    _v("x-lookalike", "v12", "audience", "CTO",
+       "Follower look-alikes targeting", "Lookalikes of @karpathy · @sama · @elaborateeng",
+       "x-lookalike-eng-leaders",
+       trigger="CTOs who follow Karpathy and Sama usually care about one thing: talent density.",
+       body=("You can't hire your way to AI-first with whiteboard loops — you need engineers "
+             "whose capability has been observed under production pressure."),
+       proof=("Gauntlet cohorts produce engineers who ship 10+ production apps in ten weeks. "
+              "Owner and Mainsail Partners hire from the same proof model."),
+       cta_label="See the hire track →",
+       hero_eyebrow="You clicked the lookalike-targeted ad",
+       h1_pre="Talent Density Beats ", h1_gold="Talent Volume",
+       sub=("Engineering leaders who follow the best builders know: capability is observed, not "
+            "interviewed. Gauntlet places engineers proven across ten weeks of 80-hour production weeks."),
+       cta_primary="Hire Proven Talent", cta_secondary="See the Proof Model",
        compare_emphasis="gauntlet",
-       order=["hero", "challenger", "prove", "numbers", "compare", "cta"],
-       challenger_hot=True,
-       prove_intro=("You've shipped before — this is how we prove you can ship AI-native. Weekly live "
-                    "reviews, escalating complexity, sustained observation across ten weeks."),
-       cta_heading="Stop waiting for permission to go AI-first",
-       cta_sub="Ten weeks. Full-time. Everything covered. Prove it under pressure.",
-       stat_highlight=1),
-    _v("engineer-ship-proof", "v06", "engineer", "ship-proof", "Ship proof", "individuals", "engineer-ship-proof",
-       trigger="Traditional interviews compress signal into hours.",
-       body=("Gauntlet observes execution across ten weeks — patterns that matter only become "
-             "visible over time."),
-       proof=("Every Challenger ships 10+ production systems during training. Weekly live reviews "
-              "under scrutiny, not whiteboard theater."),
-       cta_label="See the proof model →",
-       hero_eyebrow="You clicked the ship-proof ad",
-       h1_pre="Interviews Show Composure. ", h1_gold= "Gauntlet Shows Execution.",
-       sub=("Ten weeks of shipped code, deployed systems, and live demos under pressure. "
-            "The Challenger program is the evaluation — not preparation for one."),
-       cta_primary="Prove You Can Ship →", cta_secondary="How Selection Works",
-       compare_emphasis="gauntlet",
-       prove_intro=("Production only. Weekly live reviews. Escalating complexity. "
-                    "By the end you've shown how you adapt — not just what you can do on a good day."),
-       cta_heading="Show them you ship — don't tell them",
-       cta_sub="Ten weeks of production pressure. One credential that means something.",
-       stat_highlight=0),
-    # --- HR / L&D (companies · Catalyst emphasis) ---
-    _v("hr-catalyst", "v07", "hr", "catalyst", "Catalyst upskill", "companies", "hr-catalyst",
-       trigger="Your L&D budget buys courses. Catalyst buys engineers who come back different.",
-       body=("Six weeks, full-time step-out — your engineers build real RAG pipelines and agent "
-             "workflows, not slide decks."),
-       proof=("HR leaders at 200–500 person tech shops say upskilling wins when engineers ship "
-              "production AI systems tied to business ROI."),
-       cta_label="Worth sending the overview? →",
-       hero_eyebrow="You clicked the Catalyst ad",
-       h1_pre="Your L&D Budget Buys Courses. ", h1_gold= "Catalyst Buys AI Champions.",
-       sub=("A 6-week immersive cohort for engineers you select — real AI systems, production-grade "
-            "capstone tied to business ROI. They come back as internal AI leads, not certificate holders."),
-       cta_primary="Upskill Your Team", cta_secondary="See Catalyst Details",
-       compare_emphasis="catalyst",
-       prove_intro=("Catalyst rewires the team you already have — engineers step out full-time for six weeks "
-                    "and return building AI-native systems your org can actually deploy."),
-       cta_heading="Turn your L&D line item into AI capability",
-       cta_sub="Per-employee fee. Engineers you select. Champions you keep.",
-       stat_highlight=1),
-    _v("hr-roi", "v08", "hr", "roi", "L&D ROI", "companies", "hr-roi",
-       trigger="Training that doesn't change how engineers operate is shelfware.",
-       body=("Most L&D leaders tell us the same gap: courses complete, but nothing in production moves."),
-       proof=("Northwind cut internal AI ramp from 14 weeks to 6 with Catalyst — engineers returned "
-              "shipping RAG pipelines, not requesting more budget."),
-       cta_label="Open to the ROI breakdown? →",
-       hero_eyebrow="You clicked the L&D ROI ad",
-       h1_pre="Shelfware Training vs. ", h1_gold= "Engineers Who Ship AI",
-       sub=("Catalyst measures success by capstone completion tied to business ROI — not attendance "
-            "or quiz scores. Six weeks, full-time step-out, production-grade systems your team deploys."),
-       cta_primary="See Catalyst ROI", cta_secondary="Talk to Our Team",
-       compare_emphasis="catalyst",
-       order=["hero", "compare", "numbers", "prove", "challenger", "cta"],
-       prove_intro=("Validation isn't a certificate — it's a successful capstone project completion "
-                    "your business can point to. That's the ROI L&D leaders actually report."),
-       cta_heading="Stop funding training nobody uses",
-       cta_sub="Catalyst engineers come back shipping — not requesting the next course.",
+       prove_intro=("The engineers you admire built under pressure — Gauntlet observes the same signal "
+                    "across ten weeks before you ever sign an offer."),
+       cta_heading="Hire like the leaders you follow",
+       cta_sub="Watch engineers prove it before you commit.",
        stat_highlight=2),
-    _v("hr-velocity", "v09", "hr", "velocity", "Team velocity", "companies", "hr-velocity",
-       trigger="Upskilling wins when engineers build RAG pipelines — not watch them.",
-       body=("HR leaders at mid-market tech shops say velocity stalls when training stays theoretical."),
-       proof=("Catalyst engineers build real AI systems: agents, workflows, MCP integrations. "
-              "August 17 cohort — engineers you select, champions you keep."),
-       cta_label="Worth a 2-line reply? →",
-       hero_eyebrow="You clicked the velocity ad",
-       h1_pre="Upskilling That Changes ", h1_gold= "How Engineers Operate",
-       sub=("Catalyst is a 6-week immersive cohort — your engineers step out full-time and return "
-            "building AI systems your org can deploy next quarter. Not next year."),
-       cta_primary="Accelerate Your Team", cta_secondary="Compare Programs",
-       compare_emphasis="catalyst",
-       prove_intro=("Full-time step-out means velocity — six weeks from capable engineer to internal "
-                    "AI champion shipping production systems. That's the upskill L&D was meant to buy."),
-       cta_heading="Velocity beats volume in L&D",
-       cta_sub="Six weeks. Real systems. Engineers who come back different.",
-       stat_highlight=1),
 ]
 
 AD_BY_CAMPAIGN = {v["utm_campaign"]: v for v in AD_VARIANTS}
@@ -378,7 +446,7 @@ AD_BY_VARIANT_ID = {v["variant_id"]: v for v in AD_VARIANTS}
 
 
 def resolve_ad_variant(entry: dict) -> dict | None:
-    """Map UTM campaign + content to one of the 9 catalogued X.com ad variants."""
+    """Map UTM campaign + content to one of the 12 catalogued X.com ad variants."""
     if entry.get("channel") != "ad":
         return None
     content = (entry.get("utm_content") or "").strip().lower()
@@ -397,19 +465,18 @@ def variant_landing_url(variant: dict, page_path: str = "/gauntlet") -> str:
     return f"{page_path}?{q}"
 
 
+def ad_grid_sections() -> list[dict]:
+    """Grouped grid data for /ad-lp: two X Ads Manager categories × 6 variants each."""
+    by_cat: dict[str, list[dict]] = {c["key"]: [] for c in AD_CATEGORIES}
+    for v in AD_VARIANTS:
+        by_cat[v["category"]].append(v)
+    return [{"category": c["key"], "label": c["label"], "variants": by_cat[c["key"]]}
+            for c in AD_CATEGORIES]
+
+
 def ad_grid_rows() -> list[dict]:
-    """3×3 grid data for /ad-lp: rows = segments, cols = angles."""
-    rows = []
-    for seg_key, seg in AD_SEGMENTS.items():
-        by_angle = {v["angle"]: v for v in AD_VARIANTS if v["segment"] == seg_key}
-        ordered = [by_angle[a] for a in _ANGLE_ORDER[seg_key]]
-        rows.append({
-            "segment": seg_key,
-            "segment_info": seg,
-            "angle_labels": AD_ANGLE_LABELS[seg_key],
-            "variants": ordered,
-        })
-    return rows
+    """Backward-compatible alias — returns category sections."""
+    return ad_grid_sections()
 
 
 def generic_hero_headline() -> str:
@@ -542,8 +609,8 @@ def _audience(entry: dict, det: dict, ident: dict | None,
         aud = variant["audience"]
         return (aud,
                 f"ad variant {variant['id']} (utm_campaign={variant['utm_campaign']})",
-                f"the X.com ad promised {variant['angle_label']} to {variant['segment_label']} — "
-                "message-match the hero, CTAs, and table emphasis to that promise")
+                f"the X.com ad used {variant['x_targeting_type']} targeting "
+                f"({variant['x_targeting_example']}) — message-match the hero to that promise")
     intent = _campaign_intent(entry.get("utm_campaign"))
     if intent:
         return intent, f"utm_campaign={entry['utm_campaign']} message-matches {intent}", \
@@ -603,13 +670,23 @@ def build_page(request, email: str | None = None, overrides: dict | None = None)
       entry["rule"], "observed", f"channel = {entry['channel_label']}", entry["why"])
 
     if ad_variant:
-        t("Ad variant resolve",
-          [f"utm_campaign={ad_variant['utm_campaign']}", f"utm_content={ad_variant['variant_id']}",
-           f"segment={ad_variant['segment']}", f"angle={ad_variant['angle']}"],
+        sigs = [
+            f"utm_campaign={ad_variant['utm_campaign']}",
+            f"utm_content={ad_variant['variant_id']}",
+            f"x_targeting_type={ad_variant['x_targeting_type']}",
+            f"x_targeting_example={ad_variant['x_targeting_example']}",
+            f"audience_fit={ad_variant['audience_fit']}",
+        ]
+        why = ("the paid click carried a catalogued X.com campaign — every copy slot "
+               "message-matches this variant")
+        if ad_variant.get("hold_note"):
+            sigs.append(f"hold_policy={ad_variant['hold_note']}")
+            why += f" · {ad_variant['hold_note']}"
+        t("Ad variant resolve", sigs,
           "AD_BY_CAMPAIGN / AD_BY_VARIANT_ID lookup",
           "observed",
-          f"variant = {ad_variant['id']} · {ad_variant['segment_label']} × {ad_variant['angle_label']}",
-          "the paid click carried a catalogued X.com campaign — every copy slot message-matches this variant")
+          f"variant = {ad_variant['id']} · {ad_variant['x_targeting_type']}",
+          why)
 
     ip_sig = [f"ip={det.get('ip') or '—'}", f"network={det.get('network_type', '—')}"]
     if region:

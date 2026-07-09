@@ -53,7 +53,7 @@ def entry_links(m: dict[str, str]) -> list[tuple[str, str]]:
     page = m["page"]
     return [
         ("X ads grid", m["ad_lp"]),
-        ("Ad", f"{page}?utm_source=x&utm_medium=paid&utm_campaign=cto-hiring&utm_content=v01"),
+        ("Ad", f"{page}?utm_source=x&utm_medium=paid&utm_campaign=x-keyword-ai-hiring&utm_content=v09"),
         ("Email", f"{page}?utm_source=hubspot&utm_medium=email&utm_campaign=cohort-april&e="
                   + GS.sample_magic_token()),
         ("Search", f"{page}?ref=google"),
@@ -98,23 +98,19 @@ def _render_gauntlet(request: Request, m: dict[str, str]) -> HTMLResponse:
 
 
 def _render_ad_lp(request: Request, m: dict[str, str]) -> HTMLResponse:
-    grid = []
-    for row in GS.ad_grid_rows():
+    sections = []
+    for sec in GS.ad_grid_sections():
         variants = []
-        for v in row["variants"]:
+        for v in sec["variants"]:
             variants.append({
                 "variant": v,
                 "landing_url": GS.variant_landing_url(v, m["page"]),
                 "generic_hero": GS.generic_hero_headline(),
                 "personal_hero": GS.variant_hero_headline(v),
             })
-        grid.append({
-            "segment_info": row["segment_info"],
-            "angle_labels": row["angle_labels"],
-            "variants": variants,
-        })
+        sections.append({"label": sec["label"], "category": sec["category"], "variants": variants})
     return templates.TemplateResponse(request, "gauntlet_ad_lp.html", {
-        "grid": grid,
+        "sections": sections,
         "generic_hero": GS.generic_hero_headline(),
         "g": m,
     })

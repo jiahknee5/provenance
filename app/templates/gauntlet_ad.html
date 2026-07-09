@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ variant.segment_label }} · {{ variant.angle_label }} — Gauntlet X Ad</title>
+  <title>{{ variant.x_targeting_type }} — Gauntlet X Ad</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root{--bg:#0b0a08;--x-bg:#15202b;--x-line:#38444d;--gold:#c9a24b;--gold-t:#d5b269;--ink:#f4f2ed;--muted:#8899a6}
@@ -30,19 +30,20 @@
 </head>
 <body>
 <div class="shell">
-  <a class="back" href="{{ g.ad_lp }}">← All 9 ads</a>
+  <a class="back" href="{{ g.ad_lp }}">← All 12 ads</a>
   <div class="card">
     <div class="top">
       <div class="av">{{ variant.ad.avatar }}</div>
       <div class="meta">
         <b>{{ variant.ad.display }}</b>
-        <span>@{{ variant.ad.handle }} · Promoted · {{ variant.segment_label }}</span>
+        <span>@{{ variant.ad.handle }} · Promoted · {{ variant.x_targeting_type }}</span>
       </div>
     </div>
     <div class="body">
       <p><span class="trig">{{ variant.ad.trigger }}</span> {{ variant.ad.body }} {{ variant.ad.proof }}</p>
     </div>
-    <div class="utm">utm_source=x · utm_medium=paid · utm_campaign={{ variant.utm_campaign }} · utm_content={{ variant.variant_id }}</div>
+    <div class="utm">X config: {{ variant.x_targeting_example }}<br>
+      utm_source=x · utm_medium=paid · utm_campaign={{ variant.utm_campaign }} · utm_content={{ variant.variant_id }}</div>
     <a class="go" href="{{ landing_url }}">{{ variant.ad.cta_label }}</a>
   </div>
   <p class="hint">Click through to see the message-matched landing page hero.</p>

@@ -204,16 +204,20 @@ def test_showcase_card_publishes_the_entry_links():
 
 
 # --------------------------------------------------------------------------- #
-# 6 · X.com ad variants (9 = 3 segments × 3 angles)
+# 6 · X.com ad variants (12 = one per X Ads Manager targeting type)
 # --------------------------------------------------------------------------- #
-def test_nine_ad_variants_catalog():
-    assert len(GS.AD_VARIANTS) == 9
+def test_twelve_ad_variants_catalog():
+    assert len(GS.AD_VARIANTS) == 12
     campaigns = {v["utm_campaign"] for v in GS.AD_VARIANTS}
-    assert len(campaigns) == 9
-    assert len(GS.AD_BY_VARIANT_ID) == 9
+    assert len(campaigns) == 12
+    assert len(GS.AD_BY_VARIANT_ID) == 12
+    types = {v["x_targeting_type"] for v in GS.AD_VARIANTS}
+    assert len(types) == 12
+    assert "Follower look-alikes targeting" in types
+    assert "Keyword targeting" in types
 
 
-def test_nine_utms_produce_nine_distinct_hero_headlines():
+def test_twelve_utms_produce_twelve_distinct_hero_headlines():
     headlines = set()
     for v in GS.AD_VARIANTS:
         url = GS.variant_landing_url(v, "/gauntlet")
@@ -222,45 +226,59 @@ def test_nine_utms_produce_nine_distinct_hero_headlines():
         assert vp["h1_pre"] in t, f"h1_pre missing for {v['id']}"
         assert vp["h1_gold"] in t, f"h1_gold missing for {v['id']}: {vp['h1_gold']}"
         headlines.add(GS.variant_hero_headline(v))
-    assert len(headlines) == 9
+    assert len(headlines) == 12
 
 
 def test_ad_variant_trace_stage():
     page = GS.build_page(_Req({
         "utm_source": "x", "utm_medium": "paid",
-        "utm_campaign": "engineer-challenger", "utm_content": "v04",
+        "utm_campaign": "x-interest-ai-ml", "utm_content": "v11",
     }))
     stages = [t["stage"] for t in page["trace"]]
     assert "Ad variant resolve" in stages
-    assert page["ad_variant"]["id"] == "engineer-challenger"
-    assert any(t["stage"] == "Ad variant resolve" and "v04" in str(t["signals"]) for t in page["trace"])
+    assert page["ad_variant"]["id"] == "x-interest"
+    trace = next(t for t in page["trace"] if t["stage"] == "Ad variant resolve")
+    assert "Interest targeting" in str(trace["signals"])
+    assert "Enterprise software" in str(trace["signals"])
+    assert "v11" in str(trace["signals"])
+
+
+def test_age_gender_variants_hold_on_landing_page():
+    age = _page_text(c.get("/gauntlet?utm_source=x&utm_medium=paid&utm_campaign=x-age-senior-engineer&utm_content=v04"))
+    gender = _page_text(c.get("/gauntlet?utm_source=x&utm_medium=paid&utm_campaign=x-gender-all&utm_content=v05"))
+    assert "28" not in age or "28–45" not in age  # age range must not ship
+    assert "28–45" not in age
+    assert "All genders" not in gender
+    page = GS.build_page(_Req({"utm_medium": "paid", "utm_campaign": "x-age-senior-engineer", "utm_content": "v04"}))
+    trace = next(t for t in page["trace"] if t["stage"] == "Ad variant resolve")
+    assert "hold_policy" in str(trace["signals"]) or "hold" in trace["why"].lower()
 
 
 def test_ad_lp_grid_pages_return_200():
     for path in ("/ad-lp", "/gauntlet/ad-lp", "/gauntletapt/ad-lp"):
         r = c.get(path)
         assert r.status_code == 200, path
-        assert "9 Variants" in r.text or "9-variant" in r.text.lower() or "9 Variants" in r.text
-        assert "utm_campaign=cto-hiring" in r.text
+        assert "12" in r.text and "Targeting" in r.text
+        assert "utm_campaign=x-keyword-ai-hiring" in r.text
+        assert "Location targeting" in r.text
+        assert "Follower look-alikes targeting" in r.text
         assert GS.generic_hero_headline() in r.text
 
 
 def test_ad_single_mockup_and_redirect():
     r = c.get("/gauntlet/ad?v=v07")
     assert r.status_code == 200
-    assert "L&D budget" in r.text.lower() or "catalyst" in r.text.lower()
+    assert "Event targeting" in r.text or "HR Tech" in r.text
     assert "utm_content=v07" in r.text
     assert c.get("/gauntlet/ad", follow_redirects=False).status_code == 302
 
 
-def test_cto_hiring_vs_engineer_challenger_feel_like_different_products():
-    cto = _page_text(c.get("/gauntlet?utm_source=x&utm_medium=paid&utm_campaign=cto-hiring&utm_content=v01"))
-    eng = _page_text(c.get("/gauntlet?utm_source=x&utm_medium=paid&utm_campaign=engineer-challenger&utm_content=v04"))
-    assert "Can't Observe in 45 Minutes" in cto
-    assert "AI-First Engineer" in eng
-    assert "Become a Challenger" in eng
-    assert "Hire Proven Talent" in cto or "See the Proof Model" in cto
-    assert cto != eng
+def test_keyword_vs_lookalike_feel_like_different_products():
+    kw = _page_text(c.get("/gauntlet?utm_source=x&utm_medium=paid&utm_campaign=x-keyword-ai-hiring&utm_content=v09"))
+    lk = _page_text(c.get("/gauntlet?utm_source=x&utm_medium=paid&utm_campaign=x-lookalike-eng-leaders&utm_content=v12"))
+    assert "Can't Observe in 45 Minutes" in kw
+    assert "Talent Density" in lk
+    assert kw != lk
 
 
 def test_portal_mount_ad_lp_links_stay_under_prefix():
