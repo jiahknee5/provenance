@@ -68,7 +68,30 @@
   .obj-body .sig{font-size:11.5px;color:var(--muted);margin-top:3px}
   .obj-body .slot{font-size:11.5px;color:#475569;margin-top:4px}
   .obj-blocked{margin:0 15px 12px;border:1px solid #f2c6cd;background:#fcebed;border-radius:8px;padding:9px 11px;font-size:12.5px;color:#8c2434}
-  .obj-blocked .cap{font-size:9.5px;font-weight:800;text-transform:uppercase;color:#c0354b;margin-bottom:4px}
+  .hi-prev{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 15px;border-top:1px solid var(--line);background:#FAFBFC}
+  @media(max-width:700px){.hi-prev{grid-template-columns:1fr}}
+  .hi-prev .box{border:1px solid var(--line);border-radius:9px;background:#fff;padding:10px;min-height:100px}
+  .hi-prev .box .cap{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px}
+  .hi-prev img{width:100%;max-height:140px;object-fit:cover;border-radius:6px;border:1px solid var(--line)}
+  .hi-prev .grad{height:100px;border-radius:6px;background:linear-gradient(135deg,#0f1419 0%,#1a2332 40%,#2a3444 100%);border:1px solid var(--line)}
+  .hi-chain .trace-step{border-bottom:1px solid var(--line)}
+  .hi-chain .trace-step:last-child{border-bottom:0}
+  .hi-intent{display:flex;gap:10px;padding:9px 15px;border-bottom:1px solid var(--line);font-size:12.5px;align-items:flex-start}
+  .hi-intent:last-child{border-bottom:0}
+  .hi-intent .rk{width:22px;height:22px;border-radius:6px;background:var(--ink);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;flex:none}
+  .hi-intent.primary .rk{background:#0a8a4f}
+  .hi-intent .body{min-width:0;flex:1}
+  .hi-intent .id{font-weight:700}
+  .hi-intent .sig{font-size:11px;color:var(--muted);margin-top:3px}
+  .hi-blocked{margin:0 15px 12px;border:1px solid #f2c6cd;background:#fcebed;border-radius:8px;padding:9px 11px;font-size:12px;color:#8c2434}
+  .hi-blocked .cap{font-size:9.5px;font-weight:800;text-transform:uppercase;color:#c0354b;margin-bottom:4px}
+  table.hi-led{font-size:12px;width:100%;border-collapse:collapse;margin:4px 0}
+  table.hi-led th{font-size:10px;text-transform:uppercase;letter-spacing:.04em;text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);color:var(--muted)}
+  table.hi-led td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.hi-led tr:last-child td{border-bottom:0}
+  .hi-list{margin:0;padding:0 15px 12px 28px;font-size:12px;line-height:1.55;color:var(--ink)}
+  .hi-list li{margin:3px 0}
+  .hi-sub{padding:8px 15px 4px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
   /* ---- process map ---- */
   .pm{border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:var(--shadow);overflow:hidden;margin-top:18px}
   .pm .h{display:flex;align-items:center;gap:8px;padding:11px 15px;border-bottom:1px solid var(--line);font-size:13px;font-weight:700}
@@ -80,19 +103,23 @@
   .pm-in .val{font-size:12px;font-weight:600;color:var(--ink);margin-top:3px;word-break:break-word;font-family:ui-monospace,Menlo,monospace}
   .pm-in .feeds{font-size:10.5px;color:var(--muted);margin-top:4px}
   .pm-flow{padding:4px 0 10px;position:relative}
-  .pm-stage{display:grid;grid-template-columns:44px minmax(180px,.85fr) 1.4fr;gap:0 12px;padding:11px 15px 11px 0;position:relative}
-  @media(max-width:920px){.pm-stage{grid-template-columns:44px 1fr;row-gap:6px}.pm-stage .pm-right{grid-column:2}}
+  .pm-stage{display:block;position:relative}
   .pm-stage + .pm-stage{border-top:1px dashed var(--line)}
+  .pm-stage > summary{display:grid;grid-template-columns:44px minmax(180px,.85fr) 1.4fr;gap:0 12px;padding:11px 15px 11px 0;list-style:none;cursor:pointer}
+  .pm-stage > summary::-webkit-details-marker{display:none}
+  .pm-stage > summary:hover{background:#FAFBFC}
+  @media(max-width:920px){.pm-stage > summary{grid-template-columns:44px 1fr;row-gap:6px}.pm-stage .pm-right{grid-column:2}}
   .pm-rail{position:relative;display:flex;justify-content:center}
   .pm-rail::before{content:"";position:absolute;top:-12px;bottom:-12px;left:50%;width:2px;background:#E4E8EC}
-  .pm-stage:first-child .pm-rail::before{top:12px}
-  .pm-stage:last-child .pm-rail::before{bottom:auto;height:14px}
+  .pm-stage:first-of-type .pm-rail::before{top:12px}
+  .pm-stage:last-of-type .pm-rail::before{bottom:auto;height:14px}
+  .pm-stage[open]:last-of-type .pm-rail::before{bottom:-12px;height:auto}
   .pm-rail .n{position:relative;z-index:1;width:24px;height:24px;border-radius:7px;background:var(--ink);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;flex:none;margin-top:1px}
   .pm-stage.skip .pm-rail .n{background:#C6CDD4}
-  .pm-stage.skip .pm-left,.pm-stage.skip .pm-right{opacity:.55}
-  .pm-left .nm{font-weight:700;font-size:13px}
-  .pm-left .nm a{color:inherit;text-decoration:none}
-  .pm-left .nm a:hover{color:var(--brand)}
+  .pm-stage.skip summary .pm-left,.pm-stage.skip summary .pm-right{opacity:.55}
+  .pm-left .nm{font-weight:700;font-size:13px;display:flex;align-items:center;gap:5px}
+  .pm-left .nm .caret{font-size:9px;color:var(--muted);transition:transform .15s}
+  .pm-stage[open] .pm-left .nm .caret{transform:rotate(90deg)}
   .pm-left .rule{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.45}
   .pm-left .skiptag{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border-radius:4px;padding:1px 6px;background:#F1F3F5;color:var(--muted);margin-left:6px}
   .pm-reads{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:5px}
@@ -103,6 +130,17 @@
   .pm-out{font-size:12.5px;font-weight:600;color:var(--ink)}
   .pm-out::before{content:"→ ";color:var(--muted);font-weight:400}
   .pm-why{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.45}
+  /* drill-down */
+  .pm-drill{margin:0 15px 12px 56px;border:1px solid var(--line);border-radius:9px;background:#FAFBFC;overflow:hidden}
+  @media(max-width:920px){.pm-drill{margin-left:15px}}
+  .pm-drill .row{display:flex;gap:10px;padding:7px 12px;border-bottom:1px solid var(--line);font-size:12px;align-items:baseline}
+  .pm-drill .row:last-child{border-bottom:0}
+  .pm-drill .row.fired{background:#f4fbf7}
+  .pm-drill .row .k{color:var(--muted);min-width:170px;flex:none;font-weight:600;font-size:11px}
+  .pm-drill .row .v{color:var(--ink);min-width:0;word-break:break-word;line-height:1.5}
+  .pm-drill .row .firedtag{font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#0a8a4f;margin-left:6px;white-space:nowrap}
+  .pm-drill .foot{padding:7px 12px;font-size:11.5px;background:#fff;border-top:1px solid var(--line)}
+  .pm-drill .foot a{font-weight:600;text-decoration:none}
 </style>
 
 {% set P = page %}
@@ -139,21 +177,32 @@
   </div>
   <div class="pm-flow">
     {% for s in pmap.stages %}
-    <div class="pm-stage{{ ' skip' if s.skipped else '' }}">
-      <div class="pm-rail"><span class="n">{{ loop.index }}</span></div>
-      <div class="pm-left">
-        <div class="nm"><a href="{{ s.link }}">{{ s.title }}</a>{% if s.skipped %}<span class="skiptag">skipped</span>{% endif %}</div>
-        <div class="rule">{{ s.skip_reason if s.skipped else s.rule }}</div>
+    <details class="pm-stage{{ ' skip' if s.skipped else '' }}">
+      <summary>
+        <div class="pm-rail"><span class="n">{{ loop.index }}</span></div>
+        <div class="pm-left">
+          <div class="nm"><span class="caret">▶</span>{{ s.title }}{% if s.skipped %}<span class="skiptag">skipped</span>{% endif %}</div>
+          <div class="rule">{{ s.skip_reason if s.skipped else s.rule }}</div>
+        </div>
+        <div class="pm-right">
+          <div class="pm-reads">{% for r in s.reads %}<span class="chip">{{ r }}</span>{% endfor %}</div>
+          {% if s.branches %}
+          <div class="pm-branch">{% for b in s.branches %}<span class="b{{ ' on' if b.taken else '' }}">{{ b.label }}</span>{% endfor %}</div>
+          {% endif %}
+          <div class="pm-out">{{ s.output }}</div>
+          {% if s.why and not s.skipped %}<div class="pm-why">{{ s.why }}</div>{% endif %}
+        </div>
+      </summary>
+      <div class="pm-drill">
+        {% for r in s.detail %}
+        <div class="row{{ ' fired' if r.fired else '' }}">
+          <span class="k">{{ r.k }}</span>
+          <span class="v">{{ r.v }}{% if r.pol %} <span class="pol {{ r.pol }}">{{ r.pol }}</span>{% endif %}{% if r.fired %}<span class="firedtag">← this one</span>{% endif %}</span>
+        </div>
+        {% endfor %}
+        <div class="foot"><a href="{{ s.link }}">Open the full panel below ↓</a></div>
       </div>
-      <div class="pm-right">
-        <div class="pm-reads">{% for r in s.reads %}<span class="chip">{{ r }}</span>{% endfor %}</div>
-        {% if s.branches %}
-        <div class="pm-branch">{% for b in s.branches %}<span class="b{{ ' on' if b.taken else '' }}">{{ b.label }}</span>{% endfor %}</div>
-        {% endif %}
-        <div class="pm-out">{{ s.output }}</div>
-        {% if s.why and not s.skipped %}<div class="pm-why">{{ s.why }}</div>{% endif %}
-      </div>
-    </div>
+    </details>
     {% endfor %}
   </div>
 </div>
@@ -238,39 +287,139 @@
     </div>
 
     <div class="sec" id="sec-hero-image">
-      <div class="h">⑥ Hero image provenance <span class="tag">{{ P.hero_image.receipt.source|default('gradient') }}</span></div>
-      {% set ir = P.hero_image.receipt %}
-      <div class="kv"><span class="k">Load status</span><span class="v">{{ P.hero_image.status }} · fallback {{ P.hero_image.fallback }}<span class="why">page shell renders instantly; async fetch only when status=pending</span></span></div>
-      <div class="kv"><span class="k">Source class</span><span class="v">{{ ir.source|default('gradient') }} <span class="pol say">say</span></span></div>
-      {% if ir.intent_id %}<div class="kv"><span class="k">Intent</span><span class="v"><b>{{ ir.intent_id }}</b>{% if ir.secondary_intent_id %} + {{ ir.secondary_intent_id }}{% endif %}<span class="why">{% if ir.intent_selection and ir.intent_selection.primary %}{{ ir.intent_selection.primary.why }}{% endif %}</span></span></div>{% endif %}
-      {% if ir.conversion_goal %}<div class="kv"><span class="k">Conversion goal</span><span class="v">{{ ir.conversion_goal }}</span></div>{% endif %}
-      {% if ir.sales_technique %}<div class="kv"><span class="k">Sales technique</span><span class="v">{{ ir.sales_technique }}</span></div>{% endif %}
-      {% if ir.drives_action %}<div class="kv"><span class="k">Drives action</span><span class="v"><b>{{ ir.drives_action }}</b>{% if ir.pairs_with_objection %} · pairs with <code>{{ ir.pairs_with_objection }}</code>{% endif %}<span class="why">links image intent to hero CTA: {{ P.sections.hero.cta_primary }}</span></span></div>{% endif %}
-      {% if ir.visual_metaphor %}<div class="kv"><span class="k">Visual metaphor</span><span class="v" style="font-weight:400">{{ ir.visual_metaphor }}</span></div>{% endif %}
-      {% if ir.personalization_layers %}
-      <div class="kv"><span class="k">Personalization layers</span><span class="v" style="font-weight:400">
-        <table style="width:100%;font-size:12px;border-collapse:collapse;margin-top:4px">
-          <tr style="border-bottom:1px solid #333"><th align="left">Layer</th><th align="left">Value</th><th align="left">Source</th><th align="left">Policy</th></tr>
-          {% for layer in ir.personalization_layers %}
-          <tr><td>{{ layer.layer }}</td><td>{{ layer.value[:80] }}{% if layer.value|length > 80 %}…{% endif %}</td><td>{{ layer.source }}</td><td><span class="pol {{ layer.disposition }}">{{ layer.disposition }}</span></td></tr>
-          {% endfor %}
-        </table>
-      </span></div>
-      {% endif %}
-      {% if ir.guardrails_applied or ir.guardrails_blocked %}
-      <div class="kv"><span class="k">Guardrails</span><span class="v" style="font-weight:400;font-size:12.5px">
-        {% if ir.guardrails_applied %}<div>✓ applied: {{ ir.guardrails_applied|join(', ') }}</div>{% endif %}
-        {% if ir.guardrails_blocked %}<div style="color:#f59e0b">⊘ blocked/stripped: {{ ir.guardrails_blocked|join(', ') }}</div>{% endif %}
-        {% if ir.must_avoid %}<div style="margin-top:6px;opacity:.85">must avoid: {{ ir.must_avoid[:3]|join('; ') }}…</div>{% endif %}
-      </span></div>
-      {% endif %}
-      {% if ir.url or P.hero_image.url %}<div class="kv"><span class="k">URL</span><span class="v" style="font-size:12px;word-break:break-all">{{ P.hero_image.url or ir.url or '—' }}</span></div>{% endif %}
-      {% if ir.prompt %}<div class="kv"><span class="k">Full prompt</span><span class="v" style="font-weight:400;font-size:12.5px">{{ ir.prompt }}</span></div>{% endif %}
-      {% if ir.model %}<div class="kv"><span class="k">Model</span><span class="v">{{ ir.model }} · {{ ir.vendor|default('—') }}</span></div>{% endif %}
-      {% if ir.cache_key %}<div class="kv"><span class="k">Cache key</span><span class="v" style="font-family:ui-monospace,Menlo,monospace;font-size:12px">{{ ir.cache_key }}</span></div>{% endif %}
-      {% if ir.license %}<div class="kv"><span class="k">License</span><span class="v">{{ ir.license }}</span></div>{% endif %}
-      {% if ir.fallback_chain %}<div class="kv"><span class="k">Fallback chain</span><span class="v">{{ ir.fallback_chain|join(' → ') }}</span></div>{% endif %}
-      {% if ir.generated_at %}<div class="kv"><span class="k">Generated at</span><span class="v">{{ ir.generated_at }}</span></div>{% endif %}
+      {% set hi = P.hero_image %}
+      {% set hid = hi.dev %}
+      {% set ir = hi.receipt %}
+      <div class="h">⑥ Hero background — data &amp; decisioning <span class="tag">{{ hid.receipt.source|default('gradient') }}</span></div>
+
+      <div class="hi-chain">
+        <div class="trace-step">
+          <span class="n">1</span>
+          <div style="min-width:0">
+            <div class="nm">Intent selection</div>
+            <div class="rule">rule fired: <code>{{ hid.intent_selection.rule_fired }}</code></div>
+            {% for pick in hid.intent_selection.intents %}
+            <div class="hi-intent{{ ' primary' if pick.primary else '' }}" style="padding:8px 0 0;border:0">
+              <span class="rk">{{ pick.rank }}</span>
+              <div class="body">
+                <div class="id">{{ pick.intent_id }}{% if pick.primary %} <span class="pol say">primary</span>{% endif %}</div>
+                <div class="sig">{{ pick.why }}</div>
+                <div class="sig">signals: {% for s in pick.signals %}<span class="chip">{{ s }}</span>{% endfor %}</div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="trace-step">
+          <span class="n">2</span>
+          <div style="min-width:0">
+            <div class="nm">Conversion goal + sales technique</div>
+            <div class="out">→ drives <b>{{ hid.conversion.drives_action or '—' }}</b>{% if hid.conversion.pairs_with_objection %} · pairs with objection <code>{{ hid.conversion.pairs_with_objection }}</code>{% endif %}</div>
+            <div class="kv" style="padding:6px 0 0;border:0"><span class="k">Goal</span><span class="v">{{ hid.conversion.goal or '—' }}</span></div>
+            <div class="kv" style="padding:6px 0;border:0"><span class="k">Technique</span><span class="v">{{ hid.conversion.sales_technique or '—' }}<span class="why">links image intent to hero CTA: {{ P.sections.hero.cta_primary }}</span></span></div>
+          </div>
+        </div>
+
+        <div class="trace-step">
+          <span class="n">3</span>
+          <div style="min-width:0;width:100%">
+            <div class="nm">Personalization layers</div>
+            {% if hid.layers %}
+            <table class="hi-led">
+              <tr><th>Layer</th><th>Value</th><th>Source</th><th>Disposition</th></tr>
+              {% for layer in hid.layers %}
+              <tr>
+                <td style="font-weight:600">{{ layer.layer }}</td>
+                <td>{{ layer.value }}</td>
+                <td class="src">{{ layer.source }}</td>
+                <td><span class="pol {{ layer.disposition }}">{{ layer.disposition }}</span></td>
+              </tr>
+              {% endfor %}
+            </table>
+            {% else %}
+            <div class="empty" style="padding:8px 0">No personalization layers — tier gates or neutral context stripped industry/region.</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="trace-step">
+          <span class="n">4</span>
+          <div style="min-width:0">
+            <div class="nm">Prompt assembly</div>
+            <div class="kv" style="padding:6px 0 0;border:0"><span class="k">Visual metaphor</span><span class="v" style="font-weight:400">{{ hid.prompt.visual_metaphor or '—' }}</span></div>
+            <div class="kv" style="padding:6px 0;border:0"><span class="k">Composition</span><span class="v" style="font-weight:400">{{ hid.prompt.composition or '—' }}</span></div>
+            <div class="kv" style="padding:6px 0;border:0"><span class="k">Mood</span><span class="v">{{ hid.prompt.mood or '—' }} · accent {{ hid.prompt.accent_color or '—' }}</span></div>
+            {% if hid.prompt.must_include %}
+            <div class="hi-sub">Must include</div>
+            <ul class="hi-list">{% for item in hid.prompt.must_include %}<li>{{ item }}</li>{% endfor %}</ul>
+            {% endif %}
+            {% if hid.prompt.must_avoid %}
+            <div class="hi-sub">Must avoid</div>
+            <ul class="hi-list">{% for item in hid.prompt.must_avoid %}<li>{{ item }}</li>{% endfor %}</ul>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="trace-step">
+          <span class="n">5</span>
+          <div style="min-width:0">
+            <div class="nm">Guardrails applied</div>
+            {% if hid.guardrails.applied %}
+            <div class="kv" style="padding:6px 0 0;border:0"><span class="k">Applied</span><span class="v" style="font-weight:400">{% for g in hid.guardrails.applied %}<span class="chip">{{ g.label }}</span>{% endfor %}</span></div>
+            {% endif %}
+            {% if hid.guardrails.blocked %}
+            <div class="hi-blocked"><div class="cap">Blocked / stripped</div>{% for g in hid.guardrails.blocked %}{{ g.label }}{% if not loop.last %} · {% endif %}{% endfor %}</div>
+            {% elif not hid.guardrails.applied %}
+            <div class="empty" style="padding:8px 0">No guardrail blocks — context had no hold-tier facts to strip.</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="trace-step">
+          <span class="n">6</span>
+          <div style="min-width:0">
+            <div class="nm">Generation receipt</div>
+            <div class="kv" style="padding:6px 0 0;border:0"><span class="k">Load status</span><span class="v">{{ hid.status }} · fallback {{ hid.fallback }}<span class="why">page shell renders instantly; async fetch only when status=pending</span></span></div>
+            <div class="kv" style="padding:6px 0;border:0"><span class="k">Source</span><span class="v">{{ hid.receipt.source }} · {{ hid.receipt.vendor or '—' }}</span></div>
+            {% if hid.receipt.model %}<div class="kv" style="padding:6px 0;border:0"><span class="k">Model</span><span class="v">{{ hid.receipt.model }}</span></div>{% endif %}
+            {% if hid.receipt.cache_key %}<div class="kv" style="padding:6px 0;border:0"><span class="k">Cache key</span><span class="v" style="font-family:ui-monospace,Menlo,monospace;font-size:12px">{{ hid.receipt.cache_key }}</span></div>{% endif %}
+            {% if hid.receipt.generated_at %}<div class="kv" style="padding:6px 0;border:0"><span class="k">Generated at</span><span class="v">{{ hid.receipt.generated_at }}</span></div>{% endif %}
+            {% if hid.receipt.license %}<div class="kv" style="padding:6px 0;border:0"><span class="k">License</span><span class="v">{{ hid.receipt.license }}</span></div>{% endif %}
+            {% if hid.receipt.url or hi.url %}<div class="kv" style="padding:6px 0;border:0"><span class="k">URL</span><span class="v" style="font-size:12px;word-break:break-all">{{ hi.url or hid.receipt.url }}</span></div>{% endif %}
+            {% if hid.prompt.full_prompt %}<div class="kv" style="padding:6px 0;border:0"><span class="k">Full prompt</span><span class="v" style="font-weight:400;font-size:12.5px">{{ hid.prompt.full_prompt }}</span></div>{% endif %}
+          </div>
+        </div>
+
+        <div class="trace-step">
+          <span class="n">7</span>
+          <div style="min-width:0">
+            <div class="nm">Fallback chain</div>
+            {% if hid.fallback_chain %}
+            <div class="out">→ {{ hid.fallback_chain|join(' → ') }}</div>
+            <div class="why">cache → API → gallery → CSS gradient — first successful step wins</div>
+            {% else %}
+            <div class="empty" style="padding:8px 0">No fallback chain recorded.</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="hi-prev">
+        <div class="box">
+          <div class="cap">Generated / cached image</div>
+          {% if hid.preview.has_image %}
+          <img src="{{ hi.url or hid.receipt.url }}" alt="Hero background preview">
+          {% else %}
+          <div style="font-size:12.5px;color:var(--muted);padding:8px 0">No URL — generation pending or offline fallback.</div>
+          {% endif %}
+        </div>
+        <div class="box">
+          <div class="cap">Without generation (CSS gradient)</div>
+          <div class="grad"></div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:6px">{{ hid.preview.gradient_note }}</div>
+        </div>
+      </div>
     </div>
 
     <div class="sec" id="sec-objections">

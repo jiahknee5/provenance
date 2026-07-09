@@ -181,8 +181,8 @@ def test_dev_trace_has_every_stage_with_full_entries():
 def test_dev_page_shows_all_panels_and_toggle():
     t = c.get("/dev?as=anon").text
     for panel in ("Entry point", "Tier routing", "Signal ledger", "CRM record",
-                  "Per-slot copy decision", "Hero image provenance", "Objection checklist",
-                  "Trace — every stage"):
+                  "Per-slot copy decision", "Hero background",
+                  "Objection checklist", "Trace — every stage"):
         assert panel in t, f"/dev missing panel: {panel}"
     assert "Anonymous — no login" in t
     k = c.get("/dev?as=known").text

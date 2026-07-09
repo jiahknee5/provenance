@@ -420,16 +420,110 @@ def get_hero_image(ctx: dict, *, generate: bool = False,
 
 def resolve_hero_image(page: dict, *, generate: bool = False,
                        tenant: str | None = None) -> dict:
-    """Page-facing wrapper → {status, fallback, url?, receipt}."""
+    """Page-facing wrapper → {status, fallback, url?, receipt, dev}."""
     ctx = build_image_ctx(page)
     receipt = get_hero_image(ctx, generate=generate, tenant=tenant)
     source = receipt.get("source", "gradient")
     url = receipt.get("url")
     if source == "pending":
-        return {"status": "pending", "fallback": "gradient", "url": None, "receipt": receipt}
-    if url:
-        return {"status": "ready", "fallback": "gradient", "url": url, "receipt": receipt}
-    return {"status": "ready", "fallback": "gradient", "url": None, "receipt": receipt}
+        hero = {"status": "pending", "fallback": "gradient", "url": None, "receipt": receipt}
+    elif url:
+        hero = {"status": "ready", "fallback": "gradient", "url": url, "receipt": receipt}
+    else:
+        hero = {"status": "ready", "fallback": "gradient", "url": None, "receipt": receipt}
+    hero["dev"] = hero_image_dev_panel(hero)
+    return hero
+
+
+_GUARD_LABELS = {
+    "industry_layer_stripped": "Industry layer stripped (tier gate)",
+    "region_layer_stripped": "Region mood stripped (tier gate)",
+    "hold_source_present": "Hold-tier source present — not emitted",
+    "pattern_blocked": "Hold pattern blocked in prompt body",
+}
+
+
+def _guardrail_label(entry: str) -> str:
+    if ":" in entry:
+        kind, detail = entry.split(":", 1)
+        base = _GUARD_LABELS.get(kind, kind.replace("_", " "))
+        return f"{base} ({detail})"
+    return entry.replace("_", " ")
+
+
+def hero_image_dev_panel(hero_image: dict) -> dict:
+    """Structured decision chain for /dev panel ⑥ — full data + decisioning."""
+    receipt = hero_image.get("receipt") or {}
+    sel = receipt.get("intent_selection") or {}
+    primary = sel.get("primary") or {}
+    secondary = sel.get("secondary")
+    intents = sel.get("intents") or []
+    rule = sel.get("rule_fired") or "select_image_intent()"
+
+    intent_rows = []
+    for pick in intents:
+        intent_rows.append({
+            "intent_id": pick["intent_id"],
+            "rank": pick["rank"],
+            "why": pick.get("why", ""),
+            "signals": pick.get("signals_used") or [],
+            "disposition": pick.get("disposition", "allude"),
+            "primary": pick["intent_id"] == primary.get("intent_id"),
+        })
+
+    layers = receipt.get("personalization_layers") or []
+    applied = receipt.get("guardrails_applied") or []
+    blocked = receipt.get("guardrails_blocked") or []
+    chain = receipt.get("fallback_chain") or []
+    url = hero_image.get("url") or receipt.get("url")
+    src = receipt.get("source", "gradient")
+
+    return {
+        "intent_selection": {
+            "rule_fired": rule,
+            "primary_id": primary.get("intent_id"),
+            "secondary_id": (secondary or {}).get("intent_id"),
+            "intents": intent_rows,
+        },
+        "conversion": {
+            "goal": receipt.get("conversion_goal"),
+            "sales_technique": receipt.get("sales_technique"),
+            "drives_action": receipt.get("drives_action"),
+            "pairs_with_objection": receipt.get("pairs_with_objection"),
+        },
+        "layers": layers,
+        "prompt": {
+            "visual_metaphor": receipt.get("visual_metaphor"),
+            "composition": receipt.get("composition"),
+            "mood": receipt.get("mood"),
+            "accent_color": receipt.get("accent_color"),
+            "must_include": receipt.get("must_include") or [],
+            "must_avoid": receipt.get("must_avoid") or [],
+            "full_prompt": receipt.get("prompt"),
+        },
+        "guardrails": {
+            "applied": [{"code": g, "label": _guardrail_label(g)} for g in applied],
+            "blocked": [{"code": g, "label": _guardrail_label(g)} for g in blocked],
+        },
+        "receipt": {
+            "source": src,
+            "vendor": receipt.get("vendor"),
+            "model": receipt.get("model"),
+            "cache_key": receipt.get("cache_key"),
+            "generated_at": receipt.get("generated_at"),
+            "license": receipt.get("license"),
+            "url": url,
+            "gallery_id": receipt.get("gallery_id"),
+        },
+        "fallback_chain": chain,
+        "status": hero_image.get("status", "ready"),
+        "fallback": hero_image.get("fallback", "gradient"),
+        "preview": {
+            "url": url,
+            "has_image": bool(url),
+            "gradient_note": "CSS gradient shows when no generated/cached URL resolves",
+        },
+    }
 
 
 def hero_image_trace(receipt: dict) -> tuple[list[str], str, str]:
@@ -443,12 +537,18 @@ def hero_image_trace(receipt: dict) -> tuple[list[str], str, str]:
         sigs.append(f"intent={receipt['intent_id']}")
         if receipt.get("secondary_intent_id"):
             sigs.append(f"secondary={receipt['secondary_intent_id']}")
+    sel = receipt.get("intent_selection") or {}
+    if sel.get("rule_fired"):
+        sigs.append(f"rule={sel['rule_fired'][:72]}")
     if receipt.get("drives_action"):
         sigs.append(f"drives_action={receipt['drives_action']}")
-    sel = receipt.get("intent_selection") or {}
     primary = sel.get("primary") or {}
     if primary.get("why"):
         sigs.append(f"why={primary['why'][:80]}")
+    blocked = receipt.get("guardrails_blocked") or []
+    if blocked:
+        sigs.append(f"guardrails_blocked={len(blocked)}")
+        sigs.append(f"stripped={', '.join(blocked[:3])}")
     if receipt.get("gallery_id"):
         sigs.append(f"gallery_id={receipt['gallery_id']}")
     chain = receipt.get("fallback_chain") or []
@@ -457,19 +557,22 @@ def hero_image_trace(receipt: dict) -> tuple[list[str], str, str]:
     src = receipt.get("source", "gradient")
     intent = receipt.get("intent_id", "—")
     goal = receipt.get("conversion_goal", "—")
+    guard_summary = ""
+    if blocked:
+        guard_summary = f"; guardrails stripped {len(blocked)} item(s): {blocked[0]}"
     if src == "generated":
         out = f"generated · {receipt.get('vendor', VENDOR)} · intent={intent}"
         why = (f"disk cache miss → API generated → cached; intent {intent} ({goal}) "
-               "drives hero CTA; prompt uses structured layers only (no PII)")
+               f"drives hero CTA; prompt uses structured layers only (no PII){guard_summary}")
     elif src == "gallery":
         out = f"gallery · {receipt.get('gallery_id', 'curated')} · intent={intent}"
-        why = "no cached/generated asset — curated CC library; intent selection still logged"
+        why = f"no cached/generated asset — curated CC library; intent selection still logged{guard_summary}"
     elif src == "pending":
         out = f"pending async · intent={intent}"
-        why = "API key present but cache empty — page ships gradient; client fetch triggers gen"
+        why = f"API key present but cache empty — page ships gradient; client fetch triggers gen{guard_summary}"
     else:
         out = f"CSS gradient · intent={intent}"
-        why = "no image asset resolved — hero gradient; intent selection logged for provenance"
+        why = f"no image asset resolved — hero gradient; intent selection logged for provenance{guard_summary}"
     return sigs, out, why
 
 

@@ -274,14 +274,49 @@ def test_dev_trace_includes_hero_image_stage():
     assert page.get("hero_image")
     receipt = page["hero_image"]["receipt"]
     assert receipt.get("intent_id") == "message_match"
+    hero_trace = next(t for t in page["trace"] if t["stage"] == "Hero image resolve")
+    assert any("intent=" in s for s in hero_trace["signals"])
+    assert page["hero_image"].get("dev")
 
 
 def test_dev_panel_shows_intent_provenance():
     r = c.get("/dev?utm_medium=paid&utm_campaign=x-keyword-ai-hiring&utm_content=v09")
     assert r.status_code == 200
     assert "message_match" in r.text
-    assert "Drives action" in r.text
+    assert "Hero background" in r.text and "decisioning" in r.text
+    assert "Intent selection" in r.text
+    assert "rule fired:" in r.text
+    assert "Drives action" in r.text or "drives hire_cta" in r.text
     assert "Personalization layers" in r.text
+    assert "Prompt assembly" in r.text
+    assert "Guardrails applied" in r.text
+    assert "Fallback chain" in r.text
+    assert "Without generation" in r.text
+
+
+def test_dev_shows_intent_selection_fields():
+    page = GS.build_page(_Req({"utm_medium": "paid", "utm_campaign": "x-keyword-ai-hiring", "utm_content": "v09"}))
+    dev = page["hero_image"]["dev"]
+    assert dev["intent_selection"]["rule_fired"]
+    assert dev["intent_selection"]["primary_id"] == "message_match"
+    assert len(dev["intent_selection"]["intents"]) >= 2
+    assert dev["conversion"]["drives_action"] == "hire_cta"
+    assert dev["prompt"]["visual_metaphor"]
+    assert dev["prompt"]["full_prompt"]
+
+
+def test_dev_shows_guardrails_blocked_when_tier_strips_industry(monkeypatch):
+    monkeypatch.delenv("IMAGE_GEN_API_KEY", raising=False)
+    ctx = _ctx(industry="technology", tier=0, ad_variant_id="x-keyword",
+               top_objections=["open_market_hire"], audience_route="b2b_hire")
+    receipt = IG.get_hero_image(ctx, generate=False)
+    dev = IG.hero_image_dev_panel({"receipt": receipt, "status": "ready", "fallback": "gradient", "url": None})
+    blocked_codes = [g["code"] for g in dev["guardrails"]["blocked"]]
+    assert any("industry" in b for b in blocked_codes)
+    page = _make_page({"utm_medium": "paid", "utm_campaign": "x-keyword-ai-hiring", "utm_content": "v09"})
+    r = c.get("/dev?utm_medium=paid&utm_campaign=x-keyword-ai-hiring&utm_content=v09")
+    assert r.status_code == 200
+    assert "Guardrails applied" in r.text
 
 
 def test_gemini_api_mocked_generation_vendor(monkeypatch, tmp_path):

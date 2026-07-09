@@ -1727,14 +1727,31 @@ def process_map(page: dict) -> dict:
           "same sections, same facts — only emphasis and order move")
 
     # 11 · hero image
-    src = (P["hero_image"].get("receipt") or {}).get("source", "gradient")
+    hi = P["hero_image"]
+    ir = hi.get("receipt") or {}
+    hid = hi.get("dev") or {}
+    sel = hid.get("intent_selection") or {}
+    src = ir.get("source", "gradient")
+    hi_reads = [
+        f"status={hi.get('status', 'ready')}",
+        f"fallback={hi.get('fallback', 'gradient')}",
+        f"intent={ir.get('intent_id', '—')}",
+    ]
+    if sel.get("rule_fired"):
+        hi_reads.append(f"rule={sel['rule_fired'][:48]}")
+    if ir.get("drives_action"):
+        hi_reads.append(f"drives_action={ir['drives_action']}")
+    blocked = ir.get("guardrails_blocked") or []
+    if blocked:
+        hi_reads.append(f"guardrails_blocked={len(blocked)}")
     stage("heroimg", "Hero image resolve", "#sec-hero-image",
-          [f"status={P['hero_image'].get('status', 'ready')}",
-           f"fallback={P['hero_image'].get('fallback', '—')}"],
-          "disk cache → (async API if keyed) → scene.image_for gallery → CSS gradient",
+          hi_reads,
+          "select_image_intent → build_structured_prompt → guardrails → cache → API → gallery → gradient",
           _branches(["generated", "pending", "gallery", "gradient"], src),
-          f"source = {src}",
-          "the page shell renders instantly; only a keyed cache miss goes async")
+          f"source = {src} · intent = {ir.get('intent_id', '—')}",
+          (f"intent {ir.get('intent_id')} ({ir.get('conversion_goal', '—')}) drives hero CTA; "
+           f"{len(blocked)} guardrail(s) applied" if blocked else
+           "structured prompt assembled from signals — page shell renders instantly"))
 
     return {"inputs": inputs, "stages": stages}
 

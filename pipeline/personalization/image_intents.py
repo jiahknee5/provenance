@@ -42,6 +42,7 @@ class ImageIntentSelection(TypedDict):
     primary: ImageIntentPick
     secondary: ImageIntentPick | None
     intents: list[ImageIntentPick]
+    rule_fired: str
 
 
 class StructuredPrompt(TypedDict, total=False):
@@ -217,6 +218,11 @@ def _resolve_rank(rank: int | str, picks: list[ImageIntentPick]) -> int:
     return int(rank)
 
 
+def _rule_label(kind: str, idx: int, when: dict) -> str:
+    when_bits = ", ".join(f"{k}={v}" for k, v in (when or {}).items())
+    return f"{kind}[{idx}]" + (f" when {{{when_bits}}}" if when_bits else " (default)")
+
+
 def select_image_intent(ctx: dict, config: dict | None = None) -> ImageIntentSelection:
     """Deterministic intent selection from visitor context + tenant YAML rules."""
     config = config or _default_config()
@@ -225,9 +231,11 @@ def select_image_intent(ctx: dict, config: dict | None = None) -> ImageIntentSel
     top1 = objections[0] if objections else None
 
     picks: list[ImageIntentPick] = []
+    rule_fired = "fallback_rules (default peer_proof)"
 
-    for rule in selection_cfg.get("primary_rules") or []:
+    for idx, rule in enumerate(selection_cfg.get("primary_rules") or []):
         if _match_when(rule.get("when") or {}, ctx):
+            rule_fired = _rule_label("primary_rules", idx, rule.get("when") or {})
             for p in rule.get("picks") or []:
                 why = _format_template(p.get("why", ""), ctx, config)
                 signals = _expand_signals(list(p.get("signals_used") or []), ctx)
@@ -239,7 +247,9 @@ def select_image_intent(ctx: dict, config: dict | None = None) -> ImageIntentSel
         default_rules = [r for r in fallback_rules if not (r.get("when") or {})]
         additive_rules = [r for r in fallback_rules if (r.get("when") or {})]
 
-        def _apply_rule(rule: dict) -> None:
+        def _apply_rule(rule: dict, idx: int, *, kind: str) -> None:
+            nonlocal rule_fired
+            before = len(picks)
             for p in rule.get("picks") or []:
                 if "when_objection_loss" in p:
                     if not top1 or top1 not in (config.get("objection_metaphors") or {}):
@@ -251,15 +261,17 @@ def select_image_intent(ctx: dict, config: dict | None = None) -> ImageIntentSel
                 why = _format_template(p.get("why", ""), ctx, config)
                 signals = _expand_signals(list(p.get("signals_used") or []), ctx)
                 picks.append(_pick(p["intent_id"], rank, why, signals))
+            if len(picks) > before:
+                rule_fired = _rule_label(kind, idx, rule.get("when") or {})
 
-        for rule in additive_rules:
+        for idx, rule in enumerate(additive_rules):
             if not _match_when(rule.get("when") or {}, ctx):
                 continue
-            _apply_rule(rule)
+            _apply_rule(rule, idx, kind="fallback_rules")
 
         if not picks:
-            for rule in default_rules:
-                _apply_rule(rule)
+            for idx, rule in enumerate(default_rules):
+                _apply_rule(rule, idx, kind="fallback_rules")
 
     seen: dict[str, ImageIntentPick] = {}
     for p in picks:
@@ -271,10 +283,12 @@ def select_image_intent(ctx: dict, config: dict | None = None) -> ImageIntentSel
 
     if not ordered:
         ordered = [_pick("peer_proof", 1, "fallback default", ["default"])]
+        rule_fired = "fallback_rules (hard default peer_proof)"
 
     primary = ordered[0]
     secondary = ordered[1] if len(ordered) > 1 else None
-    return {"primary": primary, "secondary": secondary, "intents": ordered}
+    return {"primary": primary, "secondary": secondary, "intents": ordered,
+            "rule_fired": rule_fired}
 
 
 def _resolve_drives_action(ctx: dict, top_objection: str | None,
