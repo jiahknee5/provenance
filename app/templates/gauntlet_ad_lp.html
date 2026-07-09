@@ -1,13 +1,12 @@
 {#- 12-variant X.com ad grid — one per real X Ads Manager targeting type.
-    Grouped: Demographic & delivery · Audience & intent. Each card shows targeting badge,
-    example config, ad mockup, and generic vs personalized hero headline. -#}
+    Compact 100vh layout: 6×2 (wide) or 4×3 (laptop). Category via left border. -#}
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Gauntlet X Ads — 12 Targeting Types</title>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root{
       --bg:#0b0a08; --panel:#12100c; --line:#26221a; --line2:#37311f;
@@ -15,122 +14,189 @@
       --sans:'Archivo','Inter',sans-serif; --ui:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
       --x-bg:#15202b; --x-line:#38444d; --x-muted:#8899a6;
       --card-bg:#fff; --card-ink:#0f1419; --card-muted:#536471;
+      --cat-demo:#3b82f6; --cat-aud:#a855f7;
     }
     *{box-sizing:border-box;margin:0;padding:0}
-    body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--ui);-webkit-font-smoothing:antialiased}
+    html,body{height:100%;overflow:hidden}
+    body{background:var(--bg);color:var(--ink);font:11px/1.35 var(--ui);-webkit-font-smoothing:antialiased}
     a{color:inherit;text-decoration:none}
-    .wrap{max-width:1400px;margin:0 auto;padding:32px 24px 80px}
-    .top{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:36px}
-    h1{font:600 clamp(28px,4vw,40px)/1.1 var(--sans);color:#fff}
-    .sub{color:var(--body);max-width:720px;margin-top:10px;font-size:15px}
-    .nav{display:flex;gap:10px;flex-wrap:wrap}
-    .nav a{font:600 12px var(--ui);border:1px solid var(--line2);border-radius:8px;padding:8px 14px;color:var(--gold-t)}
+    .page{
+      min-height:100vh;max-height:100vh;overflow:hidden;
+      display:flex;flex-direction:column;
+      padding:6px 10px 8px;
+    }
+    .top{
+      flex:0 0 auto;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      min-height:22px;margin-bottom:6px;
+    }
+    h1{font:600 13px/1 var(--sans);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .nav{display:flex;gap:6px;flex-shrink:0}
+    .nav a{font:600 10px var(--ui);border:1px solid var(--line2);border-radius:5px;padding:3px 8px;color:var(--gold-t);white-space:nowrap}
     .nav a:hover{border-color:var(--gold);color:#fff}
-    .legend{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
-    @media(max-width:900px){.legend{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:520px){.legend{grid-template-columns:1fr}}
-    .leg{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
-    .leg b{display:block;font:600 13px var(--ui);color:#fff}
-    .leg span{font:12px var(--ui);color:var(--dim)}
-    .leg .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:middle}
-    .section{margin-bottom:40px}
-    .sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--line2)}
-    .sec-head h2{font:600 20px var(--sans);color:#fff}
-    .sec-head span{font:12px var(--mono);color:var(--dim);letter-spacing:.06em;text-transform:uppercase}
-    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-    @media(max-width:1100px){.grid{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:640px){.grid{grid-template-columns:1fr}}
-    .card{background:var(--card-bg);border:1px solid #cfd9de;border-radius:16px;overflow:hidden;height:100%;display:flex;flex-direction:column;transition:border-color .15s,box-shadow .15s}
-    .card:hover{border-color:var(--gold);box-shadow:0 8px 32px rgba(0,0,0,.35)}
-    .target{padding:16px 16px 12px;border-bottom:1px solid #eff3f4}
-    .target .badge{display:inline-block;font:700 11px var(--ui);letter-spacing:.04em;text-transform:uppercase;color:#fff;background:#1d9bf0;border-radius:4px;padding:4px 8px;margin-bottom:8px}
-    .target .type{font:700 16px var(--sans);color:var(--card-ink);line-height:1.25;margin-bottom:6px}
-    .target .config{font:12px var(--mono);color:var(--card-muted);line-height:1.4}
-    .target .fit{font:11px var(--ui);color:var(--card-muted);margin-top:8px}
-    .target .fit b{color:var(--card-ink)}
-    .x-wrap{background:var(--x-bg);border-top:1px solid var(--x-line);flex:1;display:flex;flex-direction:column}
-    .x-top{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--x-line)}
-    .av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 12px var(--ui);color:#fff;flex-shrink:0}
-    .x-meta b{display:block;font:700 13px var(--ui);color:#fff}
-    .x-meta span{font:12px var(--ui);color:var(--x-muted)}
-    .x-body{padding:12px 14px 10px;flex:1}
-    .x-body p{font:14px/1.45 var(--ui);color:#e7e9ea}
+    .grid{
+      flex:1 1 auto;min-height:0;
+      display:grid;gap:8px;
+      grid-template-columns:repeat(6,1fr);
+      grid-template-rows:repeat(2,1fr);
+    }
+    @media(max-width:1279px){
+      .grid{grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(3,1fr)}
+    }
+    .card{
+      background:var(--card-bg);
+      border:1px solid #cfd9de;
+      border-radius:8px;
+      overflow:hidden;
+      min-height:0;
+      display:flex;flex-direction:column;
+      transition:border-color .12s,box-shadow .12s;
+    }
+    .card:hover{border-color:var(--gold);box-shadow:0 4px 18px rgba(0,0,0,.32)}
+    .card.cat-demographic{border-left:3px solid var(--cat-demo)}
+    .card.cat-audience{border-left:3px solid var(--cat-aud)}
+    .meta{
+      flex:0 0 auto;
+      padding:5px 7px 4px;
+      border-bottom:1px solid #eff3f4;
+      min-height:0;
+    }
+    .cat-tag{
+      display:inline-block;
+      font:700 8px var(--ui);
+      letter-spacing:.05em;text-transform:uppercase;
+      color:#fff;border-radius:3px;padding:1px 5px;margin-bottom:3px;
+    }
+    .cat-demographic .cat-tag{background:var(--cat-demo)}
+    .cat-audience .cat-tag{background:var(--cat-aud)}
+    .type{font:700 11px/1.2 var(--sans);color:var(--card-ink);margin-bottom:2px}
+    .config{
+      font:10px/1.25 var(--mono);color:var(--card-muted);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .fit{
+      font:9px var(--ui);color:var(--card-muted);margin-top:2px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .fit b{color:var(--card-ink);font-weight:600}
+    .x-wrap{
+      flex:1 1 auto;min-height:0;
+      background:var(--x-bg);
+      display:flex;flex-direction:column;
+      overflow:hidden;
+    }
+    .x-top{
+      flex:0 0 auto;
+      display:flex;align-items:center;gap:5px;
+      padding:4px 6px;border-bottom:1px solid var(--x-line);
+    }
+    .av{
+      width:18px;height:18px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font:700 7px var(--ui);color:#fff;flex-shrink:0;
+    }
+    .x-meta{min-width:0;flex:1}
+    .x-meta b{display:block;font:600 10px/1.1 var(--ui);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .x-meta span{font:9px var(--ui);color:var(--x-muted)}
+    .x-body{
+      flex:1 1 auto;min-height:0;
+      padding:4px 6px 2px;
+      overflow:hidden;
+    }
+    .x-body p{
+      font:10px/1.3 var(--ui);color:#e7e9ea;
+      display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+      overflow:hidden;
+    }
     .x-body .trig{color:var(--gold-t);font-weight:500}
-    .x-cta{padding:0 14px 10px;font:700 12px var(--ui);color:var(--gold-t)}
-    .utm{margin:0 14px 10px;font:9px var(--mono);color:var(--x-muted);word-break:break-all;background:rgba(0,0,0,.25);border-radius:6px;padding:5px 7px}
-    .preview{margin:0 14px 14px;border-top:1px solid var(--x-line);padding-top:10px}
-    .preview .lbl{font:9px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--x-muted);margin-bottom:6px}
-    .preview .gen{font:11px var(--ui);color:#6d6960;text-decoration:line-through;margin-bottom:4px;line-height:1.35}
-    .preview .arr{font:10px var(--ui);color:var(--x-muted);margin:4px 0}
-    .preview .per{font:12px var(--ui);color:var(--gold-t);font-weight:600;line-height:1.35}
-    .chip{position:fixed;right:16px;bottom:16px;font:600 11px var(--ui);color:#cfcabf;background:rgba(18,16,12,.92);border:1px solid var(--line2);border-radius:20px;padding:7px 13px}
+    .x-foot{
+      flex:0 0 auto;
+      padding:0 6px 4px;
+      display:flex;align-items:center;gap:6px;min-width:0;
+    }
+    .x-cta{font:700 9px var(--ui);color:var(--gold-t);white-space:nowrap;flex-shrink:0}
+    .utm{
+      font:8px var(--mono);color:var(--x-muted);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;
+    }
+    .preview{
+      flex:0 0 auto;
+      margin:0 6px 5px;
+      border-top:1px solid var(--x-line);
+      padding-top:3px;
+      min-height:0;
+    }
+    .preview .lbl{font:7px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--x-muted);margin-bottom:2px}
+    .preview .gen,
+    .preview .per{
+      font:9px/1.2 var(--ui);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .preview .gen{color:#6d6960;text-decoration:line-through}
+    .preview .per{color:var(--gold-t);font-weight:600}
+    .preview .arr{display:none}
+    .chip{
+      position:fixed;right:8px;bottom:6px;
+      font:600 9px var(--ui);color:#cfcabf;
+      background:rgba(18,16,12,.92);border:1px solid var(--line2);
+      border-radius:12px;padding:4px 9px;
+    }
     .chip:hover{color:#fff;border-color:var(--gold)}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
   </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="top">
-    <div>
-      <h1>X Ads Manager Targeting — 12 Variants</h1>
-      <p class="sub">One ad per real X targeting type. Each card shows the Ads Manager config,
-        the promoted post mockup, and the hero headline shift on click-through.
-        Generic hero: <b style="color:var(--dim)">{{ generic_hero }}</b></p>
-    </div>
-    <div class="nav">
-      <a href="{{ g.page }}">Landing page</a>
-      <a href="{{ g.dev }}">/dev trace</a>
+<div class="page">
+  <header class="top">
+    <h1>X Ads Manager Targeting — 12 Variants</h1>
+    <nav class="nav">
+      <a href="{{ g.page }}">Landing</a>
+      <a href="{{ g.dev }}">/dev</a>
       <a href="/showcase">Showcase</a>
-    </div>
-  </div>
+    </nav>
+  </header>
 
-  <div class="legend">
-    <div class="leg"><b><span class="dot" style="background:#3b82f6"></span>CTO / VP Engineering</b><span>Hire · transform · talent density</span></div>
-    <div class="leg"><b><span class="dot" style="background:#10b981"></span>Senior Engineer</b><span>Challenger · career leap · ship proof</span></div>
-    <div class="leg"><b><span class="dot" style="background:#a855f7"></span>HR / L&D Leader</b><span>Catalyst upskilling · event retarget</span></div>
-    <div class="leg"><b><span class="dot" style="background:#64748b"></span>Cross-audience</b><span>Language · gender (hold) · warm engagers</span></div>
-  </div>
-
-  {% for sec in sections %}
-  <div class="section">
-    <div class="sec-head">
-      <h2>{{ sec.label }}</h2>
-      <span>{{ sec.variants | length }} variants</span>
-    </div>
-    <div class="grid">
-      {% for item in sec.variants %}
-      {% set v = item.variant %}
-      <a class="card" href="{{ item.landing_url }}" title="Open personalized landing page">
-        <div class="target">
-          <span class="badge">X targeting</span>
-          <div class="type">{{ v.x_targeting_type }}</div>
-          <div class="config">{{ v.x_targeting_example }}</div>
-          <div class="fit">Best for <b>{{ v.audience_fit_label }}</b></div>
-        </div>
-        <div class="x-wrap">
-          <div class="x-top">
-            <div class="av" style="background:{{ v.ad.accent }}">{{ v.ad.avatar }}</div>
-            <div class="x-meta">
-              <b>{{ v.ad.display }}</b>
-              <span>@{{ v.ad.handle }} · Promoted</span>
-            </div>
-          </div>
-          <div class="x-body">
-            <p><span class="trig">{{ v.ad.trigger }}</span> {{ v.ad.body }} {{ v.ad.proof }}</p>
-          </div>
-          <div class="x-cta">{{ v.ad.cta_label }}</div>
-          <div class="utm">utm_campaign={{ v.utm_campaign }} · utm_content={{ v.variant_id }}</div>
-          <div class="preview">
-            <div class="lbl">Hero headline shift</div>
-            <div class="gen">{{ item.generic_hero }}</div>
-            <div class="arr">↓ personalized</div>
-            <div class="per">{{ item.personal_hero }}</div>
+  <div class="grid">
+    {% for sec in sections %}
+    {% for item in sec.variants %}
+    {% set v = item.variant %}
+    {% set loop_idx = loop.index0 %}
+    <a class="card cat-{{ sec.category }}" href="{{ item.landing_url }}" title="{{ v.x_targeting_type }} — open personalized landing page">
+      <div class="meta">
+        {% if loop.first %}
+        <span class="cat-tag">{{ sec.label }}</span>
+        {% endif %}
+        <div class="type">{{ v.x_targeting_type }}</div>
+        <div class="config" title="{{ v.x_targeting_example }}">{{ v.x_targeting_example }}</div>
+        <div class="fit">Best for <b>{{ v.audience_fit_label }}</b></div>
+      </div>
+      <div class="x-wrap">
+        <div class="x-top">
+          <div class="av" style="background:{{ v.ad.accent }}">{{ v.ad.avatar }}</div>
+          <div class="x-meta">
+            <b>{{ v.ad.display }}</b>
+            <span>@{{ v.ad.handle }} · Promoted</span>
           </div>
         </div>
-      </a>
-      {% endfor %}
-    </div>
+        <div class="x-body">
+          <p title="{{ v.ad.text }}"><span class="trig">{{ v.ad.trigger }}</span> {{ v.ad.body }} {{ v.ad.proof }}</p>
+        </div>
+        <div class="x-foot">
+          <span class="x-cta">{{ v.ad.cta_label }}</span>
+          <span class="utm" title="utm_campaign={{ v.utm_campaign }} · utm_content={{ v.variant_id }}">utm_campaign={{ v.utm_campaign }} · utm_content={{ v.variant_id }}</span>
+        </div>
+        <div class="preview">
+          <div class="lbl">Hero shift</div>
+          <div class="gen" title="{{ item.generic_hero }}">{{ item.generic_hero }}</div>
+          <div class="arr">↓ personalized</div>
+          <div class="per" title="{{ item.personal_hero }}">{{ item.personal_hero }}</div>
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+    {% endfor %}
   </div>
-  {% endfor %}
+  <p class="sr-only">Generic hero: {{ generic_hero }}</p>
 </div>
 <a class="chip" href="{{ g.dev }}">decisions → /dev</a>
 </body>
