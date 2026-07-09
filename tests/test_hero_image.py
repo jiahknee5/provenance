@@ -131,3 +131,47 @@ def test_dev_trace_includes_hero_image_stage():
     stages = [t["stage"] for t in page["trace"]]
     assert "Hero image resolve" in stages
     assert page.get("hero_image")
+
+
+
+def test_gemini_api_mocked_generation_vendor(monkeypatch, tmp_path):
+    monkeypatch.setenv("IMAGE_GEN_API_KEY", "AQ.test-google-key")
+    monkeypatch.setenv(
+        "IMAGE_GEN_API_URL",
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent",
+    )
+    monkeypatch.setattr(IG, "CACHE_DIR", tmp_path)
+    monkeypatch.setattr(IG, "IMAGE_DIR", tmp_path / "images")
+    monkeypatch.setattr(IG, "MANIFEST", tmp_path / "manifest.json")
+    import base64
+
+    fake_png = bytes([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x01])
+
+    def _fake_gemini(prompt, *, url, key):
+        assert "Cinematic wide hero" in prompt
+        return {
+            "b64": base64.b64encode(fake_png).decode(),
+            "ext": "png",
+            "vendor": IG.GEMINI_VENDOR,
+        }
+
+    monkeypatch.setattr(IG, "_call_gemini_image_api", _fake_gemini)
+    receipt = IG.get_hero_image(_ctx(), generate=True)
+    assert receipt["source"] == "generated"
+    assert receipt["vendor"] == "google-gemini"
+
+
+def test_call_image_api_routes_to_gemini(monkeypatch):
+    monkeypatch.setenv("IMAGE_GEN_API_KEY", "AQ.test")
+    monkeypatch.setenv("IMAGE_GEN_API_URL", IG.DEFAULT_GEMINI_API_URL)
+    called = {}
+
+    def _fake(prompt, *, url, key):
+        called["url"] = url
+        called["key_set"] = bool(key)
+        return {"b64": "aW1n", "ext": "png", "vendor": IG.GEMINI_VENDOR}
+
+    monkeypatch.setattr(IG, "_call_gemini_image_api", _fake)
+    out = IG._call_image_api("safe abstract hero")
+    assert out and out["vendor"] == IG.GEMINI_VENDOR
+    assert called["url"] == IG.DEFAULT_GEMINI_API_URL

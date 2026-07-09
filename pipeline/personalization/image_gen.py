@@ -29,7 +29,12 @@ MANIFEST = CACHE_DIR / "manifest.json"
 
 DEFAULT_MODEL = "gemini-2.5-flash-image"
 DEFAULT_API_URL = "https://api.openai.com/v1/images/generations"
+DEFAULT_GEMINI_API_URL = (
+    "https://generativelanguage.googleapis.com/v1beta/models/"
+    "gemini-2.5-flash-image:generateContent"
+)
 VENDOR = "nano-banana-compatible"
+GEMINI_VENDOR = "google-gemini"
 
 # Patterns that must never appear in prompts (hold / PII surface policy).
 _FORBIDDEN_PROMPT = re.compile(
@@ -210,13 +215,47 @@ def _gallery_receipt(ctx: dict, *, prompt: str, cache_key: str, model: str,
     }
 
 
-def _call_image_api(prompt: str) -> dict | None:
-    """Minimal OpenAI-compatible text-to-image client. None on missing key or failure."""
-    key = _api_key()
-    if not key:
-        return None
+def _is_gemini_api(url: str) -> bool:
+    return "generativelanguage.googleapis.com" in url
+
+
+def _resolve_api_url() -> tuple[str, bool]:
     url = _api_url()
-    model = _model()
+    key = _api_key()
+    if _is_gemini_api(url):
+        return url, True
+    if url == DEFAULT_API_URL and key.startswith("AQ."):
+        return DEFAULT_GEMINI_API_URL, True
+    return url, False
+
+
+def _call_gemini_image_api(prompt: str, *, url: str, key: str) -> dict | None:
+    body = json.dumps({
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"responseModalities": ["IMAGE"]},
+    }).encode()
+    headers = {"x-goog-api-key": key, "Content-Type": "application/json"}
+    try:
+        r = httpx.post(url, content=body, headers=headers, timeout=120.0)
+        if r.status_code != 200:
+            return None
+        data = r.json()
+    except (httpx.HTTPError, TimeoutError, json.JSONDecodeError, OSError):
+        return None
+    for part in (((data or {}).get("candidates") or [{}])[0].get("content") or {}).get("parts") or []:
+        inline = part.get("inlineData") or part.get("inline_data")
+        if not inline:
+            continue
+        b64 = inline.get("data")
+        if not b64:
+            continue
+        mime = (inline.get("mimeType") or inline.get("mime_type") or "").lower()
+        ext = "jpg" if "jpeg" in mime or mime == "image/jpg" else "png"
+        return {"b64": b64, "ext": ext, "vendor": GEMINI_VENDOR}
+    return None
+
+
+def _call_openai_image_api(prompt: str, *, url: str, key: str, model: str) -> dict | None:
     body = json.dumps({
         "model": model,
         "prompt": prompt,
@@ -237,16 +276,27 @@ def _call_image_api(prompt: str) -> dict | None:
         return None
     item = items[0]
     if item.get("b64_json"):
-        return {"b64": item["b64_json"], "ext": "png"}
+        return {"b64": item["b64_json"], "ext": "png", "vendor": VENDOR}
     if item.get("url"):
         try:
             img_r = httpx.get(item["url"], timeout=30.0)
             if img_r.status_code == 200:
                 ext = "png" if "png" in (img_r.headers.get("content-type") or "") else "jpg"
-                return {"raw": img_r.content, "ext": ext}
+                return {"raw": img_r.content, "ext": ext, "vendor": VENDOR}
         except httpx.HTTPError:
             return None
     return None
+
+
+def _call_image_api(prompt: str) -> dict | None:
+    """OpenAI-compatible or Google Gemini generateContent. None on missing key or failure."""
+    key = _api_key()
+    if not key:
+        return None
+    url, use_gemini = _resolve_api_url()
+    if use_gemini:
+        return _call_gemini_image_api(prompt, url=url, key=key)
+    return _call_openai_image_api(prompt, url=url, key=key, model=_model())
 
 
 def _generate_and_cache(ctx: dict, prompt: str, cache_key: str, model: str) -> dict:
@@ -264,7 +314,7 @@ def _generate_and_cache(ctx: dict, prompt: str, cache_key: str, model: str) -> d
             "source": "generated",
             "prompt": prompt,
             "model": model,
-            "vendor": VENDOR,
+            "vendor": api_result.get("vendor", VENDOR),
             "cache_key": cache_key,
             "generated_at": _now_iso(),
             "license": "AI-generated (synthetic demo — disclosed on /dev)",
