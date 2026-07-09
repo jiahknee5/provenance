@@ -255,6 +255,18 @@ def test_hero_image_api_offline(monkeypatch):
     assert data["receipt"].get("intent_id")
 
 
+def test_portal_hero_image_api_prefixes_static_urls(monkeypatch):
+    monkeypatch.delenv("IMAGE_GEN_API_KEY", raising=False)
+    monkeypatch.delenv("NANO_BANANA_API_KEY", raising=False)
+    qs = "?utm_medium=paid&utm_campaign=x-keyword-ai-hiring&utm_content=v09"
+    r = c.get(f"/api/gauntletapt/hero-image{qs}")
+    assert r.status_code == 200
+    data = r.json()
+    if data.get("url"):
+        assert data["url"].startswith("/gauntletapt/static/generated/")
+    assert data["receipt"].get("intent_id")
+
+
 def test_dev_trace_includes_hero_image_stage():
     page = GS.build_page(_Req({"utm_medium": "paid", "utm_campaign": "x-keyword-ai-hiring", "utm_content": "v09"}))
     stages = [t["stage"] for t in page["trace"]]

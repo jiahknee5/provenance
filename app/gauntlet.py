@@ -92,9 +92,26 @@ def _safe_next(nxt: str, m: dict[str, str]) -> str:
     return nxt
 
 
+def _mount_static_url(url: str | None, m: dict[str, str]) -> str | None:
+    """Portal mount serves assets under /gauntletapt/static, not /static."""
+    if not url or not url.startswith("/static/"):
+        return url
+    prefix = m["static"]
+    if prefix == "/static":
+        return url
+    return prefix + url[len("/static"):]
+
+
+def _page_with_mount_urls(page: dict, m: dict[str, str]) -> dict:
+    hero = dict(page.get("hero_image") or {})
+    if hero.get("url"):
+        hero["url"] = _mount_static_url(hero["url"], m)
+    return {**page, "hero_image": hero}
+
+
 def _render_gauntlet(request: Request, m: dict[str, str]) -> HTMLResponse:
     email = _cookie_email(request)
-    page = GS.build_page(request, email=email or None)
+    page = _page_with_mount_urls(GS.build_page(request, email=email or None), m)
     page["nav"]["ad_lp"] = m["ad_lp"]
     return templates.TemplateResponse(request, "gauntlet_site.html", {
         "page": page, "qs": _qs(request), "dev_qs": _qs(request), "g": m,
@@ -162,14 +179,14 @@ def _render_dev(request: Request, m: dict[str, str]) -> HTMLResponse:
         "g": m})
 
 
-def _hero_image_json(request: Request) -> dict:
+def _hero_image_json(request: Request, m: dict[str, str]) -> dict:
     email = _cookie_email(request)
     page = GS.build_page(request, email=email or None)
     hero = IG.resolve_hero_image(page, generate=True)
     receipt = hero.get("receipt") or {}
     return {
         "status": hero.get("status", "ready"),
-        "url": hero.get("url"),
+        "url": _mount_static_url(hero.get("url"), m),
         "receipt": receipt,
         "source": receipt.get("source"),
     }
@@ -213,7 +230,7 @@ def _register_mount(m: dict[str, str]) -> None:
 
     @app.get(hero_api)
     def gauntlet_hero_image(request: Request) -> JSONResponse:
-        return JSONResponse(_hero_image_json(request))
+        return JSONResponse(_hero_image_json(request, m))
 
 
 for _mount in MOUNTS.values():

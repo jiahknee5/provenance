@@ -355,6 +355,19 @@ def test_portal_mount_serves_and_links_stay_under_prefix():
     c.get("/gauntletapt/logout")
 
 
+def test_portal_mount_hero_api_and_asset_urls_use_prefix():
+    """Portal fetch + cached hero URLs must stay under /gauntletapt."""
+    qs = "?utm_medium=paid&utm_campaign=x-keyword-ai-hiring&utm_content=v09"
+    t = c.get(f"/gauntletapt{qs}").text
+    assert 'data-hero-api="/api/gauntletapt/hero-image"' in t
+    r = c.get(f"/api/gauntletapt/hero-image{qs}")
+    assert r.status_code == 200
+    data = r.json()
+    if data.get("url"):
+        assert data["url"].startswith("/gauntletapt/static/")
+        assert not data["url"].startswith("/static/")
+
+
 # --------------------------------------------------------------------------- #
 # 7 · Objection-driven copy
 # --------------------------------------------------------------------------- #
