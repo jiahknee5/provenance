@@ -242,11 +242,11 @@
           </tr>
         </thead>
         <tbody>
-          {% for label, g, c in S.compare.rows %}
-          <tr>
-            <td class="lbl">{{ label }}</td>
-            <td class="val {{ 'em' if S.compare.emphasis == 'gauntlet' else '' }}">{{ g }}</td>
-            <td class="val {{ 'em' if S.compare.emphasis == 'catalyst' else '' }}">{{ c }}</td>
+          {% for label, gauntlet_val, catalyst_val in S.compare.rows %}
+          <tr class="{{ 'row-em' if S.compare.row_emphasis == label else '' }}">
+            <td class="lbl">{{ label }}{% if S.compare.row_emphasis == label %}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="row emphasized for objection reframe"></a></sup>{% endif %}</td>
+            <td class="val {{ 'em' if S.compare.emphasis == 'gauntlet' else '' }}">{{ gauntlet_val }}</td>
+            <td class="val {{ 'em' if S.compare.emphasis == 'catalyst' else '' }}">{{ catalyst_val }}</td>
           </tr>
           {% endfor %}
           <tr class="ctarow">

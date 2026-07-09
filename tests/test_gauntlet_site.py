@@ -170,7 +170,8 @@ def test_dev_trace_has_every_stage_with_full_entries():
                          email="maya.chen@gauntletai.com")
     stages = [t["stage"] for t in page["trace"]]
     for want in ("Entry classify", "IP resolve + classify", "Tier route", "Identity",
-                 "Segments → archetype", "Audience route", "Surface policy", "Compose"):
+                 "Segments → archetype", "Audience route", "Objection prioritize",
+                 "Surface policy", "Compose"):
         assert want in stages, f"missing trace stage: {want}"
     for t in page["trace"]:
         for key in ("stage", "signals", "rule", "disposition", "output", "why"):
@@ -180,7 +181,7 @@ def test_dev_trace_has_every_stage_with_full_entries():
 def test_dev_page_shows_all_panels_and_toggle():
     t = c.get("/dev?as=anon").text
     for panel in ("Entry point", "Tier routing", "Signal ledger", "CRM record",
-                  "Per-slot copy decision", "Trace — every stage"):
+                  "Per-slot copy decision", "Objection checklist", "Trace — every stage"):
         assert panel in t, f"/dev missing panel: {panel}"
     assert "Anonymous — no login" in t
     k = c.get("/dev?as=known").text
@@ -302,3 +303,73 @@ def test_portal_mount_serves_and_links_stay_under_prefix():
     c.post("/gauntletapt/login", data={"email": GS.sample_login_email(), "next": "/gauntletapt"})
     assert "Welcome back, Maya" in c.get("/gauntletapt").text
     c.get("/gauntletapt/logout")
+
+
+# --------------------------------------------------------------------------- #
+# 7 · Objection-driven copy
+# --------------------------------------------------------------------------- #
+def test_objection_catalog_has_fifteen_entries():
+    assert len(GS.OBJECTION_CATALOG) == 16
+    ids = {o["id"] for o in GS.OBJECTION_CATALOG}
+    assert "open_market_hire" in ids and "selection_rate_low" in ids and "ld_budget_committed" in ids
+
+
+def test_cto_keyword_ad_surfaces_hire_objection():
+    page = GS.build_page(_Req({
+        "utm_source": "x", "utm_medium": "paid",
+        "utm_campaign": "x-keyword-ai-hiring", "utm_content": "v09",
+    }))
+    top = page["objections"]["prioritized"][0]
+    assert top["objection_id"] in ("open_market_hire", "ten_weeks_long", "need_hires_not_training")
+    assert "open market" in top["text"].lower() or "45-minute" in page["sections"]["hero"]["sub"].lower() \
+        or "ten weeks" in top["text"].lower()
+
+
+def test_hr_event_ad_surfaces_ld_budget_objection():
+    page = GS.build_page(_Req({
+        "utm_source": "x", "utm_medium": "paid",
+        "utm_campaign": "x-event-hrtech", "utm_content": "v07",
+    }))
+    top = page["objections"]["prioritized"][0]
+    assert top["objection_id"] == "ld_budget_committed"
+    assert "L&D budget" in top["text"]
+
+
+def test_engineer_age_ad_surfaces_already_senior_objection():
+    page = GS.build_page(_Req({
+        "utm_source": "x", "utm_medium": "paid",
+        "utm_campaign": "x-age-senior-engineer", "utm_content": "v04",
+    }))
+    top = page["objections"]["prioritized"][0]
+    assert top["objection_id"] == "already_senior"
+    assert "already senior" in top["text"].lower()
+
+
+def test_abandoned_applicant_surfaces_selection_rate_objection():
+    page = GS.build_page(_Req({"utm_medium": "direct"}), email="liam.foster@gauntletai.com")
+    ids = [o["objection_id"] for o in page["objections"]["prioritized"]]
+    assert "selection_rate_low" in ids
+    assert any(a["objection_id"] == "selection_rate_low" for a in page["objections"]["assignments"])
+
+
+def test_objection_hold_reframes_never_ship():
+    """Blocked say-level objection reframes (income band) must not appear on /gauntlet."""
+    for p in CO.COHORT:
+        c.post("/gauntlet/login", data={"email": p["email"], "next": "/gauntlet"})
+        t = c.get("/gauntlet?utm_source=x&utm_medium=paid&utm_campaign=x-age-senior-engineer&utm_content=v04").text
+        assert "modeled your income" not in t
+        assert "pre-selected a payment plan" not in t
+        assert "pre-picked a payment plan" not in t
+        c.get("/gauntlet/logout")
+    dev = c.get("/dev?as=known").text
+    assert "Blocked say reframe" in dev or "Blocked — the say variant" in dev
+
+
+def test_objection_trace_stage():
+    page = GS.build_page(_Req({
+        "utm_source": "x", "utm_medium": "paid",
+        "utm_campaign": "x-event-hrtech", "utm_content": "v07",
+    }))
+    trace = next(t for t in page["trace"] if t["stage"] == "Objection prioritize")
+    assert "ld_budget_committed" in str(trace["signals"]) or trace["output"]
+    assert page["objections"]["assignments"]

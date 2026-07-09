@@ -562,6 +562,474 @@ ORDER_BY_AUDIENCE = {
     "neutral": DEFAULT_ORDER,
 }
 
+# --------------------------------------------------------------------------- #
+# Objection catalog — sales psychology, truth-bounded (Gauntlet site claims only)
+# Each objection: id, text, tracks[], weight_signals[], reframe slots, optional blocked_say.
+# --------------------------------------------------------------------------- #
+TRACKS = ("hire", "catalyst", "challenger")
+
+_AD_SIGNAL = {v["id"]: f"ad_{v['id'].replace('x-', '')}" for v in AD_VARIANTS}
+
+OBJECTION_CATALOG: list[dict] = [
+    # --- Hire (Gauntlet) ---
+    {"id": "open_market_hire",
+     "text": "We can hire AI talent on the open market",
+     "tracks": ["hire"],
+     "signals": [("ad_keyword", 14), ("ad_lookalike", 10), ("audience_fit_cto", 12),
+                 ("audience_route_b2b_hire", 8), ("network_corporate", 6), ("archetype_prestige", 5)],
+     "reframe": {
+         "hero_sub": ("Open-market listings look fine until six months of ramp on skills a "
+                      "45-minute loop never surfaces. Gauntlet places engineers observed across "
+                      "ten weeks of production pressure — 5,000+ applicants per cohort."),
+         "prove_card": (2, "Traditional interviews compress signal into hours. Our programs "
+                        "observe execution across weeks — patterns that matter only become visible over time."),
+         "compare_row": "Selection",
+     }},
+    {"id": "ten_weeks_long",
+     "text": "10 weeks is too long to evaluate someone",
+     "tracks": ["hire"],
+     "signals": [("ad_keyword", 12), ("ad_device", 9), ("audience_fit_cto", 10),
+                 ("audience_route_b2b_hire", 7), ("network_corporate", 5)],
+     "reframe": {
+         "hero_sub": ("Ten weeks sounds long until you compare it to six months of ramp after a "
+                      "45-minute hire. Gauntlet compresses evaluation into sustained observation — "
+                      "you watch engineers ship 10+ production apps before you sign."),
+         "prove_card": (2, "Sustained observation across weeks reveals what a single interview cannot — "
+                        "reasoning, decision-making, and response to pressure under real load."),
+         "compare_row": "Weekly hours",
+     }},
+    {"id": "placement_fees",
+     "text": "Placement fees are too expensive",
+     "tracks": ["hire"],
+     "signals": [("archetype_cost_confident", 12), ("preferential_cost", 10), ("ad_device", 7),
+                 ("audience_route_b2b_hire", 6), ("network_corporate", 5)],
+     "reframe": {
+         "hero_sub": ("A bad AI hire costs more than a placement fee — months of idle pilots while "
+                      "the team ramps. Gauntlet credits are pre-purchased; you pay after capability "
+                      "has been observed across ten weeks."),
+         "compare_row": "Pricing",
+         "compare_emphasis": "gauntlet",
+         "final_cta_sub": "Watch engineers prove it before you commit budget.",
+     },
+     "blocked_say": "We priced this for your modeled income band — here's the plan we'd push"},
+    {"id": "internal_upskill",
+     "text": "Our team can upskill internally instead",
+     "tracks": ["hire", "catalyst"],
+     "signals": [("ad_conversation", 11), ("ad_language", 8), ("audience_route_b2b_hire", 7),
+                 ("audience_companies", 6), ("archetype_prestige", 5)],
+     "reframe": {
+         "hero_sub": ("Internal upskilling works when engineers can step out full-time — most teams "
+                      "can't. Catalyst rewires the team you already have in six weeks; Hire places "
+                      "engineers who've already proven it."),
+         "compare_emphasis": "catalyst",
+         "prove_card": (0, "Every week requires shipped code and working systems — the same bar "
+                        "whether you hire net-new or rewire existing engineers."),
+     }},
+    {"id": "wrong_stack",
+     "text": "We don't know if they can ship in OUR stack",
+     "tracks": ["hire"],
+     "signals": [("tier_2", 8), ("tier_3", 10), ("industry_resolved", 9), ("audience_fit_cto", 7),
+                 ("network_corporate", 6)],
+     "reframe": {
+         "hero_sub": ("Stack fit isn't a whiteboard question — it's a production question. Challengers "
+                      "ship 10+ apps across web, mobile, and AI systems under 80-hour weeks; you observe "
+                      "how they adapt before you commit."),
+         "prove_card": (3, "Standards rise every week. By the end you've seen how engineers adapt — "
+                        "not just what they can do on a good day."),
+         "compare_row": "What they build",
+     }},
+    {"id": "bootcamp_burned",
+     "text": "We've been burned by bootcamp hires before",
+     "tracks": ["hire"],
+     "signals": [("ad_location", 8), ("ad_lookalike", 9), ("audience_fit_cto", 8),
+                 ("audience_route_b2b_hire", 6), ("network_corporate", 5)],
+     "reframe": {
+         "hero_sub": ("Bootcamps certify attendance — Gauntlet observes execution. 5,000+ applicants "
+                      "per cohort; capability is proven across ten weeks of production pressure, not "
+                      "a capstone weekend."),
+         "prove_card": (0, "This isn't preparation for evaluation. It is the evaluation — shipped code "
+                        "and working systems every week."),
+         "compare_row": "Validation",
+     }},
+    # --- Catalyst (upskill) ---
+    {"id": "no_time_away",
+     "text": "My engineers don't have time to step away",
+     "tracks": ["catalyst"],
+     "signals": [("ad_conversation", 12), ("ad_device", 9), ("audience_fit_cto", 8),
+                 ("audience_route_b2b_upskill", 10), ("audience_companies", 6)],
+     "reframe": {
+         "hero_sub": ("Six weeks full-time step-out sounds like a lot — until another quarter passes "
+                      "with pilots idle. Catalyst is built for engineers you select; they return as "
+                      "internal AI champions, not certificate holders."),
+         "compare_row": "Weekly hours",
+         "compare_emphasis": "catalyst",
+     }},
+    {"id": "ld_budget_committed",
+     "text": "L&D budget is already committed",
+     "tracks": ["catalyst"],
+     "signals": [("ad_event", 14), ("audience_fit_hr", 12), ("audience_route_b2b_upskill", 10),
+                 ("archetype_prestige", 4)],
+     "reframe": {
+         "hero_sub": ("Most L&D line items buy courses — Catalyst buys engineers who come back building "
+                      "RAG pipelines and agent workflows. Per-employee fee; production-grade capstone "
+                      "tied to business ROI."),
+         "compare_row": "Pricing",
+         "compare_emphasis": "catalyst",
+         "final_cta_sub": "Per-employee fee. Engineers you select. Champions you keep.",
+     }},
+    {"id": "six_weeks_revert",
+     "text": "6 weeks won't stick — they'll revert",
+     "tracks": ["catalyst"],
+     "signals": [("ad_event", 10), ("ad_conversation", 9), ("audience_fit_hr", 8),
+                 ("audience_route_b2b_upskill", 7)],
+     "reframe": {
+         "hero_sub": ("Short courses fade because nothing ships. Catalyst engineers build real AI systems "
+                      "— RAG pipelines, agents, workflows, MCP — with a production-grade capstone tied to "
+                      "your business ROI."),
+         "prove_card": (0, "Every week requires shipped code and working systems — engineers demo deployed "
+                        "systems under scrutiny, not slide decks."),
+         "compare_row": "Capstone",
+     }},
+    {"id": "roi_unproven",
+     "text": "ROI is unproven for our org",
+     "tracks": ["catalyst"],
+     "signals": [("ad_event", 9), ("audience_fit_hr", 10), ("audience_route_b2b_upskill", 8),
+                 ("archetype_outcomes_first", 6), ("network_corporate", 5)],
+     "reframe": {
+         "hero_sub": ("ROI shows up when engineers ship production AI systems tied to business outcomes — "
+                      "not when they collect certificates. Catalyst capstones are production-grade and "
+                      "tied to business ROI."),
+         "prove_card": (1, "Weekly live reviews let you observe reasoning and decision-making under "
+                        "pressure — the signals that predict whether capability sticks."),
+         "compare_row": "Capstone",
+     }},
+    {"id": "need_hires_not_training",
+     "text": "We need hires, not training",
+     "tracks": ["catalyst", "hire"],
+     "signals": [("ad_keyword", 11), ("ad_location", 8), ("audience_route_b2b_hire", 9),
+                 ("audience_companies", 7), ("seniority_exec", 6)],
+     "reframe": {
+         "hero_sub": ("When hiring is the bottleneck, the Hire track places engineers who've already "
+                      "shipped 10+ production apps across ten weeks. Same proof philosophy — "
+                      "different delivery."),
+         "compare_emphasis": "gauntlet",
+         "compare_row": "Best for",
+     }},
+    # --- Challenger (individual) ---
+    {"id": "cant_take_10_weeks",
+     "text": "I can't take 10 weeks off work",
+     "tracks": ["challenger"],
+     "signals": [("ad_age", 10), ("ad_movies", 8), ("audience_fit_engineer", 9),
+                 ("audience_route_individual", 8), ("network_residential", 5)],
+     "reframe": {
+         "hero_sub": ("Ten weeks full-time is a real trade — everything covered, but not part-time. "
+                      "Challengers who complete the program ship 10+ production apps; the credential "
+                      "means something because the bar is real."),
+         "challenger_body": ("Apply to train as a Gauntlet Challenger — 10 weeks, full-time, everything "
+                             "covered. Next cohort starts September 14."),
+         "compare_row": "Next cohort",
+     }},
+    {"id": "selection_rate_low",
+     "text": "Selection rate is too low — why try?",
+     "tracks": ["challenger"],
+     "signals": [("hubspot_abandoned", 14), ("ad_engager", 12), ("ad_interest", 10),
+                 ("ad_gender", 8), ("audience_route_individual", 7), ("intent_hot", 6)],
+     "reframe": {
+         "hero_sub": ("5,000+ engineers apply per cohort — the bar is high because the credential has "
+                      "to mean something. Selection is on execution under 80-hour weeks, not interview "
+                      "composure."),
+         "challenger_body": ("5,000+ applicants per cohort. Standards rise every week. If you've already "
+                             "started an application, pick up where you left off."),
+         "prove_card": (0, "This isn't preparation for evaluation. It is the evaluation — every week "
+                        "requires shipped code and working systems."),
+         "final_cta_sub": "Most engineers wait. Challengers ship.",
+     },
+     "blocked_say": "You abandoned step 3 of 4 — the selection rate scared you off; go back now"},
+    {"id": "already_senior",
+     "text": "I'm already senior — I don't need training",
+     "tracks": ["challenger"],
+     "signals": [("ad_age", 14), ("seniority_ic", 10), ("technical", 9), ("lifestage_upskiller", 7),
+                 ("audience_fit_engineer", 8), ("audience_route_individual", 6)],
+     "reframe": {
+         "hero_sub": ("Senior engineers who made the AI leap tell us the gap wasn't another cert — "
+                      "it was ten weeks of sustained observation under production pressure. "
+                      "Prove the leap; don't pitch it."),
+         "challenger_body": ("You've shipped before — Challenger is how you prove you can ship "
+                             "AI-native: RAG pipelines, agents, workflows, MCP."),
+         "prove_card": (3, "Standards rise every week — by the end you've shown how you adapt under "
+                        "escalating complexity, not just what you can do on a good day."),
+     }},
+    {"id": "learn_on_job",
+     "text": "I learn better on the job",
+     "tracks": ["challenger"],
+     "signals": [("ad_movies", 10), ("ad_interest", 8), ("audience_route_individual", 7),
+                 ("network_residential", 5), ("explorer_archetype", 6)],
+     "reframe": {
+         "hero_sub": ("On-the-job learning works until production pressure exposes gaps you can't "
+                      "see in tickets. Challenger is production only — weekly live reviews under "
+                      "scrutiny, 80-hour weeks, shipped systems every week."),
+         "prove_card": (1, "Engineers demo deployed systems under scrutiny — you observe reasoning "
+                        "and response to pressure, not tutorial follow-alongs."),
+     }},
+    {"id": "opportunity_cost",
+     "text": "The opportunity cost is too high",
+     "tracks": ["challenger"],
+     "signals": [("archetype_cost_confident", 12), ("preferential_cost", 10), ("ad_age", 8),
+                 ("audience_route_individual", 7), ("seniority_ic", 5)],
+     "reframe": {
+         "hero_sub": ("Ten weeks is expensive — so is another year watching AI pilots from the "
+                      "sidelines. Challenger is full-time, everything covered; 20,000+ applicants "
+                      "to date compete because the payoff is observed capability, not a certificate."),
+         "challenger_body": ("Apply to train as a Gauntlet Challenger — 10 weeks, full-time, "
+                             "everything covered. See payment and scholarship options on admissions."),
+         "final_cta_sub": "Ten weeks. Full-time. Everything covered. Prove it under pressure.",
+     },
+     "blocked_say": "We modeled your income band and pre-selected a payment plan — apply now"},
+]
+
+OBJECTION_BY_ID = {o["id"]: o for o in OBJECTION_CATALOG}
+
+_SIGNAL_LABELS = {
+    "ad_keyword": "X keyword ad (AI hiring intent)",
+    "ad_event": "X event ad (HR Tech / DevOps Days)",
+    "ad_age": "X age targeting (28–45, held on page)",
+    "ad_engager": "X post engager retarget",
+    "audience_fit_cto": "Ad audience fit: CTO / VP Engineering",
+    "audience_fit_hr": "Ad audience fit: HR / L&D",
+    "audience_fit_engineer": "Ad audience fit: Senior Engineer",
+    "audience_route_b2b_hire": "Audience route: B2B hire",
+    "audience_route_b2b_upskill": "Audience route: B2B upskill",
+    "audience_route_individual": "Audience route: individual / Challenger",
+    "hubspot_abandoned": "HubSpot abandoned application",
+    "archetype_cost_confident": "CRM archetype: cost-confident",
+    "preferential_cost": "Segment: cost-conscious",
+    "seniority_ic": "Clay/LinkedIn: individual contributor",
+    "technical": "Clay/LinkedIn: technical profile",
+}
+
+
+def _audience_route(audience: str, ad_variant: dict | None, ident: dict | None) -> str:
+    """Narrow audience into hire / upskill / individual / neutral for objection routing."""
+    if ad_variant:
+        fit = ad_variant["audience_fit"]
+        if fit == "HR/L&D":
+            return "b2b_upskill"
+        if fit == "CTO":
+            return "b2b_hire"
+        if fit == "Engineer":
+            return "individual"
+        emph = ad_variant["page"].get("compare_emphasis")
+        if emph == "catalyst":
+            return "b2b_upskill"
+        if emph == "gauntlet":
+            return "b2b_hire"
+        return "neutral"
+    if ident and ident.get("kind") == "cohort":
+        li = ident["view"]["linkedin"]
+        goal = (ident["view"]["declared"].get("goal") or "").lower()
+        if li.get("seniority") == "exec" or "team" in goal:
+            return "b2b_upskill" if "upskill" in goal or "team" in goal else "b2b_hire"
+        return "individual"
+    if audience == "individuals":
+        return "individual"
+    if audience == "companies":
+        return "b2b_hire"
+    return "neutral"
+
+
+def _collect_objection_signals(entry: dict, ad_variant: dict | None, audience: str,
+                               tier: int, ident: dict | None, det: dict,
+                               route: str) -> set[str]:
+    """Active signal keys for objection scoring — derived from entry, IP, CRM, ad variant."""
+    sigs: set[str] = {f"channel_{entry['channel']}"}
+    sigs.add(f"audience_{audience}")
+    sigs.add(f"audience_route_{route}")
+    sigs.add(f"tier_{tier}")
+    net = det.get("network_type", "")
+    if net in ("corporate", "corporate (via VPN)"):
+        sigs.add("network_corporate")
+    if net in ("residential", "consumer ISP", "mobile"):
+        sigs.add("network_residential")
+    if det.get("industry"):
+        sigs.add("industry_resolved")
+    if ad_variant:
+        sigs.add(_AD_SIGNAL[ad_variant["id"]])
+        fit = ad_variant["audience_fit"]
+        _fit_sig = {"CTO": "audience_fit_cto", "HR/L&D": "audience_fit_hr",
+                    "Engineer": "audience_fit_engineer"}.get(fit)
+        if _fit_sig:
+            sigs.add(_fit_sig)
+        if ad_variant["page"].get("compare_emphasis") == "catalyst":
+            sigs.add("campaign_catalyst")
+        elif ad_variant["page"].get("compare_emphasis") == "gauntlet":
+            sigs.add("campaign_hire")
+    intent = _campaign_intent(entry.get("utm_campaign"))
+    if intent == "companies":
+        sigs.add("campaign_companies")
+    elif intent == "individuals":
+        sigs.add("campaign_individuals")
+    if ident and ident.get("kind") == "cohort":
+        v, arch = ident["view"], ident["archetype"]
+        sigs.add(f"archetype_{arch['id']}")
+        if arch["id"] == "explorer":
+            sigs.add("explorer_archetype")
+        hs, li, dec = v["hubspot"], v["linkedin"], v["declared"]
+        if hs.get("abandoned"):
+            sigs.add("hubspot_abandoned")
+        if hs.get("lead_score", 0) >= 80 or hs.get("lifecycle") == "sql":
+            sigs.add("intent_hot")
+        if li.get("seniority") == "exec":
+            sigs.add("seniority_exec")
+        elif li.get("seniority") in ("ic", "career_change"):
+            sigs.add("seniority_ic")
+        if li.get("technical"):
+            sigs.add("technical")
+        goal = (dec.get("goal") or "").lower()
+        if any(w in goal for w in ("afford", "broke", "cost", "cheap")):
+            sigs.add("preferential_cost")
+        for fam, d in ident["segments"].items():
+            for s in d["segments"]:
+                if s["id"] == "cost":
+                    sigs.add("preferential_cost")
+                if s["id"] == "upskiller":
+                    sigs.add("lifestage_upskiller")
+    return sigs
+
+
+def _objection_applies(obj: dict, route: str) -> bool:
+    """Objection must match at least one track for the visitor's route."""
+    tracks = obj["tracks"]
+    if route == "b2b_hire":
+        return "hire" in tracks
+    if route == "b2b_upskill":
+        return "catalyst" in tracks
+    if route == "individual":
+        return "challenger" in tracks
+    return True  # neutral — all tracks eligible
+
+
+def prioritize_objections(ctx: dict) -> list[dict]:
+    """Rank top 3–5 objections for this visitor. ctx: entry, ad_variant, audience, tier, ident, det."""
+    route = ctx["route"]
+    active = _collect_objection_signals(
+        ctx["entry"], ctx.get("ad_variant"), ctx["audience"], ctx["tier"],
+        ctx.get("ident"), ctx["det"], route)
+    scored: list[dict] = []
+    for obj in OBJECTION_CATALOG:
+        if not _objection_applies(obj, route):
+            continue
+        score = 0
+        matched: list[str] = []
+        for sig, weight in obj["signals"]:
+            if sig in active:
+                score += weight
+                matched.append(sig)
+        if score <= 0:
+            continue
+        why_parts = [_SIGNAL_LABELS.get(m, m.replace("_", " ")) for m in matched[:3]]
+        scored.append({
+            "objection": obj,
+            "objection_id": obj["id"],
+            "text": obj["text"],
+            "score": score,
+            "signal_source": matched,
+            "why_prioritized": " + ".join(why_parts) if why_parts else "context match",
+            "rank": 0,
+        })
+    scored.sort(key=lambda x: (-x["score"], x["objection_id"]))
+    top = scored[:5]
+    for i, row in enumerate(top):
+        row["rank"] = i + 1
+    return top
+
+
+def _signal_label(sig: str) -> str:
+    return _SIGNAL_LABELS.get(sig, sig.replace("_", " "))
+
+
+def _apply_objection_reframes(hero: dict, prove: dict, challenger: dict, cta: dict,
+                              compare_emphasis: str | None, prove_cards: list,
+                              prioritized: list[dict], *, preserve_hero_sub: bool = False) -> tuple[dict, dict, dict, dict,
+                                                                 str | None, list, str | None, list[dict]]:
+    """Weave prioritized objections into copy slots. Returns updated sections + slot assignments."""
+    assignments: list[dict] = []
+    row_emphasis: str | None = None
+    if not prioritized:
+        return hero, prove, challenger, cta, compare_emphasis, prove_cards, row_emphasis, assignments
+
+    def _ack(obj: dict) -> str:
+        return f"{obj['text']} — fair question. "
+
+    # #1 → hero sub (skip when a declared goal already owns say-level hero sub)
+    o1 = prioritized[0]["objection"]
+    rf1 = o1.get("reframe", {})
+    if rf1.get("hero_sub") and not preserve_hero_sub:
+        hero["sub"] = _ack(o1) + rf1["hero_sub"]
+        assignments.append({"rank": 1, "objection_id": o1["id"], "objection": o1["text"],
+                            "slot": "hero_sub", "policy": "allude"})
+
+    # #2 → prove card
+    if len(prioritized) > 1:
+        o2 = prioritized[1]["objection"]
+        rf2 = o2.get("reframe", {})
+        if rf2.get("prove_card"):
+            idx, extra = rf2["prove_card"]
+            title, body = prove_cards[idx]
+            prove_cards[idx] = (title, body + " " + extra)
+            assignments.append({"rank": 2, "objection_id": o2["id"], "objection": o2["text"],
+                                "slot": f"prove_card_{idx}", "policy": "allude"})
+        if rf2.get("compare_row") and not row_emphasis:
+            row_emphasis = rf2["compare_row"]
+            assignments.append({"rank": 2, "objection_id": o2["id"], "objection": o2["text"],
+                                "slot": "compare_row", "policy": "allude"})
+        if rf2.get("compare_emphasis"):
+            compare_emphasis = rf2["compare_emphasis"]
+
+    # #3 → prove card or compare / challenger
+    if len(prioritized) > 2:
+        o3 = prioritized[2]["objection"]
+        rf3 = o3.get("reframe", {})
+        if rf3.get("challenger_body"):
+            challenger["body"] = rf3["challenger_body"]
+            assignments.append({"rank": 3, "objection_id": o3["id"], "objection": o3["text"],
+                                "slot": "challenger_body", "policy": "allude"})
+        elif rf3.get("prove_card"):
+            idx, extra = rf3["prove_card"]
+            title, body = prove_cards[idx]
+            if extra not in body:
+                prove_cards[idx] = (title, body + " " + extra)
+            assignments.append({"rank": 3, "objection_id": o3["id"], "objection": o3["text"],
+                                "slot": f"prove_card_{idx}", "policy": "allude"})
+        if rf3.get("compare_row"):
+            row_emphasis = rf3["compare_row"]
+            assignments.append({"rank": 3, "objection_id": o3["id"], "objection": o3["text"],
+                                "slot": "compare_row", "policy": "allude"})
+        if rf3.get("compare_emphasis"):
+            compare_emphasis = rf3["compare_emphasis"]
+
+    # #1 may also set compare row / emphasis if not consumed
+    if rf1.get("compare_row") and not row_emphasis:
+        row_emphasis = rf1["compare_row"]
+        assignments.append({"rank": 1, "objection_id": o1["id"], "objection": o1["text"],
+                            "slot": "compare_row", "policy": "allude"})
+    if rf1.get("compare_emphasis"):
+        compare_emphasis = rf1["compare_emphasis"]
+    if rf1.get("challenger_body"):
+        challenger["body"] = rf1["challenger_body"]
+        assignments.append({"rank": 1, "objection_id": o1["id"], "objection": o1["text"],
+                            "slot": "challenger_body", "policy": "allude"})
+
+    # Final CTA — last prioritized objection with final_cta_sub, else #4/#5
+    for row in reversed(prioritized):
+        rf = row["objection"].get("reframe", {})
+        if rf.get("final_cta_sub"):
+            cta["sub"] = rf["final_cta_sub"]
+            assignments.append({"rank": row["rank"], "objection_id": row["objection_id"],
+                                "objection": row["text"], "slot": "final_cta", "policy": "allude"})
+            break
+
+    return hero, prove, challenger, cta, compare_emphasis, prove_cards, row_emphasis, assignments
+
 
 # --------------------------------------------------------------------------- #
 # The builder
@@ -923,6 +1391,75 @@ def build_page(request, email: str | None = None, overrides: dict | None = None)
                       if ident and ident["kind"] == "cohort" and ident["view"]["hubspot"].get("abandoned") else None),
          why="behavioral facts steer the close but are alluded to, never itemized")
 
+    # --- objection-driven reframes (deterministic checklist → copy slots) ---
+    prove_cards = [tuple(c) for c in PROVE_CARDS]
+    pre_hero_sub = hero["sub"]
+    pre_challenger_body = challenger["body"]
+    pre_cta_sub = cta["sub"]
+    pre_compare_emphasis = compare_emphasis
+
+    aud_route = _audience_route(audience, ad_variant, ident)
+    obj_ctx = {"entry": entry, "ad_variant": ad_variant, "audience": audience,
+               "tier": tier, "ident": ident, "det": det, "route": aud_route}
+    prioritized = prioritize_objections(obj_ctx)
+    hero_sub_say = bool(ident and ident["kind"] == "cohort"
+                        and ident["view"]["declared"].get("goal"))
+    hero, prove, challenger, cta, compare_emphasis, prove_cards, compare_row_emphasis, obj_assignments = \
+        _apply_objection_reframes(hero, prove, challenger, cta, compare_emphasis, prove_cards, prioritized,
+                                  preserve_hero_sub=hero_sub_say)
+
+    obj_blocked = [{"objection_id": row["objection"]["id"], "text": row["objection"]["text"],
+                    "blocked_say": row["objection"].get("blocked_say")}
+                   for row in prioritized if row["objection"].get("blocked_say")]
+
+    if hero["sub"] != pre_hero_sub:
+        for d in diff:
+            if d["slot"] == "hero_sub":
+                d["shipped"] = h1_pre + h1_gold + " · " + hero["sub"]
+                d["changed"] = d["generic"] != d["shipped"]
+                d["source"] = d["source"] + " + objection #" + str(prioritized[0]["rank"])
+                d["why"] = (d.get("why", "") + " · objection #" + str(prioritized[0]["rank"])
+                            + " reframe woven into hero sub")
+                break
+    if challenger["body"] != pre_challenger_body:
+        for d in diff:
+            if d["slot"] == "challenger_body":
+                d["shipped"] = challenger["body"]
+                d["changed"] = True
+                d["source"] = "objection-driven reframe"
+                break
+        else:
+            slot("challenger_body", "Challenger callout", GENERIC["challenger"]["body"],
+                 challenger["body"], "objection-driven reframe", "allude",
+                 why="prioritized individual-track objection addressed in callout")
+    if cta["sub"] != pre_cta_sub:
+        for d in diff:
+            if d["slot"] == "final_cta":
+                d["shipped"] = cta["heading"] + " · " + cta["sub"]
+                d["changed"] = True
+                break
+    if compare_emphasis != pre_compare_emphasis:
+        for d in diff:
+            if d["slot"] == "compare_emphasis":
+                d["shipped"] = compare_emphasis or "none (equal columns)"
+                d["changed"] = True
+                d["source"] = "objection-driven reframe"
+                break
+
+    obj_trace_sigs = [f"route={aud_route}"] + [f"active={s}" for s in sorted(
+        _collect_objection_signals(entry, ad_variant, audience, tier, ident, det, aud_route))[:8]]
+    if prioritized:
+        obj_trace_sigs.append("ranked=" + " > ".join(
+            f"#{r['rank']} {r['objection_id']}({r['score']})" for r in prioritized))
+        obj_trace_sigs.append("slots=" + ", ".join(
+            f"{a['slot']}←#{a['rank']}" for a in obj_assignments) or "—")
+    t("Objection prioritize", obj_trace_sigs,
+      "score OBJECTION_CATALOG signals → rank top 3–5 → weave into hero/prove/compare/challenger/CTA",
+      "allude",
+      f"{len(prioritized)} objections ranked" if prioritized else "no objections matched",
+      "sales psychology meets them where they are — every reframe uses only Gauntlet site claims; "
+      "blocked say-level variants appear on /dev for contrast")
+
     order = (ad_variant["page"].get("order") if ad_variant and ad_variant["page"].get("order")
              else ORDER_BY_AUDIENCE[audience])
     t("Surface policy", [f"{d['slot']}: {d['policy']}" for d in diff],
@@ -941,9 +1478,10 @@ def build_page(request, email: str | None = None, overrides: dict | None = None)
         "entry": entry, "det": det, "ip_forced": ip_forced, "identity": ident,
         "audience": audience, "audience_rule": aud_rule,
         "tier": tier, "tier_label": tier_label, "confidence": conf,
-        "sections": {"hero": hero, "prove": {**prove, "cards": PROVE_CARDS},
+        "sections": {"hero": hero, "prove": {**prove, "cards": prove_cards},
                      "challenger": challenger,
-                     "compare": {"rows": COMPARE_ROWS, "emphasis": compare_emphasis},
+                     "compare": {"rows": COMPARE_ROWS, "emphasis": compare_emphasis,
+                                 "row_emphasis": compare_row_emphasis},
                      "numbers": {"stats": stats, "trusted": TRUSTED_BY},
                      "cta": cta},
         "order": order,
@@ -954,6 +1492,9 @@ def build_page(request, email: str | None = None, overrides: dict | None = None)
                 "ad_lp": None},
         "login_state": login_state,
         "ad_variant": ad_variant,
+        "audience_route": aud_route,
+        "objections": {"prioritized": prioritized, "assignments": obj_assignments,
+                       "blocked": obj_blocked},
         "trace": trace, "copy_diff": diff, "ledger": ledger,
     }
 
