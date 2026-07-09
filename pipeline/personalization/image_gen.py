@@ -51,23 +51,16 @@ _PII_WORDS = (
     "gender", "male", "female", "non-binary",
 )
 
-# Hold-tier facts — strip from prompts and log in receipt.
-_HOLD_STRIP_PATTERNS: list[tuple[re.Pattern[str], str]] = [
-    (re.compile(r"\b[A-Z][a-z]+\s+[A-Z][a-z]+\b"), "visitor_name"),
-    (re.compile(r"\bat\s+[A-Z][A-Za-z0-9&.\- ]{2,40}\b"), "employer_name"),
-    (re.compile(r"\b(income|salary|compensation)\s*(band|range|level)?\b", re.I), "income"),
-    (re.compile(r"\b(age|aged)\s*\d{1,2}[-–]\d{1,2}\b", re.I), "age"),
-    (re.compile(r"\b(male|female|man|woman|non-?binary)\b", re.I), "gender"),
-    (re.compile(r"\b\d{5}(-\d{4})?\b"), "zip_code"),
-]
+DEFAULT_IMAGE_TENANT = "gauntlet"
 
-_GLOBAL_MUST_AVOID = [
-    "NO faces of real people or identifiable individuals",
-    "NO company logos or brand marks",
-    "NO text, words, letters, or numbers in the image",
-    "NO visitor names, employer names, or PII",
-    "NO surveillance, creepy, or behavioral-tracking imagery",
-]
+
+def load_image_config(tenant: str = DEFAULT_IMAGE_TENANT) -> dict:
+    """Load tenant image config — defaults to Gauntlet for /gauntlet routes."""
+    return II.load_image_config(tenant)
+
+
+def _tenant_config(tenant: str | None = None) -> dict:
+    return load_image_config(tenant or DEFAULT_IMAGE_TENANT)
 
 
 def _api_key() -> str:
@@ -122,77 +115,20 @@ def build_image_ctx(page: dict) -> dict:
     }
 
 
-def select_image_intent(ctx: dict) -> II.ImageIntentSelection:
+def select_image_intent(ctx: dict, *, tenant: str | None = None) -> II.ImageIntentSelection:
     """Delegate to image_intents — exposed for tests and provenance."""
-    return II.select_image_intent(ctx)
+    config = _tenant_config(tenant)
+    return II.select_image_intent(ctx, config)
 
 
-def _apply_guardrails(structured: II.StructuredPrompt, ctx: dict) -> II.StructuredPrompt:
-    """Strip hold-tier facts; enforce must_avoid; log what was blocked."""
-    out = dict(structured)
-    blocked: list[str] = list(out.get("guardrails_blocked") or [])
-    applied: list[str] = list(out.get("guardrails_applied") or [])
-
-    hold = ctx.get("_hold") or {}
-    layers = list(out.get("personalization_layers") or [])
-
-    # Tier 0: strip industry/region if not allude-safe (tier < 1 for region, tier < 2 for industry)
-    tier = ctx.get("tier", 0)
-    if tier < 2:
-        before = len(layers)
-        layers = [l for l in layers if l["layer"] != "industry"]
-        if len(layers) < before:
-            blocked.append("industry_layer_stripped:tier<2")
-            applied.append("tier_gate:industry_hold_below_tier_2")
-    if tier < 1:
-        before = len(layers)
-        layers = [l for l in layers if l["layer"] != "region_mood"]
-        if len(layers) < before:
-            blocked.append("region_layer_stripped:tier<1")
-            applied.append("tier_gate:region_hold_below_tier_1")
-
-    out["personalization_layers"] = layers
-
-    # Build text blob for hold/PII scan
-    text_parts = [
-        out.get("composition", ""),
-        out.get("visual_metaphor", ""),
-        " ".join(l["value"] for l in layers),
-    ]
-    for key, label in (
-        ("company", "company_name"),
-        ("city", "exact_city"),
-        ("visitor_name", "visitor_name"),
-        ("income_band", "income"),
-    ):
-        val = hold.get(key)
-        if val and str(val).strip() not in ("—", "", None):
-            text_parts.append(str(val))
-            blocked.append(f"hold_source_present:{label}")
-    blob = " ".join(text_parts)
-
-    for pat, label in _HOLD_STRIP_PATTERNS:
-        if pat.search(blob):
-            blocked.append(f"pattern_blocked:{label}")
-            applied.append(f"strip_pattern:{label}")
-
-    # Enforce global must_avoid
-    must_avoid = list(dict.fromkeys((out.get("must_avoid") or []) + _GLOBAL_MUST_AVOID))
-    out["must_avoid"] = must_avoid
-    applied.extend(["must_avoid_enforced", "no_text_in_image", "no_pii", "no_logos", "no_faces"])
-
-    out["guardrails_blocked"] = list(dict.fromkeys(blocked))
-    out["guardrails_applied"] = list(dict.fromkeys(applied))
-    out["full_prompt"] = II.assemble_full_prompt(out)
+def build_image_prompt(ctx: dict, *, tenant: str | None = None) -> II.StructuredPrompt:
+    """Structured, action-driven prompt with provenance fields."""
+    config = _tenant_config(tenant)
+    selection = II.select_image_intent(ctx, config)
+    structured = II.build_structured_prompt(ctx, selection, config)
+    out = II.apply_guardrails(structured, ctx, config)
     _assert_prompt_safe(out["full_prompt"])
     return out
-
-
-def build_image_prompt(ctx: dict) -> II.StructuredPrompt:
-    """Structured, action-driven prompt with provenance fields."""
-    selection = II.select_image_intent(ctx)
-    structured = II.build_structured_prompt(ctx, selection)
-    return _apply_guardrails(structured, ctx)
 
 
 def prompt_text(structured: II.StructuredPrompt | dict) -> str:
@@ -211,7 +147,7 @@ def _assert_prompt_safe(prompt: str) -> None:
     for w in _PII_WORDS:
         if w in low:
             raise ValueError(f"prompt contains forbidden token: {w}")
-    for pat, label in _HOLD_STRIP_PATTERNS:
+    for pat, label in II.HOLD_STRIP_PATTERNS:
         if label in ("income", "age", "gender", "zip_code") and pat.search(body):
             raise ValueError(f"prompt contains hold-tier pattern: {label}")
 
@@ -449,9 +385,10 @@ def _generate_and_cache(ctx: dict, structured: II.StructuredPrompt, prompt: str,
                             model=model, fallback_chain=chain + ["gallery"])
 
 
-def get_hero_image(ctx: dict, *, generate: bool = False) -> dict:
+def get_hero_image(ctx: dict, *, generate: bool = False,
+                   tenant: str | None = None) -> dict:
     """Resolve hero image receipt. generate=True may call the image API (server-side only)."""
-    structured = build_image_prompt(ctx)
+    structured = build_image_prompt(ctx, tenant=tenant)
     prompt = structured["full_prompt"]
     model = _model()
     cache_key = image_cache_key(prompt, model)
@@ -481,10 +418,11 @@ def get_hero_image(ctx: dict, *, generate: bool = False) -> dict:
     return _generate_and_cache(ctx, structured, prompt, cache_key, model)
 
 
-def resolve_hero_image(page: dict, *, generate: bool = False) -> dict:
+def resolve_hero_image(page: dict, *, generate: bool = False,
+                       tenant: str | None = None) -> dict:
     """Page-facing wrapper → {status, fallback, url?, receipt}."""
     ctx = build_image_ctx(page)
-    receipt = get_hero_image(ctx, generate=generate)
+    receipt = get_hero_image(ctx, generate=generate, tenant=tenant)
     source = receipt.get("source", "gradient")
     url = receipt.get("url")
     if source == "pending":
@@ -612,6 +550,6 @@ def hero_image_ledger_rows(receipt: dict) -> list[dict]:
     return rows
 
 
-def intent_catalog_for_dev() -> list[dict]:
+def intent_catalog_for_dev(tenant: str | None = None) -> list[dict]:
     """Full intent taxonomy for /dev panel."""
-    return II.INTENT_CATALOG
+    return II.intent_catalog_for_config(_tenant_config(tenant))

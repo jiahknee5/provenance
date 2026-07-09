@@ -2,16 +2,20 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from unittest.mock import patch
 
 from starlette.testclient import TestClient
 
 from app.main import app
+from pipeline.common.config import RULES_DIR
 from pipeline.personalization import gauntlet_site as GS
 from pipeline.personalization import image_gen as IG
 from pipeline.personalization import image_intents as II
 
 c = TestClient(app)
+
+TEMPLATE_PATH = RULES_DIR / "_image_template.yaml"
 
 
 class _Req:
@@ -316,7 +320,45 @@ def test_call_image_api_routes_to_gemini(monkeypatch):
 def test_intent_taxonomy_complete():
     expected = {"peer_proof", "loss_avoidance", "authority", "aspiration",
                 "roi_clarity", "retarget_warm", "message_match"}
-    assert set(II.INTENT_BY_ID) == expected
+    cfg = IG.load_image_config("gauntlet")
+    assert set(cfg["intent_by_id"]) == expected
+
+
+def test_gauntlet_yaml_loads_via_framework():
+    cfg = IG.load_image_config("gauntlet")
+    assert cfg["tenant"] == "gauntlet"
+    assert len(cfg["intents"]) == 7
+    assert cfg["selection"]["primary_rules"]
+    assert cfg["action_map"]["objection_pairs"]["open_market_hire"] == "hire_cta"
+
+
+def test_template_yaml_loads():
+    cfg = II.load_image_config("_template", path=TEMPLATE_PATH)
+    assert cfg["tenant"] == "your_company_slug"
+    assert len(cfg["intents"]) >= 2
+    assert "peer_proof" in cfg["intent_by_id"]
+    assert cfg["guardrails"]["tier_gates"]["industry"] == 2
+
+
+def test_guardrails_global_must_avoid_independent_of_tenant():
+    """Global guardrails apply even with minimal tenant must_avoid."""
+    cfg = II.load_image_config("_template", path=TEMPLATE_PATH)
+    ctx = _ctx(tier=0, industry="technology")
+    ctx["_hold"] = {"visitor_name": "Jane Doe", "company": "Acme Corp"}
+    sel = II.select_image_intent(ctx, cfg)
+    structured = II.build_structured_prompt(ctx, sel, cfg)
+    guarded = II.apply_guardrails(structured, ctx, cfg)
+    avoid_blob = " ".join(guarded["must_avoid"]).lower()
+    assert "no text" in avoid_blob
+    assert "no faces" in avoid_blob
+    assert "no pii" in avoid_blob or "employer names" in avoid_blob
+    assert any("hold_source" in b for b in (guarded.get("guardrails_blocked") or []))
+
+
+def test_template_selects_default_intent():
+    cfg = II.load_image_config("_template", path=TEMPLATE_PATH)
+    sel = II.select_image_intent(_ctx(), cfg)
+    assert sel["primary"]["intent_id"] == "peer_proof"
 
 
 def test_three_persona_example_prompts():

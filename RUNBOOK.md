@@ -73,7 +73,9 @@ basis + freshness + consent → usable/disclaimer/blocked) → **synthesize** a 
 
 ## Optional: Gauntlet hero image generation (async, provenance-tagged)
 The Gauntlet replica (`/gauntlet`, `/gauntletapt`) ships a CSS gradient instantly; hero images
-generate server-side only when requested via the async API (never blocking page HTML).
+generate server-side only when requested via the async API (never blocking page HTML). The
+action-image framework is tenant-configurable — see `docs/04-workflow/ACTION-IMAGE-PERSONALIZATION.md`
+(Gauntlet = `rules/gauntlet_image.yaml`; onboarding template = `rules/_image_template.yaml`).
 
 Offline / no key: curated gallery (`scene.image_for`) → CSS gradient fallback.
 

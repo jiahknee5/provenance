@@ -97,4 +97,9 @@ withheld-count grows with knowledge · deterministic replay · bad input → saf
 - **Deterministic.** "Current time" (11:47 PM) is part of the persona — no wall clock, no RNG.
 - **Text only, for now.** The same signals would drive the *layout* next: reorder sections,
   swap the hero, change the offer. The architecture (catalog → tier → policy → ledger) is
-  identical; only the renderer's output target changes. That's the next layer.
+  identical; only the renderer's output target changes.
+
+**Hero images:** the action-image layer is documented in
+[ACTION-IMAGE-PERSONALIZATION.md](ACTION-IMAGE-PERSONALIZATION.md) — structured intents,
+YAML tenant config, guardrails, cache, and receipt. GauntletAI is the reference tenant
+(`rules/gauntlet_image.yaml`, `pipeline/personalization/image_intents.py`).
