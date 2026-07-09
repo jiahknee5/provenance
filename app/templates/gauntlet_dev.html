@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block title %}/dev — Gauntlet replica decisions · apt{% endblock %}
+{% block content %}
+<style>
+  main{max-width:1180px}
+  .gd-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .gd-head h1{font-size:26px;margin:0}
+  .gd-head .sub{color:var(--muted);font-size:14px;max-width:70ch}
+  .gd-tog{display:inline-flex;gap:3px;background:#F1F3F5;border-radius:9px;padding:3px;margin-left:auto}
+  .gd-tog a{font-size:13px;font-weight:600;color:var(--muted);padding:6px 14px;border-radius:7px;text-decoration:none}
+  .gd-tog a.on{background:#fff;color:var(--ink);box-shadow:var(--shadow)}
+  .gd-entries{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:14px 0 4px}
+  .gd-entries .lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .gd-entries a{font-size:12.5px;font-weight:600;border:1px solid var(--line);border-radius:8px;padding:6px 12px;text-decoration:none;background:#fff}
+  .gd-entries a:hover{border-color:var(--brand)}
+  .gd-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;align-items:start;margin-top:18px}
+  @media(max-width:920px){.gd-grid{grid-template-columns:1fr}}
+  .sec{border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:var(--shadow);overflow:hidden;margin-bottom:18px}
+  .sec .h{display:flex;align-items:center;gap:8px;padding:11px 15px;border-bottom:1px solid var(--line);font-size:13px;font-weight:700;color:var(--ink)}
+  .sec .h .tag{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:5px;padding:2px 8px;background:#F1F3F5;color:var(--muted)}
+  .kv{display:flex;gap:10px;padding:9px 15px;border-bottom:1px solid var(--line);font-size:13px;align-items:baseline}
+  .kv:last-child{border-bottom:0}
+  .kv .k{color:var(--muted);min-width:128px;flex:none}
+  .kv .v{color:var(--ink);font-weight:500;min-width:0;word-break:break-word}
+  .kv .v .why{display:block;font-weight:400;color:var(--muted);font-size:12px;margin-top:2px}
+  .pol{font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border-radius:4px;padding:1px 6px;white-space:nowrap}
+  .pol.say{color:#0a8a4f;background:#e7f6ee}.pol.allude{color:#1d4ed8;background:#e8efff}
+  .pol.hold{color:#c0354b;background:#fcebed}.pol.observed,.pol.mixed{color:#475569;background:#eef2f7}
+  .dispo{font-size:10px;font-weight:700;color:var(--muted)}
+  table.led{font-size:12.5px}
+  table.led th{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em}
+  table.led td{vertical-align:top;padding:7px 10px}
+  table.led td.src{color:var(--muted);font-size:11.5px;white-space:nowrap}
+  .trace-step{display:flex;gap:12px;padding:12px 15px;border-bottom:1px solid var(--line)}
+  .trace-step:last-child{border-bottom:0}
+  .trace-step .n{width:22px;height:22px;border-radius:6px;background:var(--ink);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;flex:none}
+  .trace-step .nm{font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .trace-step .rule{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .trace-step .rule code{font-size:11px}
+  .trace-step .out{font-size:12.5px;color:var(--ink);margin-top:4px;font-weight:500}
+  .trace-step .why{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .trace-step .sig{font-size:11px;color:#475569;background:#F6F8FA;border-radius:6px;padding:5px 9px;margin-top:6px;font-family:ui-monospace,Menlo,monospace;word-break:break-word}
+  .diff{padding:12px 15px;border-bottom:1px solid var(--line)}
+  .diff:last-child{border-bottom:0}
+  .diff .slot{font-weight:700;font-size:12.5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .diff .slot .chg{font-size:9.5px;font-weight:800;text-transform:uppercase;border-radius:4px;padding:1px 6px}
+  .diff .slot .chg.yes{color:#0a8a4f;background:#e7f6ee}.diff .slot .chg.no{color:var(--muted);background:#F1F3F5}
+  .diff .pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+  @media(max-width:700px){.diff .pair{grid-template-columns:1fr}}
+  .diff .box{border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:12.5px;line-height:1.5}
+  .diff .box .cap{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+  .diff .box.gen .cap{color:var(--muted)} .diff .box.gen{background:#FAFBFC;color:#475569}
+  .diff .box.ship .cap{color:#0a8a4f} .diff .box.ship{background:#f4fbf7;border-color:#bfe6cf;color:var(--ink)}
+  .diff .blocked{margin-top:8px;border:1px solid #f2c6cd;background:#fcebed;border-radius:8px;padding:9px 11px;font-size:12.5px;color:#8c2434}
+  .diff .blocked .cap{font-size:9.5px;font-weight:800;text-transform:uppercase;color:#c0354b;margin-bottom:4px}
+  .diff .meta{font-size:11px;color:var(--muted);margin-top:7px}
+  .crm-src{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;border-radius:4px;padding:1px 6px;margin-right:6px}
+  .crm-src.vector{color:#6b3fd4;background:#f0eafc}.crm-src.hubspot{color:#c05621;background:#feebdc}.crm-src.clay{color:#0e7490;background:#e0f4f8}
+  .arch{display:flex;align-items:center;gap:10px;padding:11px 15px;border-bottom:1px solid var(--line)}
+  .arch .sw{width:14px;height:14px;border-radius:4px;flex:none}
+  .empty{padding:14px 15px;font-size:13px;color:var(--muted)}
+  .chip{display:inline-block;font-size:11px;font-weight:600;color:#475569;background:#F1F3F5;border-radius:6px;padding:2px 8px;margin:2px 3px 0 0}
+</style>
+
+{% set P = page %}
+<div class="gd-head">
+  <h1>{{ g.dev }} — the decisions behind <a href="{{ g.page }}{{ qs }}" style="text-decoration:none">{{ g.page }}</a></h1>
+  <span class="gd-tog">
+    <a href="{{ toggle_anon }}" class="{{ 'on' if as_state == 'anon' else '' }}">Anonymous</a>
+    <a href="{{ toggle_known }}" class="{{ 'on' if as_state != 'anon' else '' }}">Known ({{ P.identity.email if P.identity else sample_email }})</a>
+  </span>
+</div>
+<p class="sub" style="color:var(--muted);font-size:14px;max-width:80ch;margin:4px 0 0">
+  The replica is rebuilt deterministically from (query params + login cookie). This page rebuilds the
+  <em>same</em> state and shows every stage: entry classification, the signal ledger with provenance,
+  tier routing, the CRM record, and the per-slot copy decision — including the <b>say</b>-level variants
+  the surface policy blocks.</p>
+
+<div class="gd-entries">
+  <span class="lbl">Simulate an entry</span>
+  {% for label, url in entry_links_raw %}<a href="{{ url }}">{{ label }} →</a>{% endfor %}
+  <span class="lbl" style="margin-left:8px">then log in as</span>
+  <span class="chip">{{ sample_email }}</span>
+</div>
+
+<div class="gd-grid">
+  <div>
+    <div class="sec">
+      <div class="h">① Entry point <span class="tag">{{ P.entry.channel_label }}</span></div>
+      <div class="kv"><span class="k">Channel</span><span class="v">{{ P.entry.channel_label }}<span class="why">{{ P.entry.why }}</span></span></div>
+      <div class="kv"><span class="k">Rule fired</span><span class="v"><code>{{ P.entry.rule }}</code></span></div>
+      {% for s in P.entry.signals %}
+      <div class="kv"><span class="k">{{ s.label }}</span><span class="v" {% if s.value == '—' %}style="color:var(--muted);font-weight:400"{% endif %}>{{ s.value }}</span></div>
+      {% endfor %}
+    </div>
+
+    <div class="sec">
+      <div class="h">② Tier routing <span class="tag">tier {{ P.tier }} · {{ P.tier_label }}</span></div>
+      <div class="kv"><span class="k">Network type</span><span class="v">{{ P.det.network_type or 'private / unreachable' }}</span></div>
+      <div class="kv"><span class="k">IP</span><span class="v">{{ P.det.ip or '—' }}{% if P.ip_forced %} <span class="chip">?ip= override</span>{% endif %}</span></div>
+      <div class="kv"><span class="k">Confidence</span><span class="v">location <b>{{ P.confidence.location }}</b> · company <b>{{ P.confidence.company }}</b> · industry <b>{{ P.confidence.industry }}</b></span></div>
+      <div class="kv"><span class="k">Audience route</span><span class="v">{{ P.audience }}<span class="why">{{ P.audience_rule }}</span></span></div>
+      {% if P.det.reason %}<div class="kv"><span class="k">Why</span><span class="v" style="font-weight:400;color:var(--muted)">{{ P.det.reason }}</span></div>{% endif %}
+    </div>
+
+    <div class="sec">
+      <div class="h">③ Signal ledger <span class="tag">{{ P.ledger|length }} signals</span></div>
+      <table class="led">
+        <tr><th>Signal</th><th>Value</th><th>Source · vendor</th><th>Policy → disposition</th></tr>
+        {% for r in P.ledger %}
+        <tr>
+          <td style="font-weight:600">{{ r.label }}</td>
+          <td>{{ r.value }}</td>
+          <td class="src">{{ r.source }} · {{ r.vendor }}</td>
+          <td><span class="pol {{ r.policy }}">{{ r.policy }}</span> <span class="dispo">→ {{ r.disposition }}</span></td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+
+    <div class="sec">
+      <div class="h">④ CRM record {% if P.identity and P.identity.kind == 'cohort' %}<span class="tag">via {{ P.identity.via }}</span>{% endif %}</div>
+      {% if P.identity and P.identity.kind == 'cohort' %}
+      {% set v = P.identity.view %}
+      <div class="kv"><span class="k">Identity</span><span class="v">{{ v.name }} · {{ v.email }} <span class="pol say">say</span></span></div>
+      <div class="kv"><span class="k"><span class="crm-src vector">Vector</span></span><span class="v">{{ v.linkedin.title }} · {{ v.linkedin.company }} · {{ v.linkedin.location }} <span class="pol allude">allude</span><span class="why">de-anonymized traffic — they never typed this; it may shape, never be recited</span></span></div>
+      <div class="kv"><span class="k"><span class="crm-src hubspot">HubSpot</span></span><span class="v">{{ v.hubspot.lifecycle }} · lead score {{ v.hubspot.lead_score }} · {{ v.hubspot.visits }} visits · pages: {{ v.hubspot.top_pages|join(', ') }}{% if v.hubspot.abandoned %} · abandoned: {{ v.hubspot.abandoned }}{% endif %} <span class="pol allude">allude</span></span></div>
+      {% if v.declared.goal %}<div class="kv"><span class="k"><span class="crm-src hubspot">Declared</span></span><span class="v">“{{ v.declared.goal }}” <span class="pol say">say</span><span class="why">they typed it on a form — may be recited verbatim</span></span></div>{% endif %}
+      <div class="kv"><span class="k"><span class="crm-src clay">Clay</span></span><span class="v">{{ v.linkedin.seniority }} · {{ v.linkedin.tenure }}y · {{ 'technical' if v.linkedin.technical else 'non-technical' }} · {{ v.linkedin.industry }}{% if v.deep.income_band %} · modeled income {{ v.deep.income_band }} <span class="pol hold">hold</span>{% else %} <span class="pol allude">allude</span>{% endif %}</span></div>
+      <div class="arch"><span class="sw" style="background:{{ P.identity.archetype.accent }}"></span>
+        <span style="font-size:13px"><b>Archetype: {{ P.identity.archetype.label }}</b> — {{ P.identity.archetype.reason }}
+        <span class="why" style="display:block;font-size:11.5px;color:var(--muted)">sections {{ P.identity.archetype.sections|join(' → ') }} · CTA “{{ P.identity.archetype.cta }}”</span></span></div>
+      <div class="kv"><span class="k">Segments</span><span class="v">{% for fam, d in P.identity.segments.items() %}{% for s in d.segments %}<span class="chip">{{ s.label }}</span>{% endfor %}{% endfor %}</span></div>
+      {% elif P.identity and P.identity.kind == 'resolved' %}
+      <div class="kv"><span class="k">Identity</span><span class="v">{{ P.identity.email }} <span class="pol say">say</span><span class="why">not in the cohort CRM — escalated via first-party domain resolution</span></span></div>
+      <div class="kv"><span class="k">Company</span><span class="v">{{ P.identity.resolved.company or '—' }} · tier {{ P.identity.resolved.tier }} ({{ P.identity.resolved.tier_label }})</span></div>
+      {% if P.identity.resolved.reason %}<div class="kv"><span class="k">Why</span><span class="v" style="font-weight:400;color:var(--muted)">{{ P.identity.resolved.reason }}</span></div>{% endif %}
+      {% else %}
+      <div class="empty">Anonymous — no login, no magic token. Log in on <a href="{{ g.page }}{{ qs }}">{{ g.page }}</a> (or toggle <b>Known</b> above) to see the CRM path unlock.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div>
+    <div class="sec">
+      <div class="h">⑤ Per-slot copy decision <span class="tag">{{ P.copy_diff|selectattr('changed')|list|length }} of {{ P.copy_diff|length }} personalized</span></div>
+      {% for d in P.copy_diff %}
+      <div class="diff">
+        <div class="slot">{{ d.label }}
+          <span class="chg {{ 'yes' if d.changed else 'no' }}">{{ 'personalized' if d.changed else 'generic' }}</span>
+          {% if d.changed %}<span class="pol {{ d.policy }}">{{ d.policy }}</span>{% endif %}
+        </div>
+        <div class="pair">
+          <div class="box gen"><div class="cap">Generic (everyone else)</div>{{ d.generic or '—' }}</div>
+          <div class="box ship"><div class="cap">Shipped (this visitor)</div>{{ d.shipped or '—' }}</div>
+        </div>
+        {% if d.blocked_say %}
+        <div class="blocked"><div class="cap">Blocked — the say variant the policy holds</div>“{{ d.blocked_say }}” — recites an involuntary/hold fact; it never ships.</div>
+        {% endif %}
+        <div class="meta">source: {{ d.source }}{% if d.why %} · {{ d.why }}{% endif %}</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="sec">
+      <div class="h">⑥ Trace — every stage, in order <span class="tag">deterministic</span></div>
+      {% for t in P.trace %}
+      <div class="trace-step">
+        <span class="n">{{ loop.index }}</span>
+        <div style="min-width:0">
+          <div class="nm">{{ t.stage }} <span class="pol {{ t.disposition }}">{{ t.disposition }}</span></div>
+          <div class="sig">{{ t.signals|join(' · ') }}</div>
+          <div class="rule">rule: <code>{{ t.rule }}</code></div>
+          <div class="out">→ {{ t.output }}</div>
+          <div class="why">{{ t.why }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="sec">
+      <div class="h">Section order shipped</div>
+      <div class="kv"><span class="k">Audience</span><span class="v">{{ P.audience }}</span></div>
+      <div class="kv"><span class="k">Order</span><span class="v">{{ P.order|join(' → ') }}<span class="why">same sections, same facts for everyone — only emphasis and order move</span></span></div>
+      <div class="kv"><span class="k">Open the page</span><span class="v"><a href="{{ g.page }}{{ qs }}">{{ g.page }}{{ qs }}</a></span></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
