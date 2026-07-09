@@ -212,10 +212,10 @@ AD_VARIANTS: list[dict] = [
               "upskill your existing team with Catalyst. 20,000+ applicants to date."),
        cta_label="Worth a look? →",
        hero_eyebrow="You clicked the language-targeted ad",
-       h1_pre="Your Fastest Path to Become ", h1_gold="AI-First",
-       sub=("Gauntlet transforms engineers into AI-first operators because most AI pilots "
-            "don't have a technology problem, they have a talent problem. Hire proven engineers "
-            "or upskill the team you already have."),
+       h1_pre="The Direct Path for US Engineering Teams to Go ", h1_gold="AI-First",
+       sub=("No jargon, no translation layer — Gauntlet transforms engineers into AI-first operators "
+            "because most AI pilots don't have a technology problem, they have a talent problem. "
+            "Hire proven engineers or upskill the team you already have."),
        cta_primary="Hire Proven Talent", cta_secondary="Upskill Your Team",
        compare_emphasis="catalyst",
        prove_intro=("We can train your existing team to build AI-native or place engineers who've "
