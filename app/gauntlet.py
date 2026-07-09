@@ -19,10 +19,11 @@ from __future__ import annotations
 from urllib.parse import urlencode
 
 from fastapi import Form, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 
 from app.server import app, templates
 from pipeline.personalization import gauntlet_site as GS
+from pipeline.personalization import image_gen as IG
 
 _COOKIE = "gauntlet_email"
 
@@ -36,6 +37,7 @@ MOUNTS: dict[str, dict[str, str]] = {
         "ad": "/gauntlet/ad",
         "ad_lp": "/gauntlet/ad-lp",
         "static": "/static",
+        "hero_api": "/api/gauntlet/hero-image",
     },
     "portal": {
         "page": "/gauntletapt",
@@ -45,6 +47,7 @@ MOUNTS: dict[str, dict[str, str]] = {
         "ad": "/gauntletapt/ad",
         "ad_lp": "/gauntletapt/ad-lp",
         "static": "/gauntletapt/static",
+        "hero_api": "/api/gauntletapt/hero-image",
     },
 }
 
@@ -94,7 +97,9 @@ def _render_gauntlet(request: Request, m: dict[str, str]) -> HTMLResponse:
     page = GS.build_page(request, email=email or None)
     page["nav"]["ad_lp"] = m["ad_lp"]
     return templates.TemplateResponse(request, "gauntlet_site.html", {
-        "page": page, "qs": _qs(request), "dev_qs": _qs(request), "g": m})
+        "page": page, "qs": _qs(request), "dev_qs": _qs(request), "g": m,
+        "hero_api_url": m["hero_api"],
+    })
 
 
 def _render_ad_lp(request: Request, m: dict[str, str]) -> HTMLResponse:
@@ -156,9 +161,23 @@ def _render_dev(request: Request, m: dict[str, str]) -> HTMLResponse:
         "g": m})
 
 
+def _hero_image_json(request: Request) -> dict:
+    email = _cookie_email(request)
+    page = GS.build_page(request, email=email or None)
+    hero = IG.resolve_hero_image(page, generate=True)
+    receipt = hero.get("receipt") or {}
+    return {
+        "status": hero.get("status", "ready"),
+        "url": hero.get("url"),
+        "receipt": receipt,
+        "source": receipt.get("source"),
+    }
+
+
 def _register_mount(m: dict[str, str]) -> None:
     page, login, logout, dev = m["page"], m["login"], m["logout"], m["dev"]
     ad, ad_lp = m["ad"], m["ad_lp"]
+    hero_api = m["hero_api"]
     cookie_path = _cookie_path(m)
 
     @app.get(page, response_class=HTMLResponse)
@@ -190,6 +209,10 @@ def _register_mount(m: dict[str, str]) -> None:
     @app.get(dev, response_class=HTMLResponse)
     def gauntlet_dev(request: Request) -> HTMLResponse:
         return _render_dev(request, m)
+
+    @app.get(hero_api)
+    def gauntlet_hero_image(request: Request) -> JSONResponse:
+        return JSONResponse(_hero_image_json(request))
 
 
 for _mount in MOUNTS.values():

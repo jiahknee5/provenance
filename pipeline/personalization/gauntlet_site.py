@@ -21,6 +21,7 @@ appear only on /dev, marked blocked. Every decision lands in a trace entry:
 from __future__ import annotations
 
 from pipeline.personalization import cohort as CO
+from pipeline.personalization import image_gen as IG
 from pipeline.personalization import scene as SC
 from pipeline.personalization import segments as SEG
 
@@ -1472,7 +1473,18 @@ def build_page(request, email: str | None = None, overrides: dict | None = None)
       "same sections, same facts — only emphasis and order move",
       "the structure is identical before and after login; personalization never adds or removes a claim")
 
+    hero_image = IG.resolve_hero_image({
+        "entry": entry, "det": det, "ad_variant": ad_variant, "audience": audience,
+        "audience_route": aud_route, "objections": {"prioritized": prioritized},
+    }, generate=False)
+    img_receipt = hero_image.get("receipt") or {}
+    img_sigs, img_out, img_why = IG.hero_image_trace(img_receipt)
+    t("Hero image resolve", img_sigs,
+      "disk cache → (async API if keyed) → scene.image_for gallery → CSS gradient",
+      "say", img_out, img_why)
+
     ledger = _ledger(entry, det, ident)
+    ledger.extend(IG.hero_image_ledger_rows(img_receipt))
     login_state = bool(ident and ident.get("via") == "login")
     return {
         "entry": entry, "det": det, "ip_forced": ip_forced, "identity": ident,
@@ -1496,6 +1508,7 @@ def build_page(request, email: str | None = None, overrides: dict | None = None)
         "objections": {"prioritized": prioritized, "assignments": obj_assignments,
                        "blocked": obj_blocked},
         "trace": trace, "copy_diff": diff, "ledger": ledger,
+        "hero_image": hero_image,
     }
 
 

@@ -172,6 +172,20 @@
     </div>
 
     <div class="sec">
+      <div class="h">⑥ Hero image provenance <span class="tag">{{ P.hero_image.receipt.source|default('gradient') }}</span></div>
+      {% set ir = P.hero_image.receipt %}
+      <div class="kv"><span class="k">Load status</span><span class="v">{{ P.hero_image.status }} · fallback {{ P.hero_image.fallback }}<span class="why">page shell renders instantly; async fetch only when status=pending</span></span></div>
+      <div class="kv"><span class="k">Source class</span><span class="v">{{ ir.source|default('gradient') }} <span class="pol say">say</span></span></div>
+      {% if ir.url or P.hero_image.url %}<div class="kv"><span class="k">URL</span><span class="v" style="font-size:12px;word-break:break-all">{{ P.hero_image.url or ir.url or '—' }}</span></div>{% endif %}
+      {% if ir.prompt %}<div class="kv"><span class="k">Prompt</span><span class="v" style="font-weight:400;font-size:12.5px">{{ ir.prompt }}</span></div>{% endif %}
+      {% if ir.model %}<div class="kv"><span class="k">Model</span><span class="v">{{ ir.model }} · {{ ir.vendor|default('—') }}</span></div>{% endif %}
+      {% if ir.cache_key %}<div class="kv"><span class="k">Cache key</span><span class="v" style="font-family:ui-monospace,Menlo,monospace;font-size:12px">{{ ir.cache_key }}</span></div>{% endif %}
+      {% if ir.license %}<div class="kv"><span class="k">License</span><span class="v">{{ ir.license }}</span></div>{% endif %}
+      {% if ir.fallback_chain %}<div class="kv"><span class="k">Fallback chain</span><span class="v">{{ ir.fallback_chain|join(' → ') }}</span></div>{% endif %}
+      {% if ir.generated_at %}<div class="kv"><span class="k">Generated at</span><span class="v">{{ ir.generated_at }}</span></div>{% endif %}
+    </div>
+
+    <div class="sec">
       <div class="h">⑦ Objection checklist <span class="tag">{{ P.objections.prioritized|length }} ranked</span></div>
       {% if P.objections.prioritized %}
       {% for o in P.objections.prioritized %}

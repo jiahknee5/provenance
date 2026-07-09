@@ -61,7 +61,17 @@
         radial-gradient(1100px 480px at 18% 8%, rgba(120,96,52,.20), transparent 60%),
         radial-gradient(900px 520px at 82% 20%, rgba(70,60,40,.22), transparent 55%),
         radial-gradient(1400px 700px at 50% 110%, rgba(28,24,16,.9), transparent 70%),
-        linear-gradient(180deg,#191612 0%,#12100c 45%,#0b0a08 100%)}
+        linear-gradient(180deg,#191612 0%,#12100c 45%,#0b0a08 100%);
+      background-size:cover;background-position:center center}
+    .hero.has-img::before{opacity:.35}
+    .hero.img-loading::after{content:"";position:absolute;bottom:24px;left:50%;transform:translateX(-50%);
+      width:8px;height:8px;border-radius:50%;background:var(--gold);opacity:.45;animation:heroPulse 1.4s ease-in-out infinite;z-index:3}
+    @keyframes heroPulse{0%,100%{opacity:.25;transform:translateX(-50%) scale(.85)}50%{opacity:.7;transform:translateX(-50%) scale(1)}}
+    @media (prefers-reduced-motion:reduce){
+      .hero.img-loading::after{animation:none;opacity:.35}
+      .hero.has-img{transition:none}
+    }
+    .hero.has-img{transition:background-image .6s ease}
     .hero::before{content:"";position:absolute;inset:0;opacity:.5;
       background-image:radial-gradient(rgba(255,255,255,.045) 1px, transparent 1.4px);background-size:26px 26px}
     .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,10,8,.35),rgba(11,10,8,.66) 78%,var(--bg))}
@@ -184,7 +194,9 @@
 
 {% for sec in page.order %}
 {% if sec == 'hero' %}
-<header class="hero">
+<header class="hero{% if page.hero_image.url %} has-img{% elif page.hero_image.status == 'pending' %} img-loading{% endif %}"
+  {% if page.hero_image.url %}style="background-image:linear-gradient(180deg,rgba(11,10,8,.72),rgba(11,10,8,.82)),url('{{ page.hero_image.url }}')"{% endif %}
+  id="gauntlet-hero" data-hero-api="{{ hero_api_url }}" data-hero-status="{{ page.hero_image.status }}">
   <div class="in">
     <div class="mark"><span style="color:#fff">{{ shield }}</span>Gauntlet</div>
     <div class="eyebrow">{% if S.hero.eyebrow %}{{ S.hero.eyebrow }}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="personalized — see why on /dev"></a></sup>{% endif %}</div>
@@ -313,5 +325,31 @@
 </footer>
 
 <a class="aptchip" href="{{ g.dev }}{{ dev_qs }}" title="every decision behind this page"><span class="d"></span> personalized by apt — see {{ g.dev }}</a>
+<script>
+(function(){
+  var hero=document.getElementById('gauntlet-hero');
+  if(!hero) return;
+  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var grad='radial-gradient(1100px 480px at 18% 8%, rgba(120,96,52,.20), transparent 60%),'
+    +'radial-gradient(900px 520px at 82% 20%, rgba(70,60,40,.22), transparent 55%),'
+    +'radial-gradient(1400px 700px at 50% 110%, rgba(28,24,16,.9), transparent 70%),'
+    +'linear-gradient(180deg,#191612 0%,#12100c 45%,#0b0a08 100%)';
+  function apply(url){
+    if(!url) return;
+    hero.classList.remove('img-loading');
+    hero.classList.add('has-img');
+    hero.style.backgroundImage='linear-gradient(180deg,rgba(11,10,8,.72),rgba(11,10,8,.82)),url('+JSON.stringify(url)+'),'+grad;
+    hero.style.backgroundSize='cover,cover';
+    hero.style.backgroundPosition='center center,center center';
+  }
+  if(hero.dataset.heroStatus==='pending'){
+    var api=hero.dataset.heroApi+location.search;
+    fetch(api).then(function(r){return r.json();}).then(function(d){
+      if(d&&d.url) apply(d.url);
+      else hero.classList.remove('img-loading');
+    }).catch(function(){hero.classList.remove('img-loading');});
+  }
+})();
+</script>
 </body>
 </html>
