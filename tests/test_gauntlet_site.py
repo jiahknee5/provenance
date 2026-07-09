@@ -210,6 +210,9 @@ def test_process_map_covers_every_stage_with_data_and_branches():
         assert s["reads"], f"stage {s['id']} reads no data"
         assert s["output"], f"stage {s['id']} has no output"
         assert s["link"].startswith("#sec-"), f"stage {s['id']} missing anchor"
+        assert s["detail"], f"stage {s['id']} has no drill-down detail"
+        for r in s["detail"]:
+            assert r["k"] and r["v"] not in (None, ""), f"empty drill-down row in {s['id']}"
         if s["branches"] and not s["skipped"]:
             assert sum(1 for b in s["branches"] if b["taken"]) >= 1, \
                 f"stage {s['id']} shows branches but none taken"
@@ -233,6 +236,40 @@ def test_process_map_marks_skipped_stages_for_anonymous_direct():
     assert arch["skipped"] and arch["skip_reason"]
     ident = next(s for s in pm["stages"] if s["id"] == "identity")
     assert next(b["label"] for b in ident["branches"] if b["taken"]) == "anonymous"
+    # skipped stages still drill down into the decision space they would use
+    assert any("catalogued" in r["v"].lower() or "variant" in r["v"].lower()
+               for r in adv["detail"])                     # the 12-variant catalog
+    assert len(arch["detail"]) == 6                        # all six archetypes listed
+
+
+def test_process_map_drilldowns_carry_evidence_and_fired_markers():
+    page = GS.build_page(_Req({"utm_medium": "paid", "utm_campaign": "x-keyword-ai-hiring",
+                               "utm_content": "v09"}),
+                         email="maya.chen@gauntletai.com")
+    pm = GS.process_map(page)
+    by_id = {s["id"]: s for s in pm["stages"]}
+    # entry: all four channel rules listed, exactly one fired
+    entry_rules = [r for r in by_id["entry"]["detail"] if r["k"].startswith("rule ·")]
+    assert len(entry_rules) == 4 and sum(1 for r in entry_rules if r["fired"]) == 1
+    # ad variant: the drill-down carries the actual ad copy + overridden slots
+    assert any(r["k"] == "Ad · trigger" for r in by_id["advariant"]["detail"])
+    assert any(r["k"] == "Slots overridden" for r in by_id["advariant"]["detail"])
+    # tier: all four tier definitions, exactly one fired
+    tier_rules = [r for r in by_id["tier"]["detail"] if r["k"].startswith("tier ")]
+    assert len(tier_rules) == 4 and sum(1 for r in tier_rules if r["fired"]) == 1
+    # identity: hold-tier facts are tagged hold, never bare
+    id_pols = {r["pol"] for r in by_id["identity"]["detail"] if r["pol"]}
+    assert "say" in id_pols and "allude" in id_pols
+    # audience: five precedence rungs, exactly one fired
+    rungs = by_id["audience"]["detail"]
+    assert len(rungs) == 5 and sum(1 for r in rungs if r["fired"]) == 1
+    assert rungs[0]["fired"]                               # ad variant wins the precedence
+    # policy: every copy slot appears in the drill-down
+    assert len([r for r in by_id["policy"]["detail"] if not r["k"].startswith("blocked")]) \
+        == len(page["copy_diff"])
+    # compose: all three audience orders shown, the taken one fired
+    orders = [r for r in by_id["compose"]["detail"] if r["k"].startswith("order ·")]
+    assert len(orders) >= 3 and sum(1 for r in orders if r["fired"]) >= 1
 
 
 def test_dev_page_renders_the_process_map():
@@ -359,8 +396,8 @@ def test_portal_mount_hero_api_and_asset_urls_use_prefix():
     """Portal fetch + cached hero URLs must stay under /gauntletapt."""
     qs = "?utm_medium=paid&utm_campaign=x-keyword-ai-hiring&utm_content=v09"
     t = c.get(f"/gauntletapt{qs}").text
-    assert 'data-hero-api="/api/gauntletapt/hero-image"' in t
-    r = c.get(f"/api/gauntletapt/hero-image{qs}")
+    assert 'data-hero-api="/gauntletapt/api/hero-image"' in t
+    r = c.get(f"/gauntletapt/api/hero-image{qs}")
     assert r.status_code == 200
     data = r.json()
     if data.get("url"):

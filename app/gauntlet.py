@@ -47,7 +47,7 @@ MOUNTS: dict[str, dict[str, str]] = {
         "ad": "/gauntletapt/ad",
         "ad_lp": "/gauntletapt/ad-lp",
         "static": "/gauntletapt/static",
-        "hero_api": "/api/gauntletapt/hero-image",
+        "hero_api": "/gauntletapt/api/hero-image",
     },
 }
 
@@ -164,7 +164,7 @@ def _render_dev(request: Request, m: dict[str, str]) -> HTMLResponse:
         email = cookie or GS.sample_login_email()
     else:
         email = cookie or None
-    page = GS.build_page(request, email=email)
+    page = _page_with_mount_urls(GS.build_page(request, email=email), m)
     qs = _qs(request, drop=("as",))
     dev = m["dev"]
     sep = "&" if qs else "?"
@@ -231,6 +231,13 @@ def _register_mount(m: dict[str, str]) -> None:
     @app.get(hero_api)
     def gauntlet_hero_image(request: Request) -> JSONResponse:
         return JSONResponse(_hero_image_json(request, m))
+
+    # Legacy portal API path — kept for bookmarks/tests; portal HTML uses mount-prefixed path.
+    if hero_api.startswith(m["page"] + "/api/"):
+        legacy_api = "/api" + hero_api[len(m["page"]):]
+        @app.get(legacy_api)
+        def gauntlet_hero_image_legacy(request: Request) -> JSONResponse:
+            return JSONResponse(_hero_image_json(request, m))
 
 
 for _mount in MOUNTS.values():
