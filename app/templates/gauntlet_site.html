@@ -1,0 +1,317 @@
+{#- Pixel-faithful replica of gauntletai.com (captured 2026-07-09) whose copy blocks are live
+    personalization slots. Standalone on purpose — it must look like Gauntlet's dark marketing
+    site, not the apt shell. Slots that were personalized carry a subtle gold provenance dot
+    linking to /dev. Same structure before/after login; only slot contents + order change. -#}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gauntlet AI - Your Fastest Path to Become AI-First</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b0a08; --bg2:#0e0d0a; --panel:#12100c; --line:#26221a; --line2:#37311f;
+      --gold:#c9a24b; --gold-t:#d5b269; --ink:#f4f2ed; --body:#a9a49a; --dim:#7d786e;
+      --sans:'Archivo','Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --ui:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--ui);-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:1080px;margin:0 auto;padding:0 32px}
+    .mono{font-family:var(--mono);text-transform:uppercase;letter-spacing:.14em}
+    /* provenance dot — the subtle receipt on every personalized slot */
+    sup.pv{margin-left:5px;vertical-align:super;line-height:0}
+    sup.pv a{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--gold);opacity:.55;box-shadow:0 0 0 3px rgba(201,162,75,.14)}
+    sup.pv a:hover{opacity:1}
+    /* ---- nav ---- */
+    nav.gnav{position:sticky;top:0;z-index:40;background:rgba(11,10,8,.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.05)}
+    .gnav .in{max-width:1240px;margin:0 auto;display:flex;align-items:center;gap:26px;height:62px;padding:0 28px}
+    .gnav .logo{display:flex;align-items:center;gap:9px;font:600 19px var(--sans);color:#fff}
+    .gnav .logo svg{display:block}
+    .gnav .grp{display:flex;align-items:center;gap:20px}
+    .gnav .grp .lbl{font:500 10.5px var(--mono);letter-spacing:.16em;color:var(--gold);text-transform:uppercase}
+    .gnav .grp a{font:500 14px var(--ui);color:#e8e5de}
+    .gnav .grp a:hover{color:var(--gold-t)}
+    .gnav .vr{width:1px;height:22px;background:var(--gold);opacity:.7}
+    .gnav .right{margin-left:auto;display:flex;align-items:center;gap:16px}
+    .gnav .apply{font:600 13.5px var(--ui);color:#171308;background:var(--gold);border-radius:6px;padding:11px 22px}
+    .gnav .apply:hover{background:var(--gold-t)}
+    /* login */
+    .lg{position:relative}
+    .lg summary{list-style:none;cursor:pointer;font:500 14px var(--ui);color:#e8e5de;display:flex;align-items:center;gap:5px}
+    .lg summary::-webkit-details-marker{display:none}
+    .lg summary .car{font-size:10px;opacity:.7}
+    .lg .pop{position:absolute;right:0;top:34px;background:#161410;border:1px solid var(--line2);border-radius:10px;padding:16px;width:290px;box-shadow:0 18px 50px rgba(0,0,0,.6)}
+    .lg .pop p{font:11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:9px}
+    .lg .pop input{width:100%;font:13.5px var(--ui);color:var(--ink);background:#0d0c09;border:1px solid var(--line2);border-radius:6px;padding:10px 11px;margin-bottom:9px;outline:none}
+    .lg .pop input:focus{border-color:var(--gold)}
+    .lg .pop button{width:100%;font:600 13px var(--ui);color:#171308;background:var(--gold);border:0;border-radius:6px;padding:10px;cursor:pointer}
+    .lg .pop .hint{font:10.5px var(--ui);letter-spacing:0;text-transform:none;color:var(--dim);margin:9px 0 0}
+    .lg .who{font:500 14px var(--ui);color:var(--gold-t)}
+    .lg .out{font:12px var(--ui);color:var(--dim);margin-left:9px}
+    .lg .out:hover{color:var(--ink)}
+    /* ---- hero ---- */
+    .hero{position:relative;min-height:640px;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;
+      background:
+        radial-gradient(1100px 480px at 18% 8%, rgba(120,96,52,.20), transparent 60%),
+        radial-gradient(900px 520px at 82% 20%, rgba(70,60,40,.22), transparent 55%),
+        radial-gradient(1400px 700px at 50% 110%, rgba(28,24,16,.9), transparent 70%),
+        linear-gradient(180deg,#191612 0%,#12100c 45%,#0b0a08 100%)}
+    .hero::before{content:"";position:absolute;inset:0;opacity:.5;
+      background-image:radial-gradient(rgba(255,255,255,.045) 1px, transparent 1.4px);background-size:26px 26px}
+    .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,10,8,.35),rgba(11,10,8,.66) 78%,var(--bg))}
+    .hero .in{position:relative;z-index:2;padding:96px 28px 110px;max-width:980px}
+    .hero .mark{display:flex;align-items:center;justify-content:center;gap:10px;font:600 22px var(--sans);color:#fff;margin-bottom:34px}
+    .hero .eyebrow{font:500 12px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--gold-t);margin-bottom:20px;min-height:15px}
+    .hero h1{font:600 clamp(44px,7vw,76px)/1.06 var(--sans);letter-spacing:-.015em;color:#fff;max-width:17ch;margin:0 auto}
+    .hero h1 .au{color:var(--gold-t)}
+    .hero .sub{font:400 17px/1.65 var(--ui);color:#c9c5bc;max-width:620px;margin:26px auto 0}
+    .hero .ctas{display:flex;gap:14px;justify-content:center;margin-top:40px;flex-wrap:wrap}
+    .btn{display:inline-block;font:700 12.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;border-radius:6px;padding:16px 28px;transition:all .15s}
+    .btn.gold{background:var(--gold);color:#171308}
+    .btn.gold:hover{background:var(--gold-t)}
+    .btn.ghost{border:1px solid #4a4436;color:#efece5;background:rgba(255,255,255,.02)}
+    .btn.ghost:hover{border-color:var(--gold);color:var(--gold-t)}
+    /* ---- sections ---- */
+    section.blk{border-top:1px solid rgba(255,255,255,.05);padding:110px 0}
+    .sec-h{text-align:center;max-width:860px;margin:0 auto}
+    .sec-h h2{font:600 clamp(32px,4.6vw,48px)/1.12 var(--sans);letter-spacing:-.01em;color:#fff}
+    .sec-h h2 .au{color:var(--gold-t)}
+    .sec-h .rule{width:56px;height:2px;background:var(--gold);opacity:.85;margin:26px auto 0}
+    .sec-h .intro{font:400 16.5px/1.7 var(--ui);color:var(--body);max-width:640px;margin:26px auto 0}
+    /* prove cards */
+    .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:56px}
+    @media(max-width:920px){.cards{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:560px){.cards{grid-template-columns:1fr}}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:26px 22px}
+    .card h3{font:500 11.5px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--gold-t);margin-bottom:15px}
+    .card p{font:400 13.5px/1.65 var(--ui);color:var(--body)}
+    /* challenger callout */
+    .chal{max-width:760px;margin:0 auto;text-align:center;border:1px solid var(--line2);border-radius:12px;padding:58px 48px;
+      background:linear-gradient(180deg,rgba(201,162,75,.06),rgba(201,162,75,.015))}
+    .chal.hot{border-color:rgba(201,162,75,.55);box-shadow:0 0 60px rgba(201,162,75,.09)}
+    .chal .eye{font:500 11px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--gold-t)}
+    .chal h2{font:600 clamp(28px,3.6vw,40px)/1.15 var(--sans);color:#fff;margin-top:16px}
+    .chal p{font:400 16px/1.7 var(--ui);color:var(--body);max-width:520px;margin:18px auto 0}
+    .chal .btn{margin-top:30px}
+    /* comparison table */
+    .cmp{margin-top:64px;border:1px solid var(--line2);border-radius:10px;overflow:hidden}
+    table.tbl{width:100%;border-collapse:collapse}
+    .tbl th,.tbl td{border:1px solid var(--line);padding:20px 22px;vertical-align:middle}
+    .tbl th{background:#100e0a}
+    .tbl thead .name{font:600 26px var(--sans);color:#fff}
+    .tbl thead .tag{font:400 12px var(--ui);color:var(--body);margin-top:7px}
+    .tbl td.lbl{font:500 10.5px var(--mono);letter-spacing:.15em;text-transform:uppercase;color:var(--dim);width:172px;background:#0e0d0a}
+    .tbl td.val{font:400 14px/1.6 var(--ui);color:#d6d2c9;text-align:center}
+    .tbl .em{box-shadow:inset 3px 0 0 var(--gold), inset -3px 0 0 var(--gold);background:rgba(201,162,75,.05)}
+    th.em .name{color:var(--gold-t)}
+    .tbl .ctarow td{text-align:center;padding:30px 22px}
+    /* numbers */
+    .nums{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:64px;text-align:center}
+    @media(max-width:680px){.nums{grid-template-columns:1fr}}
+    .nums b{display:block;font:600 clamp(42px,5.4vw,60px)/1 var(--sans);color:var(--gold-t)}
+    .nums span{display:block;font:500 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--body);margin-top:14px}
+    .dl{text-align:center;margin-top:56px}
+    .trusted{border-top:1px solid rgba(255,255,255,.05);margin-top:96px;padding-top:64px;text-align:center}
+    .trusted .t{font:500 10.5px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+    .trusted .logos{display:flex;gap:52px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:34px}
+    .trusted .logos span{font:600 19px var(--sans);color:#6d6960;letter-spacing:.01em}
+    /* final cta */
+    .fin{text-align:center;padding:120px 0 100px}
+    .fin h2{font:600 clamp(34px,5vw,54px)/1.1 var(--sans);color:#fff}
+    .fin .sub{font:400 17px var(--ui);color:var(--body);margin-top:18px}
+    .fin .ctas{display:flex;gap:14px;justify-content:center;margin-top:38px;flex-wrap:wrap}
+    .fin .note{display:inline-block;border:1px solid var(--line2);border-radius:8px;background:var(--panel);padding:18px 34px;margin-top:56px}
+    .fin .note .l1{font:500 12px var(--mono);letter-spacing:.12em;color:var(--gold-t)}
+    .fin .note .l2{font:400 11.5px var(--mono);letter-spacing:.1em;color:var(--dim);margin-top:7px}
+    /* footer */
+    footer.gf{border-top:1px solid rgba(255,255,255,.06);padding:74px 0 0;background:#0a0908}
+    .gf .cols{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:36px}
+    @media(max-width:760px){.gf .cols{grid-template-columns:1fr 1fr}}
+    .gf .fl{display:flex;align-items:center;gap:9px;font:600 19px var(--sans);color:var(--gold-t)}
+    .gf h4{font:500 16px var(--ui);color:#fff;margin-bottom:22px}
+    .gf ul{list-style:none}
+    .gf ul a{display:block;font:400 11px var(--mono);letter-spacing:.13em;text-transform:uppercase;color:#8d897f;padding:6px 0}
+    .gf ul a:hover{color:var(--gold-t)}
+    .gf .bar{border-top:1px solid rgba(255,255,255,.06);margin-top:64px;padding:26px 0;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+    .gf .bar .c{font:400 12px var(--mono);letter-spacing:.08em;color:#8d897f;text-transform:uppercase}
+    .gf .bar .coords{margin-left:auto;font:400 11px var(--mono);letter-spacing:.1em;color:#8d897f}
+    /* the tiny apt chip → /dev */
+    .aptchip{position:fixed;right:16px;bottom:16px;z-index:50;display:flex;align-items:center;gap:7px;
+      font:600 11px var(--ui);color:#cfcabf;background:rgba(18,16,12,.92);border:1px solid var(--line2);
+      border-radius:20px;padding:7px 13px;backdrop-filter:blur(8px)}
+    .aptchip .d{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px rgba(201,162,75,.8)}
+    .aptchip:hover{color:#fff;border-color:var(--gold)}
+  </style>
+</head>
+<body>
+{% set S = page.sections %}
+{% set shield %}<svg width="20" height="24" viewBox="0 0 20 24" fill="none"><path d="M10 0L20 3.5V11c0 6.1-4.1 10.9-10 13C4.1 21.9 0 17.1 0 11V3.5L10 0z" fill="currentColor"/></svg>{% endset %}
+
+<nav class="gnav">
+  <div class="in">
+    <a class="logo" href="{{ g.page }}{{ qs }}"><span style="color:#fff">{{ shield }}</span>Gauntlet</a>
+    <span class="grp"><span class="lbl">For Teams</span><a href="#compare">Hire</a><a href="#compare">Upskill</a></span>
+    <span class="vr"></span>
+    <span class="grp"><span class="lbl">For Individuals</span><a href="#challenger">Learn</a><a href="#challenger">Admissions</a></span>
+    <span class="right">
+      {% if page.nav.ad_lp %}<a href="{{ page.nav.ad_lp }}" style="font:500 12px var(--ui);color:var(--dim);margin-right:4px" title="9 X.com ad variants">X ads</a>{% endif %}
+      <a class="apply" href="#cta">Apply Now</a>
+      {% if page.nav.known %}
+      <span class="lg"><span class="who">{{ 'Hi ' + page.nav.first if page.nav.first else page.nav.login_email }}</span>{% if page.login_state %}<a class="out" href="{{ g.logout }}?next={{ g.page }}{{ qs|urlencode }}">Logout</a>{% endif %}</span>
+      {% else %}
+      <details class="lg">
+        <summary>Login <span class="car">▾</span></summary>
+        <div class="pop">
+          <p>Log in with your email</p>
+          <form method="post" action="{{ g.login }}">
+            <input type="hidden" name="next" value="{{ g.page }}{{ qs }}">
+            <input name="email" type="email" placeholder="you@company.com" required autocomplete="off">
+            <button type="submit">Log in</button>
+          </form>
+          <div class="hint">Demo: any cohort email unlocks the CRM path — the same page, re-personalized.</div>
+        </div>
+      </details>
+      {% endif %}
+    </span>
+  </div>
+</nav>
+
+{% for sec in page.order %}
+{% if sec == 'hero' %}
+<header class="hero">
+  <div class="in">
+    <div class="mark"><span style="color:#fff">{{ shield }}</span>Gauntlet</div>
+    <div class="eyebrow">{% if S.hero.eyebrow %}{{ S.hero.eyebrow }}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="personalized — see why on /dev"></a></sup>{% endif %}</div>
+    <h1>{{ S.hero.h1_pre }}<span class="au">{{ S.hero.h1_gold }}</span></h1>
+    <p class="sub">{{ S.hero.sub }}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="personalized — see why on /dev"></a></sup></p>
+    <div class="ctas">
+      <a class="btn gold" href="#cta">{{ S.hero.cta_primary }}</a>
+      <a class="btn ghost" href="#cta">{{ S.hero.cta_secondary }}</a>
+    </div>
+  </div>
+</header>
+
+{% elif sec == 'prove' %}
+<section class="blk" id="prove">
+  <div class="wrap">
+    <div class="sec-h">
+      <h2>{{ S.prove.h_pre }}<span class="au">{{ S.prove.h_gold }}</span></h2>
+      <div class="rule"></div>
+      <p class="intro">{{ S.prove.intro }}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="personalized — see why on /dev"></a></sup></p>
+    </div>
+    <div class="cards">
+      {% for title, body in S.prove.cards %}
+      <div class="card"><h3>{{ title }}</h3><p>{{ body }}</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% elif sec == 'challenger' %}
+<section class="blk" id="challenger">
+  <div class="wrap">
+    <div class="chal {{ 'hot' if S.challenger.emphasis else '' }}">
+      <div class="eye">{{ S.challenger.eyebrow }}</div>
+      <h2>{{ S.challenger.heading }}</h2>
+      <p>{{ S.challenger.body }}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="personalized — see why on /dev"></a></sup></p>
+      <a class="btn gold" href="#cta">{{ S.challenger.cta }}</a>
+    </div>
+  </div>
+</section>
+
+{% elif sec == 'compare' %}
+<section class="blk" id="compare">
+  <div class="wrap">
+    <div class="sec-h">
+      <h2>Same Philosophy. Different Delivery.</h2>
+      <p class="intro">Bring in new AI-native talent. Or rewire the team you already have.</p>
+    </div>
+    <div class="cmp">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th style="width:172px;background:#0e0d0a"></th>
+            <th class="{{ 'em' if S.compare.emphasis == 'gauntlet' else '' }}"><div class="name">Gauntlet</div><div class="tag">Hire AI-First Engineers{% if S.compare.emphasis == 'gauntlet' %}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="emphasis personalized — see why on /dev"></a></sup>{% endif %}</div></th>
+            <th class="{{ 'em' if S.compare.emphasis == 'catalyst' else '' }}"><div class="name">Catalyst</div><div class="tag">Rewire Your Existing Engineers{% if S.compare.emphasis == 'catalyst' %}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="emphasis personalized — see why on /dev"></a></sup>{% endif %}</div></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for label, g, c in S.compare.rows %}
+          <tr>
+            <td class="lbl">{{ label }}</td>
+            <td class="val {{ 'em' if S.compare.emphasis == 'gauntlet' else '' }}">{{ g }}</td>
+            <td class="val {{ 'em' if S.compare.emphasis == 'catalyst' else '' }}">{{ c }}</td>
+          </tr>
+          {% endfor %}
+          <tr class="ctarow">
+            <td class="lbl" style="border-bottom:0"></td>
+            <td class="{{ 'em' if S.compare.emphasis == 'gauntlet' else '' }}"><a class="btn gold" href="#cta">Hire AI-First Engineers</a></td>
+            <td class="{{ 'em' if S.compare.emphasis == 'catalyst' else '' }}"><a class="btn ghost" href="#cta">Upskill Your Team</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+{% elif sec == 'numbers' %}
+<section class="blk" id="numbers">
+  <div class="wrap">
+    <div class="sec-h"><h2>By the <span class="au">numbers</span></h2><div class="rule"></div></div>
+    <div class="nums">
+      {% for n, label in S.numbers.stats %}
+      <div><b>{{ n }}</b><span>{{ label }}</span></div>
+      {% endfor %}
+    </div>
+    <div class="dl"><a class="btn gold" href="#cta">Download Program Overview</a></div>
+    <div class="trusted">
+      <div class="t">Trusted by engineering teams at</div>
+      <div class="logos">{% for co in S.numbers.trusted %}<span>{{ co }}</span>{% endfor %}</div>
+    </div>
+  </div>
+</section>
+
+{% elif sec == 'cta' %}
+<section class="blk" id="cta" style="border-bottom:0;padding:0">
+  <div class="wrap">
+    <div class="fin">
+      <h2>{{ S.cta.heading }}</h2>
+      <p class="sub">{{ S.cta.sub }}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="personalized — see why on /dev"></a></sup></p>
+      <div class="ctas">
+        <a class="btn gold" href="#">{{ S.cta.cta_primary }}</a>
+        <a class="btn ghost" href="#">{{ S.cta.cta_secondary }}</a>
+      </div>
+      <div class="note">
+        <div class="l1">Catalyst, 6 weeks &nbsp;·&nbsp; Gauntlet, 10 weeks</div>
+        <div class="l2">Next cohort: August 2026</div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endfor %}
+
+<footer class="gf">
+  <div class="wrap">
+    <div class="cols">
+      <div><span class="fl"><span style="color:var(--gold-t)">{{ shield }}</span>Gauntlet AI</span></div>
+      <div><h4>Companies</h4><ul><li><a href="#compare">Hire</a></li><li><a href="#compare">Upskill</a></li><li><a href="#">Government</a></li><li><a href="#">AI-First Org</a></li></ul></div>
+      <div><h4>Challengers</h4><ul><li><a href="#">Night School</a></li><li><a href="#challenger">Admissions</a></li><li><a href="#">FAQ</a></li></ul></div>
+      <div><h4>About</h4><ul><li><a href="#">About Gauntlet</a></li><li><a href="#">Terms &amp; Conditions</a></li><li><a href="#">Catalyst Logistics</a></li><li><a href="#">Privacy Policy</a></li></ul></div>
+    </div>
+    <div class="bar">
+      <span class="c">Copyright 2026. Gauntlet AI. All rights reserved.</span>
+      <span class="coords">30° 16' 02" N &nbsp;·&nbsp; 97° 44' 35" W</span>
+    </div>
+  </div>
+</footer>
+
+<a class="aptchip" href="{{ g.dev }}{{ dev_qs }}" title="every decision behind this page"><span class="d"></span> personalized by apt — see {{ g.dev }}</a>
+</body>
+</html>

@@ -1,0 +1,143 @@
+{#- 9-variant X.com ad grid — 3 audience segments × 3 copy angles. Each card shows the ad
+    mockup + generic vs personalized hero headline so variance is obvious without clicking. -#}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gauntlet X Ads — 9 Variants</title>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b0a08; --panel:#12100c; --line:#26221a; --line2:#37311f;
+      --gold:#c9a24b; --gold-t:#d5b269; --ink:#f4f2ed; --body:#a9a49a; --dim:#7d786e;
+      --sans:'Archivo','Inter',sans-serif; --ui:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
+      --x-bg:#15202b; --x-line:#38444d; --x-muted:#8899a6;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--ui);-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:1280px;margin:0 auto;padding:32px 24px 80px}
+    .top{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:36px}
+    h1{font:600 clamp(28px,4vw,40px)/1.1 var(--sans);color:#fff}
+    .sub{color:var(--body);max-width:640px;margin-top:10px;font-size:15px}
+    .nav{display:flex;gap:10px;flex-wrap:wrap}
+    .nav a{font:600 12px var(--ui);border:1px solid var(--line2);border-radius:8px;padding:8px 14px;color:var(--gold-t)}
+    .nav a:hover{border-color:var(--gold);color:#fff}
+    .legend{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
+    @media(max-width:760px){.legend{grid-template-columns:1fr}}
+    .leg{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+    .leg b{display:block;font:600 13px var(--ui);color:#fff}
+    .leg span{font:12px var(--ui);color:var(--dim)}
+    .leg .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:middle}
+    .matrix{border:1px solid var(--line2);border-radius:12px;overflow:hidden}
+    .m-head{display:grid;grid-template-columns:200px repeat(3,1fr);background:#100e0a;border-bottom:1px solid var(--line2)}
+    .m-head div{padding:14px 16px;font:500 10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+    .m-head .corner{border-right:1px solid var(--line)}
+    .m-head .col{text-align:center;color:var(--gold-t)}
+    .m-row{display:grid;grid-template-columns:200px repeat(3,1fr);border-bottom:1px solid var(--line)}
+    .m-row:last-child{border-bottom:0}
+    .m-seg{padding:20px 16px;border-right:1px solid var(--line);background:rgba(255,255,255,.02)}
+    .m-seg b{display:block;font:600 15px var(--sans);color:#fff}
+    .m-seg span{display:block;font:12px var(--ui);color:var(--dim);margin-top:6px}
+    .cell{padding:16px;border-right:1px solid var(--line)}
+    .cell:last-child{border-right:0}
+    @media(max-width:1100px){
+      .m-head,.m-row{grid-template-columns:1fr}
+      .m-head .col,.m-seg{border-right:0;border-bottom:1px solid var(--line)}
+      .cell{border-right:0;border-bottom:1px solid var(--line)}
+    }
+    .card{background:var(--x-bg);border:1px solid var(--x-line);border-radius:14px;overflow:hidden;height:100%;display:flex;flex-direction:column}
+    .card:hover{border-color:var(--gold);box-shadow:0 0 30px rgba(201,162,75,.12)}
+    .x-top{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--x-line)}
+    .av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 13px var(--ui);color:#fff;flex-shrink:0}
+    .x-meta{min-width:0}
+    .x-meta b{display:block;font:700 14px var(--ui);color:#fff}
+    .x-meta span{font:13px var(--ui);color:var(--x-muted)}
+    .x-meta .promo{font:11px var(--ui);color:var(--x-muted)}
+    .x-body{padding:12px 14px 10px;flex:1}
+    .x-body p{font:15px/1.5 var(--ui);color:#e7e9ea}
+    .x-body .trig{color:var(--gold-t);font-weight:500}
+    .x-cta{padding:0 14px 14px}
+    .x-cta a{display:inline-block;font:700 13px var(--ui);color:var(--gold-t);border:1px solid var(--line2);border-radius:20px;padding:8px 16px}
+    .x-cta a:hover{background:rgba(201,162,75,.12);border-color:var(--gold)}
+    .utm{margin:0 14px 12px;font:10px var(--mono);color:var(--dim);word-break:break-all;background:rgba(0,0,0,.25);border-radius:6px;padding:6px 8px}
+    .preview{margin:0 14px 14px;border-top:1px solid var(--x-line);padding-top:12px}
+    .preview .lbl{font:9px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+    .preview .gen{font:12px var(--ui);color:#6d6960;text-decoration:line-through;margin-bottom:6px}
+    .preview .per{font:13px var(--ui);color:var(--gold-t);font-weight:600;line-height:1.35}
+    .preview .arr{font:11px var(--ui);color:var(--dim);margin:6px 0}
+    .chip{position:fixed;right:16px;bottom:16px;font:600 11px var(--ui);color:#cfcabf;background:rgba(18,16,12,.92);border:1px solid var(--line2);border-radius:20px;padding:7px 13px}
+    .chip:hover{color:#fff;border-color:var(--gold)}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>X.com Ad Campaigns — 9 Variants</h1>
+      <p class="sub">3 audience segments × 3 copy angles. Each ad has a unique UTM; clicking through
+        message-matches the landing page hero, CTAs, comparison emphasis, and stats.
+        Generic hero: <b style="color:var(--dim)">{{ generic_hero }}</b></p>
+    </div>
+    <div class="nav">
+      <a href="{{ g.page }}">Landing page</a>
+      <a href="{{ g.dev }}">/dev trace</a>
+      <a href="/showcase">Showcase</a>
+    </div>
+  </div>
+
+  <div class="legend">
+    {% for row in grid %}
+    <div class="leg">
+      <b><span class="dot" style="background:{{ row.segment_info.accent }}"></span>{{ row.segment_info.label }}</b>
+      <span>{{ row.segment_info.subtitle }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="matrix">
+    <div class="m-head">
+      <div class="corner">Segment</div>
+      {% for label in grid[0].angle_labels %}
+      <div class="col">{{ label }}</div>
+      {% endfor %}
+    </div>
+    {% for row in grid %}
+    <div class="m-row">
+      <div class="m-seg">
+        <b>{{ row.segment_info.label }}</b>
+        <span>{{ row.segment_info.subtitle }}</span>
+      </div>
+      {% for item in row.variants %}
+      {% set v = item.variant %}
+      <div class="cell">
+        <a class="card" href="{{ item.landing_url }}" title="Open personalized landing page">
+          <div class="x-top">
+            <div class="av" style="background:{{ v.ad.accent }}">{{ v.ad.avatar }}</div>
+            <div class="x-meta">
+              <b>{{ v.ad.display }}</b>
+              <span>@{{ v.ad.handle }} · Promoted</span>
+            </div>
+          </div>
+          <div class="x-body">
+            <p><span class="trig">{{ v.ad.trigger }}</span> {{ v.ad.body }} {{ v.ad.proof }}</p>
+          </div>
+          <div class="x-cta"><span>{{ v.ad.cta_label }}</span></div>
+          <div class="utm">utm_campaign={{ v.utm_campaign }} · utm_content={{ v.variant_id }}</div>
+          <div class="preview">
+            <div class="lbl">Hero headline shift</div>
+            <div class="gen">{{ item.generic_hero }}</div>
+            <div class="arr">↓ personalized</div>
+            <div class="per">{{ item.personal_hero }}</div>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+<a class="chip" href="{{ g.dev }}">decisions → /dev</a>
+</body>
+</html>

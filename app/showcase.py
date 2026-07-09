@@ -78,7 +78,11 @@ def _model(request: Request, slug: str, industry: str, region: str, ip: str, per
 
 @app.get("/showcase", response_class=HTMLResponse)
 def showcase(request: Request):
-    return templates.TemplateResponse(request, "showcase.html", {"demos": [SH.DEMOS[s] for s in SH.ORDER]})
+    from app.gauntlet import ENTRY_LINKS
+    from pipeline.personalization import gauntlet_site as GS
+    return templates.TemplateResponse(request, "showcase.html", {
+        "demos": [SH.DEMOS[s] for s in SH.ORDER],
+        "gauntlet_entries": ENTRY_LINKS, "gauntlet_login": GS.sample_login_email()})
 
 
 @app.get("/showcase/{slug}", response_class=HTMLResponse)

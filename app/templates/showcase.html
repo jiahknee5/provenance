@@ -68,6 +68,26 @@
       <span class="go">Open <i class="ph ph-arrow-right"></i></span>
     </a>
 
+    <div class="sc-sech"><h2>Live site demo</h2><span>a replica site personalized per entry point, IP, and login</span></div>
+    <div class="sc-live" style="align-items:flex-start">
+      <span class="ic" style="background:#c9a24b;color:#171308"><i class="ph ph-shield-check"></i></span>
+      <span style="min-width:0">
+        <span class="t">GauntletAI replica — entry-point + CRM personalization</span>
+        <span class="d">A pixel-faithful gauntletai.com whose copy blocks are live personalization
+          slots: the entry channel (ad · email · search · direct) message-matches the hero, the IP
+          layer routes tiers 0–3, and logging in with a cohort email unlocks the CRM path — same
+          page structure, re-personalized. Every decision is on <a href="/dev" style="color:var(--signal,#1d4ed8);font-weight:600">/dev</a>.</span>
+        <span class="d" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:9px">
+          {% for label, url in gauntlet_entries %}
+          <a href="{{ url }}" style="font-weight:600;color:var(--signal,#1d4ed8);border:1px solid var(--hairline);border-radius:8px;padding:4px 10px;text-decoration:none">{{ label }} entry →</a>
+          {% endfor %}
+          <a href="/ad-lp" style="font-weight:600;color:var(--signal,#1d4ed8);border:1px solid var(--hairline);border-radius:8px;padding:4px 10px;text-decoration:none">9 X ads grid →</a>
+          <span style="border:1px dashed var(--hairline);border-radius:8px;padding:4px 10px;color:var(--muted)">log in as <b style="color:var(--ink)">{{ gauntlet_login }}</b></span>
+        </span>
+      </span>
+      <span class="go" style="align-self:center"><a class="go" href="/gauntlet" style="text-decoration:none">Open <i class="ph ph-arrow-right"></i></a></span>
+    </div>
+
     <div class="sc-sech"><h2>Use cases</h2><span>actual personalized demo websites</span></div>
     <div class="sc-grid">
       {% for d in demos %}
