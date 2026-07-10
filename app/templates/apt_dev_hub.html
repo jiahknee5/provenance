@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}/apt/dev — personalization consoles{% endblock %}
+{% block content %}
+<style>
+  main{max-width:1100px}
+  .hub-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+  .hub-top h1{font-size:26px;margin:0}
+  .hub-site{display:inline-flex;gap:3px;background:#E8ECF0;border-radius:10px;padding:4px;margin-bottom:14px}
+  .hub-site a{font-size:13.5px;font-weight:700;color:var(--muted);padding:8px 18px;border-radius:8px;text-decoration:none}
+  .hub-site a.on{background:#fff;color:var(--ink);box-shadow:var(--shadow)}
+  .hub-site a .dom{font-weight:500;color:var(--muted);font-size:12px;margin-left:6px}
+  .hub-site a.on .dom{color:#64748b}
+  .hub-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .hub-meta .tag{font-size:12px;color:var(--muted);max-width:72ch;line-height:1.5}
+  .gd-tog{display:inline-flex;gap:3px;background:#F1F3F5;border-radius:9px;padding:3px;margin-left:auto}
+  .gd-tog a{font-size:13px;font-weight:600;color:var(--muted);padding:6px 14px;border-radius:7px;text-decoration:none}
+  .gd-tog a.on{background:#fff;color:var(--ink);box-shadow:var(--shadow)}
+  .hub-intro{font-size:14px;color:var(--muted);max-width:80ch;line-height:1.55;margin:0 0 22px}
+  .hub-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:28px}
+  @media(max-width:760px){.hub-grid{grid-template-columns:1fr}}
+  .hub-card{display:block;border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:var(--shadow);padding:16px 18px;text-decoration:none;color:inherit;transition:border-color .15s}
+  .hub-card:hover{border-color:var(--brand)}
+  .hub-card.primary{border-color:#c5d4e8;background:linear-gradient(180deg,#fafcff 0%,#fff 100%)}
+  .hub-card .cap{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px}
+  .hub-card h2{font-size:16px;margin:0 0 6px;color:var(--ink)}
+  .hub-card p{font-size:13px;line-height:1.5;color:#475569;margin:0}
+  .hub-card .go{display:inline-block;margin-top:12px;font-size:12.5px;font-weight:700;color:var(--brand)}
+  .hub-entries{border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:var(--shadow);padding:14px 18px}
+  .hub-entries .lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .hub-entries .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+  .hub-entries a{font-size:12.5px;font-weight:600;border:1px solid var(--line);border-radius:8px;padding:6px 12px;text-decoration:none;background:#fff}
+  .hub-entries a:hover{border-color:var(--brand)}
+  .chip{display:inline-block;font-size:11px;font-weight:600;color:#475569;background:#F1F3F5;border-radius:6px;padding:2px 8px}
+  .hub-note{margin-top:18px;font-size:12.5px;color:var(--muted);max-width:80ch;line-height:1.5}
+</style>
+
+<nav class="hub-site" aria-label="Select website">
+  {% for s in site_toggles %}
+  <a href="{{ s.href }}" class="{{ 'on' if s.on else '' }}">{{ s.name }}<span class="dom">{{ s.domain }}</span></a>
+  {% endfor %}
+</nav>
+
+<div class="hub-top">
+  <h1>{{ hub_path }} — personalization consoles</h1>
+</div>
+
+<div class="hub-meta">
+  <span class="tag"><strong>{{ site_name }}</strong> · {{ site_tagline }}</span>
+  <span class="gd-tog">
+    <a href="{{ toggle_anon }}" class="{{ 'on' if as_state == 'anon' else '' }}">Anonymous</a>
+    <a href="{{ toggle_known }}" class="{{ 'on' if as_state != 'anon' else '' }}">Known ({{ sample_email }})</a>
+  </span>
+</div>
+
+<p class="hub-intro">
+  One entry point for both live replicas. Pick a site above, then open the engineer or marketer console —
+  each rebuilds deterministically from query params + login cookie. Identity preview applies to console
+  deep-links; the live replica uses the real cookie.
+</p>
+
+<div class="hub-grid">
+  {% for card in console_cards %}
+  <a class="hub-card {{ card.kind }}" href="{{ card.href }}">
+    <div class="cap">{{ site_name }}</div>
+    <h2>{{ card.title }}</h2>
+    <p>{{ card.desc }}</p>
+    <span class="go">Open →</span>
+  </a>
+  {% endfor %}
+</div>
+
+<div class="hub-entries">
+  <span class="lbl">Simulate an entry for {{ site_name }}</span>
+  <div class="row">
+    {% for label, url in entry_links %}<a href="{{ url }}">{{ label }} →</a>{% endfor %}
+    <span class="lbl" style="margin-left:4px">then log in as</span>
+    <span class="chip">{{ sample_email }}</span>
+  </div>
+</div>
+
+<p class="hub-note">
+  Consoles live at <code>{{ g.dev }}</code> and <code>{{ g.dev_business }}</code>.
+  This hub does not replace them — it routes you in with the right site and identity preview.
+</p>
+{% endblock %}
