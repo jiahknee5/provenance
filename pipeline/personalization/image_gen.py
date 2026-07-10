@@ -377,6 +377,18 @@ def _load_cached(cache_key: str) -> dict | None:
     return None
 
 
+def invalidate_cached(cache_key: str) -> None:
+    """Drop a disk-cache entry so the next generate=True call regenerates it."""
+    manifest = _read_manifest()
+    entry = manifest.pop(cache_key, None)
+    if entry:
+        _write_manifest(manifest)
+    for ext in ("jpg", "png", "webp"):
+        path = _local_path(cache_key, ext)
+        if path.exists():
+            path.unlink()
+
+
 def _save_image(cache_key: str, data: bytes, ext: str = "png") -> pathlib.Path:
     _ensure_dirs()
     path = _local_path(cache_key, ext)
@@ -905,6 +917,12 @@ def image_surface_dev_panel(image: dict, *, surface_id: str = DEFAULT_SURFACE_ID
     url = image.get("url") or receipt.get("url")
     src = receipt.get("source", "gradient")
 
+    brain_target = receipt.get("brain_target")
+    brain_target_label = receipt.get("brain_target_label")
+    if brain_target and not brain_target_label:
+        from pipeline.personalization.brain_simulator import BRAIN_TARGET_LABELS
+        brain_target_label = BRAIN_TARGET_LABELS.get(brain_target, brain_target)
+
     tier = receipt.get("tier", "base_only")
     delta_signals = receipt.get("delta_signals") or []
     tier_label = {
@@ -972,6 +990,18 @@ def image_surface_dev_panel(image: dict, *, surface_id: str = DEFAULT_SURFACE_ID
             "has_image": bool(url),
             "gradient_note": "CSS gradient shows when no generated/cached URL resolves",
         },
+        "brain": {
+            "enabled": brain_target is not None or receipt.get("brain_score") is not None,
+            "brain_target": brain_target,
+            "brain_target_label": brain_target_label,
+            "brain_regions": receipt.get("brain_regions") or [],
+            "brain_simulator": receipt.get("brain_simulator"),
+            "brain_score": receipt.get("brain_score"),
+            "brain_region_scores": receipt.get("brain_region_scores") or {},
+            "candidates_evaluated": receipt.get("candidates_evaluated"),
+            "winner_index": receipt.get("winner_index"),
+            "brain_guardrail_penalty": receipt.get("brain_guardrail_penalty"),
+        },
     }
 
 
@@ -1008,6 +1038,13 @@ def hero_image_trace(receipt: dict) -> tuple[list[str], str, str]:
     if blocked:
         sigs.append(f"guardrails_blocked={len(blocked)}")
         sigs.append(f"stripped={', '.join(blocked[:3])}")
+    if receipt.get("brain_target"):
+        sigs.append(f"brain_target={receipt['brain_target']}")
+    if receipt.get("brain_score") is not None:
+        sigs.append(f"brain_score={receipt['brain_score']}")
+        sigs.append(f"brain_simulator={receipt.get('brain_simulator', 'proxy_v1')}")
+    if receipt.get("candidates_evaluated"):
+        sigs.append(f"candidates_evaluated={receipt['candidates_evaluated']}")
     if receipt.get("gallery_id"):
         sigs.append(f"gallery_id={receipt['gallery_id']}")
     chain = receipt.get("fallback_chain") or []
@@ -1023,6 +1060,10 @@ def hero_image_trace(receipt: dict) -> tuple[list[str], str, str]:
         out = f"generated · {receipt.get('vendor', VENDOR)} · intent={intent}"
         why = (f"disk cache miss → API generated → cached; intent {intent} ({goal}) "
                f"drives hero CTA; prompt uses structured layers only (no PII){guard_summary}")
+        if receipt.get("brain_score") is not None:
+            why += (f"; brain_sim {receipt.get('brain_simulator', 'proxy_v1')} scored "
+                    f"{receipt.get('candidates_evaluated', 1)} candidate(s) — "
+                    f"winner brain_score={receipt['brain_score']}")
     elif src == "gallery":
         out = f"gallery · {receipt.get('gallery_id', 'curated')} · intent={intent}"
         why = f"no cached/generated asset — curated CC library; intent selection still logged{guard_summary}"

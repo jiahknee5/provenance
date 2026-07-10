@@ -238,7 +238,7 @@ def test_process_map_covers_every_stage_with_data_and_branches():
     assert len(pm["inputs"]) == 4                      # query · referer · IP · cookie
     ids = [s["id"] for s in pm["stages"]]
     assert ids == ["entry", "advariant", "ip", "tier", "location", "identity", "archetype",
-                   "audience", "objections", "policy", "compose", "heroimg"]
+                   "audience", "objections", "policy", "compose", "brainsim", "heroimg"]
     for s in pm["stages"]:
         assert s["reads"], f"stage {s['id']} reads no data"
         assert s["output"], f"stage {s['id']} has no output"
@@ -311,7 +311,7 @@ def test_process_map_drilldowns_carry_evidence_and_fired_markers():
 def test_dev_page_renders_the_process_map():
     t = c.get("/planet/dev?as=anon").text
     assert "Process map" in t
-    for anchor in ("sec-entry", "sec-tier", "sec-location", "sec-crm", "sec-slots",
+    for anchor in ("sec-entry", "sec-tier", "sec-location", "sec-brain-sim", "sec-crm", "sec-slots",
                    "sec-hero-image", "sec-objections", "sec-order"):
         assert f'id="{anchor}"' in t and f'href="#{anchor}"' in t, f"missing anchor: {anchor}"
     for label in ("Query string", "Referer header", "Client IP", "Login cookie"):

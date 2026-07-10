@@ -171,6 +171,12 @@
       <tr><td class="k">Sales technique</td><td>{{ B.visual.technique }}</td></tr>
       <tr><td class="k">Paired CTA</td><td>{{ B.visual.paired_cta }}</td></tr>
       <tr><td class="k">Conversion goal</td><td>{{ B.visual.goal }}</td></tr>
+      {% if B.visual.get('brain_target') %}
+      <tr><td class="k">Brain target</td><td><code>{{ B.visual.brain_target }}</code>{% if B.visual.get('brain_target_label') %} — {{ B.visual.brain_target_label }}{% endif %}</td></tr>
+      {% endif %}
+      {% if B.visual.get('brain_score') is not none %}
+      <tr><td class="k">Brain score</td><td>{{ '%.3f'|format(B.visual.brain_score) }} · {{ B.visual.brain_simulator or 'proxy_v1' }}{% if B.visual.get('candidates_evaluated') %} · {{ B.visual.candidates_evaluated }} candidates{% endif %}</td></tr>
+      {% endif %}
     </tbody>
   </table>
   {% if B.visual.hero_image_url %}

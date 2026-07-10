@@ -644,6 +644,90 @@ def location_signal(det: dict, tier: int, ad_variant: dict | None) -> dict:
             "blocked_say": None}
 
 
+def brain_sim_signal(receipt: dict, *, tenant: str = IMAGE_TENANT) -> dict:
+    """Brain-simulator decision summary for /planet/dev trace, process map, and panels."""
+    from pipeline.personalization import image_intents as II
+    from pipeline.personalization.brain_simulator import (
+        BRAIN_TARGET_LABELS,
+        BRAIN_TARGET_REGIONS,
+        brain_sim_enabled,
+        intent_brain_fields,
+    )
+
+    config = II.load_image_config(tenant)
+    enabled = brain_sim_enabled(config)
+    intent_id = receipt.get("intent_id")
+    target = receipt.get("brain_target")
+    regions = list(receipt.get("brain_regions") or [])
+    if intent_id and not target:
+        for intent in config.get("intents") or []:
+            if intent["id"] == intent_id:
+                target, regions = intent_brain_fields(intent)
+                if target and not regions:
+                    regions = list(BRAIN_TARGET_REGIONS.get(target, []))
+                break
+    score = receipt.get("brain_score")
+    simulator = receipt.get("brain_simulator")
+    evaluated = receipt.get("candidates_evaluated")
+    region_scores = receipt.get("brain_region_scores") or {}
+    target_label = BRAIN_TARGET_LABELS.get(target or "", target or "—")
+
+    if not enabled:
+        return {
+            "enabled": False,
+            "mode": "disabled",
+            "intent_id": intent_id,
+            "brain_target": target,
+            "brain_target_label": target_label,
+            "brain_regions": regions,
+            "brain_simulator": None,
+            "brain_score": None,
+            "brain_region_scores": {},
+            "candidates_evaluated": None,
+            "rule": "brain_simulator.enabled: false in tenant YAML",
+            "policy": "observed",
+            "output": "brain scoring disabled for this tenant",
+            "why": "opt-in via brain_simulator.enabled in rules/*_image.yaml",
+        }
+
+    if score is not None:
+        mode = "scored"
+        top_regions = ", ".join(
+            f"{k}={v:.2f}" for k, v in sorted(
+                region_scores.items(), key=lambda x: -x[1])[:3])
+        output = (f"brain_score = {score:.3f} · {simulator or 'proxy_v1'}"
+                  + (f" · N={evaluated}" if evaluated else ""))
+        why = ("generate → score → select: best-of-N candidates scored against "
+               f"brain_target={target} cortical regions; winner cached"
+               + (f" ({top_regions})" if top_regions else ""))
+    elif target:
+        mode = "target_mapped"
+        output = f"brain_target = {target} ({target_label}) · intent {intent_id or '—'}"
+        why = ("intent YAML maps to a marketing brain_target; scoring runs on generation "
+               "(async API default N=3; pregen uses BRAIN_SIM_BEST_OF_N)")
+    else:
+        mode = "pending"
+        output = "no brain_target — gradient / gallery fallback"
+        why = "no structured intent resolved — brain simulator not invoked"
+
+    return {
+        "enabled": True,
+        "mode": mode,
+        "intent_id": intent_id,
+        "brain_target": target,
+        "brain_target_label": target_label,
+        "brain_regions": regions,
+        "brain_simulator": simulator,
+        "brain_score": score,
+        "brain_region_scores": region_scores,
+        "candidates_evaluated": evaluated,
+        "rule": "intent brain_target → BrainSimulatorScorer.select_best() on generate",
+        "policy": "observed",
+        "output": output,
+        "why": why,
+    }
+
+
 # --------------------------------------------------------------------------- #
 # Objection catalog — sales psychology, truth-bounded (verified Planet claims only)
 # Each objection: id, text, tracks[], weight_signals[], reframe slots, optional blocked_say.
@@ -1595,6 +1679,17 @@ def build_page(request, email: str | None = None, overrides: dict | None = None)
     t("Hero image resolve", img_sigs,
       "disk cache → (async API if keyed) → scene.image_for gallery → CSS gradient",
       "say", img_out, img_why)
+    brain = brain_sim_signal(img_receipt)
+    if brain["enabled"]:
+        bs_sigs = [f"intent={brain.get('intent_id') or '—'}",
+                   f"brain_target={brain.get('brain_target') or '—'}"]
+        if brain.get("brain_score") is not None:
+            bs_sigs.append(f"brain_score={brain['brain_score']}")
+            bs_sigs.append(f"simulator={brain.get('brain_simulator') or 'proxy_v1'}")
+        if brain.get("candidates_evaluated"):
+            bs_sigs.append(f"candidates={brain['candidates_evaluated']}")
+        t("Brain simulator", bs_sigs, brain["rule"], brain["policy"],
+          brain["output"], brain["why"])
 
     ledger = _ledger(entry, det, ident, loc)
     ledger.extend(IG.hero_image_ledger_rows(img_receipt))
@@ -1623,6 +1718,7 @@ def build_page(request, email: str | None = None, overrides: dict | None = None)
                        "blocked": obj_blocked},
         "trace": trace, "copy_diff": diff, "ledger": ledger,
         "hero_image": hero_image,
+        "brain_sim": brain,
     }
 
 
@@ -1699,8 +1795,8 @@ def _kv(k: str, v, pol: str | None = None, fired: bool = False) -> dict:
 
 
 def process_map(page: dict) -> dict:
-    """The /planet/dev process diagram: {inputs, stages}. Twelve stages — the Gauntlet
-    eleven plus the Location signal stage (the Planet differentiator). Skipped stages
+    """The /planet/dev process diagram: {inputs, stages}. Thirteen stages — the Gauntlet
+    eleven plus Location signal and Brain simulator (Planet image decisioning). Skipped stages
     stay visible, marked skipped — the full decision space is always on screen."""
     P = page
     entry, det, ident, ad = P["entry"], P["det"], P["identity"], P.get("ad_variant")
@@ -2025,7 +2121,54 @@ def process_map(page: dict) -> dict:
           "same sections, same facts — only emphasis and order move",
           detail=compose_detail)
 
-    # 12 · hero image
+    # 13 · brain simulator — generate → score → select (when enabled)
+    hi_ref = P["hero_image"]
+    ir_ref = hi_ref.get("receipt") or {}
+    brain = P.get("brain_sim") or brain_sim_signal(ir_ref)
+    bs_taken = {
+        "scored": "winner selected (scored)",
+        "target_mapped": "target mapped (cache hit / no regen)",
+        "pending": "not invoked",
+        "disabled": "disabled",
+    }.get(brain.get("mode", "pending"))
+    bs_detail = [
+        _kv("Enabled", "yes" if brain.get("enabled") else "no",
+            fired=bool(brain.get("enabled"))),
+        _kv("Intent", brain.get("intent_id") or ir_ref.get("intent_id") or "—"),
+        _kv("brain_target", f"{brain.get('brain_target') or '—'} "
+                            f"({brain.get('brain_target_label') or '—'})",
+            fired=bool(brain.get("brain_target"))),
+    ]
+    if brain.get("brain_regions"):
+        bs_detail.append(_kv("Regions", ", ".join(brain["brain_regions"])))
+    if brain.get("brain_score") is not None:
+        bs_detail.append(_kv("brain_score", f"{brain['brain_score']:.3f}",
+                             fired=True))
+        bs_detail.append(_kv("Simulator", brain.get("brain_simulator") or "proxy_v1"))
+        if brain.get("candidates_evaluated"):
+            bs_detail.append(_kv("Candidates evaluated", str(brain["candidates_evaluated"])))
+        for region, val in sorted((brain.get("brain_region_scores") or {}).items(),
+                                  key=lambda x: -x[1])[:4]:
+            bs_detail.append(_kv(f"ROI · {region}", f"{val:.3f}"))
+    else:
+        bs_detail.append(_kv("Loop", "generate N → score → cache winner only",
+                             fired=brain.get("enabled")))
+        bs_detail.append(_kv("Override", "BRAIN_SIM_BEST_OF_N env var"))
+    stage("brainsim", "Brain simulator", "#sec-brain-sim",
+          [f"brain_target={brain.get('brain_target') or '—'}",
+           f"intent={brain.get('intent_id') or ir_ref.get('intent_id') or '—'}"]
+          + ([f"brain_score={brain['brain_score']:.3f}"] if brain.get("brain_score") is not None else []),
+          brain.get("rule", "intent brain_target → BrainSimulatorScorer.select_best()"),
+          _branches(["winner selected (scored)", "target mapped (cache hit / no regen)",
+                     "not invoked", "disabled"],
+                    bs_taken if brain.get("enabled") else "disabled"),
+          brain.get("output", "—"),
+          brain.get("why", "predicted visual-response optimization — not measured visitor brain data"),
+          skipped=not brain.get("enabled"),
+          skip_reason="brain_simulator.enabled: false for this tenant",
+          detail=bs_detail)
+
+    # 14 · hero image
     hi = P["hero_image"]
     ir = hi.get("receipt") or {}
     hid = hi.get("dev") or {}
@@ -2052,7 +2195,9 @@ def process_map(page: dict) -> dict:
                              else ir[k]))
                    for k in ("intent_id", "secondary_intent_id", "conversion_goal", "drives_action",
                              "prompt", "model", "vendor", "cache_key", "license",
-                             "fallback_chain", "generated_at")
+                             "fallback_chain", "generated_at",
+                             "brain_target", "brain_score", "brain_simulator",
+                             "candidates_evaluated")
                    if ir.get(k) not in (None, "", [])]
     img_detail += [_kv("Guardrail applied", g, pol="hold") for g in g_blocked]
     if not img_detail:

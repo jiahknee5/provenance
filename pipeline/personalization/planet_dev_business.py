@@ -329,6 +329,7 @@ def _visual_decision(page: dict) -> dict:
     hero = page.get("sections", {}).get("hero", {})
     hi = page.get("hero_image") or {}
     hid = hi.get("dev") or IG.hero_image_dev_panel(hi)
+    brain = hid.get("brain") or page.get("brain_sim") or {}
     conv = hid.get("conversion") or {}
     prompt = hid.get("prompt") or {}
     tier = hid.get("tier") or {}
@@ -369,6 +370,11 @@ def _visual_decision(page: dict) -> dict:
         f"Decision: hero background uses {intent_id} visual strategy"
         f" — paired with “{drives}” CTA"
     )
+    if brain.get("brain_score") is not None:
+        decision += (f" · brain_score {brain['brain_score']:.2f}"
+                     f" ({brain.get('brain_simulator') or 'proxy_v1'})")
+    elif brain.get("brain_target"):
+        decision += f" · brain_target {brain['brain_target']}"
 
     return {
         "decision": decision,
@@ -382,6 +388,11 @@ def _visual_decision(page: dict) -> dict:
         "hero_image_url": hi.get("url"),
         "tier_summary": tier_summary,
         "tier_mode": tier_mode,
+        "brain_target": brain.get("brain_target"),
+        "brain_target_label": brain.get("brain_target_label"),
+        "brain_score": brain.get("brain_score"),
+        "brain_simulator": brain.get("brain_simulator"),
+        "candidates_evaluated": brain.get("candidates_evaluated"),
     }
 
 

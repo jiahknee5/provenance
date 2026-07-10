@@ -188,7 +188,8 @@
   The replica is rebuilt deterministically from (query params + login cookie). This page rebuilds the
   <em>same</em> state and walks it in five chapters: the visitor's inputs, the decision pipeline —
   including the <b>Location signal</b>, Planet's differentiator — the data held, what shipped
-  (with the <b>say</b>-level variants the surface policy blocks), and the audit trail.</p>
+  (with the <b>say</b>-level variants the surface policy blocks), and the audit trail.
+  Hero images run through the <b>Brain simulator</b> (Tribe v2 / proxy_v1) when generated.</p>
 
 <div class="gd-layout">
 <aside class="gd-side" id="gd-nav">
@@ -236,7 +237,7 @@
   <div class="ch-head">
     <span class="num">2</span>
     <h2>Process map — every decision, in order</h2>
-    <span class="q">Twelve stages run top to bottom. Pills show every branch a stage could take — the dark one was taken. Click a stage to drill into its evidence.</span>
+    <span class="q">Thirteen stages run top to bottom. Pills show every branch a stage could take — the dark one was taken. Click a stage to drill into its evidence.</span>
   </div>
   <div class="pm" style="margin-top:14px">
   <div class="pm-flow">
@@ -311,6 +312,26 @@
       {% if P.location.blocked_say %}
       <div class="kv"><span class="k">Blocked recite</span><span class="v">“{{ P.location.blocked_say }}” <span class="pol hold">hold</span><span class="why">street/property-scale precision never ships — the anti-surveillance guardrail</span></span></div>
       {% endif %}
+    </div>
+
+    <div class="sec" id="sec-brain-sim">
+      <div class="h">Brain simulator — visual response scoring <span class="tag">{{ P.brain_sim.mode }}</span></div>
+      <div class="kv"><span class="k">Enabled</span><span class="v">{% if P.brain_sim.enabled %}yes · rules/planet_image.yaml{% else %}no{% endif %}</span></div>
+      <div class="kv"><span class="k">Intent</span><span class="v"><code>{{ P.brain_sim.intent_id or '—' }}</code></span></div>
+      <div class="kv"><span class="k">brain_target</span><span class="v"><code>{{ P.brain_sim.brain_target or '—' }}</code>{% if P.brain_sim.brain_target_label %} · {{ P.brain_sim.brain_target_label }}{% endif %}</span></div>
+      {% if P.brain_sim.brain_regions %}
+      <div class="kv"><span class="k">Regions</span><span class="v">{% for r in P.brain_sim.brain_regions %}<span class="chip">{{ r }}</span>{% endfor %}</span></div>
+      {% endif %}
+      {% if P.brain_sim.get('brain_score') is not none %}
+      <div class="kv"><span class="k">brain_score</span><span class="v"><b>{{ '%.3f'|format(P.brain_sim.brain_score) }}</b> · {{ P.brain_sim.brain_simulator or 'proxy_v1' }}{% if P.brain_sim.candidates_evaluated %} · N={{ P.brain_sim.candidates_evaluated }}{% endif %}</span></div>
+      {% if P.brain_sim.brain_region_scores %}
+      <div class="kv"><span class="k">Region scores</span><span class="v" style="font-family:ui-monospace,Menlo,monospace;font-size:12px">{% for k, v in P.brain_sim.brain_region_scores.items() %}{{ k }}={{ '%.2f'|format(v) }}{% if not loop.last %} · {% endif %}{% endfor %}</span></div>
+      {% endif %}
+      {% else %}
+      <div class="kv"><span class="k">Score</span><span class="v" style="color:var(--muted);font-weight:400">— on cache hit; runs on async generation (default N=3)</span></div>
+      {% endif %}
+      <div class="kv"><span class="k">Rule fired</span><span class="v"><code>{{ P.brain_sim.rule }}</code></span></div>
+      <div class="kv"><span class="k">Why</span><span class="v" style="font-weight:400;color:var(--muted)">{{ P.brain_sim.why }}</span></div>
     </div>
   </div>
 
@@ -495,6 +516,27 @@
         <div class="trace-step">
           <span class="n">7</span>
           <div style="min-width:0">
+            <div class="nm">Brain simulator scoring</div>
+            {% set bs = P.brain_sim %}
+            <div class="kv" style="padding:6px 0 0;border:0"><span class="k">brain_target</span><span class="v"><code>{{ bs.brain_target or '—' }}</code>{% if bs.brain_target_label %} · {{ bs.brain_target_label }}{% endif %}</span></div>
+            {% if bs.brain_regions %}
+            <div class="kv" style="padding:6px 0;border:0"><span class="k">Regions</span><span class="v">{% for r in bs.brain_regions %}<span class="chip">{{ r }}</span>{% endfor %}</span></div>
+            {% endif %}
+            {% if bs.get('brain_score') is not none %}
+            <div class="kv" style="padding:6px 0;border:0"><span class="k">Winner score</span><span class="v"><b>{{ '%.3f'|format(bs.brain_score) }}</b> · {{ bs.brain_simulator or 'proxy_v1' }}{% if bs.candidates_evaluated %} · {{ bs.candidates_evaluated }} candidates{% endif %}</span></div>
+            {% if bs.brain_region_scores %}
+            <div class="kv" style="padding:6px 0;border:0"><span class="k">Region breakdown</span><span class="v" style="font-family:ui-monospace,Menlo,monospace;font-size:12px">{% for k, v in bs.brain_region_scores.items() %}{{ k }}={{ '%.2f'|format(v) }}{% if not loop.last %} · {% endif %}{% endfor %}</span></div>
+            {% endif %}
+            {% else %}
+            <div class="kv" style="padding:6px 0;border:0"><span class="k">Status</span><span class="v" style="font-weight:400;color:var(--muted)">target mapped from intent — score logged on generation / cache regen</span></div>
+            {% endif %}
+            <div class="why" style="font-size:11.5px;color:var(--muted);margin-top:4px">Predicted visual-response optimization — not measured visitor brain data. <a href="{{ g.image_decisions }}#part-brain">Full loop →</a></div>
+          </div>
+        </div>
+
+        <div class="trace-step">
+          <span class="n">8</span>
+          <div style="min-width:0">
             <div class="nm">Generation receipt</div>
             <div class="kv" style="padding:6px 0 0;border:0"><span class="k">Load status</span><span class="v">{{ hid.status }} · fallback {{ hid.fallback }}<span class="why">page shell renders instantly; async fetch only when status=pending</span></span></div>
             <div class="kv" style="padding:6px 0;border:0"><span class="k">Source</span><span class="v">{{ hid.receipt.source }} · {{ hid.receipt.vendor or '—' }}</span></div>
@@ -502,13 +544,14 @@
             {% if hid.receipt.cache_key %}<div class="kv" style="padding:6px 0;border:0"><span class="k">Cache key</span><span class="v" style="font-family:ui-monospace,Menlo,monospace;font-size:12px">{{ hid.receipt.cache_key }}</span></div>{% endif %}
             {% if hid.receipt.generated_at %}<div class="kv" style="padding:6px 0;border:0"><span class="k">Generated at</span><span class="v">{{ hid.receipt.generated_at }}</span></div>{% endif %}
             {% if hid.receipt.license %}<div class="kv" style="padding:6px 0;border:0"><span class="k">License</span><span class="v">{{ hid.receipt.license }}</span></div>{% endif %}
+            {% if ir.get('brain_score') is not none %}<div class="kv" style="padding:6px 0;border:0"><span class="k">Brain score</span><span class="v">{{ '%.3f'|format(ir.brain_score) }} · {{ ir.brain_simulator or 'proxy_v1' }}</span></div>{% endif %}
             {% if hid.receipt.url or hi.url %}<div class="kv" style="padding:6px 0;border:0"><span class="k">URL</span><span class="v" style="font-size:12px;word-break:break-all">{{ hi.url or hid.receipt.url }}</span></div>{% endif %}
             {% if hid.prompt.full_prompt %}<div class="kv" style="padding:6px 0;border:0"><span class="k">Full prompt</span><span class="v" style="font-weight:400;font-size:12.5px">{{ hid.prompt.full_prompt }}</span></div>{% endif %}
           </div>
         </div>
 
         <div class="trace-step">
-          <span class="n">8</span>
+          <span class="n">9</span>
           <div style="min-width:0">
             <div class="nm">Fallback chain</div>
             {% if hid.fallback_chain %}
