@@ -542,3 +542,40 @@ def test_portal_dev_business_links_stay_under_prefix():
     t = c.get("/gauntletapt/dev/business?as=anon").text
     assert 'href="/gauntletapt/dev/business' in t
     assert 'href="/dev/business' not in t
+
+
+# --------------------------------------------------------------------------- #
+# 9 · Image decisions guide page
+# --------------------------------------------------------------------------- #
+INTENT_NAMES = (
+    "peer_proof", "loss_avoidance", "authority", "aspiration",
+    "roi_clarity", "retarget_warm", "message_match",
+)
+
+
+def test_image_decisions_routes_return_200():
+    for path in (
+        "/image-decisions",
+        "/gauntlet/image-decisions",
+        "/gauntletapt/image-decisions",
+    ):
+        r = c.get(path)
+        assert r.status_code == 200, path
+
+
+def test_image_decisions_contains_all_intents_and_why_sections():
+    t = _page_text(c.get("/gauntletapt/image-decisions"))
+    for name in INTENT_NAMES:
+        assert name in t, f"missing intent: {name}"
+    assert "Why it works" in t
+    assert "Why each intent" in t
+    assert "Two-tier token" in t
+    assert "Provenance" in t
+    assert "drives_action" in t
+    assert "Part 1" in t and "Part 5" in t
+
+
+def test_image_decisions_nav_links_from_dev():
+    t = c.get("/dev?as=anon").text
+    assert "Image decisions →" in t
+    assert 'href="/image-decisions"' in t

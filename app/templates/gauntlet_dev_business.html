@@ -55,6 +55,7 @@
       <a href="{{ toggle_known }}" class="{{ 'on' if as_state != 'anon' else '' }}">Known lead</a>
     </span>
     <a href="{{ g.dev }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}">Technical view →</a>
+    <a href="{{ g.image_decisions }}">Image decisions guide →</a>
   </div>
 </div>
 <p class="gb-meta">{{ B.changed_count }} of {{ B.total_slots }} copy slots changed · same visitor state as <a href="{{ g.dev }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}">/dev</a></p>
@@ -140,6 +141,7 @@
 <div class="sec">
   <div class="h">5 · Visual decision</div>
   <div class="dec">{{ B.visual.decision }}</div>
+  <div class="dec" style="margin-top:8px;font-size:13px;color:var(--muted)">{{ B.visual.tier_summary }}</div>
   <table class="ops">
     <thead><tr><th>Field</th><th>Value</th></tr></thead>
     <tbody>

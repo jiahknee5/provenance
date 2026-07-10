@@ -25,6 +25,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 
 from app.server import app, templates
 from pipeline.personalization import gauntlet_dev_business as GDB
+from pipeline.personalization import gauntlet_image_decisions as GID
 from pipeline.personalization import gauntlet_site as GS
 from pipeline.personalization import image_gen as IG
 
@@ -40,6 +41,7 @@ MOUNTS: dict[str, dict[str, str]] = {
         "dev_business": "/dev/business",
         "ad": "/gauntlet/ad",
         "ad_lp": "/gauntlet/ad-lp",
+        "image_decisions": "/image-decisions",
         "static": "/static",
         "hero_api": "/api/gauntlet/hero-image",
     },
@@ -51,6 +53,7 @@ MOUNTS: dict[str, dict[str, str]] = {
         "dev_business": "/gauntletapt/dev/business",
         "ad": "/gauntletapt/ad",
         "ad_lp": "/gauntletapt/ad-lp",
+        "image_decisions": "/gauntletapt/image-decisions",
         "static": "/gauntletapt/static",
         "hero_api": "/gauntletapt/api/hero-image",
     },
@@ -195,6 +198,19 @@ def _render_dev(request: Request, m: dict[str, str]) -> HTMLResponse:
         "g": m})
 
 
+def _render_image_decisions(request: Request, m: dict[str, str]) -> HTMLResponse:
+    view = GID.build_image_decisions_view(
+        page_path=m["page"],
+        dev_path=m["dev"],
+        static_prefix=m["static"],
+    )
+    return templates.TemplateResponse(request, "gauntlet_image_decisions.html", {
+        "g": m,
+        "static_prefix": m["static"],
+        **view,
+    })
+
+
 def _render_dev_business(request: Request, m: dict[str, str]) -> HTMLResponse:
     as_state, email, page, qs = _dev_email_and_page(request, m)
     biz_path = m["dev_business"]
@@ -227,6 +243,7 @@ def _register_mount(m: dict[str, str]) -> None:
     page, login, logout, dev = m["page"], m["login"], m["logout"], m["dev"]
     dev_business = m["dev_business"]
     ad, ad_lp = m["ad"], m["ad_lp"]
+    image_decisions = m["image_decisions"]
     hero_api = m["hero_api"]
     cookie_path = _cookie_path(m)
 
@@ -264,6 +281,10 @@ def _register_mount(m: dict[str, str]) -> None:
     def gauntlet_dev_business(request: Request) -> HTMLResponse:
         return _render_dev_business(request, m)
 
+    @app.get(image_decisions, response_class=HTMLResponse)
+    def gauntlet_image_decisions(request: Request) -> HTMLResponse:
+        return _render_image_decisions(request, m)
+
     @app.get(hero_api)
     def gauntlet_hero_image(request: Request) -> JSONResponse:
         return JSONResponse(_hero_image_json(request, m))
@@ -290,3 +311,9 @@ def ad_lp_root(request: Request) -> HTMLResponse:
 @app.get("/gauntlet/dev/business", response_class=HTMLResponse)
 def gauntlet_dev_business_legacy_alias(request: Request) -> HTMLResponse:
     return _render_dev_business(request, MOUNTS["legacy"])
+
+
+# Legacy mount path for image-decisions guide.
+@app.get("/gauntlet/image-decisions", response_class=HTMLResponse)
+def gauntlet_image_decisions_legacy_alias(request: Request) -> HTMLResponse:
+    return _render_image_decisions(request, MOUNTS["legacy"])

@@ -3,6 +3,7 @@
 {% block content %}
 <style>
   main{max-width:1180px}
+  html{scroll-behavior:smooth}
   .gd-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
   .gd-head h1{font-size:26px;margin:0}
   .gd-head .sub{color:var(--muted);font-size:14px;max-width:70ch}
@@ -13,8 +14,27 @@
   .gd-entries .lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
   .gd-entries a{font-size:12.5px;font-weight:600;border:1px solid var(--line);border-radius:8px;padding:6px 12px;text-decoration:none;background:#fff}
   .gd-entries a:hover{border-color:var(--brand)}
-  .gd-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;align-items:start;margin-top:18px}
+  .gd-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;align-items:start;margin-top:14px}
   @media(max-width:920px){.gd-grid{grid-template-columns:1fr}}
+  /* ---- chapter navigation ---- */
+  .gd-nav{position:sticky;top:0;z-index:60;display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin:16px -8px 0;padding:8px;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .gd-nav a{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--muted);padding:6px 12px;border-radius:8px;text-decoration:none;border:1px solid transparent}
+  .gd-nav a .num{width:17px;height:17px;border-radius:5px;background:#E4E8EC;color:#475569;font-size:10px;font-weight:800;display:grid;place-items:center}
+  .gd-nav a:hover{color:var(--ink);background:#fff;border-color:var(--line)}
+  .gd-nav a.on{color:var(--ink);background:#fff;border-color:var(--line);box-shadow:var(--shadow)}
+  .gd-nav a.on .num{background:var(--ink);color:#fff}
+  .gd-nav .spacer{margin-left:auto;font-size:11px;color:var(--muted);padding-right:6px}
+  /* ---- chapters ---- */
+  .ch{margin-top:34px;scroll-margin-top:64px}
+  .ch-head{display:flex;align-items:baseline;gap:12px;padding-bottom:8px;border-bottom:2px solid var(--ink);margin-bottom:2px}
+  .ch-head .num{width:26px;height:26px;border-radius:8px;background:var(--ink);color:#fff;font-size:13px;font-weight:800;display:grid;place-items:center;flex:none;align-self:center}
+  .ch-head h2{font-size:17px;margin:0}
+  .ch-head .q{font-size:12.5px;color:var(--muted);margin-left:auto;text-align:right;max-width:52ch}
+  @media(max-width:920px){.ch-head .q{display:none}}
+  .ch-sub{font-size:13px;color:var(--muted);margin:8px 0 0;max-width:100ch;line-height:1.55}
+  .sec[id],.pm[id]{scroll-margin-top:64px}
+  .gd-inputs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+  @media(max-width:920px){.gd-inputs{grid-template-columns:1fr 1fr}}
   .sec{border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:var(--shadow);overflow:hidden;margin-bottom:18px}
   .sec .h{display:flex;align-items:center;gap:8px;padding:11px 15px;border-bottom:1px solid var(--line);font-size:13px;font-weight:700;color:var(--ink)}
   .sec .h .tag{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:5px;padding:2px 8px;background:#F1F3F5;color:var(--muted)}
@@ -151,23 +171,37 @@
     <a href="{{ toggle_known }}" class="{{ 'on' if as_state != 'anon' else '' }}">Known ({{ P.identity.email if P.identity else sample_email }})</a>
   </span>
   <a href="{{ g.dev_business }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}" style="font-size:13px;font-weight:600;text-decoration:none;color:var(--brand);margin-left:8px">Marketing view →</a>
+  <a href="{{ g.image_decisions }}" style="font-size:13px;font-weight:600;text-decoration:none;color:var(--brand);margin-left:8px">Image decisions →</a>
 </div>
 <p class="sub" style="color:var(--muted);font-size:14px;max-width:80ch;margin:4px 0 0">
   The replica is rebuilt deterministically from (query params + login cookie). This page rebuilds the
-  <em>same</em> state and shows every stage: entry classification, the signal ledger with provenance,
-  tier routing, the CRM record, and the per-slot copy decision — including the <b>say</b>-level variants
-  the surface policy blocks.</p>
+  <em>same</em> state and walks it in five chapters: the visitor's inputs, the decision pipeline,
+  the data held, what shipped — including the <b>say</b>-level variants the surface policy blocks —
+  and the audit trail.</p>
 
-<div class="gd-entries">
-  <span class="lbl">Simulate an entry</span>
-  {% for label, url in entry_links_raw %}<a href="{{ url }}">{{ label }} →</a>{% endfor %}
-  <span class="lbl" style="margin-left:8px">then log in as</span>
-  <span class="chip">{{ sample_email }}</span>
-</div>
+<nav class="gd-nav" id="gd-nav">
+  <a href="#ch-visitor" data-ch="ch-visitor"><span class="num">1</span>The visitor</a>
+  <a href="#ch-pipeline" data-ch="ch-pipeline"><span class="num">2</span>Decisions</a>
+  <a href="#ch-data" data-ch="ch-data"><span class="num">3</span>Data held</a>
+  <a href="#ch-shipped" data-ch="ch-shipped"><span class="num">4</span>What shipped</a>
+  <a href="#ch-audit" data-ch="ch-audit"><span class="num">5</span>Audit trail</a>
+  <span class="spacer"><a href="{{ g.page }}{{ qs }}" style="color:var(--brand);text-decoration:none;font-weight:600">open the live page →</a></span>
+</nav>
 
-<div class="pm">
-  <div class="h">⓪ Process map — data in → every decision → page out <span class="tag">this request</span></div>
-  <div class="pm-inputs">
+<!-- ================= 1 · THE VISITOR ================= -->
+<section class="ch" id="ch-visitor">
+  <div class="ch-head">
+    <span class="num">1</span>
+    <h2>The visitor — what the server starts with</h2>
+    <span class="q">The pipeline only ever gets these four inputs. Everything below is derived from them.</span>
+  </div>
+  <div class="gd-entries">
+    <span class="lbl">Simulate an entry</span>
+    {% for label, url in entry_links_raw %}<a href="{{ url }}">{{ label }} →</a>{% endfor %}
+    <span class="lbl" style="margin-left:8px">then log in as</span>
+    <span class="chip">{{ sample_email }}</span>
+  </div>
+  <div class="gd-inputs">
     {% for i in pmap.inputs %}
     <div class="pm-in">
       <div class="cap">{{ i.label }}</div>
@@ -176,6 +210,16 @@
     </div>
     {% endfor %}
   </div>
+</section>
+
+<!-- ================= 2 · THE DECISIONS ================= -->
+<section class="ch" id="ch-pipeline">
+  <div class="ch-head">
+    <span class="num">2</span>
+    <h2>Process map — every decision, in order</h2>
+    <span class="q">Eleven stages run top to bottom. Pills show every branch a stage could take — the dark one was taken. Click a stage to drill into its evidence.</span>
+  </div>
+  <div class="pm" style="margin-top:14px">
   <div class="pm-flow">
     {% for s in pmap.stages %}
     <details class="pm-stage{{ ' skip' if s.skipped else '' }}">
@@ -206,12 +250,20 @@
     </details>
     {% endfor %}
   </div>
-</div>
+  </div>
+</section>
 
-<div class="gd-grid">
+<!-- ================= 3 · THE DATA HELD ================= -->
+<section class="ch" id="ch-data">
+  <div class="ch-head">
+    <span class="num">3</span>
+    <h2>Data held for this request</h2>
+    <span class="q">Every signal with its source, vendor, and surface policy — say may be recited, allude only shapes, hold never ships.</span>
+  </div>
+  <div class="gd-grid">
   <div>
     <div class="sec" id="sec-entry">
-      <div class="h">① Entry point <span class="tag">{{ P.entry.channel_label }}</span></div>
+      <div class="h">Entry point <span class="tag">{{ P.entry.channel_label }}</span></div>
       <div class="kv"><span class="k">Channel</span><span class="v">{{ P.entry.channel_label }}<span class="why">{{ P.entry.why }}</span></span></div>
       <div class="kv"><span class="k">Rule fired</span><span class="v"><code>{{ P.entry.rule }}</code></span></div>
       {% for s in P.entry.signals %}
@@ -220,7 +272,7 @@
     </div>
 
     <div class="sec" id="sec-tier">
-      <div class="h">② Tier routing <span class="tag">tier {{ P.tier }} · {{ P.tier_label }}</span></div>
+      <div class="h">Tier routing <span class="tag">tier {{ P.tier }} · {{ P.tier_label }}</span></div>
       <div class="kv"><span class="k">Network type</span><span class="v">{{ P.det.network_type or 'private / unreachable' }}</span></div>
       <div class="kv"><span class="k">IP</span><span class="v">{{ P.det.ip or '—' }}{% if P.ip_forced %} <span class="chip">?ip= override</span>{% endif %}</span></div>
       <div class="kv"><span class="k">Confidence</span><span class="v">location <b>{{ P.confidence.location }}</b> · company <b>{{ P.confidence.company }}</b> · industry <b>{{ P.confidence.industry }}</b></span></div>
@@ -228,23 +280,11 @@
       {% if P.det.reason %}<div class="kv"><span class="k">Why</span><span class="v" style="font-weight:400;color:var(--muted)">{{ P.det.reason }}</span></div>{% endif %}
     </div>
 
-    <div class="sec" id="sec-ledger">
-      <div class="h">③ Signal ledger <span class="tag">{{ P.ledger|length }} signals</span></div>
-      <table class="led">
-        <tr><th>Signal</th><th>Value</th><th>Source · vendor</th><th>Policy → disposition</th></tr>
-        {% for r in P.ledger %}
-        <tr>
-          <td style="font-weight:600">{{ r.label }}</td>
-          <td>{{ r.value }}</td>
-          <td class="src">{{ r.source }} · {{ r.vendor }}</td>
-          <td><span class="pol {{ r.policy }}">{{ r.policy }}</span> <span class="dispo">→ {{ r.disposition }}</span></td>
-        </tr>
-        {% endfor %}
-      </table>
-    </div>
+  </div>
 
+  <div>
     <div class="sec" id="sec-crm">
-      <div class="h">④ CRM record {% if P.identity and P.identity.kind == 'cohort' %}<span class="tag">via {{ P.identity.via }}</span>{% endif %}</div>
+      <div class="h">CRM record {% if P.identity and P.identity.kind == 'cohort' %}<span class="tag">via {{ P.identity.via }}</span>{% endif %}</div>
       {% if P.identity and P.identity.kind == 'cohort' %}
       {% set v = P.identity.view %}
       <div class="kv"><span class="k">Identity</span><span class="v">{{ v.name }} · {{ v.email }} <span class="pol say">say</span></span></div>
@@ -265,10 +305,35 @@
       {% endif %}
     </div>
   </div>
+  </div>
 
+  <div class="sec" id="sec-ledger">
+    <div class="h">Signal ledger — everything held, with provenance <span class="tag">{{ P.ledger|length }} signals</span></div>
+    <table class="led">
+      <tr><th>Signal</th><th>Value</th><th>Source · vendor</th><th>Policy → disposition</th></tr>
+      {% for r in P.ledger %}
+      <tr>
+        <td style="font-weight:600">{{ r.label }}</td>
+        <td>{{ r.value }}</td>
+        <td class="src">{{ r.source }} · {{ r.vendor }}</td>
+        <td><span class="pol {{ r.policy }}">{{ r.policy }}</span> <span class="dispo">→ {{ r.disposition }}</span></td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</section>
+
+<!-- ================= 4 · WHAT SHIPPED ================= -->
+<section class="ch" id="ch-shipped">
+  <div class="ch-head">
+    <span class="num">4</span>
+    <h2>What shipped on the page</h2>
+    <span class="q">Every copy slot generic vs shipped, the hero background's full decisioning, and the section order — plus the say-level variants the policy blocked.</span>
+  </div>
+  <div class="gd-grid">
   <div>
     <div class="sec" id="sec-slots">
-      <div class="h">⑤ Per-slot copy decision <span class="tag">{{ P.copy_diff|selectattr('changed')|list|length }} of {{ P.copy_diff|length }} personalized</span></div>
+      <div class="h">Per-slot copy decision <span class="tag">{{ P.copy_diff|selectattr('changed')|list|length }} of {{ P.copy_diff|length }} personalized</span></div>
       {% for d in P.copy_diff %}
       <div class="diff">
         <div class="slot">{{ d.label }}
@@ -286,12 +351,14 @@
       </div>
       {% endfor %}
     </div>
+  </div>
 
+  <div>
     <div class="sec" id="sec-hero-image">
       {% set hi = P.hero_image %}
       {% set hid = hi.dev %}
       {% set ir = hi.receipt %}
-      <div class="h">⑥ Hero background — data &amp; decisioning <span class="tag">{{ hid.receipt.source|default('gradient') }}</span></div>
+      <div class="h">Hero background — data &amp; decisioning <span class="tag">{{ hid.receipt.source|default('gradient') }}</span></div>
 
       <div class="hi-chain">
         <div class="trace-step">
@@ -325,6 +392,22 @@
         <div class="trace-step">
           <span class="n">3</span>
           <div style="min-width:0;width:100%">
+            <div class="nm">Two-tier cache — segment base vs personalization delta</div>
+            <div class="kv" style="padding:6px 0 0;border:0"><span class="k">Tier</span><span class="v"><span class="pol say">{{ hid.tier.label }}</span>{% if hid.tier.base_warm %} · <span class="chip">base warm</span>{% endif %}</span></div>
+            {% if hid.tier.base_cache_key %}<div class="kv" style="padding:6px 0;border:0"><span class="k">Segment base key</span><span class="v" style="font-family:ui-monospace,Menlo,monospace;font-size:12px">{{ hid.tier.base_cache_key }}</span></div>{% endif %}
+            {% if hid.tier.delta_cache_key %}<div class="kv" style="padding:6px 0;border:0"><span class="k">Delta key</span><span class="v" style="font-family:ui-monospace,Menlo,monospace;font-size:12px">{{ hid.tier.delta_cache_key }}</span></div>{% endif %}
+            {% if hid.tier.delta_signals %}
+            <div class="kv" style="padding:6px 0;border:0"><span class="k">Delta signals</span><span class="v">{% for s in hid.tier.delta_signals %}<span class="chip">{{ s }}</span>{% endfor %}</span></div>
+            {% endif %}
+            {% if hid.tier.tokens_saved_estimate is not none %}<div class="kv" style="padding:6px 0;border:0"><span class="k">Tokens saved (est.)</span><span class="v">{{ hid.tier.tokens_saved_estimate }}<span class="why">vs full single-tier prompt on cache hit or delta-only gen</span></span></div>{% endif %}
+            {% if hid.tier.base_prompt %}<div class="kv" style="padding:6px 0;border:0"><span class="k">Base prompt</span><span class="v" style="font-weight:400;font-size:12px">{{ hid.tier.base_prompt }}</span></div>{% endif %}
+            {% if hid.tier.delta_prompt %}<div class="kv" style="padding:6px 0;border:0"><span class="k">Delta prompt</span><span class="v" style="font-weight:400;font-size:12px">{{ hid.tier.delta_prompt }}</span></div>{% endif %}
+          </div>
+        </div>
+
+        <div class="trace-step">
+          <span class="n">4</span>
+          <div style="min-width:0;width:100%">
             <div class="nm">Personalization layers</div>
             {% if hid.layers %}
             <table class="hi-led">
@@ -345,7 +428,7 @@
         </div>
 
         <div class="trace-step">
-          <span class="n">4</span>
+          <span class="n">5</span>
           <div style="min-width:0">
             <div class="nm">Prompt assembly</div>
             <div class="kv" style="padding:6px 0 0;border:0"><span class="k">Visual metaphor</span><span class="v" style="font-weight:400">{{ hid.prompt.visual_metaphor or '—' }}</span></div>
@@ -363,7 +446,7 @@
         </div>
 
         <div class="trace-step">
-          <span class="n">5</span>
+          <span class="n">6</span>
           <div style="min-width:0">
             <div class="nm">Guardrails applied</div>
             {% if hid.guardrails.applied %}
@@ -378,7 +461,7 @@
         </div>
 
         <div class="trace-step">
-          <span class="n">6</span>
+          <span class="n">7</span>
           <div style="min-width:0">
             <div class="nm">Generation receipt</div>
             <div class="kv" style="padding:6px 0 0;border:0"><span class="k">Load status</span><span class="v">{{ hid.status }} · fallback {{ hid.fallback }}<span class="why">page shell renders instantly; async fetch only when status=pending</span></span></div>
@@ -393,7 +476,7 @@
         </div>
 
         <div class="trace-step">
-          <span class="n">7</span>
+          <span class="n">8</span>
           <div style="min-width:0">
             <div class="nm">Fallback chain</div>
             {% if hid.fallback_chain %}
@@ -423,8 +506,27 @@
       </div>
     </div>
 
+    <div class="sec" id="sec-order">
+      <div class="h">Section order shipped</div>
+      <div class="kv"><span class="k">Audience</span><span class="v">{{ P.audience }}</span></div>
+      <div class="kv"><span class="k">Order</span><span class="v">{{ P.order|join(' → ') }}<span class="why">same sections, same facts for everyone — only emphasis and order move</span></span></div>
+      <div class="kv"><span class="k">Open the page</span><span class="v"><a href="{{ g.page }}{{ qs }}">{{ g.page }}{{ qs }}</a></span></div>
+    </div>
+  </div>
+  </div>
+</section>
+
+<!-- ================= 5 · AUDIT TRAIL ================= -->
+<section class="ch" id="ch-audit">
+  <div class="ch-head">
+    <span class="num">5</span>
+    <h2>Audit trail — why, and prove it</h2>
+    <span class="q">The sales-psychology ranking behind the copy, and the deterministic trace: same inputs, same page, same decisions — replayable.</span>
+  </div>
+  <div class="gd-grid">
+  <div>
     <div class="sec" id="sec-objections">
-      <div class="h">⑦ Objection checklist <span class="tag">{{ P.objections.prioritized|length }} ranked</span></div>
+      <div class="h">Objection checklist <span class="tag">{{ P.objections.prioritized|length }} ranked</span></div>
       {% if P.objections.prioritized %}
       {% for o in P.objections.prioritized %}
       <div class="obj-row">
@@ -446,9 +548,11 @@
       <div class="empty">No objections matched active signals for route <b>{{ P.audience_route }}</b> — generic copy only.</div>
       {% endif %}
     </div>
+  </div>
 
+  <div>
     <div class="sec" id="sec-trace">
-      <div class="h">⑧ Trace — every stage, in order <span class="tag">deterministic</span></div>
+      <div class="h">Trace — every stage, in order <span class="tag">deterministic</span></div>
       {% for t in P.trace %}
       <div class="trace-step">
         <span class="n">{{ loop.index }}</span>
@@ -462,13 +566,25 @@
       </div>
       {% endfor %}
     </div>
-
-    <div class="sec" id="sec-order">
-      <div class="h">Section order shipped</div>
-      <div class="kv"><span class="k">Audience</span><span class="v">{{ P.audience }}</span></div>
-      <div class="kv"><span class="k">Order</span><span class="v">{{ P.order|join(' → ') }}<span class="why">same sections, same facts for everyone — only emphasis and order move</span></span></div>
-      <div class="kv"><span class="k">Open the page</span><span class="v"><a href="{{ g.page }}{{ qs }}">{{ g.page }}{{ qs }}</a></span></div>
-    </div>
   </div>
-</div>
+  </div>
+</section>
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('#gd-nav a[data-ch]'));
+  var chapters = links.map(function (a) { return document.getElementById(a.getAttribute('data-ch')); });
+  function spy() {
+    var current = chapters[0];
+    for (var i = 0; i < chapters.length; i++) {
+      if (chapters[i] && chapters[i].getBoundingClientRect().top <= 80) current = chapters[i];
+    }
+    links.forEach(function (a) {
+      a.classList.toggle('on', current && a.getAttribute('data-ch') === current.id);
+    });
+  }
+  document.addEventListener('scroll', spy, { passive: true });
+  spy();
+})();
+</script>
 {% endblock %}
