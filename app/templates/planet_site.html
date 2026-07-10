@@ -10,15 +10,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Planet - Image the World Every Day</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
+    /* Palette + type taken from live planet.com computed styles (Gotham SSm → Montserrat
+       fallback; teal #009DA5 logo/accents, bright cyan #00CBE6 interactive, near-black #07090A nav). */
     :root{
-      --bg:#04070d; --bg2:#060a12; --panel:#0a1220; --line:#16233a; --line2:#1f3355;
-      --blu:#3ba1ff; --blu-t:#6cbcff; --ink:#eef3f9; --body:#9fb0c3; --dim:#68798e;
-      --sans:'Archivo','Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-      --ui:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --bg:#07090a; --bg2:#0a0f11; --panel:#0e1518; --line:#1a2428; --line2:#26343a;
+      --blu:#009da5; --blu-t:#00cbe6; --ink:#f4f7f8; --body:#a7b4b9; --dim:#6e7c82;
+      --sans:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --ui:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
       --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;
     }
+    .planet-wm{height:26px;width:auto;display:block}
     *{box-sizing:border-box;margin:0;padding:0}
     html{scroll-behavior:smooth}
     body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--ui);-webkit-font-smoothing:antialiased}
@@ -27,21 +31,21 @@
     .mono{font-family:var(--mono);text-transform:uppercase;letter-spacing:.14em}
     /* provenance dot — the subtle receipt on every personalized slot */
     sup.pv{margin-left:5px;vertical-align:super;line-height:0}
-    sup.pv a{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--blu);opacity:.55;box-shadow:0 0 0 3px rgba(59,161,255,.14)}
+    sup.pv a{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--blu);opacity:.55;box-shadow:0 0 0 3px rgba(0,157,165,.16)}
     sup.pv a:hover{opacity:1}
     /* ---- nav ---- */
-    nav.gnav{position:sticky;top:0;z-index:40;background:rgba(4,7,13,.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.05)}
-    .gnav .in{max-width:1240px;margin:0 auto;display:flex;align-items:center;gap:26px;height:62px;padding:0 28px}
-    .gnav .logo{display:flex;align-items:center;gap:9px;font:600 19px var(--sans);color:#fff}
-    .gnav .logo svg{display:block}
-    .gnav .grp{display:flex;align-items:center;gap:20px}
-    .gnav .grp .lbl{font:500 10.5px var(--mono);letter-spacing:.16em;color:var(--blu);text-transform:uppercase}
-    .gnav .grp a{font:500 14px var(--ui);color:#dfe8f2}
+    nav.gnav{position:sticky;top:0;z-index:40;background:#07090a;border-bottom:1px solid rgba(255,255,255,.08)}
+    .gnav .in{max-width:1280px;margin:0 auto;display:flex;align-items:center;gap:28px;height:80px;padding:0 32px}
+    .gnav .logo{display:flex;align-items:center;color:#fff}
+    .gnav .logo .planet-wm{height:30px}
+    .gnav .grp{display:flex;align-items:center;gap:22px}
+    .gnav .grp .lbl{font:600 12px var(--sans);letter-spacing:.01em;color:var(--blu)}
+    .gnav .grp a{font:600 15px var(--ui);color:#fff}
     .gnav .grp a:hover{color:var(--blu-t)}
-    .gnav .vr{width:1px;height:22px;background:var(--blu);opacity:.7}
-    .gnav .right{margin-left:auto;display:flex;align-items:center;gap:16px}
-    .gnav .apply{font:600 13.5px var(--ui);color:#04121f;background:var(--blu);border-radius:6px;padding:11px 22px}
-    .gnav .apply:hover{background:var(--blu-t)}
+    .gnav .vr{width:1px;height:24px;background:rgba(255,255,255,.18)}
+    .gnav .right{margin-left:auto;display:flex;align-items:center;gap:20px}
+    .gnav .apply{font:600 15px var(--ui);color:#fff;border:1px solid #fff;border-radius:6px;padding:12px 26px;transition:all .18s}
+    .gnav .apply:hover{background:#fff;color:#07090a}
     /* login */
     .lg{position:relative}
     .lg summary{list-style:none;cursor:pointer;font:500 14px var(--ui);color:#dfe8f2;display:flex;align-items:center;gap:5px}
@@ -77,25 +81,26 @@
       background-image:radial-gradient(rgba(255,255,255,.045) 1px, transparent 1.4px);background-size:26px 26px}
     .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,7,13,.35),rgba(4,7,13,.66) 78%,var(--bg))}
     .hero .in{position:relative;z-index:2;padding:96px 28px 110px;max-width:980px}
-    .hero .mark{display:flex;align-items:center;justify-content:center;gap:10px;font:600 22px var(--sans);color:#fff;margin-bottom:34px}
-    .hero .eyebrow{font:500 12px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--blu-t);margin-bottom:20px;min-height:15px}
-    .hero h1{font:600 clamp(44px,7vw,76px)/1.06 var(--sans);letter-spacing:-.015em;color:#fff;max-width:17ch;margin:0 auto}
+    .hero .mark{display:flex;align-items:center;justify-content:center;margin-bottom:34px}
+    .hero .mark .planet-wm{height:34px}
+    .hero .eyebrow{font:600 13px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--blu-t);margin-bottom:22px;min-height:15px}
+    .hero h1{font:200 clamp(46px,7.4vw,84px)/1.08 var(--sans);letter-spacing:0;color:#fff;max-width:15ch;margin:0 auto}
     .hero h1 .au{color:var(--blu-t)}
     .hero .sub{font:400 17px/1.65 var(--ui);color:#c3d0de;max-width:620px;margin:26px auto 0}
     .hero .loc{display:inline-flex;align-items:center;gap:8px;margin-top:22px;font:500 13.5px var(--mono);
       letter-spacing:.06em;color:var(--blu-t);border:1px solid var(--line2);border-radius:20px;
-      padding:8px 18px;background:rgba(59,161,255,.07)}
-    .hero .loc .orb{width:8px;height:8px;border-radius:50%;background:var(--blu);box-shadow:0 0 10px rgba(59,161,255,.9);flex:none}
+      padding:8px 18px;background:rgba(0,157,165,.07)}
+    .hero .loc .orb{width:8px;height:8px;border-radius:50%;background:var(--blu);box-shadow:0 0 10px rgba(0,157,165,.9);flex:none}
     .hero .ctas{display:flex;gap:14px;justify-content:center;margin-top:40px;flex-wrap:wrap}
-    .btn{display:inline-block;font:700 12.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;border-radius:6px;padding:16px 28px;transition:all .15s}
-    .btn.blue{background:var(--blu);color:#04121f}
-    .btn.blue:hover{background:var(--blu-t)}
-    .btn.ghost{border:1px solid #2e4468;color:#e7eef6;background:rgba(255,255,255,.02)}
-    .btn.ghost:hover{border-color:var(--blu);color:var(--blu-t)}
+    .btn{display:inline-block;font:600 15px var(--ui);letter-spacing:0;text-transform:none;border-radius:6px;padding:14px 30px;transition:all .18s}
+    .btn.blue{background:var(--blu);color:#fff}
+    .btn.blue:hover{background:var(--blu-t);color:#07090a}
+    .btn.ghost{border:1px solid var(--blu-t);color:#fff;background:transparent}
+    .btn.ghost:hover{background:var(--blu-t);color:#07090a}
     /* ---- sections ---- */
     section.blk{border-top:1px solid rgba(255,255,255,.05);padding:110px 0}
     .sec-h{text-align:center;max-width:860px;margin:0 auto}
-    .sec-h h2{font:600 clamp(32px,4.6vw,48px)/1.12 var(--sans);letter-spacing:-.01em;color:#fff}
+    .sec-h h2{font:300 clamp(32px,4.6vw,50px)/1.14 var(--sans);letter-spacing:0;color:#fff}
     .sec-h h2 .au{color:var(--blu-t)}
     .sec-h .rule{width:56px;height:2px;background:var(--blu);opacity:.85;margin:26px auto 0}
     .sec-h .intro{font:400 16.5px/1.7 var(--ui);color:var(--body);max-width:640px;margin:26px auto 0}
@@ -108,10 +113,10 @@
     .card p{font:400 13.5px/1.65 var(--ui);color:var(--body)}
     /* research callout */
     .chal{max-width:760px;margin:0 auto;text-align:center;border:1px solid var(--line2);border-radius:12px;padding:58px 48px;
-      background:linear-gradient(180deg,rgba(59,161,255,.06),rgba(59,161,255,.015))}
-    .chal.hot{border-color:rgba(59,161,255,.55);box-shadow:0 0 60px rgba(59,161,255,.09)}
+      background:linear-gradient(180deg,rgba(0,157,165,.06),rgba(0,157,165,.015))}
+    .chal.hot{border-color:rgba(0,157,165,.55);box-shadow:0 0 60px rgba(0,157,165,.09)}
     .chal .eye{font:500 11px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--blu-t)}
-    .chal h2{font:600 clamp(28px,3.6vw,40px)/1.15 var(--sans);color:#fff;margin-top:16px}
+    .chal h2{font:300 clamp(28px,3.6vw,42px)/1.16 var(--sans);color:#fff;margin-top:16px}
     .chal p{font:400 16px/1.7 var(--ui);color:var(--body);max-width:520px;margin:18px auto 0}
     .chal .btn{margin-top:30px}
     /* comparison table */
@@ -123,7 +128,7 @@
     .tbl thead .tag{font:400 12px var(--ui);color:var(--body);margin-top:7px}
     .tbl td.lbl{font:500 10.5px var(--mono);letter-spacing:.15em;text-transform:uppercase;color:var(--dim);width:172px;background:#060a12}
     .tbl td.val{font:400 14px/1.6 var(--ui);color:#cfdae6;text-align:center}
-    .tbl .em{box-shadow:inset 3px 0 0 var(--blu), inset -3px 0 0 var(--blu);background:rgba(59,161,255,.05)}
+    .tbl .em{box-shadow:inset 3px 0 0 var(--blu), inset -3px 0 0 var(--blu);background:rgba(0,157,165,.05)}
     th.em .name{color:var(--blu-t)}
     .tbl .ctarow td{text-align:center;padding:30px 22px}
     /* numbers */
@@ -138,7 +143,7 @@
     .trusted .logos span{font:600 19px var(--sans);color:#5e6f84;letter-spacing:.01em}
     /* final cta */
     .fin{text-align:center;padding:120px 0 100px}
-    .fin h2{font:600 clamp(34px,5vw,54px)/1.1 var(--sans);color:#fff}
+    .fin h2{font:200 clamp(34px,5vw,58px)/1.1 var(--sans);color:#fff}
     .fin .sub{font:400 17px var(--ui);color:var(--body);margin-top:18px}
     .fin .ctas{display:flex;gap:14px;justify-content:center;margin-top:38px;flex-wrap:wrap}
     .fin .note{display:inline-block;border:1px solid var(--line2);border-radius:8px;background:var(--panel);padding:18px 34px;margin-top:56px}
@@ -148,7 +153,8 @@
     footer.gf{border-top:1px solid rgba(255,255,255,.06);padding:74px 0 0;background:#03060b}
     .gf .cols{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:36px}
     @media(max-width:760px){.gf .cols{grid-template-columns:1fr 1fr}}
-    .gf .fl{display:flex;align-items:center;gap:9px;font:600 19px var(--sans);color:var(--blu-t)}
+    .gf .fl{display:flex;align-items:center}
+    .gf .fl .planet-wm{height:26px}
     .gf h4{font:500 16px var(--ui);color:#fff;margin-bottom:22px}
     .gf ul{list-style:none}
     .gf ul a{display:block;font:400 11px var(--mono);letter-spacing:.13em;text-transform:uppercase;color:#7d8ba0;padding:6px 0}
@@ -160,17 +166,18 @@
     .aptchip{position:fixed;right:16px;bottom:16px;z-index:50;display:flex;align-items:center;gap:7px;
       font:600 11px var(--ui);color:#c2cddb;background:rgba(8,14,26,.92);border:1px solid var(--line2);
       border-radius:20px;padding:7px 13px;backdrop-filter:blur(8px)}
-    .aptchip .d{width:7px;height:7px;border-radius:50%;background:var(--blu);box-shadow:0 0 8px rgba(59,161,255,.8)}
+    .aptchip .d{width:7px;height:7px;border-radius:50%;background:var(--blu);box-shadow:0 0 8px rgba(0,157,165,.8)}
     .aptchip:hover{color:#fff;border-color:var(--blu)}
   </style>
 </head>
 <body>
 {% set S = page.sections %}
-{% set globe %}<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.2"/><ellipse cx="12" cy="12" rx="4.6" ry="10" stroke="currentColor" stroke-width="1.4"/><path d="M2.6 9h18.8M2.6 15h18.8" stroke="currentColor" stroke-width="1.4"/></svg>{% endset %}
+{# Real planet.com wordmark (captured from live site): teal #009DA5 orbit + white "planet" + teal dot. #}
+{% set logo %}<svg class="planet-wm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240.12 117.28" role="img" aria-label="Planet"><path fill="#009da5" d="M58.64 117.28A58.64 58.64 0 1 1 115 42.37a2.11 2.11 0 0 1-4 1.17 54.43 54.43 0 1 0 .15 29.67 2.11 2.11 0 0 1 4.06 1.12 58.8 58.8 0 0 1-56.57 42.95"/><path fill="#fff" d="M40.84 40.83H41a6 6 0 0 1 6 6h.12a14.33 14.33 0 0 1 12.06-6.12c11.5 0 17.56 9.24 17.56 18.3 0 8.57-6.43 17.38-17.13 17.38-7.1 0-10.65-3.61-11.93-5.75h-.14v17.57a6.69 6.69 0 0 1-6.69-6.69V40.83zm17.89 5.65c-6.67 0-11.32 5.75-11.32 12 0 6.85 5.08 12.06 11.5 12.06A11.54 11.54 0 0 0 70.36 58.6c0-6.06-4.71-12.12-11.63-12.12m30.78 29.01h-6.36V30.21h6.36zm36.05 0v-5.26h-.12c-2.45 4.16-6.91 6.12-11.5 6.12-11.44 0-18-8.75-18-17.69 0-8.26 5.81-18 18-18 4.71 0 9.06 2 11.5 5.69h.12v-4.76h6.36v33.9zm-11.63-29c-7.83 0-11.63 6.79-11.63 12.12 0 6.12 4.83 11.93 11.57 11.93a11.84 11.84 0 0 0 11.81-11.94c0-7.22-5.2-12.12-11.75-12.12zm49.87 29V57.07c0-2.63 0-10.59-8.44-10.59-5.32 0-8.93 3.73-8.93 10.53v18.48h-6.36v-33.9H146v3.61h.12a12 12 0 0 1 9.88-4.53c5.26 0 9.55 2.26 12 6.06a16.53 16.53 0 0 1 2.14 8.69v20.07zm61.44 0a6.36 6.36 0 0 1-6.36-6.36V47.4h-4.59v-5.81h4.59V30.21a6.36 6.36 0 0 1 6.36 6.36v5h5.57v5.83h-5.57zm-14.02-17.44a17.32 17.32 0 1 0-34.64.43q0 .87.08 1.72A18.26 18.26 0 0 0 195 76.3a18.73 18.73 0 0 0 14.76-7.06l-5-2.94a13.05 13.05 0 0 1-9.8 4.29c-5.18 0-10.74-3.15-12-9.29H211c.1-.43.22-2.15.22-3.25M183 56.4a11 11 0 0 1 21.91 0z"/><path fill="#009da5" d="M240.12 72.16a3.42 3.42 0 1 1-3.42-3.35 3.38 3.38 0 0 1 3.42 3.35"/></svg>{% endset %}
 
 <nav class="gnav">
   <div class="in">
-    <a class="logo" href="{{ g.page }}{{ qs }}"><span style="color:#fff">{{ globe }}</span>Planet</a>
+    <a class="logo" href="{{ g.page }}{{ qs }}">{{ logo }}</a>
     <span class="grp"><span class="lbl">Products</span><a href="#compare">Monitoring</a><a href="#compare">Tasking</a></span>
     <span class="vr"></span>
     <span class="grp"><span class="lbl">Programs</span><a href="#research">Research</a><a href="#cta">Trial</a></span>
@@ -204,7 +211,7 @@
   {% if page.hero_image.url %}style="background-image:linear-gradient(180deg,rgba(4,7,13,.72),rgba(4,7,13,.82)),url('{{ page.hero_image.url }}')"{% endif %}
   id="planet-hero" data-hero-api="{{ hero_api_url }}" data-hero-status="{{ page.hero_image.status }}">
   <div class="in">
-    <div class="mark"><span style="color:#fff">{{ globe }}</span>Planet</div>
+    <div class="mark">{{ logo }}</div>
     <div class="eyebrow">{% if S.hero.eyebrow %}{{ S.hero.eyebrow }}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="personalized — see why on {{ g.dev }}"></a></sup>{% endif %}</div>
     <h1>{{ S.hero.h1_pre }}<span class="au">{{ S.hero.h1_blue }}</span></h1>
     <p class="sub">{{ S.hero.sub }}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="personalized — see why on {{ g.dev }}"></a></sup></p>
@@ -321,7 +328,7 @@
 <footer class="gf">
   <div class="wrap">
     <div class="cols">
-      <div><span class="fl"><span style="color:var(--blu-t)">{{ globe }}</span>Planet</span></div>
+      <div><span class="fl">{{ logo }}</span></div>
       <div><h4>Products</h4><ul><li><a href="#compare">PlanetScope</a></li><li><a href="#compare">SkySat &amp; Pelican</a></li><li><a href="#">Tanager Hyperspectral</a></li><li><a href="#">Planetary Variables</a></li></ul></div>
       <div><h4>Industries</h4><ul><li><a href="#">Agriculture</a></li><li><a href="#">Defense &amp; Intelligence</a></li><li><a href="#">Civil Government</a></li><li><a href="#">Insurance</a></li></ul></div>
       <div><h4>About</h4><ul><li><a href="#">About Planet</a></li><li><a href="#research">Education &amp; Research</a></li><li><a href="#">Disaster Data</a></li><li><a href="#">Privacy Policy</a></li></ul></div>
