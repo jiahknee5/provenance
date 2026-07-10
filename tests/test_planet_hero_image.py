@@ -272,7 +272,7 @@ def test_api_mocked_generation_receipt(monkeypatch, tmp_path):
     monkeypatch.setattr(IG, "IMAGE_DIR", tmp_path / "images")
     monkeypatch.setattr(IG, "MANIFEST", tmp_path / "manifest.json")
     fake_png = b"\x89PNG\r\n\x01"
-    monkeypatch.setattr(IG, "_call_image_api", lambda p: {"b64": __import__("base64").b64encode(fake_png).decode(), "ext": "png"})
+    monkeypatch.setattr(IG, "_call_image_api", lambda p, **kw: {"b64": __import__("base64").b64encode(fake_png).decode(), "ext": "png"})
     ctx = _ctx(industry="agriculture", region="Iowa", tier=2)
     receipt = IG.get_hero_image(ctx, generate=True, tenant=TENANT)
     assert receipt["source"] == "generated"

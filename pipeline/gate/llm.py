@@ -13,6 +13,7 @@ from typing import Optional
 
 from pipeline.common import config
 from pipeline.common.cache import LLMCache
+from pipeline.observability import api_costs as AC
 
 _JUDGE_PROMPT = (
     "You are a strict claim verifier for regulated marketing copy. "
@@ -58,6 +59,7 @@ def ollama_judge(model: str, claim: str, evidence: str, cache: Optional[LLMCache
         r.raise_for_status()
         out = _parse_label(r.json().get("response", ""))
         out["model"] = model
+        AC.record_ollama_usage(tenant="provenance", model=model, operation="gate_judge")
         return out
 
     try:
@@ -85,6 +87,13 @@ def claude_judge(claim: str, evidence: str, cache: Optional[LLMCache] = None) ->
         )
         out = _parse_label(msg.content[0].text)
         out["model"] = config.CLAUDE_JUDGE_MODEL
+        AC.record_anthropic_usage(
+            tenant="provenance",
+            model=config.CLAUDE_JUDGE_MODEL,
+            operation="gate_judge",
+            response=msg,
+            cache_key=key,
+        )
         return out
 
     try:

@@ -17,6 +17,7 @@ import re
 
 from pipeline.common import config
 from pipeline.common.cache import LLMCache
+from pipeline.observability import api_costs as AC
 from pipeline.personalization import scene as SC
 
 # --- deterministic creative angles (the briefs) -------------------------------------------
@@ -247,6 +248,13 @@ def _llm_hero(prompt: str) -> dict | None:
         client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
         r = client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=220,
                                    messages=[{"role": "user", "content": prompt}])
+        AC.record_anthropic_usage(
+            tenant="helix",
+            model="claude-haiku-4-5-20251001",
+            operation="copy_hero",
+            response=r,
+            cache_key=ck,
+        )
         txt = "".join(b.text for b in r.content if getattr(b, "type", "") == "text")
         m = re.search(r"\{.*\}", txt, re.S)
         d = _json.loads(m.group(0)) if m else {}
@@ -302,6 +310,13 @@ def _llm_brief(category: str, region: str | None) -> list[str] | None:
         client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
         r = client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=240,
                                    messages=[{"role": "user", "content": prompt}])
+        AC.record_anthropic_usage(
+            tenant="helix",
+            model="claude-haiku-4-5-20251001",
+            operation="copy_brief",
+            response=r,
+            cache_key=ck,
+        )
         txt = "".join(b.text for b in r.content if getattr(b, "type", "") == "text")
         m = re.search(r"\{.*\}", txt, re.S)
         d = _json.loads(m.group(0)) if m else {}

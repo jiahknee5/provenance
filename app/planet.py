@@ -318,6 +318,8 @@ def _hero_image_json(request: Request, m: dict[str, str]) -> dict:
         "receipt": receipt,
         "motion_receipt": motion_receipt,
         "source": receipt.get("source"),
+        "cost_usd": receipt.get("cost_usd") or receipt.get("estimated_cost_usd"),
+        "estimated_cost_usd": receipt.get("estimated_cost_usd") or receipt.get("cost_usd"),
     }
 
 

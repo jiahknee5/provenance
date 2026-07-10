@@ -26,6 +26,7 @@ from pipeline.common.config import (OBSERVE_DIR, DB_PATH, PROFILES_DB_PATH, CLAI
                                     RULES_DIR)
 from pipeline.enrichment import catalog as enrich_catalog
 from pipeline.enrichment.store import ProfileStore
+from pipeline.observability import api_costs as AC
 
 
 def _load(name: str, default=None):
@@ -117,3 +118,28 @@ def enrichment_catalog(request: Request):
         "enrichment": _load("enrichment.json"),
         "db_locations": DB_LOCATIONS,
     })
+
+
+@app.get("/costs", response_class=HTMLResponse)
+def api_costs_page(request: Request, tenant: str = "", since: str = "", until: str = ""):
+    """Estimated LLM/API spend ledger — published pricing, not exact billing."""
+    t = tenant.strip() or None
+    rows = AC.read_ledger(limit=50, tenant=t, since=since or None, until=until or None)
+    summary = AC.summarize(tenant=t, since=since or None, until=until or None)
+    return templates.TemplateResponse(request, "api_costs.html", {
+        "rows": rows,
+        "summary": summary,
+        "tenant": tenant,
+        "since": since,
+        "until": until,
+    })
+
+
+@app.get("/api/costs")
+def api_costs_json(tenant: str = "", since: str = "", until: str = "", limit: int = 50):
+    t = tenant.strip() or None
+    return JSONResponse({
+        "summary": AC.summarize(tenant=t, since=since or None, until=until or None),
+        "rows": AC.read_ledger(limit=limit, tenant=t, since=since or None, until=until or None),
+    })
+

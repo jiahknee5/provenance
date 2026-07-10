@@ -1,0 +1,42 @@
+# Estimated API pricing for observability — NOT exact billing.
+# Sources (verify periodically):
+#   Gemini image: https://ai.google.dev/gemini-api/docs/pricing
+#   OpenAI images: https://platform.openai.com/docs/pricing
+#   Anthropic: https://docs.anthropic.com/en/docs/about-claude/models
+
+services:
+  gemini_image:
+    vendor: google-gemini
+    models:
+      gemini-2.5-flash-image:
+        per_image_usd: 0.039
+        notes: "Flash image output — flat per-image estimate when token counts unavailable"
+      default:
+        per_image_usd: 0.039
+
+  openai_image:
+    vendor: nano-banana-compatible
+    models:
+      dall-e-3:
+        per_image_usd: 0.080
+      gpt-image-1:
+        per_image_usd: 0.040
+      default:
+        per_image_usd: 0.040
+
+  anthropic:
+    vendor: anthropic
+    models:
+      claude-haiku-4-5-20251001:
+        input_per_mtok_usd: 0.80
+        output_per_mtok_usd: 4.00
+      default:
+        input_per_mtok_usd: 0.80
+        output_per_mtok_usd: 4.00
+
+  ollama:
+    vendor: ollama-local
+    models:
+      default:
+        per_call_usd: 0.0
+        notes: "Local inference — $0 marginal"

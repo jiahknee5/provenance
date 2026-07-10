@@ -35,7 +35,7 @@ SHELL_ROUTES = ["/workspace", "/records", "/records/new", "/composer", "/optimiz
 # All legacy/lab routes (now light) — param routes filled with valid demo values.
 TOKEN = __import__("pipeline.personalization.cohort", fromlist=["x"]).magic_token(
     __import__("pipeline.personalization.cohort", fromlist=["x"]).COHORT[1])
-LAB_ROUTES = ["/", "/lead", "/personalize", "/inspector", "/observatory", "/funnel",
+LAB_ROUTES = ["/", "/lead", "/personalize", "/inspector", "/observatory", "/costs", "/funnel",
               "/admin/landings", "/admin/landing/maya", "/google", "/enrichment-catalog",
               "/lp", "/lp?email=maya.chen@gauntletai.com"]
 

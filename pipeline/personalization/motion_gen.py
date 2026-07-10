@@ -426,8 +426,14 @@ def get_hero_motion(
             frames.append((still_path.read_bytes(), still_ext))
 
     start_idx = len(frames)
-    for prompt in prompts[start_idx:]:
-        result = IG._call_image_api(prompt)
+    cache_key = keys.get("disk_key")
+    for fi, prompt in enumerate(prompts[start_idx:], start=start_idx):
+        result = IG._call_image_api(
+            prompt,
+            tenant=tenant,
+            operation="motion_frame",
+            cache_key=cache_key,
+        )
         if not result:
             break
         frames.append((IG._candidate_bytes(result), result.get("ext", "png")))

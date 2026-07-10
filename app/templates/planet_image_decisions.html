@@ -385,6 +385,7 @@ flowchart LR
       <div class="cand-meta">
         <code>{{ sc.brain_target }}</code> · {{ sc.brain_simulator or 'proxy_v1' }}
         · N={{ sc.candidates_evaluated }} · winner index {{ sc.winner_index }}
+        {% if sc.estimated_cost_usd %}· est. ${{ '%.4f'|format(sc.estimated_cost_usd) }}{% endif %}
         · <a href="{{ sc.dev_url }}">Receipt →</a>
       </div>
       <div class="cand-grid">
@@ -396,6 +397,9 @@ flowchart LR
           </div>
           <div class="body">
             <div class="score">brain_score {{ '%.3f'|format(c.brain_score) if c.brain_score is not none else '—' }}</div>
+            {% if c.estimated_cost_usd is not none %}
+            <div class="delta">est. ${{ '%.4f'|format(c.estimated_cost_usd) }}</div>
+            {% endif %}
             {% if c.delta_vs_winner is not none %}
             <div class="delta">{{ '%+.3f'|format(c.delta_vs_winner) }} vs winner</div>
             {% endif %}

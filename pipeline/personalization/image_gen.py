@@ -16,9 +16,13 @@ import os
 import pathlib
 import re
 import shutil
+import time
+import uuid
 from datetime import datetime, timezone
 from typing import Any
 import httpx
+
+from pipeline.observability import api_costs as AC
 
 from pipeline.personalization import gauntlet_site as GS
 from pipeline.personalization import image_intents as II
@@ -464,11 +468,25 @@ def _brain_receipt_fields(
     }
 
 
-def _generate_candidates(prompt: str, n: int) -> list[dict]:
+def _generate_candidates(
+    prompt: str,
+    n: int,
+    *,
+    tenant: str | None = None,
+    cache_key: str | None = None,
+    operation: str = "generate_image",
+) -> list[dict]:
     """Call image API up to n times; tolerate partial failures."""
     out: list[dict] = []
-    for _ in range(n):
-        result = _call_image_api(prompt)
+    for i in range(n):
+        op = operation if n == 1 else operation
+        result = _call_image_api(
+            prompt,
+            tenant=tenant,
+            operation=op,
+            cache_key=cache_key,
+            candidate_index=i if n > 1 else None,
+        )
         if result:
             out.append(result)
     return out
@@ -547,6 +565,10 @@ def candidate_gallery_from_receipt(receipt: dict, *, static_prefix: str = "/stat
     """View model for decided vs rejected candidate galleries on /image-decisions."""
     raw = receipt.get("candidates") or []
     winner_score = receipt.get("brain_score")
+    cache_key = receipt.get("cache_key")
+    tenant = receipt.get("tenant") or DEFAULT_IMAGE_TENANT
+    cost_info = AC.costs_for_cache_key(cache_key, tenant=tenant) if cache_key else {}
+    by_candidate = cost_info.get("by_candidate") or {}
     enriched: list[dict] = []
     for c in raw:
         path = c.get("image_path") or ""
@@ -558,11 +580,13 @@ def candidate_gallery_from_receipt(receipt: dict, *, static_prefix: str = "/stat
             and not c.get("selected")
         ):
             delta = round(float(c["brain_score"]) - float(winner_score), 4)
+        idx = c.get("index", 0)
         enriched.append({
             **c,
             "image_url": url,
             "delta_vs_winner": delta,
             "badge": "selected" if c.get("selected") else "rejected",
+            "estimated_cost_usd": by_candidate.get(idx, 0.0),
         })
     enriched.sort(key=lambda row: row.get("index", 0))
     winner = next((c for c in enriched if c.get("selected")), None)
@@ -575,7 +599,8 @@ def candidate_gallery_from_receipt(receipt: dict, *, static_prefix: str = "/stat
         "brain_simulator": receipt.get("brain_simulator"),
         "winner_score": winner_score,
         "prompt": receipt.get("prompt"),
-        "cache_key": receipt.get("cache_key"),
+        "cache_key": cache_key,
+        "estimated_cost_usd": cost_info.get("estimated_cost_usd", receipt.get("estimated_cost_usd", 0.0)),
         "winner": winner,
         "losers": losers,
         "candidates": enriched,
@@ -667,19 +692,59 @@ def _resolve_api_url() -> tuple[str, bool]:
     return url, False
 
 
-def _call_gemini_image_api(prompt: str, *, url: str, key: str) -> dict | None:
+def _http_status_label(code: int) -> str:
+    if code == 429:
+        return "429"
+    if code >= 400:
+        return "error"
+    return "success"
+
+
+def _record_image_api_cost(
+    *,
+    tenant: str | None,
+    model: str,
+    use_gemini: bool,
+    vendor: str,
+    operation: str,
+    cache_key: str | None,
+    status: str,
+    duration_ms: int,
+    images_generated: int,
+    request_id: str,
+    extra: dict | None = None,
+) -> dict:
+    service = AC.service_for_vendor(vendor, use_gemini=use_gemini)
+    return AC.record_call(
+        tenant=tenant or DEFAULT_IMAGE_TENANT,
+        service=service,
+        model=model,
+        operation=operation,
+        cache_key=cache_key,
+        status=status,
+        duration_ms=duration_ms,
+        images_generated=images_generated,
+        request_id=request_id,
+        extra=extra,
+    )
+
+
+def _call_gemini_image_api(prompt: str, *, url: str, key: str) -> tuple[dict | None, str, int]:
     body = json.dumps({
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {"responseModalities": ["IMAGE"]},
     }).encode()
     headers = {"x-goog-api-key": key, "Content-Type": "application/json"}
+    t0 = time.monotonic()
     try:
         r = httpx.post(url, content=body, headers=headers, timeout=120.0)
+        duration_ms = int((time.monotonic() - t0) * 1000)
         if r.status_code != 200:
-            return None
+            return None, _http_status_label(r.status_code), duration_ms
         data = r.json()
     except (httpx.HTTPError, TimeoutError, json.JSONDecodeError, OSError):
-        return None
+        duration_ms = int((time.monotonic() - t0) * 1000)
+        return None, "error", duration_ms
     for part in (((data or {}).get("candidates") or [{}])[0].get("content") or {}).get("parts") or []:
         inline = part.get("inlineData") or part.get("inline_data")
         if not inline:
@@ -689,11 +754,11 @@ def _call_gemini_image_api(prompt: str, *, url: str, key: str) -> dict | None:
             continue
         mime = (inline.get("mimeType") or inline.get("mime_type") or "").lower()
         ext = "jpg" if "jpeg" in mime or mime == "image/jpg" else "png"
-        return {"b64": b64, "ext": ext, "vendor": GEMINI_VENDOR}
-    return None
+        return {"b64": b64, "ext": ext, "vendor": GEMINI_VENDOR}, "success", duration_ms
+    return None, "error", duration_ms
 
 
-def _call_openai_image_api(prompt: str, *, url: str, key: str, model: str) -> dict | None:
+def _call_openai_image_api(prompt: str, *, url: str, key: str, model: str) -> tuple[dict | None, str, int]:
     body = json.dumps({
         "model": model,
         "prompt": prompt,
@@ -702,39 +767,71 @@ def _call_openai_image_api(prompt: str, *, url: str, key: str, model: str) -> di
         "response_format": "b64_json",
     }).encode()
     headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
+    t0 = time.monotonic()
     try:
         r = httpx.post(url, content=body, headers=headers, timeout=60.0)
+        duration_ms = int((time.monotonic() - t0) * 1000)
         if r.status_code != 200:
-            return None
+            return None, _http_status_label(r.status_code), duration_ms
         data = r.json()
     except (httpx.HTTPError, TimeoutError, json.JSONDecodeError, OSError):
-        return None
+        duration_ms = int((time.monotonic() - t0) * 1000)
+        return None, "error", duration_ms
     items = (data or {}).get("data") or []
     if not items:
-        return None
+        return None, "error", duration_ms
     item = items[0]
     if item.get("b64_json"):
-        return {"b64": item["b64_json"], "ext": "png", "vendor": VENDOR}
+        return {"b64": item["b64_json"], "ext": "png", "vendor": VENDOR}, "success", duration_ms
     if item.get("url"):
         try:
             img_r = httpx.get(item["url"], timeout=30.0)
             if img_r.status_code == 200:
                 ext = "png" if "png" in (img_r.headers.get("content-type") or "") else "jpg"
-                return {"raw": img_r.content, "ext": ext, "vendor": VENDOR}
+                return {"raw": img_r.content, "ext": ext, "vendor": VENDOR}, "success", duration_ms
         except httpx.HTTPError:
-            return None
-    return None
+            return None, "error", duration_ms
+    return None, "error", duration_ms
 
 
-def _call_image_api(prompt: str) -> dict | None:
+def _call_image_api(
+    prompt: str,
+    *,
+    tenant: str | None = None,
+    operation: str = "generate_image",
+    cache_key: str | None = None,
+    candidate_index: int | None = None,
+) -> dict | None:
     """OpenAI-compatible or Google Gemini generateContent. None on missing key or failure."""
     key = _api_key()
     if not key:
         return None
     url, use_gemini = _resolve_api_url()
+    model = _model()
+    request_id = uuid.uuid4().hex[:12]
+    op = operation
+    if candidate_index is not None:
+        op = "best_of_n_candidate"
     if use_gemini:
-        return _call_gemini_image_api(prompt, url=url, key=key)
-    return _call_openai_image_api(prompt, url=url, key=key, model=_model())
+        result, status, duration_ms = _call_gemini_image_api(prompt, url=url, key=key)
+        vendor = GEMINI_VENDOR
+    else:
+        result, status, duration_ms = _call_openai_image_api(prompt, url=url, key=key, model=model)
+        vendor = VENDOR
+    _record_image_api_cost(
+        tenant=tenant,
+        model=model,
+        use_gemini=use_gemini,
+        vendor=vendor,
+        operation=op,
+        cache_key=cache_key,
+        status=status,
+        duration_ms=duration_ms,
+        images_generated=1 if status == "success" else 0,
+        request_id=request_id,
+        extra={"candidate_index": candidate_index} if candidate_index is not None else None,
+    )
+    return result
 
 
 def _generate_and_cache(ctx: dict, structured: II.StructuredPrompt, prompt: str,
@@ -744,7 +841,9 @@ def _generate_and_cache(ctx: dict, structured: II.StructuredPrompt, prompt: str,
                         generate: bool = True) -> dict:
     chain = ["cache"]
     n = _best_of_n(tenant=tenant, generate=generate)
-    api_results = _generate_candidates(prompt, n)
+    api_results = _generate_candidates(
+        prompt, n, tenant=tenant, cache_key=cache_key, operation="generate_image",
+    )
     if api_results:
         api_result, brain_score, evaluated, winner_index, all_scores = _select_scored_candidate(
             api_results, structured, prompt, tenant=tenant,
@@ -761,8 +860,27 @@ def _generate_and_cache(ctx: dict, structured: II.StructuredPrompt, prompt: str,
         candidate_rows = _persist_candidate_provenance(
             cache_key, prompt, api_results, all_scores, winner_index,
         )
+        cost_info = AC.costs_for_cache_key(cache_key, tenant=tenant)
         if brain_sim_enabled(_tenant_config(tenant)) and n > 1:
             chain.append(f"best_of_{n}")
+            AC.record_call(
+                tenant=tenant or DEFAULT_IMAGE_TENANT,
+                service=AC.service_for_vendor(
+                    api_result.get("vendor", VENDOR),
+                    use_gemini=api_result.get("vendor") == GEMINI_VENDOR,
+                ),
+                model=model,
+                operation="best_of_n_selection",
+                cache_key=cache_key,
+                status="success",
+                images_generated=0,
+                estimated_cost_usd=0.0,
+                extra={
+                    "candidates_evaluated": evaluated,
+                    "winner_index": winner_index,
+                    "aggregate_cost_usd": cost_info["estimated_cost_usd"],
+                },
+            )
         receipt = {
             "url": _public_url(cache_key, ext),
             "source": "generated",
@@ -773,6 +891,8 @@ def _generate_and_cache(ctx: dict, structured: II.StructuredPrompt, prompt: str,
             "generated_at": _now_iso(),
             "license": "AI-generated (synthetic demo — disclosed on /dev)",
             "fallback_chain": chain + ["api"],
+            "estimated_cost_usd": cost_info["estimated_cost_usd"],
+            "cost_usd": cost_info["estimated_cost_usd"],
             **_receipt_extras(structured, tier_fields, brain_fields),
         }
         if candidate_rows:
@@ -1057,6 +1177,10 @@ def image_surface_dev_panel(image: dict, *, surface_id: str = DEFAULT_SURFACE_ID
         "base+delta": "Personalization delta applied",
     }.get(tier, tier)
 
+    cache_key = receipt.get("cache_key")
+    cost_info = AC.costs_for_cache_key(cache_key, tenant=tenant) if cache_key else {}
+    estimated_cost = receipt.get("estimated_cost_usd") or cost_info.get("estimated_cost_usd", 0.0)
+
     return {
         "surface_id": surface_id,
         "surface_label": spec["label"],
@@ -1107,6 +1231,14 @@ def image_surface_dev_panel(image: dict, *, surface_id: str = DEFAULT_SURFACE_ID
             "license": receipt.get("license"),
             "url": url,
             "gallery_id": receipt.get("gallery_id"),
+            "estimated_cost_usd": estimated_cost,
+            "cost_usd": estimated_cost,
+        },
+        "costs": {
+            "estimated_cost_usd": estimated_cost,
+            "call_count": len(cost_info.get("calls") or []),
+            "disclaimer": "Estimated from published pricing — not exact vendor billing.",
+            "calls": (cost_info.get("calls") or [])[:10],
         },
         "fallback_chain": chain,
         "status": image.get("status", "ready"),

@@ -142,7 +142,7 @@ def test_image_gen_receipt_includes_brain_fields_planet(monkeypatch, tmp_path):
         {"b64": __import__("base64").b64encode(png_b).decode(), "ext": "png"},
         {"b64": __import__("base64").b64encode(png_b).decode(), "ext": "png"},
     ] * 4)
-    monkeypatch.setattr(IG, "_call_image_api", lambda p: next(calls, None))
+    monkeypatch.setattr(IG, "_call_image_api", lambda p, **kw: next(calls, None))
     ctx = {
         "channel": "ad",
         "ad_variant_id": "x-agriculture",
@@ -202,7 +202,7 @@ def test_gauntlet_brain_scoring_off_by_default(monkeypatch, tmp_path):
     png = _minimal_png(16, 16, (10, 10, 10))
     monkeypatch.setattr(
         IG, "_call_image_api",
-        lambda p: {"b64": __import__("base64").b64encode(png).decode(), "ext": "png"},
+        lambda p, **kw: {"b64": __import__("base64").b64encode(png).decode(), "ext": "png"},
     )
     ctx = {
         "channel": "direct",

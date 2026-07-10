@@ -407,6 +407,25 @@
   </div>
 
   <div>
+    <div class="sec" id="sec-costs">
+      {% set hi = P.hero_image %}
+      {% set hid = hi.dev %}
+      {% set costs = hid.costs if hid else {} %}
+      <div class="h">API cost — this hero path <span class="tag">estimated</span></div>
+      <div class="b" style="padding:12px 15px;font-size:13px;line-height:1.55">
+        <div class="kv" style="padding:6px 0;border:0">
+          <span class="k">Hero generation (est.)</span>
+          <span class="v">${{ '%.4f'|format(costs.estimated_cost_usd or hid.receipt.estimated_cost_usd or 0) }}</span>
+        </div>
+        <div class="kv" style="padding:6px 0;border:0">
+          <span class="k">Ledger calls</span>
+          <span class="v">{{ costs.call_count or 0 }} for cache key <code style="font-size:11px">{{ hid.receipt.cache_key or '—' }}</code></span>
+        </div>
+        <div class="why" style="margin-top:6px">{{ costs.disclaimer or 'Estimated from published pricing — not exact vendor billing.' }}
+          · <a href="/costs?tenant=planet">Full ledger →</a></div>
+      </div>
+    </div>
+
     <div class="sec" id="sec-hero-image">
       {% set hi = P.hero_image %}
       {% set hid = hi.dev %}
@@ -541,6 +560,7 @@
             <div class="kv" style="padding:6px 0 0;border:0"><span class="k">Load status</span><span class="v">{{ hid.status }} · fallback {{ hid.fallback }}<span class="why">page shell renders instantly; async fetch only when status=pending</span></span></div>
             <div class="kv" style="padding:6px 0;border:0"><span class="k">Source</span><span class="v">{{ hid.receipt.source }} · {{ hid.receipt.vendor or '—' }}</span></div>
             {% if hid.receipt.model %}<div class="kv" style="padding:6px 0;border:0"><span class="k">Model</span><span class="v">{{ hid.receipt.model }}</span></div>{% endif %}
+            {% if hid.receipt.estimated_cost_usd is not none %}<div class="kv" style="padding:6px 0;border:0"><span class="k">Est. cost</span><span class="v">${{ '%.4f'|format(hid.receipt.estimated_cost_usd) }} <span class="why">published pricing, not exact billing</span></span></div>{% endif %}
             {% if hid.receipt.cache_key %}<div class="kv" style="padding:6px 0;border:0"><span class="k">Cache key</span><span class="v" style="font-family:ui-monospace,Menlo,monospace;font-size:12px">{{ hid.receipt.cache_key }}</span></div>{% endif %}
             {% if hid.receipt.generated_at %}<div class="kv" style="padding:6px 0;border:0"><span class="k">Generated at</span><span class="v">{{ hid.receipt.generated_at }}</span></div>{% endif %}
             {% if hid.receipt.license %}<div class="kv" style="padding:6px 0;border:0"><span class="k">License</span><span class="v">{{ hid.receipt.license }}</span></div>{% endif %}

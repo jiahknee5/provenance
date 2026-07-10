@@ -227,7 +227,7 @@ def test_api_mocked_generation_receipt(monkeypatch, tmp_path):
     monkeypatch.setattr(IG, "IMAGE_DIR", tmp_path / "images")
     monkeypatch.setattr(IG, "MANIFEST", tmp_path / "manifest.json")
     fake_png = b"\x89PNG\r\n\x01"
-    monkeypatch.setattr(IG, "_call_image_api", lambda p: {"b64": __import__("base64").b64encode(fake_png).decode(), "ext": "png"})
+    monkeypatch.setattr(IG, "_call_image_api", lambda p, **kw: {"b64": __import__("base64").b64encode(fake_png).decode(), "ext": "png"})
     ctx = _ctx(industry="technology", region="Texas", tier=2)
     receipt = IG.get_hero_image(ctx, generate=True)
     assert receipt["source"] == "generated"
@@ -350,11 +350,11 @@ def test_gemini_api_mocked_generation_vendor(monkeypatch, tmp_path):
     def _fake_gemini(prompt, *, url, key):
         assert "Intent:" in prompt or "Primary intent:" in prompt
         assert "Must avoid:" in prompt
-        return {
+        return ({
             "b64": base64.b64encode(fake_png).decode(),
             "ext": "png",
             "vendor": IG.GEMINI_VENDOR,
-        }
+        }, "success", 42)
 
     monkeypatch.setattr(IG, "_call_gemini_image_api", _fake_gemini)
     receipt = IG.get_hero_image(_ctx(ad_variant_id="x-keyword", audience_route="b2b_hire",
@@ -371,7 +371,7 @@ def test_call_image_api_routes_to_gemini(monkeypatch):
     def _fake(prompt, *, url, key):
         called["url"] = url
         called["key_set"] = bool(key)
-        return {"b64": "aW1n", "ext": "png", "vendor": IG.GEMINI_VENDOR}
+        return ({"b64": "aW1n", "ext": "png", "vendor": IG.GEMINI_VENDOR}, "success", 10)
 
     monkeypatch.setattr(IG, "_call_gemini_image_api", _fake)
     out = IG._call_image_api("safe abstract hero")

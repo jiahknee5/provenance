@@ -14,6 +14,7 @@ data/demo/users.jsonl
 data/demo/*.sqlite
 data/demo/*.sqlite-*
 data/demo/ledgers/
+data/demo/api_cost_ledger.jsonl
 # verification artifacts (root-level QA/demo screenshots — never committed)
 .playwright-mcp/
 /*.png
