@@ -122,6 +122,34 @@ def _page_with_mount_urls(page: dict, m: dict[str, str]) -> dict:
     hero = dict(page.get("hero_image") or {})
     if hero.get("url"):
         hero["url"] = _mount_static_url(hero["url"], m)
+    if hero.get("still_url"):
+        hero["still_url"] = _mount_static_url(hero["still_url"], m)
+    if hero.get("motion_url"):
+        hero["motion_url"] = _mount_static_url(hero["motion_url"], m)
+    motion_receipt = hero.get("motion_receipt") or {}
+    if motion_receipt.get("frames"):
+        frames = []
+        for fr in motion_receipt["frames"]:
+            fr = dict(fr)
+            if fr.get("image_url"):
+                fr["image_url"] = _mount_static_url(fr["image_url"], m)
+            frames.append(fr)
+        motion_receipt = {**motion_receipt, "frames": frames}
+        hero["motion_receipt"] = motion_receipt
+    dev = dict(hero.get("dev") or {})
+    if dev.get("motion", {}).get("frames"):
+        mdev = dict(dev["motion"])
+        mframes = []
+        for fr in mdev["frames"]:
+            fr = dict(fr)
+            if fr.get("image_url"):
+                fr["image_url"] = _mount_static_url(fr["image_url"], m)
+            mframes.append(fr)
+        mdev["frames"] = mframes
+        if mdev.get("url"):
+            mdev["url"] = _mount_static_url(mdev["url"], m)
+        dev["motion"] = mdev
+        hero["dev"] = dev
     return {**page, "hero_image": hero}
 
 
@@ -279,10 +307,16 @@ def _hero_image_json(request: Request, m: dict[str, str]) -> dict:
     page = PS.build_page(request, email=email or None)
     hero = IG.resolve_hero_image(page, generate=True, tenant=PS.IMAGE_TENANT)
     receipt = hero.get("receipt") or {}
+    motion_receipt = hero.get("motion_receipt") or {}
     return {
         "status": hero.get("status", "ready"),
         "url": _mount_static_url(hero.get("url"), m),
+        "still_url": _mount_static_url(hero.get("still_url") or hero.get("url"), m),
+        "motion_url": _mount_static_url(hero.get("motion_url"), m),
+        "motion_status": hero.get("motion_status"),
+        "motion_type": hero.get("motion_type"),
         "receipt": receipt,
+        "motion_receipt": motion_receipt,
         "source": receipt.get("source"),
     }
 

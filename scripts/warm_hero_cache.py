@@ -62,6 +62,8 @@ def main(argv: list[str] | None = None) -> int:
                         help="Regenerate even when disk cache already has an entry")
     parser.add_argument("--tenant", default="gauntlet", choices=sorted(_TENANTS),
                         help="Which demo to warm (default: gauntlet)")
+    parser.add_argument("--motion", action="store_true",
+                        help="Also warm hero motion loops (Planet only; no-op if motion disabled)")
     args = parser.parse_args(argv)
 
     states_fn, build_page, tenant = _TENANTS[args.tenant]
@@ -112,6 +114,10 @@ def main(argv: list[str] | None = None) -> int:
 
     print(f"[{args.tenant}] distinct disk keys: {len(seen_keys)}")
     print(f"Done: {ok} generated, {cached} already cached, {failed} failed")
+    if args.motion and args.tenant == "planet":
+        from scripts import pregen_motion_cache
+        print("\n--- motion pregen ---")
+        return pregen_motion_cache.main(["--tenant", "planet"])
     return 1 if failed else 0
 
 

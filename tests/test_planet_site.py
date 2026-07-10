@@ -204,7 +204,7 @@ def test_dev_trace_has_every_stage_with_full_entries():
     stages = [t["stage"] for t in page["trace"]]
     for want in ("Entry classify", "IP resolve + classify", "Tier route", "Location signal",
                  "Identity", "Segments → archetype", "Audience route", "Objection prioritize",
-                 "Hero image resolve", "Surface policy", "Compose"):
+                 "Hero image resolve", "Hero motion resolve", "Surface policy", "Compose"):
         assert want in stages, f"missing trace stage: {want}"
     for t in page["trace"]:
         for key in ("stage", "signals", "rule", "disposition", "output", "why"):
@@ -238,7 +238,8 @@ def test_process_map_covers_every_stage_with_data_and_branches():
     assert len(pm["inputs"]) == 4                      # query · referer · IP · cookie
     ids = [s["id"] for s in pm["stages"]]
     assert ids == ["entry", "advariant", "ip", "tier", "location", "identity", "archetype",
-                   "audience", "objections", "policy", "compose", "brainsim", "heroimg"]
+                   "audience", "objections", "policy", "compose", "brainsim", "heroimg",
+                   "heromotion"]
     for s in pm["stages"]:
         assert s["reads"], f"stage {s['id']} reads no data"
         assert s["output"], f"stage {s['id']} has no output"

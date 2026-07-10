@@ -11779,5 +11779,915 @@
     "vendor": "google-gemini",
     "visual_metaphor": "the theater under daily watch \u2014 map-room, not spy-cam",
     "winner_index": 2
+  },
+  "motion:02b2e2353ba05b1abd2b00299ea08a34": {
+    "assembly": "animated_webp",
+    "base_cache_key": "planet:motion:base:x-docs",
+    "cache_key": "02b2e2353ba05b1abd2b00299ea08a34",
+    "delta_cache_key": "planet:motion:delta:0f848864ca2e6a54",
+    "delta_signals": [
+      "objection:licensing_fear",
+      "archetype:outcomes_first"
+    ],
+    "duration_ms": 3000,
+    "ext": "webp",
+    "frames": [
+      {
+        "ext": "png",
+        "image_path": "motion_frames/02b2e2353ba05b1abd2b00299ea08a34/frame_0.png",
+        "image_url": "/static/generated/motion_frames/02b2e2353ba05b1abd2b00299ea08a34/frame_0.png",
+        "index": 0,
+        "label": "t0"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/02b2e2353ba05b1abd2b00299ea08a34/frame_1.png",
+        "image_url": "/static/generated/motion_frames/02b2e2353ba05b1abd2b00299ea08a34/frame_1.png",
+        "index": 1,
+        "label": "t1"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/02b2e2353ba05b1abd2b00299ea08a34/frame_2.png",
+        "image_url": "/static/generated/motion_frames/02b2e2353ba05b1abd2b00299ea08a34/frame_2.png",
+        "index": 2,
+        "label": "t2"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/02b2e2353ba05b1abd2b00299ea08a34/frame_3.png",
+        "image_url": "/static/generated/motion_frames/02b2e2353ba05b1abd2b00299ea08a34/frame_3.png",
+        "index": 3,
+        "label": "t3"
+      }
+    ],
+    "framing": "Simulated satellite change-over-time timelapse \u2014 multi-frame loop for demo storytelling. Not measured visitor brain stimulation; frames show region-scale change detection only.",
+    "generated_at": "2026-07-10T17:17:55+00:00",
+    "intent_id": "aspiration_research",
+    "license": "Synthetic timelapse from cached still (offline pregen \u2014 disclosed on /dev)",
+    "loop": true,
+    "model": "gemini-2.5-flash-image",
+    "motion_metaphor": "seasonal_shift",
+    "motion_type": "animated_webp",
+    "offline_from_still": "7e7706ad74a54874e4bcafd908282f99",
+    "source": "generated",
+    "tier": "base+delta",
+    "vendor": "motion_gen_offline"
+  },
+  "motion:313079d924511f92388346e7b344b51b": {
+    "assembly": "animated_webp",
+    "base_cache_key": "planet:motion:base:x-agriculture",
+    "cache_key": "313079d924511f92388346e7b344b51b",
+    "delta_cache_key": "planet:motion:delta:f970fd87c08a997a",
+    "delta_signals": [
+      "objection:cloud_cover",
+      "archetype:outcomes_first"
+    ],
+    "duration_ms": 3000,
+    "ext": "webp",
+    "frames": [
+      {
+        "ext": "png",
+        "image_path": "motion_frames/313079d924511f92388346e7b344b51b/frame_0.png",
+        "image_url": "/static/generated/motion_frames/313079d924511f92388346e7b344b51b/frame_0.png",
+        "index": 0,
+        "label": "t0"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/313079d924511f92388346e7b344b51b/frame_1.png",
+        "image_url": "/static/generated/motion_frames/313079d924511f92388346e7b344b51b/frame_1.png",
+        "index": 1,
+        "label": "t1"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/313079d924511f92388346e7b344b51b/frame_2.png",
+        "image_url": "/static/generated/motion_frames/313079d924511f92388346e7b344b51b/frame_2.png",
+        "index": 2,
+        "label": "t2"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/313079d924511f92388346e7b344b51b/frame_3.png",
+        "image_url": "/static/generated/motion_frames/313079d924511f92388346e7b344b51b/frame_3.png",
+        "index": 3,
+        "label": "t3"
+      }
+    ],
+    "framing": "Simulated satellite change-over-time timelapse \u2014 multi-frame loop for demo storytelling. Not measured visitor brain stimulation; frames show region-scale change detection only.",
+    "generated_at": "2026-07-10T17:17:50+00:00",
+    "intent_id": "message_match",
+    "license": "Synthetic timelapse from cached still (offline pregen \u2014 disclosed on /dev)",
+    "loop": true,
+    "model": "gemini-2.5-flash-image",
+    "motion_metaphor": "crop_growth",
+    "motion_type": "animated_webp",
+    "offline_from_still": "159a1f2e2a0a0e9ea69085d978f02d8a",
+    "source": "generated",
+    "tier": "base+delta",
+    "vendor": "motion_gen_offline"
+  },
+  "motion:39675a7798f452695ff73d10473d602d": {
+    "assembly": "animated_webp",
+    "base_cache_key": "planet:motion:base:x-insurance",
+    "cache_key": "39675a7798f452695ff73d10473d602d",
+    "delta_cache_key": "planet:motion:delta:a6e4b9cfab6806de",
+    "delta_signals": [
+      "objection:verification_trust"
+    ],
+    "duration_ms": 3000,
+    "ext": "webp",
+    "frames": [
+      {
+        "ext": "png",
+        "image_path": "motion_frames/39675a7798f452695ff73d10473d602d/frame_0.png",
+        "image_url": "/static/generated/motion_frames/39675a7798f452695ff73d10473d602d/frame_0.png",
+        "index": 0,
+        "label": "t0"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/39675a7798f452695ff73d10473d602d/frame_1.png",
+        "image_url": "/static/generated/motion_frames/39675a7798f452695ff73d10473d602d/frame_1.png",
+        "index": 1,
+        "label": "t1"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/39675a7798f452695ff73d10473d602d/frame_2.png",
+        "image_url": "/static/generated/motion_frames/39675a7798f452695ff73d10473d602d/frame_2.png",
+        "index": 2,
+        "label": "t2"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/39675a7798f452695ff73d10473d602d/frame_3.png",
+        "image_url": "/static/generated/motion_frames/39675a7798f452695ff73d10473d602d/frame_3.png",
+        "index": 3,
+        "label": "t3"
+      }
+    ],
+    "framing": "Simulated satellite change-over-time timelapse \u2014 multi-frame loop for demo storytelling. Not measured visitor brain stimulation; frames show region-scale change detection only.",
+    "generated_at": "2026-07-10T17:17:51+00:00",
+    "intent_id": "archive_advantage",
+    "license": "Synthetic timelapse from cached still (offline pregen \u2014 disclosed on /dev)",
+    "loop": true,
+    "model": "gemini-2.5-flash-image",
+    "motion_metaphor": "storm_footprint",
+    "motion_type": "animated_webp",
+    "offline_from_still": "d5a8310fa07cbf6cbfcfe2857297c76b",
+    "source": "generated",
+    "tier": "base+delta",
+    "vendor": "motion_gen_offline"
+  },
+  "motion:40596c5c6521512afc28248000b6cfca": {
+    "assembly": "animated_webp",
+    "base_cache_key": "planet:motion:base:x-agriculture",
+    "cache_key": "40596c5c6521512afc28248000b6cfca",
+    "delta_cache_key": "planet:motion:delta:77d6cddaa8e697db",
+    "delta_signals": [
+      "objection:cloud_cover"
+    ],
+    "duration_ms": 3000,
+    "ext": "webp",
+    "frames": [
+      {
+        "ext": "png",
+        "image_path": "motion_frames/40596c5c6521512afc28248000b6cfca/frame_0.png",
+        "image_url": "/static/generated/motion_frames/40596c5c6521512afc28248000b6cfca/frame_0.png",
+        "index": 0,
+        "label": "t0"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/40596c5c6521512afc28248000b6cfca/frame_1.png",
+        "image_url": "/static/generated/motion_frames/40596c5c6521512afc28248000b6cfca/frame_1.png",
+        "index": 1,
+        "label": "t1"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/40596c5c6521512afc28248000b6cfca/frame_2.png",
+        "image_url": "/static/generated/motion_frames/40596c5c6521512afc28248000b6cfca/frame_2.png",
+        "index": 2,
+        "label": "t2"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/40596c5c6521512afc28248000b6cfca/frame_3.png",
+        "image_url": "/static/generated/motion_frames/40596c5c6521512afc28248000b6cfca/frame_3.png",
+        "index": 3,
+        "label": "t3"
+      }
+    ],
+    "framing": "Simulated satellite change-over-time timelapse \u2014 multi-frame loop for demo storytelling. Not measured visitor brain stimulation; frames show region-scale change detection only.",
+    "generated_at": "2026-07-10T17:17:49+00:00",
+    "intent_id": "message_match",
+    "license": "Synthetic timelapse from cached still (offline pregen \u2014 disclosed on /dev)",
+    "loop": true,
+    "model": "gemini-2.5-flash-image",
+    "motion_metaphor": "crop_growth",
+    "motion_type": "animated_webp",
+    "offline_from_still": "159a1f2e2a0a0e9ea69085d978f02d8a",
+    "source": "generated",
+    "tier": "base+delta",
+    "vendor": "motion_gen_offline"
+  },
+  "motion:62735c1a7693fd919089d6294c515d01": {
+    "assembly": "animated_webp",
+    "base_cache_key": "planet:motion:base:x-disaster",
+    "cache_key": "62735c1a7693fd919089d6294c515d01",
+    "delta_cache_key": "planet:motion:delta:cd6cd73e45820b62",
+    "delta_signals": [
+      "objection:aoi_small"
+    ],
+    "duration_ms": 3000,
+    "ext": "webp",
+    "frames": [
+      {
+        "ext": "png",
+        "image_path": "motion_frames/62735c1a7693fd919089d6294c515d01/frame_0.png",
+        "image_url": "/static/generated/motion_frames/62735c1a7693fd919089d6294c515d01/frame_0.png",
+        "index": 0,
+        "label": "t0"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/62735c1a7693fd919089d6294c515d01/frame_1.png",
+        "image_url": "/static/generated/motion_frames/62735c1a7693fd919089d6294c515d01/frame_1.png",
+        "index": 1,
+        "label": "t1"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/62735c1a7693fd919089d6294c515d01/frame_2.png",
+        "image_url": "/static/generated/motion_frames/62735c1a7693fd919089d6294c515d01/frame_2.png",
+        "index": 2,
+        "label": "t2"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/62735c1a7693fd919089d6294c515d01/frame_3.png",
+        "image_url": "/static/generated/motion_frames/62735c1a7693fd919089d6294c515d01/frame_3.png",
+        "index": 3,
+        "label": "t3"
+      }
+    ],
+    "framing": "Simulated satellite change-over-time timelapse \u2014 multi-frame loop for demo storytelling. Not measured visitor brain stimulation; frames show region-scale change detection only.",
+    "generated_at": "2026-07-10T17:17:54+00:00",
+    "intent_id": "retarget_warm",
+    "license": "Synthetic timelapse from cached still (offline pregen \u2014 disclosed on /dev)",
+    "loop": true,
+    "model": "gemini-2.5-flash-image",
+    "motion_metaphor": "orbit_pass",
+    "motion_type": "animated_webp",
+    "offline_from_still": "5ab4f2a172b146fb6f9e6beedd3b4573",
+    "source": "generated",
+    "tier": "base+delta",
+    "vendor": "motion_gen_offline"
+  },
+  "motion:7e0b9cfa360abeb64b675b3269db4bea": {
+    "assembly": "animated_webp",
+    "base_cache_key": "planet:motion:base:x-government",
+    "cache_key": "7e0b9cfa360abeb64b675b3269db4bea",
+    "delta_cache_key": "planet:motion:delta:ad58057c65ed5367",
+    "delta_signals": [
+      "objection:data_overload"
+    ],
+    "duration_ms": 3000,
+    "ext": "webp",
+    "frames": [
+      {
+        "ext": "png",
+        "image_path": "motion_frames/7e0b9cfa360abeb64b675b3269db4bea/frame_0.png",
+        "image_url": "/static/generated/motion_frames/7e0b9cfa360abeb64b675b3269db4bea/frame_0.png",
+        "index": 0,
+        "label": "t0"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/7e0b9cfa360abeb64b675b3269db4bea/frame_1.png",
+        "image_url": "/static/generated/motion_frames/7e0b9cfa360abeb64b675b3269db4bea/frame_1.png",
+        "index": 1,
+        "label": "t1"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/7e0b9cfa360abeb64b675b3269db4bea/frame_2.png",
+        "image_url": "/static/generated/motion_frames/7e0b9cfa360abeb64b675b3269db4bea/frame_2.png",
+        "index": 2,
+        "label": "t2"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/7e0b9cfa360abeb64b675b3269db4bea/frame_3.png",
+        "image_url": "/static/generated/motion_frames/7e0b9cfa360abeb64b675b3269db4bea/frame_3.png",
+        "index": 3,
+        "label": "t3"
+      }
+    ],
+    "framing": "Simulated satellite change-over-time timelapse \u2014 multi-frame loop for demo storytelling. Not measured visitor brain stimulation; frames show region-scale change detection only.",
+    "generated_at": "2026-07-10T17:17:53+00:00",
+    "intent_id": "message_match",
+    "license": "Synthetic timelapse from cached still (offline pregen \u2014 disclosed on /dev)",
+    "loop": true,
+    "model": "gemini-2.5-flash-image",
+    "motion_metaphor": "change_wipe",
+    "motion_type": "animated_webp",
+    "offline_from_still": "a925ee53dc1080e91365535afc5c7f37",
+    "source": "generated",
+    "tier": "base+delta",
+    "vendor": "motion_gen_offline"
+  },
+  "motion:81cae81122ff2edec8b0d1a179cac722": {
+    "assembly": "animated_webp",
+    "base_cache_key": "planet:motion:base:x-energy",
+    "cache_key": "81cae81122ff2edec8b0d1a179cac722",
+    "delta_cache_key": "planet:motion:delta:fbf5764cf98b47a0",
+    "delta_signals": [
+      "objection:integration_cost",
+      "archetype:outcomes_first"
+    ],
+    "duration_ms": 3000,
+    "ext": "webp",
+    "frames": [
+      {
+        "ext": "png",
+        "image_path": "motion_frames/81cae81122ff2edec8b0d1a179cac722/frame_0.png",
+        "image_url": "/static/generated/motion_frames/81cae81122ff2edec8b0d1a179cac722/frame_0.png",
+        "index": 0,
+        "label": "t0"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/81cae81122ff2edec8b0d1a179cac722/frame_1.png",
+        "image_url": "/static/generated/motion_frames/81cae81122ff2edec8b0d1a179cac722/frame_1.png",
+        "index": 1,
+        "label": "t1"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/81cae81122ff2edec8b0d1a179cac722/frame_2.png",
+        "image_url": "/static/generated/motion_frames/81cae81122ff2edec8b0d1a179cac722/frame_2.png",
+        "index": 2,
+        "label": "t2"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/81cae81122ff2edec8b0d1a179cac722/frame_3.png",
+        "image_url": "/static/generated/motion_frames/81cae81122ff2edec8b0d1a179cac722/frame_3.png",
+        "index": 3,
+        "label": "t3"
+      }
+    ],
+    "framing": "Simulated satellite change-over-time timelapse \u2014 multi-frame loop for demo storytelling. Not measured visitor brain stimulation; frames show region-scale change detection only.",
+    "generated_at": "2026-07-10T17:17:53+00:00",
+    "intent_id": "message_match",
+    "license": "Synthetic timelapse from cached still (offline pregen \u2014 disclosed on /dev)",
+    "loop": true,
+    "model": "gemini-2.5-flash-image",
+    "motion_metaphor": "pan_left",
+    "motion_type": "animated_webp",
+    "offline_from_still": "b2caff29889a19b912bd18dd04626304",
+    "source": "generated",
+    "tier": "base+delta",
+    "vendor": "motion_gen_offline"
+  },
+  "motion:87803f618e0010e6d9381d179001abb0": {
+    "assembly": "animated_webp",
+    "base_cache_key": "planet:motion:base:x-energy",
+    "cache_key": "87803f618e0010e6d9381d179001abb0",
+    "delta_cache_key": "planet:motion:delta:fd08c29ce41824ef",
+    "delta_signals": [
+      "objection:integration_cost"
+    ],
+    "duration_ms": 3000,
+    "ext": "webp",
+    "frames": [
+      {
+        "ext": "png",
+        "image_path": "motion_frames/87803f618e0010e6d9381d179001abb0/frame_0.png",
+        "image_url": "/static/generated/motion_frames/87803f618e0010e6d9381d179001abb0/frame_0.png",
+        "index": 0,
+        "label": "t0"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/87803f618e0010e6d9381d179001abb0/frame_1.png",
+        "image_url": "/static/generated/motion_frames/87803f618e0010e6d9381d179001abb0/frame_1.png",
+        "index": 1,
+        "label": "t1"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/87803f618e0010e6d9381d179001abb0/frame_2.png",
+        "image_url": "/static/generated/motion_frames/87803f618e0010e6d9381d179001abb0/frame_2.png",
+        "index": 2,
+        "label": "t2"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/87803f618e0010e6d9381d179001abb0/frame_3.png",
+        "image_url": "/static/generated/motion_frames/87803f618e0010e6d9381d179001abb0/frame_3.png",
+        "index": 3,
+        "label": "t3"
+      }
+    ],
+    "framing": "Simulated satellite change-over-time timelapse \u2014 multi-frame loop for demo storytelling. Not measured visitor brain stimulation; frames show region-scale change detection only.",
+    "generated_at": "2026-07-10T17:17:52+00:00",
+    "intent_id": "message_match",
+    "license": "Synthetic timelapse from cached still (offline pregen \u2014 disclosed on /dev)",
+    "loop": true,
+    "model": "gemini-2.5-flash-image",
+    "motion_metaphor": "pan_left",
+    "motion_type": "animated_webp",
+    "offline_from_still": "b2caff29889a19b912bd18dd04626304",
+    "source": "generated",
+    "tier": "base+delta",
+    "vendor": "motion_gen_offline"
+  },
+  "motion:8b74a43b9844defd4943bc2e821ad5e3": {
+    "assembly": "animated_webp",
+    "base_cache_key": "planet:motion:base:x-docs",
+    "cache_key": "8b74a43b9844defd4943bc2e821ad5e3",
+    "delta_cache_key": "planet:motion:delta:0981965e869e9bcf",
+    "delta_signals": [
+      "objection:academic_budget"
+    ],
+    "duration_ms": 3000,
+    "ext": "webp",
+    "frames": [
+      {
+        "ext": "png",
+        "image_path": "motion_frames/8b74a43b9844defd4943bc2e821ad5e3/frame_0.png",
+        "image_url": "/static/generated/motion_frames/8b74a43b9844defd4943bc2e821ad5e3/frame_0.png",
+        "index": 0,
+        "label": "t0"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/8b74a43b9844defd4943bc2e821ad5e3/frame_1.png",
+        "image_url": "/static/generated/motion_frames/8b74a43b9844defd4943bc2e821ad5e3/frame_1.png",
+        "index": 1,
+        "label": "t1"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/8b74a43b9844defd4943bc2e821ad5e3/frame_2.png",
+        "image_url": "/static/generated/motion_frames/8b74a43b9844defd4943bc2e821ad5e3/frame_2.png",
+        "index": 2,
+        "label": "t2"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/8b74a43b9844defd4943bc2e821ad5e3/frame_3.png",
+        "image_url": "/static/generated/motion_frames/8b74a43b9844defd4943bc2e821ad5e3/frame_3.png",
+        "index": 3,
+        "label": "t3"
+      }
+    ],
+    "framing": "Simulated satellite change-over-time timelapse \u2014 multi-frame loop for demo storytelling. Not measured visitor brain stimulation; frames show region-scale change detection only.",
+    "generated_at": "2026-07-10T17:17:55+00:00",
+    "intent_id": "aspiration_research",
+    "license": "Synthetic timelapse from cached still (offline pregen \u2014 disclosed on /dev)",
+    "loop": true,
+    "model": "gemini-2.5-flash-image",
+    "motion_metaphor": "seasonal_shift",
+    "motion_type": "animated_webp",
+    "offline_from_still": "216e43204e1c66775653dfd87e59ebc2",
+    "source": "generated",
+    "tier": "base+delta",
+    "vendor": "motion_gen_offline"
+  },
+  "motion:91ef3065d1d9e47e6b064b8356c8f091": {
+    "assembly": "animated_webp",
+    "base_cache_key": "planet:motion:base:x-insurance",
+    "cache_key": "91ef3065d1d9e47e6b064b8356c8f091",
+    "delta_cache_key": "planet:motion:delta:ecc952d39a8b5479",
+    "delta_signals": [
+      "objection:verification_trust",
+      "archetype:outcomes_first"
+    ],
+    "duration_ms": 3000,
+    "ext": "webp",
+    "frames": [
+      {
+        "ext": "png",
+        "image_path": "motion_frames/91ef3065d1d9e47e6b064b8356c8f091/frame_0.png",
+        "image_url": "/static/generated/motion_frames/91ef3065d1d9e47e6b064b8356c8f091/frame_0.png",
+        "index": 0,
+        "label": "t0"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/91ef3065d1d9e47e6b064b8356c8f091/frame_1.png",
+        "image_url": "/static/generated/motion_frames/91ef3065d1d9e47e6b064b8356c8f091/frame_1.png",
+        "index": 1,
+        "label": "t1"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/91ef3065d1d9e47e6b064b8356c8f091/frame_2.png",
+        "image_url": "/static/generated/motion_frames/91ef3065d1d9e47e6b064b8356c8f091/frame_2.png",
+        "index": 2,
+        "label": "t2"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/91ef3065d1d9e47e6b064b8356c8f091/frame_3.png",
+        "image_url": "/static/generated/motion_frames/91ef3065d1d9e47e6b064b8356c8f091/frame_3.png",
+        "index": 3,
+        "label": "t3"
+      }
+    ],
+    "framing": "Simulated satellite change-over-time timelapse \u2014 multi-frame loop for demo storytelling. Not measured visitor brain stimulation; frames show region-scale change detection only.",
+    "generated_at": "2026-07-10T17:17:52+00:00",
+    "intent_id": "archive_advantage",
+    "license": "Synthetic timelapse from cached still (offline pregen \u2014 disclosed on /dev)",
+    "loop": true,
+    "model": "gemini-2.5-flash-image",
+    "motion_metaphor": "storm_footprint",
+    "motion_type": "animated_webp",
+    "offline_from_still": "d5a8310fa07cbf6cbfcfe2857297c76b",
+    "source": "generated",
+    "tier": "base+delta",
+    "vendor": "motion_gen_offline"
+  },
+  "motion:9daad5a2c4c2567873e7d85259d1ec0f": {
+    "assembly": "animated_webp",
+    "base_cache_key": "planet:motion:base:x-defense",
+    "cache_key": "9daad5a2c4c2567873e7d85259d1ec0f",
+    "delta_cache_key": "planet:motion:delta:a6e8aae7bb24e738",
+    "delta_signals": [
+      "objection:tasked_competitor"
+    ],
+    "duration_ms": 3000,
+    "ext": "webp",
+    "frames": [
+      {
+        "ext": "png",
+        "image_path": "motion_frames/9daad5a2c4c2567873e7d85259d1ec0f/frame_0.png",
+        "image_url": "/static/generated/motion_frames/9daad5a2c4c2567873e7d85259d1ec0f/frame_0.png",
+        "index": 0,
+        "label": "t0"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/9daad5a2c4c2567873e7d85259d1ec0f/frame_1.png",
+        "image_url": "/static/generated/motion_frames/9daad5a2c4c2567873e7d85259d1ec0f/frame_1.png",
+        "index": 1,
+        "label": "t1"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/9daad5a2c4c2567873e7d85259d1ec0f/frame_2.png",
+        "image_url": "/static/generated/motion_frames/9daad5a2c4c2567873e7d85259d1ec0f/frame_2.png",
+        "index": 2,
+        "label": "t2"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/9daad5a2c4c2567873e7d85259d1ec0f/frame_3.png",
+        "image_url": "/static/generated/motion_frames/9daad5a2c4c2567873e7d85259d1ec0f/frame_3.png",
+        "index": 3,
+        "label": "t3"
+      }
+    ],
+    "framing": "Simulated satellite change-over-time timelapse \u2014 multi-frame loop for demo storytelling. Not measured visitor brain stimulation; frames show region-scale change detection only.",
+    "generated_at": "2026-07-10T17:17:50+00:00",
+    "intent_id": "mission_authority",
+    "license": "Synthetic timelapse from cached still (offline pregen \u2014 disclosed on /dev)",
+    "loop": true,
+    "model": "gemini-2.5-flash-image",
+    "motion_metaphor": "orbit_pass",
+    "motion_type": "animated_webp",
+    "offline_from_still": "afe1c2b3ad737b500cd0aa4898639786",
+    "source": "generated",
+    "tier": "base+delta",
+    "vendor": "motion_gen_offline"
+  },
+  "motion:b98af38fe8d6dcbf31672123dd8dd4b9": {
+    "assembly": "animated_webp",
+    "base_cache_key": "planet:motion:base:x-broad",
+    "cache_key": "b98af38fe8d6dcbf31672123dd8dd4b9",
+    "delta_cache_key": "planet:motion:delta:8cf5056317953582",
+    "delta_signals": [
+      "objection:proof_before_buy"
+    ],
+    "duration_ms": 3000,
+    "ext": "webp",
+    "frames": [
+      {
+        "ext": "png",
+        "image_path": "motion_frames/b98af38fe8d6dcbf31672123dd8dd4b9/frame_0.png",
+        "image_url": "/static/generated/motion_frames/b98af38fe8d6dcbf31672123dd8dd4b9/frame_0.png",
+        "index": 0,
+        "label": "t0"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/b98af38fe8d6dcbf31672123dd8dd4b9/frame_1.png",
+        "image_url": "/static/generated/motion_frames/b98af38fe8d6dcbf31672123dd8dd4b9/frame_1.png",
+        "index": 1,
+        "label": "t1"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/b98af38fe8d6dcbf31672123dd8dd4b9/frame_2.png",
+        "image_url": "/static/generated/motion_frames/b98af38fe8d6dcbf31672123dd8dd4b9/frame_2.png",
+        "index": 2,
+        "label": "t2"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/b98af38fe8d6dcbf31672123dd8dd4b9/frame_3.png",
+        "image_url": "/static/generated/motion_frames/b98af38fe8d6dcbf31672123dd8dd4b9/frame_3.png",
+        "index": 3,
+        "label": "t3"
+      }
+    ],
+    "framing": "Simulated satellite change-over-time timelapse \u2014 multi-frame loop for demo storytelling. Not measured visitor brain stimulation; frames show region-scale change detection only.",
+    "generated_at": "2026-07-10T17:17:56+00:00",
+    "intent_id": "message_match",
+    "license": "Synthetic timelapse from cached still (offline pregen \u2014 disclosed on /dev)",
+    "loop": true,
+    "model": "gemini-2.5-flash-image",
+    "motion_metaphor": "pan_left",
+    "motion_type": "animated_webp",
+    "offline_from_still": "da37b226abd316edef67762cbf3abc11",
+    "source": "generated",
+    "tier": "base+delta",
+    "vendor": "motion_gen_offline"
+  },
+  "motion:da875f36d66eeac257ec08fccd956ea1": {
+    "assembly": "animated_webp",
+    "base_cache_key": "planet:motion:base:x-disaster",
+    "cache_key": "da875f36d66eeac257ec08fccd956ea1",
+    "delta_cache_key": "planet:motion:delta:28a7f4303b730033",
+    "delta_signals": [
+      "objection:aoi_small",
+      "archetype:outcomes_first"
+    ],
+    "duration_ms": 3000,
+    "ext": "webp",
+    "frames": [
+      {
+        "ext": "png",
+        "image_path": "motion_frames/da875f36d66eeac257ec08fccd956ea1/frame_0.png",
+        "image_url": "/static/generated/motion_frames/da875f36d66eeac257ec08fccd956ea1/frame_0.png",
+        "index": 0,
+        "label": "t0"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/da875f36d66eeac257ec08fccd956ea1/frame_1.png",
+        "image_url": "/static/generated/motion_frames/da875f36d66eeac257ec08fccd956ea1/frame_1.png",
+        "index": 1,
+        "label": "t1"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/da875f36d66eeac257ec08fccd956ea1/frame_2.png",
+        "image_url": "/static/generated/motion_frames/da875f36d66eeac257ec08fccd956ea1/frame_2.png",
+        "index": 2,
+        "label": "t2"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/da875f36d66eeac257ec08fccd956ea1/frame_3.png",
+        "image_url": "/static/generated/motion_frames/da875f36d66eeac257ec08fccd956ea1/frame_3.png",
+        "index": 3,
+        "label": "t3"
+      }
+    ],
+    "framing": "Simulated satellite change-over-time timelapse \u2014 multi-frame loop for demo storytelling. Not measured visitor brain stimulation; frames show region-scale change detection only.",
+    "generated_at": "2026-07-10T17:17:54+00:00",
+    "intent_id": "retarget_warm",
+    "license": "Synthetic timelapse from cached still (offline pregen \u2014 disclosed on /dev)",
+    "loop": true,
+    "model": "gemini-2.5-flash-image",
+    "motion_metaphor": "orbit_pass",
+    "motion_type": "animated_webp",
+    "offline_from_still": "5ab4f2a172b146fb6f9e6beedd3b4573",
+    "source": "generated",
+    "tier": "base+delta",
+    "vendor": "motion_gen_offline"
+  },
+  "motion:e7ec3c2af47c3fdced42b0cc3ace5320": {
+    "assembly": "animated_webp",
+    "base_cache_key": "planet:motion:base:x-government",
+    "cache_key": "e7ec3c2af47c3fdced42b0cc3ace5320",
+    "delta_cache_key": "planet:motion:delta:95af8b41980102a2",
+    "delta_signals": [
+      "objection:data_overload",
+      "archetype:outcomes_first"
+    ],
+    "duration_ms": 3000,
+    "ext": "webp",
+    "frames": [
+      {
+        "ext": "png",
+        "image_path": "motion_frames/e7ec3c2af47c3fdced42b0cc3ace5320/frame_0.png",
+        "image_url": "/static/generated/motion_frames/e7ec3c2af47c3fdced42b0cc3ace5320/frame_0.png",
+        "index": 0,
+        "label": "t0"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/e7ec3c2af47c3fdced42b0cc3ace5320/frame_1.png",
+        "image_url": "/static/generated/motion_frames/e7ec3c2af47c3fdced42b0cc3ace5320/frame_1.png",
+        "index": 1,
+        "label": "t1"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/e7ec3c2af47c3fdced42b0cc3ace5320/frame_2.png",
+        "image_url": "/static/generated/motion_frames/e7ec3c2af47c3fdced42b0cc3ace5320/frame_2.png",
+        "index": 2,
+        "label": "t2"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/e7ec3c2af47c3fdced42b0cc3ace5320/frame_3.png",
+        "image_url": "/static/generated/motion_frames/e7ec3c2af47c3fdced42b0cc3ace5320/frame_3.png",
+        "index": 3,
+        "label": "t3"
+      }
+    ],
+    "framing": "Simulated satellite change-over-time timelapse \u2014 multi-frame loop for demo storytelling. Not measured visitor brain stimulation; frames show region-scale change detection only.",
+    "generated_at": "2026-07-10T17:17:54+00:00",
+    "intent_id": "message_match",
+    "license": "Synthetic timelapse from cached still (offline pregen \u2014 disclosed on /dev)",
+    "loop": true,
+    "model": "gemini-2.5-flash-image",
+    "motion_metaphor": "change_wipe",
+    "motion_type": "animated_webp",
+    "offline_from_still": "a925ee53dc1080e91365535afc5c7f37",
+    "source": "generated",
+    "tier": "base+delta",
+    "vendor": "motion_gen_offline"
+  },
+  "motion:f69d4d5e7b3ca850cc80f4e9613399eb": {
+    "assembly": "animated_webp",
+    "base_cache_key": "planet:motion:base:x-defense",
+    "cache_key": "f69d4d5e7b3ca850cc80f4e9613399eb",
+    "delta_cache_key": "planet:motion:delta:c1a9e951b06d8689",
+    "delta_signals": [
+      "objection:tasked_competitor",
+      "archetype:outcomes_first"
+    ],
+    "duration_ms": 3000,
+    "ext": "webp",
+    "frames": [
+      {
+        "ext": "png",
+        "image_path": "motion_frames/f69d4d5e7b3ca850cc80f4e9613399eb/frame_0.png",
+        "image_url": "/static/generated/motion_frames/f69d4d5e7b3ca850cc80f4e9613399eb/frame_0.png",
+        "index": 0,
+        "label": "t0"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/f69d4d5e7b3ca850cc80f4e9613399eb/frame_1.png",
+        "image_url": "/static/generated/motion_frames/f69d4d5e7b3ca850cc80f4e9613399eb/frame_1.png",
+        "index": 1,
+        "label": "t1"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/f69d4d5e7b3ca850cc80f4e9613399eb/frame_2.png",
+        "image_url": "/static/generated/motion_frames/f69d4d5e7b3ca850cc80f4e9613399eb/frame_2.png",
+        "index": 2,
+        "label": "t2"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/f69d4d5e7b3ca850cc80f4e9613399eb/frame_3.png",
+        "image_url": "/static/generated/motion_frames/f69d4d5e7b3ca850cc80f4e9613399eb/frame_3.png",
+        "index": 3,
+        "label": "t3"
+      }
+    ],
+    "framing": "Simulated satellite change-over-time timelapse \u2014 multi-frame loop for demo storytelling. Not measured visitor brain stimulation; frames show region-scale change detection only.",
+    "generated_at": "2026-07-10T17:17:51+00:00",
+    "intent_id": "mission_authority",
+    "license": "Synthetic timelapse from cached still (offline pregen \u2014 disclosed on /dev)",
+    "loop": true,
+    "model": "gemini-2.5-flash-image",
+    "motion_metaphor": "orbit_pass",
+    "motion_type": "animated_webp",
+    "offline_from_still": "afe1c2b3ad737b500cd0aa4898639786",
+    "source": "generated",
+    "tier": "base+delta",
+    "vendor": "motion_gen_offline"
+  },
+  "motion:fac7ebe936976a613f816cd8ec9cbefd": {
+    "assembly": "animated_webp",
+    "base_cache_key": "planet:motion:base:x-age",
+    "cache_key": "fac7ebe936976a613f816cd8ec9cbefd",
+    "delta_cache_key": "planet:motion:delta:e1632342744b8024",
+    "delta_signals": [
+      "objection:academic_budget",
+      "archetype:outcomes_first"
+    ],
+    "duration_ms": 3000,
+    "ext": "webp",
+    "frames": [
+      {
+        "ext": "png",
+        "image_path": "motion_frames/fac7ebe936976a613f816cd8ec9cbefd/frame_0.png",
+        "image_url": "/static/generated/motion_frames/fac7ebe936976a613f816cd8ec9cbefd/frame_0.png",
+        "index": 0,
+        "label": "t0"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/fac7ebe936976a613f816cd8ec9cbefd/frame_1.png",
+        "image_url": "/static/generated/motion_frames/fac7ebe936976a613f816cd8ec9cbefd/frame_1.png",
+        "index": 1,
+        "label": "t1"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/fac7ebe936976a613f816cd8ec9cbefd/frame_2.png",
+        "image_url": "/static/generated/motion_frames/fac7ebe936976a613f816cd8ec9cbefd/frame_2.png",
+        "index": 2,
+        "label": "t2"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/fac7ebe936976a613f816cd8ec9cbefd/frame_3.png",
+        "image_url": "/static/generated/motion_frames/fac7ebe936976a613f816cd8ec9cbefd/frame_3.png",
+        "index": 3,
+        "label": "t3"
+      }
+    ],
+    "framing": "Simulated satellite change-over-time timelapse \u2014 multi-frame loop for demo storytelling. Not measured visitor brain stimulation; frames show region-scale change detection only.",
+    "generated_at": "2026-07-10T17:17:56+00:00",
+    "intent_id": "aspiration_research",
+    "license": "Synthetic timelapse from cached still (offline pregen \u2014 disclosed on /dev)",
+    "loop": true,
+    "model": "gemini-2.5-flash-image",
+    "motion_metaphor": "seasonal_shift",
+    "motion_type": "animated_webp",
+    "offline_from_still": "5f1510f79ef2453a5e0300ac9e0992f2",
+    "source": "generated",
+    "tier": "base+delta",
+    "vendor": "motion_gen_offline"
+  },
+  "motion:fcbf3848168112e41bb550847916162b": {
+    "assembly": "animated_webp",
+    "base_cache_key": "planet:motion:base:x-broad",
+    "cache_key": "fcbf3848168112e41bb550847916162b",
+    "delta_cache_key": "planet:motion:delta:36b41b68588b2351",
+    "delta_signals": [
+      "objection:proof_before_buy",
+      "archetype:outcomes_first"
+    ],
+    "duration_ms": 3000,
+    "ext": "webp",
+    "frames": [
+      {
+        "ext": "png",
+        "image_path": "motion_frames/fcbf3848168112e41bb550847916162b/frame_0.png",
+        "image_url": "/static/generated/motion_frames/fcbf3848168112e41bb550847916162b/frame_0.png",
+        "index": 0,
+        "label": "t0"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/fcbf3848168112e41bb550847916162b/frame_1.png",
+        "image_url": "/static/generated/motion_frames/fcbf3848168112e41bb550847916162b/frame_1.png",
+        "index": 1,
+        "label": "t1"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/fcbf3848168112e41bb550847916162b/frame_2.png",
+        "image_url": "/static/generated/motion_frames/fcbf3848168112e41bb550847916162b/frame_2.png",
+        "index": 2,
+        "label": "t2"
+      },
+      {
+        "ext": "png",
+        "image_path": "motion_frames/fcbf3848168112e41bb550847916162b/frame_3.png",
+        "image_url": "/static/generated/motion_frames/fcbf3848168112e41bb550847916162b/frame_3.png",
+        "index": 3,
+        "label": "t3"
+      }
+    ],
+    "framing": "Simulated satellite change-over-time timelapse \u2014 multi-frame loop for demo storytelling. Not measured visitor brain stimulation; frames show region-scale change detection only.",
+    "generated_at": "2026-07-10T17:17:56+00:00",
+    "intent_id": "message_match",
+    "license": "Synthetic timelapse from cached still (offline pregen \u2014 disclosed on /dev)",
+    "loop": true,
+    "model": "gemini-2.5-flash-image",
+    "motion_metaphor": "pan_left",
+    "motion_type": "animated_webp",
+    "offline_from_still": "da37b226abd316edef67762cbf3abc11",
+    "source": "generated",
+    "tier": "base+delta",
+    "vendor": "motion_gen_offline"
   }
 }

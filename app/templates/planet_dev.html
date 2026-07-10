@@ -581,6 +581,56 @@
       </div>
     </div>
 
+    <div class="sec" id="sec-hero-motion">
+      {% set hm = hid.motion or {} %}
+      {% set mr = hi.motion_receipt or ir.motion or {} %}
+      <div class="h">Hero motion — timelapse loop <span class="tag">{{ hm.status|default('disabled') }}</span></div>
+      <div class="why" style="font-size:12.5px;color:var(--muted);margin:0 0 12px;padding:0 14px">
+        {{ hm.framing or 'Simulated change-over-time timelapse — not visitor neuro-stimulation.' }}
+      </div>
+      <div class="hi-chain" style="padding-top:0">
+        <div class="trace-step">
+          <span class="n">1</span>
+          <div style="min-width:0">
+            <div class="nm">Motion metaphor + assembly</div>
+            <div class="kv" style="padding:6px 0 0;border:0"><span class="k">Metaphor</span><span class="v"><code>{{ hm.motion_metaphor or mr.motion_metaphor or '—' }}</code></span></div>
+            <div class="kv" style="padding:6px 0;border:0"><span class="k">Assembly</span><span class="v">{{ hm.assembly or 'animated_webp' }} · {{ hm.duration_ms or 3000 }} ms{% if hm.loop %} · loop{% endif %}</span></div>
+            {% if hm.tier.base_cache_key %}<div class="kv" style="padding:6px 0;border:0"><span class="k">Segment key</span><span class="v" style="font-family:ui-monospace,Menlo,monospace;font-size:12px">{{ hm.tier.base_cache_key }}</span></div>{% endif %}
+          </div>
+        </div>
+        {% if hm.frames or mr.frames %}
+        <div class="trace-step">
+          <span class="n">2</span>
+          <div style="min-width:0;width:100%">
+            <div class="nm">Keyframe sequence (t0 → tN)</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:8px">
+              {% for fr in (hm.frames or mr.frames) %}
+              <div style="width:120px;border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:11px">
+                {% if fr.image_url %}<img src="{{ fr.image_url }}" alt="" style="width:100%;height:72px;object-fit:cover;display:block">{% endif %}
+                <div style="padding:4px 6px;font-weight:600">{{ fr.label or ('t' ~ fr.index) }}</div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        <div class="trace-step">
+          <span class="n">3</span>
+          <div style="min-width:0">
+            <div class="nm">Loop preview</div>
+            {% if hi.motion_url or hm.url %}
+            <img src="{{ hi.motion_url or hm.url }}" alt="Motion loop preview" style="max-width:100%;border-radius:8px;margin-top:8px">
+            {% else %}
+            <div class="empty" style="padding:8px 0">No motion URL — pending pregen or async generation.</div>
+            {% endif %}
+            {% if hm.brain.change_legibility_mean is not none %}
+            <div class="kv" style="padding:6px 0 0;border:0"><span class="k">Change legibility (mean)</span><span class="v">{{ '%.3f'|format(hm.brain.change_legibility_mean) }}</span></div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="sec" id="sec-order">
       <div class="h">Section order shipped</div>
       <div class="kv"><span class="k">Audience</span><span class="v">{{ P.audience }}</span></div>

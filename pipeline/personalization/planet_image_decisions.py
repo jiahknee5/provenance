@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from pipeline.personalization import image_gen as IG
 from pipeline.personalization import image_intents as II
+from pipeline.personalization import motion_gen as MG
 from pipeline.personalization import planet_site as PS
 from pipeline.personalization import scene as SC
 from pipeline.personalization.brain_simulator import (
@@ -328,9 +329,17 @@ def _comparison_cell(params: dict | None, *, page_path: str, dev_path: str,
     structured = IG.build_image_prompt(ctx, tenant=TENANT)
     hero = IG.resolve_hero_image(page, generate=False, tenant=TENANT)
     receipt = hero.get("receipt") or {}
+    motion_receipt = hero.get("motion_receipt") or {}
     primary = sel["primary"]["intent_id"]
     url = _mount_thumb(hero.get("url") or receipt.get("url"), static_prefix)
+    motion_url = _mount_thumb(hero.get("motion_url"), static_prefix)
     gallery = IG.candidate_gallery_from_receipt(receipt, static_prefix=static_prefix)
+    motion_frames = []
+    for fr in motion_receipt.get("frames") or []:
+        motion_frames.append({
+            **fr,
+            "image_url": _mount_thumb(fr.get("image_url"), static_prefix),
+        })
     qs = ""
     if params:
         from urllib.parse import urlencode
@@ -352,6 +361,11 @@ def _comparison_cell(params: dict | None, *, page_path: str, dev_path: str,
         "source": receipt.get("source", "gradient"),
         "tier": receipt.get("tier", "base_only"),
         "candidate_gallery": gallery,
+        "motion_url": motion_url,
+        "motion_metaphor": motion_receipt.get("motion_metaphor")
+        or MG.motion_metaphor(ctx, primary, IG.load_image_config(TENANT)),
+        "motion_frames": motion_frames,
+        "motion_source": motion_receipt.get("source", hero.get("motion_status")),
     }
 
 

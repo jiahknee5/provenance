@@ -10,7 +10,7 @@ fi
 
 echo "Running test suite before deploy…"
 PYTHONPATH=. uv run pytest tests/test_brain_simulator.py tests/test_gauntlet_site.py tests/test_hero_image.py \
-  tests/test_planet_site.py tests/test_planet_hero_image.py -q
+  tests/test_planet_site.py tests/test_planet_hero_image.py tests/test_planet_motion.py -q
 
 echo "Deploying to Railway…"
 railway up --detach

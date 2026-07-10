@@ -9,6 +9,9 @@ product_context: "AI engineering talent program marketing site"
 brain_simulator:
   enabled: false
 
+motion:
+  enabled: false
+
 brand:
   accent_color: "#c9a227"
   name: GauntletAI

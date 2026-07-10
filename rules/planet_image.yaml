@@ -11,6 +11,17 @@ product_context: "daily satellite Earth-imagery platform marketing site"
 brain_simulator:
   enabled: true
 
+# Multi-frame timelapse hero loops — honest change-over-time storytelling (not neuro-stimulation).
+motion:
+  enabled: true
+  frames: 4
+  duration_ms: 3000
+  loop: true
+  assembly: animated_webp
+  framing: >-
+    Simulated satellite change-over-time timelapse — multi-frame loop for demo storytelling.
+    Not measured visitor brain stimulation; frames show region-scale change detection only.
+
 brand:
   accent_color: "#3ba1ff"
   name: Planet
@@ -69,6 +80,7 @@ ad_metaphors:
 # Intent taxonomy — each maps visitor context to a visual strategy supporting the page CTA.
 intents:
   - id: regional_truth
+    motion_metaphor: pan_left
     brain_target: attention
     brain_regions: [v1, v4, intraparietal, ppa]
     conversion_goal: "Trust → primary CTA"
@@ -88,6 +100,7 @@ intents:
     mood: "calm, planetary, quietly confident"
 
   - id: change_proof
+    motion_metaphor: change_wipe
     brain_target: change_legibility
     brain_regions: [mt, v3a, intraparietal, amygdala_threat_proxy]
     conversion_goal: "Urgency → act while change is small"
@@ -107,6 +120,7 @@ intents:
     mood: "urgent but dignified — the window is open, not closing in panic"
 
   - id: mission_authority
+    motion_metaphor: orbit_pass
     brain_target: authority
     brain_regions: [ppa, intraparietal, dlpfc_structure, amygdala_threat_proxy]
     conversion_goal: "Enterprise / mission-scale decision"
@@ -126,6 +140,7 @@ intents:
     mood: "evaluative, strategic, composed"
 
   - id: archive_advantage
+    motion_metaphor: filmstrip_scroll
     brain_target: trust
     brain_regions: [ppa, ofc_stability, amygdala_threat_proxy, v4]
     conversion_goal: "Claims / compliance buy-in"
@@ -145,6 +160,7 @@ intents:
     mood: "assured, evidentiary, patient"
 
   - id: aspiration_research
+    motion_metaphor: seasonal_shift
     brain_target: approach
     brain_regions: [ventral_striatum, ofc_warmth, ppa_depth, fusiform]
     conversion_goal: "Research program application"
@@ -164,6 +180,7 @@ intents:
     mood: "curious, luminous, generous"
 
   - id: retarget_warm
+    motion_metaphor: orbit_pass
     brain_target: approach
     brain_regions: [ventral_striatum, ofc_warmth, ppa, intraparietal]
     conversion_goal: "Post-engager continuation"
@@ -183,6 +200,7 @@ intents:
     mood: "welcoming, familiar, low-friction"
 
   - id: message_match
+    motion_metaphor: pan_left
     brain_target: message_match
     brain_regions: [clip_alignment, fusiform, v4, intraparietal]
     conversion_goal: "Ad click-through continuity"

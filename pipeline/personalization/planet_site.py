@@ -25,6 +25,7 @@ All company facts sourced from docs/research/planet-market-segments.md (verified
 from __future__ import annotations
 
 from pipeline.personalization import image_gen as IG
+from pipeline.personalization import motion_gen as MG
 from pipeline.personalization import planet_cohort as CO
 from pipeline.personalization import scene as SC
 from pipeline.personalization import segments as SEG
@@ -1679,6 +1680,12 @@ def build_page(request, email: str | None = None, overrides: dict | None = None)
     t("Hero image resolve", img_sigs,
       "disk cache → (async API if keyed) → scene.image_for gallery → CSS gradient",
       "say", img_out, img_why)
+    motion_receipt = hero_image.get("motion_receipt") or {}
+    if MG.motion_enabled(tenant=IMAGE_TENANT):
+        m_sigs, m_out, m_why = MG.hero_motion_trace(motion_receipt)
+        t("Hero motion resolve", m_sigs,
+          "keyframe stills → animated WebP loop (simulated change-over-time)",
+          "say", m_out, m_why)
     brain = brain_sim_signal(img_receipt)
     if brain["enabled"]:
         bs_sigs = [f"intent={brain.get('intent_id') or '—'}",
@@ -1693,6 +1700,7 @@ def build_page(request, email: str | None = None, overrides: dict | None = None)
 
     ledger = _ledger(entry, det, ident, loc)
     ledger.extend(IG.hero_image_ledger_rows(img_receipt))
+    ledger.extend(MG.hero_motion_ledger_rows(motion_receipt))
     login_state = bool(ident and ident.get("via") == "login")
     return {
         "entry": entry, "det": det, "ip_forced": ip_forced, "identity": ident,
@@ -2211,6 +2219,42 @@ def process_map(page: dict) -> dict:
            f"{len(g_blocked)} guardrail(s) applied" if g_blocked else
            "structured prompt assembled from signals — page shell renders instantly"),
           detail=img_detail)
+
+    # 15 · hero motion — timelapse loop (Planet only when motion.enabled)
+    motion_receipt = (hi.get("motion_receipt") or ir.get("motion") or {})
+    motion_enabled_flag = MG.motion_enabled(tenant=IMAGE_TENANT)
+    m_src = motion_receipt.get("source", "pending" if motion_enabled_flag else "disabled")
+    m_reads = [
+        f"motion_status={hi.get('motion_status', '—')}",
+        f"metaphor={motion_receipt.get('motion_metaphor', '—')}",
+        f"assembly={motion_receipt.get('assembly', 'animated_webp')}",
+    ]
+    if motion_receipt.get("cache_key"):
+        m_reads.append(f"cache_key={motion_receipt['cache_key'][:12]}…")
+    m_detail = [
+        _kv("Framing", motion_receipt.get("framing") or MG.motion_settings(tenant=IMAGE_TENANT).get("framing"),
+            fired=bool(motion_receipt.get("framing"))),
+        _kv("Motion metaphor", motion_receipt.get("motion_metaphor", "—"),
+            fired=bool(motion_receipt.get("motion_metaphor"))),
+        _kv("Assembly", motion_receipt.get("assembly", "animated_webp")),
+        _kv("Duration", f"{motion_receipt.get('duration_ms', 3000)} ms loop"),
+    ]
+    for fr in motion_receipt.get("frames") or []:
+        m_detail.append(_kv(f"Frame {fr.get('label', fr.get('index'))}",
+                              fr.get("image_url") or fr.get("image_path", "—")))
+    if motion_receipt.get("change_legibility_mean") is not None:
+        m_detail.append(_kv("Change legibility (mean)",
+                              f"{motion_receipt['change_legibility_mean']:.3f}", fired=True))
+    stage("heromotion", "Hero motion loop", "#sec-hero-motion",
+          m_reads,
+          "intent motion_metaphor → N keyframe prompts → assemble animated WebP → cache",
+          _branches(["generated", "pending", "unavailable", "disabled"], m_src),
+          (f"source = {m_src} · {motion_receipt.get('motion_metaphor', '—')}"
+           if motion_enabled_flag else "motion disabled"),
+          motion_receipt.get("framing") or "Simulated change-over-time — not visitor neuro-stimulation",
+          skipped=not motion_enabled_flag,
+          skip_reason="motion.enabled: false for this tenant",
+          detail=m_detail)
 
     return {"inputs": inputs, "stages": stages}
 

@@ -414,6 +414,26 @@ flowchart LR
         · <a href="{{ sc.dev_url }}">Receipt</a>
       </div>
       {% endif %}
+      {% if sc.motion_frames or sc.motion_url %}
+      <div class="cand-meta" style="margin-top:14px">
+        Motion · <code>{{ sc.motion_metaphor or '—' }}</code> · {{ sc.motion_source or 'pending' }}
+        {% if sc.motion_url %}· <a href="{{ sc.landing_url }}">Live loop →</a>{% endif %}
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:flex-start">
+        {% for fr in sc.motion_frames %}
+        <div style="width:100px;border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:10px">
+          {% if fr.image_url %}<img src="{{ fr.image_url }}" alt="" style="width:100%;height:64px;object-fit:cover">{% endif %}
+          <div style="padding:3px 6px;font-weight:700">{{ fr.label or ('t' ~ fr.index) }}</div>
+        </div>
+        {% endfor %}
+        {% if sc.motion_url %}
+        <div style="width:160px;border:1px solid var(--line);border-radius:8px;overflow:hidden">
+          <img src="{{ sc.motion_url }}" alt="Motion loop" style="width:100%;height:64px;object-fit:cover">
+          <div style="padding:3px 6px;font-size:10px;font-weight:700">loop preview</div>
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
     </article>
     {% endfor %}
   </div>

@@ -971,8 +971,31 @@ def resolve_surface_image(page: dict, *, surface_id: str = DEFAULT_SURFACE_ID,
 def resolve_hero_image(page: dict, *, generate: bool = False,
                        tenant: str | None = None) -> dict:
     """Page-facing wrapper for the hero surface — backward-compatible alias."""
-    return resolve_surface_image(page, surface_id=DEFAULT_SURFACE_ID,
-                                 generate=generate, tenant=tenant)
+    out = resolve_surface_image(page, surface_id=DEFAULT_SURFACE_ID,
+                                generate=generate, tenant=tenant)
+    out["still_url"] = out.get("url")
+    try:
+        from pipeline.personalization import motion_gen as MG
+        if MG.motion_enabled(tenant=tenant):
+            ctx = build_image_ctx(page)
+            motion = MG.get_hero_motion(
+                ctx, generate=generate, tenant=tenant,
+                still_receipt=out.get("receipt"),
+            )
+            out["motion_url"] = motion.get("url")
+            out["motion_type"] = motion.get("motion_type")
+            out["motion_status"] = motion.get("status")
+            if motion.get("receipt"):
+                out["motion_receipt"] = motion["receipt"]
+                merged = dict(out.get("receipt") or {})
+                merged["motion"] = motion["receipt"]
+                out["receipt"] = merged
+            dev = dict(out.get("dev") or {})
+            dev["motion"] = MG.hero_motion_dev_panel(motion)
+            out["dev"] = dev
+    except ImportError:
+        pass
+    return out
 
 
 _GUARD_LABELS = {

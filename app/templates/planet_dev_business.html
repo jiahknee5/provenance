@@ -177,11 +177,20 @@
       {% if B.visual.get('brain_score') is not none %}
       <tr><td class="k">Brain score</td><td>{{ '%.3f'|format(B.visual.brain_score) }} · {{ B.visual.brain_simulator or 'proxy_v1' }}{% if B.visual.get('candidates_evaluated') %} · {{ B.visual.candidates_evaluated }} candidates{% endif %}</td></tr>
       {% endif %}
+      {% if B.visual.hero_motion_metaphor %}
+      <tr><td class="k">Motion</td><td><code>{{ B.visual.hero_motion_metaphor }}</code> — simulated timelapse loop{% if B.visual.hero_motion_framing %}<div style="font-size:12px;color:var(--muted);margin-top:4px">{{ B.visual.hero_motion_framing }}</div>{% endif %}</td></tr>
+      {% endif %}
     </tbody>
   </table>
   {% if B.visual.hero_image_url %}
   <div style="padding:10px 14px;border-top:1px solid var(--line)">
     <img class="hi-thumb" src="{{ B.visual.hero_image_url }}" alt="Hero background">
+  </div>
+  {% endif %}
+  {% if B.visual.hero_motion_url %}
+  <div style="padding:10px 14px;border-top:1px solid var(--line)">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px">Motion loop</div>
+    <img class="hi-thumb" src="{{ B.visual.hero_motion_url }}" alt="Hero motion loop">
   </div>
   {% endif %}
 </div>

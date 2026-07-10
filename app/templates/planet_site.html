@@ -77,6 +77,14 @@
       .hero.has-img{transition:none}
     }
     .hero.has-img{transition:background-image .6s ease}
+    .hero.has-motion .hero-motion-layer{opacity:1}
+    .hero-motion-layer{position:absolute;inset:0;z-index:0;opacity:0;transition:opacity .6s ease;
+      background-size:cover;background-position:center center;pointer-events:none}
+    .hero-motion-layer img{width:100%;height:100%;object-fit:cover;display:block}
+    .hero-motion-fallback{position:absolute;inset:0;z-index:0;background-size:cover;background-position:center}
+    @media (prefers-reduced-motion:reduce){
+      .hero.has-motion .hero-motion-layer{display:none}
+    }
     .hero::before{content:"";position:absolute;inset:0;opacity:.5;
       background-image:radial-gradient(rgba(255,255,255,.045) 1px, transparent 1.4px);background-size:26px 26px}
     .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,7,13,.35),rgba(4,7,13,.66) 78%,var(--bg))}
@@ -207,9 +215,21 @@
 
 {% for sec in page.order %}
 {% if sec == 'hero' %}
-<header class="hero{% if page.hero_image.url %} has-img{% elif page.hero_image.status == 'pending' %} img-loading{% endif %}"
-  {% if page.hero_image.url %}style="background-image:linear-gradient(180deg,rgba(4,7,13,.72),rgba(4,7,13,.82)),url('{{ page.hero_image.url }}')"{% endif %}
-  id="planet-hero" data-hero-api="{{ hero_api_url }}" data-hero-status="{{ page.hero_image.status }}">
+<header class="hero{% if page.hero_image.motion_url %} has-motion{% elif page.hero_image.url %} has-img{% elif page.hero_image.status == 'pending' %} img-loading{% endif %}"
+  {% if page.hero_image.url and not page.hero_image.motion_url %}style="background-image:linear-gradient(180deg,rgba(4,7,13,.72),rgba(4,7,13,.82)),url('{{ page.hero_image.url }}')"{% endif %}
+  id="planet-hero"
+  data-hero-api="{{ hero_api_url }}"
+  data-hero-status="{{ page.hero_image.status }}"
+  data-motion-url="{{ page.hero_image.motion_url or '' }}"
+  data-motion-status="{{ page.hero_image.motion_status or '' }}"
+  data-still-url="{{ page.hero_image.still_url or page.hero_image.url or '' }}">
+  {% if page.hero_image.motion_url %}
+  <div class="hero-motion-layer" aria-hidden="true">
+    <img src="{{ page.hero_image.motion_url }}" alt="" loading="eager">
+  </div>
+  {% elif page.hero_image.url %}
+  <div class="hero-motion-fallback" aria-hidden="true" style="background-image:linear-gradient(180deg,rgba(4,7,13,.72),rgba(4,7,13,.82)),url('{{ page.hero_image.url }}')"></div>
+  {% endif %}
   <div class="in">
     <div class="mark">{{ logo }}</div>
     <div class="eyebrow">{% if S.hero.eyebrow %}{{ S.hero.eyebrow }}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="personalized — see why on {{ g.dev }}"></a></sup>{% endif %}</div>
@@ -350,7 +370,7 @@
     +'radial-gradient(900px 520px at 82% 20%, rgba(30,60,110,.24), transparent 55%),'
     +'radial-gradient(1400px 700px at 50% 110%, rgba(10,18,32,.9), transparent 70%),'
     +'linear-gradient(180deg,#0b1424 0%,#070d17 45%,#04070d 100%)';
-  function apply(url){
+  function applyStill(url){
     if(!url) return;
     hero.classList.remove('img-loading');
     hero.classList.add('has-img');
@@ -358,10 +378,33 @@
     hero.style.backgroundSize='cover,cover';
     hero.style.backgroundPosition='center center,center center';
   }
-  if(hero.dataset.heroStatus==='pending'){
+  function applyMotion(url,still){
+    if(!url||reduce) return applyStill(still);
+    hero.classList.remove('img-loading');
+    hero.classList.add('has-motion');
+    var layer=hero.querySelector('.hero-motion-layer');
+    if(!layer){
+      layer=document.createElement('div');
+      layer.className='hero-motion-layer';
+      layer.setAttribute('aria-hidden','true');
+      var img=document.createElement('img');
+      img.alt='';
+      layer.appendChild(img);
+      hero.insertBefore(layer,hero.firstChild);
+    }
+    layer.querySelector('img').src=url;
+    if(still){
+      hero.style.backgroundImage='linear-gradient(180deg,rgba(4,7,13,.72),rgba(4,7,13,.82)),url('+JSON.stringify(still)+')';
+    }
+  }
+  var motionUrl=hero.dataset.motionUrl;
+  var stillUrl=hero.dataset.stillUrl;
+  if(motionUrl){ applyMotion(motionUrl,stillUrl); }
+  else if(hero.dataset.heroStatus==='pending'){
     var api=hero.dataset.heroApi+location.search;
     fetch(api).then(function(r){return r.json();}).then(function(d){
-      if(d&&d.url) apply(d.url);
+      if(d&&d.motion_url) applyMotion(d.motion_url,d.url||d.still_url);
+      else if(d&&d.url) applyStill(d.url);
       else hero.classList.remove('img-loading');
     }).catch(function(){hero.classList.remove('img-loading');});
   }
