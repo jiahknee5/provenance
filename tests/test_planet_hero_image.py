@@ -215,9 +215,13 @@ def test_region_layer_ships_at_tier_1_the_location_signal():
 
 # --- Offline / cache / API ---
 
-def test_offline_no_api_key_returns_gallery_or_gradient(monkeypatch):
+def test_offline_no_api_key_returns_gallery_or_gradient(monkeypatch, tmp_path):
     monkeypatch.delenv("IMAGE_GEN_API_KEY", raising=False)
     monkeypatch.delenv("NANO_BANANA_API_KEY", raising=False)
+    # Isolate from the real pregenerated cache — this test asserts the cold-cache fallback.
+    monkeypatch.setattr(IG, "CACHE_DIR", tmp_path)
+    monkeypatch.setattr(IG, "IMAGE_DIR", tmp_path / "images")
+    monkeypatch.setattr(IG, "MANIFEST", tmp_path / "manifest.json")
     receipt = IG.get_hero_image(_ctx(), generate=False, tenant=TENANT)
     assert receipt["source"] in ("gallery", "gradient")
     assert receipt["source"] != "pending"
@@ -290,9 +294,13 @@ def test_planet_page_html_returns_200_without_blocking(monkeypatch):
     assert "planet-hero" in r.text
 
 
-def test_hero_image_api_offline(monkeypatch):
+def test_hero_image_api_offline(monkeypatch, tmp_path):
     monkeypatch.delenv("IMAGE_GEN_API_KEY", raising=False)
     monkeypatch.delenv("NANO_BANANA_API_KEY", raising=False)
+    # Isolate from the real pregenerated cache — this test asserts the cold-cache fallback.
+    monkeypatch.setattr(IG, "CACHE_DIR", tmp_path)
+    monkeypatch.setattr(IG, "IMAGE_DIR", tmp_path / "images")
+    monkeypatch.setattr(IG, "MANIFEST", tmp_path / "manifest.json")
     r = c.get("/api/planet/hero-image?utm_medium=paid&utm_campaign=x-location-crop-belts&utm_content=v01")
     assert r.status_code == 200
     data = r.json()
@@ -351,8 +359,12 @@ def test_dev_shows_intent_selection_fields():
     assert dev["prompt"]["full_prompt"]
 
 
-def test_dev_shows_guardrails_blocked_when_tier_strips_industry(monkeypatch):
+def test_dev_shows_guardrails_blocked_when_tier_strips_industry(monkeypatch, tmp_path):
     monkeypatch.delenv("IMAGE_GEN_API_KEY", raising=False)
+    # Isolate from the real pregenerated cache — this test asserts the cold-cache fallback.
+    monkeypatch.setattr(IG, "CACHE_DIR", tmp_path)
+    monkeypatch.setattr(IG, "IMAGE_DIR", tmp_path / "images")
+    monkeypatch.setattr(IG, "MANIFEST", tmp_path / "manifest.json")
     ctx = _ctx(industry="agriculture", tier=0, ad_variant_id="x-agriculture",
                top_objections=["cloud_cover"], audience_route="enterprise")
     receipt = IG.get_hero_image(ctx, generate=False, tenant=TENANT)

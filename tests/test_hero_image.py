@@ -170,9 +170,13 @@ def test_must_avoid_enforced_in_every_prompt():
 
 # --- Offline / cache / API ---
 
-def test_offline_no_api_key_returns_gallery_or_gradient(monkeypatch):
+def test_offline_no_api_key_returns_gallery_or_gradient(monkeypatch, tmp_path):
     monkeypatch.delenv("IMAGE_GEN_API_KEY", raising=False)
     monkeypatch.delenv("NANO_BANANA_API_KEY", raising=False)
+    # isolate from the shipped warm cache — this asserts the no-key cache-miss path
+    monkeypatch.setattr(IG, "CACHE_DIR", tmp_path)
+    monkeypatch.setattr(IG, "IMAGE_DIR", tmp_path / "images")
+    monkeypatch.setattr(IG, "MANIFEST", tmp_path / "manifest.json")
     receipt = IG.get_hero_image(_ctx(), generate=False)
     assert receipt["source"] in ("gallery", "gradient")
     assert receipt["source"] != "pending"
@@ -245,9 +249,13 @@ def test_make_page_html_returns_200_without_blocking(monkeypatch):
     assert "gauntlet-hero" in r.text
 
 
-def test_hero_image_api_offline(monkeypatch):
+def test_hero_image_api_offline(monkeypatch, tmp_path):
     monkeypatch.delenv("IMAGE_GEN_API_KEY", raising=False)
     monkeypatch.delenv("NANO_BANANA_API_KEY", raising=False)
+    # isolate from the shipped warm cache — this test asserts the cache-miss path
+    monkeypatch.setattr(IG, "CACHE_DIR", tmp_path)
+    monkeypatch.setattr(IG, "IMAGE_DIR", tmp_path / "images")
+    monkeypatch.setattr(IG, "MANIFEST", tmp_path / "manifest.json")
     r = c.get("/api/gauntlet/hero-image?utm_medium=paid&utm_campaign=x-keyword-ai-hiring&utm_content=v09")
     assert r.status_code == 200
     data = r.json()
@@ -307,8 +315,13 @@ def test_dev_shows_intent_selection_fields():
     assert dev["prompt"]["full_prompt"]
 
 
-def test_dev_shows_guardrails_blocked_when_tier_strips_industry(monkeypatch):
+def test_dev_shows_guardrails_blocked_when_tier_strips_industry(monkeypatch, tmp_path):
     monkeypatch.delenv("IMAGE_GEN_API_KEY", raising=False)
+    # isolate from the shipped warm cache — a cache hit would return the cached
+    # receipt (no industry to strip at warm time) instead of this ctx's guardrails
+    monkeypatch.setattr(IG, "CACHE_DIR", tmp_path)
+    monkeypatch.setattr(IG, "IMAGE_DIR", tmp_path / "images")
+    monkeypatch.setattr(IG, "MANIFEST", tmp_path / "manifest.json")
     ctx = _ctx(industry="technology", tier=0, ad_variant_id="x-keyword",
                top_objections=["open_market_hire"], audience_route="b2b_hire")
     receipt = IG.get_hero_image(ctx, generate=False)
