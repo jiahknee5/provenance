@@ -161,6 +161,37 @@ def test_image_gen_receipt_includes_brain_fields_planet(monkeypatch, tmp_path):
     assert receipt.get("brain_score") is not None
     assert receipt.get("candidates_evaluated", 0) >= 2
     assert "brain_region_scores" in receipt
+    candidates = receipt.get("candidates") or []
+    assert len(candidates) >= 2
+    assert sum(1 for c in candidates if c.get("selected")) == 1
+    for c in candidates:
+        assert c.get("prompt")
+        assert c.get("brain_score") is not None
+        assert c.get("image_path")
+        path = IG.IMAGE_DIR / c["image_path"]
+        assert path.exists(), c["image_path"]
+
+
+def test_candidate_gallery_from_receipt():
+    receipt = {
+        "brain_score": 0.72,
+        "brain_target": "attention",
+        "brain_simulator": "proxy_v1",
+        "candidates_evaluated": 3,
+        "winner_index": 1,
+        "prompt": "test prompt",
+        "cache_key": "abc123",
+        "candidates": [
+            {"index": 0, "prompt": "p", "brain_score": 0.68, "selected": False,
+             "image_path": "candidates/abc123/candidate_0.png"},
+            {"index": 1, "prompt": "p", "brain_score": 0.72, "selected": True,
+             "image_path": "abc123.png"},
+        ],
+    }
+    gal = IG.candidate_gallery_from_receipt(receipt)
+    assert gal["has_candidates"]
+    assert gal["winner"]["badge"] == "selected"
+    assert gal["losers"][0]["delta_vs_winner"] == -0.04
 
 
 def test_gauntlet_brain_scoring_off_by_default(monkeypatch, tmp_path):

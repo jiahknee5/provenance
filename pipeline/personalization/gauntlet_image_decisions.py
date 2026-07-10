@@ -315,6 +315,7 @@ def _comparison_cell(params: dict | None, *, page_path: str, dev_path: str,
     receipt = hero.get("receipt") or {}
     primary = sel["primary"]["intent_id"]
     url = _mount_thumb(hero.get("url") or receipt.get("url"), static_prefix)
+    gallery = IG.candidate_gallery_from_receipt(receipt, static_prefix=static_prefix)
     qs = ""
     if params:
         from urllib.parse import urlencode
@@ -335,6 +336,7 @@ def _comparison_cell(params: dict | None, *, page_path: str, dev_path: str,
         "dev_url": dev_url,
         "source": receipt.get("source", "gradient"),
         "tier": receipt.get("tier", "base_only"),
+        "candidate_gallery": gallery,
     }
 
 
@@ -425,6 +427,51 @@ def live_examples(page_path: str, *, dev_path: str, static_prefix: str = "/stati
                                 dev_path=dev_path, static_prefix=static_prefix)
         rows.append({"title": ex["title"], "subtitle": ex["subtitle"], **cell})
     return rows
+
+
+def decided_vs_rejected(*, page_path: str, dev_path: str,
+                        static_prefix: str = "/static",
+                        hero_api: str = "/api/gauntlet/hero-image") -> dict:
+    """Best-of-N winner + rejected candidates for image-decisions gallery."""
+    scenarios: list[dict] = []
+    for ex in LIVE_EXAMPLES:
+        cell = _comparison_cell(ex["params"], page_path=page_path,
+                                dev_path=dev_path, static_prefix=static_prefix)
+        gal = cell["candidate_gallery"]
+        scenarios.append({
+            "title": ex["title"],
+            "subtitle": ex["subtitle"],
+            "intent_id": cell["intent_id"],
+            "landing_url": cell["landing_url"],
+            "dev_url": cell["dev_url"],
+            **gal,
+        })
+    for pair in intent_comparisons(page_path, dev_path=dev_path, static_prefix=static_prefix):
+        for side_key in ("left", "right"):
+            cell = pair[side_key]
+            gal = cell["candidate_gallery"]
+            scenarios.append({
+                "title": f"{pair['title']} · {cell['intent_label']}",
+                "subtitle": pair["subtitle"],
+                "intent_id": cell["intent_id"],
+                "landing_url": cell["landing_url"],
+                "dev_url": cell["dev_url"],
+                **gal,
+            })
+    with_data = [s for s in scenarios if s.get("has_candidates")]
+    return {
+        "scenarios": scenarios,
+        "with_data_count": len(with_data),
+        "total_scenarios": len(scenarios),
+        "empty_hint": (
+            "Gauntlet brain_simulator is off by default. Enable in rules/gauntlet_image.yaml, "
+            f"then warm with BRAIN_SIM_BEST_OF_N=3 or hit <code>{hero_api}?generate=true</code>."
+        ),
+        "honest_framing": (
+            "When enabled: simulator-scored candidates — predicted optimization, "
+            "not measured brain data."
+        ),
+    }
 
 
 # --------------------------------------------------------------------------- #
@@ -619,7 +666,8 @@ def brain_simulator_view(config: dict) -> dict:
             "Generate N candidates (N=3 async when enabled; N=1 pregen unless BRAIN_SIM_BEST_OF_N)",
             "Score with BrainSimulatorScorer per intent brain_target",
             "Penalize guardrail-violation proxies; select highest brain_score",
-            "Cache winner; log brain_score + region_scores on receipt",
+            "Cache winner; persist rejected candidates when enabled",
+            "Log brain_score, region_scores, candidates[] on receipt",
         ],
         "target_labels": BRAIN_TARGET_LABELS,
         "region_map": REGION_SIMULATOR_MAP,
@@ -650,6 +698,9 @@ def build_image_decisions_view(*, page_path: str = "/gauntletapt",
         "brain_simulator": brain_simulator_view(config),
         "comparisons": intent_comparisons(page_path, dev_path=dev_path, static_prefix=static_prefix),
         "live_examples": live_examples(page_path, dev_path=dev_path, static_prefix=static_prefix),
+        "decided_rejected": decided_vs_rejected(
+            page_path=page_path, dev_path=dev_path, static_prefix=static_prefix,
+        ),
         "precached": precached_vs_live(),
         "provenance": {
             "config_path": config.get("_path", "rules/gauntlet_image.yaml"),
@@ -674,7 +725,7 @@ def build_image_decisions_view(*, page_path: str = "/gauntletapt",
                 "personalization_layers", "guardrails_applied", "guardrails_blocked",
                 "tier", "base_cache_key", "delta_cache_key", "tokens_saved_estimate",
                 "brain_simulator", "brain_target", "brain_score", "brain_region_scores",
-                "candidates_evaluated", "winner_index",
+                "candidates_evaluated", "winner_index", "candidates",
                 "prompt", "model", "vendor", "cache_key", "generated_at", "license",
             ],
         },

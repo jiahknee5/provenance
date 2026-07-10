@@ -233,8 +233,9 @@ def pipeline_steps() -> list[dict]:
             "summary": "Generate N candidates → Tribe v2 (or proxy_v1) score → cache winner",
             "detail": (
                 "When brain_simulator.enabled, async generation requests best-of-N candidates, "
-                "scores each against the intent's brain_target cortical regions, and caches only "
-                "the winner. Receipt logs brain_score, region_scores, candidates_evaluated. "
+                "scores each against the intent's brain_target cortical regions, caches the "
+                "winner, and persists rejected candidates (images + scores) on the manifest. "
+                "Receipt logs brain_score, region_scores, candidates_evaluated, candidates[]. "
                 "Predicted response optimization — not measured visitor brain data."
             ),
             "code": "brain_simulator.BrainSimulatorScorer.select_best()",
@@ -329,6 +330,7 @@ def _comparison_cell(params: dict | None, *, page_path: str, dev_path: str,
     receipt = hero.get("receipt") or {}
     primary = sel["primary"]["intent_id"]
     url = _mount_thumb(hero.get("url") or receipt.get("url"), static_prefix)
+    gallery = IG.candidate_gallery_from_receipt(receipt, static_prefix=static_prefix)
     qs = ""
     if params:
         from urllib.parse import urlencode
@@ -349,6 +351,7 @@ def _comparison_cell(params: dict | None, *, page_path: str, dev_path: str,
         "dev_url": dev_url,
         "source": receipt.get("source", "gradient"),
         "tier": receipt.get("tier", "base_only"),
+        "candidate_gallery": gallery,
     }
 
 
@@ -441,6 +444,53 @@ def live_examples(page_path: str, *, dev_path: str, static_prefix: str = "/stati
     return rows
 
 
+def decided_vs_rejected(*, page_path: str, dev_path: str,
+                        static_prefix: str = "/static",
+                        hero_api: str = "/api/planet/hero-image") -> dict:
+    """Best-of-N winner + rejected candidates for image-decisions Part 6."""
+    scenarios: list[dict] = []
+    for ex in LIVE_EXAMPLES:
+        cell = _comparison_cell(ex["params"], page_path=page_path,
+                                dev_path=dev_path, static_prefix=static_prefix)
+        gal = cell["candidate_gallery"]
+        scenarios.append({
+            "title": ex["title"],
+            "subtitle": ex["subtitle"],
+            "intent_id": cell["intent_id"],
+            "landing_url": cell["landing_url"],
+            "dev_url": cell["dev_url"],
+            **gal,
+        })
+    for pair in intent_comparisons(page_path, dev_path=dev_path, static_prefix=static_prefix):
+        for side_key in ("left", "right"):
+            cell = pair[side_key]
+            gal = cell["candidate_gallery"]
+            scenarios.append({
+                "title": f"{pair['title']} · {cell['intent_label']}",
+                "subtitle": pair["subtitle"],
+                "intent_id": cell["intent_id"],
+                "landing_url": cell["landing_url"],
+                "dev_url": cell["dev_url"],
+                **gal,
+            })
+    with_data = [s for s in scenarios if s.get("has_candidates")]
+    return {
+        "scenarios": scenarios,
+        "with_data_count": len(with_data),
+        "total_scenarios": len(scenarios),
+        "empty_hint": (
+            "No best-of-N candidate provenance for this state yet. Warm or generate with "
+            f"BRAIN_SIM_BEST_OF_N=3 — e.g. <code>PYTHONPATH=. BRAIN_SIM_BEST_OF_N=3 "
+            f"python -m scripts.warm_hero_cache --tenant planet --force-regen</code> "
+            f"or hit the async hero API (<code>{hero_api}?generate=true</code>)."
+        ),
+        "honest_framing": (
+            "Simulator-scored candidates — predicted visual-response optimization, "
+            "not measured visitor brain data."
+        ),
+    }
+
+
 def guardrails_view(config: dict) -> dict:
     defaults = (config.get("prompt_defaults") or {}).get("must_avoid") or []
     brand_extra = (config.get("brand") or {}).get("must_avoid_additions") or []
@@ -491,8 +541,8 @@ def brain_simulator_view(config: dict) -> dict:
             "Generate N candidates (default N=3 on async hero API; N=1 on pregen unless BRAIN_SIM_BEST_OF_N set)",
             "Score each with BrainSimulatorScorer against intent brain_target + brain_regions",
             "Penalize guardrail violations (surveillance crosshair, face-skin, text-grid proxies)",
-            "Select highest brain_score; cache winner only; discard losers",
-            "Log brain_simulator, brain_score, brain_region_scores on provenance receipt",
+            "Select highest brain_score; cache winner; persist rejected candidates for provenance",
+            "Log brain_simulator, brain_score, region_scores, candidates[] on manifest receipt",
         ],
         "target_labels": BRAIN_TARGET_LABELS,
         "region_map": REGION_SIMULATOR_MAP,
@@ -523,6 +573,9 @@ def build_image_decisions_view(*, page_path: str = "/planetapt",
         "brain_simulator": brain_simulator_view(config),
         "comparisons": intent_comparisons(page_path, dev_path=dev_path, static_prefix=static_prefix),
         "live_examples": live_examples(page_path, dev_path=dev_path, static_prefix=static_prefix),
+        "decided_rejected": decided_vs_rejected(
+            page_path=page_path, dev_path=dev_path, static_prefix=static_prefix,
+        ),
         "provenance": {
             "config_path": config.get("_path", "rules/planet_image.yaml"),
             "framework_doc": "docs/04-workflow/ACTION-IMAGE-PERSONALIZATION.md",
@@ -547,7 +600,7 @@ def build_image_decisions_view(*, page_path: str = "/planetapt",
                 "personalization_layers", "guardrails_applied", "guardrails_blocked",
                 "tier", "base_cache_key", "delta_cache_key", "tokens_saved_estimate",
                 "brain_simulator", "brain_target", "brain_score", "brain_region_scores",
-                "candidates_evaluated", "winner_index",
+                "candidates_evaluated", "winner_index", "candidates",
                 "prompt", "model", "vendor", "cache_key", "generated_at", "license",
             ],
         },

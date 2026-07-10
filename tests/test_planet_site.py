@@ -674,3 +674,13 @@ def test_image_decisions_nav_links_from_dev():
     assert 'href="/planet/dev/image-decisions"' in t
     p = c.get("/planetapt/dev?as=anon").text
     assert 'href="/planetapt/dev/image-decisions"' in p
+
+
+def test_image_decisions_renders_decided_rejected_section():
+    r = c.get("/planetapt/dev/image-decisions")
+    assert r.status_code == 200
+    t = _page_text(r)
+    assert "Decided vs rejected" in t
+    assert 'id="part-decided"' in r.text
+    assert "Candidate galleries" in t
+    assert "brain_score" in t or "demo scenarios have full candidate galleries" in t

@@ -101,6 +101,28 @@
   .inv-status{font-size:10.5px;font-weight:700;border-radius:5px;padding:2px 8px;white-space:nowrap}
   .inv-status.hit{background:#e7f6ee;color:#0a8a4f}
   .inv-status.miss{background:#fdf3e2;color:#8a5a0a}
+  .cand-scenario{padding:14px;border-bottom:1px solid var(--line)}
+  .cand-scenario:last-child{border-bottom:0}
+  .cand-scenario .t{font-weight:700;font-size:14px;margin:0 0 2px}
+  .cand-scenario .s{font-size:12px;color:var(--muted);margin:0 0 12px}
+  .cand-meta{font-size:12px;color:var(--muted);margin-bottom:10px}
+  .cand-meta code{font-size:11px}
+  .cand-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+  .cand-card{border:1px solid var(--line);border-radius:10px;background:#FAFBFC;overflow:hidden;font-size:12px}
+  .cand-card.selected{border-color:#0a8a4f;box-shadow:0 0 0 1px #0a8a4f33}
+  .cand-card.rejected{opacity:.92}
+  .cand-card .img{height:110px;background:#0a0e14;position:relative;overflow:hidden}
+  .cand-card .img img{width:100%;height:100%;object-fit:cover}
+  .cand-card .badge{position:absolute;top:6px;left:6px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:3px 7px;border-radius:4px}
+  .cand-card .badge.selected{background:#0a8a4f;color:#fff}
+  .cand-card .badge.rejected{background:#6b7280;color:#fff}
+  .cand-card .body{padding:10px 12px;line-height:1.45}
+  .cand-card .score{font-weight:700;font-size:13px;margin-bottom:4px}
+  .cand-card .delta{font-size:11px;color:#c0354b;font-weight:600}
+  .cand-card .prompt{font-size:11px;color:var(--muted);margin-top:8px;max-height:72px;overflow:auto;line-height:1.4}
+  .cand-card .regions{font-size:10px;font-family:ui-monospace,Menlo,monospace;color:var(--muted);margin-top:6px}
+  .cand-empty{padding:16px 14px;font-size:13px;color:var(--muted);line-height:1.55;background:#FAFBFC;border-radius:8px;margin:12px 14px}
+  .cand-summary{font-size:12.5px;color:var(--muted);padding:0 14px 12px}
 </style>
 
 <div class="id-head">
@@ -122,6 +144,7 @@
   <a href="#part-brain">Brain simulator</a>
   <a href="#part-4">4 · Provenance</a>
   <a href="#part-5">5 · Live examples</a>
+  <a href="#part-decided">Decided vs rejected</a>
   <a href="#part-6">6 · Pre-cached vs live</a>
 </nav>
 
@@ -364,6 +387,57 @@ flowchart LR
         {% endfor %}
       </div>
     </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="part" id="part-decided">
+  <div class="part-h"><span class="num">Gallery</span><h2>Decided vs rejected — best-of-N provenance</h2></div>
+  <p class="sub" style="margin:0 0 14px;font-size:13px;color:var(--muted);max-width:78ch;line-height:1.55">
+    {{ decided_rejected.honest_framing }}
+  </p>
+  <p class="cand-summary">{{ decided_rejected.with_data_count }} of {{ decided_rejected.total_scenarios }} demo scenarios have full candidate galleries.</p>
+
+  <div class="sec">
+    <div class="h">Candidate galleries — winner + rejected</div>
+    {% for sc in decided_rejected.scenarios %}
+    <article class="cand-scenario">
+      <div class="t">{{ sc.title }}</div>
+      <div class="s">{{ sc.subtitle }} · intent <code>{{ sc.intent_id }}</code></div>
+      {% if sc.has_candidates %}
+      <div class="cand-meta">
+        <code>{{ sc.brain_target }}</code> · {{ sc.brain_simulator or 'proxy_v1' }}
+        · N={{ sc.candidates_evaluated }} · winner index {{ sc.winner_index }}
+        · <a href="{{ sc.dev_url }}">Receipt →</a>
+      </div>
+      <div class="cand-grid">
+        {% for c in sc.candidates %}
+        <div class="cand-card {{ c.badge }}">
+          <div class="img">
+            {% if c.image_url %}<img src="{{ c.image_url }}" alt="Candidate {{ c.index }}" loading="lazy">{% endif %}
+            <span class="badge {{ c.badge }}">{{ c.badge }}</span>
+          </div>
+          <div class="body">
+            <div class="score">brain_score {{ '%.3f'|format(c.brain_score) if c.brain_score is not none else '—' }}</div>
+            {% if c.delta_vs_winner is not none %}
+            <div class="delta">{{ '%+.3f'|format(c.delta_vs_winner) }} vs winner</div>
+            {% endif %}
+            {% if c.brain_region_scores %}
+            <div class="regions">{% for k, v in c.brain_region_scores.items() %}{{ k }}={{ '%.2f'|format(v) }}{% if not loop.last %} · {% endif %}{% endfor %}</div>
+            {% endif %}
+            <div class="prompt">{{ c.prompt }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="cand-empty">
+        {{ decided_rejected.empty_hint|safe }}
+        · <a href="{{ sc.landing_url }}">Landing</a>
+        · <a href="{{ sc.dev_url }}">Receipt</a>
+      </div>
+      {% endif %}
+    </article>
     {% endfor %}
   </div>
 </section>

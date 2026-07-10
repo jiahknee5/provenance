@@ -15,6 +15,7 @@ import json
 import os
 import pathlib
 import re
+import shutil
 from datetime import datetime, timezone
 from typing import Any
 import httpx
@@ -359,8 +360,26 @@ def _public_url(cache_key: str, ext: str = "png") -> str:
     return f"/static/generated/{cache_key}.{ext}"
 
 
+def _public_generated_path(relative_path: str) -> str:
+    """URL for any file under data/demo/image_cache/images/ (incl. candidates/)."""
+    return f"/static/generated/{relative_path.lstrip('/')}"
+
+
+def mount_generated_url(url: str | None, static_prefix: str = "/static") -> str | None:
+    """Rewrite /static/generated/… for tenant-mounted static prefixes."""
+    if not url or not url.startswith("/static/generated/"):
+        return url
+    if static_prefix == "/static":
+        return url
+    return static_prefix + url[len("/static"):]
+
+
 def _local_path(cache_key: str, ext: str = "png") -> pathlib.Path:
     return IMAGE_DIR / f"{cache_key}.{ext}"
+
+
+def _candidate_rel_path(cache_key: str, index: int, ext: str) -> str:
+    return f"candidates/{cache_key}/candidate_{index}.{ext}"
 
 
 def _load_cached(cache_key: str) -> dict | None:
@@ -387,6 +406,9 @@ def invalidate_cached(cache_key: str) -> None:
         path = _local_path(cache_key, ext)
         if path.exists():
             path.unlink()
+    cand_dir = IMAGE_DIR / "candidates" / cache_key
+    if cand_dir.exists():
+        shutil.rmtree(cand_dir, ignore_errors=True)
 
 
 def _save_image(cache_key: str, data: bytes, ext: str = "png") -> pathlib.Path:
@@ -464,13 +486,13 @@ def _select_scored_candidate(
     prompt: str,
     *,
     tenant: str | None = None,
-) -> tuple[dict, dict | None, int, int]:
+) -> tuple[dict, dict | None, int, int, list[dict]]:
     """Pick best candidate when brain scoring enabled; else first success."""
     if not api_results:
         raise ValueError("no api results")
     config = _tenant_config(tenant)
     if not brain_sim_enabled(config) or not structured.get("brain_target"):
-        return api_results[0], None, len(api_results), 0
+        return api_results[0], None, len(api_results), 0, []
     scorer = BrainSimulatorScorer()
     target = structured["brain_target"]
     regions = list(structured.get("brain_regions") or [])
@@ -478,10 +500,86 @@ def _select_scored_candidate(
         GeneratedCandidate(index=i, image_bytes=_candidate_bytes(r), ext=r.get("ext", "png"))
         for i, r in enumerate(api_results)
     ]
-    winner, best_score, _all_scores = scorer.select_best(
+    winner, best_score, all_scores = scorer.select_best(
         candidates, target, regions, _brain_score_context(structured, prompt),
     )
-    return api_results[winner.index], best_score, len(api_results), winner.index
+    return api_results[winner.index], best_score, len(api_results), winner.index, all_scores
+
+
+def _persist_candidate_provenance(
+    cache_key: str,
+    prompt: str,
+    api_results: list[dict],
+    all_scores: list[dict],
+    winner_index: int,
+) -> list[dict]:
+    """Save loser images + build manifest candidates[] for best-of-N provenance."""
+    if not all_scores or len(api_results) < 2:
+        return []
+    out: list[dict] = []
+    for i, (api_result, score) in enumerate(zip(api_results, all_scores)):
+        ext = api_result.get("ext", "png")
+        selected = i == winner_index
+        if selected:
+            image_path = f"{cache_key}.{ext}"
+        else:
+            rel = _candidate_rel_path(cache_key, i, ext)
+            path = IMAGE_DIR / rel
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(_candidate_bytes(api_result))
+            image_path = rel
+        out.append({
+            "index": i,
+            "prompt": prompt,
+            "brain_score": score.get("total"),
+            "brain_region_scores": score.get("region_scores"),
+            "brain_proxy_breakdown": score.get("proxy_breakdown"),
+            "brain_penalties": score.get("penalties"),
+            "brain_guardrail_penalty": score.get("guardrail_penalty"),
+            "selected": selected,
+            "image_path": image_path,
+            "ext": ext,
+        })
+    return out
+
+
+def candidate_gallery_from_receipt(receipt: dict, *, static_prefix: str = "/static") -> dict:
+    """View model for decided vs rejected candidate galleries on /image-decisions."""
+    raw = receipt.get("candidates") or []
+    winner_score = receipt.get("brain_score")
+    enriched: list[dict] = []
+    for c in raw:
+        path = c.get("image_path") or ""
+        url = mount_generated_url(_public_generated_path(path), static_prefix) if path else None
+        delta = None
+        if (
+            winner_score is not None
+            and c.get("brain_score") is not None
+            and not c.get("selected")
+        ):
+            delta = round(float(c["brain_score"]) - float(winner_score), 4)
+        enriched.append({
+            **c,
+            "image_url": url,
+            "delta_vs_winner": delta,
+            "badge": "selected" if c.get("selected") else "rejected",
+        })
+    enriched.sort(key=lambda row: row.get("index", 0))
+    winner = next((c for c in enriched if c.get("selected")), None)
+    losers = [c for c in enriched if not c.get("selected")]
+    return {
+        "has_candidates": len(enriched) >= 2,
+        "candidates_evaluated": receipt.get("candidates_evaluated"),
+        "winner_index": receipt.get("winner_index"),
+        "brain_target": receipt.get("brain_target"),
+        "brain_simulator": receipt.get("brain_simulator"),
+        "winner_score": winner_score,
+        "prompt": receipt.get("prompt"),
+        "cache_key": receipt.get("cache_key"),
+        "winner": winner,
+        "losers": losers,
+        "candidates": enriched,
+    }
 
 
 def _receipt_extras(structured: II.StructuredPrompt, tier_fields: dict | None = None,
@@ -648,7 +746,7 @@ def _generate_and_cache(ctx: dict, structured: II.StructuredPrompt, prompt: str,
     n = _best_of_n(tenant=tenant, generate=generate)
     api_results = _generate_candidates(prompt, n)
     if api_results:
-        api_result, brain_score, evaluated, winner_index = _select_scored_candidate(
+        api_result, brain_score, evaluated, winner_index, all_scores = _select_scored_candidate(
             api_results, structured, prompt, tenant=tenant,
         )
         raw = _candidate_bytes(api_result)
@@ -659,6 +757,9 @@ def _generate_and_cache(ctx: dict, structured: II.StructuredPrompt, prompt: str,
             candidates_evaluated=evaluated,
             winner_index=winner_index,
             structured=structured,
+        )
+        candidate_rows = _persist_candidate_provenance(
+            cache_key, prompt, api_results, all_scores, winner_index,
         )
         if brain_sim_enabled(_tenant_config(tenant)) and n > 1:
             chain.append(f"best_of_{n}")
@@ -674,6 +775,8 @@ def _generate_and_cache(ctx: dict, structured: II.StructuredPrompt, prompt: str,
             "fallback_chain": chain + ["api"],
             **_receipt_extras(structured, tier_fields, brain_fields),
         }
+        if candidate_rows:
+            receipt["candidates"] = candidate_rows
         manifest = _read_manifest()
         manifest[cache_key] = {k: v for k, v in receipt.items() if k != "url"}
         manifest[cache_key]["ext"] = ext
