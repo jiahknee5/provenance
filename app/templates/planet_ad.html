@@ -1,0 +1,52 @@
+{#- Single X.com ad mockup — click through to the message-matched Planet landing page. -#}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ variant.x_targeting_type }} — Planet X Ad</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#04070d;--x-bg:#15202b;--x-line:#38444d;--blu:#3ba1ff;--blu-t:#6cbcff;--ink:#eef3f9;--muted:#8899a6}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,sans-serif;padding:24px}
+    a{color:inherit;text-decoration:none}
+    .shell{max-width:520px;width:100%}
+    .back{font:12px 'JetBrains Mono',monospace;color:var(--muted);margin-bottom:16px;display:inline-block}
+    .back:hover{color:var(--blu-t)}
+    .card{background:var(--x-bg);border:1px solid var(--x-line);border-radius:16px;overflow:hidden}
+    .top{display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid var(--x-line)}
+    .av{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 15px Inter;color:#fff;background:{{ variant.ad.accent }}}
+    .meta b{display:block;font:700 15px Inter}
+    .meta span{font:14px Inter;color:var(--muted)}
+    .body{padding:16px}
+    .body p{font:17px/1.55 Inter;color:#e7e9ea}
+    .body .trig{color:var(--blu-t);font-weight:500}
+    .utm{font:10px 'JetBrains Mono',monospace;color:var(--muted);padding:0 16px 12px;word-break:break-all}
+    .go{display:block;margin:0 16px 16px;text-align:center;font:700 14px Inter;color:#04121f;background:var(--blu);border-radius:24px;padding:14px}
+    .go:hover{background:var(--blu-t)}
+    .hint{text-align:center;font:12px Inter;color:var(--muted);margin-top:14px}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <a class="back" href="{{ g.ads }}">← All 12 ads</a>
+  <div class="card">
+    <div class="top">
+      <div class="av">{{ variant.ad.avatar }}</div>
+      <div class="meta">
+        <b>{{ variant.ad.display }}</b>
+        <span>@{{ variant.ad.handle }} · Promoted · {{ variant.x_targeting_type }}</span>
+      </div>
+    </div>
+    <div class="body">
+      <p><span class="trig">{{ variant.ad.trigger }}</span> {{ variant.ad.body }} {{ variant.ad.proof }}</p>
+    </div>
+    <div class="utm">X config: {{ variant.x_targeting_example }}<br>
+      utm_source=x · utm_medium=paid · utm_campaign={{ variant.utm_campaign }} · utm_content={{ variant.variant_id }}</div>
+    <a class="go" href="{{ landing_url }}">{{ variant.ad.cta_label }}</a>
+  </div>
+  <p class="hint">Click through to see the message-matched landing page hero. LP previews: <a href="{{ g.ads_lp }}" style="color:var(--blu-t)">{{ g.ads_lp }}</a></p>
+</div>
+</body>
+</html>

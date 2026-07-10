@@ -192,6 +192,7 @@ def _render_dev(request: Request, m: dict[str, str]) -> HTMLResponse:
     toggle_anon, toggle_known = _dev_toggles(m["dev"], qs, as_state)
     return templates.TemplateResponse(request, "gauntlet_dev.html", {
         "page": page, "pmap": GS.process_map(page),
+        "story": GS.plain_story(page),
         "as_state": as_state,
         "qs": qs, "toggle_anon": toggle_anon,
         "toggle_known": toggle_known,
@@ -220,6 +221,7 @@ def _render_dev_business(request: Request, m: dict[str, str]) -> HTMLResponse:
     toggle_anon, toggle_known = _dev_toggles(biz_path, qs, as_state)
     return templates.TemplateResponse(request, "gauntlet_dev_business.html", {
         "page": page, "biz": GDB.build_business_dev_view(page),
+        "story": GS.plain_story(page),
         "as_state": as_state,
         "qs": qs, "toggle_anon": toggle_anon,
         "toggle_known": toggle_known,

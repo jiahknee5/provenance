@@ -1,38 +1,46 @@
-"""Marketing decision log for /dev/business — campaign ops view for practitioner marketers.
+"""Marketing decision log for /planet/dev/business — campaign ops view for marketers.
 
-Deterministic transform of the `page` dict from GS.build_page() into decision rows
-a marketer can audit: arrival, segment, objections, copy slots, visual, CRM steering.
-No LLM, no extra state — same inputs as /dev.
+Deterministic transform of the `page` dict from PS.build_page() into decision rows
+a marketer can audit: arrival, segment, LOCATION (the Planet differentiator),
+objections, copy slots, visual, CRM steering. No LLM, no extra state — same inputs
+as /planet/dev.
 """
 from __future__ import annotations
 
-from pipeline.personalization import gauntlet_site as GS
 from pipeline.personalization import image_gen as IG
+from pipeline.personalization import planet_site as PS
 
 _AUDIENCE_LABELS = {
-    "companies": "B2B hiring & upskilling leaders",
-    "individuals": "Individual engineers (Challenger track)",
+    "enterprise": "Enterprise / mission programs (direct sales)",
+    "selfserve": "Self-serve ops teams (AUM + trial)",
+    "research": "Researchers & academics (Education & Research Program)",
     "neutral": "Mixed intent — no strong segment signal yet",
 }
 
 _SEGMENT_PERSONAS = {
-    "CTO": "CTO / VP Engineering hire track",
-    "Engineer": "Senior engineer Challenger track",
-    "HR/L&D": "HR / L&D Catalyst upskill track",
+    "Agronomy": "Agriculture — VP Digital Ag / agronomy enterprise track",
+    "GEOINT": "Defense & Intelligence — GEOINT / mission enterprise track",
+    "Underwriting": "Insurance — claims & cat-model enterprise track",
+    "Carbon/MRV": "Forestry & Carbon — MRV self-serve track",
+    "Energy Ops": "Energy & Infrastructure — asset-integrity self-serve track",
+    "Civil Gov": "Civil Government — state agency self-serve track",
+    "Maritime": "Maritime — MDA / enforcement enterprise track",
+    "Response": "Disaster Response — humanitarian self-serve track",
+    "Research": "Education & Research — academic program track",
     "cross-audience": "Cross-audience — message match only",
 }
 
 _NETWORK_READ = {
-    "corporate": "Corporate IP → B2B hire / Catalyst track is likelier",
-    "corporate (via VPN)": "Corporate network (possibly VPN) → B2B hire framing",
-    "residential": "Residential connection → individual engineer / Challenger track",
-    "consumer ISP": "Consumer ISP → individual engineer / Challenger track",
-    "mobile": "Mobile connection → individual engineer / Challenger track",
+    "corporate": "Corporate IP → enterprise / direct-sales track is likelier",
+    "corporate (via VPN)": "Corporate network (possibly VPN) → enterprise framing",
+    "residential": "Residential connection → practitioner / self-serve trial track",
+    "consumer ISP": "Consumer ISP → practitioner / self-serve trial track",
+    "mobile": "Mobile connection → practitioner / self-serve trial track",
 }
 
 _FIRMOGRAPHIC_READ = {
     0: "No firmographic hint — copy stays neutral; entry channel leads",
-    1: "Geo hint only — can reference region in framing, never name them",
+    1: "Geo hint only — the daily-coverage location claim may ship, never their address",
     2: "Industry signal — tailor proof and headlines to sector (never company name)",
     3: "Strong firmographic signal — sector + region framing, still no creepy recitation",
 }
@@ -41,10 +49,11 @@ _SLOT_LABELS = {
     "hero_eyebrow": "Hero eyebrow",
     "hero_headline": "Hero headline",
     "hero_sub": "Hero subhead",
+    "hero_location": "Hero location line",
     "cta_primary": "Primary CTA",
     "cta_secondary": "Secondary CTA",
     "prove_intro": "Proof block intro",
-    "challenger_body": "Challenger callout",
+    "research_body": "Research callout",
     "compare_emphasis": "Comparison table emphasis",
     "numbers_order": "Stats emphasis order",
     "final_cta": "Final CTA block",
@@ -67,9 +76,11 @@ def _marketer_reason(d: dict) -> str:
     if src and src != "—":
         if "ad variant" in src.lower():
             parts.append(f"Campaign match ({src})")
+        elif "geo-ip" in src.lower() or "location" in src.lower() or "theater" in src.lower():
+            parts.append(f"Location signal ({src})")
         elif "reverse-ip" in src.lower() or "firmographic" in src.lower():
             parts.append("Firmographic hint shapes copy — never recited")
-        elif "hubspot" in src.lower() or "crm" in src.lower():
+        elif "hubspot" in src.lower() or "crm" in src.lower() or "archetype" in src.lower():
             parts.append(f"CRM signal ({src})")
         elif "objection" in src.lower():
             parts.append(f"Objection reframe ({src})")
@@ -114,13 +125,15 @@ def _arrival_attribution(page: dict) -> dict:
         rows.extend([
             {"label": "X targeting type", "value": ad["x_targeting_type"],
              "note": ad["x_targeting_example"]},
+            {"label": "Market segment", "value": ad.get("segment", "—"),
+             "note": "one of the nine researched Planet segments"},
             {"label": "Ad variant", "value": ad["variant_id"],
              "note": f"utm_campaign={ad['utm_campaign']}"},
             {"label": "Ad hook (clicked)", "value": f"“{ac.get('trigger', '')}”"},
             {"label": "Ad body", "value": ac.get("body", "—")},
             {"label": "Ad CTA", "value": ac.get("cta_label", "—")},
             {"label": "Message-match rule",
-             "value": f"Hero must echo ad promise: “{ad['page']['h1_pre']}{ad['page']['h1_gold']}”",
+             "value": f"Hero must echo ad promise: “{ad['page']['h1_pre']}{ad['page']['h1_blue']}”",
              "note": "Landing headline, eyebrow, proof, and primary CTA continue the ad conversation"},
         ])
     elif entry.get("channel") == "email":
@@ -133,7 +146,7 @@ def _arrival_attribution(page: dict) -> dict:
                      "note": entry.get("why", "")})
     else:
         rows.append({"label": "Message-match rule",
-                     "value": "Direct visit — IP firmographics and CRM (if any) steer copy",
+                     "value": "Direct visit — IP firmographics, location, and CRM (if any) steer copy",
                      "note": entry.get("why", "")})
 
     decision = f"Decision: classify as {entry['channel_label'].lower()}"
@@ -145,6 +158,34 @@ def _arrival_attribution(page: dict) -> dict:
         decision += " → no ad promise to match"
 
     return {"channel": entry["channel_label"], "decision": decision, "rows": rows}
+
+
+def _location_read(page: dict) -> dict:
+    """The Planet differentiator as a marketer-facing decision entry."""
+    loc = page.get("location") or {}
+    mode = loc.get("mode", "none")
+    rows: list[dict] = [
+        {"label": "Region (geo-IP)", "value": loc.get("region") or page["det"].get("region") or "—"},
+        {"label": "Segment lens", "value": loc.get("segment") or "— (default daily-coverage line)"},
+        {"label": "Register", "value": {"region": "Region-scale claim (allude)",
+                                        "theater": "Theater-of-interest (defense guardrail)",
+                                        "none": "No claim — location unknown"}.get(mode, mode)},
+    ]
+    if loc.get("line"):
+        rows.append({"label": "Shipped line", "value": f"“{loc['line']}”"})
+    if loc.get("blocked_say"):
+        rows.append({"label": "Blocked recite", "value": f"“{loc['blocked_say']}”",
+                     "note": "street/property-scale precision is held — the anti-surveillance line"})
+    if mode == "region":
+        decision = ("Decision: ship the daily-coverage location claim — Planet truthfully images "
+                    f"{loc.get('region')} every day, so the region-scale line converts without creeping")
+    elif mode == "theater":
+        decision = ("Decision: defense audience — reference their security theater, never their own "
+                    "location; daily-coverage confidence, not surveillance")
+    else:
+        decision = "Decision: hold all location claims — no location confidence for this visitor"
+    return {"mode": mode, "decision": decision, "rows": rows,
+            "why": loc.get("why", "")}
 
 
 def _audience_read(page: dict) -> dict:
@@ -173,18 +214,19 @@ def _audience_read(page: dict) -> dict:
     if det.get("industry"):
         signals.append({"label": "Firmographic hint", "value": f"Sector: {det['industry']}"})
     if det.get("region"):
-        signals.append({"label": "Firmographic hint", "value": f"Region: {det['region']}"})
+        signals.append({"label": "Location signal", "value": f"Region: {det['region']} — the "
+                        "daily-coverage claim is live for this visitor"})
 
     ident = page.get("identity")
     if ident:
         if ident.get("kind") == "cohort":
             arch = ident.get("archetype", {})
             signals.append({"label": "CRM segment",
-                              "value": f"{arch.get('label', 'Known lead')} — {arch.get('reason', '')}"})
+                            "value": f"{arch.get('label', 'Known lead')} — {arch.get('reason', '')}"})
         elif ident.get("kind") == "resolved":
             co = (ident.get("resolved") or {}).get("company")
             signals.append({"label": "Login signal",
-                              "value": f"Work email" + (f" from {co}" if co else "")})
+                            "value": "Work email" + (f" from {co}" if co else "")})
 
     route = _AUDIENCE_LABELS.get(audience, audience)
     decision = f"Decision: route to {route}"
@@ -193,7 +235,7 @@ def _audience_read(page: dict) -> dict:
     elif tier >= 2 and det.get("industry"):
         decision += f" — industry hint ({det['industry']}) steers proof and framing"
     elif net in ("corporate", "corporate (via VPN)"):
-        decision += " — corporate network leans B2B hire track"
+        decision += " — corporate network leans enterprise / direct-sales track"
 
     return {
         "segment": segment,
@@ -207,17 +249,17 @@ def _shipped_reframe(page: dict, slot: str, rank: int) -> str:
     """Pull the actual copy text that answered an objection."""
     sections = page.get("sections", {})
     hero = sections.get("hero", {})
-    challenger = sections.get("challenger", {})
+    research = sections.get("research", {})
     cta = sections.get("cta", {})
     prove = sections.get("prove", {})
 
     if slot == "hero_sub":
         return hero.get("sub", "—")
-    if slot == "challenger_body":
-        return challenger.get("body", "—")
+    if slot == "research_body":
+        return research.get("body", "—")
     if slot == "final_cta":
         return f"{cta.get('heading', '')} · {cta.get('sub', '')}"
-    if slot.startswith("prove_card_"):
+    if slot and slot.startswith("prove_card_"):
         try:
             idx = int(slot.split("_")[-1])
             cards = prove.get("cards") or []
@@ -238,7 +280,7 @@ def _shipped_reframe(page: dict, slot: str, rank: int) -> str:
         if row.get("rank") == rank:
             obj = row.get("objection") or {}
             rf = obj.get("reframe", {})
-            for key in ("hero_sub", "challenger_body", "final_cta_sub"):
+            for key in ("hero_sub", "research_body", "final_cta_sub"):
                 if rf.get(key):
                     return rf[key]
     return "—"
@@ -295,7 +337,7 @@ def _visual_decision(page: dict) -> dict:
 
     intent_id = primary["intent_id"].replace("_", " ") if primary else "default gradient"
     intent_why = primary.get("why", "reinforces the hero CTA emotionally") if primary else "—"
-    mood = prompt.get("mood") or "Professional, high-trust"
+    mood = prompt.get("mood") or "Calm, planetary, confident"
     metaphor = prompt.get("visual_metaphor") or "—"
     technique = conv.get("sales_technique") or "—"
     drives = conv.get("drives_action") or hero.get("cta_primary", "")
@@ -315,7 +357,7 @@ def _visual_decision(page: dict) -> dict:
             elif s.startswith("industry:"):
                 friendly.append(s.split(":", 1)[1] + " industry")
             elif s.startswith("region:"):
-                friendly.append(s.split(":", 1)[1] + " region")
+                friendly.append(s.split(":", 1)[1] + " region — the location signal reaches the image")
             elif s.startswith("archetype:"):
                 friendly.append("CRM archetype")
         adj = " + ".join(friendly) if friendly else "personalization signals"
@@ -422,6 +464,12 @@ def _steering_vs_saying(page: dict) -> dict:
     if ad and ad.get("hold_note"):
         held.append(ad["hold_note"])
 
+    loc = page.get("location") or {}
+    if loc.get("line"):
+        steered.append("Location line: region-scale daily-coverage claim — never street or property scale")
+    if loc.get("blocked_say"):
+        held.append("Location precision (city/building scale) — never displayed")
+
     ident = page.get("identity")
     if ident and ident.get("kind") == "cohort":
         said.append("First name & declared form answers — stated when logged in")
@@ -432,11 +480,12 @@ def _steering_vs_saying(page: dict) -> dict:
 
     return {
         "said": said or ["Only first-party declared facts when the visitor identifies themselves"],
-        "steered": steered or ["Anonymous firmographics and ad context shape copy without naming the visitor"],
+        "steered": steered or ["Anonymous firmographics, region, and ad context shape copy without naming the visitor"],
         "held": held or ["No blocked facts for this visitor"],
         "rules": [
-            "We steer on industry and segment — we never name their company from IP alone",
-            "We never recite behavioral micro-details (“you bounced at step 3”)",
+            "We steer on region and segment — we never name their company from IP alone",
+            "Location claims stay at region/landscape scale — never street or property scale",
+            "Defense audiences get the theater register — their own location is never referenced",
             "Ad targeting demographics (age/gender) steer internally — never appear on page",
         ],
     }
@@ -447,6 +496,7 @@ def build_business_dev_view(page: dict) -> dict:
     return {
         "arrival": _arrival_attribution(page),
         "audience_read": _audience_read(page),
+        "location": _location_read(page),
         "objections": _objection_stack(page),
         "copy_decisions": _copy_decisions(page),
         "visual": _visual_decision(page),

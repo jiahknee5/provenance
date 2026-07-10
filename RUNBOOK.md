@@ -88,3 +88,7 @@ export IMAGE_GEN_MODEL=gemini-2.5-flash-image                            # optio
 
 Cached artifacts: `data/demo/image_cache/` (manifest + `images/` served at `/static/generated/`).
 Same prompt + model → same cache key → same image (Art IV). Full receipt on `/dev`.
+
+**Two-tier caching:** segment bases are pre-generatable (`python -m scripts.pregen_segment_images --dry-run`
+lists ~16 keys for Gauntlet ad variants + audience routes). Tier-2 deltas (objection, industry,
+region, archetype) append only when signals exist — see `docs/04-workflow/ACTION-IMAGE-PERSONALIZATION.md` §8.

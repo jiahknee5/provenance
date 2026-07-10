@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}/dev — Gauntlet replica decisions · apt{% endblock %}
+{% block title %}{{ g.dev }} — Planet replica decisions · apt{% endblock %}
 {% block content %}
 <style>
   main{max-width:1340px}
@@ -34,20 +34,6 @@
     .gd-side .side-cap{display:none}
     .gd-side a + .side-cap{border:0;margin:0;padding:0}
   }
-  /* ---- plain-English TL;DR ---- */
-  .tldr{display:grid;grid-template-columns:1.6fr 1fr;gap:0;border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:var(--shadow);overflow:hidden;margin-bottom:6px}
-  @media(max-width:920px){.tldr{grid-template-columns:1fr}}
-  .tldr .story{padding:14px 18px}
-  .tldr .story .cap{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px}
-  .tldr .story .row{display:flex;gap:10px;padding:6px 0;font-size:13.5px;line-height:1.55}
-  .tldr .story .row .lbl{flex:none;min-width:150px;font-weight:700;color:var(--ink);font-size:12px;padding-top:1px}
-  .tldr .story .row .txt{color:#333C45;min-width:0}
-  .tldr .legend{border-left:1px solid var(--line);background:#FAFBFC;padding:14px 16px}
-  @media(max-width:920px){.tldr .legend{border-left:0;border-top:1px solid var(--line)}}
-  .tldr .legend .cap{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px}
-  .tldr .legend .lrow{display:flex;gap:9px;padding:5px 0;font-size:12px;line-height:1.5;align-items:baseline}
-  .tldr .legend .lrow .pol{flex:none;margin-top:1px}
-  .tldr .legend .lrow .d{color:#475569;min-width:0}
   /* ---- chapters ---- */
   .ch{margin-top:34px;scroll-margin-top:16px}
   .ch:first-child{margin-top:0}
@@ -113,12 +99,14 @@
   .obj-body .sig{font-size:11.5px;color:var(--muted);margin-top:3px}
   .obj-body .slot{font-size:11.5px;color:#475569;margin-top:4px}
   .obj-blocked{margin:0 15px 12px;border:1px solid #f2c6cd;background:#fcebed;border-radius:8px;padding:9px 11px;font-size:12.5px;color:#8c2434}
+  .loc-line{display:flex;align-items:center;gap:9px;padding:12px 15px;border-bottom:1px solid var(--line);font-size:14px;font-weight:600;color:var(--ink)}
+  .loc-line .orb{width:9px;height:9px;border-radius:50%;background:#3ba1ff;box-shadow:0 0 8px rgba(59,161,255,.8);flex:none}
   .hi-prev{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 15px;border-top:1px solid var(--line);background:#FAFBFC}
   @media(max-width:700px){.hi-prev{grid-template-columns:1fr}}
   .hi-prev .box{border:1px solid var(--line);border-radius:9px;background:#fff;padding:10px;min-height:100px}
   .hi-prev .box .cap{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px}
   .hi-prev img{width:100%;max-height:140px;object-fit:cover;border-radius:6px;border:1px solid var(--line)}
-  .hi-prev .grad{height:100px;border-radius:6px;background:linear-gradient(135deg,#0f1419 0%,#1a2332 40%,#2a3444 100%);border:1px solid var(--line)}
+  .hi-prev .grad{height:100px;border-radius:6px;background:linear-gradient(135deg,#04070d 0%,#0a1a2e 40%,#12314f 100%);border:1px solid var(--line)}
   .hi-chain .trace-step{border-bottom:1px solid var(--line)}
   .hi-chain .trace-step:last-child{border-bottom:0}
   .hi-intent{display:flex;gap:10px;padding:9px 15px;border-bottom:1px solid var(--line);font-size:12.5px;align-items:flex-start}
@@ -197,9 +185,10 @@
   </span>
 </div>
 <p class="sub" style="color:var(--muted);font-size:14px;max-width:80ch;margin:4px 0 0">
-  The site at <a href="{{ g.page }}{{ qs }}">{{ g.page }}</a> quietly rewrites its copy for each visitor.
-  This page shows its work for <em>this</em> visit: what it knew, what it decided, what it shipped —
-  and what it refused to say. Read the summary below, then follow the five chapters.</p>
+  The replica is rebuilt deterministically from (query params + login cookie). This page rebuilds the
+  <em>same</em> state and walks it in five chapters: the visitor's inputs, the decision pipeline —
+  including the <b>Location signal</b>, Planet's differentiator — the data held, what shipped
+  (with the <b>say</b>-level variants the surface policy blocks), and the audit trail.</p>
 
 <div class="gd-layout">
 <aside class="gd-side" id="gd-nav">
@@ -212,24 +201,11 @@
   <div class="side-cap">Other views</div>
   <a href="{{ g.image_decisions }}" class="page-link">Image decisions →</a>
   <a href="{{ g.dev_business }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}" class="page-link">Marketing view →</a>
+  <a href="{{ g.ads }}" class="page-link">X ads →</a>
+  <a href="{{ g.ads_lp }}" class="page-link">LP variants →</a>
   <a href="{{ g.page }}{{ qs }}" class="page-link">Live page →</a>
 </aside>
 <div class="gd-main">
-
-<div class="tldr">
-  <div class="story">
-    <div class="cap">What just happened, in plain English</div>
-    {% for s in story %}
-    <div class="row"><span class="lbl">{{ s.label }}</span><span class="txt">{{ s.text }}</span></div>
-    {% endfor %}
-  </div>
-  <div class="legend">
-    <div class="cap">Three words used everywhere below</div>
-    <div class="lrow"><span class="pol say">say</span><span class="d">they told us themselves (typed it, logged in) — the page may quote it back.</span></div>
-    <div class="lrow"><span class="pol allude">allude</span><span class="d">inferred or bought data — it may shape tone, emphasis, and order, but is never quoted.</span></div>
-    <div class="lrow"><span class="pol hold">hold</span><span class="d">too invasive — never reaches their page. Shown here only so you can see what was blocked.</span></div>
-  </div>
-</div>
 
 <!-- ================= 1 · THE VISITOR ================= -->
 <section class="ch" id="ch-visitor">
@@ -260,7 +236,7 @@
   <div class="ch-head">
     <span class="num">2</span>
     <h2>Process map — every decision, in order</h2>
-    <span class="q">Eleven stages run top to bottom. Pills show every branch a stage could take — the dark one was taken. Click a stage to drill into its evidence.</span>
+    <span class="q">Twelve stages run top to bottom. Pills show every branch a stage could take — the dark one was taken. Click a stage to drill into its evidence.</span>
   </div>
   <div class="pm" style="margin-top:14px">
   <div class="pm-flow">
@@ -323,6 +299,19 @@
       {% if P.det.reason %}<div class="kv"><span class="k">Why</span><span class="v" style="font-weight:400;color:var(--muted)">{{ P.det.reason }}</span></div>{% endif %}
     </div>
 
+    <div class="sec" id="sec-location">
+      <div class="h">Location signal — the Planet differentiator <span class="tag">{{ P.location.mode }}</span></div>
+      {% if P.location.line %}
+      <div class="loc-line"><span class="orb"></span>“{{ P.location.line }}”</div>
+      {% endif %}
+      <div class="kv"><span class="k">Region (geo-IP)</span><span class="v">{{ P.location.region or P.det.region or '—' }} <span class="pol allude">allude</span></span></div>
+      <div class="kv"><span class="k">Segment lens</span><span class="v">{{ P.location.segment or '— (default daily-coverage line)' }}</span></div>
+      <div class="kv"><span class="k">Rule fired</span><span class="v"><code>{{ P.location.rule }}</code></span></div>
+      <div class="kv"><span class="k">Why</span><span class="v" style="font-weight:400;color:var(--muted)">{{ P.location.why }}</span></div>
+      {% if P.location.blocked_say %}
+      <div class="kv"><span class="k">Blocked recite</span><span class="v">“{{ P.location.blocked_say }}” <span class="pol hold">hold</span><span class="why">street/property-scale precision never ships — the anti-surveillance guardrail</span></span></div>
+      {% endif %}
+    </div>
   </div>
 
   <div>

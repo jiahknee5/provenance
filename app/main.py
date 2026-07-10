@@ -95,3 +95,4 @@ from app import graph as _graph  # noqa: E402,F401
 from app import help as _help  # noqa: E402,F401
 from app import archive as _archive  # noqa: E402,F401
 from app import gauntlet as _gauntlet  # noqa: E402,F401
+from app import planet as _planet  # noqa: E402,F401

@@ -122,13 +122,50 @@ def select_image_intent(ctx: dict, *, tenant: str | None = None) -> II.ImageInte
 
 
 def build_image_prompt(ctx: dict, *, tenant: str | None = None) -> II.StructuredPrompt:
-    """Structured, action-driven prompt with provenance fields."""
+    """Structured, action-driven prompt with provenance fields (full single-tier view)."""
     config = _tenant_config(tenant)
     selection = II.select_image_intent(ctx, config)
     structured = II.build_structured_prompt(ctx, selection, config)
     out = II.apply_guardrails(structured, ctx, config)
     _assert_prompt_safe(out["full_prompt"])
     return out
+
+
+def build_base_prompt(ctx: dict, *, tenant: str | None = None) -> tuple[str, II.StructuredPrompt, II.ImageIntentSelection]:
+    """Tier-1 segment-only prompt — cacheable per ad variant or intent+route."""
+    config = _tenant_config(tenant)
+    seg = II.segment_ctx(ctx)
+    selection = II.select_image_intent(seg, config)
+    structured = II.build_base_structured_prompt(seg, selection, config)
+    guarded = II.apply_guardrails(structured, seg, config)
+    prompt = II.assemble_base_prompt(guarded, config)
+    guarded["full_prompt"] = prompt
+    _assert_prompt_safe(prompt)
+    return prompt, guarded, selection
+
+
+def build_personalization_delta(ctx: dict, base_structured: II.StructuredPrompt,
+                                *, tenant: str | None = None) -> tuple[str, list[II.PersonalizationLayer]] | None:
+    """Tier-2 delta prompt — None when no signals beyond segment."""
+    config = _tenant_config(tenant)
+    if not II.has_personalization_delta(ctx, config):
+        return None
+    delta_layers = II.build_delta_layers(ctx, config)
+    if not delta_layers:
+        return None
+    # Apply hold/guardrail scan on delta text
+    blob = " ".join(l["value"] for l in delta_layers)
+    hold = ctx.get("_hold") or {}
+    for pat, label in II.HOLD_STRIP_PATTERNS:
+        if pat.search(blob):
+            delta_layers = [l for l in delta_layers if pat.search(l["value"]) is None]
+    if hold.get("visitor_name") or hold.get("company"):
+        delta_layers = [l for l in delta_layers if l["layer"] != "archetype"]
+    if not delta_layers:
+        return None
+    prompt = II.assemble_delta_prompt(base_structured, delta_layers, config)
+    _assert_prompt_safe(prompt)
+    return prompt, delta_layers
 
 
 def prompt_text(structured: II.StructuredPrompt | dict) -> str:
@@ -155,6 +192,49 @@ def _assert_prompt_safe(prompt: str) -> None:
 def image_cache_key(prompt: str, model: str | None = None) -> str:
     m = model or _model()
     return hashlib.sha256(f"{m}\x00{prompt}".encode()).hexdigest()[:32]
+
+
+def segment_cache_key(ctx: dict, intent_id: str, *, tenant: str | None = None) -> str:
+    """Semantic tier-1 key — no PII, no objection/industry/region/archetype."""
+    t = tenant or DEFAULT_IMAGE_TENANT
+    ad = ctx.get("ad_variant_id")
+    if ad:
+        return f"{t}:base:{ad}"
+    route = ctx.get("audience_route", "neutral")
+    return f"{t}:base:{intent_id}:{route}"
+
+
+def delta_cache_key(ctx: dict, *, tenant: str | None = None) -> str | None:
+    """Semantic tier-2 key hash — None when segment-only visitor."""
+    config = _tenant_config(tenant)
+    signals = II._tier2_signals_present(ctx, config)
+    if not signals:
+        return None
+    t = tenant or DEFAULT_IMAGE_TENANT
+    payload = ":".join(sorted(signals))
+    h = hashlib.sha256(payload.encode()).hexdigest()[:16]
+    return f"{t}:delta:{h}"
+
+
+def _estimate_tokens_saved(full_len: int, used_len: int, *, cache_hit: bool) -> int:
+    if cache_hit:
+        return max(full_len, 0)
+    return max(full_len - used_len, 0)
+
+
+def _tier_receipt_fields(*, tier: str, base_cache_key: str, delta_cache_key: str | None,
+                         delta_signals: list[str], base_prompt: str, delta_prompt: str | None,
+                         full_prompt_len: int, used_prompt_len: int, cache_hit: bool) -> dict:
+    return {
+        "tier": tier,
+        "base_cache_key": base_cache_key,
+        "delta_cache_key": delta_cache_key,
+        "delta_signals": delta_signals,
+        "base_prompt": base_prompt,
+        "delta_prompt": delta_prompt,
+        "tokens_saved_estimate": _estimate_tokens_saved(full_prompt_len, used_prompt_len,
+                                                        cache_hit=cache_hit),
+    }
 
 
 def _ensure_dirs() -> None:
@@ -208,9 +288,9 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
 
-def _receipt_extras(structured: II.StructuredPrompt) -> dict[str, Any]:
+def _receipt_extras(structured: II.StructuredPrompt, tier_fields: dict | None = None) -> dict[str, Any]:
     """Provenance fields stored alongside generation receipt."""
-    return {
+    out = {
         "intent_id": structured.get("intent_id"),
         "secondary_intent_id": structured.get("secondary_intent_id"),
         "conversion_goal": structured.get("conversion_goal"),
@@ -228,10 +308,14 @@ def _receipt_extras(structured: II.StructuredPrompt) -> dict[str, Any]:
         "guardrails_blocked": structured.get("guardrails_blocked"),
         "intent_selection": structured.get("selection"),
     }
+    if tier_fields:
+        out.update(tier_fields)
+    return out
 
 
 def _gradient_receipt(*, structured: II.StructuredPrompt, prompt: str, cache_key: str,
-                      model: str, fallback_chain: list[str]) -> dict:
+                      model: str, fallback_chain: list[str],
+                      tier_fields: dict | None = None) -> dict:
     return {
         "url": None,
         "source": "gradient",
@@ -242,17 +326,19 @@ def _gradient_receipt(*, structured: II.StructuredPrompt, prompt: str, cache_key
         "generated_at": None,
         "license": "CSS gradient fallback (instant, no network)",
         "fallback_chain": fallback_chain,
-        **_receipt_extras(structured),
+        **_receipt_extras(structured, tier_fields),
     }
 
 
 def _gallery_receipt(ctx: dict, *, structured: II.StructuredPrompt, prompt: str,
-                     cache_key: str, model: str, fallback_chain: list[str]) -> dict:
+                     cache_key: str, model: str, fallback_chain: list[str],
+                     tier_fields: dict | None = None) -> dict:
     ind = ctx.get("industry") or "general"
     img = SC.image_for(ind)
     if ind == "general" or img.get("id") == "neutral-wash":
         return _gradient_receipt(structured=structured, prompt=prompt, cache_key=cache_key,
-                                 model=model, fallback_chain=fallback_chain + ["gradient"])
+                                 model=model, fallback_chain=fallback_chain + ["gradient"],
+                                 tier_fields=tier_fields)
     return {
         "url": img["url"],
         "source": "gallery",
@@ -264,7 +350,7 @@ def _gallery_receipt(ctx: dict, *, structured: II.StructuredPrompt, prompt: str,
         "license": f"{img.get('license', 'CC')} · {img.get('creator', 'unknown')}",
         "gallery_id": img.get("id"),
         "fallback_chain": fallback_chain,
-        **_receipt_extras(structured),
+        **_receipt_extras(structured, tier_fields),
     }
 
 
@@ -353,7 +439,8 @@ def _call_image_api(prompt: str) -> dict | None:
 
 
 def _generate_and_cache(ctx: dict, structured: II.StructuredPrompt, prompt: str,
-                        cache_key: str, model: str) -> dict:
+                        cache_key: str, model: str,
+                        tier_fields: dict | None = None) -> dict:
     chain = ["cache"]
     api_result = _call_image_api(prompt)
     if api_result:
@@ -373,7 +460,7 @@ def _generate_and_cache(ctx: dict, structured: II.StructuredPrompt, prompt: str,
             "generated_at": _now_iso(),
             "license": "AI-generated (synthetic demo — disclosed on /dev)",
             "fallback_chain": chain + ["api"],
-            **_receipt_extras(structured),
+            **_receipt_extras(structured, tier_fields),
         }
         manifest = _read_manifest()
         manifest[cache_key] = {k: v for k, v in receipt.items() if k != "url"}
@@ -382,40 +469,151 @@ def _generate_and_cache(ctx: dict, structured: II.StructuredPrompt, prompt: str,
         return receipt
     chain.append("api_failed")
     return _gallery_receipt(ctx, structured=structured, prompt=prompt, cache_key=cache_key,
-                            model=model, fallback_chain=chain + ["gallery"])
+                            model=model, fallback_chain=chain + ["gallery"],
+                            tier_fields=tier_fields)
+
+
+def _resolve_prompts(ctx: dict, *, tenant: str | None = None) -> dict:
+    """Build tier-1 base + optional tier-2 delta/combined prompts."""
+    config = _tenant_config(tenant)
+    t = tenant or DEFAULT_IMAGE_TENANT
+
+    base_prompt, base_structured, seg_selection = build_base_prompt(ctx, tenant=tenant)
+    full_structured = build_image_prompt(ctx, tenant=tenant)
+    full_prompt = full_structured["full_prompt"]
+    full_len = len(full_prompt)
+
+    sem_base_key = segment_cache_key(ctx, base_structured["intent_id"], tenant=t)
+    sem_delta_key = delta_cache_key(ctx, tenant=t)
+    delta_signals = II._tier2_signals_present(ctx, config)
+
+    delta_result = build_personalization_delta(ctx, base_structured, tenant=tenant)
+    if delta_result:
+        delta_prompt, delta_layers = delta_result
+        combined_prompt = II.assemble_combined_prompt(base_structured, delta_layers, config)
+        tier = "base+delta"
+        gen_prompt = combined_prompt
+        used_len = len(delta_prompt)
+    else:
+        delta_prompt = None
+        delta_layers = []
+        combined_prompt = None
+        tier = "base_only"
+        gen_prompt = base_prompt
+        used_len = len(base_prompt)
+
+    model = _model()
+    base_disk_key = image_cache_key(base_prompt, model)
+    gen_disk_key = image_cache_key(gen_prompt, model)
+
+    tier_fields = _tier_receipt_fields(
+        tier=tier,
+        base_cache_key=sem_base_key,
+        delta_cache_key=sem_delta_key,
+        delta_signals=delta_signals,
+        base_prompt=base_prompt,
+        delta_prompt=delta_prompt,
+        full_prompt_len=full_len,
+        used_prompt_len=used_len,
+        cache_hit=False,
+    )
+
+    # Merge full structured for receipt (visitor-facing provenance)
+    display_structured = full_structured
+    display_structured["selection"] = seg_selection if tier == "base_only" else full_structured.get("selection")
+
+    return {
+        "base_prompt": base_prompt,
+        "delta_prompt": delta_prompt,
+        "gen_prompt": gen_prompt,
+        "full_prompt": full_prompt,
+        "base_structured": base_structured,
+        "display_structured": display_structured,
+        "base_disk_key": base_disk_key,
+        "gen_disk_key": gen_disk_key,
+        "sem_base_key": sem_base_key,
+        "sem_delta_key": sem_delta_key,
+        "tier": tier,
+        "tier_fields": tier_fields,
+        "model": model,
+        "delta_layers": delta_layers,
+    }
 
 
 def get_hero_image(ctx: dict, *, generate: bool = False,
                    tenant: str | None = None) -> dict:
-    """Resolve hero image receipt. generate=True may call the image API (server-side only)."""
-    structured = build_image_prompt(ctx, tenant=tenant)
-    prompt = structured["full_prompt"]
-    model = _model()
-    cache_key = image_cache_key(prompt, model)
+    """Resolve hero image receipt using two-tier base + delta cache strategy."""
+    resolved = _resolve_prompts(ctx, tenant=tenant)
+    base_structured = resolved["display_structured"]
+    gen_prompt = resolved["gen_prompt"]
+    base_prompt = resolved["base_prompt"]
+    base_disk_key = resolved["base_disk_key"]
+    gen_disk_key = resolved["gen_disk_key"]
+    tier = resolved["tier"]
+    tier_fields = resolved["tier_fields"]
+    model = resolved["model"]
 
-    cached = _load_cached(cache_key)
+    # a. Check full (personalized) cache key
+    cached = _load_cached(gen_disk_key)
     if cached:
-        return dict(cached)
+        tier_fields["tokens_saved_estimate"] = _estimate_tokens_saved(
+            len(resolved["full_prompt"]), 0, cache_hit=True)
+        return {**cached, **tier_fields}
+
+    # b. Segment-only visitor — check base cache
+    if tier == "base_only":
+        cached_base = _load_cached(base_disk_key)
+        if cached_base:
+            tier_fields["tokens_saved_estimate"] = _estimate_tokens_saved(
+                len(resolved["full_prompt"]), 0, cache_hit=True)
+            return {**cached_base, **tier_fields}
+
+    # c. base+delta miss but base exists — still need combined generation
+    if tier == "base+delta":
+        cached_base = _load_cached(base_disk_key)
+        if cached_base and not generate:
+            # Pending personalized variant; base is warm
+            tier_fields["base_warm"] = True
 
     if not _api_key():
-        return _gallery_receipt(ctx, structured=structured, prompt=prompt, cache_key=cache_key,
-                                model=model, fallback_chain=["cache_miss", "no_api_key", "gallery"])
+        return _gallery_receipt(ctx, structured=base_structured, prompt=gen_prompt,
+                                cache_key=gen_disk_key, model=model,
+                                fallback_chain=["cache_miss", "no_api_key", "gallery"],
+                                tier_fields=tier_fields)
 
     if not generate:
         return {
             "url": None,
             "source": "pending",
-            "prompt": prompt,
+            "prompt": gen_prompt,
             "model": model,
             "vendor": VENDOR,
-            "cache_key": cache_key,
+            "cache_key": gen_disk_key,
             "generated_at": None,
             "license": None,
             "fallback_chain": ["cache_miss", "api_key_set", "await_async"],
-            **_receipt_extras(structured),
+            **_receipt_extras(base_structured, tier_fields),
         }
 
-    return _generate_and_cache(ctx, structured, prompt, cache_key, model)
+    # d. Generate base first if miss (when delta needed, base still cached separately)
+    if tier == "base+delta" and not _load_cached(base_disk_key):
+        _generate_and_cache(ctx, resolved["base_structured"], base_prompt,
+                            base_disk_key, model,
+                            _tier_receipt_fields(
+                                tier="base",
+                                base_cache_key=resolved["sem_base_key"],
+                                delta_cache_key=None,
+                                delta_signals=[],
+                                base_prompt=base_prompt,
+                                delta_prompt=None,
+                                full_prompt_len=len(resolved["full_prompt"]),
+                                used_prompt_len=len(base_prompt),
+                                cache_hit=False,
+                            ))
+
+    # e. Generate final image (base_only or base+delta combined prompt)
+    return _generate_and_cache(ctx, base_structured, gen_prompt, gen_disk_key, model,
+                               tier_fields)
 
 
 def resolve_hero_image(page: dict, *, generate: bool = False,
@@ -478,6 +676,14 @@ def hero_image_dev_panel(hero_image: dict) -> dict:
     url = hero_image.get("url") or receipt.get("url")
     src = receipt.get("source", "gradient")
 
+    tier = receipt.get("tier", "base_only")
+    delta_signals = receipt.get("delta_signals") or []
+    tier_label = {
+        "base": "Segment base (pre-cached)",
+        "base_only": "Segment base only — no delta signals",
+        "base+delta": "Personalization delta applied",
+    }.get(tier, tier)
+
     return {
         "intent_selection": {
             "rule_fired": rule,
@@ -492,6 +698,17 @@ def hero_image_dev_panel(hero_image: dict) -> dict:
             "pairs_with_objection": receipt.get("pairs_with_objection"),
         },
         "layers": layers,
+        "tier": {
+            "mode": tier,
+            "label": tier_label,
+            "base_cache_key": receipt.get("base_cache_key"),
+            "delta_cache_key": receipt.get("delta_cache_key"),
+            "delta_signals": delta_signals,
+            "tokens_saved_estimate": receipt.get("tokens_saved_estimate"),
+            "base_prompt": receipt.get("base_prompt"),
+            "delta_prompt": receipt.get("delta_prompt"),
+            "base_warm": receipt.get("base_warm", False),
+        },
         "prompt": {
             "visual_metaphor": receipt.get("visual_metaphor"),
             "composition": receipt.get("composition"),
@@ -537,6 +754,10 @@ def hero_image_trace(receipt: dict) -> tuple[list[str], str, str]:
         sigs.append(f"intent={receipt['intent_id']}")
         if receipt.get("secondary_intent_id"):
             sigs.append(f"secondary={receipt['secondary_intent_id']}")
+    if receipt.get("tier"):
+        sigs.append(f"tier={receipt['tier']}")
+    if receipt.get("base_cache_key"):
+        sigs.append(f"base_key={receipt['base_cache_key'][:24]}")
     sel = receipt.get("intent_selection") or {}
     if sel.get("rule_fired"):
         sigs.append(f"rule={sel['rule_fired'][:72]}")
@@ -631,6 +852,38 @@ def hero_image_ledger_rows(receipt: dict) -> list[dict]:
             "value": receipt["cache_key"],
             "source": "hash(prompt + model)",
             "vendor": "data/demo/image_cache/",
+            "policy": "observed",
+        })
+    if receipt.get("tier"):
+        rows.append({
+            "label": "Image tier",
+            "value": receipt["tier"],
+            "source": "two-tier cache",
+            "vendor": "image_gen.resolve",
+            "policy": "observed",
+        })
+    if receipt.get("base_cache_key"):
+        rows.append({
+            "label": "Segment base key",
+            "value": receipt["base_cache_key"],
+            "source": "segment identity",
+            "vendor": "image_gen.resolve",
+            "policy": "observed",
+        })
+    if receipt.get("delta_cache_key"):
+        rows.append({
+            "label": "Personalization delta key",
+            "value": receipt["delta_cache_key"],
+            "source": "objection/industry/region/archetype",
+            "vendor": "image_gen.resolve",
+            "policy": "observed",
+        })
+    if receipt.get("tokens_saved_estimate") is not None:
+        rows.append({
+            "label": "Tokens saved (est.)",
+            "value": str(receipt["tokens_saved_estimate"]),
+            "source": "full vs base/delta prompt",
+            "vendor": "image_gen.resolve",
             "policy": "observed",
         })
     if receipt.get("license"):

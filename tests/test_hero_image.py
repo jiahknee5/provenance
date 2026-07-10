@@ -201,14 +201,15 @@ def test_cache_hit_same_url(monkeypatch, tmp_path):
     monkeypatch.setattr(IG, "IMAGE_DIR", tmp_path / "images")
     monkeypatch.setattr(IG, "MANIFEST", tmp_path / "manifest.json")
     ctx = _ctx(audience_route="b2b_hire", industry="technology", tier=2)
-    prompt = _prompt_text(ctx)
-    key = IG.image_cache_key(prompt)
+    resolved = IG._resolve_prompts(ctx)
+    prompt = resolved["gen_prompt"]
+    key = resolved["gen_disk_key"]
     (tmp_path / "images").mkdir(parents=True)
     (tmp_path / "images" / f"{key}.png").write_bytes(b"\x89PNG\r\n")
     manifest = {key: {"source": "generated", "prompt": prompt, "model": IG._model(),
                       "vendor": IG.VENDOR, "cache_key": key, "ext": "png",
                       "generated_at": "2026-07-09T00:00:00+00:00", "license": "test",
-                      "intent_id": "authority"}}
+                      "intent_id": "authority", "tier": "base+delta"}}
     (tmp_path / "manifest.json").write_text(json.dumps(manifest))
     r1 = IG.get_hero_image(ctx)
     r2 = IG.get_hero_image(ctx)
@@ -288,6 +289,7 @@ def test_dev_panel_shows_intent_provenance():
     assert "rule fired:" in r.text
     assert "Drives action" in r.text or "drives hire_cta" in r.text
     assert "Personalization layers" in r.text
+    assert "Two-tier cache" in r.text
     assert "Prompt assembly" in r.text
     assert "Guardrails applied" in r.text
     assert "Fallback chain" in r.text
@@ -333,7 +335,7 @@ def test_gemini_api_mocked_generation_vendor(monkeypatch, tmp_path):
     fake_png = bytes([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x01])
 
     def _fake_gemini(prompt, *, url, key):
-        assert "Primary intent:" in prompt
+        assert "Intent:" in prompt or "Primary intent:" in prompt
         assert "Must avoid:" in prompt
         return {
             "b64": base64.b64encode(fake_png).decode(),
@@ -423,3 +425,79 @@ def test_three_persona_example_prompts():
         assert structured["intent_id"] == intent, params
         assert structured["drives_action"] == action, params
         assert structured["full_prompt"]
+
+
+# --- Two-tier base + delta ---
+
+def test_segment_only_visitor_uses_base_key_no_delta():
+    ctx = _ctx(ad_variant_id="x-keyword", audience_route="b2b_hire", tier=0)
+    assert IG.delta_cache_key(ctx) is None
+    base_prompt, base_structured, _ = IG.build_base_prompt(ctx)
+    assert IG.build_personalization_delta(ctx, base_structured) is None
+    receipt = IG.get_hero_image(ctx, generate=False)
+    assert receipt["tier"] == "base_only"
+    assert receipt["base_cache_key"] == "gauntlet:base:x-keyword"
+    assert receipt.get("delta_cache_key") is None
+
+
+def test_objection_and_industry_appends_delta():
+    ctx = _ctx(ad_variant_id="x-keyword", audience_route="b2b_hire",
+               top_objections=["open_market_hire"], industry="technology", tier=2)
+    base_prompt, base_structured, _ = IG.build_base_prompt(ctx)
+    delta = IG.build_personalization_delta(ctx, base_structured)
+    assert delta is not None
+    delta_prompt, layers = delta
+    layer_names = {l["layer"] for l in layers}
+    assert "objection_theme" in layer_names
+    assert "industry" in layer_names
+    receipt = IG.get_hero_image(ctx, generate=False)
+    assert receipt["tier"] == "base+delta"
+    assert receipt["delta_cache_key"]
+    assert "objection:open_market_hire" in receipt["delta_signals"]
+
+
+def test_same_segment_same_base_cache_key():
+    ctx_a = _ctx(ad_variant_id="x-keyword", audience_route="b2b_hire", tier=0)
+    ctx_b = _ctx(ad_variant_id="x-keyword", audience_route="b2b_hire", tier=0,
+                 top_objections=["placement_fees"])
+    _, struct_a, _ = IG.build_base_prompt(ctx_a)
+    _, struct_b, _ = IG.build_base_prompt(ctx_b)
+    key_a = IG.segment_cache_key(ctx_a, struct_a["intent_id"])
+    key_b = IG.segment_cache_key(ctx_b, struct_b["intent_id"])
+    assert key_a == key_b == "gauntlet:base:x-keyword"
+
+
+def test_receipt_tier_field_populated(monkeypatch):
+    monkeypatch.delenv("IMAGE_GEN_API_KEY", raising=False)
+    ctx = _ctx(ad_variant_id="x-keyword", top_objections=["open_market_hire"], tier=0)
+    receipt = IG.get_hero_image(ctx, generate=False)
+    assert receipt["tier"] in ("base_only", "base+delta")
+    assert receipt["base_cache_key"]
+    hero = IG.resolve_hero_image({"entry": {"channel": "ad"}, "det": {},
+                                  "ad_variant": {"id": "x-keyword"},
+                                  "audience": "neutral", "audience_route": "neutral",
+                                  "objections": {"prioritized": [{"objection_id": "open_market_hire", "rank": 1}]},
+                                  "sections": {"hero": {"cta_primary": "Hire"}}},
+                                 generate=False)
+    assert hero["dev"]["tier"]["mode"] == "base+delta"
+
+
+def test_pregen_dry_run_lists_segment_keys():
+    from scripts.pregen_segment_images import _segment_specs
+    specs = _segment_specs()
+    assert len(specs) >= 12
+    keys = {s["key"] for s in specs}
+    assert "gauntlet:base:x-keyword" in keys
+    assert any(k.startswith("gauntlet:base:peer_proof:") for k in keys)
+
+
+def test_keyword_plus_industry_cache_keys():
+    ctx = _ctx(ad_variant_id="x-keyword", top_objections=["open_market_hire"],
+               industry="technology", tier=2)
+    _, struct, _ = IG.build_base_prompt(ctx)
+    base_key = IG.segment_cache_key(ctx, struct["intent_id"])
+    delta_key = IG.delta_cache_key(ctx)
+    assert base_key == "gauntlet:base:x-keyword"
+    assert delta_key and delta_key.startswith("gauntlet:delta:")
+    assert "objection:open_market_hire" in II._tier2_signals_present(ctx, IG.load_image_config())
+    assert "industry:technology" in II._tier2_signals_present(ctx, IG.load_image_config())

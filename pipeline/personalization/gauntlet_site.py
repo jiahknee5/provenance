@@ -1581,6 +1581,101 @@ def _kv(k: str, v, pol: str | None = None, fired: bool = False) -> dict:
     return {"k": k, "v": v if v not in (None, "") else "—", "pol": pol, "fired": fired}
 
 
+# --------------------------------------------------------------------------- #
+# Plain-English story for /dev — the whole request in four sentences, no jargon.
+# Deterministic function of the built page, like everything else on the page.
+# --------------------------------------------------------------------------- #
+_NET_PLAIN = {
+    "corporate": "a corporate office network, so reverse-IP can name the company",
+    "corporate (via VPN)": "a corporate VPN — a company signal, held at lower confidence",
+    "consumer ISP": "a home internet connection — the IP names their provider, not an employer",
+    "residential": "a home internet connection — the IP names their provider, not an employer",
+    "mobile": "a mobile carrier — location is coarse and there's no employer signal",
+    "VPN / proxy": "a commercial VPN — the IP describes the exit node, not the visitor",
+    "hosting / cloud": "a datacenter — likely a bot or a VPN exit, not a person at a desk",
+    "private / unreachable": "a private/local address, which tells us nothing",
+}
+
+_TIER_PLAIN = {
+    0: "the IP adds nothing to the page",
+    1: "the page may use rough location, nothing more",
+    2: "the page may shape copy for their industry and region — without ever naming the company",
+    3: "the page may shape copy for their industry and region, and engage competitive framing",
+}
+
+_AUDIENCE_PLAIN = {
+    "companies": "buyers at companies (hire or upskill a team)",
+    "individuals": "an individual engineer (the Challenger track)",
+    "neutral": "no particular audience — the real site's default",
+}
+
+
+def plain_story(page: dict) -> list[dict]:
+    """Four labelled plain-English sentences: how they arrived, what the network says,
+    who they are, and what the page did about it. No pipeline vocabulary."""
+    P = page
+    entry, det, ident, ad = P["entry"], P["det"], P["identity"], P.get("ad_variant")
+
+    # 1 · arrival
+    if ad:
+        arrived = (f"They clicked a paid ad on X ({ad['x_targeting_type'].lower()} — "
+                   f"\u201c{ad['x_targeting_example']}\u201d), so the page knows exactly which "
+                   "promise brought them here.")
+    elif entry["channel"] == "ad":
+        arrived = "They clicked a paid ad, so the page knows a campaign promise brought them here."
+    elif entry["channel"] == "email":
+        arrived = ("They clicked a link in an email we sent — a warm arrival"
+                   + (", and the link's token already identifies who it was sent to."
+                      if entry.get("token_person_id") else ", though the link alone doesn't say who they are."))
+    elif entry["channel"] == "search":
+        arrived = "They arrived from a search engine — some intent, but no campaign promise to match."
+    else:
+        arrived = "They typed the address directly — the visit itself tells the page nothing."
+
+    # 2 · network
+    net = det.get("network_type") or "private / unreachable"
+    network = (f"Their connection looks like {_NET_PLAIN.get(net, net)}; "
+               f"so {_TIER_PLAIN.get(P['tier'], _TIER_PLAIN[0])}.")
+
+    # 3 · identity
+    if ident and ident["kind"] == "cohort":
+        v = ident["view"]
+        extras = []
+        if v["hubspot"].get("visits"):
+            extras.append(f"{v['hubspot']['visits']} past visits")
+        if v["hubspot"].get("abandoned"):
+            extras.append(f"an application abandoned at the {v['hubspot']['abandoned']}")
+        if v["declared"].get("goal"):
+            extras.append(f"a goal they typed on a form (\u201c{v['declared']['goal']}\u201d)")
+        who = (f"They're known: {v['name']} ({ident['email']}), matched to the CRM via "
+               f"{ident['via']} — the record holds {', '.join(extras) if extras else 'their history'}.")
+    elif ident and ident["kind"] == "resolved":
+        comp = ident["resolved"].get("company")
+        who = (f"They logged in with a work email; the domain identifies {comp} — "
+               "a company, but no personal history." if comp else
+               f"They logged in as {ident['email']}, but the domain resolves to no company.")
+    else:
+        who = "They haven't logged in, so the page knows nobody — nothing personal may be said."
+
+    # 4 · what the page did
+    diff = P["copy_diff"]
+    changed = sum(1 for d in diff if d["changed"])
+    blocked = sum(1 for d in diff if d.get("blocked_say")) + len(P["objections"]["blocked"])
+    did = (f"The page rebuilt itself for {_AUDIENCE_PLAIN.get(P['audience'], P['audience'])}: "
+           f"{changed} of {len(diff)} copy blocks changed"
+           + (f", and {blocked} more personal variant{'s' if blocked != 1 else ''} "
+              "(reciting facts they never volunteered) were written but blocked — "
+              "they ship only to this page, never to theirs." if blocked else
+              "; nothing crossed the line that would need blocking."))
+
+    return [
+        {"label": "How they arrived", "text": arrived},
+        {"label": "What the network says", "text": network},
+        {"label": "Who they are", "text": who},
+        {"label": "What the page did", "text": did},
+    ]
+
+
 def process_map(page: dict) -> dict:
     """The /dev process diagram: {inputs, stages}. Each stage carries the data it reads,
     the rule, EVERY branch it could take (the taken one flagged), the output, an anchor

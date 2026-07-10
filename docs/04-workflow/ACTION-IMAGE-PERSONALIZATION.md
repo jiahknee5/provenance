@@ -210,20 +210,66 @@ same objection ranking, same ad variant, same audience route.
 
 ---
 
-## 8. Cache + reproducibility
+## 8. Cache + reproducibility (two-tier)
 
-```python
-cache_key = sha256(f"{model}\x00{prompt}")[:32]
+Hero images use a **segment base + personalization delta** pattern to cut API/token usage
+while preserving personalization when extra signals exist.
+
+### Tier 1 — Segment base (pre-cacheable)
+
+Stable per segment — no PII, no objection, no industry/region/archetype:
+
+| Semantic key | When |
+|---|---|
+| `{tenant}:base:{ad_variant_id}` | Paid ad visitor (12 Gauntlet variants) |
+| `{tenant}:base:{intent_id}:{audience_route}` | Direct / no ad variant |
+
+Disk cache: `sha256(model + base_prompt)[:32]`. Base prompt ~100 tokens (intent + composition + brand mood + ad/audience layers only).
+
+Pre-generate offline:
+
+```bash
+PYTHONPATH=. python -m scripts.pregen_segment_images --dry-run   # list keys
+PYTHONPATH=. python -m scripts.pregen_segment_images             # API generate
 ```
 
-- Same prompt + model → same key → same image (CONSTITUTION Art IV)
-- Manifest: `data/demo/image_cache/manifest.json`
-- Images: `data/demo/image_cache/images/` → served at `/static/generated/`
-- Page load: cache check only (`generate=False`)
-- Client fetch: `/api/gauntlet/hero-image?…` with `generate=True`
+### Tier 2 — Personalization delta
 
-Env vars: `IMAGE_GEN_API_KEY` (or `NANO_BANANA_API_KEY`), `IMAGE_GEN_API_URL`,
-`IMAGE_GEN_MODEL`. See [RUNBOOK.md](../../RUNBOOK.md).
+Triggered when **any** tier-2 signal passes tier gates:
+
+- Top objection with mapped visual metaphor
+- Industry (tier ≥ 2)
+- Region mood (tier ≥ 1)
+- CRM/login archetype
+
+Semantic delta key: `{tenant}:delta:{hash(objection,industry,region,archetype)}`.
+
+Delta prompt references base scene — ~40–60% shorter than full single-tier prompt. Combined
+prompt (base summary + delta) used for generation when img2img unavailable.
+
+### Resolution flow
+
+1. Check full cache (combined prompt hash)
+2. If miss and segment-only → check base cache
+3. If base warm + delta needed → API with combined prompt only
+4. If base miss → generate base, cache, then delta if needed
+5. Receipt: `tier`, `base_cache_key`, `delta_cache_key`, `tokens_saved_estimate`
+
+**Token savings:**
+
+| Case | API tokens |
+|---|---|
+| Segment-only repeat visit | ~0 (base cached) |
+| Delta variant first visit | combined prompt (~40–60% shorter than full) |
+| Full cache hit | ~0 |
+
+Legacy single-tier equivalent still available via `build_image_prompt()` for provenance display.
+
+Manifest: `data/demo/image_cache/manifest.json` · Images: `data/demo/image_cache/images/` → `/static/generated/`
+
+Page load: cache check only (`generate=False`). Client fetch: `/api/gauntlet/hero-image?…` with `generate=True`.
+
+Env vars: `IMAGE_GEN_API_KEY` (or `NANO_BANANA_API_KEY`), `IMAGE_GEN_API_URL`, `IMAGE_GEN_MODEL`. See [RUNBOOK.md](../../RUNBOOK.md).
 
 ---
 

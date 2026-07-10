@@ -1,9 +1,8 @@
 {% extends "base.html" %}
-{% block title %}Marketing decision log — Gauntlet personalization · apt{% endblock %}
+{% block title %}Marketing decision log — Planet personalization · apt{% endblock %}
 {% block content %}
 <style>
-  main{max-width:1240px}
-  html{scroll-behavior:smooth}
+  main{max-width:1040px}
   .gb-head{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:6px}
   .gb-head h1{font-size:24px;margin:0;line-height:1.25}
   .gb-head .links{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
@@ -12,39 +11,6 @@
   .gb-tog a{font-size:13px;font-weight:600;color:var(--muted);padding:6px 14px;border-radius:7px;text-decoration:none}
   .gb-tog a.on{background:#fff;color:var(--ink);box-shadow:var(--shadow)}
   .gb-meta{font-size:12.5px;color:var(--muted);margin:0 0 12px}
-  /* ---- left sidebar navigation (mirrors /dev) ---- */
-  .gd-layout{display:grid;grid-template-columns:196px minmax(0,1fr);gap:26px;align-items:start;margin-top:14px}
-  .gd-side{position:sticky;top:14px;display:flex;flex-direction:column;gap:2px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:10px 8px}
-  .gd-side .side-cap{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:6px 10px 4px}
-  .gd-side a + .side-cap{margin-top:10px;border-top:1px solid var(--line);padding-top:12px}
-  .gd-side a{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:600;color:var(--muted);padding:7px 10px;border-radius:8px;text-decoration:none;border:1px solid transparent}
-  .gd-side a .num{width:18px;height:18px;border-radius:5px;background:#E4E8EC;color:#475569;font-size:10px;font-weight:800;display:grid;place-items:center;flex:none}
-  .gd-side a:hover{color:var(--ink);background:#F6F8FA}
-  .gd-side a.on{color:var(--ink);background:#F1F3F5;border-color:var(--line)}
-  .gd-side a.on .num{background:var(--ink);color:#fff}
-  .gd-side a.page-link{color:var(--brand)}
-  .gd-main{min-width:0}
-  @media(max-width:920px){
-    .gd-layout{grid-template-columns:1fr;gap:0}
-    .gd-side{position:sticky;top:0;z-index:60;flex-direction:row;flex-wrap:wrap;align-items:center;border-radius:0 0 12px 12px;margin:0 -8px;padding:8px}
-    .gd-side .side-cap{display:none}
-    .gd-side a + .side-cap{border:0;margin:0;padding:0}
-  }
-  .sec[id]{scroll-margin-top:16px}
-  /* ---- plain-English TL;DR (mirrors /dev) ---- */
-  .tldr{display:grid;grid-template-columns:1.6fr 1fr;gap:0;border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px}
-  @media(max-width:920px){.tldr{grid-template-columns:1fr}}
-  .tldr .story{padding:14px 18px}
-  .tldr .story .cap{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px}
-  .tldr .story .row{display:flex;gap:10px;padding:6px 0;font-size:13.5px;line-height:1.55}
-  .tldr .story .row .lbl{flex:none;min-width:150px;font-weight:700;color:var(--ink);font-size:12px;padding-top:1px}
-  .tldr .story .row .txt{color:#333C45;min-width:0}
-  .tldr .legend{border-left:1px solid var(--line);background:#FAFBFC;padding:14px 16px}
-  @media(max-width:920px){.tldr .legend{border-left:0;border-top:1px solid var(--line)}}
-  .tldr .legend .cap{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px}
-  .tldr .legend .lrow{display:flex;gap:9px;padding:5px 0;font-size:12px;line-height:1.5;align-items:baseline}
-  .tldr .legend .lrow .pol{flex:none;margin-top:1px}
-  .tldr .legend .lrow .d{color:#475569;min-width:0}
   .sec{border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px}
   .sec .h{padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px}
   .sec .h .tag{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:5px;padding:2px 8px;background:#F1F3F5;color:var(--muted)}
@@ -78,6 +44,8 @@
   .steer-col .cap{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
   .steer-col.say .cap{color:#0a8a4f}.steer-col.steer .cap{color:#1d4ed8}.steer-col.hold .cap{color:#c0354b}
   .steer-col ul{margin:0;padding-left:16px;line-height:1.5}
+  .loc-line{display:flex;align-items:center;gap:9px;padding:10px 14px;border-bottom:1px solid var(--line);font-size:13.5px;font-weight:600;color:var(--ink)}
+  .loc-line .orb{width:9px;height:9px;border-radius:50%;background:#3ba1ff;box-shadow:0 0 8px rgba(59,161,255,.8);flex:none}
 </style>
 
 {% set B = biz %}
@@ -88,50 +56,18 @@
       <a href="{{ toggle_anon }}" class="{{ 'on' if as_state == 'anon' else '' }}">Anonymous</a>
       <a href="{{ toggle_known }}" class="{{ 'on' if as_state != 'anon' else '' }}">Known lead</a>
     </span>
+    <a href="{{ g.dev }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}">Technical view →</a>
+    <a href="{{ g.image_decisions }}">Image decisions guide →</a>
   </div>
 </div>
-<p class="gb-meta">The live page rewrote {{ B.changed_count }} of {{ B.total_slots }} copy slots for this visitor.
-  This log explains each call the way a marketer would — same visit, no engineering detail
-  (that's the <a href="{{ g.dev }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}">technical view</a>).</p>
-
-<div class="gd-layout">
-<aside class="gd-side" id="gb-nav">
-  <div class="side-cap">On this page</div>
-  <a href="#b-arrival" data-ch="b-arrival"><span class="num">1</span>Arrival</a>
-  <a href="#b-audience" data-ch="b-audience"><span class="num">2</span>Audience</a>
-  <a href="#b-objections" data-ch="b-objections"><span class="num">3</span>Objections</a>
-  <a href="#b-copy" data-ch="b-copy"><span class="num">4</span>Copy changes</a>
-  <a href="#b-visual" data-ch="b-visual"><span class="num">5</span>Visual</a>
-  <a href="#b-lead" data-ch="b-lead"><span class="num">6</span>The lead</a>
-  <a href="#b-policy" data-ch="b-policy"><span class="num">7</span>Guardrails</a>
-  <div class="side-cap">Other views</div>
-  <a href="{{ g.dev }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}" class="page-link">Technical view →</a>
-  <a href="{{ g.image_decisions }}" class="page-link">Image decisions guide →</a>
-  <a href="{{ g.page }}{{ qs }}" class="page-link">Live page →</a>
-</aside>
-<div class="gd-main">
-
-<div class="tldr">
-  <div class="story">
-    <div class="cap">This visit, in plain English</div>
-    {% for s in story %}
-    <div class="row"><span class="lbl">{{ s.label }}</span><span class="txt">{{ s.text }}</span></div>
-    {% endfor %}
-  </div>
-  <div class="legend">
-    <div class="cap">Three words used everywhere below</div>
-    <div class="lrow"><span class="pol say">say</span><span class="d">they told us themselves (typed it, logged in) — the copy may quote it back.</span></div>
-    <div class="lrow"><span class="pol steer">steer</span><span class="d">inferred or bought data — it may shape tone, emphasis, and order, but is never quoted.</span></div>
-    <div class="lrow"><span class="pol hold">hold</span><span class="d">too invasive — never reaches their page. Shown in this log only so you can see what was blocked.</span></div>
-  </div>
-</div>
+<p class="gb-meta">{{ B.changed_count }} of {{ B.total_slots }} copy slots changed · same visitor state as <a href="{{ g.dev }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}">{{ g.dev }}</a></p>
 
 <div class="gb-entries">
   <span class="lbl">Simulate entry</span>
   {% for label, url in entry_links_raw %}<a href="{{ url }}">{{ label }} →</a>{% endfor %}
 </div>
 
-<div class="sec" id="b-arrival">
+<div class="sec">
   <div class="h">1 · Arrival &amp; attribution <span class="tag">{{ B.arrival.channel }}</span></div>
   <div class="dec">{{ B.arrival.decision }}</div>
   <table class="ops">
@@ -148,8 +84,26 @@
   </table>
 </div>
 
-<div class="sec" id="b-audience">
-  <div class="h">2 · Audience read <span class="tag">{{ B.audience_read.segment }}</span></div>
+<div class="sec">
+  <div class="h">2 · Location signal — Planet's differentiator <span class="tag">{{ B.location.mode }}</span></div>
+  <div class="dec">{{ B.location.decision }}</div>
+  <table class="ops">
+    <thead><tr><th>Field</th><th>Value</th><th>Note</th></tr></thead>
+    <tbody>
+      {% for r in B.location.rows %}
+      <tr>
+        <td class="k">{{ r.label }}</td>
+        <td>{{ r.value }}</td>
+        <td class="note">{{ r.note or '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if B.location.why %}<div class="dec" style="border-top:1px solid var(--line);font-weight:400;color:var(--muted)">{{ B.location.why }}</div>{% endif %}
+</div>
+
+<div class="sec">
+  <div class="h">3 · Audience read <span class="tag">{{ B.audience_read.segment }}</span></div>
   <div class="dec">{{ B.audience_read.decision }}</div>
   <table class="ops">
     <thead><tr><th>Signal</th><th>Read</th></tr></thead>
@@ -162,8 +116,8 @@
   </table>
 </div>
 
-<div class="sec" id="b-objections">
-  <div class="h">3 · Objection stack <span class="tag">{{ B.objections|length }} ranked</span></div>
+<div class="sec">
+  <div class="h">4 · Objection stack <span class="tag">{{ B.objections|length }} ranked</span></div>
   {% if B.objections %}
   <table class="ops">
     <thead><tr><th>#</th><th>Objection</th><th>Why now</th><th>Slot</th><th>Copy response</th><th>Decision</th></tr></thead>
@@ -185,8 +139,8 @@
   {% endif %}
 </div>
 
-<div class="sec" id="b-copy">
-  <div class="h">4 · Copy decisions <span class="tag">{{ B.changed_count }}/{{ B.total_slots }} changed</span></div>
+<div class="sec">
+  <div class="h">5 · Copy decisions <span class="tag">{{ B.changed_count }}/{{ B.total_slots }} changed</span></div>
   <table class="ops">
     <thead><tr><th>Slot</th><th>Δ</th><th>Generic</th><th>Shipped</th><th>Why</th><th>Decision</th></tr></thead>
     <tbody>
@@ -204,8 +158,8 @@
   </table>
 </div>
 
-<div class="sec" id="b-visual">
-  <div class="h">5 · Visual decision</div>
+<div class="sec">
+  <div class="h">6 · Visual decision</div>
   <div class="dec">{{ B.visual.decision }}</div>
   <div class="dec" style="margin-top:8px;font-size:13px;color:var(--muted)">{{ B.visual.tier_summary }}</div>
   <table class="ops">
@@ -226,8 +180,8 @@
   {% endif %}
 </div>
 
-<div class="sec" id="b-lead">
-  <div class="h">6 · CRM / lead context {% if B.lead %}<span class="tag">logged in</span>{% else %}<span class="tag">anonymous</span>{% endif %}</div>
+<div class="sec">
+  <div class="h">7 · CRM / lead context {% if B.lead %}<span class="tag">logged in</span>{% else %}<span class="tag">anonymous</span>{% endif %}</div>
   {% if B.lead %}
   <table class="ops">
     <thead><tr><th>Field</th><th>Value</th></tr></thead>
@@ -251,8 +205,8 @@
   {% endif %}
 </div>
 
-<div class="sec" id="b-policy">
-  <div class="h">7 · Steering vs saying <span class="tag">policy</span></div>
+<div class="sec">
+  <div class="h">8 · Steering vs saying <span class="tag">policy</span></div>
   <div class="steer-grid">
     <div class="steer-col say"><div class="cap">Say</div><ul>{% for x in B.steering.said %}<li>{{ x }}</li>{% endfor %}</ul></div>
     <div class="steer-col steer"><div class="cap">Steer</div><ul>{% for x in B.steering.steered %}<li>{{ x }}</li>{% endfor %}</ul></div>
@@ -264,25 +218,4 @@
   </table>
   <div class="foot-link"><a href="{{ g.dev }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}">Technical view →</a> for pipeline trace, signal ledger, and engineering detail.</div>
 </div>
-
-</div>
-</div>
-
-<script>
-(function () {
-  var links = Array.prototype.slice.call(document.querySelectorAll('#gb-nav a[data-ch]'));
-  var sections = links.map(function (a) { return document.getElementById(a.getAttribute('data-ch')); });
-  function spy() {
-    var current = sections[0];
-    for (var i = 0; i < sections.length; i++) {
-      if (sections[i] && sections[i].getBoundingClientRect().top <= 80) current = sections[i];
-    }
-    links.forEach(function (a) {
-      a.classList.toggle('on', current && a.getAttribute('data-ch') === current.id);
-    });
-  }
-  document.addEventListener('scroll', spy, { passive: true });
-  spy();
-})();
-</script>
 {% endblock %}

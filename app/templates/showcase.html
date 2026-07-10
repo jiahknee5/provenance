@@ -88,6 +88,25 @@
       <span class="go" style="align-self:center"><a class="go" href="/gauntlet" style="text-decoration:none">Open <i class="ph ph-arrow-right"></i></a></span>
     </div>
 
+    <div class="sc-live" style="align-items:flex-start">
+      <span class="ic" style="background:#3ba1ff;color:#04121f"><i class="ph ph-globe-hemisphere-west"></i></span>
+      <span style="min-width:0">
+        <span class="t">Planet replica — location-first satellite-imagery personalization</span>
+        <span class="d">A planet.com-style site built on the nine researched market segments where
+          LOCATION is the star signal: Planet images every place on Earth daily, so the visitor's
+          region truthfully drives copy ("Every field in {region}, imaged today") and the
+          satellite-view hero imagery — guarded at region scale, never property scale. Every
+          decision is on <a href="/planet/dev" style="color:var(--signal,#1d4ed8);font-weight:600">/planet/dev</a> · <a href="/planet/dev/image-decisions" style="color:var(--signal,#1d4ed8);font-weight:600">image decisions guide</a>.</span>
+        <span class="d" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:9px">
+          {% for label, url in planet_entries %}
+          <a href="{{ url }}" style="font-weight:600;color:var(--signal,#1d4ed8);border:1px solid var(--hairline);border-radius:8px;padding:4px 10px;text-decoration:none">{{ label }} entry →</a>
+          {% endfor %}
+          <span style="border:1px dashed var(--hairline);border-radius:8px;padding:4px 10px;color:var(--muted)">log in as <b style="color:var(--ink)">{{ planet_login }}</b></span>
+        </span>
+      </span>
+      <span class="go" style="align-self:center"><a class="go" href="/planet" style="text-decoration:none">Open <i class="ph ph-arrow-right"></i></a></span>
+    </div>
+
     <div class="sc-sech"><h2>Use cases</h2><span>actual personalized demo websites</span></div>
     <div class="sc-grid">
       {% for d in demos %}

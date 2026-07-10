@@ -1,0 +1,120 @@
+{#- /ads — JUST the X ad variations: all 12 FULL X-post mockups in a grid, one per real
+    X Ads Manager targeting type × Planet market segment. Each card is the complete
+    promoted post (avatar, copy, CTA, UTM chips) and clicks through to its personalized
+    landing URL. The landing-page previews live separately on /ads-lp. -#}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Planet X Ads — 12 Targeting Types</title>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#04070d; --panel:#0a1220; --line:#16233a; --line2:#1f3355;
+      --blu:#3ba1ff; --blu-t:#6cbcff; --ink:#eef3f9; --body:#9fb0c3; --dim:#68798e;
+      --sans:'Archivo','Inter',sans-serif; --ui:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
+      --x-bg:#15202b; --x-line:#38444d; --x-muted:#8899a6;
+      --cat-vert:#3fa34d; --cat-aud:#8a5cf6;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--ink);font:13px/1.45 var(--ui);-webkit-font-smoothing:antialiased;padding:18px 22px 40px}
+    a{color:inherit;text-decoration:none}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}
+    h1{font:600 18px/1 var(--sans);color:#fff}
+    .sub{font:12px var(--ui);color:var(--dim);margin:6px 0 16px}
+    .nav{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap}
+    .nav a{font:600 11px var(--ui);border:1px solid var(--line2);border-radius:5px;padding:4px 10px;color:var(--blu-t);white-space:nowrap}
+    .nav a:hover{border-color:var(--blu);color:#fff}
+    .cat{margin:18px 0 10px;display:flex;align-items:center;gap:10px}
+    .cat .tag{font:700 10px var(--ui);letter-spacing:.06em;text-transform:uppercase;color:#fff;border-radius:4px;padding:2px 8px}
+    .cat.vertical .tag{background:var(--cat-vert)}
+    .cat.audience .tag{background:var(--cat-aud)}
+    .cat .n{font:11px var(--mono);color:var(--dim)}
+    .grid{display:grid;gap:14px;grid-template-columns:repeat(3,1fr)}
+    @media(max-width:1100px){.grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:720px){.grid{grid-template-columns:1fr}}
+    .card{background:var(--x-bg);border:1px solid var(--x-line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;transition:border-color .12s,box-shadow .12s}
+    .card:hover{border-color:var(--blu);box-shadow:0 4px 18px rgba(0,0,0,.4)}
+    .card.cat-vertical{border-top:3px solid var(--cat-vert)}
+    .card.cat-audience{border-top:3px solid var(--cat-aud)}
+    .meta{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border-bottom:1px solid var(--x-line);background:rgba(255,255,255,.02)}
+    .meta .type{font:700 11.5px var(--sans);color:#fff}
+    .meta .seg{font:10px var(--mono);color:var(--x-muted);text-transform:uppercase;letter-spacing:.08em}
+    .xtop{display:flex;align-items:center;gap:10px;padding:12px 12px 8px}
+    .av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 12px var(--ui);color:#fff;flex-shrink:0}
+    .xmeta b{display:block;font:700 13.5px var(--ui);color:#fff}
+    .xmeta span{font:12px var(--ui);color:var(--x-muted)}
+    .xbody{padding:2px 12px 10px;flex:1}
+    .xbody p{font:13.5px/1.5 var(--ui);color:#e7e9ea}
+    .xbody .trig{color:var(--blu-t);font-weight:500}
+    .config{font:10px var(--mono);color:var(--x-muted);padding:0 12px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .utm{display:flex;gap:5px;flex-wrap:wrap;padding:0 12px 10px}
+    .utm span{font:9.5px var(--mono);color:var(--x-muted);border:1px solid var(--x-line);border-radius:4px;padding:2px 7px}
+    .go{display:block;margin:0 12px 8px;text-align:center;font:700 12.5px var(--ui);color:#04121f;background:var(--blu);border-radius:20px;padding:10px}
+    .go:hover{background:var(--blu-t)}
+    .foot{display:flex;justify-content:space-between;align-items:center;padding:0 12px 12px}
+    .foot .fit{font:10.5px var(--ui);color:var(--x-muted)}
+    .foot .fit b{color:#e7e9ea;font-weight:600}
+    .foot a{font:600 10.5px var(--ui);color:var(--blu-t)}
+    .chip{position:fixed;right:12px;bottom:10px;font:600 10px var(--ui);color:#c2cddb;background:rgba(8,14,26,.92);border:1px solid var(--line2);border-radius:12px;padding:5px 10px}
+    .chip:hover{color:#fff;border-color:var(--blu)}
+  </style>
+</head>
+<body>
+<header class="top">
+  <h1>Planet X Ads — 12 Targeting Types, 9 Market Segments</h1>
+  <nav class="nav">
+    <a href="{{ g.page }}">Landing</a>
+    <a href="{{ g.ads_lp }}">LP variants</a>
+    <a href="{{ g.dev }}">/dev</a>
+    <a href="{{ g.image_decisions }}">Image decisions</a>
+    <a href="/showcase">Showcase</a>
+  </nav>
+</header>
+<p class="sub">Each mockup is a full X promoted post; the CTA clicks through to its message-matched
+personalized landing URL. The landing-page variations live on <a href="{{ g.ads_lp }}" style="color:var(--blu-t)">{{ g.ads_lp }}</a>.</p>
+
+{% for sec in sections %}
+<div class="cat {{ sec.category }}">
+  <span class="tag">{{ sec.label }}</span>
+  <span class="n">{{ sec.variants|length }} variants</span>
+</div>
+<div class="grid">
+  {% for item in sec.variants %}
+  {% set v = item.variant %}
+  <div class="card cat-{{ sec.category }}">
+    <div class="meta">
+      <span class="type">{{ v.x_targeting_type }}</span>
+      <span class="seg">{{ v.segment }}</span>
+    </div>
+    <div class="xtop">
+      <div class="av" style="background:{{ v.ad.accent }}">{{ v.ad.avatar }}</div>
+      <div class="xmeta">
+        <b>{{ v.ad.display }}</b>
+        <span>@{{ v.ad.handle }} · Promoted</span>
+      </div>
+    </div>
+    <div class="xbody">
+      <p><span class="trig">{{ v.ad.trigger }}</span> {{ v.ad.body }} {{ v.ad.proof }}</p>
+    </div>
+    <div class="config" title="{{ v.x_targeting_example }}">X config: {{ v.x_targeting_example }}</div>
+    <div class="utm">
+      <span>utm_source=x</span>
+      <span>utm_medium=paid</span>
+      <span>utm_campaign={{ v.utm_campaign }}</span>
+      <span>utm_content={{ v.variant_id }}</span>
+    </div>
+    <a class="go" href="{{ item.landing_url }}">{{ v.ad.cta_label }}</a>
+    <div class="foot">
+      <span class="fit">Best for <b>{{ v.audience_fit_label }}</b></span>
+      <a href="{{ item.single_url }}">Full mockup →</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endfor %}
+
+<a class="chip" href="{{ g.dev }}">decisions → {{ g.dev }}</a>
+</body>
+</html>

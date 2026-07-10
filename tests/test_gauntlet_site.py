@@ -272,6 +272,50 @@ def test_process_map_drilldowns_carry_evidence_and_fired_markers():
     assert len(orders) >= 3 and sum(1 for r in orders if r["fired"]) >= 1
 
 
+def test_plain_story_covers_all_four_beats_without_jargon():
+    # known visitor from the keyword ad — every beat reflects the actual state
+    page = GS.build_page(_Req({"utm_medium": "paid", "utm_campaign": "x-keyword-ai-hiring",
+                               "utm_content": "v09"}),
+                         email="maya.chen@gauntletai.com")
+    story = GS.plain_story(page)
+    assert [s["label"] for s in story] == [
+        "How they arrived", "What the network says", "Who they are", "What the page did"]
+    joined = " ".join(s["text"] for s in story)
+    assert "paid ad" in joined and "Maya Chen" in joined
+    assert "copy blocks changed" in joined
+    for jargon in ("utm_", "firmographic", "tier ", "archetype"):
+        assert jargon not in joined, f"story leaks pipeline jargon: {jargon}"
+    # anonymous direct — the story says so plainly
+    anon = " ".join(s["text"] for s in GS.plain_story(GS.build_page(_Req())))
+    assert "typed the address directly" in anon
+    assert "knows nobody" in anon
+
+
+def test_dev_page_renders_story_and_legend():
+    t = c.get("/dev?as=known").text
+    assert "What just happened, in plain English" in t
+    for label in ("How they arrived", "What the network says", "Who they are", "What the page did"):
+        assert label in t
+    # the say/allude/hold legend explains the vocabulary
+    assert "Three words used everywhere below" in t
+    assert "never reaches their page" in t
+
+
+def test_dev_business_renders_story_sidebar_and_legend():
+    t = c.get("/dev/business?as=known").text
+    assert "This visit, in plain English" in t
+    for label in ("How they arrived", "What the network says", "Who they are", "What the page did"):
+        assert label in t
+    # sidebar navigation with anchors into all seven sections
+    for anchor in ("b-arrival", "b-audience", "b-objections", "b-copy",
+                   "b-visual", "b-lead", "b-policy"):
+        assert f'id="{anchor}"' in t and f'href="#{anchor}"' in t, f"missing anchor: {anchor}"
+    # the legend uses the business vocabulary (steer, not allude)
+    assert "Three words used everywhere below" in t and ">steer<" in t
+    p = c.get("/gauntletapt/dev/business?as=anon").text
+    assert 'href="/gauntletapt/dev' in p and "This visit, in plain English" in p
+
+
 def test_dev_page_renders_the_process_map():
     t = c.get("/dev?as=anon").text
     assert "Process map" in t

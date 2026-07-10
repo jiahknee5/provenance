@@ -6,7 +6,13 @@
 .pytest_cache
 .playwright-mcp
 data/
+# ship the pre-generated hero image cache — Railway's FS is ephemeral, so without
+# this every deploy wipes all backgrounds and visitors wait ~30s per state
+!data/demo/image_cache
+!data/demo/image_cache/**
 *.png
+!data/demo/image_cache/images/*.png
+!data/demo/image_cache/images/*.jpg
 .DS_Store
 .env
 # not served by the app — keep the image lean

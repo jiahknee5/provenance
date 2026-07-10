@@ -18,6 +18,7 @@ from pipeline.common.config import RULES_DIR
 
 TENANT_CONFIG_FILES: dict[str, str] = {
     "gauntlet": "gauntlet_image.yaml",
+    "planet": "planet_image.yaml",
 }
 
 _CONFIG_CACHE: dict[str, dict[str, Any]] = {}
@@ -507,6 +508,168 @@ def assemble_full_prompt(structured: StructuredPrompt,
     parts.append("Must avoid: " + "; ".join(structured.get("must_avoid") or []) + ".")
     parts.append(f"Drives action: {structured.get('drives_action', 'program_overview')}.")
     return " ".join(parts)
+
+
+# --- Two-tier prompt assembly (segment base + personalization delta) ---
+
+TIER1_LAYERS = frozenset({"ad_message_match", "audience_route"})
+TIER2_LAYER_SOURCES = frozenset({"objection_theme", "industry", "region_mood", "archetype"})
+
+
+def segment_ctx(ctx: dict) -> dict:
+    """Strip tier-2 signals — stable segment identity for base cache keys."""
+    out = dict(ctx)
+    out["top_objection"] = None
+    out["top_objections"] = []
+    out["industry"] = "general"
+    out["region"] = None
+    out["archetype_id"] = None
+    return out
+
+
+def _tier_gates(config: dict) -> dict[str, int]:
+    return (config.get("guardrails") or {}).get("tier_gates") or {}
+
+
+def _tier2_signals_present(ctx: dict, config: dict | None = None) -> list[str]:
+    """Return active tier-2 signal ids (pre-guardrail eligibility check)."""
+    config = config or _default_config()
+    gates = _tier_gates(config)
+    tier = ctx.get("tier", 0)
+    signals: list[str] = []
+    top1 = (_top_objections(ctx) or [None])[0]
+    if top1 and top1 in (config.get("objection_metaphors") or {}):
+        signals.append(f"objection:{top1}")
+    if tier >= gates.get("industry", 2) and (ctx.get("industry") or "general") != "general":
+        signals.append(f"industry:{ctx['industry']}")
+    if tier >= gates.get("region_mood", 1) and ctx.get("region"):
+        signals.append(f"region:{ctx['region']}")
+    if ctx.get("archetype_id"):
+        signals.append(f"archetype:{ctx['archetype_id']}")
+    return signals
+
+
+def has_personalization_delta(ctx: dict, config: dict | None = None) -> bool:
+    """True when any tier-2 personalization signal is present and eligible."""
+    return bool(_tier2_signals_present(ctx, config))
+
+
+def build_base_structured_prompt(ctx: dict, selection: ImageIntentSelection,
+                                   config: dict | None = None) -> StructuredPrompt:
+    """Segment-only structured prompt — intent + ad/audience layers, no objection/industry/region."""
+    seg = segment_ctx(ctx)
+    structured = build_structured_prompt(seg, selection, config)
+    layers = [l for l in (structured.get("personalization_layers") or [])
+              if l["layer"] in TIER1_LAYERS]
+    structured["personalization_layers"] = layers
+    structured["pairs_with_objection"] = None
+    return structured
+
+
+def build_delta_layers(ctx: dict, config: dict | None = None) -> list[PersonalizationLayer]:
+    """Tier-2 personalization layers only (respects tier gates)."""
+    config = config or _default_config()
+    gates = _tier_gates(config)
+    tier = ctx.get("tier", 0)
+    layers: list[PersonalizationLayer] = []
+
+    industry_key = ctx.get("industry") or "general"
+    if tier >= gates.get("industry", 2) and industry_key != "general":
+        env = (config.get("industry_env") or {}).get(
+            industry_key,
+            (config.get("industry_env") or {}).get("general", "professional workspace"),
+        )
+        layers.append({
+            "layer": "industry",
+            "value": env,
+            "source": "reverse-IP industry (tier-gated)",
+            "disposition": "allude",
+        })
+
+    region = ctx.get("region")
+    if tier >= gates.get("region_mood", 1) and region:
+        layers.append({
+            "layer": "region_mood",
+            "value": f"{region} regional tone — no landmarks",
+            "source": "geo-IP region",
+            "disposition": "allude",
+        })
+
+    objections = _top_objections(ctx)
+    top1 = objections[0] if objections else None
+    if top1:
+        metaphor = (config.get("objection_metaphors") or {}).get(
+            top1, "stalled initiative beside active deployment")
+        layers.append({
+            "layer": "objection_theme",
+            "value": metaphor,
+            "source": f"objection #{1} {top1}",
+            "disposition": "allude",
+        })
+
+    archetype_id = ctx.get("archetype_id")
+    if archetype_id:
+        archetypes = (config.get("archetypes") or {})
+        label = archetypes.get(archetype_id, archetype_id.replace("_", " "))
+        layers.append({
+            "layer": "archetype",
+            "value": f"CRM archetype {label} — continuation energy, no naming",
+            "source": f"login archetype {archetype_id}",
+            "disposition": "allude",
+        })
+
+    return layers
+
+
+def assemble_base_prompt(structured: StructuredPrompt,
+                         config: dict | None = None) -> str:
+    """Shorter segment-only prompt (~100 tokens) — pre-cacheable per segment."""
+    config = config or _default_config()
+    product = config.get("product_context", "marketing site")
+    parts = [
+        f"Cinematic wide hero backdrop for a {product}.",
+        f"Intent: {structured['intent_id']} — {structured['conversion_goal']}.",
+        f"Composition: {structured['composition']}",
+        f"Visual metaphor: {structured['visual_metaphor']}",
+        f"Mood: {structured['mood']}. Accent {structured['accent_color']}.",
+    ]
+    for layer in structured.get("personalization_layers") or []:
+        parts.append(f"{layer['layer']}: {layer['value']}.")
+    must_avoid = structured.get("must_avoid") or []
+    if must_avoid:
+        parts.append("Must avoid: " + "; ".join(must_avoid[:4]) + ".")
+    return " ".join(parts)
+
+
+def assemble_delta_prompt(base_structured: StructuredPrompt,
+                          delta_layers: list[PersonalizationLayer],
+                          config: dict | None = None) -> str:
+    """Shorter delta prompt referencing base scene — ~40-60% fewer tokens than full."""
+    config = config or _default_config()
+    base_hint = (
+        f"{base_structured['intent_id']} scene — "
+        f"{base_structured['visual_metaphor'][:100]}"
+    )
+    parts = [
+        f"Same hero scene as segment base ({base_hint}).",
+        "Adjust composition to emphasize:",
+    ]
+    for layer in delta_layers:
+        parts.append(f"{layer['layer']}: {layer['value']}.")
+    parts.append(f"Mood stays {base_structured['mood']}. Accent {base_structured['accent_color']}.")
+    must_avoid = base_structured.get("must_avoid") or []
+    if must_avoid:
+        parts.append("Must avoid: " + "; ".join(must_avoid[:4]) + ".")
+    return " ".join(parts)
+
+
+def assemble_combined_prompt(base_structured: StructuredPrompt,
+                             delta_layers: list[PersonalizationLayer],
+                             config: dict | None = None) -> str:
+    """Base summary + delta — used when generating personalized variant without img2img."""
+    base = assemble_base_prompt(base_structured, config)
+    delta = assemble_delta_prompt(base_structured, delta_layers, config)
+    return f"{base} Personalization overlay: {delta}"
 
 
 def intent_catalog_for_config(config: dict | None = None) -> list[dict]:
