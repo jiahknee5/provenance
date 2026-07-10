@@ -22,6 +22,11 @@ import httpx
 from pipeline.personalization import gauntlet_site as GS
 from pipeline.personalization import image_intents as II
 from pipeline.personalization import scene as SC
+from pipeline.personalization.brain_simulator import (
+    BrainSimulatorScorer,
+    GeneratedCandidate,
+    brain_sim_enabled,
+)
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 CACHE_DIR = ROOT / "data" / "demo" / "image_cache"
@@ -52,6 +57,33 @@ _PII_WORDS = (
 )
 
 DEFAULT_IMAGE_TENANT = "gauntlet"
+DEFAULT_SURFACE_ID = "hero"
+
+_SURFACE_DEFAULTS: dict[str, dict] = {
+    "hero": {
+        "label": "Hero background",
+        "placement": "Full-width hero section backdrop",
+        "prompt_opener": "Cinematic wide hero backdrop for a {product}.",
+    },
+    "og": {
+        "label": "Open Graph / social preview",
+        "placement": "Link share unfurl (Twitter, LinkedIn, Slack)",
+        "prompt_opener": (
+            "Open Graph social preview card (1200×630) for a {product} — "
+            "shareable link thumbnail."
+        ),
+        "must_include": [
+            "1200x630 social card aspect ratio with safe center crop margins",
+            "bold single focal subject readable at thumbnail size",
+            "dark moody atmosphere with warm gold accent ({accent_color})",
+            "single clear focal point — processing fluency",
+        ],
+        "composition_suffix": (
+            "Framed as a social share thumbnail with centered focal subject and "
+            "generous safe margins for platform crop — no text overlay."
+        ),
+    },
+}
 
 
 def load_image_config(tenant: str = DEFAULT_IMAGE_TENANT) -> dict:
@@ -61,6 +93,70 @@ def load_image_config(tenant: str = DEFAULT_IMAGE_TENANT) -> dict:
 
 def _tenant_config(tenant: str | None = None) -> dict:
     return load_image_config(tenant or DEFAULT_IMAGE_TENANT)
+
+
+def surface_spec(surface_id: str, *, tenant: str | None = None) -> dict:
+    """Marketer-facing surface metadata + prompt overrides from tenant config."""
+    config = _tenant_config(tenant)
+    yaml_surfaces = (config.get("surfaces") or {})
+    base = dict(_SURFACE_DEFAULTS.get(surface_id, _SURFACE_DEFAULTS["hero"]))
+    base.update(yaml_surfaces.get(surface_id) or {})
+    base["id"] = surface_id
+    return base
+
+
+def list_surface_ids(*, tenant: str | None = None) -> list[str]:
+    """Ordered surface ids for a tenant — hero first, then config extras."""
+    config = _tenant_config(tenant)
+    yaml_ids = list((config.get("surfaces") or {}).keys())
+    out = [DEFAULT_SURFACE_ID]
+    for sid in yaml_ids:
+        if sid not in out:
+            out.append(sid)
+    return out
+
+
+def _surface_opener(surface_id: str, config: dict) -> str:
+    spec = surface_spec(surface_id, tenant=config.get("tenant"))
+    product = config.get("product_context", "marketing site")
+    accent = (config.get("brand") or {}).get("accent_color", "#c9a227")
+    tmpl = spec.get("prompt_opener", _SURFACE_DEFAULTS["hero"]["prompt_opener"])
+    return tmpl.format(product=product, accent_color=accent)
+
+
+def _rewrite_prompt_opener(prompt: str, opener: str) -> str:
+    """Replace the first sentence of an assembled prompt with the surface opener."""
+    dot = prompt.find(". ")
+    if dot == -1:
+        return opener + " " + prompt
+    return opener + prompt[dot:]
+
+
+def _apply_surface(structured: II.StructuredPrompt, surface_id: str,
+                   config: dict) -> II.StructuredPrompt:
+    """Apply per-surface must_include / composition overrides before assembly."""
+    if surface_id == DEFAULT_SURFACE_ID:
+        return structured
+    spec = surface_spec(surface_id, tenant=config.get("tenant"))
+    out = dict(structured)
+    accent = out.get("accent_color") or (config.get("brand") or {}).get("accent_color", "#c9a227")
+    if spec.get("must_include"):
+        tail = [m for m in (out.get("must_include") or [])
+                if m.startswith("conversion goal") or m.startswith("secondary visual")]
+        out["must_include"] = [
+            item.format(accent_color=accent) for item in spec["must_include"]
+        ] + tail
+    suffix = spec.get("composition_suffix")
+    if suffix:
+        out["composition"] = (out.get("composition") or "").rstrip() + " " + suffix.strip()
+    out["surface_id"] = surface_id
+    return out
+
+
+def _finalize_surface_prompt(prompt: str, surface_id: str, config: dict) -> str:
+    if surface_id == DEFAULT_SURFACE_ID:
+        return prompt
+    return _rewrite_prompt_opener(prompt, _surface_opener(surface_id, config))
 
 
 def _api_key() -> str:
@@ -189,19 +285,23 @@ def _assert_prompt_safe(prompt: str) -> None:
             raise ValueError(f"prompt contains hold-tier pattern: {label}")
 
 
-def image_cache_key(prompt: str, model: str | None = None) -> str:
+def image_cache_key(prompt: str, model: str | None = None, *,
+                    surface_id: str = DEFAULT_SURFACE_ID) -> str:
     m = model or _model()
-    return hashlib.sha256(f"{m}\x00{prompt}".encode()).hexdigest()[:32]
+    surf = "" if surface_id == DEFAULT_SURFACE_ID else f"{surface_id}\x00"
+    return hashlib.sha256(f"{m}\x00{surf}{prompt}".encode()).hexdigest()[:32]
 
 
-def segment_cache_key(ctx: dict, intent_id: str, *, tenant: str | None = None) -> str:
+def segment_cache_key(ctx: dict, intent_id: str, *, tenant: str | None = None,
+                      surface_id: str = DEFAULT_SURFACE_ID) -> str:
     """Semantic tier-1 key — no PII, no objection/industry/region/archetype."""
     t = tenant or DEFAULT_IMAGE_TENANT
+    surf = "" if surface_id == DEFAULT_SURFACE_ID else f"{surface_id}:"
     ad = ctx.get("ad_variant_id")
     if ad:
-        return f"{t}:base:{ad}"
+        return f"{t}:base:{surf}{ad}"
     route = ctx.get("audience_route", "neutral")
-    return f"{t}:base:{intent_id}:{route}"
+    return f"{t}:base:{surf}{intent_id}:{route}"
 
 
 def delta_cache_key(ctx: dict, *, tenant: str | None = None) -> str | None:
@@ -288,13 +388,100 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
 
-def _receipt_extras(structured: II.StructuredPrompt, tier_fields: dict | None = None) -> dict[str, Any]:
+def _best_of_n(*, tenant: str | None = None, generate: bool = False) -> int:
+    """Candidates per API call when brain scoring is active. Default n=3 async, n=1 pregen."""
+    env = (os.environ.get("BRAIN_SIM_BEST_OF_N") or "").strip()
+    if env.isdigit():
+        return max(1, min(int(env), 8))
+    config = _tenant_config(tenant)
+    if not brain_sim_enabled(config):
+        return 1
+    return 3 if generate else 1
+
+
+def _brain_score_context(structured: II.StructuredPrompt, prompt: str) -> dict:
+    return {
+        "prompt": prompt,
+        "must_avoid": structured.get("must_avoid") or [],
+        "visual_metaphor": structured.get("visual_metaphor") or "",
+        "mood": structured.get("mood") or "",
+    }
+
+
+def _brain_receipt_fields(
+    score: dict | None,
+    *,
+    candidates_evaluated: int,
+    winner_index: int,
+    structured: II.StructuredPrompt,
+) -> dict[str, Any]:
+    if not score:
+        return {}
+    return {
+        "brain_simulator": score.get("brain_simulator"),
+        "brain_target": score.get("brain_target") or structured.get("brain_target"),
+        "brain_score": score.get("total"),
+        "brain_region_scores": score.get("region_scores"),
+        "brain_proxy_breakdown": score.get("proxy_breakdown"),
+        "brain_penalties": score.get("penalties"),
+        "brain_guardrail_penalty": score.get("guardrail_penalty"),
+        "candidates_evaluated": candidates_evaluated,
+        "winner_index": winner_index,
+    }
+
+
+def _generate_candidates(prompt: str, n: int) -> list[dict]:
+    """Call image API up to n times; tolerate partial failures."""
+    out: list[dict] = []
+    for _ in range(n):
+        result = _call_image_api(prompt)
+        if result:
+            out.append(result)
+    return out
+
+
+def _candidate_bytes(api_result: dict) -> bytes:
+    if "b64" in api_result:
+        return base64.b64decode(api_result["b64"])
+    return api_result["raw"]
+
+
+def _select_scored_candidate(
+    api_results: list[dict],
+    structured: II.StructuredPrompt,
+    prompt: str,
+    *,
+    tenant: str | None = None,
+) -> tuple[dict, dict | None, int, int]:
+    """Pick best candidate when brain scoring enabled; else first success."""
+    if not api_results:
+        raise ValueError("no api results")
+    config = _tenant_config(tenant)
+    if not brain_sim_enabled(config) or not structured.get("brain_target"):
+        return api_results[0], None, len(api_results), 0
+    scorer = BrainSimulatorScorer()
+    target = structured["brain_target"]
+    regions = list(structured.get("brain_regions") or [])
+    candidates = [
+        GeneratedCandidate(index=i, image_bytes=_candidate_bytes(r), ext=r.get("ext", "png"))
+        for i, r in enumerate(api_results)
+    ]
+    winner, best_score, _all_scores = scorer.select_best(
+        candidates, target, regions, _brain_score_context(structured, prompt),
+    )
+    return api_results[winner.index], best_score, len(api_results), winner.index
+
+
+def _receipt_extras(structured: II.StructuredPrompt, tier_fields: dict | None = None,
+                    brain_fields: dict | None = None) -> dict[str, Any]:
     """Provenance fields stored alongside generation receipt."""
     out = {
         "intent_id": structured.get("intent_id"),
         "secondary_intent_id": structured.get("secondary_intent_id"),
         "conversion_goal": structured.get("conversion_goal"),
         "sales_technique": structured.get("sales_technique"),
+        "brain_target": structured.get("brain_target"),
+        "brain_regions": structured.get("brain_regions"),
         "personalization_layers": structured.get("personalization_layers"),
         "composition": structured.get("composition"),
         "visual_metaphor": structured.get("visual_metaphor"),
@@ -310,6 +497,8 @@ def _receipt_extras(structured: II.StructuredPrompt, tier_fields: dict | None = 
     }
     if tier_fields:
         out.update(tier_fields)
+    if brain_fields:
+        out.update(brain_fields)
     return out
 
 
@@ -440,16 +629,27 @@ def _call_image_api(prompt: str) -> dict | None:
 
 def _generate_and_cache(ctx: dict, structured: II.StructuredPrompt, prompt: str,
                         cache_key: str, model: str,
-                        tier_fields: dict | None = None) -> dict:
+                        tier_fields: dict | None = None, *,
+                        tenant: str | None = None,
+                        generate: bool = True) -> dict:
     chain = ["cache"]
-    api_result = _call_image_api(prompt)
-    if api_result:
-        if "b64" in api_result:
-            raw = base64.b64decode(api_result["b64"])
-        else:
-            raw = api_result["raw"]
+    n = _best_of_n(tenant=tenant, generate=generate)
+    api_results = _generate_candidates(prompt, n)
+    if api_results:
+        api_result, brain_score, evaluated, winner_index = _select_scored_candidate(
+            api_results, structured, prompt, tenant=tenant,
+        )
+        raw = _candidate_bytes(api_result)
         ext = api_result.get("ext", "png")
         _save_image(cache_key, raw, ext)
+        brain_fields = _brain_receipt_fields(
+            brain_score,
+            candidates_evaluated=evaluated,
+            winner_index=winner_index,
+            structured=structured,
+        )
+        if brain_sim_enabled(_tenant_config(tenant)) and n > 1:
+            chain.append(f"best_of_{n}")
         receipt = {
             "url": _public_url(cache_key, ext),
             "source": "generated",
@@ -460,7 +660,7 @@ def _generate_and_cache(ctx: dict, structured: II.StructuredPrompt, prompt: str,
             "generated_at": _now_iso(),
             "license": "AI-generated (synthetic demo — disclosed on /dev)",
             "fallback_chain": chain + ["api"],
-            **_receipt_extras(structured, tier_fields),
+            **_receipt_extras(structured, tier_fields, brain_fields),
         }
         manifest = _read_manifest()
         manifest[cache_key] = {k: v for k, v in receipt.items() if k != "url"}
@@ -473,17 +673,24 @@ def _generate_and_cache(ctx: dict, structured: II.StructuredPrompt, prompt: str,
                             tier_fields=tier_fields)
 
 
-def _resolve_prompts(ctx: dict, *, tenant: str | None = None) -> dict:
+def _resolve_prompts(ctx: dict, *, tenant: str | None = None,
+                     surface_id: str = DEFAULT_SURFACE_ID) -> dict:
     """Build tier-1 base + optional tier-2 delta/combined prompts."""
     config = _tenant_config(tenant)
     t = tenant or DEFAULT_IMAGE_TENANT
 
     base_prompt, base_structured, seg_selection = build_base_prompt(ctx, tenant=tenant)
     full_structured = build_image_prompt(ctx, tenant=tenant)
-    full_prompt = full_structured["full_prompt"]
+    base_structured = _apply_surface(base_structured, surface_id, config)
+    full_structured = _apply_surface(full_structured, surface_id, config)
+    base_prompt = _finalize_surface_prompt(
+        II.assemble_base_prompt(base_structured, config), surface_id, config)
+    full_prompt = _finalize_surface_prompt(
+        II.assemble_full_prompt(full_structured, config), surface_id, config)
     full_len = len(full_prompt)
 
-    sem_base_key = segment_cache_key(ctx, base_structured["intent_id"], tenant=t)
+    sem_base_key = segment_cache_key(ctx, base_structured["intent_id"],
+                                     tenant=t, surface_id=surface_id)
     sem_delta_key = delta_cache_key(ctx, tenant=t)
     delta_signals = II._tier2_signals_present(ctx, config)
 
@@ -492,7 +699,7 @@ def _resolve_prompts(ctx: dict, *, tenant: str | None = None) -> dict:
         delta_prompt, delta_layers = delta_result
         combined_prompt = II.assemble_combined_prompt(base_structured, delta_layers, config)
         tier = "base+delta"
-        gen_prompt = combined_prompt
+        gen_prompt = _finalize_surface_prompt(combined_prompt, surface_id, config)
         used_len = len(delta_prompt)
     else:
         delta_prompt = None
@@ -503,8 +710,8 @@ def _resolve_prompts(ctx: dict, *, tenant: str | None = None) -> dict:
         used_len = len(base_prompt)
 
     model = _model()
-    base_disk_key = image_cache_key(base_prompt, model)
-    gen_disk_key = image_cache_key(gen_prompt, model)
+    base_disk_key = image_cache_key(base_prompt, model, surface_id=surface_id)
+    gen_disk_key = image_cache_key(gen_prompt, model, surface_id=surface_id)
 
     tier_fields = _tier_receipt_fields(
         tier=tier,
@@ -537,13 +744,15 @@ def _resolve_prompts(ctx: dict, *, tenant: str | None = None) -> dict:
         "tier_fields": tier_fields,
         "model": model,
         "delta_layers": delta_layers,
+        "surface_id": surface_id,
     }
 
 
-def get_hero_image(ctx: dict, *, generate: bool = False,
-                   tenant: str | None = None) -> dict:
-    """Resolve hero image receipt using two-tier base + delta cache strategy."""
-    resolved = _resolve_prompts(ctx, tenant=tenant)
+def get_surface_image(ctx: dict, *, surface_id: str = DEFAULT_SURFACE_ID,
+                      generate: bool = False,
+                      tenant: str | None = None) -> dict:
+    """Resolve an image surface receipt using two-tier base + delta cache strategy."""
+    resolved = _resolve_prompts(ctx, tenant=tenant, surface_id=surface_id)
     base_structured = resolved["display_structured"]
     gen_prompt = resolved["gen_prompt"]
     base_prompt = resolved["base_prompt"]
@@ -609,28 +818,46 @@ def get_hero_image(ctx: dict, *, generate: bool = False,
                                 full_prompt_len=len(resolved["full_prompt"]),
                                 used_prompt_len=len(base_prompt),
                                 cache_hit=False,
-                            ))
+                            ),
+                            tenant=tenant, generate=generate)
 
     # e. Generate final image (base_only or base+delta combined prompt)
     return _generate_and_cache(ctx, base_structured, gen_prompt, gen_disk_key, model,
-                               tier_fields)
+                               tier_fields, tenant=tenant, generate=generate)
+
+
+def get_hero_image(ctx: dict, *, generate: bool = False,
+                   tenant: str | None = None) -> dict:
+    """Resolve hero image receipt — alias for the default hero surface."""
+    return get_surface_image(ctx, surface_id=DEFAULT_SURFACE_ID,
+                             generate=generate, tenant=tenant)
+
+
+def resolve_surface_image(page: dict, *, surface_id: str = DEFAULT_SURFACE_ID,
+                          generate: bool = False,
+                          tenant: str | None = None) -> dict:
+    """Page-facing wrapper → {status, fallback, url?, receipt, dev, surface_id}."""
+    ctx = build_image_ctx(page)
+    receipt = get_surface_image(ctx, surface_id=surface_id,
+                                generate=generate, tenant=tenant)
+    source = receipt.get("source", "gradient")
+    url = receipt.get("url")
+    if source == "pending":
+        out = {"status": "pending", "fallback": "gradient", "url": None, "receipt": receipt}
+    elif url:
+        out = {"status": "ready", "fallback": "gradient", "url": url, "receipt": receipt}
+    else:
+        out = {"status": "ready", "fallback": "gradient", "url": None, "receipt": receipt}
+    out["surface_id"] = surface_id
+    out["dev"] = image_surface_dev_panel(out, surface_id=surface_id, tenant=tenant)
+    return out
 
 
 def resolve_hero_image(page: dict, *, generate: bool = False,
                        tenant: str | None = None) -> dict:
-    """Page-facing wrapper → {status, fallback, url?, receipt, dev}."""
-    ctx = build_image_ctx(page)
-    receipt = get_hero_image(ctx, generate=generate, tenant=tenant)
-    source = receipt.get("source", "gradient")
-    url = receipt.get("url")
-    if source == "pending":
-        hero = {"status": "pending", "fallback": "gradient", "url": None, "receipt": receipt}
-    elif url:
-        hero = {"status": "ready", "fallback": "gradient", "url": url, "receipt": receipt}
-    else:
-        hero = {"status": "ready", "fallback": "gradient", "url": None, "receipt": receipt}
-    hero["dev"] = hero_image_dev_panel(hero)
-    return hero
+    """Page-facing wrapper for the hero surface — backward-compatible alias."""
+    return resolve_surface_image(page, surface_id=DEFAULT_SURFACE_ID,
+                                 generate=generate, tenant=tenant)
 
 
 _GUARD_LABELS = {
@@ -649,9 +876,11 @@ def _guardrail_label(entry: str) -> str:
     return entry.replace("_", " ")
 
 
-def hero_image_dev_panel(hero_image: dict) -> dict:
-    """Structured decision chain for /dev panel ⑥ — full data + decisioning."""
-    receipt = hero_image.get("receipt") or {}
+def image_surface_dev_panel(image: dict, *, surface_id: str = DEFAULT_SURFACE_ID,
+                            tenant: str | None = None) -> dict:
+    """Structured decision chain for /dev panel — full data + decisioning per surface."""
+    spec = surface_spec(surface_id, tenant=tenant)
+    receipt = image.get("receipt") or {}
     sel = receipt.get("intent_selection") or {}
     primary = sel.get("primary") or {}
     secondary = sel.get("secondary")
@@ -673,7 +902,7 @@ def hero_image_dev_panel(hero_image: dict) -> dict:
     applied = receipt.get("guardrails_applied") or []
     blocked = receipt.get("guardrails_blocked") or []
     chain = receipt.get("fallback_chain") or []
-    url = hero_image.get("url") or receipt.get("url")
+    url = image.get("url") or receipt.get("url")
     src = receipt.get("source", "gradient")
 
     tier = receipt.get("tier", "base_only")
@@ -685,6 +914,9 @@ def hero_image_dev_panel(hero_image: dict) -> dict:
     }.get(tier, tier)
 
     return {
+        "surface_id": surface_id,
+        "surface_label": spec["label"],
+        "surface_placement": spec.get("placement", ""),
         "intent_selection": {
             "rule_fired": rule,
             "primary_id": primary.get("intent_id"),
@@ -733,14 +965,20 @@ def hero_image_dev_panel(hero_image: dict) -> dict:
             "gallery_id": receipt.get("gallery_id"),
         },
         "fallback_chain": chain,
-        "status": hero_image.get("status", "ready"),
-        "fallback": hero_image.get("fallback", "gradient"),
+        "status": image.get("status", "ready"),
+        "fallback": image.get("fallback", "gradient"),
         "preview": {
             "url": url,
             "has_image": bool(url),
             "gradient_note": "CSS gradient shows when no generated/cached URL resolves",
         },
     }
+
+
+def hero_image_dev_panel(hero_image: dict) -> dict:
+    """Backward-compatible alias — hero surface dev panel."""
+    sid = hero_image.get("surface_id") or DEFAULT_SURFACE_ID
+    return image_surface_dev_panel(hero_image, surface_id=sid)
 
 
 def hero_image_trace(receipt: dict) -> tuple[list[str], str, str]:
@@ -884,6 +1122,30 @@ def hero_image_ledger_rows(receipt: dict) -> list[dict]:
             "value": str(receipt["tokens_saved_estimate"]),
             "source": "full vs base/delta prompt",
             "vendor": "image_gen.resolve",
+            "policy": "observed",
+        })
+    if receipt.get("brain_score") is not None:
+        rows.append({
+            "label": "Brain simulator score",
+            "value": str(receipt["brain_score"]),
+            "source": receipt.get("brain_simulator", "proxy_v1"),
+            "vendor": "brain_simulator",
+            "policy": "observed",
+        })
+    if receipt.get("brain_target"):
+        rows.append({
+            "label": "Brain target",
+            "value": receipt["brain_target"],
+            "source": "intent YAML",
+            "vendor": "brain_simulator",
+            "policy": "say",
+        })
+    if receipt.get("candidates_evaluated"):
+        rows.append({
+            "label": "Candidates evaluated",
+            "value": str(receipt["candidates_evaluated"]),
+            "source": "best-of-N",
+            "vendor": "image_gen",
             "policy": "observed",
         })
     if receipt.get("license"):

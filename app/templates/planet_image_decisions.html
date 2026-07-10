@@ -94,6 +94,7 @@
   <a href="#part-1">1 · Pipeline</a>
   <a href="#part-2">2 · Why each intent</a>
   <a href="#part-3">3 · Two-tier tokens</a>
+  <a href="#part-brain">Brain simulator</a>
   <a href="#part-4">4 · Provenance</a>
   <a href="#part-5">5 · Live examples</a>
 </nav>
@@ -224,6 +225,38 @@ flowchart LR
       <tbody>{% for r in two_tier.resolution %}<tr><td>{{ r }}</td></tr>{% endfor %}</tbody>
     </table>
     <div class="b" style="border-top:1px solid var(--line)">Pre-generate segment bases: <code>{{ two_tier.pregen_cmd }}</code></div>
+  </div>
+</section>
+
+<section class="part" id="part-brain">
+  <div class="part-h"><span class="num">Brain</span><h2>Brain simulator (Tribe v2)</h2></div>
+  <div class="sec">
+    <p style="margin-bottom:12px"><strong>{{ brain_simulator.honest_framing }}</strong></p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px">{{ brain_simulator.backend_note }}
+      {% if brain_simulator.enabled %}<span style="color:var(--brand);font-weight:600"> · Enabled for this tenant</span>{% else %} · Disabled for this tenant{% endif %}</p>
+    <div class="h">Generate → score → select</div>
+    <ol class="principles">{% for step in brain_simulator.loop %}<li>{{ step }}</li>{% endfor %}</ol>
+    <p style="font-size:12px;color:var(--muted);margin-top:8px">Override candidate count: <code>{{ brain_simulator.env_var }}</code></p>
+  </div>
+  <div class="sec">
+    <div class="h">Marketing brain targets → simulated cortical regions</div>
+    <table class="id">
+      <thead><tr><th>Intent</th><th>brain_target</th><th>Regions</th><th>Simulator read</th></tr></thead>
+      <tbody>
+        {% for row in brain_simulator.intent_mapping %}
+        <tr>
+          <td class="mono">{{ row.intent_id }}</td>
+          <td><code>{{ row.brain_target }}</code><br><span style="font-size:11px;color:var(--muted)">{{ row.brain_target_label }}</span></td>
+          <td class="mono" style="font-size:11px">{{ row.brain_regions }}</td>
+          <td style="font-size:11px">{{ row.region_detail }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="sec">
+    <div class="h">Example provenance receipt (brain fields)</div>
+    <pre class="mono" style="font-size:11px;background:#f4f6f9;padding:12px;border-radius:8px;overflow:auto">{{ brain_simulator.example_receipt | tojson(indent=2) }}</pre>
   </div>
 </section>
 

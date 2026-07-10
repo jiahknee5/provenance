@@ -123,6 +123,7 @@ def main(argv: list[str] | None = None) -> int:
                 used_prompt_len=len(prompt),
                 cache_hit=False,
             ),
+            tenant=tenant, generate=False,
         )
         if receipt.get("source") == "generated":
             print(f"  OK {s['key']} → {receipt.get('url')}")

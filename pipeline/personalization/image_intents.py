@@ -51,6 +51,8 @@ class StructuredPrompt(TypedDict, total=False):
     secondary_intent_id: str | None
     conversion_goal: str
     sales_technique: str
+    brain_target: str | None
+    brain_regions: list[str]
     personalization_layers: list[PersonalizationLayer]
     composition: str
     visual_metaphor: str
@@ -399,12 +401,15 @@ def build_structured_prompt(ctx: dict, selection: ImageIntentSelection,
     must_avoid.extend(brand.get("must_avoid_additions") or [])
 
     drives_action = _resolve_drives_action(ctx, top1, config)
+    brain_target, brain_regions = _intent_brain_fields(intent)
 
     return {
         "intent_id": primary_id,
         "secondary_intent_id": secondary_id,
         "conversion_goal": intent.get("conversion_goal", intent.get("goal", "")),
         "sales_technique": intent["sales_technique"],
+        "brain_target": brain_target,
+        "brain_regions": brain_regions,
         "personalization_layers": layers,
         "composition": composition,
         "visual_metaphor": visual_metaphor,
@@ -670,6 +675,15 @@ def assemble_combined_prompt(base_structured: StructuredPrompt,
     base = assemble_base_prompt(base_structured, config)
     delta = assemble_delta_prompt(base_structured, delta_layers, config)
     return f"{base} Personalization overlay: {delta}"
+
+
+def _intent_brain_fields(intent: dict) -> tuple[str | None, list[str]]:
+    """brain_target + brain_regions from intent YAML (Tribe v2 integration)."""
+    from pipeline.personalization.brain_simulator import BRAIN_TARGET_REGIONS, intent_brain_fields
+    target, regions = intent_brain_fields(intent)
+    if target and not regions:
+        regions = list(BRAIN_TARGET_REGIONS.get(target, []))
+    return target, regions
 
 
 def intent_catalog_for_config(config: dict | None = None) -> list[dict]:

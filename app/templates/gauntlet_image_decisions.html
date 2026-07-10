@@ -75,6 +75,32 @@
   .cmp-duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   @media(max-width:700px){.cmp-duo{grid-template-columns:1fr}}
   ul.principles{margin:4px 0 0;padding-left:18px;font-size:12.5px}
+  /* Part 6 · cache decision graph — mirrors the /dev process-map language */
+  .cg{padding:4px 0 10px}
+  .cg-stage{display:grid;grid-template-columns:44px minmax(180px,.85fr) 1.4fr;gap:0 12px;padding:11px 15px 11px 0;position:relative}
+  .cg-stage + .cg-stage{border-top:1px dashed var(--line)}
+  @media(max-width:920px){.cg-stage{grid-template-columns:44px 1fr;row-gap:6px}.cg-right{grid-column:2}}
+  .cg-rail{position:relative;display:flex;justify-content:center}
+  .cg-rail::before{content:"";position:absolute;top:-12px;bottom:-12px;left:50%;width:2px;background:#E4E8EC}
+  .cg-stage:first-child .cg-rail::before{top:12px}
+  .cg-stage:last-child .cg-rail::before{bottom:auto;height:14px}
+  .cg-rail .n{position:relative;z-index:1;width:24px;height:24px;border-radius:7px;background:var(--ink);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;flex:none;margin-top:1px}
+  .cg-left .nm{font-weight:700;font-size:13px}
+  .cg-left .code{font-size:10.5px;color:var(--muted);font-family:ui-monospace,Menlo,monospace;margin-top:2px;word-break:break-word}
+  .cg-reads{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:5px}
+  .cg-reads .chip{font-size:10.5px;font-weight:600;color:#475569;background:#F6F8FA;border:1px solid var(--line);border-radius:5px;padding:1px 7px;font-family:ui-monospace,Menlo,monospace}
+  .cg-branches{display:grid;gap:5px;margin-bottom:6px}
+  .cg-branches .br{display:flex;gap:8px;align-items:baseline}
+  .cg-branches .b{font-size:10.5px;font-weight:700;border-radius:6px;padding:2px 9px;border:1px solid var(--line);color:var(--muted);background:#fff;white-space:nowrap;flex:none}
+  .cg-branches .b.pre{background:#e7f6ee;border-color:#bfe6d0;color:#0a8a4f}
+  .cg-branches .b.live{background:#fdf3e2;border-color:#ecd9ad;color:#8a5a0a}
+  .cg-branches .desc{font-size:11.5px;color:var(--muted);line-height:1.45}
+  .cg-out{font-size:12.5px;font-weight:600;color:var(--ink)}
+  .cg-out::before{content:"→ ";color:var(--muted);font-weight:400}
+  .cg-note{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.45}
+  .inv-status{font-size:10.5px;font-weight:700;border-radius:5px;padding:2px 8px;white-space:nowrap}
+  .inv-status.hit{background:#e7f6ee;color:#0a8a4f}
+  .inv-status.miss{background:#fdf3e2;color:#8a5a0a}
 </style>
 
 <div class="id-head">
@@ -93,8 +119,10 @@
   <a href="#part-1">1 · Pipeline</a>
   <a href="#part-2">2 · Why each intent</a>
   <a href="#part-3">3 · Two-tier tokens</a>
+  <a href="#part-brain">Brain simulator</a>
   <a href="#part-4">4 · Provenance</a>
   <a href="#part-5">5 · Live examples</a>
+  <a href="#part-6">6 · Pre-cached vs live</a>
 </nav>
 
 <section class="part" id="part-1">
@@ -226,6 +254,37 @@ flowchart LR
   </div>
 </section>
 
+<section class="part" id="part-brain">
+  <div class="part-h"><span class="num">Brain</span><h2>Brain simulator (Tribe v2)</h2></div>
+  <div class="sec">
+    <p style="margin-bottom:12px"><strong>{{ brain_simulator.honest_framing }}</strong></p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px">{{ brain_simulator.backend_note }}
+      {% if brain_simulator.enabled %}<span style="color:var(--brand);font-weight:600"> · Enabled</span>{% else %} · <strong>Disabled by default</strong> — opt in via <code>brain_simulator.enabled: true</code>{% endif %}</p>
+    <div class="h">Generate → score → select</div>
+    <ol class="principles">{% for step in brain_simulator.loop %}<li>{{ step }}</li>{% endfor %}</ol>
+    <p style="font-size:12px;color:var(--muted);margin-top:8px">Override: <code>{{ brain_simulator.env_var }}</code></p>
+  </div>
+  <div class="sec">
+    <div class="h">Intent → brain_target mapping (ready when enabled)</div>
+    <table class="id">
+      <thead><tr><th>Intent</th><th>brain_target</th><th>Regions</th></tr></thead>
+      <tbody>
+        {% for row in brain_simulator.intent_mapping %}
+        <tr>
+          <td class="mono">{{ row.intent_id }}</td>
+          <td><code>{{ row.brain_target }}</code></td>
+          <td class="mono" style="font-size:11px">{{ row.brain_regions }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="sec">
+    <div class="h">Example receipt snippet</div>
+    <pre class="mono" style="font-size:11px;background:#f4f6f9;padding:12px;border-radius:8px;overflow:auto">{{ brain_simulator.example_receipt | tojson(indent=2) }}</pre>
+  </div>
+</section>
+
 <section class="part" id="part-4">
   <div class="part-h"><span class="num">Part 4</span><h2>Provenance &amp; trust</h2></div>
   <div class="sec">
@@ -306,6 +365,65 @@ flowchart LR
       </div>
     </div>
     {% endfor %}
+  </div>
+</section>
+
+<section class="part" id="part-6">
+  <div class="part-h"><span class="num">Part 6</span><h2>Pre-cached vs live — the cache decision graph</h2></div>
+
+  <div class="sec">
+    <div class="h">What "pre-cached" and "live" mean here</div>
+    <div class="b">{{ precached.preamble }}</div>
+  </div>
+
+  <div class="sec">
+    <div class="h">Decision graph — request to pixel <code>image_gen.get_hero_image()</code></div>
+    <div class="cg">
+      {% for s in precached.graph %}
+      <div class="cg-stage">
+        <div class="cg-rail"><span class="n">{{ loop.index }}</span></div>
+        <div class="cg-left">
+          <div class="nm">{{ s.label }}</div>
+          <div class="code">{{ s.code }}</div>
+        </div>
+        <div class="cg-right">
+          {% if s.reads %}<div class="cg-reads">{% for r in s.reads %}<span class="chip">{{ r }}</span>{% endfor %}</div>{% endif %}
+          {% if s.branches %}
+          <div class="cg-branches">
+            {% for b in s.branches %}
+            <div class="br"><span class="b{{ ' ' + b.kind if b.kind }}">{{ b.label }}</span><span class="desc">{{ b.desc }}</span></div>
+            {% endfor %}
+          </div>
+          {% endif %}
+          <div class="cg-out">{{ s.output }}</div>
+          {% if s.note %}<div class="cg-note">{{ s.note }}</div>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="h">Warmed demo states — live cache status <code>{{ precached.inventory.cached }}/{{ precached.inventory.total }} pre-cached right now</code></div>
+    <table class="id">
+      <thead><tr><th>State</th><th>Tier</th><th>Disk key</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for row in precached.inventory.rows %}
+        <tr>
+          <td>{{ row.label }}</td>
+          <td class="mono">{{ row.tier }}</td>
+          <td class="mono">{{ row.disk_key }}</td>
+          <td><span class="inv-status {{ 'hit' if row.cached else 'miss' }}">{{ row.status }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="b" style="border-top:1px solid var(--line)">
+      Operational rule: after adding ad variants or demo states, run
+      <code>{{ precached.ops_rule }}</code> before deploying — the warmed cache ships inside
+      the Docker image (a <code>.dockerignore</code> exception for <code>data/demo/image_cache/</code>),
+      because Railway's filesystem is ephemeral and a deploy wipes anything generated at runtime.
+    </div>
   </div>
 </section>
 

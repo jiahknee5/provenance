@@ -4,9 +4,16 @@ Deterministic view model: intent taxonomy, pipeline, two-tier strategy, live com
 No LLM; reads rules/gauntlet_image.yaml + image_gen resolution for thumbnails."""
 from __future__ import annotations
 
+from pipeline.personalization import cohort as CO
 from pipeline.personalization import gauntlet_site as GS
 from pipeline.personalization import image_gen as IG
 from pipeline.personalization import image_intents as II
+from pipeline.personalization.brain_simulator import (
+    BRAIN_TARGET_LABELS,
+    REGION_SIMULATOR_MAP,
+    brain_target_mapping_table,
+    example_receipt_snippet,
+)
 
 # Narrative enrichments — conversion psychology (not in YAML; stable doc copy).
 _VISITOR_FEELS: dict[str, str] = {
@@ -198,6 +205,17 @@ def pipeline_steps() -> list[dict]:
                 "GLOBAL_MUST_AVOID enforced; _assert_prompt_safe() blocks PII patterns."
             ),
             "code": "image_intents.apply_guardrails()",
+        },
+        {
+            "id": "brain_sim",
+            "label": "Brain simulator",
+            "summary": "Optional best-of-N scoring when brain_simulator.enabled in YAML",
+            "detail": (
+                "Gauntlet ships brain_target mappings but scoring is tenant-opt-in "
+                "(brain_simulator.enabled: false by default). When enabled, same "
+                "generate → score → select loop as Planet via BrainSimulatorScorer."
+            ),
+            "code": "brain_simulator.BrainSimulatorScorer.select_best()",
         },
         {
             "id": "cache",
@@ -409,6 +427,150 @@ def live_examples(page_path: str, *, dev_path: str, static_prefix: str = "/stati
     return rows
 
 
+# --------------------------------------------------------------------------- #
+# Part 6 · Pre-cached vs live — shared state list + cache decision graph
+# --------------------------------------------------------------------------- #
+WARM_KNOWN_EMAIL = "maya.chen@gauntletai.com"
+
+
+def demo_cache_states() -> list[tuple[str, dict, str | None] | tuple[str, dict, str | None, str]]:
+    """The demo states the warm script pre-generates — single source of truth
+    is the version-controlled manifest rules/gauntlet_prebuild.yaml.
+
+    scripts/warm_hero_cache.py and the /dev/business console read the same
+    manifest, so the guide, the console, and the warmer can never drift apart.
+    Default content: all 12 catalogued X ad variants plus direct/search/email
+    entries, each as anonymous and as the known cohort login, per surface."""
+    from pipeline.personalization import prebuild as PB
+    return PB.prebuild_states()
+
+
+def cache_inventory() -> dict:
+    """LIVE cache status per warmed demo state — deterministic disk read, no API calls."""
+    rows = []
+    cached_n = 0
+    for entry in demo_cache_states():
+        if len(entry) == 4:
+            label, params, email, surface_id = entry
+        else:
+            label, params, email = entry
+            surface_id = IG.DEFAULT_SURFACE_ID
+        page = GS.build_page(_Req(dict(params)), email=email)
+        ctx = IG.build_image_ctx(page)
+        resolved = IG._resolve_prompts(ctx, surface_id=surface_id)
+        hit = IG._load_cached(resolved["gen_disk_key"]) is not None
+        cached_n += 1 if hit else 0
+        surf = IG.surface_spec(surface_id)
+        rows.append({
+            "label": label,
+            "surface_id": surface_id,
+            "surface_label": surf["label"],
+            "tier": resolved["tier"],
+            "disk_key": resolved["gen_disk_key"][:12] + "…",
+            "cached": hit,
+            "status": ("cached · served inline, instant" if hit
+                       else "miss · would generate live (~30s)"),
+        })
+    return {"rows": rows, "cached": cached_n, "total": len(rows)}
+
+
+def cache_decision_graph() -> list[dict]:
+    """Top-to-bottom decision graph for get_hero_image() — every branch describable."""
+    return [
+        {
+            "label": "Request lands",
+            "code": "image_gen.build_image_ctx()",
+            "reads": ["channel", "ad_variant_id", "audience_route", "tier",
+                      "top_objection", "industry/region"],
+            "branches": [],
+            "output": "Deterministic image ctx — same visitor state ⇒ same prompts ⇒ same cache keys",
+            "note": "",
+        },
+        {
+            "label": "Build prompts — tier split",
+            "code": "image_gen._resolve_prompts()",
+            "reads": ["segment_cache_key", "delta_cache_key"],
+            "branches": [
+                {"label": "base_only", "kind": "",
+                 "desc": ("Segment signals only — semantic key gauntlet:base:<ad-id> "
+                          "or gauntlet:base:<intent>:<route>; one prompt, one image.")},
+                {"label": "base+delta", "kind": "",
+                 "desc": ("Tier-2 signals present (objection / industry / region / archetype) — "
+                          "delta key = hash of the sorted signals; combined prompt on top of the base.")},
+            ],
+            "output": "gen prompt → disk key = sha256(model + prompt)[:32]",
+            "note": "",
+        },
+        {
+            "label": "Disk cache?",
+            "code": "image_gen._load_cached(gen_disk_key)",
+            "reads": ["data/demo/image_cache/manifest.json", "images/<key>.jpg"],
+            "branches": [
+                {"label": "hit → pre-cached", "kind": "pre",
+                 "desc": ("Image is on disk — the 30 warmed demo states ship inside the deploy "
+                          "image, so these render inline, instantly. Anything generated live "
+                          "since the last deploy also lands here.")},
+                {"label": "miss → live path", "kind": "live",
+                 "desc": "Nothing on disk for this prompt — fall through to the API-key gate."},
+            ],
+            "output": "hit: receipt + URL, done · miss: continue below",
+            "note": "",
+        },
+        {
+            "label": "API key?",
+            "code": "image_gen._api_key()",
+            "reads": ["IMAGE_GEN_API_KEY"],
+            "branches": [
+                {"label": "no key → gallery", "kind": "",
+                 "desc": ("Curated CC gallery — only when an industry actually resolved "
+                          "(tier ≥ 2); otherwise the CSS gradient. Never blocks the page.")},
+                {"label": "no key + no industry → gradient", "kind": "",
+                 "desc": "CSS gradient fallback — instant, no network, receipt still logged."},
+                {"label": "key set → pending", "kind": "live",
+                 "desc": ("Page ships the gradient with status pending; the site's client JS "
+                          "calls the hero-image API to generate asynchronously.")},
+            ],
+            "output": "gallery / gradient (offline) or pending → async generation",
+            "note": "",
+        },
+        {
+            "label": "Live generation (async)",
+            "code": "hero-image API · generate=True",
+            "reads": ["gen prompt", "Gemini (~30s)"],
+            "branches": [
+                {"label": "base_only miss", "kind": "live",
+                 "desc": "One image: generate the base prompt, cache to disk."},
+                {"label": "base+delta miss", "kind": "live",
+                 "desc": ("Two images: generate the segment base first (cached under its own "
+                          "key for base_only visitors), then the combined base+delta image.")},
+            ],
+            "output": ("Cached to data/demo/image_cache/ — every later visitor in this state "
+                       "gets it inline, until the next deploy wipes the ephemeral filesystem"),
+            "note": ("The first visitor in a live state sees the gradient while generation "
+                     "runs; nobody ever waits on the image API."),
+        },
+    ]
+
+
+def precached_vs_live() -> dict:
+    """View model for Part 6 — plain-English preamble, graph, live inventory, ops rule."""
+    return {
+        "preamble": (
+            "Pre-cached = the 30 demo states below, generated once by the warm script and "
+            "baked into the deploy image — those hero backgrounds render inline, instantly. "
+            "Live = any state outside that set (a real corporate IP resolving an industry, "
+            "another cohort login, a new ad variant): the first visitor sees the CSS gradient "
+            "while the image generates once (~30s, Gemini), then it stays cached on disk for "
+            "every later visitor — until the next deploy, because Railway's filesystem is "
+            "ephemeral. The warm script plus the .dockerignore exception for "
+            "data/demo/image_cache/ are what let the pre-cached set survive deploys."
+        ),
+        "ops_rule": "railway run python -m scripts.warm_hero_cache",
+        "graph": cache_decision_graph(),
+        "inventory": cache_inventory(),
+    }
+
+
 def guardrails_view(config: dict) -> dict:
     defaults = (config.get("prompt_defaults") or {}).get("must_avoid") or []
     return {
@@ -441,6 +603,32 @@ def signals_in() -> list[dict]:
     ]
 
 
+def brain_simulator_view(config: dict) -> dict:
+    enabled = bool((config.get("brain_simulator") or {}).get("enabled"))
+    return {
+        "enabled": enabled,
+        "backend_note": (
+            "Tribe v2 when installed; proxy_v1 otherwise. Gauntlet defaults to disabled — "
+            "set brain_simulator.enabled: true in rules/gauntlet_image.yaml to activate."
+        ),
+        "honest_framing": (
+            "Predicted visual-response optimization via simulator — not measured brain data "
+            "and not a claim that images stimulate the visitor's cortex."
+        ),
+        "loop": [
+            "Generate N candidates (N=3 async when enabled; N=1 pregen unless BRAIN_SIM_BEST_OF_N)",
+            "Score with BrainSimulatorScorer per intent brain_target",
+            "Penalize guardrail-violation proxies; select highest brain_score",
+            "Cache winner; log brain_score + region_scores on receipt",
+        ],
+        "target_labels": BRAIN_TARGET_LABELS,
+        "region_map": REGION_SIMULATOR_MAP,
+        "intent_mapping": brain_target_mapping_table(config),
+        "example_receipt": example_receipt_snippet(),
+        "env_var": "BRAIN_SIM_BEST_OF_N",
+    }
+
+
 def build_image_decisions_view(*, page_path: str = "/gauntletapt",
                                page_base: str | None = None,
                                dev_path: str = "/gauntletapt/dev",
@@ -459,8 +647,10 @@ def build_image_decisions_view(*, page_path: str = "/gauntletapt",
         "intents": intents,
         "guardrails": guard,
         "two_tier": two_tier_strategy(),
+        "brain_simulator": brain_simulator_view(config),
         "comparisons": intent_comparisons(page_path, dev_path=dev_path, static_prefix=static_prefix),
         "live_examples": live_examples(page_path, dev_path=dev_path, static_prefix=static_prefix),
+        "precached": precached_vs_live(),
         "provenance": {
             "config_path": config.get("_path", "rules/gauntlet_image.yaml"),
             "framework_doc": "docs/04-workflow/ACTION-IMAGE-PERSONALIZATION.md",
@@ -483,6 +673,8 @@ def build_image_decisions_view(*, page_path: str = "/gauntletapt",
                 "intent_id", "conversion_goal", "sales_technique", "drives_action",
                 "personalization_layers", "guardrails_applied", "guardrails_blocked",
                 "tier", "base_cache_key", "delta_cache_key", "tokens_saved_estimate",
+                "brain_simulator", "brain_target", "brain_score", "brain_region_scores",
+                "candidates_evaluated", "winner_index",
                 "prompt", "model", "vendor", "cache_key", "generated_at", "license",
             ],
         },

@@ -8,6 +8,12 @@ from pipeline.personalization import image_gen as IG
 from pipeline.personalization import image_intents as II
 from pipeline.personalization import planet_site as PS
 from pipeline.personalization import scene as SC
+from pipeline.personalization.brain_simulator import (
+    BRAIN_TARGET_LABELS,
+    REGION_SIMULATOR_MAP,
+    brain_target_mapping_table,
+    example_receipt_snippet,
+)
 
 TENANT = "planet"
 
@@ -220,6 +226,18 @@ def pipeline_steps() -> list[dict]:
                 "identifiable homes, no targeting imagery); _assert_prompt_safe() blocks PII."
             ),
             "code": "image_intents.apply_guardrails()",
+        },
+        {
+            "id": "brain_sim",
+            "label": "Brain simulator",
+            "summary": "Generate N candidates → Tribe v2 (or proxy_v1) score → cache winner",
+            "detail": (
+                "When brain_simulator.enabled, async generation requests best-of-N candidates, "
+                "scores each against the intent's brain_target cortical regions, and caches only "
+                "the winner. Receipt logs brain_score, region_scores, candidates_evaluated. "
+                "Predicted response optimization — not measured visitor brain data."
+            ),
+            "code": "brain_simulator.BrainSimulatorScorer.select_best()",
         },
         {
             "id": "cache",
@@ -457,6 +475,33 @@ def signals_in() -> list[dict]:
     ]
 
 
+def brain_simulator_view(config: dict) -> dict:
+    enabled = bool((config.get("brain_simulator") or {}).get("enabled"))
+    return {
+        "enabled": enabled,
+        "backend_note": (
+            "Tribe v2 encoding model when installed; otherwise proxy_v1 "
+            "(saliency, structure, prompt-alignment proxies mapped to ROI scores)."
+        ),
+        "honest_framing": (
+            "Predicted visual-response optimization via brain simulator — not literal "
+            "stimulation of the visitor's cortex and not measured EEG/fMRI."
+        ),
+        "loop": [
+            "Generate N candidates (default N=3 on async hero API; N=1 on pregen unless BRAIN_SIM_BEST_OF_N set)",
+            "Score each with BrainSimulatorScorer against intent brain_target + brain_regions",
+            "Penalize guardrail violations (surveillance crosshair, face-skin, text-grid proxies)",
+            "Select highest brain_score; cache winner only; discard losers",
+            "Log brain_simulator, brain_score, brain_region_scores on provenance receipt",
+        ],
+        "target_labels": BRAIN_TARGET_LABELS,
+        "region_map": REGION_SIMULATOR_MAP,
+        "intent_mapping": brain_target_mapping_table(config),
+        "example_receipt": example_receipt_snippet(),
+        "env_var": "BRAIN_SIM_BEST_OF_N",
+    }
+
+
 def build_image_decisions_view(*, page_path: str = "/planetapt",
                                page_base: str | None = None,
                                dev_path: str = "/planetapt/dev",
@@ -475,6 +520,7 @@ def build_image_decisions_view(*, page_path: str = "/planetapt",
         "intents": intents,
         "guardrails": guard,
         "two_tier": two_tier_strategy(),
+        "brain_simulator": brain_simulator_view(config),
         "comparisons": intent_comparisons(page_path, dev_path=dev_path, static_prefix=static_prefix),
         "live_examples": live_examples(page_path, dev_path=dev_path, static_prefix=static_prefix),
         "provenance": {
@@ -500,6 +546,8 @@ def build_image_decisions_view(*, page_path: str = "/planetapt",
                 "intent_id", "conversion_goal", "sales_technique", "drives_action",
                 "personalization_layers", "guardrails_applied", "guardrails_blocked",
                 "tier", "base_cache_key", "delta_cache_key", "tokens_saved_estimate",
+                "brain_simulator", "brain_target", "brain_score", "brain_region_scores",
+                "candidates_evaluated", "winner_index",
                 "prompt", "model", "vendor", "cache_key", "generated_at", "license",
             ],
         },

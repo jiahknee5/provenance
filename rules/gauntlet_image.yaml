@@ -5,6 +5,10 @@
 tenant: gauntlet
 product_context: "AI engineering talent program marketing site"
 
+# Opt-in: set enabled: true to activate best-of-N brain scoring (shared module with Planet).
+brain_simulator:
+  enabled: false
+
 brand:
   accent_color: "#c9a227"
   name: GauntletAI
@@ -56,6 +60,8 @@ ad_metaphors:
 # Intent taxonomy — each maps visitor context to a visual strategy supporting the page CTA.
 intents:
   - id: peer_proof
+    brain_target: trust
+    brain_regions: [ppa, ofc_stability, fusiform, intraparietal]
     conversion_goal: "Trust → click CTA"
     design_principles:
       - "Matched-peer environment without literal faces"
@@ -73,6 +79,8 @@ intents:
     mood: "credible, peer-aligned, calm confidence"
 
   - id: loss_avoidance
+    brain_target: change_legibility
+    brain_regions: [mt, v3a, intraparietal, amygdala_threat_proxy]
     conversion_goal: "Urgency → apply/hire"
     design_principles:
       - "Abstract loss frame — stalled state, not fear-mongering"
@@ -90,6 +98,8 @@ intents:
     mood: "urgent but dignified — opportunity closing, not panic"
 
   - id: authority
+    brain_target: authority
+    brain_regions: [ppa, intraparietal, dlpfc_structure, fusiform]
     conversion_goal: "B2B hire decision"
     design_principles:
       - "Demo-day / production deploy metaphor"
@@ -107,6 +117,8 @@ intents:
     mood: "evaluative, serious, proof-first"
 
   - id: aspiration
+    brain_target: approach
+    brain_regions: [ventral_striatum, ofc_warmth, fusiform, ppa_depth]
     conversion_goal: "Individual Challenger apply"
     design_principles:
       - "Engineer at terminal shipping — capstone energy"
@@ -124,6 +136,8 @@ intents:
     mood: "determined, immersive, forward-leaning"
 
   - id: roi_clarity
+    brain_target: trust
+    brain_regions: [ppa, ofc_stability, dlpfc_structure, ventral_striatum]
     conversion_goal: "HR/L&D buy-in"
     design_principles:
       - "Team transformation visual — champions returning"
@@ -141,6 +155,8 @@ intents:
     mood: "practical, transformative, board-ready"
 
   - id: retarget_warm
+    brain_target: approach
+    brain_regions: [ventral_striatum, ofc_warmth, intraparietal, ppa]
     conversion_goal: "Post-engager click"
     design_principles:
       - "Familiar brand moment — continuation not restart"
@@ -158,6 +174,8 @@ intents:
     mood: "welcoming, familiar, low-friction"
 
   - id: message_match
+    brain_target: message_match
+    brain_regions: [clip_alignment, fusiform, v4, intraparietal]
     conversion_goal: "Ad click-through"
     design_principles:
       - "Visual echoes ad promise (Cialdini consistency)"
@@ -315,6 +333,26 @@ prompt_defaults:
     - "NO literal objection quotes or ad copy as text overlay"
     - "NO maps, addresses, or exact city landmarks"
     - "NO demographic or compensation modeling cues"
+
+# Image surfaces — each gets its own resolve path, cache keys, and prompt shape.
+# Hero is the page backdrop; og is the Open Graph / social share thumbnail.
+surfaces:
+  hero:
+    label: "Hero background"
+    placement: "Full-width hero section backdrop"
+    prompt_opener: "Cinematic wide hero backdrop for a {product}."
+  og:
+    label: "Open Graph / social preview"
+    placement: "Link share unfurl (Twitter, LinkedIn, Slack)"
+    prompt_opener: "Open Graph social preview card (1200×630) for a {product} — shareable link thumbnail."
+    must_include:
+      - "1200x630 social card aspect ratio with safe center crop margins"
+      - "bold single focal subject readable at thumbnail size"
+      - "dark moody atmosphere with warm gold accent ({accent_color})"
+      - "single clear focal point — processing fluency"
+    composition_suffix: >-
+      Framed as a social share thumbnail with centered focal subject and generous
+      safe margins for platform crop — no text overlay.
 
 # Tier gates for personalization layers (surface policy alignment).
 guardrails:

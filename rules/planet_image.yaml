@@ -7,6 +7,10 @@
 tenant: planet
 product_context: "daily satellite Earth-imagery platform marketing site"
 
+# NEvo-style generate → score → select via Tribe v2 simulator (proxy_v1 when backend absent).
+brain_simulator:
+  enabled: true
+
 brand:
   accent_color: "#3ba1ff"
   name: Planet
@@ -65,6 +69,8 @@ ad_metaphors:
 # Intent taxonomy — each maps visitor context to a visual strategy supporting the page CTA.
 intents:
   - id: regional_truth
+    brain_target: attention
+    brain_regions: [v1, v4, intraparietal, ppa]
     conversion_goal: "Trust → primary CTA"
     design_principles:
       - "The visitor's regional landform type at landscape scale — never street scale"
@@ -82,6 +88,8 @@ intents:
     mood: "calm, planetary, quietly confident"
 
   - id: change_proof
+    brain_target: change_legibility
+    brain_regions: [mt, v3a, intraparietal, amygdala_threat_proxy]
     conversion_goal: "Urgency → act while change is small"
     design_principles:
       - "Before/after seam or change-detection wipe — change made visible"
@@ -99,6 +107,8 @@ intents:
     mood: "urgent but dignified — the window is open, not closing in panic"
 
   - id: mission_authority
+    brain_target: authority
+    brain_regions: [ppa, intraparietal, dlpfc_structure, amygdala_threat_proxy]
     conversion_goal: "Enterprise / mission-scale decision"
     design_principles:
       - "Map-room gravitas: theater-scale littoral or border region at dusk"
@@ -116,6 +126,8 @@ intents:
     mood: "evaluative, strategic, composed"
 
   - id: archive_advantage
+    brain_target: trust
+    brain_regions: [ppa, ofc_stability, amygdala_threat_proxy, v4]
     conversion_goal: "Claims / compliance buy-in"
     design_principles:
       - "The before-picture already exists — time machine framing"
@@ -133,6 +145,8 @@ intents:
     mood: "assured, evidentiary, patient"
 
   - id: aspiration_research
+    brain_target: approach
+    brain_regions: [ventral_striatum, ofc_warmth, ppa_depth, fusiform]
     conversion_goal: "Research program application"
     design_principles:
       - "Science-poster beauty: a natural feature changing across sequential tiles"
@@ -150,6 +164,8 @@ intents:
     mood: "curious, luminous, generous"
 
   - id: retarget_warm
+    brain_target: approach
+    brain_regions: [ventral_striatum, ofc_warmth, ppa, intraparietal]
     conversion_goal: "Post-engager continuation"
     design_principles:
       - "Familiar brand moment — continuation not restart"
@@ -167,6 +183,8 @@ intents:
     mood: "welcoming, familiar, low-friction"
 
   - id: message_match
+    brain_target: message_match
+    brain_regions: [clip_alignment, fusiform, v4, intraparietal]
     conversion_goal: "Ad click-through continuity"
     design_principles:
       - "Visual echoes the ad promise (Cialdini consistency)"
