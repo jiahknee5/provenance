@@ -7,8 +7,13 @@ from __future__ import annotations
 from pipeline.personalization import image_gen as IG
 from pipeline.personalization import image_intents as II
 from pipeline.personalization import planet_site as PS
+from pipeline.personalization import scene as SC
 
 TENANT = "planet"
+
+# The cohort login the warm script uses for the "known" states — a synthetic
+# customer email that resolves to a CRM archetype (see planet_cohort).
+WARM_KNOWN_EMAIL = PS.sample_login_email()
 
 # Narrative enrichments — conversion psychology (not in YAML; stable doc copy).
 _VISITOR_FEELS: dict[str, str] = {
@@ -500,3 +505,39 @@ def build_image_decisions_view(*, page_path: str = "/planetapt",
         },
         "accent_color": brand.get("accent_color", "#3ba1ff"),
     }
+
+
+def demo_cache_states() -> list[tuple[str, dict, str | None]]:
+    """The Planet demo states the warm script pre-generates — single source of truth.
+
+    scripts/warm_hero_cache.py --tenant planet imports this list. Unlike Gauntlet,
+    Planet almost always ships a base+delta hero (an objection nearly always fires,
+    and geo-IP region is the star signal), so warming only the segment bases is not
+    enough — the combined images are what production actually serves. States:
+      · all 12 catalogued X ad variants (anon + known cohort login)
+      · direct / search / email entries (anon + known)
+      · every verified example-account IP (anon) — the LOCATION / region variants
+        the /dev IP picker surfaces (region_mood + tier-2 industry deltas)
+
+    Each tuple is (label, query_params, email); the warmer walks the real
+    PS.build_page() → image_gen path so the disk cache keys match production
+    exactly (region-name guardrail stripping, PDL industry resolution, and all)."""
+    states: list[tuple[str, dict, str | None]] = []
+    for v in PS.AD_VARIANTS:
+        params = {"utm_source": "x", "utm_medium": "paid",
+                  "utm_campaign": v["utm_campaign"], "utm_content": v["variant_id"]}
+        states.append((f"ad {v['variant_id']} {v['id']} · anon", params, None))
+        states.append((f"ad {v['variant_id']} {v['id']} · known", params, WARM_KNOWN_EMAIL))
+    entries = [
+        ("direct", {}),
+        ("search", {"ref": "google"}),
+        ("email", {"utm_source": "hubspot", "utm_medium": "email",
+                   "utm_campaign": "crisis-responders", "e": PS.sample_magic_token()}),
+    ]
+    for label, params in entries:
+        states.append((f"{label} · anon", params, None))
+        states.append((f"{label} · known", params, WARM_KNOWN_EMAIL))
+    for group in SC.EXAMPLE_ACCOUNTS.get("groups", []):
+        for row in group.get("rows", []):
+            states.append((f"ip {row['company']} ({row['ip']})", {"ip": row["ip"]}, None))
+    return states

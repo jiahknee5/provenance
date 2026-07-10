@@ -11,6 +11,9 @@ data/
 !data/demo/image_cache
 !data/demo/image_cache/**
 *.png
+# re-include after *.png: the hero cache holds both .jpg and .png frames
+# (the image model returns either), and all must ship in the deploy image.
+!data/demo/image_cache/**
 .DS_Store
 .env
 # not served by the app — keep the image lean
