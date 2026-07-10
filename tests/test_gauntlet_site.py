@@ -555,7 +555,9 @@ INTENT_NAMES = (
 
 def test_image_decisions_routes_return_200():
     for path in (
-        "/image-decisions",
+        "/dev/image-decisions",                       # canonical (lives under /dev)
+        "/gauntletapt/dev/image-decisions",           # canonical, portal mount
+        "/image-decisions",                           # pre-/dev aliases
         "/gauntlet/image-decisions",
         "/gauntletapt/image-decisions",
     ):
@@ -578,4 +580,6 @@ def test_image_decisions_contains_all_intents_and_why_sections():
 def test_image_decisions_nav_links_from_dev():
     t = c.get("/dev?as=anon").text
     assert "Image decisions →" in t
-    assert 'href="/image-decisions"' in t
+    assert 'href="/dev/image-decisions"' in t
+    p = c.get("/gauntletapt/dev?as=anon").text
+    assert 'href="/gauntletapt/dev/image-decisions"' in p

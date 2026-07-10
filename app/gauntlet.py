@@ -8,10 +8,13 @@
   GET  /gauntlet/logout  — clears the cookie
   GET  /dev              — the decisioning companion
   GET  /dev/business     — marketing/sales narrative (same state as /dev)
+  GET  /dev/image-decisions — hero image decision guide
+       (aliases: /image-decisions, /gauntlet/image-decisions)
 
   Portal mount (johnnycchung.com/gauntletapt via Vercel rewrite):
   GET  /gauntletapt, /gauntletapt/login, /gauntletapt/logout, /gauntletapt/dev,
-       /gauntletapt/dev/business
+       /gauntletapt/dev/business, /gauntletapt/dev/image-decisions
+       (alias: /gauntletapt/image-decisions)
 
 State lives entirely in (query params + one cookie), so both pages are rebuilt
 deterministically per request — CONSTITUTION reproducibility, no server-side sessions.
@@ -41,7 +44,7 @@ MOUNTS: dict[str, dict[str, str]] = {
         "dev_business": "/dev/business",
         "ad": "/gauntlet/ad",
         "ad_lp": "/gauntlet/ad-lp",
-        "image_decisions": "/image-decisions",
+        "image_decisions": "/dev/image-decisions",
         "static": "/static",
         "hero_api": "/api/gauntlet/hero-image",
     },
@@ -53,7 +56,7 @@ MOUNTS: dict[str, dict[str, str]] = {
         "dev_business": "/gauntletapt/dev/business",
         "ad": "/gauntletapt/ad",
         "ad_lp": "/gauntletapt/ad-lp",
-        "image_decisions": "/gauntletapt/image-decisions",
+        "image_decisions": "/gauntletapt/dev/image-decisions",
         "static": "/gauntletapt/static",
         "hero_api": "/gauntletapt/api/hero-image",
     },
@@ -313,7 +316,17 @@ def gauntlet_dev_business_legacy_alias(request: Request) -> HTMLResponse:
     return _render_dev_business(request, MOUNTS["legacy"])
 
 
-# Legacy mount path for image-decisions guide.
+# Pre-/dev aliases for the image-decisions guide — canonical is {dev}/image-decisions.
+@app.get("/image-decisions", response_class=HTMLResponse)
+def image_decisions_root_alias(request: Request) -> HTMLResponse:
+    return _render_image_decisions(request, MOUNTS["legacy"])
+
+
 @app.get("/gauntlet/image-decisions", response_class=HTMLResponse)
 def gauntlet_image_decisions_legacy_alias(request: Request) -> HTMLResponse:
     return _render_image_decisions(request, MOUNTS["legacy"])
+
+
+@app.get("/gauntletapt/image-decisions", response_class=HTMLResponse)
+def gauntlet_image_decisions_portal_alias(request: Request) -> HTMLResponse:
+    return _render_image_decisions(request, MOUNTS["portal"])

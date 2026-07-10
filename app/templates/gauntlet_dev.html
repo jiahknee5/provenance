@@ -2,7 +2,7 @@
 {% block title %}/dev — Gauntlet replica decisions · apt{% endblock %}
 {% block content %}
 <style>
-  main{max-width:1180px}
+  main{max-width:1340px}
   html{scroll-behavior:smooth}
   .gd-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
   .gd-head h1{font-size:26px;margin:0}
@@ -16,23 +16,34 @@
   .gd-entries a:hover{border-color:var(--brand)}
   .gd-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;align-items:start;margin-top:14px}
   @media(max-width:920px){.gd-grid{grid-template-columns:1fr}}
-  /* ---- chapter navigation ---- */
-  .gd-nav{position:sticky;top:0;z-index:60;display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin:16px -8px 0;padding:8px;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
-  .gd-nav a{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--muted);padding:6px 12px;border-radius:8px;text-decoration:none;border:1px solid transparent}
-  .gd-nav a .num{width:17px;height:17px;border-radius:5px;background:#E4E8EC;color:#475569;font-size:10px;font-weight:800;display:grid;place-items:center}
-  .gd-nav a:hover{color:var(--ink);background:#fff;border-color:var(--line)}
-  .gd-nav a.on{color:var(--ink);background:#fff;border-color:var(--line);box-shadow:var(--shadow)}
-  .gd-nav a.on .num{background:var(--ink);color:#fff}
-  .gd-nav .spacer{margin-left:auto;font-size:11px;color:var(--muted);padding-right:6px}
+  /* ---- left sidebar navigation ---- */
+  .gd-layout{display:grid;grid-template-columns:196px minmax(0,1fr);gap:26px;align-items:start;margin-top:18px}
+  .gd-side{position:sticky;top:14px;display:flex;flex-direction:column;gap:2px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:10px 8px}
+  .gd-side .side-cap{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:6px 10px 4px}
+  .gd-side .side-cap + .side-cap,.gd-side a + .side-cap{margin-top:10px;border-top:1px solid var(--line);padding-top:12px}
+  .gd-side a{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:600;color:var(--muted);padding:7px 10px;border-radius:8px;text-decoration:none;border:1px solid transparent}
+  .gd-side a .num{width:18px;height:18px;border-radius:5px;background:#E4E8EC;color:#475569;font-size:10px;font-weight:800;display:grid;place-items:center;flex:none}
+  .gd-side a:hover{color:var(--ink);background:#F6F8FA}
+  .gd-side a.on{color:var(--ink);background:#F1F3F5;border-color:var(--line)}
+  .gd-side a.on .num{background:var(--ink);color:#fff}
+  .gd-side a.page-link{color:var(--brand)}
+  .gd-main{min-width:0}
+  @media(max-width:920px){
+    .gd-layout{grid-template-columns:1fr;gap:0}
+    .gd-side{position:sticky;top:0;z-index:60;flex-direction:row;flex-wrap:wrap;align-items:center;border-radius:0 0 12px 12px;margin:0 -8px;padding:8px}
+    .gd-side .side-cap{display:none}
+    .gd-side a + .side-cap{border:0;margin:0;padding:0}
+  }
   /* ---- chapters ---- */
-  .ch{margin-top:34px;scroll-margin-top:64px}
+  .ch{margin-top:34px;scroll-margin-top:16px}
+  .ch:first-child{margin-top:0}
   .ch-head{display:flex;align-items:baseline;gap:12px;padding-bottom:8px;border-bottom:2px solid var(--ink);margin-bottom:2px}
   .ch-head .num{width:26px;height:26px;border-radius:8px;background:var(--ink);color:#fff;font-size:13px;font-weight:800;display:grid;place-items:center;flex:none;align-self:center}
   .ch-head h2{font-size:17px;margin:0}
   .ch-head .q{font-size:12.5px;color:var(--muted);margin-left:auto;text-align:right;max-width:52ch}
   @media(max-width:920px){.ch-head .q{display:none}}
   .ch-sub{font-size:13px;color:var(--muted);margin:8px 0 0;max-width:100ch;line-height:1.55}
-  .sec[id],.pm[id]{scroll-margin-top:64px}
+  .sec[id],.pm[id]{scroll-margin-top:16px}
   .gd-inputs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
   @media(max-width:920px){.gd-inputs{grid-template-columns:1fr 1fr}}
   .sec{border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:var(--shadow);overflow:hidden;margin-bottom:18px}
@@ -170,8 +181,6 @@
     <a href="{{ toggle_anon }}" class="{{ 'on' if as_state == 'anon' else '' }}">Anonymous</a>
     <a href="{{ toggle_known }}" class="{{ 'on' if as_state != 'anon' else '' }}">Known ({{ P.identity.email if P.identity else sample_email }})</a>
   </span>
-  <a href="{{ g.dev_business }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}" style="font-size:13px;font-weight:600;text-decoration:none;color:var(--brand);margin-left:8px">Marketing view →</a>
-  <a href="{{ g.image_decisions }}" style="font-size:13px;font-weight:600;text-decoration:none;color:var(--brand);margin-left:8px">Image decisions →</a>
 </div>
 <p class="sub" style="color:var(--muted);font-size:14px;max-width:80ch;margin:4px 0 0">
   The replica is rebuilt deterministically from (query params + login cookie). This page rebuilds the
@@ -179,14 +188,20 @@
   the data held, what shipped — including the <b>say</b>-level variants the surface policy blocks —
   and the audit trail.</p>
 
-<nav class="gd-nav" id="gd-nav">
+<div class="gd-layout">
+<aside class="gd-side" id="gd-nav">
+  <div class="side-cap">On this page</div>
   <a href="#ch-visitor" data-ch="ch-visitor"><span class="num">1</span>The visitor</a>
   <a href="#ch-pipeline" data-ch="ch-pipeline"><span class="num">2</span>Decisions</a>
   <a href="#ch-data" data-ch="ch-data"><span class="num">3</span>Data held</a>
   <a href="#ch-shipped" data-ch="ch-shipped"><span class="num">4</span>What shipped</a>
   <a href="#ch-audit" data-ch="ch-audit"><span class="num">5</span>Audit trail</a>
-  <span class="spacer"><a href="{{ g.page }}{{ qs }}" style="color:var(--brand);text-decoration:none;font-weight:600">open the live page →</a></span>
-</nav>
+  <div class="side-cap">Other views</div>
+  <a href="{{ g.image_decisions }}" class="page-link">Image decisions →</a>
+  <a href="{{ g.dev_business }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}" class="page-link">Marketing view →</a>
+  <a href="{{ g.page }}{{ qs }}" class="page-link">Live page →</a>
+</aside>
+<div class="gd-main">
 
 <!-- ================= 1 · THE VISITOR ================= -->
 <section class="ch" id="ch-visitor">
@@ -569,6 +584,9 @@
   </div>
   </div>
 </section>
+
+</div>
+</div>
 
 <script>
 (function () {
