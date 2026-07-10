@@ -22,3 +22,6 @@ architecture/
 team/
 mikhail/
 docs/
+
+# Pregen frames only; ship animated WebP loops for production hero
+data/demo/image_cache/images/motion_frames/

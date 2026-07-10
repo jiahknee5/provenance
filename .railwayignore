@@ -26,3 +26,8 @@ data/demo/cache/
 data/demo/ledgers/
 data/demo/users.jsonl
 data/demo/eval_history.jsonl
+
+# Motion pregen PNG frames (~114MB) — production hero serves animated WebP under images/motion/
+data/demo/image_cache/images/motion_frames/
+.venv-local/
+/*.png
