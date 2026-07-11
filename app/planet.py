@@ -49,6 +49,8 @@ MOUNTS: dict[str, dict[str, str]] = {
         "ad": "/planet/ad",
         "ads": "/planet/ads",
         "ads_lp": "/planet/ads-lp",
+        "direct_gallery": "/planet/direct",
+        "email_gallery": "/planet/email",
         "image_decisions": "/planet/dev/image-decisions",
         "static": "/static",
         "hero_api": "/api/planet/hero-image",
@@ -62,6 +64,8 @@ MOUNTS: dict[str, dict[str, str]] = {
         "ad": "/planetapt/ad",
         "ads": "/planetapt/ads",
         "ads_lp": "/planetapt/ads-lp",
+        "direct_gallery": "/planetapt/direct",
+        "email_gallery": "/planetapt/email",
         "image_decisions": "/planetapt/dev/image-decisions",
         "static": "/planetapt/static",
         "hero_api": "/planetapt/api/hero-image",
@@ -302,6 +306,13 @@ def _render_dev_business(request: Request, m: dict[str, str]) -> HTMLResponse:
         "g": m})
 
 
+def _render_channel_gallery(request: Request, m: dict[str, str], channel: str) -> HTMLResponse:
+    from pipeline.personalization import demo_nav as NAV
+
+    view = NAV.build_channel_gallery_view(request, "planet", channel, m)
+    return templates.TemplateResponse(request, "demo_channel_gallery.html", view)
+
+
 def _hero_image_json(request: Request, m: dict[str, str]) -> dict:
     email = _cookie_email(request)
     page = PS.build_page(request, email=email or None)
@@ -346,6 +357,14 @@ def _register_mount(m: dict[str, str]) -> None:
     @app.get(ads_lp, response_class=HTMLResponse)
     def planet_ads_lp(request: Request) -> HTMLResponse:
         return _render_ads_lp(request, m)
+
+    @app.get(m["direct_gallery"], response_class=HTMLResponse)
+    def planet_direct_gallery(request: Request) -> HTMLResponse:
+        return _render_channel_gallery(request, m, "direct")
+
+    @app.get(m["email_gallery"], response_class=HTMLResponse)
+    def planet_email_gallery(request: Request) -> HTMLResponse:
+        return _render_channel_gallery(request, m, "email")
 
     @app.post(login)
     def planet_login(request: Request, email: str = Form(...), next: str = Form("")) -> RedirectResponse:

@@ -44,6 +44,8 @@ MOUNTS: dict[str, dict[str, str]] = {
         "dev_business": "/dev/business",
         "ad": "/gauntlet/ad",
         "ad_lp": "/gauntlet/ad-lp",
+        "direct_gallery": "/gauntlet/direct",
+        "email_gallery": "/gauntlet/email",
         "image_decisions": "/dev/image-decisions",
         "static": "/static",
         "hero_api": "/api/gauntlet/hero-image",
@@ -56,6 +58,8 @@ MOUNTS: dict[str, dict[str, str]] = {
         "dev_business": "/gauntletapt/dev/business",
         "ad": "/gauntletapt/ad",
         "ad_lp": "/gauntletapt/ad-lp",
+        "direct_gallery": "/gauntletapt/direct",
+        "email_gallery": "/gauntletapt/email",
         "image_decisions": "/gauntletapt/dev/image-decisions",
         "static": "/gauntletapt/static",
         "hero_api": "/gauntletapt/api/hero-image",
@@ -231,6 +235,13 @@ def _render_dev_business(request: Request, m: dict[str, str]) -> HTMLResponse:
         "g": m})
 
 
+def _render_channel_gallery(request: Request, m: dict[str, str], channel: str) -> HTMLResponse:
+    from pipeline.personalization import demo_nav as NAV
+
+    view = NAV.build_channel_gallery_view(request, "gauntlet", channel, m)
+    return templates.TemplateResponse(request, "demo_channel_gallery.html", view)
+
+
 def _hero_image_json(request: Request, m: dict[str, str]) -> dict:
     email = _cookie_email(request)
     page = GS.build_page(request, email=email or None)
@@ -265,6 +276,14 @@ def _register_mount(m: dict[str, str]) -> None:
     @app.get(ad_lp, response_class=HTMLResponse)
     def gauntlet_ad_lp(request: Request) -> HTMLResponse:
         return _render_ad_lp(request, m)
+
+    @app.get(m["direct_gallery"], response_class=HTMLResponse)
+    def gauntlet_direct_gallery(request: Request) -> HTMLResponse:
+        return _render_channel_gallery(request, m, "direct")
+
+    @app.get(m["email_gallery"], response_class=HTMLResponse)
+    def gauntlet_email_gallery(request: Request) -> HTMLResponse:
+        return _render_channel_gallery(request, m, "email")
 
     @app.post(login)
     def gauntlet_login(request: Request, email: str = Form(...), next: str = Form("")) -> RedirectResponse:

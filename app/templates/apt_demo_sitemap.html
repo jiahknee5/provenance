@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}/apt/demo — visitor demo tour{% endblock %}
+{% block content %}
+<style>
+  main{max-width:1100px}
+  .demo-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+  .demo-top h1{font-size:26px;margin:0}
+  .demo-intro{font-size:14px;color:var(--muted);max-width:82ch;line-height:1.55;margin:0 0 22px}
+  .demo-ops{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--brand);text-decoration:none;margin-bottom:24px}
+  .demo-ops:hover{text-decoration:underline}
+  .tenant-block{border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:var(--shadow);padding:18px 20px;margin-bottom:18px}
+  .tenant-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+  .tenant-head h2{font-size:20px;margin:0}
+  .tenant-head .dom{font-size:13px;color:var(--muted);font-weight:600}
+  .tenant-tagline{font-size:13px;color:#475569;line-height:1.5;margin:0 0 14px;max-width:72ch}
+  .tenant-meta{font-size:11px;color:var(--muted);margin-bottom:14px}
+  .channel-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  @media(max-width:900px){.channel-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:520px){.channel-grid{grid-template-columns:1fr}}
+  .channel-tile{display:block;border:1px solid var(--line);border-radius:11px;padding:14px 16px;text-decoration:none;color:inherit;background:linear-gradient(180deg,#fafcff 0%,#fff 100%);transition:border-color .15s}
+  .channel-tile:hover{border-color:var(--brand)}
+  .channel-tile .lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+  .channel-tile h3{font-size:15px;margin:0 0 6px;color:var(--ink)}
+  .channel-tile p{font-size:12.5px;line-height:1.45;color:#64748b;margin:0}
+  .channel-tile .go{display:inline-block;margin-top:10px;font-size:12px;font-weight:700;color:var(--brand)}
+  .channel-tile .cnt{font-size:11px;color:var(--muted);margin-top:6px}
+  .demo-foot{margin-top:8px;font-size:12.5px;color:var(--muted);max-width:80ch;line-height:1.5}
+</style>
+
+<div class="demo-top">
+  <h1>{{ hub_path }} — visitor demo tour</h1>
+</div>
+
+<p class="demo-intro">
+  One sitemap for sales and product review: pick a tenant, then a channel. Each tile opens the
+  curated gallery or landing URL — same deterministic personalization engine as production, no new logic.
+</p>
+
+<a class="demo-ops" href="{{ ops_hub_path }}">Ops consoles → {{ ops_hub_path }}</a>
+
+{% for t in tenants %}
+<section class="tenant-block" aria-labelledby="tenant-{{ t.id }}">
+  <div class="tenant-head">
+    <h2 id="tenant-{{ t.id }}">{{ t.name }}</h2>
+    <span class="dom">{{ t.domain }}</span>
+  </div>
+  <p class="tenant-tagline">{{ t.tagline }}</p>
+  <p class="tenant-meta">Audience tabs on galleries: <strong>{{ t.audience_business }}</strong> · <strong>{{ t.audience_consumer }}</strong></p>
+  <div class="channel-grid">
+    {% for ch in t.channels %}
+    <a class="channel-tile" href="{{ ch.href }}">
+      <div class="lbl">{{ t.name }}</div>
+      <h3>{{ ch.label }}</h3>
+      <p>{{ ch.desc }}</p>
+      <span class="go">Open gallery →</span>
+      <div class="cnt">{{ ch.scenario_count }} curated scenario{{ 's' if ch.scenario_count != 1 else '' }}</div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endfor %}
+
+<p class="demo-foot">
+  Scenario catalog: <code>rules/demo_scenarios.yaml</code> (v{{ version }}, {{ scenario_count }} entries).
+  Direct and email galleries link to curated scenario cards; ads and search link to live routes today.
+</p>
+{% endblock %}

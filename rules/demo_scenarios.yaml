@@ -1,0 +1,240 @@
+# Demo navigation scenarios — visitor tour plane (Gauntlet + Planet).
+# Loader: pipeline/personalization/demo_nav.py
+# NOT the legacy bandit catalog in demo_scenarios.py.
+version: 1
+tenants:
+  - gauntlet
+  - planet
+
+scenarios:
+  # ── Gauntlet · Direct ──────────────────────────────────────────────
+  - id: g-direct-anon-tier0
+    tenant: gauntlet
+    channel: direct
+    audience: consumer
+    title: "Cold visit — no signals"
+    story: "Typed the URL. No UTMs, no login. IP layer is the only hint (tier 0 offline)."
+    query_params: {}
+    ip_override: null
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}"
+    console_deep_link_pattern: "{mount_dev}?as=anon"
+    tags: [tier0, anonymous]
+    featured: true
+
+  - id: g-direct-corp-tier2
+    tenant: gauntlet
+    channel: direct
+    audience: business
+    title: "Corporate IP — Apple office"
+    story: "Anonymous visitor from a resolved corporate netblock. Firmographic copy may allude; never recites employer."
+    query_params: {}
+    ip_override: "17.253.144.10"
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}?ip=17.253.144.10"
+    console_deep_link_pattern: "{mount_dev}?ip=17.253.144.10&as=anon"
+    tags: [corporate, tier2, apple]
+    featured: true
+
+  - id: g-direct-known-return
+    tenant: gauntlet
+    channel: direct
+    audience: consumer
+    title: "Known return — Maya logged in"
+    story: "Direct revisit with CRM cookie. Welcome-back say-level copy; Vector employer stays allude."
+    query_params: {}
+    ip_override: null
+    identity_hint: login_maya
+    landing_url_pattern: "{mount_page}"
+    console_deep_link_pattern: "{mount_dev}?as=known"
+    tags: [return-visitor, crm]
+    featured: false
+
+  # ── Gauntlet · Email ─────────────────────────────────────────────────
+  - id: g-email-liam-token
+    tenant: gauntlet
+    channel: email
+    audience: consumer
+    title: "HubSpot cohort — Liam (magic link)"
+    story: "April cohort email with embedded token. Identified pre-login; abandoned-application objection may surface on console only."
+    email_preview:
+      subject: "Liam — finish your Gauntlet application"
+      preheader: "Your April cohort spot is still open. One click to resume."
+      cta: "Continue application →"
+      recipient_hint: "liam.foster@gauntletai.com"
+    query_params:
+      utm_source: hubspot
+      utm_medium: email
+      utm_campaign: cohort-april
+      e: "${magic:liam}"
+    ip_override: null
+    identity_hint: token_liam
+    landing_url_pattern: "{mount_page}?utm_source=hubspot&utm_medium=email&utm_campaign=cohort-april&e=${magic:liam}"
+    console_deep_link_pattern: "{mount_dev}?utm_source=hubspot&utm_medium=email&utm_campaign=cohort-april&e=${magic:liam}&as=known"
+    tags: [hubspot, magic-token, liam]
+    featured: true
+
+  - id: g-email-maya-known
+    tenant: gauntlet
+    channel: email
+    audience: business
+    title: "Known exec — Maya (logged in + email UTMs)"
+    story: "Email channel classification with active session. Say-level name + declared goals; Cedar Health employer never recited."
+    email_preview:
+      subject: "Maya — catalyst track for engineering leaders"
+      preheader: "Your declared goal: ship AI products faster. See the cohort fit."
+      cta: "Review catalyst track →"
+      recipient_hint: "maya.chen@gauntletai.com"
+    query_params:
+      utm_source: hubspot
+      utm_medium: email
+      utm_campaign: catalyst-nurture
+    ip_override: null
+    identity_hint: login_maya
+    landing_url_pattern: "{mount_page}?utm_source=hubspot&utm_medium=email&utm_campaign=catalyst-nurture"
+    console_deep_link_pattern: "{mount_dev}?utm_source=hubspot&utm_medium=email&utm_campaign=catalyst-nurture&as=known"
+    tags: [hubspot, maya, b2b]
+    featured: false
+
+  # ── Gauntlet · Ads ────────────────────────────────────────────────────
+  - id: g-ads-v09-keyword
+    tenant: gauntlet
+    channel: ads
+    audience: business
+    title: "X keyword ad — v09 AI hiring"
+    story: "Paid click with utm_content=v09. Hero message-matches keyword targeting."
+    query_params:
+      utm_source: x
+      utm_medium: paid
+      utm_campaign: x-keyword-ai-hiring
+      utm_content: v09
+    ip_override: null
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}?utm_source=x&utm_medium=paid&utm_campaign=x-keyword-ai-hiring&utm_content=v09"
+    console_deep_link_pattern: "{mount_dev}?utm_source=x&utm_medium=paid&utm_campaign=x-keyword-ai-hiring&utm_content=v09&as=anon"
+    tags: [v09, keyword, prebuild]
+    featured: true
+
+  - id: g-search-google
+    tenant: gauntlet
+    channel: search
+    audience: all
+    title: "Organic search — Google referrer"
+    story: "Simulated search arrival via ?ref=google. Intent-neutral hero; IP tier drives emphasis."
+    query_params:
+      ref: google
+    ip_override: null
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}?ref=google"
+    console_deep_link_pattern: "{mount_dev}?ref=google&as=anon"
+    tags: [search]
+    featured: false
+
+  # ── Planet · Direct ────────────────────────────────────────────────────
+  - id: p-direct-anon-tier0
+    tenant: planet
+    channel: direct
+    audience: consumer
+    title: "Self-serve cold visit"
+    story: "Direct hit with no location confidence (offline tier 0). No region line ships."
+    query_params: {}
+    ip_override: null
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}"
+    console_deep_link_pattern: "{mount_dev}?as=anon"
+    tags: [tier0, selfserve]
+    featured: true
+
+  - id: p-direct-ag-region
+    tenant: planet
+    channel: direct
+    audience: business
+    title: "Ag enterprise — Midwest region"
+    story: "Corporate IP with resolved agriculture segment. Location line: 'Every field in {region}, imaged today.'"
+    query_params: {}
+    ip_override: "19.7.0.1"
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}?ip=19.7.0.1"
+    console_deep_link_pattern: "{mount_dev}?ip=19.7.0.1&as=anon"
+    tags: [location, enterprise, agriculture]
+    featured: true
+
+  # ── Planet · Email ───────────────────────────────────────────────────
+  - id: p-email-kofi-token
+    tenant: planet
+    channel: email
+    audience: consumer
+    title: "Crisis responders — Kofi (magic link)"
+    story: "HubSpot crisis-responders campaign. Token identifies Kofi pre-login; relief-org context."
+    email_preview:
+      subject: "Kofi — imagery for crisis response teams"
+      preheader: "Daily coverage when minutes matter. Your trial link inside."
+      cta: "Open crisis responder trial →"
+      recipient_hint: "kofi.adeyemi@reliefresponse.org"
+    query_params:
+      utm_source: hubspot
+      utm_medium: email
+      utm_campaign: crisis-responders
+      e: "${magic:kofi}"
+    ip_override: null
+    identity_hint: token_kofi
+    landing_url_pattern: "{mount_page}?utm_source=hubspot&utm_medium=email&utm_campaign=crisis-responders&e=${magic:kofi}"
+    console_deep_link_pattern: "{mount_dev}?utm_source=hubspot&utm_medium=email&utm_campaign=crisis-responders&e=${magic:kofi}&as=known"
+    tags: [hubspot, kofi, response]
+    featured: true
+
+  - id: p-email-amara-known
+    tenant: planet
+    channel: email
+    audience: business
+    title: "Enterprise agronomy — Amara (logged in)"
+    story: "Email channel + CRM session. Enterprise track emphasis; location + archetype on console."
+    email_preview:
+      subject: "Amara — enterprise imagery for agronomy teams"
+      preheader: "Field-scale coverage + MRV workflows. See your enterprise path."
+      cta: "View enterprise plan →"
+      recipient_hint: "amara.diallo@meridianagronomy.com"
+    query_params:
+      utm_source: hubspot
+      utm_medium: email
+      utm_campaign: enterprise-nurture
+    ip_override: null
+    identity_hint: login_amara
+    landing_url_pattern: "{mount_page}?utm_source=hubspot&utm_medium=email&utm_campaign=enterprise-nurture"
+    console_deep_link_pattern: "{mount_dev}?utm_source=hubspot&utm_medium=email&utm_campaign=enterprise-nurture&as=known"
+    tags: [amara, enterprise]
+    featured: false
+
+  # ── Planet · Ads ─────────────────────────────────────────────────────
+  - id: p-ads-v01-crop-belts
+    tenant: planet
+    channel: ads
+    audience: business
+    title: "X location ad — v01 crop belts"
+    story: "Paid social with location targeting creative. Hero + location line message-match."
+    query_params:
+      utm_source: x
+      utm_medium: paid
+      utm_campaign: x-location-crop-belts
+      utm_content: v01
+    ip_override: null
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}?utm_source=x&utm_medium=paid&utm_campaign=x-location-crop-belts&utm_content=v01"
+    console_deep_link_pattern: "{mount_dev}?utm_source=x&utm_medium=paid&utm_campaign=x-location-crop-belts&utm_content=v01&as=anon"
+    tags: [v01, location-ad]
+    featured: true
+
+  - id: p-search-google
+    tenant: planet
+    channel: search
+    audience: all
+    title: "Organic search — Google referrer"
+    story: "Simulated search arrival via ?ref=google. Intent-neutral hero; location tier drives emphasis."
+    query_params:
+      ref: google
+    ip_override: null
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}?ref=google"
+    console_deep_link_pattern: "{mount_dev}?ref=google&as=anon"
+    tags: [search]
+    featured: false
