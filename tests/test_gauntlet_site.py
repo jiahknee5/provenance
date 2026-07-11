@@ -330,8 +330,8 @@ def test_dev_page_renders_the_process_map():
 def test_showcase_card_publishes_the_entry_links():
     t = c.get("/showcase").text
     assert "GauntletAI replica" in t
-    assert "utm_medium=paid" in t and "ref=google" in t and 'href="/gauntlet"' in t
-    assert "/ad-lp" in t
+    assert "utm_medium=paid" in t and "ref=google" in t and 'href="/gauntletapt"' in t
+    assert "/gauntletapt/ad-lp" in t
     assert GS.sample_login_email() in t
 
 

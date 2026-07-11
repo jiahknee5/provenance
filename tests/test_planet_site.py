@@ -322,7 +322,7 @@ def test_dev_page_renders_the_process_map():
 def test_showcase_card_publishes_the_entry_links():
     t = c.get("/showcase").text
     assert "Planet replica" in t
-    assert 'href="/planet"' in t and "/planet/ads" in t and "/planet/ads-lp" in t
+    assert 'href="/planetapt"' in t and "/planetapt/ads" in t and "/planetapt/ads-lp" in t
     assert PS.sample_login_email() in t
 
 
