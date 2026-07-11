@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Email entry gallery — Campaign command center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e14;--panel:#121820;--panel2:#1a2230;--ink:#e8edf4;--muted:#8b9cb3;
+    --line:#2a3548;--accent:#ff7a59;--accent2:#00d4aa;--chip-bg:#1e2838;--chip-fg:#a8c4e8;
+    --radius:8px;--shadow:0 4px 24px rgba(0,0,0,.45);
+    --sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',monospace;--display:'IBM Plex Sans',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--sans);font-size:14px;line-height:1.5;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1140px;margin:0 auto;padding:24px 28px 80px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:20px;font-size:12px;color:var(--muted)}
+  .topbar strong{color:var(--ink)}
+  .chip{display:inline-block;font-family:var(--mono);font-size:10.5px;font-weight:500;color:var(--chip-fg);background:var(--chip-bg);border-radius:6px;padding:3px 8px;border:1px solid var(--line)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .btn{display:inline-block;font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+  .btn.primary{background:var(--accent);color:#0a0e14;border-color:var(--accent)}
+  .vfoot{position:fixed;bottom:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 20px;background:var(--panel);border-top:1px solid var(--line);font-size:11px;z-index:99;flex-wrap:wrap}
+  .vbadge{font-weight:700;padding:5px 12px;border-radius:999px;background:#ff7a59;color:#0a0e14}
+  .vnav a{color:var(--muted);margin:0 2px;font-weight:600}
+  .vnav a.on{color:var(--accent)}
+  
+  .hero{background:var(--panel2);border:1px solid var(--line);border-radius:var(--radius);padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .hero h1{font-family:var(--display);font-size:22px;font-weight:700;margin:0}
+  .hero p{font-size:13px;color:var(--muted);margin:4px 0 0;max-width:60ch}
+  .hero .stat{font-family:var(--mono);font-size:11px;color:var(--accent2);background:var(--chip-bg);padding:4px 10px;border-radius:6px}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+<style>
+  .email-wrap{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:10px;background:var(--panel2)}
+  .email-hdr{padding:8px 12px;font-family:var(--mono);font-size:10px;color:var(--muted);border-bottom:1px solid var(--line)}
+  .email-in{padding:12px 14px}
+  .email-subj{font-size:14px;font-weight:700;margin-bottom:4px}
+  .email-pre{font-size:11px;color:var(--muted);margin-bottom:10px}
+  .email-cta{display:inline-block;font-size:11px;font-weight:700;background:var(--accent);color:#0a0e14;padding:6px 12px;border-radius:6px;margin-top:8px}
+  .card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .sc-card{border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:14px}
+</style>
+<div class="topbar"><span>Mockup · <strong>Email gallery</strong></span><a href="/apt/demo">← Sitemap</a></div>
+<a class="gal-back" href="/apt/demo" style="font-size:12px;margin-bottom:12px;display:inline-block">← Demo sitemap</a>
+<div class="hero"><div><h1>/gauntletapt/email — Email entry gallery</h1><p>HubSpot cohort sends — magic token or logged-in CRM before landing.</p></div></div>
+<nav class="aud-tog" style="display:flex;gap:8px;margin-bottom:16px">
+  <a href="#" class="btn" style="background:var(--accent);color:#0a0e14">All</a>
+  <a href="#" class="btn">Companies / Enterprise</a>
+  <a href="#" class="btn">Individuals / Self-serve</a>
+</nav>
+<div class="card-grid"><article class="sc-card featured" id="g-email-liam-token">
+  <div class="email-wrap">
+    <div class="email-hdr">HubSpot · liam.foster@gauntletai.com</div>
+    <div class="email-in">
+      <div class="email-subj">Liam — finish your Gauntlet application</div>
+      <div class="email-pre">Your April cohort spot is still open. One click to resume.</div>
+      <p style="font-size:12px;color:var(--muted);line-height:1.45;margin-top:8px">April cohort email with embedded token. Identified pre-login; abandoned-application objection may surface on console only.</p>
+      <span class="email-cta">Continue application →</span>
+    </div>
+  </div>
+  <h2>HubSpot cohort — Liam (magic link)</h2>
+  <div class="chips"><span class="chip">hubspot</span><span class="chip">magic-token</span><span class="chip">utm_campaign=cohort-april</span></div>
+  <div class="links" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
+    <a class="btn primary" href="#">Open landing →</a>
+    <a class="btn" href="#">Engineer console</a>
+    <a class="btn" href="#">Marketer console</a>
+  </div>
+</article><article class="sc-card" id="g-email-maya-known">
+  <div class="email-wrap">
+    <div class="email-hdr">HubSpot · maya.chen@gauntletai.com</div>
+    <div class="email-in">
+      <div class="email-subj">Maya — catalyst track for engineering leaders</div>
+      <div class="email-pre">Your declared goal: ship AI products faster. See the cohort fit.</div>
+      <p style="font-size:12px;color:var(--muted);line-height:1.45;margin-top:8px">Email channel classification with active session. Say-level name + declared goals; Cedar Health employer never recited.</p>
+      <span class="email-cta">Review catalyst track →</span>
+    </div>
+  </div>
+  <h2>Known exec — Maya (logged in + email UTMs)</h2>
+  <div class="chips"><span class="chip">hubspot</span><span class="chip">maya</span><span class="chip">b2b</span></div>
+  <div class="links" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
+    <a class="btn primary" href="#">Open landing →</a>
+    <a class="btn" href="#">Engineer console</a>
+    <a class="btn" href="#">Marketer console</a>
+  </div>
+</article><article class="sc-card featured" id="p-email-kofi-token">
+  <div class="email-wrap">
+    <div class="email-hdr">HubSpot · kofi.adeyemi@reliefresponse.org</div>
+    <div class="email-in">
+      <div class="email-subj">Kofi — imagery for crisis response teams</div>
+      <div class="email-pre">Daily coverage when minutes matter. Your trial link inside.</div>
+      <p style="font-size:12px;color:var(--muted);line-height:1.45;margin-top:8px">HubSpot crisis-responders campaign. Token identifies Kofi pre-login; relief-org context.</p>
+      <span class="email-cta">Open crisis responder trial →</span>
+    </div>
+  </div>
+  <h2>Crisis responders — Kofi (magic link)</h2>
+  <div class="chips"><span class="chip">hubspot</span><span class="chip">kofi</span><span class="chip">utm_campaign=crisis-responders</span></div>
+  <div class="links" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
+    <a class="btn primary" href="#">Open landing →</a>
+    <a class="btn" href="#">Engineer console</a>
+    <a class="btn" href="#">Marketer console</a>
+  </div>
+</article><article class="sc-card" id="p-email-amara-known">
+  <div class="email-wrap">
+    <div class="email-hdr">HubSpot · amara.diallo@meridianagronomy.com</div>
+    <div class="email-in">
+      <div class="email-subj">Amara — enterprise imagery for agronomy teams</div>
+      <div class="email-pre">Field-scale coverage + MRV workflows. See your enterprise path.</div>
+      <p style="font-size:12px;color:var(--muted);line-height:1.45;margin-top:8px">Email channel + CRM session. Enterprise track emphasis; location + archetype on console.</p>
+      <span class="email-cta">View enterprise plan →</span>
+    </div>
+  </div>
+  <h2>Enterprise agronomy — Amara (logged in)</h2>
+  <div class="chips"><span class="chip">amara</span><span class="chip">enterprise</span></div>
+  <div class="links" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
+    <a class="btn primary" href="#">Open landing →</a>
+    <a class="btn" href="#">Engineer console</a>
+    <a class="btn" href="#">Marketer console</a>
+  </div>
+</article></div>
+</div>
+<footer class="vfoot">
+  <span class="vbadge">Variant A — Campaign command center</span>
+  <nav class="vnav"><a href="/apt/mockups/email-a" class="on">A</a> · <a href="/apt/mockups/email-b">B</a> · <a href="/apt/mockups/email-c">C</a> · <a href="/apt/mockups">All mockups</a></nav>
+</footer>
+</body>
+</html>

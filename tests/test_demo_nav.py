@@ -282,3 +282,24 @@ def test_planet_ads_links_demo_sitemap():
     t = c.get("/planetapt/ads").text
     assert 'href="/apt/demo"' in t
     assert "← Demo sitemap" in t
+
+
+def test_mockups_index_returns_200():
+    r = c.get("/apt/mockups")
+    assert r.status_code == 200
+    t = r.text
+    assert "15 UI mockups" in t
+    assert "/apt/mockups/sitemap-a" in t
+    assert "/apt/mockups/ads-c" in t
+
+
+def test_mockup_page_serves_html():
+    r = c.get("/apt/mockups/sitemap-b")
+    assert r.status_code == 200
+    assert "Variant B" in r.text
+    assert "GauntletAI" in r.text
+    assert "/apt/mockups/sitemap-c" in r.text
+
+
+def test_mockup_unknown_returns_404():
+    assert c.get("/apt/mockups/not-a-real-mock").status_code == 404

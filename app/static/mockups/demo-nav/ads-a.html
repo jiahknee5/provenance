@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>X ads grid — Campaign command center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e14;--panel:#121820;--panel2:#1a2230;--ink:#e8edf4;--muted:#8b9cb3;
+    --line:#2a3548;--accent:#ff7a59;--accent2:#00d4aa;--chip-bg:#1e2838;--chip-fg:#a8c4e8;
+    --radius:8px;--shadow:0 4px 24px rgba(0,0,0,.45);
+    --sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',monospace;--display:'IBM Plex Sans',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--sans);font-size:14px;line-height:1.5;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;body{overflow:hidden;height:100vh}}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1140px;margin:0 auto;padding:24px 28px 80px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:20px;font-size:12px;color:var(--muted)}
+  .topbar strong{color:var(--ink)}
+  .chip{display:inline-block;font-family:var(--mono);font-size:10.5px;font-weight:500;color:var(--chip-fg);background:var(--chip-bg);border-radius:6px;padding:3px 8px;border:1px solid var(--line)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .btn{display:inline-block;font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+  .btn.primary{background:var(--accent);color:#0a0e14;border-color:var(--accent)}
+  .vfoot{position:fixed;bottom:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 20px;background:var(--panel);border-top:1px solid var(--line);font-size:11px;z-index:99;flex-wrap:wrap}
+  .vbadge{font-weight:700;padding:5px 12px;border-radius:999px;background:#ff7a59;color:#0a0e14}
+  .vnav a{color:var(--muted);margin:0 2px;font-weight:600}
+  .vnav a.on{color:var(--accent)}
+  
+  .hero{background:var(--panel2);border:1px solid var(--line);border-radius:var(--radius);padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .hero h1{font-family:var(--display);font-size:22px;font-weight:700;margin:0}
+  .hero p{font-size:13px;color:var(--muted);margin:4px 0 0;max-width:60ch}
+  .hero .stat{font-family:var(--mono);font-size:11px;color:var(--accent2);background:var(--chip-bg);padding:4px 10px;border-radius:6px}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+<style>
+  html,body{height:100%;overflow:hidden}
+  .wrap{max-width:none;padding:8px 12px 60px;height:100vh;display:flex;flex-direction:column}
+  .ad-grid{flex:1;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(2,1fr);gap:8px;min-height:0}
+  @media(max-width:1200px){.ad-grid{grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(3,1fr)}}
+  .ad-card{display:flex;flex-direction:column;border:1px solid #cfd9de;border-radius:8px;overflow:hidden;background:#fff;color:#0f1419;text-decoration:none;min-height:0}
+  .ad-card:hover{border-color:var(--accent);text-decoration:none}
+  .ad-card.cat-demographic{border-left:3px solid #3b82f6}
+  .ad-card.cat-audience{border-left:3px solid #a855f7}
+  .ad-meta{padding:6px 8px;border-bottom:1px solid #eff3f4;font-size:10px}
+  .cat-tag{display:inline-block;font-size:7px;font-weight:700;text-transform:uppercase;color:#fff;border-radius:3px;padding:1px 5px;margin-bottom:3px}
+  .ad-type{font-weight:700;font-size:11px}
+  .ad-cfg{font-family:var(--mono);font-size:9px;color:#536471;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ad-fit{font-size:9px;color:#536471}
+  .x-post{flex:1;background:#15202b;display:flex;flex-direction:column;min-height:0}
+  .x-top{display:flex;gap:6px;padding:5px 7px;border-bottom:1px solid #38444d;align-items:center}
+  .av{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff}
+  .x-top b{display:block;font-size:10px;color:#fff}
+  .x-top span{font-size:9px;color:#8899a6}
+  .x-text{padding:5px 7px;font-size:10px;color:#e7e9ea;line-height:1.3;flex:1}
+  .trig{color:#c9a24b;font-weight:500}
+  .x-foot{padding:0 7px 4px;display:flex;gap:6px;font-size:9px}
+  .x-cta{color:#c9a24b;font-weight:700}
+  .utm{font-family:var(--mono);color:#8899a6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hero-shift{padding:4px 7px;border-top:1px solid #38444d;font-size:9px}
+  .hero-shift .lbl{font-family:var(--mono);font-size:7px;text-transform:uppercase;color:#8899a6}
+  .hero-shift .gen{color:#6d6960;text-decoration:line-through;display:block}
+  .hero-shift .per{color:#c9a24b;font-weight:600;display:block}
+</style>
+<div class="topbar"><span>Mockup · <strong>Ads grid</strong></span><span>GauntletAI</span></div>
+<div class="hero" style="margin-bottom:8px;padding:10px 14px"><div><h1 style="font-size:14px">X Ads Manager — 12 Variants</h1><p style="font-size:10px">GauntletAI paid-social catalog</p></div><a href="/apt/demo" class="chip">← Sitemap</a></div>
+<div class="ad-grid"><a class="ad-card cat-demographic" href="/gauntletapt?utm_source=x&utm_medium=paid&utm_campaign=x-location-tech-hubs&utm_content=v01">
+  <div class="ad-meta">
+    <span class="cat-tag" style="background:#3b82f6">demographic</span>
+    <div class="ad-type">Location targeting</div>
+    <div class="ad-cfg">SF Bay Area · Austin · Seattle</div>
+    <div class="ad-fit">Best for <b>CTO</b></div>
+  </div>
+  <div class="x-post">
+    <div class="x-top"><span class="av" style="background:#3b82f6">LD</span><div><b>Gauntlet AI</b><span>@GauntletAI · Promoted</span></div></div>
+    <p class="x-text"><span class="trig">Bay Area and Austin CTOs tell us the same hiring story.</span></p>
+    <div class="x-foot"><span class="x-cta">See how they prove it →</span><span class="utm">utm_content=v01</span></div>
+    <div class="hero-shift"><span class="lbl">Hero shift</span><span class="gen">Generic hero headline</span><span class="per">Tech Hubs Don't Have an AI Model Problem. They Have a Talent Proof Problem.</span></div>
+  </div>
+</a><a class="ad-card cat-demographic" href="/gauntletapt?utm_source=x&utm_medium=paid&utm_campaign=x-language-en-us&utm_content=v02">
+  <div class="ad-meta">
+    <span class="cat-tag" style="background:#3b82f6">demographic</span>
+    <div class="ad-type">Language targeting</div>
+    <div class="ad-cfg">English (United States)</div>
+    <div class="ad-fit">Best for <b>Cross-audience</b></div>
+  </div>
+  <div class="x-post">
+    <div class="x-top"><span class="av" style="background:#64748b">GA</span><div><b>Gauntlet AI</b><span>@GauntletAI · Promoted</span></div></div>
+    <p class="x-text"><span class="trig">Most AI pilots stall — and it's rarely the model.</span></p>
+    <div class="x-foot"><span class="x-cta">Worth a look? →</span><span class="utm">utm_content=v02</span></div>
+    <div class="hero-shift"><span class="lbl">Hero shift</span><span class="gen">Generic hero headline</span><span class="per">The Direct Path for US Engineering Teams to Go AI-First</span></div>
+  </div>
+</a><a class="ad-card cat-demographic" href="/gauntletapt?utm_source=x&utm_medium=paid&utm_campaign=x-device-wifi-office&utm_content=v03">
+  <div class="ad-meta">
+    <span class="cat-tag" style="background:#3b82f6">demographic</span>
+    <div class="ad-type">Device targeting</div>
+    <div class="ad-cfg">Desktop · Wi-Fi · Office hours</div>
+    <div class="ad-fit">Best for <b>CTO</b></div>
+  </div>
+  <div class="x-post">
+    <div class="x-top"><span class="av" style="background:#3b82f6">LD</span><div><b>Gauntlet AI</b><span>@GauntletAI · Promoted</span></div></div>
+    <p class="x-text"><span class="trig">B2B buyers research AI hiring solutions at their desk.</span></p>
+    <div class="x-foot"><span class="x-cta">Open to the breakdown? →</span><span class="utm">utm_content=v03</span></div>
+    <div class="hero-shift"><span class="lbl">Hero shift</span><span class="gen">Generic hero headline</span><span class="per">Evaluate AI Talent Programs Like You Evaluate Vendors</span></div>
+  </div>
+</a><a class="ad-card cat-demographic" href="/gauntletapt?utm_source=x&utm_medium=paid&utm_campaign=x-age-senior-engineer&utm_content=v04">
+  <div class="ad-meta">
+    <span class="cat-tag" style="background:#3b82f6">demographic</span>
+    <div class="ad-type">Age targeting</div>
+    <div class="ad-cfg">28–45</div>
+    <div class="ad-fit">Best for <b>Engineer</b></div>
+  </div>
+  <div class="x-post">
+    <div class="x-top"><span class="av" style="background:#22c55e">EN</span><div><b>Gauntlet AI</b><span>@GauntletAI · Promoted</span></div></div>
+    <p class="x-text"><span class="trig">Senior engineers who made the AI leap tell us the same thing.</span></p>
+    <div class="x-foot"><span class="x-cta">Worth applying? →</span><span class="utm">utm_content=v04</span></div>
+    <div class="hero-shift"><span class="lbl">Hero shift</span><span class="gen">Generic hero headline</span><span class="per">The Career Leap Experienced Engineers Regret Waiting On</span></div>
+  </div>
+</a><a class="ad-card cat-demographic" href="/gauntletapt?utm_source=x&utm_medium=paid&utm_campaign=x-gender-all&utm_content=v05">
+  <div class="ad-meta">
+    <span class="cat-tag" style="background:#3b82f6">demographic</span>
+    <div class="ad-type">Gender targeting</div>
+    <div class="ad-cfg">All genders (broad reach)</div>
+    <div class="ad-fit">Best for <b>Cross-audience</b></div>
+  </div>
+  <div class="x-post">
+    <div class="x-top"><span class="av" style="background:#64748b">GA</span><div><b>Gauntlet AI</b><span>@GauntletAI · Promoted</span></div></div>
+    <p class="x-text"><span class="trig">5,000+ engineers apply per Gauntlet cohort.</span></p>
+    <div class="x-foot"><span class="x-cta">See how selection works →</span><span class="utm">utm_content=v05</span></div>
+    <div class="hero-shift"><span class="lbl">Hero shift</span><span class="gen">Generic hero headline</span><span class="per">Prove You're an AI-First Engineer</span></div>
+  </div>
+</a><a class="ad-card cat-audience" href="/gauntletapt?utm_source=x&utm_medium=paid&utm_campaign=x-conversation-ai-transform&utm_content=v06">
+  <div class="ad-meta">
+    <span class="cat-tag" style="background:#a855f7">audience</span>
+    <div class="ad-type">Conversation targeting</div>
+    <div class="ad-cfg">AI transformation threads</div>
+    <div class="ad-fit">Best for <b>CTO</b></div>
+  </div>
+  <div class="x-post">
+    <div class="x-top"><span class="av" style="background:#a855f7">LD</span><div><b>Gauntlet AI</b><span>@GauntletAI · Promoted</span></div></div>
+    <p class="x-text"><span class="trig">Your Q3 note mentioned doubling the engineering org.</span></p>
+    <div class="x-foot"><span class="x-cta">Worth a look? →</span><span class="utm">utm_content=v06</span></div>
+    <div class="hero-shift"><span class="lbl">Hero shift</span><span class="gen">Generic hero headline</span><span class="per">Your Engineers Ship Features. Catalyst Teaches Them to Ship AI.</span></div>
+  </div>
+</a><a class="ad-card cat-audience" href="/gauntletapt?utm_source=x&utm_medium=paid&utm_campaign=x-event-hrtech&utm_content=v07">
+  <div class="ad-meta">
+    <span class="cat-tag" style="background:#a855f7">audience</span>
+    <div class="ad-type">Event targeting</div>
+    <div class="ad-cfg">HR Tech Conference attendees</div>
+    <div class="ad-fit">Best for <b>HR/L&D</b></div>
+  </div>
+  <div class="x-post">
+    <div class="x-top"><span class="av" style="background:#a855f7">HR</span><div><b>Gauntlet AI</b><span>@GauntletAI · Promoted</span></div></div>
+    <p class="x-text"><span class="trig">Your L&D budget buys courses. Catalyst buys engineers who come back different.</span></p>
+    <div class="x-foot"><span class="x-cta">Worth sending the overview? →</span><span class="utm">utm_content=v07</span></div>
+    <div class="hero-shift"><span class="lbl">Hero shift</span><span class="gen">Generic hero headline</span><span class="per">Your L&D Budget Buys Courses. Catalyst Buys AI Champions.</span></div>
+  </div>
+</a><a class="ad-card cat-audience" href="/gauntletapt?utm_source=x&utm_medium=paid&utm_campaign=x-engager-retarget&utm_content=v08">
+  <div class="ad-meta">
+    <span class="cat-tag" style="background:#a855f7">audience</span>
+    <div class="ad-type">Post Engager</div>
+    <div class="ad-cfg">Engaged with @GauntletAI (30d)</div>
+    <div class="ad-fit">Best for <b>Cross-audience</b></div>
+  </div>
+  <div class="x-post">
+    <div class="x-top"><span class="av" style="background:#a855f7">GA</span><div><b>Gauntlet AI</b><span>@GauntletAI · Promoted</span></div></div>
+    <p class="x-text"><span class="trig">You liked our post about the Challenger selection rate.</span></p>
+    <div class="x-foot"><span class="x-cta">Pick up where you left off →</span><span class="utm">utm_content=v08</span></div>
+    <div class="hero-shift"><span class="lbl">Hero shift</span><span class="gen">Generic hero headline</span><span class="per">You Saw the Selection Rate. Here's the Proof Model.</span></div>
+  </div>
+</a><a class="ad-card cat-audience" href="/gauntletapt?utm_source=x&utm_medium=paid&utm_campaign=x-keyword-ai-hiring&utm_content=v09">
+  <div class="ad-meta">
+    <span class="cat-tag" style="background:#a855f7">audience</span>
+    <div class="ad-type">Keyword targeting</div>
+    <div class="ad-cfg">AI engineer hiring · ML team build</div>
+    <div class="ad-fit">Best for <b>CTO</b></div>
+  </div>
+  <div class="x-post">
+    <div class="x-top"><span class="av" style="background:#a855f7">LD</span><div><b>Gauntlet AI</b><span>@GauntletAI · Promoted</span></div></div>
+    <p class="x-text"><span class="trig">Saw your team posted three ML engineer roles last month.</span></p>
+    <div class="x-foot"><span class="x-cta">See how they prove it →</span><span class="utm">utm_content=v09</span></div>
+    <div class="hero-shift"><span class="lbl">Hero shift</span><span class="gen">Generic hero headline</span><span class="per">Stop Interviewing for Skills You Can't Observe in 45 Minutes</span></div>
+  </div>
+</a><a class="ad-card cat-audience" href="/gauntletapt?utm_source=x&utm_medium=paid&utm_campaign=x-movies-earth-docs&utm_content=v10">
+  <div class="ad-meta">
+    <span class="cat-tag" style="background:#a855f7">audience</span>
+    <div class="ad-type">Movies & TV targeting</div>
+    <div class="ad-cfg">Sci-fi · tech documentary fans</div>
+    <div class="ad-fit">Best for <b>Engineer</b></div>
+  </div>
+  <div class="x-post">
+    <div class="x-top"><span class="av" style="background:#a855f7">EN</span><div><b>Gauntlet AI</b><span>@GauntletAI · Promoted</span></div></div>
+    <p class="x-text"><span class="trig">Engineers who binge tech docs apply at 3× the rate.</span></p>
+    <div class="x-foot"><span class="x-cta">Worth applying? →</span><span class="utm">utm_content=v10</span></div>
+    <div class="hero-shift"><span class="lbl">Hero shift</span><span class="gen">Generic hero headline</span><span class="per">The Engineers Who Watch Ship Under Pressure</span></div>
+  </div>
+</a><a class="ad-card cat-audience" href="/gauntletapt?utm_source=x&utm_medium=paid&utm_campaign=x-interest-ml-devops&utm_content=v11">
+  <div class="ad-meta">
+    <span class="cat-tag" style="background:#a855f7">audience</span>
+    <div class="ad-type">Interest targeting</div>
+    <div class="ad-cfg">Machine learning · DevOps</div>
+    <div class="ad-fit">Best for <b>Engineer</b></div>
+  </div>
+  <div class="x-post">
+    <div class="x-top"><span class="av" style="background:#a855f7">EN</span><div><b>Gauntlet AI</b><span>@GauntletAI · Promoted</span></div></div>
+    <p class="x-text"><span class="trig">Your feed says you care about ML infra.</span></p>
+    <div class="x-foot"><span class="x-cta">Apply to Challenger →</span><span class="utm">utm_content=v11</span></div>
+    <div class="hero-shift"><span class="lbl">Hero shift</span><span class="gen">Generic hero headline</span><span class="per">Your Feed Knows You're Ready for AI-Native</span></div>
+  </div>
+</a><a class="ad-card cat-audience" href="/gauntletapt?utm_source=x&utm_medium=paid&utm_campaign=x-lookalike-followers&utm_content=v12">
+  <div class="ad-meta">
+    <span class="cat-tag" style="background:#a855f7">audience</span>
+    <div class="ad-type">Follower lookalike</div>
+    <div class="ad-cfg">Similar to @GauntletAI followers</div>
+    <div class="ad-fit">Best for <b>Cross-audience</b></div>
+  </div>
+  <div class="x-post">
+    <div class="x-top"><span class="av" style="background:#a855f7">GA</span><div><b>Gauntlet AI</b><span>@GauntletAI · Promoted</span></div></div>
+    <p class="x-text"><span class="trig">People like you hire from Gauntlet cohorts.</span></p>
+    <div class="x-foot"><span class="x-cta">See the proof model →</span><span class="utm">utm_content=v12</span></div>
+    <div class="hero-shift"><span class="lbl">Hero shift</span><span class="gen">Generic hero headline</span><span class="per">Hire Engineers Who've Already Proven It</span></div>
+  </div>
+</a></div>
+</div>
+<footer class="vfoot">
+  <span class="vbadge">Variant A — Campaign command center</span>
+  <nav class="vnav"><a href="/apt/mockups/ads-a" class="on">A</a> · <a href="/apt/mockups/ads-b">B</a> · <a href="/apt/mockups/ads-c">C</a> · <a href="/apt/mockups">All mockups</a></nav>
+</footer>
+</body>
+</html>

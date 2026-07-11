@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>/apt/dev — ops hub — Campaign command center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e14;--panel:#121820;--panel2:#1a2230;--ink:#e8edf4;--muted:#8b9cb3;
+    --line:#2a3548;--accent:#ff7a59;--accent2:#00d4aa;--chip-bg:#1e2838;--chip-fg:#a8c4e8;
+    --radius:8px;--shadow:0 4px 24px rgba(0,0,0,.45);
+    --sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',monospace;--display:'IBM Plex Sans',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--sans);font-size:14px;line-height:1.5;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1140px;margin:0 auto;padding:24px 28px 80px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:20px;font-size:12px;color:var(--muted)}
+  .topbar strong{color:var(--ink)}
+  .chip{display:inline-block;font-family:var(--mono);font-size:10.5px;font-weight:500;color:var(--chip-fg);background:var(--chip-bg);border-radius:6px;padding:3px 8px;border:1px solid var(--line)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .btn{display:inline-block;font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+  .btn.primary{background:var(--accent);color:#0a0e14;border-color:var(--accent)}
+  .vfoot{position:fixed;bottom:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 20px;background:var(--panel);border-top:1px solid var(--line);font-size:11px;z-index:99;flex-wrap:wrap}
+  .vbadge{font-weight:700;padding:5px 12px;border-radius:999px;background:#ff7a59;color:#0a0e14}
+  .vnav a{color:var(--muted);margin:0 2px;font-weight:600}
+  .vnav a.on{color:var(--accent)}
+  
+  .hero{background:var(--panel2);border:1px solid var(--line);border-radius:var(--radius);padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .hero h1{font-family:var(--display);font-size:22px;font-weight:700;margin:0}
+  .hero p{font-size:13px;color:var(--muted);margin:4px 0 0;max-width:60ch}
+  .hero .stat{font-family:var(--mono);font-size:11px;color:var(--accent2);background:var(--chip-bg);padding:4px 10px;border-radius:6px}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+<style>
+  .site-tog{display:inline-flex;gap:2px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:3px;margin-bottom:16px}
+  .site-tog a{font-size:12px;font-weight:600;padding:7px 16px;border-radius:6px;color:var(--muted);text-decoration:none}
+  .site-tog a.on{background:var(--accent);color:#0a0e14}
+  .id-tog{display:inline-flex;gap:2px;margin-left:auto}
+  .id-tog a{font-family:var(--mono);font-size:11px;padding:5px 12px;border:1px solid var(--line);border-radius:6px;color:var(--muted);text-decoration:none}
+  .id-tog a.on{border-color:var(--accent2);color:var(--accent2)}
+  .hub-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:20px 0}
+  .hub-card{display:block;padding:14px 16px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:inherit;text-decoration:none}
+  .hub-card:hover{border-color:var(--accent);text-decoration:none}
+  .hub-card h2{font-size:14px;margin-bottom:6px}
+  .hub-card p{font-size:11px;color:var(--muted);line-height:1.45}
+  .hub-card .go{font-family:var(--mono);font-size:10px;color:var(--accent);margin-top:10px}
+  .entries{padding:14px 16px;border:1px solid var(--line);border-radius:8px;background:var(--panel2)}
+</style>
+<div class="topbar"><span>Mockup · <strong>Ops hub</strong></span><a href="/apt/demo">Demo sitemap →</a></div>
+<div class="hero"><div><h1>/apt/dev — personalization consoles</h1><p>Site picker + identity preview → engineer or marketer console.</p></div></div>
+<nav class="site-tog"><a href="#" class="on">GauntletAI</a><a href="#">Planet</a></nav>
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px">
+  <span style="font-size:12px;color:var(--muted)">GauntletAI · gauntletai.com</span>
+  <nav class="id-tog"><a href="#" class="on">anon</a><a href="#">known · maya.chen@gauntletai.com</a></nav>
+</div>
+<div class="hub-grid"><a class="hub-card" href="/gauntletapt/dev/business"><h2>Marketer console</h2><p>Campaign-ops view — workflow, copy slots, image guardrails, staged YAML diffs.</p><span class="go">Open →</span></a><a class="hub-card" href="/gauntletapt/dev"><h2>Engineer console</h2><p>Full decision trace, 11-stage process map, plain-English story, audit ledger.</p><span class="go">Open →</span></a><a class="hub-card" href="/gauntletapt/image-decisions"><h2>Image decisions</h2><p>Pipeline guide — intents, guardrails, pre-cached vs live inventory.</p><span class="go">Open →</span></a><a class="hub-card" href="/gauntletapt"><h2>Live replica</h2><p>The personalized page a visitor sees — same query params, no console chrome.</p><span class="go">Open →</span></a><a class="hub-card" href="/gauntletapt/ad-lp"><h2>X ads grid</h2><p>All 12 paid-social mockups with per-variant landing links.</p><span class="go">Open →</span></a></div>
+<div class="entries">
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px">Simulate an entry for GauntletAI</div>
+  <div class="chips"><a class="chip" href="/gauntletapt">Direct →</a> <a class="chip" href="/gauntletapt?utm_source=hubspot&utm_medium=email">Email UTMs →</a> <a class="chip" href="/gauntletapt?utm_source=x&utm_medium=paid&utm_campaign=x-keyword-ai-hiring&utm_content=v09">X ad v09 →</a> <a class="chip" href="/gauntletapt?ref=google">Search →</a> <span class="chip">then log in as maya.chen@gauntletai.com</span></div>
+</div>
+</div>
+<footer class="vfoot">
+  <span class="vbadge">Variant A — Campaign command center</span>
+  <nav class="vnav"><a href="/apt/mockups/hub-a" class="on">A</a> · <a href="/apt/mockups/hub-b">B</a> · <a href="/apt/mockups/hub-c">C</a> · <a href="/apt/mockups">All mockups</a></nav>
+</footer>
+</body>
+</html>

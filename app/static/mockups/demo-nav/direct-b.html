@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Direct entry gallery — Product tour</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#faf9f7;--panel:#ffffff;--panel2:#f6f4f0;--ink:#1a1f36;--muted:#697386;
+    --line:#e3e8ee;--accent:#635bff;--accent2:#0a2540;--chip-bg:#f0f3f9;--chip-fg:#3c4257;
+    --radius:12px;--shadow:0 1px 3px rgba(50,50,93,.08),0 4px 12px rgba(50,50,93,.06);
+    --sans:'Source Sans 3',Georgia,serif;--mono:'Source Sans 3',Georgia,serif;--display:'Fraunces',Georgia,serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--sans);font-size:14px;line-height:1.5;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1140px;margin:0 auto;padding:24px 28px 80px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:20px;font-size:12px;color:var(--muted)}
+  .topbar strong{color:var(--ink)}
+  .chip{display:inline-block;font-family:var(--mono);font-size:10.5px;font-weight:500;color:var(--chip-fg);background:var(--chip-bg);border-radius:6px;padding:3px 8px;border:1px solid var(--line)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .btn{display:inline-block;font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .vfoot{position:fixed;bottom:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 20px;background:var(--panel);border-top:1px solid var(--line);font-size:11px;z-index:99;flex-wrap:wrap}
+  .vbadge{font-weight:700;padding:5px 12px;border-radius:999px;background:#635bff;color:#fff}
+  .vnav a{color:var(--muted);margin:0 2px;font-weight:600}
+  .vnav a.on{color:var(--accent)}
+  
+  .hero{padding:56px 0 36px;border-bottom:1px solid var(--line);margin-bottom:36px}
+  .hero .kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:12px}
+  .hero h1{font-family:var(--display);font-size:clamp(36px,4.5vw,48px);font-weight:600;line-height:1.12;letter-spacing:-.02em;max-width:18ch}
+  .hero p{font-size:18px;color:var(--muted);max-width:52ch;margin-top:16px;line-height:1.65}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+<style>
+  .gal-back{font-size:14px;margin-bottom:20px;display:inline-block}
+  .aud-tog{display:flex;gap:20px;margin-bottom:28px;border-bottom:1px solid var(--line);padding-bottom:12px}
+  .aud-tog a{font-size:14px;font-weight:600;color:var(--muted);text-decoration:none;padding-bottom:12px;margin-bottom:-13px;border-bottom:2px solid transparent}
+  .aud-tog a.on{color:var(--ink);border-color:var(--accent)}
+  .card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
+  .sc-card{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);padding:28px;box-shadow:var(--shadow)}
+  .sc-card.featured{border-color:var(--accent)}
+  .sc-card h2{font-family:var(--display);font-size:22px;margin-bottom:10px}
+  .sc-card .story{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:14px}
+  .links{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+</style>
+<div class="topbar"><span>Mockup · <strong>Direct gallery</strong></span><span>GauntletAI</span></div>
+<a class="gal-back" href="/apt/demo">← Demo sitemap</a>
+<div class="hero">
+  <div class="kicker">GauntletAI · Direct</div>
+  <h1>Direct entry gallery</h1>
+  <p>Typed URL — IP tier and network type are the only arrival signals.</p>
+</div>
+<nav class="aud-tog"><a href="#" class="on">All</a><a href="#">Companies</a><a href="#">Individuals</a></nav>
+<div class="card-grid"><article class="sc-card featured" id="g-direct-anon-tier0">
+  <h2>Cold visit — no signals</h2>
+  <p class="story">Typed the URL. No UTMs, no login. IP layer is the only hint (tier 0 offline).</p>
+  <div class="chips"><span class="chip">tier0</span><span class="chip">anonymous</span><span class="chip">anon</span></div>
+  <div class="links">
+    <a class="btn primary" href="/gauntletapt">Open landing →</a>
+    <a class="btn" href="/gauntletapt/dev">Engineer console</a>
+    <a class="btn" href="/gauntletapt/dev/business">Marketer console</a>
+  </div>
+</article><article class="sc-card featured" id="g-direct-corp-tier2">
+  <h2>Corporate IP — Apple office</h2>
+  <p class="story">Anonymous visitor from a resolved corporate netblock. Firmographic copy may allude; never recites employer.</p>
+  <div class="chips"><span class="chip">corporate</span><span class="chip">tier2</span><span class="chip">apple</span><span class="chip">ip=17.253.144.10</span></div>
+  <div class="links">
+    <a class="btn primary" href="/gauntletapt">Open landing →</a>
+    <a class="btn" href="/gauntletapt/dev">Engineer console</a>
+    <a class="btn" href="/gauntletapt/dev/business">Marketer console</a>
+  </div>
+</article><article class="sc-card" id="g-direct-known-return">
+  <h2>Known return — Maya logged in</h2>
+  <p class="story">Direct revisit with CRM cookie. Welcome-back say-level copy; Vector employer stays allude.</p>
+  <div class="chips"><span class="chip">return-visitor</span><span class="chip">crm</span><span class="chip">login maya</span></div>
+  <div class="links">
+    <a class="btn primary" href="/gauntletapt">Open landing →</a>
+    <a class="btn" href="/gauntletapt/dev">Engineer console</a>
+    <a class="btn" href="/gauntletapt/dev/business">Marketer console</a>
+  </div>
+</article></div>
+</div>
+<footer class="vfoot">
+  <span class="vbadge">Variant B — Product tour</span>
+  <nav class="vnav"><a href="/apt/mockups/direct-a">A</a> · <a href="/apt/mockups/direct-b" class="on">B</a> · <a href="/apt/mockups/direct-c">C</a> · <a href="/apt/mockups">All mockups</a></nav>
+</footer>
+</body>
+</html>
