@@ -25,6 +25,41 @@
   .channel-tile .go{display:inline-block;margin-top:10px;font-size:12px;font-weight:700;color:var(--brand)}
   .channel-tile .cnt{font-size:11px;color:var(--muted);margin-top:6px}
   .demo-foot{margin-top:8px;font-size:12.5px;color:var(--muted);max-width:80ch;line-height:1.5}
+  /* ── flow diagram (how the demo works) ── */
+  .flow-wrap{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,#fafcff 0%,#fff 100%);box-shadow:var(--shadow);padding:20px 22px;margin:0 0 22px}
+  .flow-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:0 0 5px}
+  .flow-sub{font-size:13px;color:#475569;line-height:1.5;margin:0 0 18px;max-width:82ch}
+  .flow-sub strong{color:var(--ink)}
+  .flow-lane{margin-bottom:12px}
+  .flow-lane-hd{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:10px}
+  .flow-lane-hd .pill{font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#fff;background:var(--brand);border-radius:999px;padding:3px 9px}
+  .flow-lane.ops .flow-lane-hd .pill{background:#0f172a}
+  .flow-steps{display:flex;flex-wrap:nowrap;align-items:stretch;gap:0;overflow-x:auto;padding-bottom:2px}
+  .flow-step{flex:1 1 150px;min-width:146px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:11px 13px;display:flex;flex-direction:column;gap:2px}
+  .flow-step .num{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:999px;background:var(--brand);color:#fff;font-size:11px;font-weight:800;margin-bottom:4px}
+  .flow-lane.ops .flow-step .num{background:#0f172a}
+  .flow-step .k{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .flow-step .t{font-size:12.5px;line-height:1.4;color:var(--ink)}
+  .flow-step code{font-size:11.5px;background:#f1f5f9;padding:1px 5px;border-radius:5px}
+  .flow-arrow{display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:18px;padding:0 7px;flex:0 0 auto}
+  .flow-bridge{font-size:12.5px;color:var(--brand);font-weight:600;margin:2px 0 14px;line-height:1.55}
+  .flow-bridge .dn{font-size:16px;line-height:1;margin-right:6px}
+  .flow-bridge strong{color:var(--brand2)}
+  .rich-strip{margin-top:6px;border-top:1px dashed var(--line);padding-top:15px}
+  .rich-hd{font-size:12.5px;color:#475569;margin:0 0 11px}
+  .rich-hd b{color:var(--ink)}
+  .rich-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .rich-cell{border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:linear-gradient(180deg,#fff 0%,#f8fbff 100%)}
+  .rich-cell .c-name{font-size:12px;font-weight:800;color:var(--ink);display:flex;align-items:center;justify-content:space-between;gap:6px}
+  .rich-cell .c-name .lv{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--brand)}
+  .rich-cell .c-desc{font-size:11px;color:#64748b;line-height:1.4;margin-top:3px}
+  .rich-grad{height:5px;border-radius:999px;margin:11px 0 4px;background:linear-gradient(90deg,#dbeafe 0%,#2E6FF5 100%)}
+  .rich-scale{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);font-weight:600}
+  @media(max-width:720px){
+    .flow-steps{flex-direction:column;overflow-x:visible}
+    .flow-arrow{transform:rotate(90deg);padding:5px 0}
+    .rich-bar{grid-template-columns:repeat(2,1fr)}
+  }
 </style>
 
 <div class="demo-top">
@@ -32,11 +67,57 @@
 </div>
 
 <p class="demo-intro">
-  One sitemap for sales and product review: pick a tenant, then a channel. Each tile opens the
-  curated gallery or landing URL — same deterministic personalization engine as production, no new logic.
+  One sitemap for sales and product review — same deterministic personalization engine as production,
+  no new logic. Here's how a single visit works, start to finish:
 </p>
 
-<a class="demo-ops" href="{{ ops_hub_path }}">Ops consoles → {{ ops_hub_path }}</a>
+<div class="flow-wrap" aria-label="How the demo works">
+  <p class="flow-title">How the demo works</p>
+  <p class="flow-sub">
+    Every visitor sees a page personalized to who they are — and the page only says what we can
+    <strong>prove</strong>, each line carrying a receipt. Follow the flow:
+  </p>
+
+  <div class="flow-lane">
+    <div class="flow-lane-hd"><span class="pill">Visitor tour</span> What a prospect experiences</div>
+    <div class="flow-steps">
+      <div class="flow-step"><span class="num">1</span><span class="k">Start</span><span class="t">You are here — <code>/apt/demo</code></span></div>
+      <span class="flow-arrow" aria-hidden="true">→</span>
+      <div class="flow-step"><span class="num">2</span><span class="k">Tenant</span><span class="t">Pick the company: Gauntlet or Planet</span></div>
+      <span class="flow-arrow" aria-hidden="true">→</span>
+      <div class="flow-step"><span class="num">3</span><span class="k">Channel</span><span class="t">How they arrived: Direct · Search · Ads · Email</span></div>
+      <span class="flow-arrow" aria-hidden="true">→</span>
+      <div class="flow-step"><span class="num">4</span><span class="k">Scenario</span><span class="t">Pick who's visiting — a curated real-world case</span></div>
+      <span class="flow-arrow" aria-hidden="true">→</span>
+      <div class="flow-step"><span class="num">5</span><span class="k">Live page</span><span class="t">The real page, personalized — every claim carries a receipt</span></div>
+    </div>
+  </div>
+
+  <div class="flow-bridge"><span class="dn">↓</span> On the live page, click the <strong>receipt chip</strong> to go behind the scenes and see <em>why</em> every choice was made</div>
+
+  <div class="flow-lane ops">
+    <div class="flow-lane-hd"><span class="pill">Behind the scenes</span> What you show to explain it</div>
+    <div class="flow-steps">
+      <div class="flow-step"><span class="num">6</span><span class="k">Engineer console</span><span class="t">The full decision trace + process map — how it personalized, step by step</span></div>
+      <span class="flow-arrow" aria-hidden="true">→</span>
+      <div class="flow-step"><span class="num">7</span><span class="k">Marketer console</span><span class="t">The business view: copy decisions, delivery, and attribution</span></div>
+    </div>
+  </div>
+
+  <div class="rich-strip">
+    <p class="rich-hd">One rule of thumb: <b>channels differ by how much we know the moment a visitor arrives.</b></p>
+    <div class="rich-bar">
+      <div class="rich-cell"><span class="c-name">Direct <span class="lv">least</span></span><span class="c-desc">Typed the URL — just IP &amp; network type</span></div>
+      <div class="rich-cell"><span class="c-name">Search</span><span class="c-desc">+ search intent from the referrer</span></div>
+      <div class="rich-cell"><span class="c-name">Ads</span><span class="c-desc">+ the full campaign — UTMs &amp; ad variant</span></div>
+      <div class="rich-cell"><span class="c-name">Email <span class="lv">most</span></span><span class="c-desc">+ CRM identity, before they even log in</span></div>
+    </div>
+    <div class="rich-grad"></div>
+    <div class="rich-scale"><span>less data at arrival</span><span>more data at arrival</span></div>
+  </div>
+</div>
+
+<a class="demo-ops" href="{{ ops_hub_path }}">Skip to the ops consoles → {{ ops_hub_path }}</a>
 
 {% for t in tenants %}
 <section class="tenant-block" aria-labelledby="tenant-{{ t.id }}">
