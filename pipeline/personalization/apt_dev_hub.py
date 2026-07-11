@@ -62,19 +62,22 @@ def _as_state(request: Request, site: dict) -> str:
     return "known" if cookie else "anon"
 
 
+_DEMO_HUB_PATH = "/apt/demo"
+
+
 def _console_cards(m: dict[str, str], qs: str, as_state: str) -> list[dict]:
     as_q = f"{qs}&as={as_state}" if "?" in qs else f"{qs}?as={as_state}"
     cards = [
         {
-            "title": "Engineer console",
-            "desc": "Full decision trace, 11-stage process map, plain-English story, audit ledger.",
-            "href": f"{m['dev']}{as_q}",
-            "kind": "primary",
-        },
-        {
             "title": "Marketer console",
             "desc": "Campaign-ops view — workflow, copy slots, image guardrails, staged YAML diffs.",
             "href": f"{m['dev_business']}{as_q}",
+            "kind": "primary",
+        },
+        {
+            "title": "Engineer console",
+            "desc": "Full decision trace, 11-stage process map, plain-English story, audit ledger.",
+            "href": f"{m['dev']}{as_q}",
             "kind": "primary",
         },
         {
@@ -135,6 +138,7 @@ def build_hub_view(request: Request) -> dict:
     sample_email = site["sample_email"]()
     return {
         "hub_path": _HUB_PATH,
+        "demo_hub_path": _DEMO_HUB_PATH,
         "site": site,
         "site_id": site["id"],
         "site_name": site["name"],

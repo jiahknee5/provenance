@@ -83,6 +83,8 @@ def entry_links(m: dict[str, str]) -> list[tuple[str, str]]:
                   + PS.sample_magic_token()),
         ("Search", f"{page}?ref=google"),
         ("Direct", page),
+        ("Direct gallery", m["direct_gallery"]),
+        ("Email gallery", m["email_gallery"]),
     ]
 
 

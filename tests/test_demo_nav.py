@@ -120,6 +120,50 @@ def test_wf_demo_003_email_gallery_liam_token_trace():
     assert "Pinecrest" not in landing.text
 
 
+def test_wf_demo_004_ad_lp_v09_clickthrough():
+    r = c.get("/gauntletapt/ad-lp")
+    assert r.status_code == 200
+    t = r.text
+    assert "utm_content=v09" in t
+    assert "/gauntletapt?utm_source=x" in t and "utm_campaign=x-keyword-ai-hiring" in t
+    assert "/gauntletapt/dev?utm_source=x" in t and "utm_content=v09" in t and "as=anon" in t
+    assert 'href="/apt/demo"' in t
+
+
+def test_wf_demo_005_identity_preview_toggle_persists():
+    anon = c.get("/apt/dev?site=gauntlet&as=anon").text
+    assert "as=anon" in anon
+    known = c.get("/apt/dev?site=gauntlet&as=known").text
+    assert "as=known" in known
+    assert "/gauntletapt/dev" in known and "as=known" in known
+    assert "/gauntletapt/dev/business" in known and "as=known" in known
+
+
+def test_wf_demo_006_hub_site_switch_preserves_as():
+    t = c.get("/apt/dev?site=gauntlet&as=known").text
+    assert 'href="/apt/dev?site=planet&amp;as=known"' in t
+    assert "/gauntletapt/dev" in t and "as=known" in t
+
+
+def test_apt_dev_hub_marketer_console_first():
+    t = c.get("/apt/dev").text
+    m_pos = t.find("Marketer console")
+    e_pos = t.find("Engineer console")
+    assert m_pos != -1 and e_pos != -1
+    assert m_pos < e_pos
+
+
+def test_apt_dev_hub_links_demo_sitemap():
+    t = c.get("/apt/dev").text
+    assert 'href="/apt/demo"' in t
+
+
+def test_demo_sitemap_prompt_reference_count():
+    t = c.get("/apt/demo").text
+    assert "design_prompts.yaml" in t
+    assert "Prompt reference" in t
+
+
 def test_wf_demo_007_sales_demo_urls_all_return_200():
     """Smoke: sitemap + galleries + existing ad routes + search entry return 200."""
     paths = [

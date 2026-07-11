@@ -20,8 +20,11 @@ def test_apt_dev_hub_returns_200():
 def test_apt_dev_hub_defaults_to_gauntlet():
     t = c.get("/apt/dev").text
     assert 'href="/gauntletapt/dev' in t
-    assert "Engineer console" in t
     assert "Marketer console" in t
+    assert "Engineer console" in t
+    m_pos = t.find("Marketer console")
+    e_pos = t.find("Engineer console")
+    assert m_pos < e_pos
 
 
 def test_apt_dev_hub_site_planet():

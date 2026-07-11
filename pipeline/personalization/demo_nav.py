@@ -16,6 +16,7 @@ from starlette.requests import Request
 from app.gauntlet import MOUNTS as GAUNTLET_MOUNTS
 from app.planet import MOUNTS as PLANET_MOUNTS
 from pipeline.personalization import cohort as CO
+from pipeline.personalization import design_prompts as DP
 from pipeline.personalization import planet_cohort as PCO
 
 SCENARIOS_PATH = Path(__file__).resolve().parents[2] / "rules" / "demo_scenarios.yaml"
@@ -220,11 +221,13 @@ def _tenant_section(tenant: str, data: dict[str, Any]) -> dict[str, Any]:
 def build_sitemap_view(request: Request) -> dict[str, Any]:
     data = load_scenarios()
     tenants = [_tenant_section(t, data) for t in data.get("tenants") or ("gauntlet", "planet")]
+    prompt_count = len(DP.list_entries())
     return {
         "hub_path": _HUB_PATH,
         "ops_hub_path": _OPS_HUB_PATH,
         "tenants": tenants,
         "scenario_count": len(data["scenarios"]),
+        "prompt_reference_count": prompt_count,
         "version": data.get("version", 1),
     }
 

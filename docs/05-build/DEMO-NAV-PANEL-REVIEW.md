@@ -1,6 +1,7 @@
 # Demo Nav + Generation Workflow — Expert Panel Review
 
-**Date:** 2026-07-10  
+**Date:** 2026-07-10 (updated 2026-07-11 — Phase 2 complete)  
+**Status:** Phases 1–2 shipped; Phase 3 cross-links in progress  
 **Artifacts reviewed:**
 - `docs/05-build/DEMO-NAV-PLAN.md`
 - `docs/05-build/GENERATION-PROMPT-WORKFLOW.md`

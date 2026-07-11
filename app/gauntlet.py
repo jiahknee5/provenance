@@ -76,6 +76,8 @@ def entry_links(m: dict[str, str]) -> list[tuple[str, str]]:
                   + GS.sample_magic_token()),
         ("Search", f"{page}?ref=google"),
         ("Direct", page),
+        ("Direct gallery", m["direct_gallery"]),
+        ("Email gallery", m["email_gallery"]),
     ]
 
 
@@ -146,10 +148,16 @@ def _render_ad_lp(request: Request, m: dict[str, str]) -> HTMLResponse:
                 "personal_hero": GS.variant_hero_headline(v),
             })
         sections.append({"label": sec["label"], "category": sec["category"], "variants": variants})
+    dev_sample = (
+        f"{m['dev']}?utm_source=x&utm_medium=paid"
+        f"&utm_campaign=x-keyword-ai-hiring&utm_content=v09&as=anon"
+    )
     return templates.TemplateResponse(request, "gauntlet_ad_lp.html", {
         "sections": sections,
         "generic_hero": GS.generic_hero_headline(),
         "g": m,
+        "dev_sample": dev_sample,
+        "demo_hub_path": "/apt/demo",
     })
 
 

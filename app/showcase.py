@@ -78,14 +78,30 @@ def _model(request: Request, slug: str, industry: str, region: str, ip: str, per
 
 @app.get("/showcase", response_class=HTMLResponse)
 def showcase(request: Request):
-    from app.gauntlet import ENTRY_LINKS
-    from app.planet import ENTRY_LINKS as PLANET_ENTRY_LINKS
+    from app.gauntlet import MOUNTS as GAUNTLET_MOUNTS
+    from app.gauntlet import entry_links as gauntlet_entry_links
+    from app.planet import MOUNTS as PLANET_MOUNTS
+    from app.planet import entry_links as planet_entry_links
     from pipeline.personalization import gauntlet_site as GS
     from pipeline.personalization import planet_site as PS
+    gm = GAUNTLET_MOUNTS["portal"]
+    pm = PLANET_MOUNTS["portal"]
     return templates.TemplateResponse(request, "showcase.html", {
         "demos": [SH.DEMOS[s] for s in SH.ORDER],
-        "gauntlet_entries": ENTRY_LINKS, "gauntlet_login": GS.sample_login_email(),
-        "planet_entries": PLANET_ENTRY_LINKS, "planet_login": PS.sample_login_email()})
+        "gauntlet_entries": gauntlet_entry_links(gm),
+        "gauntlet_login": GS.sample_login_email(),
+        "gauntlet_page": gm["page"],
+        "gauntlet_dev": gm["dev"],
+        "gauntlet_dev_business": gm["dev_business"],
+        "gauntlet_image_decisions": gm["image_decisions"],
+        "gauntlet_ad_lp": gm["ad_lp"],
+        "planet_entries": planet_entry_links(pm),
+        "planet_login": PS.sample_login_email(),
+        "planet_page": pm["page"],
+        "planet_dev": pm["dev"],
+        "planet_dev_business": pm["dev_business"],
+        "planet_image_decisions": pm["image_decisions"],
+    })
 
 
 @app.get("/showcase/{slug}", response_class=HTMLResponse)

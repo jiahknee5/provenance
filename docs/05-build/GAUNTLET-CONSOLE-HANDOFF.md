@@ -32,6 +32,9 @@ Two mount prefixes register identical handlers in `app/gauntlet.py` (`MOUNTS["le
 | `/dev/business` | `/gauntletapt/dev/business` | **Marketer** | 8-section console, staged config diffs, delivery inventory |
 | `/dev/image-decisions` | `/gauntletapt/dev/image-decisions` | Marketer / ops | Image pipeline guide (Parts 1–6) |
 | `/gauntlet/ad`, `/gauntlet/ad-lp` | `/gauntletapt/ad`, `/gauntletapt/ad-lp` | Demo entry | X ad mockups + 12-variant grid |
+| `/gauntlet/direct`, `/gauntlet/email` | `/gauntletapt/direct`, `/gauntletapt/email` | Demo entry | Curated direct + email channel galleries |
+| `/apt/demo` | `/apt/demo` | Visitor tour | Demo sitemap — tenant picker + four channel tiles |
+| `/apt/dev` | `/apt/dev` | Ops hub | Site picker + console deep-links (marketer card first) |
 | `/api/gauntlet/hero-image` | `/gauntletapt/api/hero-image` | Client JS | Async hero generation JSON (hero surface only today) |
 
 **Aliases (legacy mount only unless noted):**

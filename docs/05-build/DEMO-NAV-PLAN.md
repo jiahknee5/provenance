@@ -168,6 +168,16 @@ flowchart TD
 | **Acceptance criteria** | Each `WF-DEMO-*` has a pytest stub or e2e test; workflow runner can replay against `johnnycchung.com` |
 | **Deploy notes** | E2E tests run outside CI by default (network-dependent) |
 
+### Phase 6 — Google/Meta ad platform stubs (deferred)
+
+**Goal:** Full Google Ads / Meta Ads Manager gallery stubs mirroring the X ad grid.
+
+| Item | Detail |
+|------|--------|
+| **Status** | **Deferred** — not in v1 scope; X grid + ad-lp covers paid-social demo needs |
+| **Reason** | No new personalization logic required; stubs are navigation-only mockups with high design cost |
+| **When to revisit** | After Phase 3 cross-links ship and sales requests multi-platform ad walkthrough |
+
 ---
 
 ## C. Scenario catalog spec
