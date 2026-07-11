@@ -214,6 +214,7 @@ def _render_ads(request: Request, m: dict[str, str]) -> HTMLResponse:
         sections.append({"label": sec["label"], "category": sec["category"], "variants": variants})
     return templates.TemplateResponse(request, "planet_ads.html", {
         "sections": sections,
+        "demo_hub_path": "/apt/demo",
         "g": m,
     })
 

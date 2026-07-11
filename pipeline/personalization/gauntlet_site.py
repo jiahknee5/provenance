@@ -1473,12 +1473,18 @@ def build_page(request, email: str | None = None, overrides: dict | None = None)
       "same sections, same facts — only emphasis and order move",
       "the structure is identical before and after login; personalization never adds or removes a claim")
 
-    hero_image = IG.resolve_hero_image({
+    hero_image = IG.resolve_surface_image({
         "entry": entry, "det": det, "identity": ident, "ad_variant": ad_variant,
         "audience": audience, "audience_route": aud_route, "tier": tier,
         "objections": {"prioritized": prioritized},
         "sections": {"hero": hero, "compare": {"emphasis": compare_emphasis}},
-    }, generate=False)
+    }, surface_id="hero", generate=False)
+    og_image = IG.resolve_surface_image({
+        "entry": entry, "det": det, "identity": ident, "ad_variant": ad_variant,
+        "audience": audience, "audience_route": aud_route, "tier": tier,
+        "objections": {"prioritized": prioritized},
+        "sections": {"hero": hero, "compare": {"emphasis": compare_emphasis}},
+    }, surface_id="og", generate=False)
     img_receipt = hero_image.get("receipt") or {}
     img_sigs, img_out, img_why = IG.hero_image_trace(img_receipt)
     t("Hero image resolve", img_sigs,
@@ -1511,6 +1517,8 @@ def build_page(request, email: str | None = None, overrides: dict | None = None)
                        "blocked": obj_blocked},
         "trace": trace, "copy_diff": diff, "ledger": ledger,
         "hero_image": hero_image,
+        "og_image": og_image,
+        "image_surfaces": {"hero": hero_image, "og": og_image},
     }
 
 

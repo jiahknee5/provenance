@@ -1,0 +1,191 @@
+{
+  "version": 1,
+  "source": "docs/05-build/DEMO-NAV-PLAN.md",
+  "base_url": "https://johnnycchung.com",
+  "local_note": "Local dev: swap gauntletapt → gauntlet, planetapt → planet",
+  "workflows": [
+    {
+      "id": "WF-DEMO-001",
+      "title": "Sitemap tour (Gauntlet, all channels)",
+      "preconditions": [
+        "Phase 1 shipped",
+        "cookies cleared",
+        "desktop viewport ≥ 1024px"
+      ],
+      "starting_url": "https://johnnycchung.com/apt/demo",
+      "test": "tests/test_demo_nav.py::test_wf_demo_001_sitemap_tour_gauntlet_channels",
+      "steps": [
+        {"step": 1, "action": "navigate", "target": "/apt/demo", "expected": "Page title contains demo; tenant section visible"},
+        {"step": 2, "action": "click", "target": "GauntletAI channel grid", "expected": "Ads, Direct, Email, Search tiles shown"},
+        {"step": 3, "action": "click", "target": "Ads tile", "expected": "/gauntletapt/ad-lp — X Ads Manager Targeting — 12 Variants"},
+        {"step": 4, "action": "navigate_back", "target": "/apt/demo", "expected": "Gauntlet channels"},
+        {"step": 5, "action": "click", "target": "Direct tile", "expected": "/gauntletapt/direct with audience tabs"},
+        {"step": 6, "action": "navigate_back", "target": "/apt/demo", "expected": "Gauntlet channels"},
+        {"step": 7, "action": "click", "target": "Email tile", "expected": "/gauntletapt/email with HubSpot-style cards"},
+        {"step": 8, "action": "navigate_back", "target": "/apt/demo", "expected": "Gauntlet channels"},
+        {"step": 9, "action": "click", "target": "Search tile", "expected": "/gauntletapt?ref=google"},
+        {"step": 10, "action": "verify", "target": "replica body", "expected": "Hero loads; .aptchip links to /gauntletapt/dev"}
+      ]
+    },
+    {
+      "id": "WF-DEMO-002",
+      "title": "Direct gallery: business vs consumer → corporate IP → marketer console",
+      "preconditions": ["Phase 2 shipped", "cookies cleared"],
+      "starting_url": "https://johnnycchung.com/gauntletapt/direct",
+      "test": "tests/test_demo_nav.py::test_wf_demo_002_direct_gallery_corporate_ip_to_business_console",
+      "steps": [
+        {"step": 1, "action": "navigate", "target": "/gauntletapt/direct", "expected": "Business and Consumer tabs"},
+        {"step": 2, "action": "click", "target": "Consumer tab", "expected": "Cold visit, Known return scenarios"},
+        {"step": 3, "action": "click", "target": "Business tab", "expected": "Corporate IP — Apple office"},
+        {"step": 4, "action": "click", "target": "Corporate IP card", "expected": "/gauntletapt?ip=17.253.144.10"},
+        {"step": 5, "action": "verify", "target": "replica hero", "expected": "B2B emphasis; no employer name as say"},
+        {"step": 6, "action": "click", "target": ".aptchip", "expected": "/gauntletapt/dev?ip=17.253.144.10"},
+        {"step": 7, "action": "verify", "target": "#ch-pipeline", "expected": "IP resolve shows Apple / corporate"},
+        {"step": 8, "action": "click", "target": "Marketing view →", "expected": "/gauntletapt/dev/business?ip=17.253.144.10&as=anon"},
+        {"step": 9, "action": "verify", "target": "Arrival & attribution", "expected": "Channel = direct; IP context in audience read"}
+      ]
+    },
+    {
+      "id": "WF-DEMO-003",
+      "title": "Email gallery: HubSpot card → CRM-aware landing → email channel on console",
+      "preconditions": ["Phase 2 shipped", "cookies cleared", "Liam token scenario"],
+      "starting_url": "https://johnnycchung.com/gauntletapt/email",
+      "test": "tests/test_demo_nav.py::test_wf_demo_003_email_gallery_liam_token_trace",
+      "steps": [
+        {"step": 1, "action": "navigate", "target": "/gauntletapt/email", "expected": "HubSpot-styled email cards"},
+        {"step": 2, "action": "click", "target": "Liam magic link card", "expected": "utm_medium=email and e=mt_ in URL"},
+        {"step": 3, "action": "verify", "target": "replica hero", "expected": "Welcome back, Liam (say, no login)"},
+        {"step": 4, "action": "verify", "target": "replica body", "expected": "Pinecrest employer not recited"},
+        {"step": 5, "action": "click", "target": ".aptchip", "expected": "/gauntletapt/dev with email UTMs"},
+        {"step": 6, "action": "verify", "target": "entry panel", "expected": "Entry classify = email"},
+        {"step": 7, "action": "verify", "target": "plain-English story", "expected": "Arrival beat mentions email"},
+        {"step": 8, "action": "click", "target": "Marketing view →", "expected": "Business console with same query"},
+        {"step": 9, "action": "verify", "target": "Arrival & attribution", "expected": "utm_medium = email; Liam / token identity"}
+      ]
+    },
+    {
+      "id": "WF-DEMO-004",
+      "title": "Ads gallery: ad-lp variant click-through",
+      "preconditions": ["cookies cleared"],
+      "starting_url": "https://johnnycchung.com/gauntletapt/ad-lp",
+      "test": "tests/test_demo_nav.py::test_wf_demo_004_ad_lp_v09_clickthrough",
+      "steps": [
+        {"step": 1, "action": "navigate", "target": "/gauntletapt/ad-lp", "expected": "12 cards; nav links"},
+        {"step": 2, "action": "locate", "target": "utm_content=v09 card", "expected": "Keyword / AI hiring variant"},
+        {"step": 3, "action": "click", "target": "v09 card", "expected": "Landing with full UTM stack"},
+        {"step": 4, "action": "verify", "target": "hero headline", "expected": "Message-matched to ad"},
+        {"step": 5, "action": "verify", "target": "ad-lp preview", "expected": "Personalized hero matches replica"},
+        {"step": 6, "action": "click", "target": "decisions chip on ad-lp", "expected": "/gauntletapt/dev"},
+        {"step": 7, "action": "navigate", "target": "v09 landing with UTMs", "expected": "/gauntletapt/dev with full UTMs"},
+        {"step": 8, "action": "verify", "target": "process map", "expected": "Variant v09 / Keyword targeting fired"}
+      ]
+    },
+    {
+      "id": "WF-DEMO-005",
+      "title": "Identity preview: anon vs known toggle persistence (hub → console)",
+      "preconditions": ["cookies cleared"],
+      "starting_url": "https://johnnycchung.com/apt/dev?site=gauntlet&as=anon",
+      "test": "tests/test_demo_nav.py::test_wf_demo_005_identity_preview_toggle_persists",
+      "steps": [
+        {"step": 1, "action": "navigate", "target": "/apt/dev?site=gauntlet&as=anon", "expected": "Anonymous toggle active"},
+        {"step": 2, "action": "verify", "target": "engineer console card href", "expected": "contains as=anon"},
+        {"step": 3, "action": "click", "target": "Known toggle", "expected": "URL → as=known"},
+        {"step": 4, "action": "verify", "target": "console card hrefs", "expected": "all contain as=known"},
+        {"step": 5, "action": "click", "target": "Engineer console", "expected": "/gauntletapt/dev?as=known"},
+        {"step": 6, "action": "verify", "target": ".gd-tog on engineer page", "expected": "Known active; Maya email"},
+        {"step": 7, "action": "verify", "target": "identity panel", "expected": "CRM path, not anonymous"},
+        {"step": 8, "action": "click", "target": "Marketing view →", "expected": "as=known preserved"},
+        {"step": 9, "action": "click", "target": "Anonymous on business console", "expected": "as=anon; identity reverts"}
+      ]
+    },
+    {
+      "id": "WF-DEMO-006",
+      "title": "Ops console: site switch preserves as param",
+      "preconditions": [],
+      "starting_url": "https://johnnycchung.com/apt/dev?site=gauntlet&as=known",
+      "test": "tests/test_demo_nav.py::test_wf_demo_006_hub_site_switch_preserves_as",
+      "steps": [
+        {"step": 1, "action": "navigate", "target": "/apt/dev?site=gauntlet&as=known", "expected": "Gauntlet selected"},
+        {"step": 2, "action": "verify", "target": "Planet toggle link", "expected": "href=/apt/dev?site=planet&as=known"},
+        {"step": 3, "action": "click", "target": "Planet", "expected": "site=planet; as=known preserved"},
+        {"step": 4, "action": "verify", "target": "hub meta tag", "expected": "location signal tagline"},
+        {"step": 5, "action": "verify", "target": "engineer console card", "expected": "/planetapt/dev?as=known"},
+        {"step": 6, "action": "click", "target": "Engineer console", "expected": "Planet /dev with known preview"},
+        {"step": 7, "action": "click", "target": "GauntletAI", "expected": "Returns to gauntlet; as=known preserved"}
+      ]
+    },
+    {
+      "id": "WF-DEMO-007",
+      "title": "Full sales demo script (~15 min smoke)",
+      "preconditions": ["Phases 1–3 shipped", "cookies cleared"],
+      "starting_url": "https://johnnycchung.com/apt/demo",
+      "test": "tests/test_demo_nav.py::test_wf_demo_007_sales_demo_urls_all_return_200",
+      "steps": [
+        {"step": 1, "action": "open", "target": "/apt/demo", "expected": "Demo sitemap loads"},
+        {"step": 2, "action": "navigate", "target": "Gauntlet email → Liam", "expected": "Magic token welcome-back"},
+        {"step": 3, "action": "click", "target": ".aptchip", "expected": "Engineer console process map"},
+        {"step": 4, "action": "point", "target": "say/steer/hold legend", "expected": "Three surface policies"},
+        {"step": 5, "action": "click", "target": "Marketing view →", "expected": "Copy + Delivery sections"},
+        {"step": 6, "action": "navigate", "target": "Gauntlet ads v09", "expected": "Message-matched landing"},
+        {"step": 7, "action": "navigate", "target": "Gauntlet direct corporate IP", "expected": "Firmographic allude"},
+        {"step": 8, "action": "navigate", "target": "/apt/dev?as=known", "expected": "Ops hub identity preview"},
+        {"step": 9, "action": "switch", "target": "Planet hub", "expected": "Location signal vertical"},
+        {"step": 10, "action": "open", "target": "/planetapt/direct agriculture IP", "expected": "Location line on hero"},
+        {"step": 11, "action": "open", "target": "/planetapt/ads", "expected": "Full X mockups"},
+        {"step": 12, "action": "open", "target": "/gauntletapt/dev/business Delivery", "expected": "Prebuild inventory"},
+        {"step": 13, "action": "close", "target": "bare /gauntletapt", "expected": "Contrast with warm email visit"}
+      ]
+    },
+    {
+      "id": "WF-DEMO-008",
+      "title": "Planet location signal (direct + location)",
+      "preconditions": ["cookies cleared"],
+      "starting_url": "https://johnnycchung.com/planetapt/direct",
+      "test": "tests/test_demo_nav.py::test_wf_demo_008_planet_location_signal_direct",
+      "steps": [
+        {"step": 1, "action": "navigate", "target": "/planetapt/direct", "expected": "Planet direct gallery"},
+        {"step": 2, "action": "click", "target": "Ag enterprise — Midwest region (ip=19.7.0.1)", "expected": "/planetapt?ip=19.7.0.1"},
+        {"step": 3, "action": "verify", "target": "hero location_line", "expected": "Region-scale claim; not street address"},
+        {"step": 4, "action": "click", "target": ".aptchip", "expected": "/planetapt/dev?ip=19.7.0.1&as=anon"},
+        {"step": 5, "action": "verify", "target": "Location stage", "expected": "Stage fired; mode ≠ none when region resolves"},
+        {"step": 6, "action": "compare", "target": "/planetapt/dev?ip=10.0.0.1", "expected": "Location tier 0 / no claim"},
+        {"step": 7, "action": "optional", "target": "x-location-crop-belts v01 ad", "expected": "Location + ad message-match"}
+      ]
+    },
+    {
+      "id": "WF-DEMO-009",
+      "title": "Say / allude / hold verification",
+      "preconditions": ["cookies cleared for Gauntlet"],
+      "starting_url": "https://johnnycchung.com/gauntletapt?utm_source=hubspot&utm_medium=email&utm_campaign=cohort-april&e={liam_token}",
+      "test": "tests/test_demo_nav.py::test_wf_demo_009_hold_never_on_replica_blocked_on_dev",
+      "steps": [
+        {"step": 1, "action": "navigate", "target": "Liam email landing URL", "expected": "Replica loads"},
+        {"step": 2, "action": "search", "target": "replica body", "expected": "No You bailed at the blocked say"},
+        {"step": 3, "action": "search", "target": "replica body", "expected": "No income band hold facts"},
+        {"step": 4, "action": "search", "target": "replica body", "expected": "Finish what you started allude may appear"},
+        {"step": 5, "action": "click", "target": ".aptchip → /dev", "expected": "Blocked variant in copy diff on console"},
+        {"step": 6, "action": "verify", "target": "#ch-audit panels", "expected": "Hold facts marked hold policy"},
+        {"step": 7, "action": "repeat", "target": "Maya logged-in /gauntletapt", "expected": "Welcome back Maya; Cedar Health not recited"},
+        {"step": 8, "action": "verify", "target": "/dev for Maya", "expected": "Blocked de-anonymized variant console-only"}
+      ]
+    },
+    {
+      "id": "WF-DEMO-010",
+      "title": "Image prebuild vs live (Delivery section)",
+      "preconditions": ["Production deploy with warmed cache"],
+      "starting_url": "https://johnnycchung.com/gauntletapt/dev/business?utm_source=x&utm_medium=paid&utm_campaign=x-keyword-ai-hiring&utm_content=v09&as=anon",
+      "test": "tests/test_demo_nav.py::test_wf_demo_010_prebuild_delivery_inventory",
+      "steps": [
+        {"step": 1, "action": "navigate", "target": "marketer console v09 URL", "expected": "Marketer console loads"},
+        {"step": 2, "action": "scroll", "target": "Delivery section", "expected": "Manifest states from gauntlet_prebuild.yaml"},
+        {"step": 3, "action": "locate", "target": "ad v09 · anon row", "expected": "pre-built or documented fallback"},
+        {"step": 4, "action": "verify", "target": "Delivery copy", "expected": "warm_hero_cache script reference"},
+        {"step": 5, "action": "navigate", "target": "/gauntletapt/dev/image-decisions", "expected": "Image decisions guide"},
+        {"step": 6, "action": "scroll", "target": "Part 6 pre-cached vs live", "expected": "Inventory counts match Delivery"},
+        {"step": 7, "action": "navigate", "target": "v09 replica landing", "expected": "Hero image loads"},
+        {"step": 8, "action": "optional", "target": "staged drawer prebuild toggle", "expected": "Client-side diff only"},
+        {"step": 9, "action": "compare", "target": "/dev/business?as=anon direct", "expected": "Direct · anon row in Delivery"}
+      ]
+    }
+  ]
+}

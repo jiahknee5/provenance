@@ -306,10 +306,11 @@ def test_dev_business_renders_story_sidebar_and_legend():
     assert "This visit, in plain English" in t
     for label in ("How they arrived", "What the network says", "Who they are", "What the page did"):
         assert label in t
-    # sidebar navigation with anchors into all seven sections
-    for anchor in ("b-arrival", "b-audience", "b-objections", "b-copy",
-                   "b-visual", "b-lead", "b-policy"):
+    # console sidebar navigation with anchors into all eight sections
+    for anchor in ("b-overview", "b-workflow", "b-data", "b-decisions",
+                   "b-copy", "img-hero", "b-guardrails", "b-delivery"):
         assert f'id="{anchor}"' in t and f'href="#{anchor}"' in t, f"missing anchor: {anchor}"
+    assert 'id="img-og"' in t and 'href="#img-og"' in t
     # the legend uses the business vocabulary (steer, not allude)
     assert "Three words used everywhere below" in t and ">steer<" in t
     p = c.get("/gauntletapt/dev/business?as=anon").text
@@ -534,8 +535,8 @@ def test_dev_business_routes_return_200():
 def test_dev_business_uses_decisioning_sections_not_engineering_jargon():
     t = _page_text(c.get(f"/gauntletapt/dev/business{KEYWORD_QS}&as=anon"))
     for want in ("Arrival & attribution", "Audience read", "Objection stack",
-                 "Copy decisions", "Visual decision", "Steering vs saying",
-                 "Technical view →"):
+                 "Copy decisions", "Hero background", "Open Graph / social preview",
+                 "Steering vs saying", "Technical view →"):
         assert want in t, f"missing decisioning section: {want}"
     for gone in ("For this visitor, we", "Recommended action for your team",
                  "Impact at scale", "Visitor journey", "Decision summary",
@@ -589,6 +590,149 @@ def test_portal_dev_business_links_stay_under_prefix():
 
 
 # --------------------------------------------------------------------------- #
+# 8b · Marketer console (/dev/business rebuild)
+# --------------------------------------------------------------------------- #
+def test_console_sidebar_sections_render_on_both_mounts():
+    for path in ("/dev/business", "/gauntletapt/dev/business"):
+        t = c.get(f"{path}?as=anon").text
+        for section in ("Overview", "Workflow", "Data in", "Decisions",
+                        "Copy", "Images", "Guardrails", "Delivery"):
+            assert f"</span>{section}</a>" in t, f"{path} missing console nav: {section}"
+
+
+def test_console_workflow_diagram_shows_branches_with_one_taken():
+    t = c.get(f"/dev/business{KEYWORD_QS}&as=anon").text
+    assert "the whole request as a decision tree" in t
+    # branch pills render, exactly the taken ones highlighted
+    assert t.count('class="b on"') >= 6  # most stages take one branch
+    assert 'class="b"' in t              # untaken branches stay visible
+    # skipped stages stay on screen, marked skipped (anon → no CRM persona)
+    assert "skipped — no CRM record" in t
+    # the taken path includes the keyword-ad branch
+    assert "catalogued variant" in t
+    # multi-surface branch after compose
+    assert "Image surfaces" in t
+    assert "Hero background" in t
+    assert "Open Graph" in t
+
+
+def test_console_images_card_shows_intent_and_load_policy():
+    t = _page_text(c.get(f"/gauntletapt/dev/business{KEYWORD_QS}&as=anon"))
+    assert "Intent selection — rule fired" in t
+    assert "message match" in t          # primary intent pill for the keyword ad
+    assert "Prompt assembly" in t and "Must avoid" in t
+    assert "Two-tier cache" in t
+    # the load-policy control: status badge + prebuild toggle staging a manifest diff
+    assert "load-badge" in t
+    assert 'data-stage="prebuild"' in t
+    assert 'data-surface="hero"' in t
+    assert 'data-surface="og"' in t
+    assert "pre-build this state before deploy" in t
+
+
+def test_console_renders_multiple_image_surface_cards():
+    t = _page_text(c.get(f"/gauntletapt/dev/business{KEYWORD_QS}&as=anon"))
+    assert 'id="img-hero"' in t
+    assert 'id="img-og"' in t
+    assert "Hero background" in t
+    assert "Open Graph / social preview" in t
+    assert "1200×630" in t or "1200x630" in t
+    assert t.count('class="im-surface-tag"') >= 2
+    assert 'data-surface="hero"' in t and 'data-surface="og"' in t
+
+
+def test_console_image_surfaces_have_distinct_provenance():
+    from pipeline.personalization import gauntlet_dev_business as GDB
+
+    params = {
+        "utm_source": "x", "utm_medium": "paid",
+        "utm_campaign": "x-keyword-ai-hiring", "utm_content": "v09",
+    }
+    page = GS.build_page(_Req(params))
+    biz = GDB.build_business_dev_view(page)
+    cards = biz["console"]["image_cards"]
+    assert len(cards) >= 2
+    ids = [c["id"] for c in cards]
+    assert "hero" in ids and "og" in ids
+    hero = next(c for c in cards if c["id"] == "hero")
+    og = next(c for c in cards if c["id"] == "og")
+    assert hero["load"]["surface_id"] == "hero"
+    assert og["load"]["surface_id"] == "og"
+    assert hero["intent"]["primary_id"] == og["intent"]["primary_id"]
+    assert hero["prompt"]["composition"] != og["prompt"]["composition"]
+    assert hero["load"]["surface_id"] != og["load"]["surface_id"] or hero["load"]["status"] != og["load"]["status"]
+    assert "social preview" in og["decision"].lower()
+    assert "hero background" in hero["decision"].lower()
+    assert "1200" in " ".join(og["prompt"]["must_include"]) or "1200" in og["prompt"]["composition"]
+
+
+def test_console_guardrails_section_lists_config_rules():
+    t = _page_text(c.get("/dev/business?as=anon"))
+    from pipeline.personalization import image_intents as II
+    config = II.load_image_config("gauntlet")
+    for rule in (config.get("prompt_defaults") or {})["must_avoid"]:
+        assert rule in t, f"config guardrail missing from console: {rule}"
+    for gate in (config.get("guardrails") or {})["tier_gates"]:
+        assert gate.replace("_", " ") in t, f"tier gate missing: {gate}"
+    assert "rules/gauntlet_image.yaml" in t
+    assert "Steering vs saying" in t
+
+
+def test_console_staged_changes_container_exists():
+    for path in ("/dev/business", "/gauntletapt/dev/business"):
+        t = c.get(f"{path}?as=anon").text
+        assert 'id="staged-changes"' in t, path
+        assert "Staged changes" in t
+        assert "nothing is saved server-side" in t
+        assert "Copy patch" in t
+
+
+def test_prebuild_manifest_loads_and_warm_script_uses_it():
+    from pipeline.personalization import prebuild as PB
+    import scripts.warm_hero_cache as W
+
+    manifest = PB.load_prebuild_manifest()
+    assert manifest["tenant"] == "gauntlet"
+    assert "surfaces" in manifest
+    assert set(manifest["surfaces"]) >= {"hero", "og"}
+    rows = PB.manifest_states()
+    assert len(rows) == 30  # 12 ad variants × 2 identities + direct/search/email × 2
+    assert all(set(r) >= {"id", "label", "params", "email", "prebuild", "surface_id"} for r in rows)
+    all_rows = PB.manifest_all_states()
+    assert len(all_rows) == 60  # 30 states × 2 surfaces
+    assert {r["surface_id"] for r in all_rows} == {"hero", "og"}
+    # default content: everything prebuilt, matching the historical warm list
+    states = PB.prebuild_states()
+    assert len(states) == 60
+    labels = [s[0] for s in states]
+    assert "ad v09 · anon" in labels and "email · known" in labels
+    assert "ad v09 · anon · og" in labels
+    ad9 = next(s for s in states if s[0] == "ad v09 · anon")
+    assert ad9[1]["utm_campaign"] == "x-keyword-ai-hiring" and ad9[2] is None and ad9[3] == "hero"
+    og9 = next(s for s in states if s[0] == "ad v09 · anon · og")
+    assert og9[3] == "og"
+    # the warm script's gauntlet state list IS the manifest loader (no drift)
+    assert W._TENANTS["gauntlet"][0] is PB.prebuild_states
+    # dry-run lists both surfaces
+    import io
+    import contextlib
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        rc = W.main(["--dry-run"])
+    assert rc == 0
+    out = buf.getvalue()
+    assert "surface=hero" in out and "surface=og" in out
+    assert "demo states to warm: 60" in out
+
+
+def test_console_delivery_inventory_reads_manifest_states():
+    t = _page_text(c.get("/dev/business?as=anon"))
+    assert "rules/gauntlet_prebuild.yaml" in t
+    assert "ad v09 · anon" in t and "email · known" in t
+    assert "railway run python -m scripts.warm_hero_cache" in t
+
+
+# --------------------------------------------------------------------------- #
 # 9 · Image decisions guide page
 # --------------------------------------------------------------------------- #
 INTENT_NAMES = (
@@ -619,6 +763,27 @@ def test_image_decisions_contains_all_intents_and_why_sections():
     assert "Provenance" in t
     assert "drives_action" in t
     assert "Part 1" in t and "Part 5" in t
+
+
+def test_image_decisions_precached_vs_live_graph_on_both_mounts():
+    for path in ("/dev/image-decisions", "/gauntletapt/dev/image-decisions"):
+        t = _page_text(c.get(path))
+        assert "Part 6" in t, path
+        assert "Pre-cached vs live" in t, path
+        for marker in ("pre-cached", "live path", "gradient", "gallery", "pending",
+                       "base_only", "base+delta", "Disk cache?", "API key?"):
+            assert marker in t, f"{path} missing marker: {marker}"
+        assert "warm_hero_cache" in t, path  # operational rule documented
+
+
+def test_image_decisions_inventory_lists_warmed_states_with_status():
+    t = _page_text(c.get("/gauntletapt/dev/image-decisions"))
+    assert len(GS.AD_VARIANTS) == 12
+    for v in GS.AD_VARIANTS:
+        assert f"ad {v['variant_id']} · anon" in t, v["variant_id"]
+        assert f"ad {v['variant_id']} · known" in t, v["variant_id"]
+    # every inventory row carries a cached/miss status
+    assert ("served inline, instant" in t) or ("would generate live" in t)
 
 
 def test_image_decisions_nav_links_from_dev():

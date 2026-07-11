@@ -1,12 +1,21 @@
 """Tests for /apt/demo visitor tour sitemap and demo_scenarios.yaml."""
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 from starlette.testclient import TestClient
 
 from app.main import app
+from pipeline.personalization import cohort as CO
 from pipeline.personalization import demo_nav as NAV
 
 c = TestClient(app)
+
+WORKFLOWS_PATH = Path(__file__).resolve().parents[1] / "docs" / "workflows.json"
+V09_QS = (
+    "?utm_source=x&utm_medium=paid&utm_campaign=x-keyword-ai-hiring&utm_content=v09"
+)
 
 
 def test_demo_scenarios_yaml_loads():
@@ -180,3 +189,96 @@ def test_wf_demo_007_sales_demo_urls_all_return_200():
     ]
     for path in paths:
         assert c.get(path).status_code == 200, path
+
+
+def test_workflows_json_exports_wf_demo_001_through_010():
+    data = json.loads(WORKFLOWS_PATH.read_text(encoding="utf-8"))
+    ids = [w["id"] for w in data["workflows"]]
+    for n in range(1, 11):
+        want = f"WF-DEMO-{n:03d}"
+        assert want in ids, want
+    by_id = {w["id"]: w for w in data["workflows"]}
+    assert by_id["WF-DEMO-008"]["test"].endswith("test_wf_demo_008_planet_location_signal_direct")
+    assert by_id["WF-DEMO-009"]["test"].endswith("test_wf_demo_009_hold_never_on_replica_blocked_on_dev")
+    assert by_id["WF-DEMO-010"]["test"].endswith("test_wf_demo_010_prebuild_delivery_inventory")
+
+
+def test_wf_demo_008_planet_location_signal_direct():
+    direct = c.get("/planetapt/direct")
+    assert direct.status_code == 200
+    assert "ip=19.7.0.1" in direct.text
+    assert "Midwest" in direct.text or "Ag enterprise" in direct.text
+
+    landing = c.get("/planetapt?ip=19.7.0.1")
+    assert landing.status_code == 200
+    assert "imaged" in landing.text.lower()
+    assert "Dearborn" not in landing.text  # city precision held
+
+    dev = c.get("/planetapt/dev?ip=19.7.0.1&as=anon")
+    assert dev.status_code == 200
+    assert "Location signal" in dev.text
+
+    tier0 = c.get("/planetapt/dev?ip=10.0.0.1&as=anon")
+    assert tier0.status_code == 200
+    assert "tier 0" in tier0.text
+
+
+def test_wf_demo_009_hold_never_on_replica_blocked_on_dev():
+    tok = CO.magic_token(CO.BY_ID["liam"])
+    landing = c.get(
+        "/gauntletapt?utm_source=hubspot&utm_medium=email&utm_campaign=cohort-april&e=" + tok
+    )
+    assert landing.status_code == 200
+    t = landing.text
+    assert "You bailed at the" not in t
+    assert "Welcome back, Liam" in t
+    assert "Pinecrest" not in t
+
+    dev = c.get(
+        "/gauntletapt/dev?utm_source=hubspot&utm_medium=email&utm_campaign=cohort-april&e="
+        + tok
+    ).text
+    assert "Blocked — the say variant the policy holds" in dev
+    assert "You bailed at the" in dev
+
+    c.post("/gauntletapt/login", data={"email": "maya.chen@gauntletai.com", "next": "/gauntletapt"})
+    maya_site = c.get("/gauntletapt").text
+    maya_dev = c.get("/gauntletapt/dev?as=known").text
+    c.get("/gauntletapt/logout")
+    assert "Welcome back, Maya" in maya_site
+    assert "Cedar Health" not in maya_site
+    assert "de-anonymized" in maya_dev or "Blocked" in maya_dev
+
+
+def test_wf_demo_010_prebuild_delivery_inventory():
+    t = c.get(f"/gauntletapt/dev/business{V09_QS}&as=anon").text
+    assert t.count('id="b-delivery"') == 1
+    assert "rules/gauntlet_prebuild.yaml" in t
+    assert "ad v09 · anon" in t
+    assert "railway run python -m scripts.warm_hero_cache" in t
+    assert 'data-stage="prebuild"' in t
+
+    guide = c.get("/gauntletapt/dev/image-decisions")
+    assert guide.status_code == 200
+    assert "pre-cached" in guide.text.lower() or "Pre-cached" in guide.text
+
+    direct_biz = c.get("/gauntletapt/dev/business?as=anon").text
+    assert "direct · anon" in direct_biz.lower() or "Direct · anon" in direct_biz
+
+
+def test_marketer_console_channel_strip_and_prompt_catalog():
+    t = c.get(f"/gauntletapt/dev/business{V09_QS}&as=anon").text
+    assert 'href="/apt/demo"' in t
+    assert "← Demo sitemap" in t
+    assert "visit context" in t
+    assert "Prompt reference" in t
+    assert "rules/design_prompts.yaml" in t
+    assert "gauntlet.hero.message_match.ad" in t
+    assert 'class="side-cap">Copy</div>' in t
+    assert 'class="side-cap">Images</div>' in t
+
+
+def test_planet_ads_links_demo_sitemap():
+    t = c.get("/planetapt/ads").text
+    assert 'href="/apt/demo"' in t
+    assert "← Demo sitemap" in t
