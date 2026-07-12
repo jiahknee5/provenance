@@ -97,6 +97,7 @@ _TENANT_META: dict[str, dict[str, str]] = {
 # The shell + dropdown enumerate tenants from config — adding a tenant here (plus its
 # MOUNTS branch below) is the whole registration; no template or route special-casing.
 _TENANTS: tuple[str, ...] = tuple(_TENANT_META)
+TENANTS = _TENANTS  # public alias — route modules validate ?site= against config
 
 _IDENTITY_AS: dict[str, str] = {
     "anon": "anon",
@@ -301,36 +302,39 @@ def build_sitemap_view(request: Request) -> dict[str, Any]:
             "logo_bg": logo_bg, "logo_ch": logo_ch,
             "href": f"{_HUB_PATH}?site={t}", "active": (not is_new and t == site),
         })
+    shell = console_shell_ctx(nav_site, "channels",
+                              active_sub=None if is_new else "start")
+    if is_new:
+        # The onboarding state shows itself, not a tenant, in the switcher summary.
+        shell["active"] = {"logo_bg": "#2E6FF5", "logo_ch": "+",
+                           "name": "New website", "domain": "your-domain.com"}
+        shell["tenants"] = [dict(t, active=False) for t in shell["tenants"]]
     return {
+        **shell,
         "hub_path": _HUB_PATH,
         "ops_hub_path": _OPS_HUB_PATH,
-        "active": active,
+        "site_view": active,
+        "page_name": active["name"],
+        "page_domain": active.get("domain", ""),
         "site": site,
         "is_new": is_new,
-        "tenants": tenants,
-        "add_new_href": f"{_HUB_PATH}?site=new",
         "stats": {
             "tenants": len(all_tenants),
             "channels": len(_CHANNELS),
             "scenarios": len(data["scenarios"]),
-        },
-        "nav": {
-            "channels": f"{_HUB_PATH}?site={nav_site}",
-            "consoles": f"{_OPS_HUB_PATH}?site={nav_site}",
-            "observatory": "/observatory",
-            "costs": "/costs",
-            "replica": active["replica_href"],
         },
         "prompt_reference_count": len(DP.list_entries()),
     }
 
 
 def console_shell_ctx(active_site: str, active_nav: str, *,
-                      switch_hrefs: dict[str, str] | None = None) -> dict[str, Any]:
+                      switch_hrefs: dict[str, str] | None = None,
+                      active_sub: str | None = None) -> dict[str, Any]:
     """Sidebar/shell context for any page adopting the apt console shell.
 
     Returns the fields _apt_sidebar.html reads: brand, active (current website),
-    tenants (dropdown options), add_new_href, nav, active_nav.
+    tenants (dropdown options), add_new_href, nav (flat — topbar buttons),
+    nav_tree (the 3-level marketer IA), active_group/active_sub.
     """
     all_t = _TENANTS
     meta = _TENANT_META[active_site]
@@ -346,9 +350,54 @@ def console_shell_ctx(active_site: str, active_nav: str, *,
             "id": t, "name": tm["name"], "logo_bg": tbg, "logo_ch": tch,
             "href": href, "active": t == active_site,
         })
+    # Level 3 under Campaigns → Channels: the tenant's four acquisition channels,
+    # named the way a marketer names them (platform hint where one exists).
+    _mk_label = {"direct": "Direct traffic", "search": "Organic search",
+                 "ads": "Paid ads · X", "email": "Email · HubSpot"}
+    channel_children = [
+        {"id": c, "label": _mk_label[c],
+         "href": _channel_gallery_href(active_site, c, m)}
+        for c in _CHANNEL_ORDER
+    ]
+    # Level 3 under Personalization → Page sections: the sections this website's
+    # registry actually declares — the nav mirrors the designer, per tenant.
+    from pipeline.personalization import sections as SEC
+    section_children = [
+        {"id": s["id"], "label": s.get("label") or s["id"].title(),
+         "href": f"{m['dev_business']}#sd-{s['id']}"}
+        for s in SEC.list_sections(active_site)
+    ]
+    nav_tree = [
+        {"group": "Campaigns", "key": "channels", "items": [
+            {"id": "start", "icon": "◧", "label": "Overview", "href": f"{_HUB_PATH}?site={active_site}"},
+            {"id": "channel-galleries", "icon": "▤", "label": "Channels",
+             "href": f"{_HUB_PATH}?site={active_site}", "children": channel_children},
+        ]},
+        {"group": "Personalization", "key": "consoles", "items": [
+            {"id": "designer", "icon": "◨", "label": "Page sections",
+             "href": m["dev_business"], "children": section_children},
+            {"id": "engineer", "icon": "⌗", "label": "Decision trace", "href": m["dev"]},
+            {"id": "hub", "icon": "◑", "label": "Preview as visitor", "href": f"{_OPS_HUB_PATH}?site={active_site}"},
+        ]},
+        {"group": "Results", "key": "measure", "items": [
+            {"id": "observatory", "icon": "◔", "label": "Live activity", "href": f"/observatory?site={active_site}"},
+            {"id": "costs", "icon": "$", "label": "Spend", "href": f"/costs?site={active_site}"},
+        ]},
+        {"group": "Your website", "key": "live", "items": [
+            {"id": "replica", "icon": "↗", "label": f"Open {meta['domain']}", "href": m["page"]},
+        ]},
+    ]
+    # Back-compat: pages pass observatory/costs as active_nav.
+    group_of = {"channels": "channels", "consoles": "consoles",
+                "observatory": "measure", "costs": "measure"}
+    active_group = group_of.get(active_nav, active_nav)
+    if active_sub is None and active_nav in ("observatory", "costs"):
+        active_sub = active_nav
     return {
         "brand": "apt",
         "active_nav": active_nav,
+        "active_group": active_group,
+        "active_sub": active_sub,
         "active": active,
         "tenants": tenants,
         "add_new_href": f"{_HUB_PATH}?site=new",
@@ -359,6 +408,7 @@ def console_shell_ctx(active_site: str, active_nav: str, *,
             "costs": "/costs",
             "replica": m["page"],
         },
+        "nav_tree": nav_tree,
     }
 
 
@@ -433,7 +483,7 @@ def build_channel_gallery_view(
         t: _channel_gallery_href(t, channel, _mounts_for(t)) for t in _TENANTS
     }
     return {
-        **console_shell_ctx(tenant, "channels", switch_hrefs=switch_hrefs),
+        **console_shell_ctx(tenant, "channels", switch_hrefs=switch_hrefs, active_sub=channel),
         "hub_path": _HUB_PATH,
         "tenant": tenant,
         "tenant_name": meta["name"],

@@ -65,8 +65,8 @@ def _events(since: int = 0) -> list[dict]:
 def observatory(request: Request):
     from pipeline.personalization import demo_nav as NAV
     site = request.query_params.get("site", "gauntlet")
-    if site not in ("gauntlet", "planet"):
-        site = "gauntlet"
+    if site not in NAV.TENANTS:
+        site = NAV.TENANTS[0]
     shell = NAV.console_shell_ctx(site, "observatory")
     meta = _load("meta.json")
     if not meta:
@@ -123,8 +123,8 @@ def api_costs_page(request: Request, tenant: str = "", since: str = "", until: s
     summary = AC.summarize(tenant=t, since=since or None, until=until or None)
     from pipeline.personalization import demo_nav as NAV
     site = request.query_params.get("site", "gauntlet")
-    if site not in ("gauntlet", "planet"):
-        site = "gauntlet"
+    if site not in NAV.TENANTS:
+        site = NAV.TENANTS[0]
     return templates.TemplateResponse(request, "api_costs.html", {
         **NAV.console_shell_ctx(site, "costs"),
         "rows": rows,

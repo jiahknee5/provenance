@@ -155,7 +155,7 @@ def _render_dev(request: Request, m: dict[str, str]) -> HTMLResponse:
     toggle_anon, toggle_known = _dev_toggles(m["dev"], qs)
     from pipeline.personalization import demo_nav as _NAV
     return templates.TemplateResponse(request, "skyfi_dev.html", {
-        **_NAV.console_shell_ctx("skyfi", "consoles"),
+        **_NAV.console_shell_ctx("skyfi", "consoles", active_sub="engineer"),
         "demo_flow_active": "engineer",
         "page": page, "pmap": SS.process_map(page),
         "as_state": as_state,
@@ -172,7 +172,7 @@ def _render_dev_business(request: Request, m: dict[str, str]) -> HTMLResponse:
     toggle_anon, toggle_known = _dev_toggles(m["dev_business"], qs)
     from pipeline.personalization import demo_nav as _NAV
     return templates.TemplateResponse(request, "skyfi_dev_business.html", {
-        **_NAV.console_shell_ctx("skyfi", "consoles"),
+        **_NAV.console_shell_ctx("skyfi", "consoles", active_sub="designer"),
         "demo_flow_active": "marketer",
         "page": page, "biz": SDB.build_business_dev_view(page),
         "as_state": as_state,

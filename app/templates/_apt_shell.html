@@ -44,6 +44,17 @@
   .nav a:hover{background:var(--line2)}
   .nav a.on{background:var(--brand-t);color:var(--brand-d)}
   .nav a.on .ic{opacity:1}
+  /* nested nav (subsections + sub-sub-sections) */
+  .nav-branch summary{list-style:none;display:flex;align-items:center;cursor:pointer;border-radius:8px}
+  .nav-branch summary::-webkit-details-marker{display:none}
+  .nav-branch summary a{flex:1}
+  .nav-branch summary .tw{padding:0 8px;color:var(--muted);font-size:10px;transition:transform .15s}
+  .nav-branch[open] summary .tw{transform:rotate(180deg)}
+  .nav-branch summary:hover{background:var(--line2)}
+  .nav-kids{display:flex;flex-direction:column;gap:1px;margin:1px 0 3px}
+  .nav-kids a.kid{padding:6px 10px 6px 36px;font-size:12.5px;font-weight:600;color:var(--muted);border-left:2px solid var(--line);border-radius:0 8px 8px 0;margin-left:17px}
+  .nav-kids a.kid:hover{color:var(--ink);background:var(--line2);border-left-color:var(--brand)}
+  .nav-kids a.kid.on{color:var(--brand-d);background:var(--brand-t);border-left-color:var(--brand)}
   .side .foot{margin-top:auto;display:flex;align-items:center;gap:9px;border-top:1px solid var(--line);padding-top:12px}
   .side .foot .av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#2E6FF5);color:#fff;display:grid;place-items:center;font-weight:700;font-size:11px}
   .side .foot .nm{font-size:12px;font-weight:600;line-height:1.2}
