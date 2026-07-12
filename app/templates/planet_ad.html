@@ -19,7 +19,26 @@
     *{box-sizing:border-box;margin:0;padding:0}
     body{min-height:100vh;background:var(--bg);color:var(--ink);font:13px/1.45 var(--ui);padding:24px}
     a{color:inherit;text-decoration:none}
-    .shell{max-width:640px;margin:0 auto}
+    .duo{display:grid;grid-template-columns:minmax(320px,640px) minmax(300px,470px);gap:24px;align-items:start;justify-content:center;max-width:1180px;margin:0 auto}
+    @media(max-width:1020px){.duo{grid-template-columns:1fr;max-width:640px}}
+    .shell{max-width:640px;margin:0}
+    /* --- The thinking panel --- */
+    .think-panel{background:#0a1220;border:1px solid var(--line2);border-radius:14px;padding:14px 14px 12px}
+    .tp-head{font:700 14px var(--sans);color:var(--blu-t);letter-spacing:.02em;margin-bottom:2px}
+    .tp-sub{font:11.5px/1.5 var(--ui);color:var(--dim);margin-bottom:10px}
+    details.tp-beat{border:1px solid var(--line);border-radius:9px;margin-bottom:6px;background:rgba(255,255,255,.02);overflow:hidden}
+    details.tp-beat[open]{border-color:var(--line2)}
+    details.tp-beat summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;padding:8px 10px;font:600 12px var(--ui);color:var(--ink)}
+    details.tp-beat summary::-webkit-details-marker{display:none}
+    details.tp-beat summary:hover{color:var(--blu-t)}
+    .tp-num{flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--blu);color:#04121f;display:inline-flex;align-items:center;justify-content:center;font:700 10px var(--mono)}
+    .tp-body{padding:0 12px 10px}
+    .tp-body p{font:12px/1.6 var(--ui);color:#9fb0c3}
+    .tp-body ul{margin:7px 0 0;padding-left:0;list-style:none}
+    .tp-body li{font:10.5px/1.5 var(--mono);color:var(--dim);border-left:2px solid var(--line2);padding:2px 0 2px 8px;margin-top:4px;word-break:break-word}
+    .tp-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .tp-links a{font:700 11.5px var(--ui);border:1px solid var(--line2);border-radius:7px;padding:7px 12px;color:var(--blu-t)}
+    .tp-links a:hover{border-color:var(--blu);color:#fff}
     .back{font:12px var(--mono);color:var(--dim);margin-bottom:16px;display:inline-block}
     .back:hover{color:var(--blu-t)}
     .ad-manager{
@@ -96,6 +115,7 @@
   </style>
 </head>
 <body>
+<div class="duo">
 <div class="shell">
   <a class="back" href="{{ g.ads }}">← All 12 ads</a>
   <div class="ad-manager">
@@ -171,6 +191,25 @@
   </div>
   <p class="hint">Click the post to open the message-matched landing page. LP previews:
     <a href="{{ g.ads_lp }}">{{ g.ads_lp }}</a></p>
+</div>
+<aside class="think-panel">
+  <div class="tp-head">The thinking</div>
+  <p class="tp-sub">Why this ad exists and what the click must deliver — every quote below reads
+    from the live variant catalog and rules/planet_image.yaml.</p>
+  {% for b in explainer.beats %}
+  <details class="tp-beat" {% if loop.first %}open{% endif %}>
+    <summary><span class="tp-num">{{ loop.index }}</span>{{ b.title }}</summary>
+    <div class="tp-body">
+      <p>{{ b.body }}</p>
+      {% if b.points %}<ul>{% for pt in b.points %}<li>{{ pt }}</li>{% endfor %}</ul>{% endif %}
+    </div>
+  </details>
+  {% endfor %}
+  <div class="tp-links">
+    <a href="{{ landing_url }}">Open the landing page →</a>
+    <a href="{{ explainer.dev_url }}">See it decide →</a>
+  </div>
+</aside>
 </div>
 </body>
 </html>

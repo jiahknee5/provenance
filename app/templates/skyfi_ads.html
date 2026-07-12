@@ -1,0 +1,185 @@
+{#- /skyfi/ads — 6 full-fidelity X.com promoted-post mockups (SkyFi verticals) with the
+    marketer "The thinking" affordance per card. External-styled ad mockup page:
+    space-dark #060b16 base, signal-yellow #fcc219, Hanken Grotesk + DM Mono. -#}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SkyFi X Ads — 6 Vertical Creatives</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#060b16; --panel:#0a1220; --line:#152238; --line2:#1f3355;
+      --yel:#fcc219; --yel-t:#ffd75e; --ink:#eef3f9; --body:#9fb0c3; --dim:#68798e;
+      --sans:'Hanken Grotesk',sans-serif; --ui:'Hanken Grotesk',sans-serif; --mono:'DM Mono',monospace;
+      --x-font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      --x-bg:#000; --x-post-bg:#000; --x-text:#e7e9ea; --x-muted:#71767b;
+      --x-link:#1d9bf0; --x-border:#2f3336; --x-card-bg:#16181c;
+      --x-hover:rgba(231,233,234,.1);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--ink);font:13px/1.45 var(--ui);-webkit-font-smoothing:antialiased;padding:18px 22px 40px}
+    a{color:inherit;text-decoration:none}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}
+    h1{font:700 18px/1 var(--sans);color:#fff}
+    .sub{font:12px var(--ui);color:var(--dim);margin:6px 0 16px}
+    .nav{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap}
+    .nav a{font:600 11px var(--ui);border:1px solid var(--line2);border-radius:5px;padding:4px 10px;color:var(--yel-t);white-space:nowrap}
+    .nav a:hover{border-color:var(--yel);color:#fff}
+    .cat{margin:18px 0 10px;display:flex;align-items:center;gap:10px}
+    .cat .tag{font:700 10px var(--ui);letter-spacing:.06em;text-transform:uppercase;color:#171203;background:var(--yel);border-radius:4px;padding:2px 8px}
+    .cat .n{font:11px var(--mono);color:var(--dim)}
+    .grid{display:grid;gap:20px;grid-template-columns:repeat(auto-fill,minmax(520px,1fr))}
+    @media(max-width:560px){.grid{grid-template-columns:1fr}}
+
+    /* --- ad-manager chrome (outside the X post) --- */
+    .ad-slot{display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel);border-top:3px solid var(--yel)}
+    .ad-manager{padding:8px 12px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--line);font:10px var(--mono);color:var(--dim)}
+    .ad-manager-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
+    .ad-manager-type{font:600 11.5px var(--sans);color:#fff}
+    .ad-manager-seg{font:10px var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--yel-t)}
+    .ad-manager-utms{display:flex;gap:4px;flex-wrap:wrap}
+    .ad-manager-utms span{border:1px solid var(--line2);border-radius:3px;padding:1px 6px;font-size:9px}
+    .ad-slot-foot{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-top:1px solid var(--line);background:rgba(255,255,255,.02);font:10.5px var(--ui);color:var(--dim)}
+    .ad-slot-foot b{color:var(--ink);font-weight:600}
+    .ad-slot-foot a{color:var(--yel-t);font-weight:600}
+    .ad-slot-foot a:hover{color:#fff}
+    /* --- "The thinking" affordance --- */
+    details.think{border-top:1px solid var(--line);background:rgba(255,255,255,.02)}
+    details.think summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;padding:7px 12px;font:700 10.5px var(--ui);color:var(--yel-t)}
+    details.think summary::-webkit-details-marker{display:none}
+    details.think summary:hover{color:#fff}
+    details.think .tk-body{padding:0 12px 10px;font:11px/1.5 var(--ui);color:var(--body)}
+    details.think .tk-body a{display:inline-block;margin-top:5px;font:700 10.5px var(--ui);color:var(--yel-t)}
+    details.think .tk-body a:hover{color:#fff}
+
+    /* --- X.com post (dark timeline) --- */
+    .x-post-link{display:block;background:var(--x-post-bg);transition:background .12s}
+    .x-post-link:hover{background:var(--x-hover)}
+    article.x-post{
+      display:grid;grid-template-columns:52px 1fr;gap:0 12px;
+      padding:12px 16px 8px;font-family:var(--x-font);color:var(--x-text);
+      max-width:598px;width:100%;
+    }
+    .x-avatar-col{padding-top:2px}
+    .x-avatar{
+      width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+      font:700 13px var(--x-font);color:#171203;background:var(--yel);flex-shrink:0;
+    }
+    .x-main{min-width:0}
+    .x-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:2px}
+    .x-names{display:flex;flex-wrap:wrap;align-items:baseline;gap:0;line-height:20px;font-size:15px}
+    .x-display{font-weight:700;color:var(--x-text);margin-right:2px}
+    .x-handle,.x-dot,.x-time{color:var(--x-muted);font-weight:400}
+    .x-handle{margin-left:2px}
+    .x-dot{margin:0 2px}
+    .x-promoted{font:13px/1.3 var(--x-font);color:var(--x-muted);margin:0 0 8px}
+    .x-text{font:15px/20px var(--x-font);color:var(--x-text);white-space:pre-wrap;word-wrap:break-word;margin-bottom:12px}
+    .x-card{
+      display:block;border:1px solid var(--x-border);border-radius:16px;overflow:hidden;
+      margin-bottom:12px;background:var(--x-card-bg);transition:background .12s;
+    }
+    .x-card:hover{background:rgba(22,24,28,.85)}
+    .x-card-img{
+      height:130px;position:relative;overflow:hidden;
+      background:linear-gradient(135deg,#0a1220 0%,#243048 55%,#fcc21966 100%);
+    }
+    .x-card-img::after{
+      content:'';position:absolute;inset:0;
+      background:linear-gradient(90deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.15) 48%,rgba(252,194,25,.25) 100%);
+    }
+    .x-card-img-label{
+      position:absolute;left:12px;bottom:10px;right:12px;z-index:1;
+      font:700 13px/1.25 var(--x-font);color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6);
+    }
+    .x-card-body{padding:10px 12px 12px;border-top:1px solid var(--x-border)}
+    .x-card-domain{font:13px var(--x-font);color:var(--x-muted);margin-bottom:2px}
+    .x-card-title{font:15px/1.3 var(--x-font);color:var(--x-text)}
+    .x-card-desc{font:13px/1.35 var(--x-font);color:var(--x-muted);margin-top:4px}
+    .chip{position:fixed;right:12px;bottom:10px;font:600 10px var(--ui);color:#c2cddb;background:rgba(8,14,26,.92);border:1px solid var(--line2);border-radius:12px;padding:5px 10px}
+    .chip:hover{color:#fff;border-color:var(--yel)}
+  </style>
+</head>
+<body>
+<header class="top">
+  <h1>SkyFi X Ads — 6 Vertical Creatives</h1>
+  <nav class="nav">
+    <a href="{{ demo_hub_path }}">← Demo sitemap</a>
+    <a href="{{ g.page }}">Landing</a>
+    <a href="{{ g.dev }}">/dev</a>
+    <a href="/showcase">Showcase</a>
+  </nav>
+</header>
+<p class="sub">Each card is a full-fidelity X promoted post. Click the link preview to open its
+message-matched landing URL, or open “The thinking” for the marketer rationale.</p>
+
+{% for sec in sections %}
+<div class="cat">
+  <span class="tag">{{ sec.label }}</span>
+  <span class="n">{{ sec.variants|length }} variants</span>
+</div>
+<div class="grid">
+  {% for item in sec.variants %}
+  {% set v = item.variant %}
+  <div class="ad-slot">
+    <div class="ad-manager">
+      <div class="ad-manager-top">
+        <span class="ad-manager-type">Vertical creative</span>
+        <span class="ad-manager-seg">{{ v.segment }}</span>
+      </div>
+      <div class="ad-manager-utms">
+        <span>utm_source=x</span>
+        <span>utm_medium=paid</span>
+        <span>utm_campaign={{ v.utm_campaign }}</span>
+        <span>utm_content={{ v.variant_id }}</span>
+      </div>
+    </div>
+    <a class="x-post-link" href="{{ item.landing_url }}">
+      <article class="x-post" aria-label="Promoted post from {{ v.ad.display }}">
+        <div class="x-avatar-col">
+          <div class="x-avatar">SF</div>
+        </div>
+        <div class="x-main">
+          <div class="x-header">
+            <div class="x-names">
+              <span class="x-display">{{ v.ad.display }}</span>
+              <span class="x-handle">@{{ v.ad.handle }}</span>
+              <span class="x-dot">·</span>
+              <span class="x-time">2h</span>
+            </div>
+          </div>
+          <p class="x-promoted">Promoted</p>
+          <div class="x-text">{{ v.ad.trigger }} {{ v.ad.body }}</div>
+          <div class="x-card">
+            <div class="x-card-img">
+              <div class="x-card-img-label">{{ v.page.h1_pre }}{{ v.page.h1_blue }}</div>
+            </div>
+            <div class="x-card-body">
+              <div class="x-card-domain">skyfi.com</div>
+              <div class="x-card-title">{{ v.page.h1_pre }}{{ v.page.h1_blue }}</div>
+              <div class="x-card-desc">{{ v.ad.cta_label }}</div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </a>
+    <div class="ad-slot-foot">
+      <span>Segment <b>{{ v.segment }}</b> · route {{ v.audience }}</span>
+      <a href="{{ item.single_url }}">Full mockup →</a>
+    </div>
+    <details class="think">
+      <summary>The thinking <span>→</span></summary>
+      <div class="tk-body">
+        {{ item.explainer.condensed }}
+        <a href="{{ item.single_url }}">Full six-beat panel →</a>
+      </div>
+    </details>
+  </div>
+  {% endfor %}
+</div>
+{% endfor %}
+
+<a class="chip" href="{{ g.dev }}">decisions → {{ g.dev }}</a>
+</body>
+</html>

@@ -51,7 +51,9 @@
       min-height:0;
       display:flex;flex-direction:column;
       transition:border-color .12s,box-shadow .12s;
+      position:relative;
     }
+    .card-link{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
     .card:hover{border-color:var(--gold);box-shadow:0 4px 18px rgba(0,0,0,.32)}
     .card.cat-demographic{border-left:3px solid var(--cat-demo)}
     .card.cat-audience{border-left:3px solid var(--cat-aud)}
@@ -135,6 +137,23 @@
     .preview .gen{color:#6d6960;text-decoration:line-through}
     .preview .per{color:var(--gold-t);font-weight:600}
     .preview .arr{display:none}
+    /* --- "The thinking" affordance: summary strip + upward overlay (keeps 100vh grid) --- */
+    details.think{flex:0 0 auto;border-top:1px solid #eff3f4;background:var(--card-bg)}
+    details.think summary{
+      cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;
+      padding:3px 7px;font:700 9px var(--ui);color:var(--cat-demo);
+    }
+    .cat-audience details.think summary{color:var(--cat-aud)}
+    details.think summary::-webkit-details-marker{display:none}
+    details.think summary:hover{color:var(--card-ink)}
+    details.think .tk-body{
+      position:absolute;left:4px;right:4px;bottom:22px;z-index:6;
+      background:#0f1419;color:#e7e9ea;border:1px solid var(--gold);
+      border-radius:6px;padding:7px 8px;box-shadow:0 8px 22px rgba(0,0,0,.5);
+      font:9.5px/1.45 var(--ui);
+    }
+    details.think .tk-body a{display:inline-block;margin-top:4px;font:700 9px var(--ui);color:var(--gold-t)}
+    details.think .tk-body a:hover{color:#fff}
     .chip{
       position:fixed;right:8px;bottom:6px;
       font:600 9px var(--ui);color:#cfcabf;
@@ -163,7 +182,8 @@
     {% for item in sec.variants %}
     {% set v = item.variant %}
     {% set loop_idx = loop.index0 %}
-    <a class="card cat-{{ sec.category }}" href="{{ item.landing_url }}" title="{{ v.x_targeting_type }} — open personalized landing page">
+    <div class="card cat-{{ sec.category }}">
+    <a class="card-link" href="{{ item.landing_url }}" title="{{ v.x_targeting_type }} — open personalized landing page">
       <div class="meta">
         {% if loop.first %}
         <span class="cat-tag">{{ sec.label }}</span>
@@ -195,6 +215,14 @@
         </div>
       </div>
     </a>
+    <details class="think">
+      <summary>The thinking <span>→</span></summary>
+      <div class="tk-body">
+        {{ item.explainer.condensed }}
+        <a href="{{ item.single_url }}">Full six-beat panel →</a>
+      </div>
+    </details>
+    </div>
     {% endfor %}
     {% endfor %}
   </div>

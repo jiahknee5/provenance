@@ -1,4 +1,4 @@
-{#- Single X.com ad mockup — click through to the message-matched landing page. -#}
+{#- Single X.com ad mockup + "The thinking" marketer panel (six beats, config-grounded). -#}
 <!doctype html>
 <html lang="en">
 <head>
@@ -7,11 +7,12 @@
   <title>{{ variant.x_targeting_type }} — Gauntlet X Ad</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    :root{--bg:#0b0a08;--x-bg:#15202b;--x-line:#38444d;--gold:#c9a24b;--gold-t:#d5b269;--ink:#f4f2ed;--muted:#8899a6}
+    :root{--bg:#0b0a08;--panel:#12100c;--line:#26221a;--line2:#37311f;--x-bg:#15202b;--x-line:#38444d;--gold:#c9a24b;--gold-t:#d5b269;--ink:#f4f2ed;--body:#a9a49a;--muted:#8899a6;--dim:#7d786e}
     *{box-sizing:border-box;margin:0;padding:0}
-    body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,sans-serif;padding:24px}
+    body{min-height:100vh;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,sans-serif;padding:24px}
     a{color:inherit;text-decoration:none}
-    .shell{max-width:520px;width:100%}
+    .duo{display:grid;grid-template-columns:minmax(320px,520px) minmax(300px,460px);gap:24px;align-items:start;justify-content:center;max-width:1040px;margin:0 auto}
+    @media(max-width:980px){.duo{grid-template-columns:1fr;max-width:560px}}
     .back{font:12px 'JetBrains Mono',monospace;color:var(--muted);margin-bottom:16px;display:inline-block}
     .back:hover{color:var(--gold-t)}
     .card{background:var(--x-bg);border:1px solid var(--x-line);border-radius:16px;overflow:hidden}
@@ -26,9 +27,27 @@
     .go{display:block;margin:0 16px 16px;text-align:center;font:700 14px Inter;color:#171308;background:var(--gold);border-radius:24px;padding:14px}
     .go:hover{background:var(--gold-t)}
     .hint{text-align:center;font:12px Inter;color:var(--muted);margin-top:14px}
+    /* --- The thinking panel --- */
+    .think-panel{background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:14px 14px 12px}
+    .tp-head{font:700 14px Inter;color:var(--gold-t);letter-spacing:.02em;margin-bottom:2px}
+    .tp-sub{font:11.5px/1.5 Inter;color:var(--dim);margin-bottom:10px}
+    details.tp-beat{border:1px solid var(--line);border-radius:9px;margin-bottom:6px;background:rgba(255,255,255,.02);overflow:hidden}
+    details.tp-beat[open]{border-color:var(--line2)}
+    details.tp-beat summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;padding:8px 10px;font:600 12px Inter;color:var(--ink)}
+    details.tp-beat summary::-webkit-details-marker{display:none}
+    details.tp-beat summary:hover{color:var(--gold-t)}
+    .tp-num{flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--gold);color:#171308;display:inline-flex;align-items:center;justify-content:center;font:700 10px 'JetBrains Mono',monospace}
+    .tp-body{padding:0 12px 10px}
+    .tp-body p{font:12px/1.6 Inter;color:var(--body)}
+    .tp-body ul{margin:7px 0 0;padding-left:0;list-style:none}
+    .tp-body li{font:10.5px/1.5 'JetBrains Mono',monospace;color:var(--dim);border-left:2px solid var(--line2);padding:2px 0 2px 8px;margin-top:4px;word-break:break-word}
+    .tp-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .tp-links a{font:700 11.5px Inter;border:1px solid var(--line2);border-radius:7px;padding:7px 12px;color:var(--gold-t)}
+    .tp-links a:hover{border-color:var(--gold);color:#fff}
   </style>
 </head>
 <body>
+<div class="duo">
 <div class="shell">
   <a class="back" href="{{ g.ad_lp }}">← All 12 ads</a>
   <div class="card">
@@ -47,6 +66,25 @@
     <a class="go" href="{{ landing_url }}">{{ variant.ad.cta_label }}</a>
   </div>
   <p class="hint">Click through to see the message-matched landing page hero.</p>
+</div>
+<aside class="think-panel">
+  <div class="tp-head">The thinking</div>
+  <p class="tp-sub">Why this ad exists and what the click must deliver — every quote below reads
+    from the live variant catalog and rules/gauntlet_image.yaml.</p>
+  {% for b in explainer.beats %}
+  <details class="tp-beat" {% if loop.first %}open{% endif %}>
+    <summary><span class="tp-num">{{ loop.index }}</span>{{ b.title }}</summary>
+    <div class="tp-body">
+      <p>{{ b.body }}</p>
+      {% if b.points %}<ul>{% for pt in b.points %}<li>{{ pt }}</li>{% endfor %}</ul>{% endif %}
+    </div>
+  </details>
+  {% endfor %}
+  <div class="tp-links">
+    <a href="{{ landing_url }}">Open the landing page →</a>
+    <a href="{{ explainer.dev_url }}">See it decide →</a>
+  </div>
+</aside>
 </div>
 </body>
 </html>

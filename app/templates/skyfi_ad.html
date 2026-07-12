@@ -1,0 +1,156 @@
+{#- Single SkyFi X.com promoted-post mockup + "The thinking" marketer panel. -#}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ variant.segment }} — SkyFi X Ad</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#060b16; --panel:#0a1220; --line:#152238; --line2:#1f3355;
+      --yel:#fcc219; --yel-t:#ffd75e; --ink:#eef3f9; --body:#9fb0c3; --dim:#68798e;
+      --sans:'Hanken Grotesk',sans-serif; --ui:'Hanken Grotesk',sans-serif; --mono:'DM Mono',monospace;
+      --x-font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      --x-text:#e7e9ea; --x-muted:#71767b; --x-border:#2f3336; --x-card-bg:#16181c;
+      --x-hover:rgba(231,233,234,.1);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{min-height:100vh;background:var(--bg);color:var(--ink);font:13px/1.45 var(--ui);padding:24px}
+    a{color:inherit;text-decoration:none}
+    .duo{display:grid;grid-template-columns:minmax(320px,600px) minmax(300px,470px);gap:24px;align-items:start;justify-content:center;max-width:1140px;margin:0 auto}
+    @media(max-width:1020px){.duo{grid-template-columns:1fr;max-width:620px}}
+    .back{font:12px var(--mono);color:var(--dim);margin-bottom:16px;display:inline-block}
+    .back:hover{color:var(--yel-t)}
+    .ad-manager{
+      padding:10px 14px;margin-bottom:12px;border:1px solid var(--line);border-radius:10px;
+      background:rgba(255,255,255,.03);font:10px var(--mono);color:var(--dim);
+    }
+    .ad-manager b{color:#fff;font:600 12px var(--sans)}
+    .ad-manager-utms{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+    .ad-manager-utms span{border:1px solid var(--line2);border-radius:3px;padding:1px 6px;font-size:9px}
+    .x-shell{border:1px solid var(--x-border);border-radius:16px;overflow:hidden;background:#000}
+    .x-post-link{display:block;transition:background .12s}
+    .x-post-link:hover{background:var(--x-hover)}
+    article.x-post{
+      display:grid;grid-template-columns:52px 1fr;gap:0 12px;
+      padding:16px 20px 12px;font-family:var(--x-font);color:var(--x-text);
+    }
+    .x-avatar{
+      width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+      font:700 13px var(--x-font);color:#171203;background:var(--yel);
+    }
+    .x-main{min-width:0}
+    .x-names{display:flex;flex-wrap:wrap;align-items:baseline;line-height:20px;font-size:15px}
+    .x-display{font-weight:700;color:var(--x-text);margin-right:2px}
+    .x-handle,.x-dot,.x-time{color:var(--x-muted);font-weight:400}
+    .x-handle{margin-left:2px}
+    .x-dot{margin:0 2px}
+    .x-promoted{font:13px/1.3 var(--x-font);color:var(--x-muted);margin:0 0 10px}
+    .x-text{font:15px/20px var(--x-font);color:var(--x-text);white-space:pre-wrap;word-wrap:break-word;margin-bottom:14px}
+    .x-card{
+      display:block;border:1px solid var(--x-border);border-radius:16px;overflow:hidden;
+      margin-bottom:6px;background:var(--x-card-bg);
+    }
+    .x-card-img{
+      height:160px;position:relative;overflow:hidden;
+      background:linear-gradient(135deg,#0a1220 0%,#243048 55%,#fcc21966 100%);
+    }
+    .x-card-img::after{
+      content:'';position:absolute;inset:0;
+      background:linear-gradient(90deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.15) 48%,rgba(252,194,25,.25) 100%);
+    }
+    .x-card-img-label{
+      position:absolute;left:14px;bottom:12px;right:14px;z-index:1;
+      font:700 15px/1.25 var(--x-font);color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6);
+    }
+    .x-card-body{padding:12px 14px 14px;border-top:1px solid var(--x-border)}
+    .x-card-domain{font:13px var(--x-font);color:var(--x-muted);margin-bottom:2px}
+    .x-card-title{font:15px/1.35 var(--x-font);color:var(--x-text)}
+    .x-card-desc{font:13px/1.4 var(--x-font);color:var(--x-muted);margin-top:6px}
+    .hint{text-align:center;font:12px var(--ui);color:var(--dim);margin-top:16px}
+    .hint a{color:var(--yel-t)}
+    /* --- The thinking panel --- */
+    .think-panel{background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:14px 14px 12px}
+    .tp-head{font:700 14px var(--sans);color:var(--yel-t);letter-spacing:.02em;margin-bottom:2px}
+    .tp-sub{font:11.5px/1.5 var(--ui);color:var(--dim);margin-bottom:10px}
+    details.tp-beat{border:1px solid var(--line);border-radius:9px;margin-bottom:6px;background:rgba(255,255,255,.02);overflow:hidden}
+    details.tp-beat[open]{border-color:var(--line2)}
+    details.tp-beat summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;padding:8px 10px;font:600 12px var(--ui);color:var(--ink)}
+    details.tp-beat summary::-webkit-details-marker{display:none}
+    details.tp-beat summary:hover{color:var(--yel-t)}
+    .tp-num{flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--yel);color:#171203;display:inline-flex;align-items:center;justify-content:center;font:700 10px var(--mono)}
+    .tp-body{padding:0 12px 10px}
+    .tp-body p{font:12px/1.6 var(--ui);color:var(--body)}
+    .tp-body ul{margin:7px 0 0;padding-left:0;list-style:none}
+    .tp-body li{font:10.5px/1.5 var(--mono);color:var(--dim);border-left:2px solid var(--line2);padding:2px 0 2px 8px;margin-top:4px;word-break:break-word}
+    .tp-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .tp-links a{font:700 11.5px var(--ui);border:1px solid var(--line2);border-radius:7px;padding:7px 12px;color:var(--yel-t)}
+    .tp-links a:hover{border-color:var(--yel);color:#fff}
+  </style>
+</head>
+<body>
+<div class="duo">
+<div class="shell">
+  <a class="back" href="{{ g.ads }}">← All 6 ads</a>
+  <div class="ad-manager">
+    <b>Vertical creative</b> · {{ variant.segment }} · route {{ variant.audience }}
+    <div class="ad-manager-utms">
+      <span>utm_source=x</span>
+      <span>utm_medium=paid</span>
+      <span>utm_campaign={{ variant.utm_campaign }}</span>
+      <span>utm_content={{ variant.variant_id }}</span>
+    </div>
+  </div>
+  <div class="x-shell">
+    <a class="x-post-link" href="{{ landing_url }}">
+      <article class="x-post" aria-label="Promoted post from {{ variant.ad.display }}">
+        <div class="x-avatar-col">
+          <div class="x-avatar">SF</div>
+        </div>
+        <div class="x-main">
+          <div class="x-names">
+            <span class="x-display">{{ variant.ad.display }}</span>
+            <span class="x-handle">@{{ variant.ad.handle }}</span>
+            <span class="x-dot">·</span>
+            <span class="x-time">2h</span>
+          </div>
+          <p class="x-promoted">Promoted</p>
+          <div class="x-text">{{ variant.ad.trigger }} {{ variant.ad.body }}</div>
+          <div class="x-card">
+            <div class="x-card-img">
+              <div class="x-card-img-label">{{ variant.page.h1_pre }}{{ variant.page.h1_blue }}</div>
+            </div>
+            <div class="x-card-body">
+              <div class="x-card-domain">skyfi.com</div>
+              <div class="x-card-title">{{ variant.page.h1_pre }}{{ variant.page.h1_blue }}</div>
+              <div class="x-card-desc">{{ variant.ad.cta_label }}</div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </a>
+  </div>
+  <p class="hint">Click the post to open the message-matched landing page.</p>
+</div>
+<aside class="think-panel">
+  <div class="tp-head">The thinking</div>
+  <p class="tp-sub">Why this ad exists and what the click must deliver — every quote below reads
+    from the live variant catalog and rules/skyfi_image.yaml.</p>
+  {% for b in explainer.beats %}
+  <details class="tp-beat" {% if loop.first %}open{% endif %}>
+    <summary><span class="tp-num">{{ loop.index }}</span>{{ b.title }}</summary>
+    <div class="tp-body">
+      <p>{{ b.body }}</p>
+      {% if b.points %}<ul>{% for pt in b.points %}<li>{{ pt }}</li>{% endfor %}</ul>{% endif %}
+    </div>
+  </details>
+  {% endfor %}
+  <div class="tp-links">
+    <a href="{{ landing_url }}">Open the landing page →</a>
+    <a href="{{ explainer.dev_url }}">See it decide →</a>
+  </div>
+</aside>
+</div>
+</body>
+</html>

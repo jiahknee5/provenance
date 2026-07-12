@@ -51,6 +51,14 @@
     .ad-slot-foot b{color:var(--ink);font-weight:600}
     .ad-slot-foot a{color:var(--blu-t);font-weight:600}
     .ad-slot-foot a:hover{color:#fff}
+    /* --- "The thinking" affordance --- */
+    details.think{border-top:1px solid var(--line);background:rgba(255,255,255,.02)}
+    details.think summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;padding:7px 12px;font:700 10.5px var(--ui);color:var(--blu-t)}
+    details.think summary::-webkit-details-marker{display:none}
+    details.think summary:hover{color:#fff}
+    details.think .tk-body{padding:0 12px 10px;font:11px/1.5 var(--ui);color:#9fb0c3}
+    details.think .tk-body a{display:inline-block;margin-top:5px;font:700 10.5px var(--ui);color:var(--blu-t)}
+    details.think .tk-body a:hover{color:#fff}
 
     /* --- X.com post (dark timeline) --- */
     .x-post-link{display:block;background:var(--x-post-bg);transition:background .12s}
@@ -231,6 +239,13 @@ preview to open its message-matched landing URL. LP previews live on
       <span>Best for <b>{{ v.audience_fit_label }}</b></span>
       <a href="{{ item.single_url }}">Full mockup →</a>
     </div>
+    <details class="think">
+      <summary>The thinking <span>→</span></summary>
+      <div class="tk-body">
+        {{ item.explainer.condensed }}
+        <a href="{{ item.single_url }}">Full six-beat panel →</a>
+      </div>
+    </details>
   </div>
   {% endfor %}
 </div>

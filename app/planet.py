@@ -31,6 +31,7 @@ from fastapi import Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 
 from app.server import app, templates
+from pipeline.personalization import ad_explainers as AE
 from pipeline.personalization import image_gen as IG
 from pipeline.personalization import planet_dev_business as PDB
 from pipeline.personalization import planet_image_decisions as PID
@@ -188,6 +189,8 @@ def _render_ad(request: Request, m: dict[str, str]) -> HTMLResponse:
     return templates.TemplateResponse(request, "planet_ad.html", {
         "variant": variant,
         "landing_url": PS.variant_landing_url(variant, m["page"]),
+        "explainer": AE.explainer_for("planet", variant, page_path=m["page"],
+                                      dev_path=m["dev"]),
         "g": m,
     })
 
@@ -200,6 +203,8 @@ def _render_ads(request: Request, m: dict[str, str]) -> HTMLResponse:
         return templates.TemplateResponse(request, "planet_ad.html", {
             "variant": variant,
             "landing_url": PS.variant_landing_url(variant, m["page"]),
+            "explainer": AE.explainer_for("planet", variant, page_path=m["page"],
+                                          dev_path=m["dev"]),
             "g": m,
         })
     sections = []
@@ -210,6 +215,8 @@ def _render_ads(request: Request, m: dict[str, str]) -> HTMLResponse:
                 "variant": v,
                 "landing_url": PS.variant_landing_url(v, m["page"]),
                 "single_url": f"{m['ad']}?v={v['variant_id']}",
+                "explainer": AE.explainer_for("planet", v, page_path=m["page"],
+                                              dev_path=m["dev"]),
             })
         sections.append({"label": sec["label"], "category": sec["category"], "variants": variants})
     return templates.TemplateResponse(request, "planet_ads.html", {
@@ -237,6 +244,9 @@ def _render_ads_lp(request: Request, m: dict[str, str]) -> HTMLResponse:
                 "order": order,
                 "emphasis": vp.get("compare_emphasis") or "—",
                 "cta_primary": vp["cta_primary"],
+                "single_url": f"{m['ad']}?v={v['variant_id']}",
+                "explainer": AE.explainer_for("planet", v, page_path=m["page"],
+                                              dev_path=m["dev"]),
             })
         sections.append({"label": sec["label"], "category": sec["category"], "variants": variants})
     return templates.TemplateResponse(request, "planet_ad_lp.html", {

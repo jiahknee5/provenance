@@ -27,6 +27,7 @@ from fastapi import Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 
 from app.server import app, templates
+from pipeline.personalization import ad_explainers as AE
 from pipeline.personalization import gauntlet_dev_business as GDB
 from pipeline.personalization import gauntlet_image_decisions as GID
 from pipeline.personalization import gauntlet_site as GS
@@ -146,6 +147,9 @@ def _render_ad_lp(request: Request, m: dict[str, str]) -> HTMLResponse:
                 "landing_url": GS.variant_landing_url(v, m["page"]),
                 "generic_hero": GS.generic_hero_headline(),
                 "personal_hero": GS.variant_hero_headline(v),
+                "single_url": f"{m['ad']}?v={v['variant_id']}",
+                "explainer": AE.explainer_for("gauntlet", v, page_path=m["page"],
+                                              dev_path=m["dev"]),
             })
         sections.append({"label": sec["label"], "category": sec["category"], "variants": variants})
     dev_sample = (
@@ -175,6 +179,8 @@ def _render_ad(request: Request, m: dict[str, str]) -> HTMLResponse:
     return templates.TemplateResponse(request, "gauntlet_ad.html", {
         "variant": variant,
         "landing_url": GS.variant_landing_url(variant, m["page"]),
+        "explainer": AE.explainer_for("gauntlet", variant, page_path=m["page"],
+                                      dev_path=m["dev"]),
         "g": m,
     })
 

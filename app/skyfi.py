@@ -13,10 +13,15 @@
                           drawer + dev/audit fold — same visitor state as /skyfi/dev.
   GET  /skyfi/direct    — direct-entry scenario gallery (demo_nav, config-driven)
   GET  /skyfi/email     — email-entry scenario gallery
+  GET  /skyfi/ads       — JUST the X ad variations: all 6 full X-post mockups
+                          (each with the marketer "The thinking" affordance)
+  GET  /skyfi/ad?v=…    — one X ad mockup + the six-beat thinking panel
+                          (no match → redirect to /skyfi/ads)
 
   Portal mount (johnnycchung.com/skyfiapt via Vercel rewrite):
   GET  /skyfiapt, /skyfiapt/login, /skyfiapt/logout, /skyfiapt/dev,
-       /skyfiapt/dev/business, /skyfiapt/direct, /skyfiapt/email
+       /skyfiapt/dev/business, /skyfiapt/direct, /skyfiapt/email,
+       /skyfiapt/ads, /skyfiapt/ad
 
 State lives entirely in (query params + one cookie), so both pages are rebuilt
 deterministically per request — CONSTITUTION reproducibility, no server-side sessions.
@@ -29,6 +34,7 @@ from fastapi import Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 
 from app.server import app, templates
+from pipeline.personalization import ad_explainers as AE
 from pipeline.personalization import image_gen as IG
 from pipeline.personalization import skyfi_dev_business as SDB
 from pipeline.personalization import skyfi_site as SS
@@ -43,6 +49,8 @@ MOUNTS: dict[str, dict[str, str]] = {
         "logout": "/skyfi/logout",
         "dev": "/skyfi/dev",
         "dev_business": "/skyfi/dev/business",
+        "ad": "/skyfi/ad",
+        "ads": "/skyfi/ads",
         "direct_gallery": "/skyfi/direct",
         "email_gallery": "/skyfi/email",
         "static": "/static",
@@ -54,6 +62,8 @@ MOUNTS: dict[str, dict[str, str]] = {
         "logout": "/skyfiapt/logout",
         "dev": "/skyfiapt/dev",
         "dev_business": "/skyfiapt/dev/business",
+        "ad": "/skyfiapt/ad",
+        "ads": "/skyfiapt/ads",
         "direct_gallery": "/skyfiapt/direct",
         "email_gallery": "/skyfiapt/email",
         "static": "/skyfiapt/static",
@@ -65,6 +75,7 @@ MOUNTS: dict[str, dict[str, str]] = {
 def entry_links(m: dict[str, str]) -> list[tuple[str, str]]:
     page = m["page"]
     return [
+        ("X ads", m["ads"]),
         ("Ad", f"{page}?utm_source=x&utm_medium=paid&utm_campaign=x-monitor-your-site&utm_content=sv01"),
         ("Email", f"{page}?utm_source=hubspot&utm_medium=email&utm_campaign=tasking-program&e="
                   + SS.sample_magic_token()),
@@ -191,6 +202,54 @@ def _render_channel_gallery(request: Request, m: dict[str, str], channel: str) -
     return templates.TemplateResponse(request, "demo_channel_gallery.html", view)
 
 
+def _resolve_single_variant(request: Request) -> dict | None:
+    campaign = request.query_params.get("campaign", "").strip().lower()
+    vid = request.query_params.get("v", "").strip().lower()
+    if vid and vid in SS.AD_BY_VARIANT_ID:
+        return SS.AD_BY_VARIANT_ID[vid]
+    if campaign and campaign in SS.AD_BY_CAMPAIGN:
+        return SS.AD_BY_CAMPAIGN[campaign]
+    return None
+
+
+def _render_ad(request: Request, m: dict[str, str]) -> HTMLResponse:
+    """Single X ad mockup + thinking panel — ?v= / ?campaign=; no match → /ads grid."""
+    variant = _resolve_single_variant(request)
+    if variant is None:
+        return RedirectResponse(m["ads"], status_code=302)
+    return templates.TemplateResponse(request, "skyfi_ad.html", {
+        "variant": variant,
+        "landing_url": SS.variant_landing_url(variant, m["page"]),
+        "explainer": AE.explainer_for("skyfi", variant, page_path=m["page"],
+                                      dev_path=m["dev"]),
+        "g": m,
+    })
+
+
+def _render_ads(request: Request, m: dict[str, str]) -> HTMLResponse:
+    """JUST the X ad variations — all 6 full X-post mockups (SkyFi verticals).
+    ?v= / ?campaign= keeps single-ad rendering working on this path too."""
+    variant = _resolve_single_variant(request)
+    if variant is not None:
+        return _render_ad(request, m)
+    variants = []
+    for v in SS.AD_VARIANTS:
+        variants.append({
+            "variant": v,
+            "landing_url": SS.variant_landing_url(v, m["page"]),
+            "single_url": f"{m['ad']}?v={v['variant_id']}",
+            "explainer": AE.explainer_for("skyfi", v, page_path=m["page"],
+                                          dev_path=m["dev"]),
+        })
+    sections = [{"label": "SkyFi verticals", "category": "vertical", "variants": variants}]
+    return templates.TemplateResponse(request, "skyfi_ads.html", {
+        "demo_flow_active": "scenario",
+        "sections": sections,
+        "demo_hub_path": "/apt/demo",
+        "g": m,
+    })
+
+
 def _hero_image_json(request: Request, m: dict[str, str]) -> dict:
     email = _cookie_email(request)
     page = SS.build_page(request, email=email or None)
@@ -216,6 +275,14 @@ def _register_mount(m: dict[str, str]) -> None:
     @app.get(page, response_class=HTMLResponse)
     def skyfi_page(request: Request) -> HTMLResponse:
         return _render_skyfi(request, m)
+
+    @app.get(m["ad"], response_class=HTMLResponse)
+    def skyfi_ad(request: Request) -> HTMLResponse:
+        return _render_ad(request, m)
+
+    @app.get(m["ads"], response_class=HTMLResponse)
+    def skyfi_ads(request: Request) -> HTMLResponse:
+        return _render_ads(request, m)
 
     @app.get(m["direct_gallery"], response_class=HTMLResponse)
     def skyfi_direct_gallery(request: Request) -> HTMLResponse:
