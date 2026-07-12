@@ -11,8 +11,10 @@ pinned by the contract ``[PANEL — locked]``:
     (hierarchical fallback), so posteriors visibly move within one demo session.
 
 The truth boundary is structural (Art II), never a filter: ``cleared_pool()`` Gates every
-candidate's claims (``gate.verify_variant``) AND its message hygiene
-(``creative.verify_message``), and only the doubly-cleared are CONSTRUCTED into the
+candidate's claims (``gate.verify_variant``), its message hygiene
+(``creative.verify_message``), and — for text targets — every visible line through the
+real copy Gate (``creative.verify_copy``: superlative / comparative / inferred-competitor
+recite / number-not-in-sources, T-05). Only the triply-cleared are CONSTRUCTED into the
 ActionPool — build_action_pool's pattern (generation/variants.py:81). ``pick()``
 Thompson-samples that pool, so a blocked / held / red / spammy candidate is unreachable.
 
@@ -154,13 +156,30 @@ class DecisionPool:
             verdicts = self.gate.verify_variant(v) if not unknown else []
             claims_cleared = not unknown and all(cv.verdict != Verdict.RED for cv in verdicts)
             msg = CR.verify_message(v.template, channel=self.channel, stage="cold")
-            cleared = claims_cleared and msg["ok"]
+            # the real copy Gate, per visible line (T-05/S2.1): superlative / comparative /
+            # reciting an inferred competitor / a number the sources don't back. Facts =
+            # the approved text of the claims THIS candidate asserts; the tenant's own
+            # brand is never treated as a competitor of itself.
+            copy_checks: list[dict] = []
+            if meta.get("kind") == "text":
+                lines = [ln for ln in v.template.splitlines() if ln.strip()]
+                facts = " ".join(self.gate.library.claim(cid).text
+                                 for cid in v.claim_ids if self.gate.library.claim(cid))
+                comps = [c for c in CR.COMPETITOR_HINTS if tenant.lower() not in c.lower()]
+                copy_checks = CR.verify_copy(lines, facts, None,
+                                             meta.get("policy") or "allude",
+                                             competitors=comps)
+            copy_ok = all(ch["ok"] for ch in copy_checks)
+            cleared = claims_cleared and msg["ok"] and copy_ok
             report.append({
                 "pool_id": pid, "variant_id": vid, "arm": v.arm_label,
                 "planted_lie": v.planted_lie, "cleared": cleared,
                 "claims_cleared": claims_cleared, "unknown_claim_ids": unknown,
                 "message_ok": msg["ok"], "message_vetoes": msg["vetoes"],
-                "message_warnings": msg["warnings"], "in_pool": cleared,
+                "message_warnings": msg["warnings"],
+                "copy_ok": copy_ok,
+                "copy_blocks": [ch["reason"] for ch in copy_checks if not ch["ok"]],
+                "in_pool": cleared,
                 "verdicts": [{"claim_id": cv.claim_id, "verdict": cv.verdict.value,
                               "flags": cv.rule_flags} for cv in verdicts],
             })
@@ -397,3 +416,17 @@ class DecisionPool:
         """The provenance receipt minted when this variant cleared the Gate. Every
         pick() result has one by construction; KeyError for anything never cleared."""
         return self._receipts[variant_id]
+
+
+# --------------------------------------------------------------------------- #
+# Module-level seam (T-05) — the WF-DESIGN harness's entry point for generative
+# text rows: dp.cleared_pool(tenant, section_id, target_id). Delegates to the
+# shared per-gate DecisionPool over the real Gate with the generative candidate
+# provider (pipeline/personalization/generative_text.py). Lazy import — the
+# provider imports this module for the DecisionPool class.
+# --------------------------------------------------------------------------- #
+def cleared_pool(tenant: str, section_id: str, target_id: str) -> list[Variant]:
+    """Gate-cleared pool for one registry target, from the shared default pool."""
+    from pipeline.personalization import generative_text as GT
+    return GT.pool_for(tenant, section_id, target_id).cleared_pool(
+        tenant, section_id, target_id)
