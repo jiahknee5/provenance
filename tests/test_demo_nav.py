@@ -48,15 +48,20 @@ def test_wf_demo_001_sitemap_tour_gauntlet_channels():
     assert "demo tour" in t.lower() or "visitor demo" in t.lower()
     assert "GauntletAI" in t
     assert "Planet" in t
+    # Default active site = gauntlet → its four channel entries link out.
     assert 'href="/gauntletapt/ad-lp"' in t
     assert 'href="/gauntletapt/direct"' in t
     assert 'href="/gauntletapt/email"' in t
     assert 'href="/gauntletapt?ref=google"' in t
-    assert 'href="/planetapt/ads"' in t
-    assert 'href="/planetapt/direct"' in t
-    assert 'href="/planetapt/email"' in t
-    assert 'href="/planetapt?ref=google"' in t
     assert 'href="/apt/dev' in t
+    # The sidebar website selector switches the active tenant.
+    assert 'href="/apt/demo?site=planet"' in t
+    # …and ?site=planet surfaces planet's four channel entries.
+    p = c.get("/apt/demo?site=planet").text
+    assert 'href="/planetapt/ads"' in p
+    assert 'href="/planetapt/direct"' in p
+    assert 'href="/planetapt/email"' in p
+    assert 'href="/planetapt?ref=google"' in p
 
 
 def test_direct_email_galleries_return_200():

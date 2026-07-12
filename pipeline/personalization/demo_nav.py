@@ -37,6 +37,36 @@ _CHANNEL_DESC: dict[str, str] = {
     "search": "Organic referrer — intent-neutral entry.",
 }
 
+# Display order = data-richness ascending (direct < search < ads < email).
+_CHANNEL_ORDER: tuple[str, ...] = ("direct", "search", "ads", "email")
+# Which real marketing platform each channel maps to (drives the badge + accent).
+_CHANNEL_PLATFORM: dict[str, str] = {
+    "direct": "Anonymous", "search": "Google", "ads": "X Ads", "email": "HubSpot",
+}
+_CHANNEL_ICON: dict[str, str] = {"direct": "⌁", "search": "⌕", "ads": "◎", "email": "✉"}
+_CHANNEL_SUB: dict[str, str] = {
+    "direct": "Typed the URL", "search": "Organic referrer",
+    "ads": "Paid campaign", "email": "HubSpot cohort",
+}
+_CHANNEL_SIGNAL: dict[str, int] = {"direct": 1, "search": 2, "ads": 3, "email": 4}
+_CHANNEL_SIGNAL_LABEL: dict[str, str] = {
+    "direct": "low", "search": "medium", "ads": "high", "email": "richest",
+}
+_CHANNEL_LONG: dict[str, str] = {
+    "direct": "Cold visit — no campaign, no login. The IP layer is the only signal: "
+              "network type, region, corporate netblock.",
+    "search": "Arrived from a search engine. Adds intent from the referrer on top of the "
+              "IP layer — intent-neutral hero, region-aware.",
+    "ads": "Paid click with the full UTM stack + ad variant. The hero message-matches the "
+           "exact campaign creative the visitor clicked.",
+    "email": "Warmest arrival. A magic token identifies the person from CRM before they "
+             "log in — name, account, and history, all gated.",
+}
+# Sidebar account-switcher swatch per tenant (bg, initial).
+_TENANT_LOGO: dict[str, tuple[str, str]] = {
+    "gauntlet": ("#111827", "G"), "planet": ("#0b6b3a", "P"),
+}
+
 _TENANT_META: dict[str, dict[str, str]] = {
     "gauntlet": {
         "name": "GauntletAI",
@@ -196,39 +226,71 @@ def scenarios_for(
 def _tenant_section(tenant: str, data: dict[str, Any]) -> dict[str, Any]:
     meta = _TENANT_META[tenant]
     m = _mounts_for(tenant)
+    logo_bg, logo_ch = _TENANT_LOGO[tenant]
     channels = []
-    for ch in _CHANNELS:
+    for ch in _CHANNEL_ORDER:
         count = len([s for s in data["scenarios"] if s["tenant"] == tenant and s["channel"] == ch])
+        count_label = "12 variants" if ch == "ads" else (
+            f"{count} scenario" if count == 1 else f"{count} scenarios")
         channels.append({
             "id": ch,
             "label": _CHANNEL_LABELS[ch],
-            "desc": _CHANNEL_DESC[ch],
+            "sub": _CHANNEL_SUB[ch],
+            "desc": _CHANNEL_LONG[ch],
+            "platform": _CHANNEL_PLATFORM[ch],
+            "icon": _CHANNEL_ICON[ch],
+            "signal": _CHANNEL_SIGNAL[ch],
+            "signal_label": _CHANNEL_SIGNAL_LABEL[ch],
             "href": _channel_gallery_href(tenant, ch, m),
-            "scenario_count": count,
+            "count_label": count_label,
         })
     return {
         "id": tenant,
         "name": meta["name"],
         "domain": meta["domain"],
-        "tagline": meta["tagline"],
-        "audience_business": meta["audience_business"],
-        "audience_consumer": meta["audience_consumer"],
+        "logo_bg": logo_bg,
+        "logo_ch": logo_ch,
         "channels": channels,
-        "ops_href": f"{_OPS_HUB_PATH}?site={tenant}",
+        "replica_href": m["page"],
+        "consoles_href": f"{_OPS_HUB_PATH}?site={tenant}",
     }
 
 
 def build_sitemap_view(request: Request) -> dict[str, Any]:
     data = load_scenarios()
-    tenants = [_tenant_section(t, data) for t in data.get("tenants") or ("gauntlet", "planet")]
-    prompt_count = len(DP.list_entries())
+    all_tenants = tuple(data.get("tenants") or ("gauntlet", "planet"))
+    site = request.query_params.get("site", "").strip().lower()
+    if site not in all_tenants:
+        site = all_tenants[0]
+    active = _tenant_section(site, data)
+    tenants = []
+    for t in all_tenants:
+        meta = _TENANT_META[t]
+        logo_bg, logo_ch = _TENANT_LOGO[t]
+        tenants.append({
+            "id": t, "name": meta["name"], "domain": meta["domain"],
+            "logo_bg": logo_bg, "logo_ch": logo_ch,
+            "href": f"{_HUB_PATH}?site={t}", "active": t == site,
+        })
     return {
         "hub_path": _HUB_PATH,
         "ops_hub_path": _OPS_HUB_PATH,
+        "active": active,
+        "site": site,
         "tenants": tenants,
-        "scenario_count": len(data["scenarios"]),
-        "prompt_reference_count": prompt_count,
-        "version": data.get("version", 1),
+        "stats": {
+            "tenants": len(all_tenants),
+            "channels": len(_CHANNELS),
+            "scenarios": len(data["scenarios"]),
+        },
+        "nav": {
+            "channels": f"{_HUB_PATH}?site={site}",
+            "consoles": f"{_OPS_HUB_PATH}?site={site}",
+            "observatory": "/observatory",
+            "costs": "/costs",
+            "replica": active["replica_href"],
+        },
+        "prompt_reference_count": len(DP.list_entries()),
     }
 
 

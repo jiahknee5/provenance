@@ -1,7 +1,7 @@
 {# Light bridge nav for legacy/lab pages — re-themed via atlas.css (now light). Links back
    into the Quiet-Workspace shell app and across the lab surfaces. Active tab from the path. #}
 <header class="top">
-  <a class="brand" href="/workspace" style="text-decoration:none"><span class="dot">◈</span> Provenance{% if subtitle is defined and subtitle %} <span class="navsub">· {{ subtitle }}</span>{% endif %}</a>
+  <a class="brand" href="/workspace" style="text-decoration:none"><span class="dot">◈</span> apt{% if subtitle is defined and subtitle %} <span class="navsub">· {{ subtitle }}</span>{% endif %}</a>
   <nav>
     {% set p = request.url.path %}
     <a href="/workspace" class="{{ 'on' if p in ['/workspace','/records'] else '' }}">App ↗</a>

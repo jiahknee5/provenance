@@ -16,4 +16,4 @@ from pipeline.personalization import demo_nav as NAV
 
 @app.get("/apt/demo", response_class=HTMLResponse)
 def apt_demo_sitemap(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse(request, "apt_demo_sitemap.html", {**NAV.build_sitemap_view(request), "demo_flow_active": "start"})
+    return templates.TemplateResponse(request, "apt_demo_sitemap.html", NAV.build_sitemap_view(request))
