@@ -17,3 +17,14 @@ with the build; these notes concern prose in the deck corpus.
 These are wording reconciliations only — the product definition, the 5 modules, and the
 "constrained optimization as a structural fix for reward-hacking" thesis are unchanged and
 are what the build proves.
+
+## R38 retirement mapping (pre-seeded for T-09; update as routes are cut)
+| Legacy route(s) | Disposition | Where the value lives now |
+|---|---|---|
+| /demo, /demo/variant, /demo/monitor, /demo/live | retire | tour: /apt/demo; monitors: per-section obs (T-04) |
+| /workspace, /records* | retire | apt shell consoles |
+| /inspector, /graph, /agent | retire | per-section agent graph + observability (T-04) |
+| /assurance, /optimizer, /funnel | retire | per-decision pillar panels (S4) |
+| /personalize, /composer, /policies, /help*, /archive, /sources, /showcase*, /admin/landings, /lp, /google* | retire | designer Data panel + docs |
+| /enrichment-catalog | fold | section Data panel note |
+| / (home), /lead, /submit, /site/<token>* | KEEP if property tests exercise them (property tests win over retirement — T-09 logs exceptions here) |
