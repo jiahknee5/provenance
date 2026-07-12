@@ -24,8 +24,9 @@
 
   {% if nav_tree %}
   {% for grp in nav_tree %}
-  <div class="navlbl">{{ grp.group }}</div>
-  <nav class="nav">
+  <details class="nav-group" {{ 'open' if active_group == grp.key else '' }}>
+    <summary class="navlbl">{{ grp.group }} <span class="gtw">▾</span></summary>
+    <nav class="nav">
     {% for it in grp['items'] %}
     {% if it.children %}
     <details class="nav-branch" {{ 'open' if active_group == grp.key else '' }}>
@@ -43,7 +44,8 @@
     <a class="{{ 'on' if active_sub == it.id else '' }}" href="{{ it.href }}"><span class="ic">{{ it.icon }}</span> {{ it.label }}</a>
     {% endif %}
     {% endfor %}
-  </nav>
+    </nav>
+  </details>
   {% endfor %}
   {% else %}
   {# fallback: pages whose views predate nav_tree #}

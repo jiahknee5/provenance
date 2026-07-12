@@ -44,6 +44,12 @@
   .nav a:hover{background:var(--line2)}
   .nav a.on{background:var(--brand-t);color:var(--brand-d)}
   .nav a.on .ic{opacity:1}
+  /* collapsible nav groups */
+  .nav-group>summary.navlbl{cursor:pointer;list-style:none;display:flex;align-items:center}
+  .nav-group>summary.navlbl::-webkit-details-marker{display:none}
+  .nav-group>summary.navlbl .gtw{margin-left:auto;font-size:9px;transition:transform .15s}
+  .nav-group:not([open])>summary.navlbl .gtw{transform:rotate(-90deg)}
+  .nav-group>summary.navlbl:hover{color:var(--ink)}
   /* nested nav (subsections + sub-sub-sections) */
   .nav-branch summary{list-style:none;display:flex;align-items:center;cursor:pointer;border-radius:8px}
   .nav-branch summary::-webkit-details-marker{display:none}

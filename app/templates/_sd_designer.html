@@ -4,6 +4,11 @@
    state. Every edit stages a YAML diff to rules/<tenant>_sections.yaml through the
    shared drawer (_sd_drawer.html) — nothing saves server-side. #}
 <style>
+  .sd-card>summary.h{cursor:pointer;list-style:none}
+  .sd-card>summary.h::-webkit-details-marker{display:none}
+  .sd-card>summary.h::after{content:"\25BE";margin-left:8px;color:var(--muted);font-size:11px;transition:transform .15s}
+  .sd-card:not([open])>summary.h::after{transform:rotate(-90deg)}
+  .sd-card:not([open])>summary.h{border-bottom:0}
   .sd-card .h .sd-region{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:5px;padding:2px 8px;background:#E8EFFF;color:#1d4ed8}
   .sd-ptog{display:inline-flex;gap:6px;align-items:center;font-size:11.5px;font-weight:600;color:var(--ink)}
   .sd-ptog input{accent-color:var(--ink)}
@@ -86,8 +91,8 @@
 </div>
 
 {% for s in SD.sections %}
-<div class="sec sd-card" id="sd-{{ s.id }}" data-testid="sd-section-{{ s.id }}">
-  <div class="h" data-guard-row>
+<details class="sec sd-card" id="sd-{{ s.id }}" data-testid="sd-section-{{ s.id }}" {{ 'open' if loop.first else '' }}>
+  <summary class="h" data-guard-row>
     {{ s.label }}
     <span class="sd-region">{{ s.region }}</span>
     <label class="sd-ptog" data-testid="sd-personalize-{{ s.id }}" title="Off = this section ships the generic site for everyone">
@@ -97,7 +102,7 @@
     </label>
     <span class="stg-mark">staged</span>
     <span class="tag">{{ s.text_targets|length }} text · {{ s.image_targets|length }} image</span>
-  </div>
+  </summary>
   <div class="sub" data-testid="sd-goal-{{ s.id }}">Goal: {{ s.goal or '— no goal recorded yet' }}</div>
   <div class="sd-chips" data-testid="sd-channels-{{ s.id }}">
     <span class="cap">Channels</span>
@@ -300,5 +305,21 @@
       </div>
     </details>
   </div>
-</div>
+</details>
 {% endfor %}
+
+<script>
+(function(){
+  document.querySelectorAll('.sd-card > summary .sd-ptog').forEach(function(el){
+    el.addEventListener('click', function(e){ e.stopPropagation(); });
+  });
+  function sdOpenHash(){
+    var h = (location.hash || '').replace(/[^#\w-]/g, '');
+    if (!h || h === '#') return;
+    var el = document.querySelector(h);
+    if (el && el.tagName === 'DETAILS') { el.open = true; }
+  }
+  window.addEventListener('hashchange', sdOpenHash);
+  sdOpenHash();
+})();
+</script>
