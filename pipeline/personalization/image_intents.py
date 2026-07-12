@@ -492,6 +492,46 @@ def apply_guardrails(structured: StructuredPrompt, ctx: dict,
     return out
 
 
+_HEX_TOKEN_RE = re.compile(r"\s*\(#[0-9a-fA-F]{3,8}\)|#[0-9a-fA-F]{3,8}\b")
+
+
+def _strip_hex(text: str) -> str:
+    """Drop hex color codes from prompt text (config prose may carry them)."""
+    return _HEX_TOKEN_RE.sub("", text)
+
+
+def _accent_phrase(hex_color: str) -> str:
+    """Plain-English accent description for generation-prompt text (W8-B).
+
+    Never put the literal hex code in a prompt — image models typeset stray
+    tokens into the picture, violating the no-text-in-image guardrail (seen
+    live on prod: "#fcc219" rendered into a skyfi backdrop). Receipts keep
+    the hex in their accent_color field; only prompt text uses this phrase.
+    """
+    try:
+        h = hex_color.lstrip("#")
+        r, g, b = (int(h[i:i + 2], 16) / 255.0 for i in (0, 2, 4))
+    except (ValueError, IndexError):
+        return "brand accent"
+    import colorsys
+    hue, lig, sat = colorsys.rgb_to_hls(r, g, b)
+    deg = hue * 360
+    if sat < 0.15:
+        return "neutral grey accent"
+    name = "red"
+    for lo, hi, nm in ((0, 15, "red"), (15, 38, "orange"), (38, 70, "golden yellow"),
+                       (70, 160, "green"), (160, 200, "teal"), (200, 260, "blue"),
+                       (260, 300, "violet"), (300, 345, "magenta"), (345, 361, "red")):
+        if lo <= deg < hi:
+            name = nm
+            break
+    if lig > 0.72:
+        name = f"light {name}"
+    elif lig < 0.28:
+        name = f"deep {name}"
+    return f"{name} accent"
+
+
 def assemble_full_prompt(structured: StructuredPrompt,
                          config: dict | None = None) -> str:
     """Flatten StructuredPrompt into API-ready text."""
@@ -503,14 +543,14 @@ def assemble_full_prompt(structured: StructuredPrompt,
         f"Sales technique: {structured['sales_technique']}.",
         f"Composition: {structured['composition']}",
         f"Visual metaphor: {structured['visual_metaphor']}",
-        f"Mood: {structured['mood']}. Accent color {structured['accent_color']}.",
+        f"Mood: {structured['mood']}. {_accent_phrase(structured['accent_color']).capitalize()} lighting.",
     ]
     if structured.get("secondary_intent_id"):
         parts.append(f"Secondary intent cue: {structured['secondary_intent_id']}.")
     for layer in structured.get("personalization_layers") or []:
         parts.append(f"{layer['layer']} ({layer['disposition']}): {layer['value']}.")
-    parts.append("Must include: " + "; ".join(structured.get("must_include") or []) + ".")
-    parts.append("Must avoid: " + "; ".join(structured.get("must_avoid") or []) + ".")
+    parts.append("Must include: " + "; ".join(_strip_hex(x) for x in structured.get("must_include") or []) + ".")
+    parts.append("Must avoid: " + "; ".join(_strip_hex(x) for x in structured.get("must_avoid") or []) + ".")
     parts.append(f"Drives action: {structured.get('drives_action', 'program_overview')}.")
     return " ".join(parts)
 
@@ -636,13 +676,13 @@ def assemble_base_prompt(structured: StructuredPrompt,
         f"Intent: {structured['intent_id']} — {structured['conversion_goal']}.",
         f"Composition: {structured['composition']}",
         f"Visual metaphor: {structured['visual_metaphor']}",
-        f"Mood: {structured['mood']}. Accent {structured['accent_color']}.",
+        f"Mood: {structured['mood']}. {_accent_phrase(structured['accent_color']).capitalize()} lighting.",
     ]
     for layer in structured.get("personalization_layers") or []:
         parts.append(f"{layer['layer']}: {layer['value']}.")
     must_avoid = structured.get("must_avoid") or []
     if must_avoid:
-        parts.append("Must avoid: " + "; ".join(must_avoid[:4]) + ".")
+        parts.append("Must avoid: " + "; ".join(_strip_hex(x) for x in must_avoid[:4]) + ".")
     return " ".join(parts)
 
 
@@ -661,10 +701,10 @@ def assemble_delta_prompt(base_structured: StructuredPrompt,
     ]
     for layer in delta_layers:
         parts.append(f"{layer['layer']}: {layer['value']}.")
-    parts.append(f"Mood stays {base_structured['mood']}. Accent {base_structured['accent_color']}.")
+    parts.append(f"Mood stays {base_structured['mood']}. {_accent_phrase(base_structured['accent_color']).capitalize()} lighting.")
     must_avoid = base_structured.get("must_avoid") or []
     if must_avoid:
-        parts.append("Must avoid: " + "; ".join(must_avoid[:4]) + ".")
+        parts.append("Must avoid: " + "; ".join(_strip_hex(x) for x in must_avoid[:4]) + ".")
     return " ".join(parts)
 
 

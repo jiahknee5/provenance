@@ -49,6 +49,8 @@
   .steer-col ul{margin:0;padding-left:16px;line-height:1.5}
   .loc-line{display:flex;align-items:center;gap:9px;padding:10px 14px;border-bottom:1px solid var(--line);font-size:13.5px;font-weight:600;color:var(--ink)}
   .loc-line .orb{width:9px;height:9px;border-radius:50%;background:#0B63E5;box-shadow:0 0 8px rgba(11,99,229,.8);flex:none}
+  .zone-cap{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:20px 0 8px;padding-top:14px;border-top:1px solid var(--line)}
+  .zone-cap:first-of-type{margin-top:8px;padding-top:0;border-top:0}
 </style>
 
 {% set B = biz %}
@@ -75,12 +77,12 @@
 </div>
 <p class="gb-meta">{{ B.changed_count }} of {{ B.total_slots }} copy slots changed · same visitor state as <a href="{{ g.dev }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}">{{ g.dev }}</a></p>
 
-<!-- Sections — the per-section designer (S5, contract: designer-dom.md).
-     Entry simulation lives on Personalization → Preview as visitor (W8-A). -->
-{% include "_sd_designer.html" %}
+{# W8-B: three chronological zones replace numbered chapters — context → design →
+   proof. Entry simulation lives on Personalization → Preview as visitor (W8-A). #}
+<div class="zone-cap">This visit — who arrived, what we knew</div>
 
 <details class="sec sd-devfold">
-  <summary class="h">1 · Arrival &amp; attribution <span class="tag">{{ B.arrival.channel }}</span></summary>
+  <summary class="h">Arrival &amp; attribution <span class="tag">{{ B.arrival.channel }}</span></summary>
   <div class="dec">{{ B.arrival.decision }}</div>
   <table class="ops">
     <thead><tr><th>Field</th><th>Value</th><th>Note</th></tr></thead>
@@ -97,7 +99,7 @@
 </details>
 
 <details class="sec">
-  <summary class="h">2 · Location × industry — SkyFi's differentiator <span class="tag">{{ B.location.mode }}</span></summary>
+  <summary class="h">Location × industry — SkyFi's differentiator <span class="tag">{{ B.location.mode }}</span></summary>
   <div class="dec">{{ B.location.decision }}</div>
   <table class="ops">
     <thead><tr><th>Field</th><th>Value</th><th>Note</th></tr></thead>
@@ -115,7 +117,7 @@
 </details>
 
 <details class="sec sd-devfold">
-  <summary class="h">3 · Audience read <span class="tag">{{ B.audience_read.segment }}</span></summary>
+  <summary class="h">Audience read <span class="tag">{{ B.audience_read.segment }}</span></summary>
   <div class="dec">{{ B.audience_read.decision }}</div>
   <table class="ops">
     <thead><tr><th>Signal</th><th>Read</th></tr></thead>
@@ -129,7 +131,40 @@
 </details>
 
 <details class="sec">
-  <summary class="h">4 · Copy decisions <span class="tag">{{ B.changed_count }}/{{ B.total_slots }} changed</span></summary>
+  <summary class="h">CRM / lead context {% if B.lead %}<span class="tag">logged in</span>{% else %}<span class="tag">anonymous</span>{% endif %}</summary>
+  {% if B.lead %}
+  <table class="ops">
+    <thead><tr><th>Field</th><th>Value</th></tr></thead>
+    <tbody>
+      {% if B.lead.kind == 'crm' %}
+      <tr><td class="k">Contact</td><td>{{ B.lead.name }} · {{ B.lead.email }}</td></tr>
+      <tr><td class="k">Lifecycle</td><td>{{ B.lead.lifecycle }} · score {{ B.lead.lead_score }} · {{ B.lead.visits }} visits</td></tr>
+      {% if B.lead.declared_goal %}<tr><td class="k">Declared goal</td><td>{{ B.lead.declared_goal }}</td></tr>{% endif %}
+      {% if B.lead.declared_aoi %}<tr><td class="k">Declared AOI</td><td>{{ B.lead.declared_aoi }} — first-party, drawn in the order flow (S09)</td></tr>{% endif %}
+      {% if B.lead.abandoned %}<tr><td class="k">Abandoned</td><td>{{ B.lead.abandoned }}</td></tr>{% endif %}
+      <tr><td class="k">Archetype</td><td>{{ B.lead.archetype }}</td></tr>
+      {% if B.lead.segments %}<tr><td class="k">Segments</td><td>{{ B.lead.segments|join(', ') }}</td></tr>{% endif %}
+      {% else %}
+      <tr><td class="k">Email</td><td>{{ B.lead.email }}</td></tr>
+      {% if B.lead.company %}<tr><td class="k">Company</td><td>{{ B.lead.company }}</td></tr>{% endif %}
+      {% endif %}
+    </tbody>
+  </table>
+  <div class="dec" style="border-top:1px solid var(--line)">{% for line in B.lead.copy_steering %}{{ line }}{% if not loop.last %} · {% endif %}{% endfor %}</div>
+  {% else %}
+  <div class="empty">No CRM record — toggle <b>Known lead</b> or log in on <a href="{{ g.page }}{{ qs }}">{{ g.page }}</a>.</div>
+  {% endif %}
+</details>
+
+<div class="zone-cap">Design — what changes on this page</div>
+
+<!-- Sections — the per-section designer (S5, contract: designer-dom.md) -->
+{% include "_sd_designer.html" %}
+
+<div class="zone-cap">Proof — what shipped, and why</div>
+
+<details class="sec">
+  <summary class="h">Copy decisions <span class="tag">{{ B.changed_count }}/{{ B.total_slots }} changed</span></summary>
   <table class="ops">
     <thead><tr><th>Slot</th><th>Δ</th><th>Generic</th><th>Shipped</th><th>Why</th><th>Decision</th></tr></thead>
     <tbody>
@@ -148,7 +183,7 @@
 </details>
 
 <details class="sec">
-  <summary class="h">5 · Visual decision</summary>
+  <summary class="h">Visual decision</summary>
   <div class="dec">{{ B.visual.decision }}</div>
   <div class="dec" style="margin-top:8px;font-size:13px;color:var(--muted)">{{ B.visual.tier_summary }}</div>
   <table class="ops">
@@ -185,33 +220,7 @@
 </details>
 
 <details class="sec">
-  <summary class="h">6 · CRM / lead context {% if B.lead %}<span class="tag">logged in</span>{% else %}<span class="tag">anonymous</span>{% endif %}</summary>
-  {% if B.lead %}
-  <table class="ops">
-    <thead><tr><th>Field</th><th>Value</th></tr></thead>
-    <tbody>
-      {% if B.lead.kind == 'crm' %}
-      <tr><td class="k">Contact</td><td>{{ B.lead.name }} · {{ B.lead.email }}</td></tr>
-      <tr><td class="k">Lifecycle</td><td>{{ B.lead.lifecycle }} · score {{ B.lead.lead_score }} · {{ B.lead.visits }} visits</td></tr>
-      {% if B.lead.declared_goal %}<tr><td class="k">Declared goal</td><td>{{ B.lead.declared_goal }}</td></tr>{% endif %}
-      {% if B.lead.declared_aoi %}<tr><td class="k">Declared AOI</td><td>{{ B.lead.declared_aoi }} — first-party, drawn in the order flow (S09)</td></tr>{% endif %}
-      {% if B.lead.abandoned %}<tr><td class="k">Abandoned</td><td>{{ B.lead.abandoned }}</td></tr>{% endif %}
-      <tr><td class="k">Archetype</td><td>{{ B.lead.archetype }}</td></tr>
-      {% if B.lead.segments %}<tr><td class="k">Segments</td><td>{{ B.lead.segments|join(', ') }}</td></tr>{% endif %}
-      {% else %}
-      <tr><td class="k">Email</td><td>{{ B.lead.email }}</td></tr>
-      {% if B.lead.company %}<tr><td class="k">Company</td><td>{{ B.lead.company }}</td></tr>{% endif %}
-      {% endif %}
-    </tbody>
-  </table>
-  <div class="dec" style="border-top:1px solid var(--line)">{% for line in B.lead.copy_steering %}{{ line }}{% if not loop.last %} · {% endif %}{% endfor %}</div>
-  {% else %}
-  <div class="empty">No CRM record — toggle <b>Known lead</b> or log in on <a href="{{ g.page }}{{ qs }}">{{ g.page }}</a>.</div>
-  {% endif %}
-</details>
-
-<details class="sec">
-  <summary class="h">7 · Steering vs saying <span class="tag">policy</span></summary>
+  <summary class="h">Steering vs saying <span class="tag">policy</span></summary>
   <div class="steer-grid">
     <div class="steer-col say"><div class="cap">Say</div><ul>{% for x in B.steering.said %}<li>{{ x }}</li>{% endfor %}</ul></div>
     <div class="steer-col steer"><div class="cap">Steer</div><ul>{% for x in B.steering.steered %}<li>{{ x }}</li>{% endfor %}</ul></div>

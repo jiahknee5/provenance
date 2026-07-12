@@ -54,3 +54,18 @@ presentation-IA assertions only (none locked; engines untouched).
 
 Engineer consoles (`/dev` pages) keep their own rails for now — technical
 audience, candidate for a later wave.
+
+## W8-B chronological zones + prompt hex fix (2026-07-12, same loop)
+
+- All 3 marketer consoles: numbered chapters (which showed gaps like 1→5→6 when
+  the Developer/audit fold is off) replaced by three zones in visit order —
+  **This visit** (arrival/location/audience/CRM context) → **Design** (section
+  cards) → **Proof** (copy/visual/steering, gauntlet + images/guardrails/delivery).
+  CRM/lead context moved into the context zone (it is an input, not an outcome).
+- Root-cause guardrail fix: generation prompts no longer contain literal hex
+  codes (`Accent #fcc219` was typeset INTO a live skyfi backdrop — no-text-in-
+  image violation). `image_intents._accent_phrase()` renders the accent as plain
+  English; `_strip_hex()` cleans config prose in prompt joins. Receipts keep the
+  hex in `accent_color`. Stored examples in `rules/design_prompts.yaml`
+  refreshed to match (test_design_prompts pins stored == live). Image cache is
+  ephemeral per deploy (container FS), so no baked assets were invalidated.
