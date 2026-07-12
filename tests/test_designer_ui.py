@@ -1,7 +1,7 @@
-"""Designer UI DOM contract tests (T-03/S5) — 04-spec/contracts/designer-dom.md.
+"""Designer UI DOM contract tests (T-03/S5, T-07b) — 04-spec/contracts/designer-dom.md.
 
-The marketer consoles (gauntlet + planet) render one sd-section-{id} card per
-registry section, Q1–Q10 controls read-only-bound to registry + page state, a
+The marketer consoles (gauntlet + planet + skyfi) render one sd-section-{id} card
+per registry section, Q1–Q10 controls read-only-bound to registry + page state, a
 staged drawer that targets rules/<tenant>_sections.yaml (kind "sections"), and a
 dev/audit toggle (sd-devtoggle) folding the engineer trace/audit sections.
 """
@@ -18,6 +18,7 @@ c = TestClient(app)
 CONSOLES = {
     "gauntlet": "/gauntletapt/dev/business",
     "planet": "/planetapt/dev/business",
+    "skyfi": "/skyfiapt/dev/business",
 }
 TENANTS = list(CONSOLES)
 
@@ -173,7 +174,8 @@ def test_image_target_cards_carry_all_controls(tenant):
 def test_ab_panel_lists_routes_and_control(tenant):
     t = _page(tenant)
     routes = {"gauntlet": ["b2b_hire", "b2b_upskill", "individual", "neutral"],
-              "planet": ["enterprise", "selfserve", "research", "neutral"]}[tenant]
+              "planet": ["enterprise", "selfserve", "research", "neutral"],
+              "skyfi": ["enterprise", "selfserve", "neutral"]}[tenant]
     for r in routes:
         assert r in t
     assert "lift vs control" in t
@@ -259,3 +261,34 @@ def test_planet_direct_visit_binds_location_section():
     assert _tid("sd-section-location") in t
     assert _tid("sd-text-location-hero_location") in t
     assert "direct — this visit" in t
+
+
+def test_skyfi_direct_visit_binds_location_section():
+    r = c.get(CONSOLES["skyfi"] + "?ip=19.7.0.1&as=anon")
+    assert r.status_code == 200
+    t = r.text
+    assert _tid("sd-section-location") in t
+    assert _tid("sd-text-location-hero_location") in t
+    assert "direct — this visit" in t
+
+
+def test_skyfi_realtime_images_wear_the_swap_class():
+    # S02 beat: skyfi's registry seeds every image workflow realtime — the latency
+    # badge is the ~2s gradient→swap class on each image surface, never blocking.
+    t = _page("skyfi")
+    for it in SEC.list_image_targets("skyfi"):
+        assert it["workflow"] == "realtime", f"registry drifted: {it['surface_id']}"
+        i = t.find(_tid(f"sd-latency-{it['surface_id']}"))
+        assert i != -1
+        tag_start = t.rfind("<span", 0, i)
+        assert 'class="sd-badge lat swap"' in t[tag_start:i], it["surface_id"]
+        assert t[i:].split(">", 1)[1].startswith("~2s swap")
+
+
+def test_skyfi_dev_business_serves_both_mounts():
+    # T-07b replaces the 302→/dev redirect with the real designer on both mounts.
+    for path in ("/skyfi/dev/business", "/skyfiapt/dev/business"):
+        r = c.get(path + "?as=anon")
+        assert r.status_code == 200, path
+        assert not r.history or all(h.status_code != 302 for h in r.history), path
+        assert _tid("sd-staged") in r.text, path

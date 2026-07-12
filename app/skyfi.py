@@ -8,9 +8,9 @@
   GET  /skyfi/logout    — clears the cookie
   GET  /skyfi/dev       — the decisioning console (incl. the Location × industry stage
                           and the declared-AOI / arm-Ex policy panel)
-  GET  /skyfi/dev/business — 302 → /skyfi/dev for now; the per-section marketer designer
-                          arrives with the S5 rework (T-03). The mount key exists so
-                          config consumers (galleries, scenario URLs) keep working.
+  GET  /skyfi/dev/business — the per-section marketer designer (S5/T-07b): one card per
+                          rules/skyfi_sections.yaml section, sd-* DOM contract, staged
+                          drawer + dev/audit fold — same visitor state as /skyfi/dev.
   GET  /skyfi/direct    — direct-entry scenario gallery (demo_nav, config-driven)
   GET  /skyfi/email     — email-entry scenario gallery
 
@@ -30,6 +30,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 
 from app.server import app, templates
 from pipeline.personalization import image_gen as IG
+from pipeline.personalization import skyfi_dev_business as SDB
 from pipeline.personalization import skyfi_site as SS
 
 _COOKIE = "skyfi_email"
@@ -166,6 +167,23 @@ def _render_dev(request: Request, m: dict[str, str]) -> HTMLResponse:
         "g": m})
 
 
+def _render_dev_business(request: Request, m: dict[str, str]) -> HTMLResponse:
+    as_state, email, page, qs = _dev_email_and_page(request, m)
+    toggle_anon, toggle_known = _dev_toggles(m["dev_business"], qs)
+    from pipeline.personalization import demo_nav as _NAV
+    return templates.TemplateResponse(request, "skyfi_dev_business.html", {
+        **_NAV.console_shell_ctx("skyfi", "consoles"),
+        "demo_flow_active": "marketer",
+        "page": page, "biz": SDB.build_business_dev_view(page),
+        "as_state": as_state,
+        "qs": qs, "toggle_anon": toggle_anon,
+        "toggle_known": toggle_known,
+        "entry_links_raw": entry_links(m),
+        "sample_email": SS.sample_login_email(),
+        "static_prefix": m["static"],
+        "g": m})
+
+
 def _render_channel_gallery(request: Request, m: dict[str, str], channel: str) -> HTMLResponse:
     from pipeline.personalization import demo_nav as NAV
 
@@ -225,12 +243,9 @@ def _register_mount(m: dict[str, str]) -> None:
     def skyfi_dev(request: Request) -> HTMLResponse:
         return _render_dev(request, m)
 
-    # Marketer console arrives with the S5 per-section designer rework (T-03);
-    # until then the mount key resolves and lands on the engineer console.
-    @app.get(dev_business)
-    def skyfi_dev_business(request: Request) -> RedirectResponse:
-        qs = _qs(request)
-        return RedirectResponse(f"{dev}{qs}", status_code=302)
+    @app.get(dev_business, response_class=HTMLResponse)
+    def skyfi_dev_business(request: Request) -> HTMLResponse:
+        return _render_dev_business(request, m)
 
     @app.get(hero_api)
     def skyfi_hero_image(request: Request) -> JSONResponse:

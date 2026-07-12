@@ -328,11 +328,15 @@ def test_dev_rebuilds_the_same_state_as_the_entry_url():
     assert "Monitor Your Site," in d                  # the shipped hero appears in the copy diff
 
 
-def test_dev_business_redirects_to_engineer_console_for_now():
+def test_dev_business_serves_the_marketer_designer():
+    # T-07b: the placeholder 302 → /skyfi/dev is gone — the per-section designer
+    # (S5 sd-* DOM contract) serves directly, same visitor state as /skyfi/dev.
     r = c.get("/skyfi/dev/business?as=anon", follow_redirects=False)
-    assert r.status_code == 302
-    assert r.headers["location"].startswith("/skyfi/dev")
-    assert "as=anon" in r.headers["location"]
+    assert r.status_code == 200
+    t = r.text
+    assert 'data-testid="sd-section-hero"' in t
+    assert 'data-sections-config="rules/skyfi_sections.yaml"' in t
+    assert '/skyfi/dev' in t                       # technical-view link keeps the pairing
 
 
 # --------------------------------------------------------------------------- #
