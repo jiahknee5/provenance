@@ -6,7 +6,14 @@
 # The location section is Planet's differentiator (hero_location — the daily-coverage
 # line, region scale only). region: research matches the build_page region key for the
 # research callout (planet's analog of gauntlet's challenger section).
-# Image workflows: realtime — no rules/planet_prebuild.yaml manifest exists today.
+# Image workflows: hero/og/section_backdrop realtime; the location region_backdrop is
+# prebuilt for the COMMON crop-belt regions — accounted in rules/planet_prebuild.yaml
+# within the S3.3 caps (K=8/target). Long-tail regions stay realtime (P08).
+#
+# T-08 (W3): generative rows seeded per the WF-DESIGN matrix — P07 prove_intro_gen
+# (gen, prebuilt pool), P10 cta_gen (gen, realtime cache-by-key), P02 region_backdrop
+# (prebuilt image), P08 section_backdrop (realtime image). Generative slots serve ONLY
+# from the Gate-cleared decision pool.
 
 version: 1
 tenant: planet
@@ -76,7 +83,13 @@ sections:
         source: catalog
         claims: []
         prompt: ""
-    image_targets: []
+    image_targets:
+      - surface_id: region_backdrop
+        label: "Region backdrop (crop-belt)"
+        workflow: prebuilt
+        intent_rules: inherit
+        guardrails: inherit
+        prebuilt_states_cap: 8
     guardrails: {}
     evals: [gate_pass, hold_never_ships]
   - id: prove
@@ -95,7 +108,22 @@ sections:
         source: catalog
         claims: []
         prompt: ""
-    image_targets: []
+      - slot_id: prove_intro_gen
+        label: "Prove intro (generative pool)"
+        mode: generative
+        workflow: prebuilt
+        strategy: authority
+        policy: allude
+        source: catalog
+        claims: []
+        prompt: "Prove intro for enterprise agronomy contacts (declared goals ride at say level): authority framing bounded by approved claims — no superlatives, no competitor names, no invented numbers."
+        gate: helix_tenant
+    image_targets:
+      - surface_id: section_backdrop
+        label: "Prove section backdrop"
+        workflow: realtime
+        intent_rules: inherit
+        guardrails: inherit
     guardrails: {}
     evals: [gate_pass, hold_never_ships]
   - id: research
@@ -161,6 +189,16 @@ sections:
         source: catalog
         claims: []
         prompt: ""
+      - slot_id: cta_gen
+        label: "CTA (generative, cache-by-key)"
+        mode: generative
+        workflow: realtime
+        strategy: scarcity-honest
+        policy: allude
+        source: catalog
+        claims: []
+        prompt: "Closing CTA for returning known visitors: honest scarcity only — a scarcity claim without a provable deadline is dropped; no superlatives, no competitor names, no invented numbers."
+        gate: helix_tenant
     image_targets: []
     guardrails: {}
     evals: [gate_pass, hold_never_ships]

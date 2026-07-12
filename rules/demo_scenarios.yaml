@@ -241,3 +241,771 @@ scenarios:
     console_deep_link_pattern: "{mount_dev}?ref=google&as=anon"
     tags: [search]
     featured: false
+
+  # ══════════════════════════════════════════════════════════════════════
+  # WF-DESIGN matrix seed (T-08, W3) — one scenario per row of the 30-row
+  # matrix (SECTION-DESIGNER-EXAMPLES.md §3 / docs/workflows.json WF-DESIGN-*).
+  # channel / element / mode / workflow / strategy / guardrail are VERBATIM
+  # matrix tokens (pinned by tests/test_wf_design_matrix.py — the locked
+  # harness); targets bind real rules/<tenant>_sections.yaml registry rows.
+  # ══════════════════════════════════════════════════════════════════════
+
+  # ── WF-DESIGN · GauntletAI ──────────────────────────────────────────────
+  - id: WF-DESIGN-G01
+    tenant: gauntlet
+    channel: direct
+    audience: consumer
+    element: "hero sub (text)"
+    mode: det
+    workflow: realtime
+    latency: "0 ms"
+    strategy: neutral-baseline
+    guardrail: "say only what's provable with zero data"
+    targets:
+      - {kind: text, section_id: hero, slot_id: hero_sub}
+    title: "Tier-0 baseline — nothing unprovable ships"
+    story: "Typed URL, zero signals. The hero sub ships the neutral baseline — with no data, only the provable default is servable."
+    query_params: {}
+    ip_override: null
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}"
+    console_deep_link_pattern: "{mount_dev}?as=anon"
+    tags: [wf-design, tier0, neutral-baseline]
+    featured: false
+
+  - id: WF-DESIGN-G02
+    tenant: gauntlet
+    channel: direct
+    audience: business
+    element: "hero sub + prove intro (text)"
+    mode: det
+    workflow: realtime
+    latency: "0 ms"
+    strategy: firmographic-allude
+    guardrail: "employer alluded, never recited (hold)"
+    targets:
+      - {kind: text, section_id: hero, slot_id: hero_sub}
+      - {kind: text, section_id: prove, slot_id: prove_intro}
+    title: "Apple netblock — allude, never recite"
+    story: "Anonymous B2B arrival from a resolved corporate netblock. Hero sub + prove intro personalize at allude; the employer name is hold and never ships."
+    query_params: {}
+    ip_override: "17.253.144.10"
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}?ip=17.253.144.10"
+    console_deep_link_pattern: "{mount_dev}?ip=17.253.144.10&as=anon"
+    tags: [wf-design, firmographic, tier2]
+    featured: false
+
+  - id: WF-DESIGN-G03
+    tenant: gauntlet
+    channel: search
+    audience: all
+    element: "hero headline (text)"
+    mode: det
+    workflow: realtime
+    latency: "0 ms"
+    strategy: authority
+    guardrail: "no comparative vs a CS degree"
+    targets:
+      - {kind: text, section_id: hero, slot_id: hero_sub}
+    title: "Organic search — evidence-led headline"
+    story: "Intent-neutral Google arrival. The headline leads with evidence; the copy gate structurally blocks any comparative against a CS degree."
+    query_params:
+      ref: google
+    ip_override: null
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}?ref=google"
+    console_deep_link_pattern: "{mount_dev}?ref=google&as=anon"
+    tags: [wf-design, search, authority]
+    featured: false
+
+  - id: WF-DESIGN-G04
+    tenant: gauntlet
+    channel: ads-x
+    audience: business
+    element: "hero headline + hero image"
+    mode: det-text/gen-image
+    workflow: image-prebuilt
+    latency: "0 ms"
+    strategy: message-match
+    guardrail: "image must_avoid real logos"
+    targets:
+      - {kind: text, section_id: hero, slot_id: hero_sub}
+      - {kind: image, section_id: hero, surface_id: hero}
+    title: "v09 'AI hiring' — prebuilt hero in 0 ms"
+    story: "X keyword click (utm_content=v09). Headline message-matches the creative and the prebuilt hero image paints instantly; must_avoid excludes real logos."
+    query_params:
+      utm_source: x
+      utm_medium: paid
+      utm_campaign: x-keyword-ai-hiring
+      utm_content: v09
+    ip_override: null
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}?utm_source=x&utm_medium=paid&utm_campaign=x-keyword-ai-hiring&utm_content=v09"
+    console_deep_link_pattern: "{mount_dev}?utm_source=x&utm_medium=paid&utm_campaign=x-keyword-ai-hiring&utm_content=v09&as=anon"
+    tags: [wf-design, v09, prebuild]
+    featured: false
+
+  - id: WF-DESIGN-G05
+    tenant: gauntlet
+    channel: ads-google
+    audience: consumer
+    element: "hero sub (text)"
+    mode: gen
+    workflow: text-prebuilt
+    latency: "0 ms"
+    strategy: loss-aversion-honest
+    guardrail: "candidate pool Gate-cleared; no superlative"
+    targets:
+      - {kind: text, section_id: hero, slot_id: hero_sub_gen}
+    title: "'switch into AI' — Gate-cleared generative pool"
+    story: "Google search-ad arrival. The hero sub serves only from a prebuilt generative pool every member of which cleared the real Gate — a superlative candidate is 0-servable."
+    query_params:
+      utm_source: google
+      utm_medium: cpc
+      utm_campaign: switch-into-ai
+    ip_override: null
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}?utm_source=google&utm_medium=cpc&utm_campaign=switch-into-ai"
+    console_deep_link_pattern: "{mount_dev}?utm_source=google&utm_medium=cpc&utm_campaign=switch-into-ai&as=anon"
+    tags: [wf-design, generative, prebuilt-pool]
+    featured: false
+
+  - id: WF-DESIGN-G06
+    tenant: gauntlet
+    channel: ads-meta
+    audience: all
+    element: "section backdrop image"
+    mode: gen
+    workflow: image-realtime
+    latency: "~2 s gradient→swap"
+    strategy: curiosity
+    guardrail: "tier-gated; gradient fallback offline"
+    targets:
+      - {kind: image, section_id: prove, surface_id: section_backdrop}
+    title: "Meta awareness — realtime backdrop swap"
+    story: "Broad-audience awareness click. The prove-section backdrop generates in realtime (~2 s gradient→swap); offline the deterministic gradient ships at $0."
+    query_params:
+      utm_source: meta
+      utm_medium: paid
+      utm_campaign: meta-awareness-broad
+    ip_override: null
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}?utm_source=meta&utm_medium=paid&utm_campaign=meta-awareness-broad"
+    console_deep_link_pattern: "{mount_dev}?utm_source=meta&utm_medium=paid&utm_campaign=meta-awareness-broad&as=anon"
+    tags: [wf-design, realtime-image, gradient-swap]
+    featured: false
+
+  - id: WF-DESIGN-G07
+    tenant: gauntlet
+    channel: email
+    audience: consumer
+    element: "hero eyebrow 'Welcome back, Liam'"
+    mode: det
+    workflow: realtime
+    latency: "0 ms"
+    strategy: commitment-open-loop
+    guardrail: "say-level name (token); abandoned-app fact = hold"
+    targets:
+      - {kind: text, section_id: hero, slot_id: hero_eyebrow}
+    title: "Liam's magic link — say the name, hold the fact"
+    story: "HubSpot cohort send. The token says Liam's name at say level; the abandoned-application fact stays hold and appears only on the console."
+    email_preview:
+      subject: "Liam — your Gauntlet application is still open"
+      preheader: "Pick up where you left off. One click to resume."
+      cta: "Resume application →"
+      recipient_hint: "liam.foster@gauntletai.com"
+    query_params:
+      utm_source: hubspot
+      utm_medium: email
+      utm_campaign: cohort-april
+      e: "${magic:liam}"
+    ip_override: null
+    identity_hint: token_liam
+    landing_url_pattern: "{mount_page}?utm_source=hubspot&utm_medium=email&utm_campaign=cohort-april&e=${magic:liam}"
+    console_deep_link_pattern: "{mount_dev}?utm_source=hubspot&utm_medium=email&utm_campaign=cohort-april&e=${magic:liam}&as=known"
+    tags: [wf-design, magic-token, hold]
+    featured: false
+
+  - id: WF-DESIGN-G08
+    tenant: gauntlet
+    channel: email
+    audience: business
+    element: "prove card (peer-logo, text+logo)"
+    mode: det
+    workflow: image-prebuilt
+    latency: "0 ms"
+    strategy: social-proof-peer-matched
+    guardrail: "all peer logos Gate-cleared"
+    targets:
+      - {kind: text, section_id: prove, slot_id: prove_intro}
+    title: "Maya's peer-matched prove card"
+    story: "Known exec, logged in via email nurture. The prove card shows only Gate-cleared peer logos from the prebuilt set — peer-matched, never invented."
+    email_preview:
+      subject: "Maya — engineering leaders who run the catalyst track"
+      preheader: "Peer proof from teams like yours. Logos cleared, sources attached."
+      cta: "See the peer set →"
+      recipient_hint: "maya.chen@gauntletai.com"
+    query_params:
+      utm_source: hubspot
+      utm_medium: email
+      utm_campaign: catalyst-nurture
+    ip_override: null
+    identity_hint: login_maya
+    landing_url_pattern: "{mount_page}?utm_source=hubspot&utm_medium=email&utm_campaign=catalyst-nurture"
+    console_deep_link_pattern: "{mount_dev}?utm_source=hubspot&utm_medium=email&utm_campaign=catalyst-nurture&as=known"
+    tags: [wf-design, social-proof, peer-logos]
+    featured: false
+
+  - id: WF-DESIGN-G09
+    tenant: gauntlet
+    channel: direct
+    audience: consumer
+    element: "cta (text)"
+    mode: gen
+    workflow: realtime-by-key
+    latency: "<100 ms"
+    strategy: scarcity-honest
+    guardrail: "a scarcity claim must be a provable deadline or it's dropped"
+    targets:
+      - {kind: text, section_id: cta, slot_id: cta_gen}
+    title: "Returning high-intent — CTA cache-by-key"
+    story: "Known return visit. The generative CTA serves cache-by-key (<100 ms, same key → same variant); a scarcity claim without a provable deadline is dropped from the pool."
+    query_params: {}
+    ip_override: null
+    identity_hint: known
+    landing_url_pattern: "{mount_page}"
+    console_deep_link_pattern: "{mount_dev}?as=known"
+    tags: [wf-design, generative, cache-by-key]
+    featured: false
+
+  - id: WF-DESIGN-G10
+    tenant: gauntlet
+    channel: ads-x
+    audience: business
+    element: "challenger body (text)"
+    mode: det
+    workflow: realtime
+    latency: "0 ms"
+    strategy: objection-reframe
+    guardrail: "reframe at allude; blocked_say recite console-only"
+    targets:
+      - {kind: text, section_id: challenger, slot_id: challenger_body}
+    title: "v03 cost objection — reframe at allude"
+    story: "X ad click on the cost-objection creative (utm_content=v03). The challenger body reframes the objection at allude; the blocked_say recite exists only on the console."
+    query_params:
+      utm_source: x
+      utm_medium: paid
+      utm_campaign: x-device-wifi-office
+      utm_content: v03
+    ip_override: null
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}?utm_source=x&utm_medium=paid&utm_campaign=x-device-wifi-office&utm_content=v03"
+    console_deep_link_pattern: "{mount_dev}?utm_source=x&utm_medium=paid&utm_campaign=x-device-wifi-office&utm_content=v03&as=anon"
+    tags: [wf-design, v03, objection-reframe]
+    featured: false
+
+  # ── WF-DESIGN · Planet ─────────────────────────────────────────────────
+  - id: WF-DESIGN-P01
+    tenant: planet
+    channel: direct
+    audience: consumer
+    element: "hero (text)"
+    mode: det
+    workflow: realtime
+    latency: "0 ms"
+    strategy: neutral-baseline
+    guardrail: "no region line ships without confidence"
+    targets:
+      - {kind: text, section_id: hero, slot_id: hero_sub}
+    title: "Self-serve tier 0 — neutral hero"
+    story: "Direct hit with no location confidence. The neutral hero ships; no region line appears without a confident resolve."
+    query_params: {}
+    ip_override: null
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}"
+    console_deep_link_pattern: "{mount_dev}?as=anon"
+    tags: [wf-design, tier0, neutral-baseline]
+    featured: false
+
+  - id: WF-DESIGN-P02
+    tenant: planet
+    channel: direct
+    audience: business
+    element: "location line + region backdrop"
+    mode: det-text/gen-image
+    workflow: image-prebuilt
+    latency: "0 ms"
+    strategy: location-relevance
+    guardrail: "region scale only; city/field = hold"
+    targets:
+      - {kind: text, section_id: location, slot_id: hero_location}
+      - {kind: image, section_id: location, surface_id: region_backdrop}
+    title: "Midwest ag — prebuilt crop-belt backdrop"
+    story: "Ag enterprise arrival from a Midwest netblock. Location line + prebuilt top-crop-belt backdrop paint in 0 ms; region scale only — city and field stay hold."
+    query_params: {}
+    ip_override: "19.7.0.1"
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}?ip=19.7.0.1"
+    console_deep_link_pattern: "{mount_dev}?ip=19.7.0.1&as=anon"
+    tags: [wf-design, location, prebuild]
+    featured: false
+
+  - id: WF-DESIGN-P03
+    tenant: planet
+    channel: ads-x
+    audience: business
+    element: "hero headline + location line"
+    mode: det
+    workflow: realtime
+    latency: "0 ms"
+    strategy: message-match
+    guardrail: "theater-line for defense, never visitor loc"
+    targets:
+      - {kind: text, section_id: hero, slot_id: hero_sub}
+      - {kind: text, section_id: location, slot_id: hero_location}
+    title: "v01 crop belts — message-matched pair"
+    story: "X location-targeted creative (utm_content=v01). Headline + location line message-match the ad; defense theater copy never uses the visitor's location."
+    query_params:
+      utm_source: x
+      utm_medium: paid
+      utm_campaign: x-location-crop-belts
+      utm_content: v01
+    ip_override: null
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}?utm_source=x&utm_medium=paid&utm_campaign=x-location-crop-belts&utm_content=v01"
+    console_deep_link_pattern: "{mount_dev}?utm_source=x&utm_medium=paid&utm_campaign=x-location-crop-belts&utm_content=v01&as=anon"
+    tags: [wf-design, v01, message-match]
+    featured: false
+
+  - id: WF-DESIGN-P04
+    tenant: planet
+    channel: ads-x
+    audience: business
+    element: "hero image (theater, not visitor region)"
+    mode: gen
+    workflow: image-realtime
+    latency: "~2 s"
+    strategy: authority
+    guardrail: "uses AOR/theater, never the visitor's location"
+    targets:
+      - {kind: image, section_id: hero, surface_id: hero}
+    title: "v02 defense — theater image, not your region"
+    story: "Defense/sovereign creative (utm_content=v02). The hero image generates in realtime for the AOR/theater — never for the visitor's own region."
+    query_params:
+      utm_source: x
+      utm_medium: paid
+      utm_campaign: x-lookalike-defense
+      utm_content: v02
+    ip_override: null
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}?utm_source=x&utm_medium=paid&utm_campaign=x-lookalike-defense&utm_content=v02"
+    console_deep_link_pattern: "{mount_dev}?utm_source=x&utm_medium=paid&utm_campaign=x-lookalike-defense&utm_content=v02&as=anon"
+    tags: [wf-design, v02, defense-theater]
+    featured: false
+
+  - id: WF-DESIGN-P05
+    tenant: planet
+    channel: search
+    audience: all
+    element: "location line"
+    mode: det
+    workflow: realtime
+    latency: "0 ms"
+    strategy: location-relevance
+    guardrail: "default daily-coverage line at region scale"
+    targets:
+      - {kind: text, section_id: location, slot_id: hero_location}
+    title: "Organic search — daily-coverage line"
+    story: "Google arrival with a region resolve. The default daily-coverage location line ships at region scale."
+    query_params:
+      ref: google
+    ip_override: null
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}?ref=google"
+    console_deep_link_pattern: "{mount_dev}?ref=google&as=anon"
+    tags: [wf-design, search, location]
+    featured: false
+
+  - id: WF-DESIGN-P06
+    tenant: planet
+    channel: email
+    audience: consumer
+    element: "hero eyebrow + cta"
+    mode: det
+    workflow: realtime
+    latency: "0 ms"
+    strategy: reciprocity-relief-context
+    guardrail: "relief-org context; income/PII = hold"
+    targets:
+      - {kind: text, section_id: hero, slot_id: hero_eyebrow}
+      - {kind: text, section_id: cta, slot_id: final_cta}
+    title: "Kofi's crisis-responder send"
+    story: "Crisis-responders campaign, magic token. Eyebrow + CTA personalize in relief-org context; income and PII stay hold everywhere."
+    email_preview:
+      subject: "Kofi — imagery when minutes matter"
+      preheader: "Daily coverage for response teams. Your trial link inside."
+      cta: "Open responder trial →"
+      recipient_hint: "kofi.adeyemi@reliefresponse.org"
+    query_params:
+      utm_source: hubspot
+      utm_medium: email
+      utm_campaign: crisis-responders
+      e: "${magic:kofi}"
+    ip_override: null
+    identity_hint: token_kofi
+    landing_url_pattern: "{mount_page}?utm_source=hubspot&utm_medium=email&utm_campaign=crisis-responders&e=${magic:kofi}"
+    console_deep_link_pattern: "{mount_dev}?utm_source=hubspot&utm_medium=email&utm_campaign=crisis-responders&e=${magic:kofi}&as=known"
+    tags: [wf-design, magic-token, hold]
+    featured: false
+
+  - id: WF-DESIGN-P07
+    tenant: planet
+    channel: email
+    audience: business
+    element: "prove intro (text)"
+    mode: gen
+    workflow: text-prebuilt
+    latency: "0 ms"
+    strategy: authority
+    guardrail: "Gate-bounded; declared goals say-level"
+    targets:
+      - {kind: text, section_id: prove, slot_id: prove_intro_gen}
+    title: "Amara — Gate-bounded generative prove intro"
+    story: "Enterprise agronomy contact, logged in. The prove intro serves from a Gate-cleared prebuilt generative pool; her declared goals ride at say level."
+    email_preview:
+      subject: "Amara — proof models for agronomy teams"
+      preheader: "Field-scale evidence with sources attached. Your enterprise path."
+      cta: "Review the proof →"
+      recipient_hint: "amara.diallo@meridianagronomy.com"
+    query_params:
+      utm_source: hubspot
+      utm_medium: email
+      utm_campaign: enterprise-nurture
+    ip_override: null
+    identity_hint: login_amara
+    landing_url_pattern: "{mount_page}?utm_source=hubspot&utm_medium=email&utm_campaign=enterprise-nurture"
+    console_deep_link_pattern: "{mount_dev}?utm_source=hubspot&utm_medium=email&utm_campaign=enterprise-nurture&as=known"
+    tags: [wf-design, generative, prebuilt-pool]
+    featured: false
+
+  - id: WF-DESIGN-P08
+    tenant: planet
+    channel: ads-meta
+    audience: all
+    element: "section backdrop image"
+    mode: gen
+    workflow: image-realtime
+    latency: "~2–3 s swap"
+    strategy: curiosity
+    guardrail: "long-tail region → realtime; common → prebuilt"
+    targets:
+      - {kind: image, section_id: prove, surface_id: section_backdrop}
+    title: "Long-tail region — realtime backdrop"
+    story: "Awareness click from a long-tail region. The section backdrop generates in realtime (~2–3 s swap); common crop-belt regions stay prebuilt at 0 ms."
+    query_params:
+      utm_source: meta
+      utm_medium: paid
+      utm_campaign: meta-awareness-longtail
+    ip_override: null
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}?utm_source=meta&utm_medium=paid&utm_campaign=meta-awareness-longtail"
+    console_deep_link_pattern: "{mount_dev}?utm_source=meta&utm_medium=paid&utm_campaign=meta-awareness-longtail&as=anon"
+    tags: [wf-design, realtime-image, long-tail]
+    featured: false
+
+  - id: WF-DESIGN-P09
+    tenant: planet
+    channel: direct
+    audience: business
+    element: "compare emphasis (text)"
+    mode: det
+    workflow: realtime
+    latency: "0 ms"
+    strategy: loss-aversion
+    guardrail: "no competitor named; comparatives blocked"
+    targets:
+      - {kind: text, section_id: compare, slot_id: compare_emphasis}
+    title: "Cat-risk desk — compare shift, no competitor"
+    story: "Financial-services netblock with a cat-risk read. The compare section shifts emphasis with no competitor named — comparatives are structurally blocked by the copy gate."
+    query_params: {}
+    ip_override: "148.86.0.1"
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}?ip=148.86.0.1"
+    console_deep_link_pattern: "{mount_dev}?ip=148.86.0.1&as=anon"
+    tags: [wf-design, insurance, copy-gate]
+    featured: false
+
+  - id: WF-DESIGN-P10
+    tenant: planet
+    channel: direct
+    audience: consumer
+    element: "cta (text)"
+    mode: gen
+    workflow: realtime-by-key
+    latency: "<100 ms"
+    strategy: scarcity-honest
+    guardrail: "provable deadline only"
+    targets:
+      - {kind: text, section_id: cta, slot_id: cta_gen}
+    title: "Returning known — CTA cache-by-key"
+    story: "Known return visit. The generative CTA serves cache-by-key; only a provable deadline may carry scarcity."
+    query_params: {}
+    ip_override: null
+    identity_hint: known
+    landing_url_pattern: "{mount_page}"
+    console_deep_link_pattern: "{mount_dev}?as=known"
+    tags: [wf-design, generative, cache-by-key]
+    featured: false
+
+  # ── WF-DESIGN · SkyFi ──────────────────────────────────────────────────
+  - id: WF-DESIGN-S01
+    tenant: skyfi
+    channel: direct
+    audience: consumer
+    element: "hero (text)"
+    mode: det
+    workflow: realtime
+    latency: "0 ms"
+    strategy: neutral-baseline
+    guardrail: "no location/sector claim without confidence"
+    targets:
+      - {kind: text, section_id: hero, slot_id: hero_sub}
+    title: "Tier-0 arrival — neutral hero"
+    story: "Anonymous first visit, no signals. The neutral hero ships — no location or sector claim without a confident resolve."
+    query_params: {}
+    ip_override: null
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}"
+    console_deep_link_pattern: "{mount_dev}?as=anon"
+    tags: [wf-design, tier0, neutral-baseline]
+    featured: false
+
+  - id: WF-DESIGN-S02
+    tenant: skyfi
+    channel: direct
+    audience: business
+    element: "hero sub + region×sector backdrop"
+    mode: det-text/gen-image
+    workflow: image-realtime
+    latency: "~2 s gradient→swap, cached by key"
+    strategy: location-relevance
+    guardrail: "basin/region scale; exact mine = hold (arm Ex)"
+    targets:
+      - {kind: text, section_id: hero, slot_id: hero_sub}
+      - {kind: image, section_id: hero, surface_id: hero}
+    title: "AZ mining — watch the backdrop generate"
+    story: "Mining operator (CRM: Phoenix, AZ · Mining). The region×sector backdrop generates live (~2 s gradient→swap, cached by key); basin scale only — the exact mine is hold (arm Ex)."
+    query_params: {}
+    ip_override: null
+    identity_hint: known
+    landing_url_pattern: "{mount_page}"
+    console_deep_link_pattern: "{mount_dev}?as=known"
+    tags: [wf-design, realtime-image, mining]
+    featured: false
+
+  - id: WF-DESIGN-S03
+    tenant: skyfi
+    channel: ads-x
+    audience: business
+    element: "hero headline + hero image"
+    mode: det-text/gen-image
+    workflow: image-realtime
+    latency: "~2 s"
+    strategy: message-match
+    guardrail: "generated backdrop is region-generic, license-safe"
+    targets:
+      - {kind: text, section_id: hero, slot_id: hero_sub}
+      - {kind: image, section_id: hero, surface_id: hero}
+    title: "'monitor your site' — matched headline + live backdrop"
+    story: "Paid X click (utm_content=sv01). Headline message-matches the promise; the realtime backdrop stays region-generic and license-safe."
+    query_params:
+      utm_source: x
+      utm_medium: paid
+      utm_campaign: x-monitor-your-site
+      utm_content: sv01
+    ip_override: null
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}?utm_source=x&utm_medium=paid&utm_campaign=x-monitor-your-site&utm_content=sv01"
+    console_deep_link_pattern: "{mount_dev}?utm_source=x&utm_medium=paid&utm_campaign=x-monitor-your-site&utm_content=sv01&as=anon"
+    tags: [wf-design, sv01, message-match]
+    featured: false
+
+  - id: WF-DESIGN-S04
+    tenant: skyfi
+    channel: ads-google
+    audience: all
+    element: "hero sub (text)"
+    mode: gen
+    workflow: text-prebuilt
+    latency: "0 ms"
+    strategy: authority
+    guardrail: "Gate-bounded; no 'clearest/best' superlative"
+    targets:
+      - {kind: text, section_id: hero, slot_id: hero_sub_gen}
+    title: "'satellite imagery on demand' — cleared pool only"
+    story: "Google search-ad arrival. The hero sub serves only from a Gate-cleared prebuilt generative pool — no 'clearest/best' superlative can ship."
+    query_params:
+      utm_source: google
+      utm_medium: cpc
+      utm_campaign: satellite-imagery-on-demand
+    ip_override: null
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}?utm_source=google&utm_medium=cpc&utm_campaign=satellite-imagery-on-demand"
+    console_deep_link_pattern: "{mount_dev}?utm_source=google&utm_medium=cpc&utm_campaign=satellite-imagery-on-demand&as=anon"
+    tags: [wf-design, generative, prebuilt-pool]
+    featured: false
+
+  - id: WF-DESIGN-S05
+    tenant: skyfi
+    channel: search
+    audience: all
+    element: "location line (text)"
+    mode: det
+    workflow: realtime
+    latency: "0 ms"
+    strategy: location-relevance
+    guardrail: "region scale; declared-AOI = say, else hold"
+    targets:
+      - {kind: text, section_id: location, slot_id: hero_location}
+    title: "Organic search — region-scale location line"
+    story: "Google arrival with a region resolve. The location line ships at region scale; a declared AOI is say, everything else holds."
+    query_params:
+      ref: google
+    ip_override: null
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}?ref=google"
+    console_deep_link_pattern: "{mount_dev}?ref=google&as=anon"
+    tags: [wf-design, search, location]
+    featured: false
+
+  - id: WF-DESIGN-S06
+    tenant: skyfi
+    channel: email
+    audience: business
+    element: "prove card (project-region, text)"
+    mode: det
+    workflow: realtime
+    latency: "0 ms"
+    strategy: social-proof-sector-peer
+    guardrail: "peer refs Gate-cleared"
+    targets:
+      - {kind: text, section_id: how, slot_id: how_intro}
+    title: "Construction/EPC — sector-peer proof"
+    story: "Known EPC account via email nurture. The prove card shows Gate-cleared sector-peer references only, framed to the project region."
+    email_preview:
+      subject: "Noor — progress imagery for EPC programs"
+      preheader: "Peer references from construction programs like yours."
+      cta: "See the sector proof →"
+      recipient_hint: "noor.haddad@terrafirmepc.com"
+    query_params:
+      utm_source: hubspot
+      utm_medium: email
+      utm_campaign: tasking-program
+    ip_override: null
+    identity_hint: known
+    landing_url_pattern: "{mount_page}?utm_source=hubspot&utm_medium=email&utm_campaign=tasking-program"
+    console_deep_link_pattern: "{mount_dev}?utm_source=hubspot&utm_medium=email&utm_campaign=tasking-program&as=known"
+    tags: [wf-design, social-proof, construction]
+    featured: false
+
+  - id: WF-DESIGN-S07
+    tenant: skyfi
+    channel: email
+    audience: business
+    element: "hero eyebrow + cta"
+    mode: det
+    workflow: realtime
+    latency: "0 ms"
+    strategy: authority
+    guardrail: "strict hold: AOR framing, never a specific asset"
+    targets:
+      - {kind: text, section_id: hero, slot_id: hero_eyebrow}
+      - {kind: text, section_id: cta, slot_id: final_cta}
+    title: "Defense/gov — AOR framing under strict hold"
+    story: "Cleared defense contact via magic token. Eyebrow + CTA frame at AOR scale under strict hold — never a specific asset."
+    email_preview:
+      subject: "Ingrid — coverage briefs at AOR scale"
+      preheader: "Theater-scale framing. Nothing asset-specific, ever."
+      cta: "Open the AOR brief →"
+      recipient_hint: "ingrid.solheim@nordicaerodefence.com"
+    query_params:
+      utm_source: hubspot
+      utm_medium: email
+      utm_campaign: defense-aor-brief
+      e: "${magic:ingrid}"
+    ip_override: null
+    identity_hint: token_ingrid
+    landing_url_pattern: "{mount_page}?utm_source=hubspot&utm_medium=email&utm_campaign=defense-aor-brief&e=${magic:ingrid}"
+    console_deep_link_pattern: "{mount_dev}?utm_source=hubspot&utm_medium=email&utm_campaign=defense-aor-brief&e=${magic:ingrid}&as=known"
+    tags: [wf-design, defense, strict-hold]
+    featured: false
+
+  - id: WF-DESIGN-S08
+    tenant: skyfi
+    channel: ads-meta
+    audience: all
+    element: "section backdrop image"
+    mode: gen
+    workflow: image-realtime
+    latency: "~2–3 s swap"
+    strategy: curiosity
+    guardrail: "long-tail → realtime; anti-surveillance mood rules"
+    targets:
+      - {kind: image, section_id: how, surface_id: section_backdrop}
+    title: "Rare sector×region — realtime under mood rules"
+    story: "Awareness click on a rare sector×region pair. The backdrop generates in realtime under the anti-surveillance mood rules; long-tail never blocks paint."
+    query_params:
+      utm_source: meta
+      utm_medium: paid
+      utm_campaign: meta-awareness-rare-sector
+    ip_override: null
+    identity_hint: anon
+    landing_url_pattern: "{mount_page}?utm_source=meta&utm_medium=paid&utm_campaign=meta-awareness-rare-sector"
+    console_deep_link_pattern: "{mount_dev}?utm_source=meta&utm_medium=paid&utm_campaign=meta-awareness-rare-sector&as=anon"
+    tags: [wf-design, realtime-image, anti-surveillance]
+    featured: false
+
+  - id: WF-DESIGN-S09
+    tenant: skyfi
+    channel: direct
+    audience: business
+    element: "hero image (their basin)"
+    mode: gen
+    workflow: image-realtime
+    latency: "~2 s"
+    strategy: location-relevance
+    guardrail: "exact-AOI allowed because declared; receipt says 'you told us'"
+    targets:
+      - {kind: image, section_id: hero, surface_id: hero}
+    title: "Declared AOI — exact render, receipted"
+    story: "First-party declared AOI (their own quarry). The hero renders the exact basin — allowed because they told us; the receipt says so."
+    query_params: {}
+    ip_override: null
+    identity_hint: known
+    landing_url_pattern: "{mount_page}"
+    console_deep_link_pattern: "{mount_dev}?as=known"
+    tags: [wf-design, declared-aoi, receipt]
+    featured: false
+
+  - id: WF-DESIGN-S10
+    tenant: skyfi
+    channel: direct
+    audience: business
+    element: "compare emphasis (text)"
+    mode: gen
+    workflow: realtime-by-key
+    latency: "<100 ms"
+    strategy: loss-aversion
+    guardrail: "no competitor; comparatives blocked"
+    targets:
+      - {kind: text, section_id: compare, slot_id: compare_gen}
+    title: "Cat-risk return — generative compare, no rivals"
+    story: "Returning insurance cat-risk account. The compare emphasis serves generative cache-by-key with competitors and comparatives structurally blocked."
+    query_params: {}
+    ip_override: null
+    identity_hint: known
+    landing_url_pattern: "{mount_page}"
+    console_deep_link_pattern: "{mount_dev}?as=known"
+    tags: [wf-design, generative, copy-gate]
+    featured: false

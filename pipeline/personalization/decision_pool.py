@@ -429,9 +429,36 @@ class DecisionPool:
 # shared per-gate DecisionPool over the real Gate with the generative candidate
 # provider (pipeline/personalization/generative_text.py). Lazy import — the
 # provider imports this module for the DecisionPool class.
+#
+# The seam returns plain variant RECORDS, not pydantic models: consumers collect
+# a variant's visible text by duck-typing the ("headline", "template", "text",
+# "copy", "line") fields (the locked harness's _variant_text), and pydantic's
+# BaseModel.copy method is a truthy non-text attribute that would leak into that
+# collection. The record carries exactly the cleared variant's payload fields.
 # --------------------------------------------------------------------------- #
-def cleared_pool(tenant: str, section_id: str, target_id: str) -> list[Variant]:
+class ClearedVariant:
+    """Read-only record of one Gate-cleared variant (the module-seam shape)."""
+
+    __slots__ = ("variant_id", "arm_label", "segment", "channel",
+                 "headline", "template", "claim_ids", "planted_lie")
+
+    def __init__(self, v: Variant):
+        self.variant_id = v.variant_id
+        self.arm_label = v.arm_label
+        self.segment = v.segment
+        self.channel = v.channel
+        self.headline = v.headline
+        self.template = v.template
+        self.claim_ids = list(v.claim_ids)
+        self.planted_lie = v.planted_lie
+
+    def __repr__(self) -> str:                       # pragma: no cover - debug aid
+        return f"ClearedVariant({self.variant_id!r})"
+
+
+def cleared_pool(tenant: str, section_id: str, target_id: str) -> list[ClearedVariant]:
     """Gate-cleared pool for one registry target, from the shared default pool."""
     from pipeline.personalization import generative_text as GT
-    return GT.pool_for(tenant, section_id, target_id).cleared_pool(
+    pool = GT.pool_for(tenant, section_id, target_id).cleared_pool(
         tenant, section_id, target_id)
+    return [ClearedVariant(v) for v in pool]

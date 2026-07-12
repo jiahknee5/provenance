@@ -6,7 +6,12 @@
 # at BASIN/REGION scale; exact-AOI is hold, arm Ex, unless declared first-party → say
 # with the "you told us" receipt — the S09 flip).
 # Image workflows: realtime everywhere — rules/skyfi_prebuild.yaml is empty by design
-# (S02 is the signature realtime beat). Generative slots land with T-05/T-08 wiring.
+# (S02 is the signature realtime beat).
+#
+# T-08 (W3): generative rows seeded per the WF-DESIGN matrix — S04 hero_sub_gen
+# (gen, prebuilt pool), S10 compare_gen (gen, realtime cache-by-key), S08
+# section_backdrop (realtime image). Generative slots serve ONLY from the
+# Gate-cleared decision pool (skyfi_tenant rule set).
 
 version: 1
 tenant: skyfi
@@ -45,6 +50,16 @@ sections:
         source: catalog
         claims: []
         prompt: ""
+      - slot_id: hero_sub_gen
+        label: "Hero sub (generative pool)"
+        mode: generative
+        workflow: prebuilt
+        strategy: authority
+        policy: allude
+        source: catalog
+        claims: []
+        prompt: "Hero sub for 'satellite imagery on demand' search-ad arrivals: authority framing, Gate-bounded — no 'clearest/best' superlatives, no competitor names, no invented numbers."
+        gate: skyfi_tenant
     image_targets:
       - surface_id: hero
         label: "Hero backdrop (region×sector)"
@@ -95,7 +110,12 @@ sections:
         source: catalog
         claims: []
         prompt: ""
-    image_targets: []
+    image_targets:
+      - surface_id: section_backdrop
+        label: "How-it-works backdrop (sector×region)"
+        workflow: realtime
+        intent_rules: inherit
+        guardrails: inherit
     guardrails: {}
     evals: [gate_pass, hold_never_ships]
   - id: pricing
@@ -133,6 +153,16 @@ sections:
         source: catalog
         claims: []
         prompt: ""
+      - slot_id: compare_gen
+        label: "Compare emphasis (generative, cache-by-key)"
+        mode: generative
+        workflow: realtime
+        strategy: loss-aversion
+        policy: allude
+        source: catalog
+        claims: []
+        prompt: "Compare-section emphasis for returning insurance cat-risk accounts: loss-aversion framing with competitors and comparatives structurally blocked — never name a company, no superlatives, no invented numbers."
+        gate: skyfi_tenant
     image_targets: []
     guardrails: {}
     evals: [gate_pass, hold_never_ships]

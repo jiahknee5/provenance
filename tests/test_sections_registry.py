@@ -1,8 +1,16 @@
 """Section registry (T-01, S1/R30) — round-trip, validation rejections, seed completeness.
 
 The registry seed is DESCRIPTIVE (Art IV): rules/{gauntlet,planet}_sections.yaml must
-carry exactly the slot() ids build_page records in copy_diff today — no slot missing,
-none invented. Validation rules are pinned by 04-spec/contracts/registry-schema.md.
+carry exactly the slot() ids build_page records in copy_diff today — no DETERMINISTIC
+slot missing, none invented. Validation rules are pinned by
+04-spec/contracts/registry-schema.md.
+
+T-08 (W3) architecture update: the WF-DESIGN matrix's generative rows are seeded in the
+registries (G05/G09, P07/P10, S04/S10 gen text slots + the G06/P08 section_backdrop and
+P02 region_backdrop image surfaces). Generative slots are POOL-served
+(decision_pool.cleared_pool over the real Gate), not copy_diff slot-fill, so the
+build_page parity pins below apply to deterministic slots and the generative seed is
+pinned explicitly per tenant.
 """
 from __future__ import annotations
 
@@ -33,7 +41,8 @@ def test_round_trip_gauntlet_sections():
         assert s["personalize"] is True
     hero = SR.get_section("gauntlet", "hero")
     assert hero["region"] == "hero"
-    assert [t["slot_id"] for t in hero["text_targets"]] == ["hero_eyebrow", "hero_sub", "hero_cta"]
+    assert [t["slot_id"] for t in hero["text_targets"]] == \
+        ["hero_eyebrow", "hero_sub", "hero_cta", "hero_sub_gen"]
     assert [t["surface_id"] for t in hero["image_targets"]] == ["hero", "og"]
 
 
@@ -53,17 +62,32 @@ def test_get_section_unknown_id_raises():
 def test_flattened_targets_carry_section_id():
     for t in SR.list_text_targets("gauntlet"):
         assert t["section_id"] in {"hero", "prove", "challenger", "compare", "cta"}
-        assert t["mode"] == "deterministic" and t["workflow"] == "realtime"
-        assert not t["prompt"]
+        if t["mode"] == "deterministic":
+            # deterministic slot-fill stays realtime/$0 with no prompt (the T-01 seed)
+            assert t["workflow"] == "realtime"
+            assert not t["prompt"]
+        else:
+            # T-08 generative rows: pool-served, prompt + gate mandatory (schema rules)
+            assert t["mode"] == "generative"
+            assert t["workflow"] in {"prebuilt", "realtime"}
+            assert t["prompt"] and t["gate"]
     imgs = {t["surface_id"]: t for t in SR.list_image_targets("gauntlet")}
-    assert set(imgs) == {"hero", "og"}
-    assert all(t["section_id"] == "hero" for t in imgs.values())
+    assert set(imgs) == {"hero", "og", "section_backdrop"}
+    assert imgs["hero"]["section_id"] == "hero"
+    assert imgs["og"]["section_id"] == "hero"
+    assert imgs["section_backdrop"]["section_id"] == "prove"      # G06 backdrop row
 
 
 def test_image_workflows_mirror_prebuild_manifests():
-    # gauntlet_prebuild.yaml flags hero+og states → prebuilt; planet has no manifest → realtime
-    assert {t["workflow"] for t in SR.list_image_targets("gauntlet")} == {"prebuilt"}
-    assert {t["workflow"] for t in SR.list_image_targets("planet")} == {"realtime"}
+    # gauntlet_prebuild.yaml flags hero+og states → prebuilt; the prove
+    # section_backdrop has no manifest entry → realtime (G06).
+    g = {t["surface_id"]: t["workflow"] for t in SR.list_image_targets("gauntlet")}
+    assert g == {"hero": "prebuilt", "og": "prebuilt", "section_backdrop": "realtime"}
+    # planet_prebuild.yaml flags ONLY the location region_backdrop (P02, S3.3
+    # manifest accounting); hero/og and the prove backdrop stay realtime.
+    p = {t["surface_id"]: t["workflow"] for t in SR.list_image_targets("planet")}
+    assert p == {"hero": "realtime", "og": "realtime",
+                 "region_backdrop": "prebuilt", "section_backdrop": "realtime"}
 
 
 def test_loader_caches_like_demo_nav():
@@ -181,7 +205,9 @@ def test_accepts_valid_registry_and_generative_shape():
 
 
 # --------------------------------------------------------------------------- #
-# 3 · Seed completeness — every build_page slot id is in the registry, none extra
+# 3 · Seed completeness — every build_page slot id is in the registry; the
+#     deterministic registry invents none. Generative slots (T-08) are pool-served
+#     (decision_pool.cleared_pool), never copy_diff slot-fill — pinned explicitly.
 # --------------------------------------------------------------------------- #
 def _observed_slot_ids(mod) -> set[str]:
     """Union of copy_diff slot ids across a direct visit and an ad visit whose
@@ -195,18 +221,36 @@ def _observed_slot_ids(mod) -> set[str]:
     return ids
 
 
+def _registry_by_mode(tenant: str) -> tuple[set[str], set[str]]:
+    det = {t["slot_id"] for t in SR.list_text_targets(tenant)
+           if t["mode"] == "deterministic"}
+    gen = {t["slot_id"] for t in SR.list_text_targets(tenant)
+           if t["mode"] == "generative"}
+    return det, gen
+
+
 def test_seed_completeness_gauntlet():
     observed = _observed_slot_ids(GS)
-    registry = {t["slot_id"] for t in SR.list_text_targets("gauntlet")}
-    assert observed - registry == set(), f"build_page slots missing from registry: {observed - registry}"
-    assert registry - observed == set(), f"registry invents slots build_page never ships: {registry - observed}"
+    det, gen = _registry_by_mode("gauntlet")
+    assert observed - (det | gen) == set(), \
+        f"build_page slots missing from registry: {observed - (det | gen)}"
+    assert det - observed == set(), \
+        f"registry invents deterministic slots build_page never ships: {det - observed}"
+    # the T-08 generative seed, exactly (G05 prebuilt pool + G09 cache-by-key)
+    assert gen == {"hero_sub_gen", "cta_gen"}
+    assert gen & observed == set(), "generative slots are pool-served, never copy_diff"
 
 
 def test_seed_completeness_planet():
     observed = _observed_slot_ids(PS)
-    registry = {t["slot_id"] for t in SR.list_text_targets("planet")}
-    assert observed - registry == set(), f"build_page slots missing from registry: {observed - registry}"
-    assert registry - observed == set(), f"registry invents slots build_page never ships: {registry - observed}"
+    det, gen = _registry_by_mode("planet")
+    assert observed - (det | gen) == set(), \
+        f"build_page slots missing from registry: {observed - (det | gen)}"
+    assert det - observed == set(), \
+        f"registry invents deterministic slots build_page never ships: {det - observed}"
+    # the T-08 generative seed, exactly (P07 prebuilt pool + P10 cache-by-key)
+    assert gen == {"prove_intro_gen", "cta_gen"}
+    assert gen & observed == set(), "generative slots are pool-served, never copy_diff"
 
 
 # --------------------------------------------------------------------------- #

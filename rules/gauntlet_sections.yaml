@@ -5,8 +5,14 @@
 #
 # policy = the highest surface level the slot ships TODAY (say-level branches exist
 # for hero_eyebrow/hero_sub via login identity + declared goal; everything else allude).
-# All text targets are deterministic ($0, realtime) — the current provable path.
-# Image workflows: prebuilt because rules/gauntlet_prebuild.yaml flags hero+og states.
+# Deterministic text targets stay $0/realtime — the provable default path.
+# Image workflows: prebuilt because rules/gauntlet_prebuild.yaml flags hero+og states;
+# the prove section_backdrop is registry-driven realtime (no manifest entry).
+#
+# T-08 (W3): generative rows seeded per the WF-DESIGN matrix — G05 hero_sub_gen
+# (gen, prebuilt pool), G09 cta_gen (gen, realtime cache-by-key), G06 section_backdrop
+# (realtime image). Generative slots serve ONLY from the Gate-cleared decision pool
+# (decision_pool.cleared_pool via generative_text.candidates_for).
 
 version: 1
 tenant: gauntlet
@@ -45,6 +51,16 @@ sections:
         source: catalog
         claims: []
         prompt: ""
+      - slot_id: hero_sub_gen
+        label: "Hero sub (generative pool)"
+        mode: generative
+        workflow: prebuilt
+        strategy: loss-aversion-honest
+        policy: allude
+        source: catalog
+        claims: []
+        prompt: "Hero sub for the AI fellowship's 'switch into AI' search-ad arrivals: honest loss-aversion framing, outcome-led — no superlatives, no competitor names, no invented numbers."
+        gate: helix_tenant
     image_targets:
       - surface_id: hero
         label: "Hero background"
@@ -76,7 +92,12 @@ sections:
         source: catalog
         claims: []
         prompt: ""
-    image_targets: []
+    image_targets:
+      - surface_id: section_backdrop
+        label: "Prove section backdrop"
+        workflow: realtime
+        intent_rules: inherit
+        guardrails: inherit
     guardrails: {}
     evals: [gate_pass, hold_never_ships]
   - id: challenger
@@ -142,6 +163,16 @@ sections:
         source: catalog
         claims: []
         prompt: ""
+      - slot_id: cta_gen
+        label: "CTA (generative, cache-by-key)"
+        mode: generative
+        workflow: realtime
+        strategy: scarcity-honest
+        policy: allude
+        source: catalog
+        claims: []
+        prompt: "Closing CTA for returning high-intent visitors: honest scarcity only — a scarcity claim without a provable deadline is dropped; no superlatives, no competitor names, no invented numbers."
+        gate: helix_tenant
     image_targets: []
     guardrails: {}
     evals: [gate_pass, hold_never_ships]
