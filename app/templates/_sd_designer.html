@@ -20,6 +20,8 @@
   .sd-target .tt-head{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#FAFBFC;flex-wrap:wrap}
   .sd-target .tt-head .nm{font-size:12.5px;font-weight:700;color:var(--ink)}
   .sd-target .tt-head .sid{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:var(--muted)}
+  .sd-how{margin-left:auto;font-size:10.5px;font-weight:700;color:var(--brand);white-space:nowrap}
+  .sd-how:hover{color:var(--brand-d);text-decoration:underline}
   .sd-badge{font-size:9.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;border-radius:4px;padding:2px 7px;white-space:nowrap}
   .sd-badge.gate{color:#0a8a4f;background:#e7f6ee}
   .sd-badge.lat.instant{color:#0a8a4f;background:#e7f6ee}
@@ -119,6 +121,7 @@
       <span class="sd-badge lat {{ t.latency.cls }}" data-testid="sd-latency-{{ t.slot_id }}">{{ t.latency.label }}</span>
       <span class="sd-badge cost" data-testid="sd-cost-{{ t.slot_id }}">{{ t.cost }}</span>
       <span class="sd-badge drift" data-testid="sd-drift-{{ t.slot_id }}" title="{{ t.drift.note }}">drift: {{ t.drift.status }} · rules {{ t.drift.rules_version[:8] }}</span>
+      {% if loop.first %}<a class="sd-how" href="/apt/playbook?site={{ SD.tenant }}#copy">How this works →</a>{% endif %}
     </div>
     <div class="sd-ctls">
       <label class="sd-ctl">How the words are made
@@ -210,6 +213,7 @@
       <span class="sd-badge lat {{ t.latency.cls }}" data-testid="sd-latency-{{ t.surface_id }}">{{ t.latency.label }}</span>
       <span class="sd-badge cost" data-testid="sd-cost-{{ t.surface_id }}">{{ t.cost }}</span>
       <span class="sd-badge drift" data-testid="sd-drift-{{ t.surface_id }}" title="{{ t.drift.note }}">drift: {{ t.drift.status }} · rules {{ t.drift.rules_version[:8] }}</span>
+      {% if loop.first %}<a class="sd-how" href="/apt/playbook?site={{ SD.tenant }}#images">How this works →</a>{% endif %}
     </div>
     <div class="sd-imgrid">
       <div class="thumb">
