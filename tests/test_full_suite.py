@@ -1,13 +1,13 @@
-"""Full acceptance suite — the loop's gate (PRD §7, SPEC §E, plan.md exit criteria).
+"""Engine acceptance suite — the loop's gate (PRD §7, SPEC §E, plan.md exit criteria).
 
-Deterministic, offline. Proves the WHOLE site is functioning and aligned to the spine:
-  • every route renders (200),
-  • zero dead internal links / buttons (functional link audit),
-  • the ⌘K palette resolves to real routes,
-  • create-record persists; filter / sort / view do real work,
-  • the composer Gate blocks held facts,
-  • the variant→source receipt drill-down (placement + injection + receipt + blocked-never-selected),
-  • provenance completeness, persona journeys, and one-design consistency across all surfaces.
+Deterministic, offline. After the R38 legacy-plane retirement (T-09) this suite proves the
+ENGINE and the kept surfaces:
+  • the kept routes render (200) with zero dead internal links,
+  • the scene engine, creative agents, and the two-axis Gate (copy / message / sequence),
+  • the deterministic classifier (network type → confidence → tier),
+  • the composer send-check (a `hold` fact can never reach copy),
+  • the variant→source receipt invariants (placement + injection + blocked-never-selected),
+  • provenance completeness and drift pause/unblock.
 """
 from __future__ import annotations
 
@@ -25,17 +25,10 @@ from pipeline.personalization import cloner
 from pipeline.personalization import demo_scenarios as DS
 
 c = TestClient(app)
-TPL = pathlib.Path(__file__).resolve().parents[1] / "app" / "templates"
 
-# Surfaces on the Quiet-Workspace shell.
-SHELL_PAGES = ["composer", "sources"]
-SHELL_ROUTES = ["/composer", "/sources"]
-# All legacy/lab routes (now light) — param routes filled with valid demo values.
-TOKEN = __import__("pipeline.personalization.cohort", fromlist=["x"]).magic_token(
-    __import__("pipeline.personalization.cohort", fromlist=["x"]).COHORT[1])
-LAB_ROUTES = ["/", "/lead", "/personalize", "/observatory", "/costs",
-              "/admin/landings", "/admin/landing/maya", "/google", "/enrichment-catalog",
-              "/lp", "/lp?email=maya.chen@gauntletai.com"]
+# Kept routes (R38): / redirects to the apt sitemap; /lead+/submit feed /site/<token>
+# (property T4's surface); /observatory + /costs are apt-shell dashboards.
+LAB_ROUTES = ["/", "/lead", "/observatory", "/costs", "/enrichment-catalog"]
 
 
 # ---- registered-route matcher (for the dead-link audit) -----------------------
@@ -58,15 +51,15 @@ def _is_registered(path: str) -> bool:
 
 # ============================ render =============================================
 def test_every_route_renders():
-    for route in SHELL_ROUTES + LAB_ROUTES:
+    for route in LAB_ROUTES:
         assert c.get(route).status_code == 200, f"{route} did not render 200"
 
 
 # ============================ functional link/button audit ======================
 def test_no_dead_internal_links_on_any_surface():
-    """Every internal href/action on every surface points at a registered route."""
+    """Every internal href/action on every kept surface points at a registered route."""
     bad = {}
-    for route in SHELL_ROUTES + LAB_ROUTES:
+    for route in LAB_ROUTES:
         html = c.get(route).text
         links = set(re.findall(r'(?:href|action)="(/[^"#?]*)', html))
         for link in links:
@@ -75,18 +68,6 @@ def test_no_dead_internal_links_on_any_surface():
             if not _is_registered(link):
                 bad.setdefault(route, set()).add(link)
     assert not bad, f"dead internal links: { {k: sorted(v) for k, v in bad.items()} }"
-
-
-def test_no_styled_button_without_target_in_shell_templates():
-    """The original bug: an <a class="q-btn ..."> with no href is a dead button. Forbid it."""
-    offenders = {}
-    for name in SHELL_PAGES + ["shell"]:
-        body = (TPL / f"{name}.html").read_text()
-        for m in re.finditer(r'<a\b[^>]*class="[^"]*\bq-btn\b[^"]*"[^>]*>', body):
-            tag = m.group(0)
-            if "href=" not in tag:
-                offenders.setdefault(name, []).append(tag[:70])
-    assert not offenders, f"dead q-btn anchors (no href): {offenders}"
 
 
 def test_scene_engine_deterministic_and_sourced():
@@ -202,15 +183,6 @@ def test_sequence_gate_rejects_single_touch_and_dupes():
     assert CR.verify_sequence(["hook: hiring", "hook: funding", "breakup"])["ok"] is True
 
 
-def test_policies_message_hygiene_is_locked():
-    """Outbound message hygiene (one-CTA, word cap, no cold calendar link) is a locked anti-slop standard."""
-    from app import policies as P
-    cards = P._antislop_cards()
-    assert any("One ask" in card["name"] for card in cards) and all(card["rule"] == "block" for card in cards)
-    t = c.get("/policies").text
-    assert "One ask per message" in t and "cold first touch" in t                      # rendered, locked
-
-
 def test_classifier_confidence_and_tier():
     """The deterministic router: network type → per-field confidence → personalization tier."""
     from pipeline.personalization import scene as SC
@@ -263,64 +235,6 @@ def test_tier3_competitor_agent_is_gated():
     assert d["blocked_example"]["ok"] is False                         # the named-competitor arm is blocked
 
 
-def test_policies_corpus_and_claims_model():
-    """Policies lead with the corpus (cite-or-don't-say) + an approved/forbidden claim list."""
-    t = c.get("/policies").text
-    assert c.get("/policies").status_code == 200
-    for tab in ('data-tab="corpus"', 'data-tab="claims"', 'data-tab="provability"',
-                'data-tab="disclosure"', 'data-tab="antislop"', 'data-tab="data"'):
-        assert tab in t
-    # corpus docs editable; claims have a can-say (with cite) + a cannot-say editor
-    assert 'name="c_name"' in t and 'name="cs_claim"' in t and 'name="cs_cite"' in t and 'name="cannot"' in t
-    # provability is the locked Gate, framed around grounded-in-corpus + citation
-    assert "platform standard · inviolable" in t and "grounded in the corpus" in t.lower() and "cite" in t.lower()
-
-
-def test_policies_edit_persists_and_resets():
-    """Tenant edits (a corpus doc + a forbidden claim + a disclosure rule) persist; reset reverts."""
-    from app import policies as P
-    P._clear_overrides()
-    assert any("Involuntary" in d["name"] for d in P._disclosure({}))   # a seed default is present
-    c.post("/policies/save", data={
-        "c_name": "Trust center", "c_kind": "url", "c_ref": "https://x/trust",
-        "cs_claim": "SOC 2 Type II since 2024", "cs_cite": "Trust center",
-        "cannot": "FDA-approved", "d_name": "First-party", "d_desc": "say it", "d_rule": "say",
-        "sensitive": "biometrics", "consent_required": "on"})
-    ovr = P._overrides()
-    assert ovr["corpus"][0]["name"] == "Trust center" and ovr["corpus"][0]["kind"] == "url"
-    assert ovr["can_say"][0]["cite"] == "Trust center" and "FDA-approved" in ovr["cannot_say"]
-    assert ovr["disclosure"][0]["rule"] == "say"               # tenant-set disclosure rule persisted
-    # the Gate's provability rules are code-defined — never part of the tenant override
-    assert "corpus" not in str(P._provability_cards()) or all(card["rule"] for card in P._provability_cards())
-    c.post("/policies/reset")
-    assert P._overrides() == {}                                # back to defaults
-
-
-def test_corpus_files_are_grounded_and_served():
-    """Seed corpus docs carry real (synthetic) content, served for citation + the View modal."""
-    from app import policies as P
-    seeded = [d for d in P._corpus({}) if d["hasfile"]]
-    assert len(seeded) >= 4                                    # the synthetic files exist on disk
-    body = c.get("/policies/corpus/product-one-pager").text
-    assert "12-week" in body and "cite" in body.lower()        # practical + on-thesis content
-    assert c.get("/policies/corpus/pricing-packaging").text.count("$12,000") >= 1
-    assert c.get("/policies/corpus/nope-not-real").status_code == 404   # unknown slug is honest
-
-
-def test_archive_moves_noncore_surfaces_off_the_nav():
-    """Non-core/lab surfaces are off the sidebar and collected in /archive; routes still resolve."""
-    assert c.get("/archive").status_code == 200
-    from app import archive as AR
-    lab = [it["route"] for g in AR.ARCHIVE if g["group"] != "Internal decks" for it in g["items"]]
-    assert "/personalize" in lab and "/enrichment-catalog" in lab
-    for rt in lab:
-        assert c.get(rt).status_code == 200, rt              # every archived surface still works
-    shell = c.get("/sources").text
-    sidebar = shell.split("q-cmdk-scrim")[0]                 # nav markup, before the ⌘K palette
-    assert 'href="/archive"' in sidebar                      # Archive reachable from the shell
-    assert 'href="/personalize"' not in sidebar              # but the lab surfaces are off the sidebar
-
-
 def test_resolve_ip_is_honest_offline():
     from pipeline.personalization import scene as SC
     d = SC.resolve_ip("10.0.0.1")   # private — no network, honest reason, no captured data
@@ -353,11 +267,6 @@ def test_composer_clears_clean_and_blocks_held():
     r = composer_check("On your income you can easily afford this — we noticed you've been comparing us with other bootcamps")
     assert r["blocked"] is True and len(r["hits"]) >= 2
     assert all(h["source"] for h in r["hits"])
-
-
-def test_composer_examples_are_clickable():
-    html = c.get("/composer").text
-    assert html.count('href="/composer?msg=') >= 2  # the Try-it examples pre-fill the box
 
 
 # ============================ variant→source receipt drill-down =================
@@ -420,25 +329,3 @@ def test_agent_explains_win_with_provenance():
     assert "hold" in (r["note"] or "").lower()
 
 
-# ============================ one-design consistency ===========================
-def test_all_shell_pages_extend_shell():
-    for name in SHELL_PAGES:
-        body = (TPL / f"{name}.html").read_text()
-        assert 'extends "shell.html"' in body, f"{name}.html must extend the shell"
-
-
-def test_shell_pages_carry_no_off_token_raw_hex():
-    """Shell templates use only quiet.css tokens (var(--…)) — no 6-digit raw hex (data
-    colours come from Python via inline style, not literal hex in the template)."""
-    hex_re = re.compile(r"#[0-9a-fA-F]{6}\b")
-    offenders = {}
-    for name in SHELL_PAGES + ["shell"]:
-        found = sorted(set(hex_re.findall((TPL / f"{name}.html").read_text())))
-        if found:
-            offenders[name] = found
-    assert not offenders, f"raw hex outside the token set: {offenders}"
-
-
-def test_pages_lead_with_the_proves_spine_line():
-    for route in ["/composer", "/sources"]:
-        assert "Proves:" in c.get(route).text, f"{route} missing its 'Proves:' spine line"

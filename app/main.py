@@ -66,13 +66,6 @@ from app import site as _site  # noqa: E402,F401
 from app import observatory as _observatory  # noqa: E402,F401
 from app import persuasion as _persuasion  # noqa: E402,F401
 from app import showcase as _showcase  # noqa: E402,F401
-from app import personalize as _personalize  # noqa: E402,F401
-from app import cohort as _cohort  # noqa: E402,F401
-from app import google_login as _google_login  # noqa: E402,F401
-from app import sources as _sources  # noqa: E402,F401
-from app import composer as _composer  # noqa: E402,F401
-from app import policies as _policies  # noqa: E402,F401
-from app import archive as _archive  # noqa: E402,F401
 from app import gauntlet as _gauntlet  # noqa: E402,F401
 from app import planet as _planet  # noqa: E402,F401
 from app import skyfi as _skyfi  # noqa: E402,F401
