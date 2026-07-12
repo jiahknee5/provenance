@@ -224,14 +224,32 @@ def test_warm_copy_cache_bakes_byte_identical_and_pool_regates(gate, tmp_path,
                                                                      "trap_competitor")}
 
 
-def test_warm_copy_cache_noop_on_seed_registries(tmp_path, monkeypatch):
-    """The T-01 seed registries carry no generative targets yet — the warm script must
-    be a clean $0 no-op over them (rc 0, nothing baked)."""
+def test_warm_copy_cache_bakes_the_seeded_registries_offline_at_zero_dollars(
+        tmp_path, monkeypatch):
+    """T-08 seeded the WF-DESIGN generative rows into the REAL registries, so the warm
+    script now bakes exactly the prebuilt generative targets (G05/P07/S04) over them —
+    offline (no key): rc 0, $0 (no cost rows), deterministic bytes, non-empty cleared
+    pools (an empty pool would exit nonzero — fail-loud deploy gate)."""
+    ledger = tmp_path / "ledger.jsonl"
+    monkeypatch.setattr(AC, "LEDGER_PATH", ledger)
     monkeypatch.setattr(GT, "COPY_CACHE_DIR", tmp_path / "copy_cache")
     monkeypatch.setattr(config, "ANTHROPIC_API_KEY", "")
     GT.reset_state()
-    assert WCC.main([]) == 0
-    assert not (tmp_path / "copy_cache").exists()
+    try:
+        assert WCC.main([]) == 0
+        baked = sorted(p.name for p in (tmp_path / "copy_cache").glob("*.json"))
+        assert baked == ["gauntlet__hero__hero_sub_gen.json",
+                         "planet__prove__prove_intro_gen.json",
+                         "skyfi__hero__hero_sub_gen.json"]
+        assert _ledger_rows(ledger) == []                  # offline warm is $0
+        first = {p.name: p.read_bytes()
+                 for p in (tmp_path / "copy_cache").glob("*.json")}
+        GT.reset_state()
+        assert WCC.main(["--force-regen"]) == 0            # byte-identical re-warm
+        for p in (tmp_path / "copy_cache").glob("*.json"):
+            assert p.read_bytes() == first[p.name]
+    finally:
+        GT.reset_state()
 
 
 # --------------------------------------------------------------------------- #

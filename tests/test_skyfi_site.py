@@ -372,15 +372,25 @@ def test_portal_mount_hero_api_and_asset_urls_use_prefix():
 # 8 · Registry seed (descriptive, Art IV) + prebuild-by-design
 # --------------------------------------------------------------------------- #
 def test_registry_seed_matches_build_page_slots_exactly():
-    """Every copy_diff slot id is in rules/skyfi_sections.yaml, and none is invented."""
+    """Every copy_diff slot id is in rules/skyfi_sections.yaml, and the deterministic
+    registry invents none. Generative slots (T-08: S04 prebuilt pool + S10
+    cache-by-key) are pool-served via decision_pool.cleared_pool, never copy_diff
+    slot-fill — pinned explicitly."""
     reqs = [_Req(), _Req({"utm_medium": "paid", "utm_campaign": "x-monitor-your-site",
                           "utm_content": "sv01"})]
     observed: set[str] = set()
     for r in reqs:
         observed |= {d["slot"] for d in SS.build_page(r)["copy_diff"]}
-    registry = {t["slot_id"] for t in SR.list_text_targets("skyfi")}
-    assert observed - registry == set(), f"build_page slots missing from registry: {observed - registry}"
-    assert registry - observed == set(), f"registry invents slots build_page never ships: {registry - observed}"
+    det = {t["slot_id"] for t in SR.list_text_targets("skyfi")
+           if t["mode"] == "deterministic"}
+    gen = {t["slot_id"] for t in SR.list_text_targets("skyfi")
+           if t["mode"] == "generative"}
+    assert observed - (det | gen) == set(), \
+        f"build_page slots missing from registry: {observed - (det | gen)}"
+    assert det - observed == set(), \
+        f"registry invents deterministic slots build_page never ships: {det - observed}"
+    assert gen == {"hero_sub_gen", "compare_gen"}
+    assert gen & observed == set(), "generative slots are pool-served, never copy_diff"
 
 
 def test_registry_image_targets_realtime_matching_empty_prebuild():

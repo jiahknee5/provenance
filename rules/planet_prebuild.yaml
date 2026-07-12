@@ -1,0 +1,56 @@
+# Planet — image prebuild manifest (per surface).
+# T-08 reconciliation of the manifest-accounting gap: the location section's
+# region_backdrop surface is workflow=prebuilt (WF-DESIGN-P02 — the Midwest ag
+# arrival paints the top-crop-belt backdrop in 0 ms), so its baked states are
+# ACCOUNTED here under the S3.3 [PANEL — locked] caps (K=8 states/target,
+# 24 baked/tenant, 80 global). scripts/warm_hero_cache.py --check counts these
+# flags (raw YAML, no catalog resolution) and fails the deploy gate on any
+# violation.
+#
+# Scope note (known gap, tracked): planet's hero/og warm list is still
+# code-driven (pipeline/personalization/planet_image_decisions.demo_cache_states)
+# and those surfaces stay workflow=realtime in rules/planet_sections.yaml —
+# nothing here flags hero/og states. Only the COMMON crop-belt regions are
+# flagged prebuilt; long-tail regions generate realtime (WF-DESIGN-P08:
+# "long-tail region → realtime; common → prebuilt").
+
+tenant: planet
+known_email: amara.diallo@meridianagronomy.com
+
+surfaces:
+  region_backdrop:
+    - id: region-midwest-corn-belt
+      label: "region backdrop · Midwest corn belt"
+      entry: direct
+      identity: anon
+      prebuild: true
+    - id: region-great-plains-wheat
+      label: "region backdrop · Great Plains wheat belt"
+      entry: direct
+      identity: anon
+      prebuild: true
+    - id: region-central-valley
+      label: "region backdrop · California Central Valley"
+      entry: direct
+      identity: anon
+      prebuild: true
+    - id: region-mississippi-delta
+      label: "region backdrop · Mississippi Delta"
+      entry: direct
+      identity: anon
+      prebuild: true
+    - id: region-corn-belt-known
+      label: "region backdrop · Midwest corn belt · known"
+      entry: direct
+      identity: known
+      prebuild: true
+    - id: region-pampas-longtail
+      label: "region backdrop · Pampas (long-tail — realtime)"
+      entry: direct
+      identity: anon
+      prebuild: false
+    - id: region-danube-longtail
+      label: "region backdrop · Danube basin (long-tail — realtime)"
+      entry: direct
+      identity: anon
+      prebuild: false

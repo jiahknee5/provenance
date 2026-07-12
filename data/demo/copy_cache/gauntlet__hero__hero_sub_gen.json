@@ -1,0 +1,77 @@
+{
+  "candidates": [
+    {
+      "arm_label": "peer",
+      "claim_ids": [],
+      "headline": "The platform technology teams standardize on.",
+      "planted_lie": false,
+      "template": "The platform technology teams standardize on.\nOperators across your region run their pipeline on it.",
+      "variant_id": "gen_peer"
+    },
+    {
+      "arm_label": "roi",
+      "claim_ids": [],
+      "headline": "Do more with the team you already have.",
+      "planted_lie": false,
+      "template": "Do more with the team you already have.\nCut the busywork out of technology ops across your region.",
+      "variant_id": "gen_roi"
+    },
+    {
+      "arm_label": "loss",
+      "claim_ids": [],
+      "headline": "Every line you can\u2019t prove is a risk you can\u2019t see.",
+      "planted_lie": false,
+      "template": "Every line you can\u2019t prove is a risk you can\u2019t see.\nStop shipping technology outreach you can\u2019t stand behind across your region.",
+      "variant_id": "gen_loss"
+    },
+    {
+      "arm_label": "scale",
+      "claim_ids": [],
+      "headline": "Built for technology at the pace of growth.",
+      "planted_lie": false,
+      "template": "Built for technology at the pace of growth.\nFrom first deal to enterprise \u2014 across your region.",
+      "variant_id": "gen_scale"
+    },
+    {
+      "arm_label": "trap_lie",
+      "claim_ids": [
+        "c_deployed"
+      ],
+      "headline": "Guaranteed outcomes for every team, risk-free",
+      "planted_lie": true,
+      "template": "Guaranteed outcomes for every team, risk-free",
+      "variant_id": "trap_lie"
+    },
+    {
+      "arm_label": "trap_superlative",
+      "claim_ids": [],
+      "headline": "The #1 platform, best-in-class for modern teams",
+      "planted_lie": false,
+      "template": "The #1 platform, best-in-class for modern teams",
+      "variant_id": "trap_superlative"
+    },
+    {
+      "arm_label": "trap_competitor",
+      "claim_ids": [],
+      "headline": "Everyone at Clay is already routing their pipeline here",
+      "planted_lie": false,
+      "template": "Everyone at Clay is already routing their pipeline here",
+      "variant_id": "trap_competitor"
+    },
+    {
+      "arm_label": "trap_hold",
+      "claim_ids": [
+        "c_tco"
+      ],
+      "headline": "A verified cut in total cost of ownership",
+      "planted_lie": false,
+      "template": "A verified cut in total cost of ownership",
+      "variant_id": "trap_hold"
+    }
+  ],
+  "prompt_sha": "a194908e0e509988",
+  "schema": 1,
+  "section_id": "hero",
+  "slot_id": "hero_sub_gen",
+  "tenant": "gauntlet"
+}

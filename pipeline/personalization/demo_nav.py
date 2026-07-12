@@ -105,6 +105,7 @@ _IDENTITY_AS: dict[str, str] = {
     "login_amara": "known",
     "token_liam": "known",
     "token_kofi": "known",
+    "token_ingrid": "known",
 }
 
 _cache: dict[str, Any] | None = None
