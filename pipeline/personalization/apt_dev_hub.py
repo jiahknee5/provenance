@@ -118,6 +118,8 @@ def _console_cards(m: dict[str, str], qs: str, as_state: str) -> list[dict]:
 
 
 def build_hub_view(request: Request) -> dict:
+    from pipeline.personalization import demo_nav as NAV
+
     site_id = request.query_params.get("site", _DEFAULT).strip().lower()
     site = _BY_ID.get(site_id, _BY_ID[_DEFAULT])
     m = site["mounts"]
@@ -125,28 +127,21 @@ def build_hub_view(request: Request) -> dict:
     qs = _qs(request, site=site["id"], drop=("as",))
     toggle_anon = _HUB_PATH + _qs(request, site=site["id"], as_state="anon", drop=("as",))
     toggle_known = _HUB_PATH + _qs(request, site=site["id"], as_state="known", drop=("as",))
-    site_toggles = [
-        {
-            "id": s["id"],
-            "name": s["name"],
-            "domain": s["domain"],
-            "href": _HUB_PATH + _qs(request, site=s["id"], as_state=as_state, drop=("as",)),
-            "on": s["id"] == site["id"],
-        }
+    # Website dropdown switches the tenant while preserving the identity preview.
+    switch_hrefs = {
+        s["id"]: _HUB_PATH + _qs(request, site=s["id"], as_state=as_state, drop=("as",))
         for s in _SITES
-    ]
+    }
+    shell = NAV.console_shell_ctx(site["id"], "consoles", switch_hrefs=switch_hrefs)
     sample_email = site["sample_email"]()
     return {
+        **shell,
         "hub_path": _HUB_PATH,
         "demo_hub_path": _DEMO_HUB_PATH,
-        "site": site,
-        "site_id": site["id"],
         "site_name": site["name"],
         "site_domain": site["domain"],
         "site_tagline": site["tagline"],
-        "site_toggles": site_toggles,
         "as_state": as_state,
-        "qs": qs,
         "toggle_anon": toggle_anon,
         "toggle_known": toggle_known,
         "sample_email": sample_email,

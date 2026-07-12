@@ -19,4 +19,4 @@ from pipeline.personalization import apt_dev_hub as HUB
 
 @app.get("/apt/dev", response_class=HTMLResponse)
 def apt_dev_hub(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse(request, "apt_dev_hub.html", {**HUB.build_hub_view(request), "demo_flow_active": "console"})
+    return templates.TemplateResponse(request, "apt_dev_hub.html", HUB.build_hub_view(request))

@@ -305,6 +305,43 @@ def build_sitemap_view(request: Request) -> dict[str, Any]:
     }
 
 
+def console_shell_ctx(active_site: str, active_nav: str, *,
+                      switch_hrefs: dict[str, str] | None = None) -> dict[str, Any]:
+    """Sidebar/shell context for any page adopting the apt console shell.
+
+    Returns the fields _apt_sidebar.html reads: brand, active (current website),
+    tenants (dropdown options), add_new_href, nav, active_nav.
+    """
+    all_t = ("gauntlet", "planet")
+    meta = _TENANT_META[active_site]
+    bg, ch = _TENANT_LOGO[active_site]
+    m = _mounts_for(active_site)
+    active = {"logo_bg": bg, "logo_ch": ch, "name": meta["name"], "domain": meta["domain"]}
+    tenants = []
+    for t in all_t:
+        tm = _TENANT_META[t]
+        tbg, tch = _TENANT_LOGO[t]
+        href = (switch_hrefs or {}).get(t) or f"{_HUB_PATH}?site={t}"
+        tenants.append({
+            "id": t, "name": tm["name"], "logo_bg": tbg, "logo_ch": tch,
+            "href": href, "active": t == active_site,
+        })
+    return {
+        "brand": "apt",
+        "active_nav": active_nav,
+        "active": active,
+        "tenants": tenants,
+        "add_new_href": f"{_HUB_PATH}?site=new",
+        "nav": {
+            "channels": f"{_HUB_PATH}?site={active_site}",
+            "consoles": f"{_OPS_HUB_PATH}?site={active_site}",
+            "observatory": "/observatory",
+            "costs": "/costs",
+            "replica": m["page"],
+        },
+    }
+
+
 _CHANNEL_GALLERY: dict[str, dict[str, str]] = {
     "direct": {
         "label": "Direct",
