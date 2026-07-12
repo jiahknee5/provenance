@@ -1,0 +1,284 @@
+{# Per-section designer cards (S5/T-03). Expects SD = biz.designer in context.
+   DOM contract: 04-spec/contracts/designer-dom.md — sd-* data-testids, one card per
+   registry section, Q1–Q10 controls read-only-bound to registry + this visit's page
+   state. Every edit stages a YAML diff to rules/<tenant>_sections.yaml through the
+   shared drawer (_sd_drawer.html) — nothing saves server-side. #}
+<style>
+  .sd-card .h .sd-region{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:5px;padding:2px 8px;background:#E8EFFF;color:#1d4ed8}
+  .sd-ptog{display:inline-flex;gap:6px;align-items:center;font-size:11.5px;font-weight:600;color:var(--ink)}
+  .sd-ptog input{accent-color:var(--ink)}
+  .sd-chips{display:flex;gap:5px;flex-wrap:wrap;padding:8px 14px;border-bottom:1px solid var(--line);align-items:center}
+  .sd-chips .cap{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-right:4px}
+  .sd-chip{font-size:10.5px;font-weight:600;border:1px solid var(--line);border-radius:6px;padding:2px 9px;color:var(--muted);background:#fff}
+  .sd-chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .sd-target{border-top:1px solid var(--line)}
+  .sd-target .tt-head{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#FAFBFC;flex-wrap:wrap}
+  .sd-target .tt-head .nm{font-size:12.5px;font-weight:700;color:var(--ink)}
+  .sd-target .tt-head .sid{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:var(--muted)}
+  .sd-badge{font-size:9.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;border-radius:4px;padding:2px 7px;white-space:nowrap}
+  .sd-badge.gate{color:#0a8a4f;background:#e7f6ee}
+  .sd-badge.lat.instant{color:#0a8a4f;background:#e7f6ee}
+  .sd-badge.lat.swap{color:#946200;background:#fdf3dc}
+  .sd-badge.lat.blocking{color:#c0354b;background:#fcebed}
+  .sd-badge.cost{color:#1d4ed8;background:#e8efff;text-transform:none;letter-spacing:0}
+  .sd-badge.drift{color:var(--muted);background:#F1F3F5;text-transform:none;letter-spacing:0}
+  .sd-ctls{display:flex;gap:10px;flex-wrap:wrap;padding:8px 14px;border-top:1px dashed var(--line)}
+  .sd-ctl{display:flex;flex-direction:column;gap:3px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  .sd-ctl select,.sd-ctl textarea{font-size:11.5px;font-weight:600;border:1px solid var(--line);border-radius:7px;padding:3px 6px;background:#fff;color:var(--ink);font-family:inherit}
+  .sd-livewarn{font-size:10.5px;color:#c0354b;font-weight:700;align-self:center}
+  .sd-promptwrap{padding:8px 14px;border-top:1px dashed var(--line)}
+  .sd-promptwrap .cap{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:4px}
+  .sd-promptwrap textarea{width:100%;font-size:11.5px;border:1px solid var(--line);border-radius:8px;padding:7px 9px;font-family:inherit;color:var(--ink)}
+  .sd-copy{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px dashed var(--line)}
+  @media(max-width:760px){.sd-copy{grid-template-columns:1fr}}
+  .sd-copy .col{padding:7px 14px;font-size:12px;line-height:1.5}
+  .sd-copy .col.gen{color:#475569;border-right:1px solid var(--line)}
+  @media(max-width:760px){.sd-copy .col.gen{border-right:0;border-bottom:1px dashed var(--line)}}
+  .sd-copy .col .cap{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:3px}
+  .sd-panels{display:flex;gap:8px;flex-wrap:wrap;padding:8px 14px;border-top:1px dashed var(--line);align-items:flex-start}
+  details.sd-panel{border:1px solid var(--line);border-radius:8px;background:#fff;font-size:11.5px;min-width:180px;flex:1 1 200px}
+  details.sd-panel summary{cursor:pointer;padding:6px 10px;font-size:11px;font-weight:700;color:var(--ink);list-style-position:inside}
+  details.sd-panel[open] summary{border-bottom:1px dashed var(--line)}
+  details.sd-panel .bd{padding:7px 10px}
+  .sd-kv{display:flex;gap:8px;padding:2px 0;font-size:11px;line-height:1.45}
+  .sd-kv > span:first-child{flex:none;min-width:96px;color:var(--muted);font-weight:600}
+  .sd-kv > span:last-child{color:#333C45;min-width:0;word-break:break-word}
+  .sd-kv .mono{font-family:ui-monospace,Menlo,monospace;font-size:10.5px}
+  .sd-note{font-size:10.5px;color:var(--muted);padding-top:4px;line-height:1.45}
+  .sd-imgrid{display:grid;grid-template-columns:190px 1fr;gap:0;border-top:1px dashed var(--line)}
+  @media(max-width:760px){.sd-imgrid{grid-template-columns:1fr}}
+  .sd-imgrid .thumb{padding:10px 14px;border-right:1px solid var(--line)}
+  @media(max-width:760px){.sd-imgrid .thumb{border-right:0;border-bottom:1px dashed var(--line)}}
+  .sd-imgrid .thumb .ph{width:100%;aspect-ratio:16/9;border-radius:8px;border:1px solid var(--line);background:linear-gradient(135deg,#12100c 0%,#1e1a14 45%,#c9a22755 100%);object-fit:cover;display:block}
+  .sd-imgrid .thumb .st{margin-top:6px;font-size:10.5px;color:var(--muted);line-height:1.5}
+  .sd-imgrid .bd{min-width:0}
+  .sd-addrow{display:flex;gap:8px;padding:9px 14px;border-top:1px solid var(--line);background:#FAFBFC;align-items:center;flex-wrap:wrap}
+  .sd-addrow button{font-size:11.5px;font-weight:700;border:1px dashed var(--line);border-radius:8px;padding:5px 11px;background:#fff;color:var(--ink);cursor:pointer}
+  .sd-addrow button.on{border-style:solid;border-color:var(--ink);background:var(--ink);color:#fff}
+  .sd-addrow .hint{font-size:10.5px;color:var(--muted)}
+  .sd-graph-nodes{display:flex;flex-direction:column;gap:4px}
+  .sd-gnode{border:1px solid var(--line);border-radius:7px}
+  .sd-gnode.skip{opacity:.55}
+  .sd-gnode summary{cursor:pointer;padding:4px 9px;font-size:11px;font-weight:600;color:var(--ink);list-style-position:inside}
+  .sd-gnode .gio{padding:5px 9px;border-top:1px dashed var(--line);font-size:10.5px;color:#475569;line-height:1.5}
+  .sd-obs{width:100%;border-collapse:collapse;font-size:11px}
+  .sd-obs td{padding:3px 6px;border-bottom:1px dashed var(--line);vertical-align:top}
+  .sd-obs tr:last-child td{border-bottom:0}
+  .sd-obs td.seq{color:var(--muted);font-family:ui-monospace,Menlo,monospace;width:28px}
+  .sd-obs td.ev{font-family:ui-monospace,Menlo,monospace;white-space:nowrap;color:var(--ink)}
+  /* load badge fallback (gauntlet console defines the pre-built/warm/live variants) */
+  .sd-card .load-badge{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;border-radius:5px;padding:2px 8px;color:var(--muted);background:#F1F3F5;display:inline-block}
+  .sd-card .load-badge.pre-built,.sd-card .load-badge.generated{color:#0a8a4f;background:#e7f6ee}
+  .sd-card .load-badge.warm{color:#946200;background:#fdf3dc}
+  .sd-card .load-badge.live{color:#1d4ed8;background:#e8efff}
+</style>
+
+<div class="sec" id="sd-designer">
+  <div class="h">Sections — design every personalized element
+    <span class="tag">{{ SD.sections|length }} sections · registry v {{ SD.rules_version[:8] }}</span></div>
+  <div class="sub">One card per page section from
+    <span style="font-family:ui-monospace,Menlo,monospace">{{ SD.config.sections }}</span>.
+    Values come from the registry and this visit; every edit stages a YAML diff to the
+    registry in the drawer below — nothing saves live.</div>
+</div>
+
+{% for s in SD.sections %}
+<div class="sec sd-card" id="sd-{{ s.id }}" data-testid="sd-section-{{ s.id }}">
+  <div class="h" data-guard-row>
+    {{ s.label }}
+    <span class="sd-region">{{ s.region }}</span>
+    <label class="sd-ptog" data-testid="sd-personalize-{{ s.id }}" title="Off = this section ships the generic site for everyone">
+      <input type="checkbox" data-stage="sections" data-sd-section="{{ s.id }}" data-sd-field="personalize"
+             data-original="{{ 'true' if s.personalize else 'false' }}" {{ 'checked' if s.personalize else '' }}>
+      personalize
+    </label>
+    <span class="stg-mark">staged</span>
+    <span class="tag">{{ s.text_targets|length }} text · {{ s.image_targets|length }} image</span>
+  </div>
+  <div class="sub" data-testid="sd-goal-{{ s.id }}">Goal: {{ s.goal or '— no goal recorded yet' }}</div>
+  <div class="sd-chips" data-testid="sd-channels-{{ s.id }}">
+    <span class="cap">Channels</span>
+    {% for ch in s.channels %}<span class="sd-chip{{ ' on' if ch == SD.active_channel else '' }}">{{ ch }}{{ ' — this visit' if ch == SD.active_channel else '' }}</span>{% endfor %}
+  </div>
+
+  {% for t in s.text_targets %}
+  <div class="sd-target" data-testid="sd-text-{{ s.id }}-{{ t.slot_id }}" data-sd-target-card data-guard-row>
+    <div class="tt-head">
+      <span class="nm">{{ t.label }}</span>
+      <span class="sid">{{ t.slot_id }}</span>
+      <span class="stg-mark">staged</span>
+      <span class="sd-badge gate {{ t.gate.status }}" data-testid="sd-gate-{{ t.slot_id }}" title="{{ t.gate.reason }}">gate: {{ t.gate.status }}</span>
+      <span class="sd-badge lat {{ t.latency.cls }}" data-testid="sd-latency-{{ t.slot_id }}">{{ t.latency.label }}</span>
+      <span class="sd-badge cost" data-testid="sd-cost-{{ t.slot_id }}">{{ t.cost }}</span>
+      <span class="sd-badge drift" data-testid="sd-drift-{{ t.slot_id }}">drift: {{ t.drift.status }} · rules {{ t.drift.rules_version[:8] }}</span>
+    </div>
+    <div class="sd-ctls">
+      <label class="sd-ctl">How the words are made
+        <select data-testid="sd-mode-{{ t.slot_id }}" data-stage="sections" data-sd-section="{{ s.id }}"
+                data-sd-target-kind="text" data-sd-target="{{ t.slot_id }}" data-sd-field="mode" data-original="{{ t.mode }}">
+          <option value="deterministic"{{ ' selected' if t.mode == 'deterministic' else '' }}>deterministic — slot-fill from the catalog, $0</option>
+          <option value="generative"{{ ' selected' if t.mode == 'generative' else '' }}>generative — AI candidates, every one through the Gate</option>
+        </select>
+      </label>
+      <label class="sd-ctl">When it's built
+        <select data-testid="sd-workflow-{{ t.slot_id }}" data-stage="sections" data-sd-section="{{ s.id }}"
+                data-sd-target-kind="text" data-sd-target="{{ t.slot_id }}" data-sd-field="workflow" data-original="{{ t.workflow }}">
+          <option value="realtime"{{ ' selected' if t.workflow == 'realtime' else '' }}>realtime — per visit, cached by key</option>
+          <option value="prebuilt"{{ ' selected' if t.workflow == 'prebuilt' else '' }}>prebuilt — baked offline before deploy</option>
+        </select>
+      </label>
+      <label class="sd-ctl">Persuasion strategy
+        <select data-testid="sd-strategy-{{ t.slot_id }}" data-stage="sections" data-sd-section="{{ s.id }}"
+                data-sd-target-kind="text" data-sd-target="{{ t.slot_id }}" data-sd-field="strategy" data-original="{{ t.strategy }}">
+          {% for st in SD.strategies %}
+          <option value="{{ st }}"{{ ' selected' if t.strategy == st else '' }}>{{ st.replace('-', ' ') }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="sd-ctl">What it may say
+        <select data-testid="sd-policy-{{ t.slot_id }}" data-stage="sections" data-sd-section="{{ s.id }}"
+                data-sd-target-kind="text" data-sd-target="{{ t.slot_id }}" data-sd-field="policy" data-original="{{ t.policy }}">
+          <option value="say"{{ ' selected' if t.policy == 'say' else '' }}>say — quote first-party facts out loud</option>
+          <option value="allude"{{ ' selected' if t.policy == 'allude' else '' }}>allude — steer with context, never quote</option>
+          <option value="hold"{{ ' selected' if t.policy == 'hold' else '' }}>hold — the fact never ships</option>
+        </select>
+      </label>
+    </div>
+    <div class="sd-promptwrap" data-testid="sd-prompt-{{ t.slot_id }}"{{ '' if t.mode == 'generative' else ' hidden' }}>
+      <div class="cap">Prompt — generative mode only · Gate rule set: {{ t.gate_rule }}</div>
+      <textarea rows="3" data-stage="sections" data-sd-section="{{ s.id }}" data-sd-target-kind="text"
+                data-sd-target="{{ t.slot_id }}" data-sd-field="prompt" data-original="{{ t.prompt }}"
+                placeholder="Describe what the AI may write — every candidate still passes the Gate before it can ship.">{{ t.prompt }}</textarea>
+    </div>
+    <div class="sd-copy">
+      <div class="col gen"><div class="cap">Generic site</div>{{ t.generic }}</div>
+      <div class="col"><div class="cap">Shipped this visit{{ ' · changed' if t.changed else ' · default' }}</div>{{ t.shipped }}</div>
+    </div>
+    <div class="sd-panels">
+      <details class="sd-panel" data-testid="sd-receipt-{{ t.slot_id }}">
+        <summary>Receipt — where this came from</summary>
+        <div class="bd">
+          <div class="sd-kv"><span>source</span><span>{{ t.receipt.source_id }}</span></div>
+          <div class="sd-kv"><span>lawful basis</span><span>{{ t.receipt.lawful_basis }}</span></div>
+          <div class="sd-kv"><span>policy</span><span>{{ t.receipt.policy }}</span></div>
+          <div class="sd-kv"><span>gate verdict</span><span>{{ t.receipt.gate_verdict }} — {{ t.gate.reason }}</span></div>
+          <div class="sd-kv"><span>claims</span><span>{{ t.receipt.claim_ids }}</span></div>
+          <div class="sd-kv"><span>cache_key</span><span class="mono">{{ t.receipt.cache_key }}</span></div>
+          <div class="sd-kv"><span>mode · workflow</span><span>{{ t.receipt.mode }} · {{ t.receipt.workflow }}</span></div>
+          <div class="sd-kv"><span>rules_version</span><span class="mono">{{ t.receipt.rules_version }}</span></div>
+        </div>
+      </details>
+      <details class="sd-panel" data-testid="sd-ab-{{ t.slot_id }}">
+        <summary>A/B — posteriors per route</summary>
+        <div class="bd">
+          {% for r in t.ab.routes %}
+          <div class="sd-kv"><span>{{ r }}</span><span>no posterior yet · lift vs control —</span></div>
+          {% endfor %}
+          <div class="sd-note">{{ t.ab.note }}</div>
+        </div>
+      </details>
+    </div>
+  </div>
+  {% endfor %}
+
+  {% for t in s.image_targets %}
+  <div class="sd-target" data-testid="sd-image-{{ s.id }}-{{ t.surface_id }}" data-sd-target-card data-guard-row>
+    <div class="tt-head">
+      <span class="nm">{{ t.label }}</span>
+      <span class="sid">{{ t.surface_id }}</span>
+      <span class="stg-mark">staged</span>
+      <span class="sd-badge gate {{ t.gate.status }}" data-testid="sd-gate-{{ t.surface_id }}" title="{{ t.gate.reason }}">gate: {{ t.gate.status }}</span>
+      <span class="sd-badge lat {{ t.latency.cls }}" data-testid="sd-latency-{{ t.surface_id }}">{{ t.latency.label }}</span>
+      <span class="sd-badge cost" data-testid="sd-cost-{{ t.surface_id }}">{{ t.cost }}</span>
+      <span class="sd-badge drift" data-testid="sd-drift-{{ t.surface_id }}">drift: {{ t.drift.status }} · rules {{ t.drift.rules_version[:8] }}</span>
+    </div>
+    <div class="sd-imgrid">
+      <div class="thumb">
+        {% if t.url %}<img class="ph" src="{{ t.url }}" alt="{{ t.label }} preview">{% else %}<div class="ph"></div>{% endif %}
+        <div class="st"><span class="load-badge {{ t.load_status.replace(' ', '-') }}">{{ t.load_status }}</span></div>
+        <div class="st">{{ t.load_note }}</div>
+        {% if t.intent %}<div class="st">visual strategy: {{ t.intent.replace('_', ' ') }}</div>{% endif %}
+      </div>
+      <div class="bd">
+        <div class="sd-ctls" style="border-top:0">
+          <label class="sd-ctl">When it's built
+            <select data-testid="sd-workflow-{{ t.surface_id }}" data-stage="sections" data-sd-section="{{ s.id }}"
+                    data-sd-target-kind="image" data-sd-target="{{ t.surface_id }}" data-sd-field="workflow" data-original="{{ t.workflow }}">
+              <option value="prebuilt"{{ ' selected' if t.workflow == 'prebuilt' else '' }}>prebuilt — baked before deploy, instant</option>
+              <option value="realtime"{{ ' selected' if t.workflow == 'realtime' else '' }}>realtime — gradient first, ~2s swap, cached</option>
+              <option value="live"{{ ' selected' if t.workflow == 'live' else '' }}>live — generate while the visitor waits</option>
+            </select>
+          </label>
+          <span class="sd-livewarn"{{ '' if t.workflow == 'live' else ' hidden' }}>⚠ live blocks first paint — discouraged; prefer realtime</span>
+        </div>
+        <div class="sd-panels">
+          <details class="sd-panel" data-testid="sd-receipt-{{ t.surface_id }}">
+            <summary>Receipt — where this came from</summary>
+            <div class="bd">
+              <div class="sd-kv"><span>source</span><span>{{ t.receipt.source_id }}</span></div>
+              <div class="sd-kv"><span>lawful basis</span><span>{{ t.receipt.lawful_basis }}</span></div>
+              <div class="sd-kv"><span>policy</span><span>{{ t.receipt.policy }}</span></div>
+              <div class="sd-kv"><span>gate verdict</span><span>{{ t.receipt.gate_verdict }} — {{ t.gate.reason }}</span></div>
+              <div class="sd-kv"><span>cache_key</span><span class="mono">{{ t.receipt.cache_key }}</span></div>
+              <div class="sd-kv"><span>mode · workflow</span><span>{{ t.receipt.mode }} · {{ t.receipt.workflow }}</span></div>
+              <div class="sd-kv"><span>rules_version</span><span class="mono">{{ t.receipt.rules_version }}</span></div>
+            </div>
+          </details>
+          <details class="sd-panel" data-testid="sd-ab-{{ t.surface_id }}">
+            <summary>A/B — posteriors per route</summary>
+            <div class="bd">
+              {% for r in t.ab.routes %}
+              <div class="sd-kv"><span>{{ r }}</span><span>no posterior yet · lift vs control —</span></div>
+              {% endfor %}
+              <div class="sd-note">{{ t.ab.note }}</div>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+  <div class="sd-addrow" data-guard-row>
+    <button type="button" data-testid="sd-add-text-{{ s.id }}" data-stage="sections" data-sd-op="add"
+            data-sd-target-kind="text" data-sd-section="{{ s.id }}">+ text target</button>
+    <button type="button" data-testid="sd-add-image-{{ s.id }}" data-stage="sections" data-sd-op="add"
+            data-sd-target-kind="image" data-sd-section="{{ s.id }}">+ image target</button>
+    <span class="stg-mark">staged</span>
+    <span class="hint">adding a target stages a registry stub — edit the YAML in review before it ships</span>
+  </div>
+
+  <div class="sd-panels" style="border-top:1px solid var(--line)">
+    <details class="sd-panel" data-testid="sd-graph-{{ s.id }}">
+      <summary>Agent graph — how this section decided</summary>
+      <div class="bd sd-graph-nodes">
+        {% for n in s.graph %}
+        <details class="sd-gnode{{ ' skip' if n.skipped else '' }}">
+          <summary>{{ n.title }} → {{ 'skipped' if n.skipped else n.outcome }}</summary>
+          <div class="gio"><b>in:</b> visit signals · <b>decision:</b> {{ 'skipped' if n.skipped else n.outcome }} · <b>out:</b> {{ '—' if n.skipped else (n.why or '—') }}</div>
+        </details>
+        {% endfor %}
+      </div>
+    </details>
+    <details class="sd-panel" data-testid="sd-evals-{{ s.id }}">
+      <summary>Evals — what this section is held to</summary>
+      <div class="bd">
+        {% for e in s.evals %}
+        <div class="sd-kv"><span>{{ e.label }}</span><span>{{ e.status }}</span></div>
+        {% endfor %}
+      </div>
+    </details>
+    <details class="sd-panel" data-testid="sd-observe-{{ s.id }}">
+      <summary>Observability — this visit's events</summary>
+      <div class="bd">
+        <table class="sd-obs">
+          {% for row in s.observe %}
+          <tr><td class="seq">{{ row.seq }}</td><td class="ev">{{ row.event }}</td><td>{{ row.detail }}</td></tr>
+          {% endfor %}
+        </table>
+        <div class="sd-note">per-section event rows for this request — the live poll-since-seq stream lands with the observability wave</div>
+      </div>
+    </details>
+  </div>
+</div>
+{% endfor %}

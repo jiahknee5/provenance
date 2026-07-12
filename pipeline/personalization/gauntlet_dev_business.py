@@ -8,11 +8,13 @@ delivery. No LLM, no extra state, no server-side writes — same inputs as /dev;
 """
 from __future__ import annotations
 
+from pipeline.observability import api_costs as AC
 from pipeline.personalization import design_prompts as DP
 from pipeline.personalization import gauntlet_site as GS
 from pipeline.personalization import image_gen as IG
 from pipeline.personalization import image_intents as II
 from pipeline.personalization import prebuild as PB
+from pipeline.personalization import sections as SEC
 
 _AUDIENCE_LABELS = {
     "companies": "B2B hiring & upskilling leaders",
@@ -918,6 +920,244 @@ def _prompt_catalog(page: dict) -> dict:
     }
 
 
+# --------------------------------------------------------------------------- #
+# Section designer (S5/T-03) — one card per registry section, read-only values
+# from rules/gauntlet_sections.yaml + this visit's page dict. Edits stage YAML
+# diffs to the registry via the shared drawer; nothing writes server-side.
+# DOM contract: 04-spec/contracts/designer-dom.md (sd-* testids).
+# --------------------------------------------------------------------------- #
+_SD_TENANT = "gauntlet"
+_SD_ROUTES = ["b2b_hire", "b2b_upskill", "individual", "neutral"]   # S4.2 audience_route
+_SD_IMAGE_STAGES = {"heroimg", "imgsurfaces", "brainsim", "heromotion"}
+_SD_STRATEGIES = ["objection-reframe", "social-proof", "authority", "scarcity-honest",
+                  "loss-aversion", "location-relevance", "message-match", "neutral"]
+_SD_LAWFUL = {
+    "say": "first-party / declared — may be quoted",
+    "allude": "inferred or bought — steers only, never quoted",
+    "hold": "held — never reaches the page",
+}
+
+
+def _sd_latency(kind: str, mode: str | None, workflow: str) -> dict:
+    """Q8 latency class per designer-dom.md: instant | ~2s swap | blocking⚠."""
+    if kind == "text":
+        if mode == "deterministic" or workflow == "prebuilt":
+            return {"cls": "instant", "label": "instant"}
+        return {"cls": "swap", "label": "~2s swap"}
+    if workflow == "prebuilt":
+        return {"cls": "instant", "label": "instant"}
+    if workflow == "realtime":
+        return {"cls": "swap", "label": "~2s swap"}
+    return {"cls": "blocking", "label": "blocking⚠"}
+
+
+def _sd_text_cost(mode: str, workflow: str) -> str:
+    if mode == "deterministic":
+        return "$0 / visit — deterministic slot-fill"
+    if workflow == "prebuilt":
+        return "$0 / visit — Gate-cleared pool replays from cache"
+    return "LLM cost on first visit · cached by visit key after"
+
+
+def _sd_gate_verdict(d: dict | None, policy_live: str) -> dict:
+    if d is None:
+        return {"status": "pass", "reason": "registry target — no live slot bound this visit"}
+    if d.get("blocked_say"):
+        return {"status": "pass", "reason": "shipped copy cleared — 1 say-variant held by policy"}
+    return {"status": "pass", "reason": f"cleared under the {policy_live} policy"}
+
+
+def _sd_text_target(t: dict, d: dict | None, rules_version: str, routes: list[str]) -> dict:
+    policy_live = (d or {}).get("policy") or t.get("policy", "allude")
+    verdict = _sd_gate_verdict(d, policy_live)
+    mode, workflow = t.get("mode", "deterministic"), t.get("workflow", "realtime")
+    cache_key = ("— deterministic slot-fill, no cache needed" if mode == "deterministic"
+                 else f"pool:{t['slot_id']}")
+    return {
+        "slot_id": t["slot_id"],
+        "label": t.get("label") or t["slot_id"],
+        "mode": mode, "workflow": workflow,
+        "strategy": t.get("strategy", "neutral"),
+        "policy": t.get("policy", "allude"),
+        "policy_live": policy_live,
+        "prompt": t.get("prompt") or "",
+        "gate_rule": t.get("gate") or f"{_SD_TENANT}_tenant",
+        "source": t.get("source", "catalog"),
+        "claims": t.get("claims") or [],
+        "shipped": ((d or {}).get("shipped") or "—")[:220],
+        "generic": ((d or {}).get("generic") or "—")[:220],
+        "changed": bool((d or {}).get("changed")),
+        "gate": verdict,
+        "latency": _sd_latency("text", mode, workflow),
+        "cost": _sd_text_cost(mode, workflow),
+        "receipt": {
+            "source_id": (d or {}).get("source") or t.get("source", "catalog"),
+            "lawful_basis": _SD_LAWFUL.get(policy_live, policy_live),
+            "policy": policy_live,
+            "gate_verdict": verdict["status"],
+            "claim_ids": ", ".join(t.get("claims") or []) or "—",
+            "cache_key": cache_key,
+            "mode": mode, "workflow": workflow,
+            "rules_version": rules_version,
+        },
+        "ab": {"routes": routes,
+               "note": "posteriors per route arrive with the per-decision pool — "
+                       "a random-control holdout measures lift"},
+        "drift": {"status": "active", "rules_version": rules_version},
+    }
+
+
+def _sd_graph(pmap: dict, page: dict, has_images: bool,
+              stage_titles: dict | None = None) -> list[dict]:
+    nodes = []
+    for s in pmap["stages"]:
+        if s["id"] in _SD_IMAGE_STAGES and not has_images:
+            continue
+        title = s["title"]
+        if stage_titles and s["id"] in stage_titles:
+            title = stage_titles[s["id"]][0]
+        outcome = s["output"]
+        if s["id"] == "tier":  # console vocabulary, not "tier N" jargon
+            outcome = f"confidence {page.get('tier', 0)} · {page.get('tier_label', 'neutral')}"
+        nodes.append({"id": s["id"], "title": title, "outcome": outcome,
+                      "why": s["why"], "skipped": s["skipped"]})
+    return nodes
+
+
+def _sd_evals(sec: dict, brain: dict) -> list[dict]:
+    out = []
+    for e in sec.get("evals") or []:
+        if e == "gate_pass":
+            status = "pass — a blocked variant can never ship (structural)"
+        elif e == "hold_never_ships":
+            status = "enforced — hold facts never reach the page (property-tested)"
+        elif e == "brain_score":
+            bs = brain.get("brain_score")
+            status = (f"{bs:.2f} · {brain.get('brain_simulator') or 'proxy_v1'}"
+                      if bs is not None else "scored at generation time (best-of-N)")
+        else:
+            status = "tracked"
+        out.append({"id": e, "label": e.replace("_", " "), "status": status})
+    return out
+
+
+def _designer_view(page: dict, console: dict) -> dict:
+    """Everything the per-section designer cards need (read-only this wave)."""
+    secs = SEC.list_sections(_SD_TENANT)
+    rules_version = SEC.registry_version(_SD_TENANT)
+    diff_by_slot = {d.get("slot"): d for d in page.get("copy_diff", [])}
+    pmap = GS.process_map(page)
+    per_gen = AC.estimate_cost(service="gemini_image", model=IG.DEFAULT_MODEL,
+                               images_generated=1)
+    image_cards = {c["id"]: c for c in console.get("image_cards") or []}
+    delivery_rows = (console.get("delivery") or {}).get("rows") or []
+    brain = (((page.get("hero_image") or {}).get("dev") or {}).get("brain")
+             or page.get("brain_sim") or {})
+
+    seq = 0
+    out_sections: list[dict] = []
+    for sec in secs:
+        observe: list[dict] = []
+        text_targets: list[dict] = []
+        for t in sec.get("text_targets") or []:
+            d = diff_by_slot.get(t["slot_id"])
+            tt = _sd_text_target(t, d, rules_version, _SD_ROUTES)
+            seq += 1
+            observe.append({
+                "seq": seq, "event": f"copy.decide {t['slot_id']}",
+                "detail": f"{tt['policy_live']} · "
+                          + ("rewrote copy" if tt["changed"] else "default shipped")
+                          + (" · 1 say-variant held" if (d or {}).get("blocked_say") else ""),
+            })
+            text_targets.append(tt)
+
+        image_targets: list[dict] = []
+        for t in sec.get("image_targets") or []:
+            surf = t["surface_id"]
+            card = image_cards.get(surf)
+            srows = [r for r in delivery_rows if r.get("surface_id") == surf]
+            baked = sum(1 for r in srows if r.get("prebuild"))
+            workflow = t.get("workflow", "prebuilt")
+            if workflow == "prebuilt":
+                cost = (f"${per_gen:.3f}/gen offline · {baked} of {len(srows)} demo states "
+                        "baked · $0/visit")
+            elif workflow == "realtime":
+                cost = f"${per_gen:.3f}/gen first visit · $0 after cache-by-key"
+            else:
+                cost = f"${per_gen:.3f}/gen every uncached visit — discouraged"
+            guard = (card or {}).get("guardrails") or {}
+            applied, blocked_g = guard.get("applied") or [], guard.get("blocked") or []
+            verdict = {"status": "pass",
+                       "reason": (f"{len(applied)} guardrails applied"
+                                  + (f" · {len(blocked_g)} blocked" if blocked_g else ""))
+                       if card else "registry target — not rendered on this page yet"}
+            load = (card or {}).get("load") or {}
+            seq += 1
+            observe.append({
+                "seq": seq, "event": f"image.resolve {surf}",
+                "detail": f"{(card or {}).get('source', '—')} · "
+                          f"{load.get('status', workflow)}",
+            })
+            image_targets.append({
+                "surface_id": surf,
+                "label": t.get("label") or surf,
+                "workflow": workflow,
+                "prebuilt_states_cap": t.get("prebuilt_states_cap"),
+                "url": (card or {}).get("url"),
+                "source": (card or {}).get("source", "—"),
+                "load_status": load.get("status", "—"),
+                "load_note": load.get("note", ""),
+                "intent": ((card or {}).get("intent") or {}).get("primary_id"),
+                "gate": verdict,
+                "latency": _sd_latency("image", None, workflow),
+                "cost": cost,
+                "receipt": {
+                    "source_id": (card or {}).get("source", "—"),
+                    "lawful_basis": _SD_LAWFUL["allude"],
+                    "policy": "allude",
+                    "gate_verdict": verdict["status"],
+                    "claim_ids": "—",
+                    "cache_key": ((card or {}).get("tier") or {}).get("base_cache_key") or "—",
+                    "mode": "generative", "workflow": workflow,
+                    "rules_version": rules_version,
+                },
+                "ab": {"routes": _SD_ROUTES,
+                       "note": "posteriors per route arrive with the per-decision pool — "
+                               "a random-control holdout measures lift"},
+                "drift": {"status": "active", "rules_version": rules_version},
+            })
+
+        out_sections.append({
+            "id": sec["id"],
+            "label": sec.get("label") or sec["id"],
+            "region": sec.get("region", sec["id"]),
+            "personalize": bool(sec.get("personalize")),
+            "goal": sec.get("goal", ""),
+            "channels": sec.get("channels") or [],
+            "text_targets": text_targets,
+            "image_targets": image_targets,
+            "graph": _sd_graph(pmap, page, bool(sec.get("image_targets")), _WF_STAGES),
+            "evals": _sd_evals(sec, brain),
+            "observe": observe,
+        })
+
+    channel = page["entry"].get("channel", "direct")
+    return {
+        "tenant": _SD_TENANT,
+        "sections": out_sections,
+        "rules_version": rules_version,
+        # registry channel vocabulary is "ads"; entry classify says "ad"
+        "active_channel": {"ad": "ads"}.get(channel, channel),
+        "strategies": _SD_STRATEGIES,
+        "config": {
+            "sections": f"rules/{_SD_TENANT}_sections.yaml",
+            "image": "rules/gauntlet_image.yaml",
+            "prebuild": "rules/gauntlet_prebuild.yaml",
+            "copy_module": "pipeline/personalization/gauntlet_site.py",
+        },
+    }
+
+
 def build_business_console_view(page: dict) -> dict:
     """Everything the marketer console template needs beyond the classic view."""
     pmap = GS.process_map(page)
@@ -947,6 +1187,7 @@ def build_business_console_view(page: dict) -> dict:
 
 def build_business_dev_view(page: dict) -> dict:
     """Transform build_page() output into the marketer console view model."""
+    console = build_business_console_view(page)
     return {
         "arrival": _arrival_attribution(page),
         "audience_read": _audience_read(page),
@@ -957,5 +1198,6 @@ def build_business_dev_view(page: dict) -> dict:
         "steering": _steering_vs_saying(page),
         "changed_count": len(_changed_slots(page)),
         "total_slots": len(page.get("copy_diff", [])),
-        "console": build_business_console_view(page),
+        "console": console,
+        "designer": _designer_view(page, console),
     }

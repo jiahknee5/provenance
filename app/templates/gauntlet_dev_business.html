@@ -147,7 +147,6 @@
   .cp-guards .g.blocked{color:#c0354b}
   .cp-guards .g .dot{flex:none;width:6px;height:6px;border-radius:3px;background:#C6CDD4;position:relative;top:-1px}
   .cp-guards .g.blocked .dot{background:#c0354b}
-  select.stg{font-size:11.5px;font-weight:600;border:1px solid var(--line);border-radius:7px;padding:3px 6px;background:#fff;color:var(--ink)}
   /* ---- image cards ---- */
   .im-tabs{display:flex;gap:6px;padding:8px 14px;border-bottom:1px solid var(--line);background:#FAFBFC;flex-wrap:wrap}
   .im-tabs a{font-size:12px;font-weight:700;color:var(--muted);padding:5px 12px;border-radius:7px;text-decoration:none;border:1px solid transparent}
@@ -186,28 +185,12 @@
   .steer-col .cap{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
   .steer-col.say .cap{color:#0a8a4f}.steer-col.steer .cap{color:#1d4ed8}.steer-col.hold .cap{color:#c0354b}
   .steer-col ul{margin:0;padding-left:16px;line-height:1.5}
-  /* ---- staged changes drawer ---- */
-  #staged-changes{position:fixed;right:18px;bottom:18px;z-index:120;width:min(460px,calc(100vw - 36px));border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:0 12px 40px rgba(15,23,42,.18)}
-  #staged-changes .bar{display:flex;align-items:center;gap:9px;padding:10px 14px;cursor:pointer}
-  #staged-changes .bar .cnt{width:20px;height:20px;border-radius:6px;background:var(--ink);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center}
-  #staged-changes .bar .ttl{font-size:12.5px;font-weight:700;color:var(--ink)}
-  #staged-changes .bar .hint{margin-left:auto;font-size:11px;color:var(--muted)}
-  #staged-changes .body{display:none;border-top:1px solid var(--line);max-height:min(430px,60vh);overflow:auto}
-  #staged-changes.open .body{display:block}
-  #staged-changes .item{padding:8px 14px;border-bottom:1px dashed var(--line);font-size:12px;line-height:1.45}
-  #staged-changes .item b{color:var(--ink)}
-  #staged-changes pre{margin:0;padding:12px 14px;font-family:ui-monospace,Menlo,monospace;font-size:11px;line-height:1.55;background:#0F1419;color:#D7DEE6;white-space:pre-wrap;word-break:break-word}
-  #staged-changes .actions{display:flex;gap:8px;align-items:center;padding:10px 14px;border-top:1px solid var(--line);background:#FAFBFC}
-  #staged-changes .actions button{font-size:12px;font-weight:700;border:1px solid var(--line);border-radius:8px;padding:6px 12px;background:#fff;cursor:pointer}
-  #staged-changes .actions button.primary{background:var(--ink);border-color:var(--ink);color:#fff}
-  #staged-changes .note{padding:0 14px 12px;font-size:10.5px;color:var(--muted);line-height:1.5;background:#FAFBFC}
-  #staged-changes.empty .bar .cnt{background:#C6CDD4}
-  .stg-mark{display:none;font-size:9px;font-weight:800;text-transform:uppercase;color:#946200;background:#fdf3dc;border-radius:4px;padding:1px 6px}
-  .staged .stg-mark{display:inline-block}
+  /* ---- staged changes drawer + designer styles live in _sd_drawer.html / _sd_designer.html ---- */
 </style>
 
 {% set B = biz %}
 {% set C = biz.console %}
+{% set SD = biz.designer %}
 </head>
 <body>
 <div class="app">
@@ -222,6 +205,9 @@
       <a href="{{ toggle_anon }}" class="{{ 'on' if as_state == 'anon' else '' }}">Anonymous</a>
       <a href="{{ toggle_known }}" class="{{ 'on' if as_state != 'anon' else '' }}">Known lead</a>
     </span>
+    <label class="sd-devtog" data-testid="sd-devtoggle" title="Fold in the engineer console's trace and audit sections">
+      <input type="checkbox" id="sd-devtoggle-input"> Developer / audit
+    </label>
   </div>
 </div>
 <p class="gb-meta">Review what the live page decided for this visit — and stage changes to the rules that decide the next one.
@@ -241,6 +227,10 @@
   <a href="#b-workflow" data-ch="b-workflow"><span class="num">2</span>Workflow</a>
   <a href="#b-data" data-ch="b-data"><span class="num">3</span>Data in</a>
   <a href="#b-decisions" data-ch="b-decisions"><span class="num">4</span>Decisions</a>
+  <div class="side-cap">Sections</div>
+  {% for s in SD.sections %}
+  <a href="#sd-{{ s.id }}" class="img-sub" data-ch="sd-{{ s.id }}">{{ s.label }}</a>
+  {% endfor %}
   <div class="side-cap">Copy</div>
   <a href="#b-copy" data-ch="b-copy"><span class="num">5</span>Copy</a>
   <div class="side-cap">Images</div>
@@ -286,8 +276,11 @@
   </div>
 </div>
 
-<!-- 2 · Workflow -->
-<div class="sec" id="b-workflow">
+<!-- Sections — the per-section designer (S5, contract: designer-dom.md) -->
+{% include "_sd_designer.html" %}
+
+<!-- 2 · Workflow (trace/audit — folded behind the Developer/audit toggle) -->
+<div class="sec sd-devfold" id="b-workflow">
   <div class="h">2 · Workflow — the whole request as a decision tree <span class="tag">{{ C.workflow|length }} steps</span></div>
   <div class="sub">Every branch each step could take stays visible; the dark pill is the path this visit actually took. Greyed steps were skipped — the full decision space is always on screen.</div>
   <div class="wf">
@@ -314,8 +307,8 @@
   </div>
 </div>
 
-<!-- 3 · Data in -->
-<div class="sec" id="b-data">
+<!-- 3 · Data in (trace/audit — folded) -->
+<div class="sec sd-devfold" id="b-data">
   <div class="h">3 · Data in — everything the request carried <span class="tag">{{ C.signals|length }} signals</span></div>
   <div class="in-strip">
     {% for i in C.inputs %}
@@ -338,8 +331,8 @@
   </table>
 </div>
 
-<!-- Arrival card (kept from the classic log) -->
-<div class="sec">
+<!-- Arrival card (kept from the classic log; trace/audit — folded) -->
+<div class="sec sd-devfold">
   <div class="h">Arrival &amp; attribution <span class="tag">{{ B.arrival.channel }}</span></div>
   <div class="dec">{{ B.arrival.decision }}</div>
   <table class="ops">
@@ -356,8 +349,8 @@
   </table>
 </div>
 
-<!-- 4 · Decisions -->
-<div class="sec" id="b-decisions" style="border:0;box-shadow:none;background:transparent;overflow:visible">
+<!-- 4 · Decisions (trace/audit — folded) -->
+<div class="sec sd-devfold" id="b-decisions" style="border:0;box-shadow:none;background:transparent;overflow:visible">
   {% for d in C.decisions %}
   <div class="sec">
     <div class="h">{% if loop.first %}4 · Decisions — {% endif %}{{ d.title }}<span class="tag">{{ d.outcome }}</span></div>
@@ -609,25 +602,7 @@
 </div>
 </div>
 
-<!-- Staged changes drawer — client-side only, renders copyable config diffs -->
-<div id="staged-changes" class="empty" data-image-config="{{ C.config_paths.image }}" data-prebuild-config="{{ C.config_paths.prebuild }}">
-  <div class="bar" id="stg-bar">
-    <span class="cnt" id="stg-count">0</span>
-    <span class="ttl">Staged changes</span>
-    <span class="hint" id="stg-hint">toggle a guardrail or prebuild flag to stage a config diff</span>
-  </div>
-  <div class="body">
-    <div id="stg-items"></div>
-    <pre id="stg-patch"># No staged changes yet.</pre>
-    <div class="actions">
-      <button class="primary" id="stg-copy">Copy patch</button>
-      <button id="stg-clear">Clear all</button>
-      <span style="font-size:11px;color:var(--muted)" id="stg-copied"></span>
-    </div>
-    <div class="note">Staged only — nothing is saved server-side (same inputs always render the same page).
-      Apply by editing the file(s) above in the repo and deploying; the warm script picks up prebuild changes on the next <span style="font-family:ui-monospace,Menlo,monospace">railway up</span>.</div>
-  </div>
-</div>
+{% include "_sd_drawer.html" %}
 
 <script>
 (function () {
@@ -635,9 +610,11 @@
   var links = Array.prototype.slice.call(document.querySelectorAll('#gb-nav a[data-ch]'));
   var sections = links.map(function (a) { return document.getElementById(a.getAttribute('data-ch')); });
   function spy() {
-    var current = sections[0];
+    var current = null;
     for (var i = 0; i < sections.length; i++) {
-      if (sections[i] && sections[i].getBoundingClientRect().top <= 80) current = sections[i];
+      if (!sections[i] || sections[i].offsetParent === null) continue;  // folded/hidden
+      if (current === null) current = sections[i];
+      if (sections[i].getBoundingClientRect().top <= 80) current = sections[i];
     }
     links.forEach(function (a) {
       a.classList.toggle('on', current && a.getAttribute('data-ch') === current.id);
@@ -645,156 +622,6 @@
   }
   document.addEventListener('scroll', spy, { passive: true });
   spy();
-
-  /* ---- staged changes (client-side only; renders copyable YAML diffs) ---- */
-  var drawer = document.getElementById('staged-changes');
-  var imageCfg = drawer.getAttribute('data-image-config');
-  var prebuildCfg = drawer.getAttribute('data-prebuild-config');
-  var staged = {};   // key -> {title, file, patch}
-
-  function patchFor(el) {
-    var kind = el.getAttribute('data-stage');
-    if (kind === 'must-avoid') {
-      var text = el.getAttribute('data-text');
-      if (el.checked) return null;
-      return {
-        title: 'Guardrail off: “' + text + '”',
-        file: imageCfg,
-        patch: '# ' + imageCfg + ' -> prompt_defaults.must_avoid — remove this line:\n-  - "' + text + '"',
-      };
-    }
-    if (kind === 'tier-gate') {
-      var orig = el.getAttribute('data-original');
-      if (el.value === orig) return null;
-      var gate = el.getAttribute('data-gate');
-      return {
-        title: 'Confidence gate: ' + gate.replace('_', ' ') + ' level ' + orig + '+ -> level ' + el.value + '+',
-        file: imageCfg,
-        patch: '# ' + imageCfg + ' -> guardrails.tier_gates\n-    ' + gate + ': ' + orig + '\n+    ' + gate + ': ' + el.value,
-      };
-    }
-    if (kind === 'prebuild') {
-      var origB = el.getAttribute('data-original') === 'true';
-      if (el.checked === origB) return null;
-      var state = el.getAttribute('data-state');
-      var surface = el.getAttribute('data-surface') || 'hero';
-      return {
-        title: 'Prebuild ' + (el.checked ? 'on' : 'off') + ': ' + surface + ' · ' + el.getAttribute('data-state-label'),
-        file: prebuildCfg,
-        patch: '# ' + prebuildCfg + ' -> surfaces.' + surface + ', entry `- id: ' + state + '`\n-    prebuild: ' + (origB ? 'true' : 'false') + '\n+    prebuild: ' + (el.checked ? 'true' : 'false'),
-      };
-    }
-    if (kind === 'copy-policy') {
-      var origP = el.getAttribute('data-original');
-      if (el.value === origP) return null;
-      return {
-        title: 'Copy policy: ' + el.getAttribute('data-slot-label') + ' ' + origP + ' -> ' + el.value,
-        file: 'pipeline/personalization/gauntlet_site.py',
-        patch: '# PROPOSAL — copy-slot surface policy is enforced in code today\n' +
-               '# (pipeline/personalization/gauntlet_site.py, the slot() calls — no YAML equivalent yet).\n' +
-               '#   ' + el.getAttribute('data-slot') + ': ' + origP + ' -> ' + el.value,
-      };
-    }
-    return null;
-  }
-
-  function keyFor(el) {
-    var surface = el.getAttribute('data-surface') || '';
-    return el.getAttribute('data-stage') + ':' +
-      (surface ? surface + ':' : '') +
-      (el.getAttribute('data-state') || el.getAttribute('data-gate') ||
-       el.getAttribute('data-rule-id') || el.getAttribute('data-slot') || '');
-  }
-
-  function render() {
-    var keys = Object.keys(staged);
-    var count = keys.length;
-    document.getElementById('stg-count').textContent = String(count);
-    document.getElementById('stg-hint').textContent = count
-      ? 'review the config diff below — applies via repo + deploy'
-      : 'toggle a guardrail or prebuild flag to stage a config diff';
-    drawer.classList.toggle('empty', count === 0);
-    drawer.classList.toggle('open', count > 0);
-    var items = document.getElementById('stg-items');
-    items.innerHTML = '';
-    var byFile = {};
-    keys.forEach(function (k) {
-      var c = staged[k];
-      var div = document.createElement('div');
-      div.className = 'item';
-      div.innerHTML = '<b></b> <span style="color:var(--muted)">· ' + c.file + '</span>';
-      div.querySelector('b').textContent = c.title;
-      items.appendChild(div);
-      (byFile[c.file] = byFile[c.file] || []).push(c.patch);
-    });
-    var patch = keys.length
-      ? Object.keys(byFile).map(function (f) { return byFile[f].join('\n\n'); }).join('\n\n')
-      : '# No staged changes yet.';
-    document.getElementById('stg-patch').textContent = patch;
-  }
-
-  function markRow(el) {
-    var row = el.closest('[data-guard-row]');
-    if (row) row.classList.toggle('staged', !!staged[keyFor(el)]);
-    if (el.getAttribute('data-stage') === 'must-avoid') {
-      var r = el.closest('.gr-row');
-      if (r) r.classList.toggle('off', !el.checked);
-    }
-  }
-
-  function onChange(e) {
-    var el = e.target;
-    if (!el.getAttribute || !el.getAttribute('data-stage')) return;
-    var kind = el.getAttribute('data-stage');
-    var change = patchFor(el);
-    var key = keyFor(el);
-    if (change) staged[key] = change; else delete staged[key];
-    if (kind === 'prebuild') {
-      // keep duplicate prebuild controls (image card + delivery table) in sync
-      var st = el.getAttribute('data-state');
-      var surf = el.getAttribute('data-surface') || 'hero';
-      document.querySelectorAll('[data-stage="prebuild"][data-state="' + st + '"][data-surface="' + surf + '"]').forEach(function (o) {
-        o.checked = el.checked;
-        markRow(o);
-      });
-    } else {
-      markRow(el);
-    }
-    render();
-  }
-  document.addEventListener('change', onChange);
-
-  document.getElementById('stg-bar').addEventListener('click', function () {
-    drawer.classList.toggle('open');
-  });
-  document.getElementById('stg-clear').addEventListener('click', function () {
-    Object.keys(staged).forEach(function (k) { delete staged[k]; });
-    document.querySelectorAll('[data-stage]').forEach(function (el) {
-      var kind = el.getAttribute('data-stage');
-      if (kind === 'must-avoid') el.checked = true;
-      if (kind === 'prebuild') el.checked = el.getAttribute('data-original') === 'true';
-      if (kind === 'tier-gate' || kind === 'copy-policy') el.value = el.getAttribute('data-original');
-      markRow(el);
-      var r = el.closest('.gr-row'); if (r) r.classList.remove('off');
-    });
-    render();
-  });
-  document.getElementById('stg-copy').addEventListener('click', function () {
-    var text = document.getElementById('stg-patch').textContent;
-    function done() {
-      var s = document.getElementById('stg-copied');
-      s.textContent = 'copied';
-      setTimeout(function () { s.textContent = ''; }, 1500);
-    }
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(done);
-    } else {
-      var ta = document.createElement('textarea');
-      ta.value = text; document.body.appendChild(ta); ta.select();
-      document.execCommand('copy'); document.body.removeChild(ta); done();
-    }
-  });
-  render();
 })();
 </script>
 </div>

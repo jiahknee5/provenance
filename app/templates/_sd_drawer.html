@@ -1,0 +1,312 @@
+{# Staged-changes drawer + staging JS, shared by the marketer consoles (S5/T-03).
+   Expects SD = biz.designer in context (config paths). Kinds staged client-side:
+   sections (registry YAML — designer-dom.md), must-avoid / tier-gate (image config),
+   prebuild (manifest), copy-policy (legacy slot proposal). Renders copyable YAML
+   diffs only — nothing is saved server-side (Art IV/V). #}
+<style>
+  #staged-changes{position:fixed;right:18px;bottom:18px;z-index:120;width:min(460px,calc(100vw - 36px));border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:0 12px 40px rgba(15,23,42,.18)}
+  #staged-changes .bar{display:flex;align-items:center;gap:9px;padding:10px 14px;cursor:pointer}
+  #staged-changes .bar .cnt{width:20px;height:20px;border-radius:6px;background:var(--ink);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center}
+  #staged-changes .bar .ttl{font-size:12.5px;font-weight:700;color:var(--ink)}
+  #staged-changes .bar .hint{margin-left:auto;font-size:11px;color:var(--muted)}
+  #staged-changes .body{display:none;border-top:1px solid var(--line);max-height:min(430px,60vh);overflow:auto}
+  #staged-changes.open .body{display:block}
+  #staged-changes .item{padding:8px 14px;border-bottom:1px dashed var(--line);font-size:12px;line-height:1.45}
+  #staged-changes .item b{color:var(--ink)}
+  #staged-changes pre{margin:0;padding:12px 14px;font-family:ui-monospace,Menlo,monospace;font-size:11px;line-height:1.55;background:#0F1419;color:#D7DEE6;white-space:pre-wrap;word-break:break-word}
+  #staged-changes .actions{display:flex;gap:8px;align-items:center;padding:10px 14px;border-top:1px solid var(--line);background:#FAFBFC}
+  #staged-changes .actions button{font-size:12px;font-weight:700;border:1px solid var(--line);border-radius:8px;padding:6px 12px;background:#fff;cursor:pointer}
+  #staged-changes .actions button.primary{background:var(--ink);border-color:var(--ink);color:#fff}
+  #staged-changes .note{padding:0 14px 12px;font-size:10.5px;color:var(--muted);line-height:1.5;background:#FAFBFC}
+  #staged-changes.empty .bar .cnt{background:#C6CDD4}
+  .stg-mark{display:none;font-size:9px;font-weight:800;text-transform:uppercase;color:#946200;background:#fdf3dc;border-radius:4px;padding:1px 6px}
+  .staged .stg-mark{display:inline-block}
+  select.stg{font-size:11.5px;font-weight:600;border:1px solid var(--line);border-radius:7px;padding:3px 6px;background:#fff;color:var(--ink)}
+  /* developer / audit fold (sd-devtoggle) */
+  .sd-devtog{display:inline-flex;gap:6px;align-items:center;font-size:12.5px;font-weight:600;color:var(--muted);border:1px solid var(--line);border-radius:9px;padding:5px 12px;background:#fff;cursor:pointer}
+  .sd-devtog input{accent-color:var(--ink)}
+  body.sd-dev-open .sd-devtog{color:var(--ink);border-color:var(--ink)}
+  .sd-devfold{display:none}
+  body.sd-dev-open .sd-devfold{display:block}
+</style>
+
+<!-- Staged changes drawer — client-side only, renders copyable config diffs -->
+<div id="staged-changes" class="empty" data-testid="sd-staged"
+     data-sections-config="{{ SD.config.sections }}"
+     data-image-config="{{ SD.config.image }}"
+     data-prebuild-config="{{ SD.config.prebuild }}"
+     data-copy-module="{{ SD.config.copy_module }}">
+  <div class="bar" id="stg-bar">
+    <span class="cnt" id="stg-count">0</span>
+    <span class="ttl">Staged changes</span>
+    <span class="hint" id="stg-hint">edit a section control to stage a YAML diff</span>
+  </div>
+  <div class="body">
+    <div id="stg-items"></div>
+    <pre id="stg-patch"># No staged changes yet.</pre>
+    <div class="actions">
+      <button class="primary" id="stg-copy">Copy patch</button>
+      <button id="stg-clear">Clear all</button>
+      <span style="font-size:11px;color:var(--muted)" id="stg-copied"></span>
+    </div>
+    <div class="note">Staged only — nothing is saved server-side (same inputs always render the same page).
+      Apply by editing the file(s) above in the repo and deploying; the warm script picks up prebuild changes on the next <span style="font-family:ui-monospace,Menlo,monospace">railway up</span>.</div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var drawer = document.getElementById('staged-changes');
+  if (!drawer) return;
+  var sectionsCfg = drawer.getAttribute('data-sections-config');
+  var imageCfg = drawer.getAttribute('data-image-config');
+  var prebuildCfg = drawer.getAttribute('data-prebuild-config');
+  var copyModule = drawer.getAttribute('data-copy-module');
+  var staged = {};   // key -> {title, file, patch}
+
+  /* ---- sections kind: every designer edit diffs rules/<tenant>_sections.yaml ---- */
+  function sectionsPatch(el) {
+    var secId = el.getAttribute('data-sd-section');
+    var op = el.getAttribute('data-sd-op') || 'set';
+    var kindT = el.getAttribute('data-sd-target-kind') || '';
+    var target = el.getAttribute('data-sd-target') || '';
+    var listKey = kindT === 'image' ? 'image_targets' : 'text_targets';
+    var idKey = kindT === 'image' ? 'surface_id' : 'slot_id';
+    if (op === 'add') {
+      if (el.dataset.staged !== '1') return null;
+      var stub = kindT === 'image'
+        ? '+      - surface_id: ' + secId + '_img_new\n+        label: "New image target"\n+        workflow: realtime\n+        intent_rules: inherit\n+        guardrails: inherit\n+        prebuilt_states_cap: 8'
+        : '+      - slot_id: ' + secId + '_txt_new\n+        label: "New text target"\n+        mode: deterministic\n+        workflow: realtime\n+        strategy: neutral\n+        policy: allude\n+        source: catalog\n+        claims: []\n+        prompt: ""';
+      return {
+        title: 'Add ' + (kindT === 'image' ? 'image' : 'text') + ' target: section ' + secId,
+        file: sectionsCfg,
+        patch: '# ' + sectionsCfg + ' -> sections[id: ' + secId + '].' + listKey + ' — append:\n' + stub,
+      };
+    }
+    var field = el.getAttribute('data-sd-field');
+    var orig = el.getAttribute('data-original') || '';
+    var val = el.type === 'checkbox' ? (el.checked ? 'true' : 'false') : el.value;
+    if (val === orig) return null;
+    var yamlOrig = field === 'prompt' ? JSON.stringify(orig) : orig;
+    var yamlVal = field === 'prompt' ? JSON.stringify(val) : val;
+    var where = 'sections[id: ' + secId + ']' + (target ? ' -> ' + listKey + '[' + idKey + ': ' + target + ']' : '');
+    var indent = target ? '        ' : '    ';
+    return {
+      title: 'Section ' + secId + (target ? ' · ' + target : '') + ': ' + field + ' ' + (orig || '""') + ' -> ' + (val || '""'),
+      file: sectionsCfg,
+      patch: '# ' + sectionsCfg + ' -> ' + where + '\n-' + indent + field + ': ' + yamlOrig + '\n+' + indent + field + ': ' + yamlVal,
+    };
+  }
+
+  function patchFor(el) {
+    var kind = el.getAttribute('data-stage');
+    if (kind === 'sections') return sectionsPatch(el);
+    if (kind === 'must-avoid') {
+      var text = el.getAttribute('data-text');
+      if (el.checked) return null;
+      return {
+        title: 'Guardrail off: “' + text + '”',
+        file: imageCfg,
+        patch: '# ' + imageCfg + ' -> prompt_defaults.must_avoid — remove this line:\n-  - "' + text + '"',
+      };
+    }
+    if (kind === 'tier-gate') {
+      var orig = el.getAttribute('data-original');
+      if (el.value === orig) return null;
+      var gate = el.getAttribute('data-gate');
+      return {
+        title: 'Confidence gate: ' + gate.replace('_', ' ') + ' level ' + orig + '+ -> level ' + el.value + '+',
+        file: imageCfg,
+        patch: '# ' + imageCfg + ' -> guardrails.tier_gates\n-    ' + gate + ': ' + orig + '\n+    ' + gate + ': ' + el.value,
+      };
+    }
+    if (kind === 'prebuild') {
+      var origB = el.getAttribute('data-original') === 'true';
+      if (el.checked === origB) return null;
+      var state = el.getAttribute('data-state');
+      var surface = el.getAttribute('data-surface') || 'hero';
+      return {
+        title: 'Prebuild ' + (el.checked ? 'on' : 'off') + ': ' + surface + ' · ' + el.getAttribute('data-state-label'),
+        file: prebuildCfg,
+        patch: '# ' + prebuildCfg + ' -> surfaces.' + surface + ', entry `- id: ' + state + '`\n-    prebuild: ' + (origB ? 'true' : 'false') + '\n+    prebuild: ' + (el.checked ? 'true' : 'false'),
+      };
+    }
+    if (kind === 'copy-policy') {
+      var origP = el.getAttribute('data-original');
+      if (el.value === origP) return null;
+      return {
+        title: 'Copy policy: ' + el.getAttribute('data-slot-label') + ' ' + origP + ' -> ' + el.value,
+        file: copyModule,
+        patch: '# PROPOSAL — copy-slot surface policy is enforced in code today\n' +
+               '# (' + copyModule + ', the slot() calls — the registry policy field is the YAML home).\n' +
+               '#   ' + el.getAttribute('data-slot') + ': ' + origP + ' -> ' + el.value,
+      };
+    }
+    return null;
+  }
+
+  function keyFor(el) {
+    if (el.getAttribute('data-stage') === 'sections') {
+      return 'sections:' + (el.getAttribute('data-sd-section') || '') + ':' +
+        (el.getAttribute('data-sd-target') || '') + ':' +
+        (el.getAttribute('data-sd-field') ||
+         (el.getAttribute('data-sd-op') || '') + '-' + (el.getAttribute('data-sd-target-kind') || ''));
+    }
+    var surface = el.getAttribute('data-surface') || '';
+    return el.getAttribute('data-stage') + ':' +
+      (surface ? surface + ':' : '') +
+      (el.getAttribute('data-state') || el.getAttribute('data-gate') ||
+       el.getAttribute('data-rule-id') || el.getAttribute('data-slot') || '');
+  }
+
+  function render() {
+    var keys = Object.keys(staged);
+    var count = keys.length;
+    document.getElementById('stg-count').textContent = String(count);
+    document.getElementById('stg-hint').textContent = count
+      ? 'review the YAML diff below — applies via repo + deploy'
+      : 'edit a section control to stage a YAML diff';
+    drawer.classList.toggle('empty', count === 0);
+    drawer.classList.toggle('open', count > 0);
+    var items = document.getElementById('stg-items');
+    items.innerHTML = '';
+    var byFile = {};
+    keys.forEach(function (k) {
+      var c = staged[k];
+      var div = document.createElement('div');
+      div.className = 'item';
+      div.innerHTML = '<b></b> <span style="color:var(--muted)">· ' + c.file + '</span>';
+      div.querySelector('b').textContent = c.title;
+      items.appendChild(div);
+      (byFile[c.file] = byFile[c.file] || []).push(c.patch);
+    });
+    var patch = keys.length
+      ? Object.keys(byFile).map(function (f) { return byFile[f].join('\n\n'); }).join('\n\n')
+      : '# No staged changes yet.';
+    document.getElementById('stg-patch').textContent = patch;
+  }
+
+  function markRow(el) {
+    var row = el.closest('[data-guard-row]');
+    if (row) row.classList.toggle('staged', !!staged[keyFor(el)]);
+    if (el.getAttribute('data-stage') === 'must-avoid') {
+      var r = el.closest('.gr-row');
+      if (r) r.classList.toggle('off', !el.checked);
+    }
+  }
+
+  /* designer UI sync: prompt editor visible iff mode=generative; live workflow warns */
+  function syncUi(el) {
+    if (el.getAttribute('data-stage') !== 'sections') return;
+    var field = el.getAttribute('data-sd-field');
+    var card = el.closest('[data-sd-target-card]');
+    if (!card) return;
+    if (field === 'mode') {
+      var wrap = card.querySelector('.sd-promptwrap');
+      if (wrap) wrap.hidden = el.value !== 'generative';
+    }
+    if (field === 'workflow') {
+      var warn = card.querySelector('.sd-livewarn');
+      if (warn) warn.hidden = el.value !== 'live';
+    }
+  }
+
+  function onChange(e) {
+    var el = e.target;
+    if (!el.getAttribute || !el.getAttribute('data-stage')) return;
+    var kind = el.getAttribute('data-stage');
+    var change = patchFor(el);
+    var key = keyFor(el);
+    if (change) staged[key] = change; else delete staged[key];
+    if (kind === 'prebuild') {
+      // keep duplicate prebuild controls (image card + delivery table) in sync
+      var st = el.getAttribute('data-state');
+      var surf = el.getAttribute('data-surface') || 'hero';
+      document.querySelectorAll('[data-stage="prebuild"][data-state="' + st + '"][data-surface="' + surf + '"]').forEach(function (o) {
+        o.checked = el.checked;
+        markRow(o);
+      });
+    } else {
+      markRow(el);
+    }
+    syncUi(el);
+    render();
+  }
+  document.addEventListener('change', onChange);
+
+  /* add-target buttons toggle a staged registry stub */
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest ? e.target.closest('button[data-stage="sections"][data-sd-op="add"]') : null;
+    if (!btn) return;
+    btn.dataset.staged = btn.dataset.staged === '1' ? '' : '1';
+    btn.classList.toggle('on', btn.dataset.staged === '1');
+    var change = patchFor(btn);
+    var key = keyFor(btn);
+    if (change) staged[key] = change; else delete staged[key];
+    markRow(btn);
+    render();
+  });
+
+  document.getElementById('stg-bar').addEventListener('click', function () {
+    drawer.classList.toggle('open');
+  });
+  document.getElementById('stg-clear').addEventListener('click', function () {
+    Object.keys(staged).forEach(function (k) { delete staged[k]; });
+    document.querySelectorAll('[data-stage]').forEach(function (el) {
+      var kind = el.getAttribute('data-stage');
+      if (kind === 'must-avoid') el.checked = true;
+      if (kind === 'prebuild') el.checked = el.getAttribute('data-original') === 'true';
+      if (kind === 'tier-gate' || kind === 'copy-policy') el.value = el.getAttribute('data-original');
+      if (kind === 'sections') {
+        if ((el.getAttribute('data-sd-op') || '') === 'add') {
+          el.dataset.staged = '';
+          el.classList.remove('on');
+        } else if (el.type === 'checkbox') {
+          el.checked = el.getAttribute('data-original') === 'true';
+        } else {
+          el.value = el.getAttribute('data-original') || '';
+        }
+        syncUi(el);
+      }
+      markRow(el);
+      var r = el.closest('.gr-row'); if (r) r.classList.remove('off');
+    });
+    render();
+  });
+  document.getElementById('stg-copy').addEventListener('click', function () {
+    var text = document.getElementById('stg-patch').textContent;
+    function done() {
+      var s = document.getElementById('stg-copied');
+      s.textContent = 'copied';
+      setTimeout(function () { s.textContent = ''; }, 1500);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done);
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta); done();
+    }
+  });
+
+  /* dev/audit toggle (sd-devtoggle) — folds the engineer trace/audit sections */
+  var devInput = document.getElementById('sd-devtoggle-input');
+  if (devInput) {
+    devInput.addEventListener('change', function () {
+      document.body.classList.toggle('sd-dev-open', devInput.checked);
+    });
+  }
+  /* a sidebar/anchor link into the folded region opens the fold first */
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('a[href^="#"]') : null;
+    if (!a) return;
+    var target = document.getElementById(a.getAttribute('href').slice(1));
+    if (target && target.closest('.sd-devfold') && !document.body.classList.contains('sd-dev-open')) {
+      if (devInput) devInput.checked = true;
+      document.body.classList.add('sd-dev-open');
+    }
+  });
+
+  render();
+})();
+</script>
