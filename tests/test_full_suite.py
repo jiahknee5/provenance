@@ -28,12 +28,12 @@ c = TestClient(app)
 TPL = pathlib.Path(__file__).resolve().parents[1] / "app" / "templates"
 
 # Surfaces on the Quiet-Workspace shell.
-SHELL_PAGES = ["composer", "optimizer", "agent", "assurance", "sources"]
-SHELL_ROUTES = ["/composer", "/optimizer", "/agent", "/assurance", "/sources"]
+SHELL_PAGES = ["composer", "optimizer", "assurance", "sources"]
+SHELL_ROUTES = ["/composer", "/optimizer", "/assurance", "/sources"]
 # All legacy/lab routes (now light) — param routes filled with valid demo values.
 TOKEN = __import__("pipeline.personalization.cohort", fromlist=["x"]).magic_token(
     __import__("pipeline.personalization.cohort", fromlist=["x"]).COHORT[1])
-LAB_ROUTES = ["/", "/lead", "/personalize", "/inspector", "/observatory", "/costs", "/funnel",
+LAB_ROUTES = ["/", "/lead", "/personalize", "/observatory", "/costs", "/funnel",
               "/admin/landings", "/admin/landing/maya", "/google", "/enrichment-catalog",
               "/lp", "/lp?email=maya.chen@gauntletai.com"]
 
@@ -312,20 +312,13 @@ def test_archive_moves_noncore_surfaces_off_the_nav():
     assert c.get("/archive").status_code == 200
     from app import archive as AR
     lab = [it["route"] for g in AR.ARCHIVE if g["group"] != "Internal decks" for it in g["items"]]
-    assert "/personalize" in lab and "/inspector" in lab and "/enrichment-catalog" in lab
+    assert "/personalize" in lab and "/enrichment-catalog" in lab
     for rt in lab:
         assert c.get(rt).status_code == 200, rt              # every archived surface still works
     shell = c.get("/sources").text
     sidebar = shell.split("q-cmdk-scrim")[0]                 # nav markup, before the ⌘K palette
     assert 'href="/archive"' in sidebar                      # Archive reachable from the shell
     assert 'href="/personalize"' not in sidebar              # but the lab surfaces are off the sidebar
-    assert 'href="/inspector"' not in sidebar
-
-
-def test_graph_page_embeds_the_exhibit():
-    r = c.get("/graph")
-    assert r.status_code == 200
-    assert "/static/mockups/decision-tree.html" in r.text and "Agent graph" in r.text
 
 
 def test_resolve_ip_is_honest_offline():
@@ -454,5 +447,5 @@ def test_shell_pages_carry_no_off_token_raw_hex():
 
 
 def test_pages_lead_with_the_proves_spine_line():
-    for route in ["/composer", "/optimizer", "/agent", "/assurance", "/sources"]:
+    for route in ["/composer", "/optimizer", "/assurance", "/sources"]:
         assert "Proves:" in c.get(route).text, f"{route} missing its 'Proves:' spine line"

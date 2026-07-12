@@ -20,11 +20,9 @@
     <nav class="q-nav">
       <a class="q-ni {{ 'on' if p.startswith('/composer') else '' }}" href="/composer"><i class="ph ph-pen-nib"></i>Composer</a>
       <a class="q-ni {{ 'on' if p.startswith('/optimizer') else '' }}" href="/optimizer"><i class="ph ph-trend-up"></i>Optimizer</a>
-      <a class="q-ni {{ 'on' if p.startswith('/agent') else '' }}" href="/agent"><i class="ph ph-sparkle"></i>Agent</a>
       <div class="q-sect q-label">Trust</div>
       <a class="q-ni {{ 'on' if p.startswith('/assurance') else '' }}" href="/assurance"><i class="ph ph-shield-check"></i>Assurance</a>
       <a class="q-ni {{ 'on' if p.startswith('/policies') else '' }}" href="/policies"><i class="ph ph-scroll"></i>Policies</a>
-      <a class="q-ni {{ 'on' if p.startswith('/graph') else '' }}" href="/graph"><i class="ph ph-tree-structure"></i>Agent graph</a>
       <a class="q-ni {{ 'on' if p.startswith('/sources') else '' }}" href="/sources"><i class="ph ph-database"></i>Sources</a>
       <div class="q-sect q-label">Showcase</div>
       <a class="q-ni {{ 'on' if p == '/showcase' else '' }}" href="/showcase"><i class="ph ph-squares-four"></i>Use cases</a>
@@ -52,17 +50,13 @@
       <input id="cmdk-input" type="text" placeholder="Search surfaces or ask the agent&hellip;" autocomplete="off" spellcheck="false" aria-label="Command">
     </div>
     <div class="qlist" id="cmdk-list">
-      <a class="qi ask" data-kind="ask" data-keep="1" href="/agent"><i class="ph ph-sparkle"></i><span class="lab">Ask the agent&hellip;</span><span class="hint">⏎</span></a>
       <a class="qi" data-label="composer message copy outreach gate write" href="/composer"><i class="ph ph-pen-nib"></i>Composer<span class="hint">go</span></a>
       <a class="qi" data-label="optimizer bandit experiment variant winner lift" href="/optimizer"><i class="ph ph-trend-up"></i>Optimizer<span class="hint">go</span></a>
-      <a class="qi" data-label="agent navigator ask deterministic" href="/agent"><i class="ph ph-sparkle"></i>Agent<span class="hint">go</span></a>
       <a class="qi" data-label="assurance trust drift watch monitor traps" href="/assurance"><i class="ph ph-shield-check"></i>Assurance<span class="hint">go</span></a>
       <a class="qi" data-label="policies surface say allude hold company product personal what the llm can say" href="/policies"><i class="ph ph-scroll"></i>Policies<span class="hint">go</span></a>
-      <a class="qi" data-label="agent graph decision tree router tiers classify" href="/graph"><i class="ph ph-tree-structure"></i>Agent graph<span class="hint">go</span></a>
       <a class="qi" data-label="sources data provenance connectors catalog" href="/sources"><i class="ph ph-database"></i>Sources<span class="hint">go</span></a>
       <a class="qi" data-label="showcase use cases gallery personalized demo sites" href="/showcase"><i class="ph ph-squares-four"></i>Use cases<span class="hint">go</span></a>
       <a class="qi" data-label="lab personalize tiers creepy super-personalization" href="/personalize"><i class="ph ph-magic-wand"></i>Personalize<span class="hint">archive</span></a>
-      <a class="qi" data-label="lab inspector claim ledger regret" href="/inspector"><i class="ph ph-magnifying-glass-plus"></i>Inspector<span class="hint">archive</span></a>
       <a class="qi" data-label="lab observatory pipeline run node graph" href="/observatory"><i class="ph ph-graph"></i>Observatory<span class="hint">archive</span></a>
       <a class="qi" data-label="lab funnel customer journey paths" href="/funnel"><i class="ph ph-funnel"></i>Funnel<span class="hint">archive</span></a>
       <a class="qi" data-label="lab cohort gallery seed users landings" href="/admin/landings"><i class="ph ph-users-three"></i>Cohort<span class="hint">archive</span></a>

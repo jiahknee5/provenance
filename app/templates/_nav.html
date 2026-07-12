@@ -5,7 +5,6 @@
   <nav>
     {% set p = request.url.path %}
     <a href="/personalize" class="{{ 'on' if p == '/personalize' else '' }}">Personalize</a>
-    <a href="/inspector" class="{{ 'on' if p == '/inspector' else '' }}">Inspector</a>
     <a href="/observatory" class="{{ 'on' if p == '/observatory' else '' }}">Observatory</a>
     <a href="/costs" class="{{ 'on' if p == '/costs' else '' }}">Costs</a>
     <a href="/funnel" class="{{ 'on' if p == '/funnel' else '' }}">Funnel</a>
