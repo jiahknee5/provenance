@@ -203,7 +203,9 @@ def _dev_toggles(dev_path: str, qs: str, as_state: str) -> tuple[str, str]:
 def _render_dev(request: Request, m: dict[str, str]) -> HTMLResponse:
     as_state, email, page, qs = _dev_email_and_page(request, m)
     toggle_anon, toggle_known = _dev_toggles(m["dev"], qs, as_state)
+    from pipeline.personalization import demo_nav as _NAV
     return templates.TemplateResponse(request, "gauntlet_dev.html", {
+        **_NAV.console_shell_ctx("gauntlet", "consoles"),
         "page": page, "pmap": GS.process_map(page),
         "story": GS.plain_story(page),
         "as_state": as_state,
@@ -233,7 +235,9 @@ def _render_dev_business(request: Request, m: dict[str, str]) -> HTMLResponse:
     as_state, email, page, qs = _dev_email_and_page(request, m)
     biz_path = m["dev_business"]
     toggle_anon, toggle_known = _dev_toggles(biz_path, qs, as_state)
+    from pipeline.personalization import demo_nav as _NAV
     return templates.TemplateResponse(request, "gauntlet_dev_business.html", {
+        **_NAV.console_shell_ctx("gauntlet", "consoles"),
         "page": page, "biz": GDB.build_business_dev_view(page),
         "story": GS.plain_story(page),
         "as_state": as_state,

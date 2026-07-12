@@ -428,10 +428,14 @@ def test_portal_mount_serves_and_links_stay_under_prefix():
     assert 'href="/dev' not in t
     d = c.get("/gauntletapt/dev?as=anon").text
     assert "Entry point" in d and 'href="/gauntletapt' in d
-    assert 'href="/gauntletapt/static/atlas.css"' in d
-    assert 'href="/static/atlas.css"' not in d
+    # The console is now a self-contained apt shell (inline CSS) — no external stylesheet
+    # to leak under any prefix (this removes the old portal-static-404 workaround). Image
+    # assets still stay under /gauntletapt, never the root prefix.
+    assert 'ws-dd' in d  # apt shell rendered
+    assert 'href="/static/atlas.css"' not in d and 'href="/gauntletapt/static/atlas.css"' not in d
+    assert '"/static/generated' not in d  # no root-prefix asset leak
     legacy_dev = c.get("/dev?as=anon").text
-    assert 'href="/static/atlas.css"' in legacy_dev
+    assert "Entry point" in legacy_dev  # legacy mount still serves the console
     c.post("/gauntletapt/login", data={"email": GS.sample_login_email(), "next": "/gauntletapt"})
     assert "Welcome back, Maya" in c.get("/gauntletapt").text
     c.get("/gauntletapt/logout")

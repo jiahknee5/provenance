@@ -484,10 +484,14 @@ def test_portal_mount_serves_and_links_stay_under_prefix():
     assert 'href="/planet/dev' not in t
     d = c.get("/planetapt/dev?as=anon").text
     assert "Entry point" in d and 'href="/planetapt' in d
-    assert 'href="/planetapt/static/atlas.css"' in d
-    assert 'href="/static/atlas.css"' not in d
+    # The console is now a self-contained apt shell (inline CSS) — no external stylesheet
+    # to leak under any prefix (this removes the old portal-static-404 workaround). Its own
+    # body links + image assets still stay under /planetapt.
+    assert 'ws-dd' in d  # apt shell rendered
+    assert 'href="/static/atlas.css"' not in d and 'href="/planetapt/static/atlas.css"' not in d
+    assert '"/static/generated' not in d  # no root-prefix asset leak
     legacy_dev = c.get("/planet/dev?as=anon").text
-    assert 'href="/static/atlas.css"' in legacy_dev
+    assert "Entry point" in legacy_dev  # legacy mount still serves the console
     c.post("/planetapt/login", data={"email": PS.sample_login_email(), "next": "/planetapt"})
     assert "Welcome back, Amara" in c.get("/planetapt").text
     c.get("/planetapt/logout")

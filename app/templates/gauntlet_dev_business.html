@@ -1,6 +1,10 @@
-{% extends "base.html" %}
-{% block title %}Marketer console — Gauntlet personalization · apt{% endblock %}
-{% block content %}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marketer console — Gauntlet personalization · apt</title>
+{% include "_apt_shell.html" %}
 <style>
   main{max-width:1280px}
   html{scroll-behavior:smooth}
@@ -204,6 +208,13 @@
 
 {% set B = biz %}
 {% set C = biz.console %}
+</head>
+<body>
+<div class="app">
+{% include "_apt_sidebar.html" %}
+<div class="main">
+<div class="topbar"><div class="crumb">{{ active.name }} / <b>Console</b></div><div class="grow"></div><a class="btn-primary" href="{{ nav.channels }}">Demo sitemap →</a></div>
+<div class="content" style="max-width:none">
 <div class="gb-head">
   <h1>Marketer console — <a href="{{ g.page }}{{ qs }}" style="text-decoration:none">{{ g.page }}</a></h1>
   <div class="links">
@@ -786,4 +797,8 @@
   render();
 })();
 </script>
-{% endblock %}
+</div>
+</div>
+</div>
+</body>
+</html>

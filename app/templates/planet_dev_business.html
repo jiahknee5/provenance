@@ -1,6 +1,10 @@
-{% extends "base.html" %}
-{% block title %}Marketing decision log — Planet personalization · apt{% endblock %}
-{% block content %}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marketing decision log — Planet personalization · apt</title>
+{% include "_apt_shell.html" %}
 <style>
   main{max-width:1040px}
   .gb-head{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:6px}
@@ -49,6 +53,13 @@
 </style>
 
 {% set B = biz %}
+</head>
+<body>
+<div class="app">
+{% include "_apt_sidebar.html" %}
+<div class="main">
+<div class="topbar"><div class="crumb">{{ active.name }} / <b>Console</b></div><div class="grow"></div><a class="btn-primary" href="{{ nav.channels }}">Demo sitemap →</a></div>
+<div class="content" style="max-width:none">
 <div class="gb-head">
   <h1>Decision log — <a href="{{ g.page }}{{ qs }}" style="text-decoration:none">{{ g.page }}</a></h1>
   <div class="links">
@@ -233,4 +244,8 @@
   </table>
   <div class="foot-link"><a href="{{ g.dev }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}">Technical view →</a> for pipeline trace, signal ledger, and engineering detail.</div>
 </div>
-{% endblock %}
+</div>
+</div>
+</div>
+</body>
+</html>
