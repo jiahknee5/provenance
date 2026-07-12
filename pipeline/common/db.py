@@ -70,10 +70,30 @@ def connect(path: Optional[Path] = None) -> sqlite3.Connection:
     return conn
 
 
+# Idempotent column migrations for tables that predate a schema addition —
+# CREATE TABLE IF NOT EXISTS never alters an existing table, so a dev DB created
+# before multi-tenancy lacks impressions.tenant/.policy and every /site visit dies.
+_MIGRATIONS = {
+    "impressions": [
+        ("tenant", "TEXT DEFAULT 'helix'"),
+        ("policy", "TEXT DEFAULT 'bandit'"),
+    ],
+}
+
+
+def _migrate(conn: sqlite3.Connection) -> None:
+    for table, cols in _MIGRATIONS.items():
+        have = {r["name"] for r in conn.execute(f"PRAGMA table_info({table})")}
+        for name, decl in cols:
+            if have and name not in have:
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {decl}")
+
+
 def init_db(path: Optional[Path] = None) -> None:
     conn = connect(path)
     try:
         conn.executescript(_SCHEMA)
+        _migrate(conn)
         conn.commit()
     finally:
         conn.close()

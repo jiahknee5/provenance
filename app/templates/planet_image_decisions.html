@@ -1,7 +1,14 @@
-{% extends "base.html" %}
-{% block title %}Hero image decisions — {{ brand_name }} · apt{% endblock %}
-{% block content %}
-<style>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hero image decisions — {{ brand_name }} · apt</title>
+  <link rel="stylesheet" href="{{ static_prefix }}/atlas.css">
+  <link rel="stylesheet" href="{{ static_prefix }}/style.css">
+</head>
+<body>
+  <main><style>
   main{max-width:1080px}
   .id-head{margin-bottom:8px}
   .id-head h1{font-size:26px;margin:0 0 6px;line-height:1.2}
@@ -446,5 +453,6 @@ flowchart LR
 <script type="module">
   import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
   mermaid.initialize({ startOnLoad: true, theme: 'neutral', securityLevel: 'loose' });
-</script>
-{% endblock %}
+</script></main>
+</body>
+</html>

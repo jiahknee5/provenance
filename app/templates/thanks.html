@@ -1,7 +1,14 @@
-{% extends "base.html" %}
-{% block title %}Thanks — Helix Analytics{% endblock %}
-{% block content %}
-<section class="card narrow">
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Thanks — Helix Analytics</title>
+  <link rel="stylesheet" href="{{ static_prefix }}/atlas.css">
+  <link rel="stylesheet" href="{{ static_prefix }}/style.css">
+</head>
+<body>
+  <main><section class="card narrow">
   <h1>Thanks, {{ r.name.split()[0] }}.</h1>
   <p class="sub">Your personalized clinical-ops ROI report for <strong>{{ r.company }}</strong>
      is ready. We've placed you in the <code>{{ r.segment }}</code> segment.</p>
@@ -16,5 +23,10 @@
   <p><a class="cta" href="/site/{{ r.token }}">View your personalized page →</a></p>
   <p class="fineprint">recipient_id <code>{{ r.recipient_id }}</code> ·
      token <code>{{ r.token }}</code> (opaque — no PII in the URL)</p>
-</section>
-{% endblock %}
+</section></main>
+  <footer class="foot">
+    Helix Analytics · clinical-ops ROI analytics ·
+    <span class="muted">apt demo — every claim shown was verified before it shipped.</span>
+  </footer>
+</body>
+</html>

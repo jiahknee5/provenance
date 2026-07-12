@@ -1,12 +1,24 @@
-{% extends "base.html" %}
-{% block title %}Assessment booked — Helix Analytics{% endblock %}
-{% block content %}
-<section class="card narrow">
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Assessment booked — Helix Analytics</title>
+  <link rel="stylesheet" href="{{ static_prefix }}/atlas.css">
+  <link rel="stylesheet" href="{{ static_prefix }}/style.css">
+</head>
+<body>
+  <main><section class="card narrow">
   <h1>You're booked, {{ r.name.split()[0] }}.</h1>
   <p class="sub">A Helix Analytics specialist will reach out about your {{ r.company }}
      ROI assessment.</p>
   <p class="fineprint">Your click was logged as a website CTA for segment
      <code>{{ r.segment }}</code> — it feeds the same bandit that optimizes the campaign,
      inside the truth boundary.</p>
-</section>
-{% endblock %}
+</section></main>
+  <footer class="foot">
+    Helix Analytics · clinical-ops ROI analytics ·
+    <span class="muted">apt demo — every claim shown was verified before it shipped.</span>
+  </footer>
+</body>
+</html>

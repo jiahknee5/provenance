@@ -24,7 +24,6 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from app.server import app, templates
 from pipeline.common.config import (OBSERVE_DIR, DB_PATH, PROFILES_DB_PATH, CLAIMS_DIR,
                                     RULES_DIR)
-from pipeline.enrichment import catalog as enrich_catalog
 from pipeline.enrichment.store import ProfileStore
 from pipeline.observability import api_costs as AC
 
@@ -114,16 +113,6 @@ def api_profiles():
     store = ProfileStore()
     return JSONResponse({"summary": store.summary(), "facts": store.all_facts(),
                          "db_locations": DB_LOCATIONS})
-
-
-@app.get("/enrichment-catalog", response_class=HTMLResponse)
-def enrichment_catalog(request: Request):
-    """Every data source we could enrich with, paid or free, honest about cost + basis."""
-    return templates.TemplateResponse(request, "enrichment_catalog.html", {
-        "grouped": enrich_catalog.grouped(),
-        "enrichment": _load("enrichment.json"),
-        "db_locations": DB_LOCATIONS,
-    })
 
 
 @app.get("/costs", response_class=HTMLResponse)

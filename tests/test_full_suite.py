@@ -28,7 +28,7 @@ c = TestClient(app)
 
 # Kept routes (R38): / redirects to the apt sitemap; /lead+/submit feed /site/<token>
 # (property T4's surface); /observatory + /costs are apt-shell dashboards.
-LAB_ROUTES = ["/", "/lead", "/observatory", "/costs", "/enrichment-catalog"]
+LAB_ROUTES = ["/", "/lead", "/observatory", "/costs"]
 
 
 # ---- registered-route matcher (for the dead-link audit) -----------------------

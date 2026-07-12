@@ -1,7 +1,14 @@
-{% extends "base.html" %}
-{% block title %}Request the Clinical-Ops ROI Report — Helix Analytics{% endblock %}
-{% block content %}
-<section class="hero">
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Request the Clinical-Ops ROI Report — Helix Analytics</title>
+  <link rel="stylesheet" href="{{ static_prefix }}/atlas.css">
+  <link rel="stylesheet" href="{{ static_prefix }}/style.css">
+</head>
+<body>
+  <main><section class="hero">
   <h1>See what Helix Analytics would save your system.</h1>
   <p class="sub">Tell us about your organization and we'll send a personalized clinical-ops
      ROI report — and follow up with a few tailored examples.</p>
@@ -43,5 +50,10 @@
   <button type="submit">Send me the report →</button>
   <p class="fineprint">Synthetic demo. No real email is sent; your submission is stored locally
     to drive the apt pipeline.</p>
-</form>
-{% endblock %}
+</form></main>
+  <footer class="foot">
+    Helix Analytics · clinical-ops ROI analytics ·
+    <span class="muted">apt demo — every claim shown was verified before it shipped.</span>
+  </footer>
+</body>
+</html>

@@ -1,11 +1,13 @@
-"""Entrypoint (`uvicorn app.main:app`). Registers the form routes and pulls in the
-website + inspector route modules.
+"""Entrypoint (`uvicorn app.main:app`). One design (R38): the apt console shell.
 
-  GET  /            — the real, working lead-capture form (Helix Analytics)
+  GET  /            — 302 → /apt/demo (the demo sitemap is the front door)
+  GET  /lead        — the Helix Analytics lead-capture form (feeds /site/<token>)
   POST /submit      — create a Recipient -> SQLite, return a thank-you + magic link
-  GET  /site/{token}— the ultra-personalized website channel (app/site.py)
-  GET  /personalize — the provenance-tagged super-personalization demo (app/personalize.py)
-  GET  /inspector   — the demo inspector UI (app/inspector.py)
+  GET  /site/{token}— the ultra-personalized website channel (app/site.py; property T4)
+
+Everything else mounts from the route modules imported below: the gauntlet/planet/skyfi
+replica planes, the /apt tour + consoles, the observatory/costs dashboards, the gate-pinned
+/showcase index, and the persuasion API.
 """
 from __future__ import annotations
 

@@ -1,7 +1,14 @@
-{% extends "base.html" %}
-{% block title %}Your Helix Analytics ROI page — {{ r.company }}{% endblock %}
-{% block content %}
-<section class="hero">
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your Helix Analytics ROI page — {{ r.company }}</title>
+  <link rel="stylesheet" href="{{ static_prefix }}/atlas.css">
+  <link rel="stylesheet" href="{{ static_prefix }}/style.css">
+</head>
+<body>
+  <main><section class="hero">
   <h1>{{ r.name.split()[0] }}, here's what Helix Analytics means for {{ r.company }}.</h1>
   <p class="sub">Tailored for a <strong>{{ r.role.replace('_',' ') }}</strong> leader at a
      <strong>{{ r.company_size }}</strong> organization looking to {{ use_case }}.
@@ -57,5 +64,10 @@
      stale, or PHI — so they never reached this page.</p>
   {% endif %}
 </section>
-{% endif %}
-{% endblock %}
+{% endif %}</main>
+  <footer class="foot">
+    Helix Analytics · clinical-ops ROI analytics ·
+    <span class="muted">apt demo — every claim shown was verified before it shipped.</span>
+  </footer>
+</body>
+</html>
