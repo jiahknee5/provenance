@@ -97,15 +97,15 @@
 </div>
 
 {# ---- Tier routing summary ---- #}
-<div class="sec" id="sec-tier">
-  <div class="h">Tier routing<span class="tag">tier {{ page.tier }} · {{ page.tier_label }}</span></div>
+<details class="sec" id="sec-tier" open>
+  <summary class="h">Tier routing<span class="tag">tier {{ page.tier }} · {{ page.tier_label }}</span></summary>
   <div class="kv"><div class="k">Network</div><div class="v">{{ page.det.network_type or 'private / unreachable' }}</div></div>
   <div class="kv"><div class="k">Confidence</div><div class="v">location={{ page.confidence.location }} · company={{ page.confidence.company }} · industry={{ page.confidence.industry }}</div></div>
-</div>
+</details>
 
 {# ---- Location × industry + the AOI policy (the SkyFi differentiator) ---- #}
-<div class="sec" id="sec-location">
-  <div class="h">Location signal — Location × industry &amp; the AOI policy<span class="tag">{{ page.location.mode }}</span></div>
+<details class="sec" id="sec-location">
+  <summary class="h">Location signal — Location × industry &amp; the AOI policy<span class="tag">{{ page.location.mode }}</span></summary>
   <div class="branches">
     {% for s in pmap.stages if s.id == 'location' %}{% for b in s.branches %}<span class="b {{ 'on' if b.taken else '' }}">{{ b.label }}</span>{% endfor %}{% endfor %}
   </div>
@@ -121,11 +121,11 @@
   {% if page.location.blocked_say %}
   <div class="kv"><div class="k">Blocked (arm Ex)</div><div class="v" style="color:#B42318">“{{ page.location.blocked_say }}”<span class="pol hold">hold</span></div></div>
   {% endif %}
-</div>
+</details>
 
 {# ---- Process map — every stage, every branch ---- #}
-<div class="sec" id="sec-entry">
-  <div class="h">Process map — every stage, every branch</div>
+<details class="sec" id="sec-entry">
+  <summary class="h">Process map — every stage, every branch</summary>
   {% for s in pmap.stages %}
   <div style="border-bottom:1px solid var(--line)">
     <div class="kv" style="border-bottom:0"><div class="k">{{ loop.index }} · {{ s.title }}</div>
@@ -137,11 +137,11 @@
     </details>
   </div>
   {% endfor %}
-</div>
+</details>
 
 {# ---- CRM record ---- #}
-<div class="sec" id="sec-crm">
-  <div class="h">CRM record{% if page.identity %}<span class="tag">{{ page.identity.via }}</span>{% else %}<span class="tag skip">anonymous</span>{% endif %}</div>
+<details class="sec" id="sec-crm">
+  <summary class="h">CRM record{% if page.identity %}<span class="tag">{{ page.identity.via }}</span>{% else %}<span class="tag skip">anonymous</span>{% endif %}</summary>
   {% if page.identity and page.identity.kind == 'cohort' %}
   <div class="kv"><div class="k">Person</div><div class="v">{{ page.identity.view.name }} · {{ page.identity.view.linkedin.title }}<span class="pol say">say</span></div></div>
   <div class="kv"><div class="k">Archetype</div><div class="v">{{ page.identity.archetype.label }} — {{ page.identity.archetype.reason }}<span class="pol allude">allude</span></div></div>
@@ -153,11 +153,11 @@
   {% else %}
   <div class="kv"><div class="k">Anonymous — no login</div><div class="v">log in as {{ sample_email }} to unlock the CRM path</div></div>
   {% endif %}
-</div>
+</details>
 
 {# ---- Signal ledger ---- #}
-<div class="sec" id="sec-ledger">
-  <div class="h">Signal ledger<span class="tag">{{ page.ledger | length }} rows</span></div>
+<details class="sec" id="sec-ledger">
+  <summary class="h">Signal ledger<span class="tag">{{ page.ledger | length }} rows</span></summary>
   <table class="led">
     <thead><tr><th>Signal</th><th>Value</th><th>Source</th><th>Vendor</th><th>Disposition</th></tr></thead>
     <tbody>
@@ -167,11 +167,11 @@
       {% endfor %}
     </tbody>
   </table>
-</div>
+</details>
 
 {# ---- Per-slot copy decisions + blocked say variants ---- #}
-<div class="sec" id="sec-slots">
-  <div class="h">Per-slot copy decision<span class="tag">{{ page.copy_diff | selectattr('changed') | list | length }} of {{ page.copy_diff | length }} personalized</span></div>
+<details class="sec" id="sec-slots">
+  <summary class="h">Per-slot copy decision<span class="tag">{{ page.copy_diff | selectattr('changed') | list | length }} of {{ page.copy_diff | length }} personalized</span></summary>
   {% for d in page.copy_diff %}
   <div class="slot">
     <div class="t">{{ d.label }}<span class="pol {{ d.policy }}">{{ d.policy }}</span>{% if not d.changed %}<span class="pol" style="background:#F1F3F5;color:var(--muted)">generic</span>{% endif %}</div>
@@ -183,26 +183,27 @@
     <div class="src">source: {{ d.source }} — {{ d.why }}</div>
   </div>
   {% endfor %}
-</div>
+</details>
 
 {# ---- Hero background ---- #}
-<div class="sec" id="sec-hero-image">
-  <div class="h">Hero background<span class="tag">{{ page.hero_image.receipt.source if page.hero_image.receipt else 'gradient' }}</span></div>
+<details class="sec" id="sec-hero-image">
+  <summary class="h">Hero background<span class="tag">{{ page.hero_image.receipt.source if page.hero_image.receipt else 'gradient' }}</span></summary>
   <div class="kv"><div class="k">Status</div><div class="v">{{ page.hero_image.status or 'ready' }} · intent {{ page.hero_image.receipt.intent_id if page.hero_image.receipt else '—' }}</div></div>
   <div class="kv"><div class="k">Workflow</div><div class="v">realtime — S02 is the live beat: first visit generates (~2 s gradient→swap), cached by key thereafter; offline the deterministic gradient ships at $0</div></div>
-</div>
+</details>
 
 {# ---- Trace — every stage ---- #}
-<div class="sec" id="sec-trace">
-  <div class="h">Trace — every stage<span class="tag">{{ page.trace | length }} entries</span></div>
+<details class="sec" id="sec-trace">
+  <summary class="h">Trace — every stage<span class="tag">{{ page.trace | length }} entries</span></summary>
   {% for t in page.trace %}
   <div class="kv"><div class="k">{{ t.stage }}</div>
     <div class="v">{{ t.output }}<span class="pol {{ t.disposition if t.disposition in ('say','allude','hold') else 'allude' }}">{{ t.disposition }}</span>
       <span class="why" style="display:block;color:var(--muted);font-weight:400;font-size:12px;margin-top:3px">{{ t.rule }} — {{ t.why }}</span></div></div>
   {% endfor %}
-</div>
+</details>
 
 <div class="foothint">Deterministic rebuild: same query params + cookie → same page, same trace. The marketer's per-section designer replaces this list view with the S5 rework.</div>
+{% include "_collapse.html" %}
 </div>
 </div>
 </div>

@@ -253,8 +253,8 @@
 </div>
 
 <!-- 1 · Overview -->
-<div class="sec" id="b-overview">
-  <div class="h">1 · Overview <span class="tag">this visit</span></div>
+<details class="sec" id="b-overview">
+  <summary class="h">1 · Overview <span class="tag">this visit</span></summary>
   <div class="tldr">
     <div class="story">
       <div class="cap">This visit, in plain English</div>
@@ -274,14 +274,14 @@
     <div class="cell"><div class="n">{{ n.n }}</div><div class="l">{{ n.label }}</div></div>
     {% endfor %}
   </div>
-</div>
+</details>
 
 <!-- Sections — the per-section designer (S5, contract: designer-dom.md) -->
 {% include "_sd_designer.html" %}
 
 <!-- 2 · Workflow (trace/audit — folded behind the Developer/audit toggle) -->
-<div class="sec sd-devfold" id="b-workflow">
-  <div class="h">2 · Workflow — the whole request as a decision tree <span class="tag">{{ C.workflow|length }} steps</span></div>
+<details class="sec sd-devfold" id="b-workflow">
+  <summary class="h">2 · Workflow — the whole request as a decision tree <span class="tag">{{ C.workflow|length }} steps</span></summary>
   <div class="sub">Every branch each step could take stays visible; the dark pill is the path this visit actually took. Greyed steps were skipped — the full decision space is always on screen.</div>
   <div class="wf">
     {% for s in C.workflow %}
@@ -305,11 +305,11 @@
     </div>
     {% endfor %}
   </div>
-</div>
+</details>
 
 <!-- 3 · Data in (trace/audit — folded) -->
-<div class="sec sd-devfold" id="b-data">
-  <div class="h">3 · Data in — everything the request carried <span class="tag">{{ C.signals|length }} signals</span></div>
+<details class="sec sd-devfold" id="b-data">
+  <summary class="h">3 · Data in — everything the request carried <span class="tag">{{ C.signals|length }} signals</span></summary>
   <div class="in-strip">
     {% for i in C.inputs %}
     <div class="card"><div class="l">{{ i.label }}</div><div class="v">{{ i.value }}</div><div class="f">feeds: {{ i.feeds }}</div></div>
@@ -329,11 +329,11 @@
       {% endfor %}
     </tbody>
   </table>
-</div>
+</details>
 
 <!-- Arrival card (kept from the classic log; trace/audit — folded) -->
-<div class="sec sd-devfold">
-  <div class="h">Arrival &amp; attribution <span class="tag">{{ B.arrival.channel }}</span></div>
+<details class="sec sd-devfold">
+  <summary class="h">Arrival &amp; attribution <span class="tag">{{ B.arrival.channel }}</span></summary>
   <div class="dec">{{ B.arrival.decision }}</div>
   <table class="ops">
     <thead><tr><th>Field</th><th>Value</th><th>Note</th></tr></thead>
@@ -347,13 +347,13 @@
       {% endfor %}
     </tbody>
   </table>
-</div>
+</details>
 
 <!-- 4 · Decisions (trace/audit — folded) -->
 <div class="sec sd-devfold" id="b-decisions" style="border:0;box-shadow:none;background:transparent;overflow:visible">
   {% for d in C.decisions %}
-  <div class="sec">
-    <div class="h">{% if loop.first %}4 · Decisions — {% endif %}{{ d.title }}<span class="tag">{{ d.outcome }}</span></div>
+  <details class="sec">
+    <summary class="h">{% if loop.first %}4 · Decisions — {% endif %}{{ d.title }}<span class="tag">{{ d.outcome }}</span></summary>
     <div class="sub">{{ d.subtitle }}{% if d.why %} · {{ d.why }}{% endif %}</div>
     {% if d.branches %}
     <div style="padding:9px 14px;border-bottom:1px solid var(--line)">
@@ -369,13 +369,13 @@
       </div>
       {% endfor %}
     </div>
-  </div>
+  </details>
   {% endfor %}
 </div>
 
 <!-- 5 · Copy -->
-<div class="sec" id="b-copy">
-  <div class="h">5 · Copy decisions — every slot, shipped vs generic <span class="tag">{{ B.changed_count }}/{{ B.total_slots }} changed</span></div>
+<details class="sec" id="b-copy">
+  <summary class="h">5 · Copy decisions — every slot, shipped vs generic <span class="tag">{{ B.changed_count }}/{{ B.total_slots }} changed</span></summary>
   <div class="sub">One card per copy slot: what the generic site says, what shipped for this visit, the rule that fired, and the guardrails on the slot. The policy control stages a change for review — nothing saves live.</div>
   {% for cp in C.copy_cards %}
   <div class="cp-card" data-guard-row>
@@ -406,12 +406,12 @@
     </div>
   </div>
   {% endfor %}
-</div>
+</details>
 
 <!-- 6 · Images -->
 {% if C.prompt_catalog.entries %}
-<div class="sec" id="b-prompt-ref">
-  <div class="h">Prompt reference — <code>{{ C.prompt_catalog.config_path }}</code> <span class="tag">{{ C.prompt_catalog.channel_label }}</span></div>
+<details class="sec" id="b-prompt-ref">
+  <summary class="h">Prompt reference — <code>{{ C.prompt_catalog.config_path }}</code> <span class="tag">{{ C.prompt_catalog.channel_label }}</span></summary>
   <div class="sub">Read-only catalog entries for this channel{% if C.prompt_catalog.primary_intent %} · primary intent <b>{{ C.prompt_catalog.primary_intent.replace('_', ' ') }}</b> highlighted{% endif %}. Staging still happens in the image cards below.</div>
   <div class="dp-ref">
     {% for ref in C.prompt_catalog.entries %}
@@ -422,7 +422,7 @@
     </div>
     {% endfor %}
   </div>
-</div>
+</details>
 {% endif %}
 {% if C.image_cards|length > 1 %}
 <div class="im-tabs" id="b-images">
@@ -432,8 +432,8 @@
 </div>
 {% endif %}
 {% for im in C.image_cards %}
-<div class="sec" id="img-{{ im.id }}">
-  <div class="h">6 · Images — {{ im.label }} <span class="im-surface-tag">{{ im.id }}</span> <span class="tag">{{ im.source }}</span></div>
+<details class="sec" id="img-{{ im.id }}">
+  <summary class="h">6 · Images — {{ im.label }} <span class="im-surface-tag">{{ im.id }}</span> <span class="tag">{{ im.source }}</span></summary>
   <div class="sub">{{ im.placement }}</div>
   <div class="dec">{{ im.decision }}</div>
   <div class="im-grid">
@@ -507,12 +507,12 @@
     </div>
   </div>
   <div class="foot-link">Full methodology: <a href="{{ g.image_decisions }}">image decisions guide →</a></div>
-</div>
+</details>
 {% endfor %}
 
 <!-- 7 · Guardrails -->
-<div class="sec" id="b-guardrails">
-  <div class="h">7 · Guardrails — the rules behind every prompt <span class="tag">{{ C.guardrails.fired_this_visit }} fired this visit</span></div>
+<details class="sec" id="b-guardrails">
+  <summary class="h">7 · Guardrails — the rules behind every prompt <span class="tag">{{ C.guardrails.fired_this_visit }} fired this visit</span></summary>
   <div class="sub">Loaded from <span style="font-family:ui-monospace,Menlo,monospace">{{ C.guardrails.config_path }}</span>. Unchecking a rule or changing a gate stages the exact config change for review — this console never writes.</div>
 
   <div class="h" style="border-top:1px solid var(--line);font-size:12px">Image prompt safety — applies to every image surface</div>
@@ -563,11 +563,11 @@
     <div class="steer-col steer"><div class="cap">Steer</div><ul>{% for x in B.steering.steered %}<li>{{ x }}</li>{% endfor %}</ul></div>
     <div class="steer-col hold"><div class="cap">Hold</div><ul>{% for x in B.steering.held %}<li>{{ x }}</li>{% endfor %}</ul></div>
   </div>
-</div>
+</details>
 
 <!-- 8 · Delivery -->
-<div class="sec" id="b-delivery">
-  <div class="h">8 · Delivery — image load speed per demo state <span class="tag">{{ C.delivery.cached }}/{{ C.delivery.total }} cached</span></div>
+<details class="sec" id="b-delivery">
+  <summary class="h">8 · Delivery — image load speed per demo state <span class="tag">{{ C.delivery.cached }}/{{ C.delivery.total }} cached</span></summary>
   <div class="sub">The prebuild manifest (<span style="font-family:ui-monospace,Menlo,monospace">{{ C.config_paths.prebuild }}</span>) decides which states get generated before deploy. Toggle a state to stage a manifest change; the warm script and this console read the same file.</div>
   <div class="dc-rows">
     {% for line in C.delivery.graph_summary %}
@@ -597,12 +597,13 @@
   <div class="foot-link">Ops rule: run <span style="font-family:ui-monospace,Menlo,monospace">{{ C.delivery.ops_rule }}</span> before deploy so every <span style="font-family:ui-monospace,Menlo,monospace">prebuild: true</span> state ships baked-in.
     Deep dive: <a href="{{ g.image_decisions }}#part-6">pre-cached vs live, in the image decisions guide →</a> ·
     <a href="{{ g.dev }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}">Technical view →</a></div>
-</div>
+</details>
 
 </div>
 </div>
 
 {% include "_sd_drawer.html" %}
+{% include "_collapse.html" %}
 
 <script>
 (function () {

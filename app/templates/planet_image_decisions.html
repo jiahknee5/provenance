@@ -129,8 +129,8 @@
   <a href="#part-decided">6 · Decided vs rejected</a>
 </nav>
 
-<section class="part" id="part-1">
-  <div class="part-h"><span class="num">Part 1</span><h2>The decision pipeline</h2></div>
+<details class="part" id="part-1" open>
+  <summary class="part-h"><span class="num">Part 1</span><h2>The decision pipeline</h2></summary>
 
   <div class="sec">
     <div class="h">Flow — signals to hero render</div>
@@ -201,10 +201,10 @@ flowchart LR
   </div>
   {% endif %}
   {% endfor %}
-</section>
+</details>
 
-<section class="part" id="part-2">
-  <div class="part-h"><span class="num">Part 2</span><h2>Why each intent helps the conversion goal</h2></div>
+<details class="part" id="part-2">
+  <summary class="part-h"><span class="num">Part 2</span><h2>Why each intent helps the conversion goal</h2></summary>
 
   {% for card in intents %}
   <article class="intent-card" id="intent-{{ card.id }}">
@@ -231,10 +231,10 @@ flowchart LR
     </div>
   </article>
   {% endfor %}
-</section>
+</details>
 
-<section class="part" id="part-3">
-  <div class="part-h"><span class="num">Part 3</span><h2>Two-tier token strategy</h2></div>
+<details class="part" id="part-3">
+  <summary class="part-h"><span class="num">Part 3</span><h2>Two-tier token strategy</h2></summary>
   <div class="sec">
     <div class="h">Segment base + personalization delta</div>
     <div class="tier-cols">
@@ -256,10 +256,10 @@ flowchart LR
     </table>
     <div class="b" style="border-top:1px solid var(--line)">Pre-generate segment bases: <code>{{ two_tier.pregen_cmd }}</code></div>
   </div>
-</section>
+</details>
 
-<section class="part" id="part-brain">
-  <div class="part-h"><span class="num">Brain</span><h2>Brain simulator (Tribe v2)</h2></div>
+<details class="part" id="part-brain">
+  <summary class="part-h"><span class="num">Brain</span><h2>Brain simulator (Tribe v2)</h2></summary>
   <div class="sec">
     <p style="margin-bottom:12px"><strong>{{ brain_simulator.honest_framing }}</strong></p>
     <p style="font-size:13px;color:var(--muted);margin-bottom:12px">{{ brain_simulator.backend_note }}
@@ -288,10 +288,10 @@ flowchart LR
     <div class="h">Example provenance receipt (brain fields)</div>
     <pre class="mono" style="font-size:11px;background:#f4f6f9;padding:12px;border-radius:8px;overflow:auto">{{ brain_simulator.example_receipt | tojson(indent=2) }}</pre>
   </div>
-</section>
+</details>
 
-<section class="part" id="part-4">
-  <div class="part-h"><span class="num">Part 4</span><h2>Provenance &amp; trust</h2></div>
+<details class="part" id="part-4">
+  <summary class="part-h"><span class="num">Part 4</span><h2>Provenance &amp; trust</h2></summary>
   <div class="sec">
     <div class="h">{{ provenance.dev_panel }} on <a href="{{ provenance.dev_path }}#sec-hero-image">{{ provenance.dev_path }}</a></div>
     <div class="prove-infer">
@@ -308,10 +308,10 @@ flowchart LR
       Config: <code>{{ provenance.config_path }}</code> · Full spec: <code>{{ provenance.framework_doc }}</code>
     </div>
   </div>
-</section>
+</details>
 
-<section class="part" id="part-5">
-  <div class="part-h"><span class="num">Part 5</span><h2>Live examples</h2></div>
+<details class="part" id="part-5">
+  <summary class="part-h"><span class="num">Part 5</span><h2>Live examples</h2></summary>
 
   <div class="sec">
     <div class="h">Crop-belt ad · Defense lookalike · Early-career researcher</div>
@@ -371,10 +371,10 @@ flowchart LR
     </div>
     {% endfor %}
   </div>
-</section>
+</details>
 
-<section class="part" id="part-decided">
-  <div class="part-h"><span class="num">Part 6</span><h2>Decided vs rejected — best-of-N provenance</h2></div>
+<details class="part" id="part-decided">
+  <summary class="part-h"><span class="num">Part 6</span><h2>Decided vs rejected — best-of-N provenance</h2></summary>
   <p class="sub" style="margin:0 0 14px;font-size:13px;color:var(--muted);max-width:78ch;line-height:1.55">
     {{ decided_rejected.honest_framing }} When <code>brain_simulator.enabled</code> runs best-of-N,
     every candidate is scored, the winner is cached as the hero, and rejected alternatives are
@@ -448,11 +448,12 @@ flowchart LR
     </article>
     {% endfor %}
   </div>
-</section>
+</details>
 
 <script type="module">
   import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
   mermaid.initialize({ startOnLoad: true, theme: 'neutral', securityLevel: 'loose' });
-</script></main>
+</script>
+{% include "_collapse.html" %}</main>
 </body>
 </html>
