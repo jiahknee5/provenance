@@ -36,3 +36,12 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Provenance — Helix Analytics demo", lifespan=lifespan)
 app.mount("/static/generated", StaticFiles(directory=str(GENERATED_DIR)), name="generated")
 app.mount("/static", StaticFiles(directory=str(APP_DIR / "static")), name="static")
+# Portal-prefixed static aliases: prod's Vercel rewrites map /<tenant>apt/static/* back to
+# /static/*, but bare localhost and Railway-direct have no rewrite layer — serve the same
+# trees at the prefixed paths so every mount style works everywhere (kills a whole class
+# of local-only 404s: tenant logos, hero images, css).
+for _prefix in ("gauntletapt", "planetapt", "skyfiapt"):
+    app.mount(f"/{_prefix}/static/generated", StaticFiles(directory=str(GENERATED_DIR)),
+              name=f"{_prefix}-generated")
+    app.mount(f"/{_prefix}/static", StaticFiles(directory=str(APP_DIR / "static")),
+              name=f"{_prefix}-static")
