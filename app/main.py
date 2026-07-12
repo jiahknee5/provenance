@@ -64,11 +64,8 @@ def submit(request: Request,
 # attach the website + inspector + observatory + assurance routes
 from app import site as _site  # noqa: E402,F401
 from app import observatory as _observatory  # noqa: E402,F401
-from app import assurance as _assurance  # noqa: E402,F401
-from app import optimizer as _optimizer  # noqa: E402,F401
 from app import persuasion as _persuasion  # noqa: E402,F401
 from app import showcase as _showcase  # noqa: E402,F401
-from app import funnel as _funnel  # noqa: E402,F401
 from app import personalize as _personalize  # noqa: E402,F401
 from app import cohort as _cohort  # noqa: E402,F401
 from app import google_login as _google_login  # noqa: E402,F401

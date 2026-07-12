@@ -16,8 +16,6 @@ ARCHIVE = [
     {"group": "Superseded by a core surface", "note": "Folded into the main workflow (PRD §5).", "items": [
         {"name": "Personalize", "route": "/personalize", "by": "Composer + Live demo",
          "desc": "Tiered “what a site could know on load” (anonymous → broker → CRM), tasteful vs creepy, with the provenance ledger."},
-        {"name": "Funnel", "route": "/funnel", "by": "Records",
-         "desc": "Every way a customer enters, what’s captured at each step, and who may use it."},
         {"name": "Cohort gallery", "route": "/admin/landings", "by": "Records",
          "desc": "A gallery of the seed users, each with an archetype and a personalized landing."},
         {"name": "Enrichment catalog", "route": "/enrichment-catalog", "by": "Sources",

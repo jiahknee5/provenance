@@ -28,12 +28,12 @@ c = TestClient(app)
 TPL = pathlib.Path(__file__).resolve().parents[1] / "app" / "templates"
 
 # Surfaces on the Quiet-Workspace shell.
-SHELL_PAGES = ["composer", "optimizer", "assurance", "sources"]
-SHELL_ROUTES = ["/composer", "/optimizer", "/assurance", "/sources"]
+SHELL_PAGES = ["composer", "sources"]
+SHELL_ROUTES = ["/composer", "/sources"]
 # All legacy/lab routes (now light) — param routes filled with valid demo values.
 TOKEN = __import__("pipeline.personalization.cohort", fromlist=["x"]).magic_token(
     __import__("pipeline.personalization.cohort", fromlist=["x"]).COHORT[1])
-LAB_ROUTES = ["/", "/lead", "/personalize", "/observatory", "/costs", "/funnel",
+LAB_ROUTES = ["/", "/lead", "/personalize", "/observatory", "/costs",
               "/admin/landings", "/admin/landing/maya", "/google", "/enrichment-catalog",
               "/lp", "/lp?email=maya.chen@gauntletai.com"]
 
@@ -388,9 +388,7 @@ def test_cloner_injects_per_placement_with_markers():
 
 
 def test_blocked_arm_provably_never_selected():
-    # the optimizer surface shows the blocked arm at 0× and never a winner
-    t = c.get("/optimizer").text
-    assert "selected 0" in t and "relies on a hold fact" in t
+    # every scenario carries a blocked arm, and it is provably never selectable
     for s in DS.SCENARIOS:
         b = DS.blocked_variant(s)
         assert b is not None and b.blocked
@@ -422,11 +420,6 @@ def test_agent_explains_win_with_provenance():
     assert "hold" in (r["note"] or "").lower()
 
 
-def test_assurance_panel_renders():
-    t = c.get("/assurance").text
-    assert "Trust score" in t and "Drift watch" in t and "Trap catch-rate" in t
-
-
 # ============================ one-design consistency ===========================
 def test_all_shell_pages_extend_shell():
     for name in SHELL_PAGES:
@@ -447,5 +440,5 @@ def test_shell_pages_carry_no_off_token_raw_hex():
 
 
 def test_pages_lead_with_the_proves_spine_line():
-    for route in ["/composer", "/optimizer", "/assurance", "/sources"]:
+    for route in ["/composer", "/sources"]:
         assert "Proves:" in c.get(route).text, f"{route} missing its 'Proves:' spine line"
