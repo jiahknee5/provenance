@@ -260,9 +260,18 @@ def build_sitemap_view(request: Request) -> dict[str, Any]:
     data = load_scenarios()
     all_tenants = tuple(data.get("tenants") or ("gauntlet", "planet"))
     site = request.query_params.get("site", "").strip().lower()
-    if site not in all_tenants:
+    is_new = site == "new"
+    if not is_new and site not in all_tenants:
         site = all_tenants[0]
-    active = _tenant_section(site, data)
+    nav_site = all_tenants[0] if is_new else site
+    if is_new:
+        active = {
+            "id": "new", "name": "New website", "domain": "your-domain.com",
+            "logo_bg": "#2E6FF5", "logo_ch": "+", "channels": [],
+            "replica_href": "#", "consoles_href": "#",
+        }
+    else:
+        active = _tenant_section(site, data)
     tenants = []
     for t in all_tenants:
         meta = _TENANT_META[t]
@@ -270,22 +279,24 @@ def build_sitemap_view(request: Request) -> dict[str, Any]:
         tenants.append({
             "id": t, "name": meta["name"], "domain": meta["domain"],
             "logo_bg": logo_bg, "logo_ch": logo_ch,
-            "href": f"{_HUB_PATH}?site={t}", "active": t == site,
+            "href": f"{_HUB_PATH}?site={t}", "active": (not is_new and t == site),
         })
     return {
         "hub_path": _HUB_PATH,
         "ops_hub_path": _OPS_HUB_PATH,
         "active": active,
         "site": site,
+        "is_new": is_new,
         "tenants": tenants,
+        "add_new_href": f"{_HUB_PATH}?site=new",
         "stats": {
             "tenants": len(all_tenants),
             "channels": len(_CHANNELS),
             "scenarios": len(data["scenarios"]),
         },
         "nav": {
-            "channels": f"{_HUB_PATH}?site={site}",
-            "consoles": f"{_OPS_HUB_PATH}?site={site}",
+            "channels": f"{_HUB_PATH}?site={nav_site}",
+            "consoles": f"{_OPS_HUB_PATH}?site={nav_site}",
             "observatory": "/observatory",
             "costs": "/costs",
             "replica": active["replica_href"],

@@ -23,15 +23,35 @@
   .brand{display:flex;align-items:center;gap:9px;padding:6px 8px 14px;font-weight:800;font-size:19px;letter-spacing:-.02em}
   .brand .mk{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--brand),var(--brand-d));display:grid;place-items:center;color:#fff;font-size:15px}
   .navlbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:12px 8px 5px}
-  .ws-list{display:flex;flex-direction:column;gap:3px;margin-bottom:4px}
-  .ws-opt{display:flex;align-items:center;gap:9px;border:1px solid transparent;border-radius:9px;padding:7px 9px;cursor:pointer}
-  .ws-opt:hover{background:var(--line2)}
-  .ws-opt.on{background:var(--brand-t);border-color:#cfe0ff}
-  .ws-opt .lg{width:24px;height:24px;border-radius:6px;color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px;flex:0 0 auto}
-  .ws-opt .nm{font-weight:700;font-size:12.5px;line-height:1.15}
-  .ws-opt .nm span{display:block;font-weight:500;font-size:10.5px;color:var(--muted)}
-  .ws-opt.on .nm{color:var(--brand-d)}
-  .ws-opt .ck{margin-left:auto;font-size:12px;font-weight:800;color:var(--brand)}
+  .ws-dd{margin-bottom:4px}
+  .ws-dd summary{list-style:none;display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:9px;padding:7px 9px;cursor:pointer}
+  .ws-dd summary::-webkit-details-marker{display:none}
+  .ws-dd summary:hover{background:var(--line2)}
+  .ws-dd[open] summary{border-color:#cfe0ff;background:var(--brand-t)}
+  .ws-dd .lg{width:24px;height:24px;border-radius:6px;color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px;flex:0 0 auto}
+  .ws-dd .nm{font-weight:700;font-size:12.5px;line-height:1.15}
+  .ws-dd .nm span{display:block;font-weight:500;font-size:10.5px;color:var(--muted)}
+  .ws-dd summary .cv{margin-left:auto;color:var(--muted);font-size:11px;transition:transform .15s}
+  .ws-dd[open] summary .cv{transform:rotate(180deg)}
+  .ws-menu{margin-top:4px;border:1px solid var(--line);border-radius:9px;padding:4px;box-shadow:var(--sh)}
+  .ws-mi{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:7px;font-weight:600;font-size:12.5px;color:var(--body)}
+  .ws-mi:hover{background:var(--line2)}
+  .ws-mi.on{color:var(--brand-d)}
+  .ws-mi .lg{width:20px;height:20px;border-radius:5px;color:#fff;display:grid;place-items:center;font-weight:800;font-size:10px;flex:0 0 auto}
+  .ws-mi .ck{margin-left:auto;color:var(--brand);font-weight:800}
+  .ws-mi.add{color:var(--brand);font-weight:700;border-top:1px solid var(--line2);margin-top:3px;padding-top:9px}
+  .ws-mi.add .lg{background:var(--brand-t);color:var(--brand);border:1px dashed #b9d0ff}
+  /* new-website onboarding stub */
+  .onboard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:var(--sh);max-width:580px}
+  .onboard label{font-size:12px;font-weight:700;color:var(--ink);display:block;margin-bottom:7px}
+  .onb-row{display:flex;gap:8px}
+  .onb-row input{flex:1;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13.5px;font-family:inherit;color:var(--ink)}
+  .onb-row input:focus{outline:none;border-color:var(--brand)}
+  .onb-steps{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+  .onb-step{flex:1 1 150px;border:1px solid var(--line);border-radius:10px;padding:11px 13px;font-size:12px;color:var(--body);line-height:1.45}
+  .onb-step b{display:block;color:var(--brand);font-size:11px;margin-bottom:3px}
+  .onb-note{margin-top:14px;font-size:11.5px;color:var(--muted);line-height:1.5}
+  .onb-note code{background:var(--line2);padding:1px 5px;border-radius:5px}
   .nav a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;font-weight:600;font-size:13px;color:var(--body)}
   .nav a .ic{width:16px;text-align:center;opacity:.7}
   .nav a:hover{background:var(--line2)}
@@ -114,15 +134,22 @@
     <div class="brand"><span class="mk">◈</span> {{ brand | default('apt') }}</div>
 
     <div class="navlbl">Website</div>
-    <div class="ws-list">
-      {% for t in tenants %}
-      <a class="ws-opt {{ 'on' if t.active else '' }}" href="{{ t.href }}">
-        <span class="lg" style="background:{{ t.logo_bg }}">{{ t.logo_ch }}</span>
-        <div class="nm">{{ t.name }}<span>{{ t.domain }}</span></div>
-        {% if t.active %}<span class="ck">✓</span>{% endif %}
-      </a>
-      {% endfor %}
-    </div>
+    <details class="ws-dd">
+      <summary>
+        <span class="lg" style="background:{{ active.logo_bg }}">{{ active.logo_ch }}</span>
+        <div class="nm">{{ active.name }}<span>{{ active.domain }}</span></div>
+        <span class="cv">▾</span>
+      </summary>
+      <div class="ws-menu">
+        {% for t in tenants %}
+        <a class="ws-mi {{ 'on' if t.active else '' }}" href="{{ t.href }}">
+          <span class="lg" style="background:{{ t.logo_bg }}">{{ t.logo_ch }}</span> {{ t.name }}
+          {% if t.active %}<span class="ck">✓</span>{% endif %}
+        </a>
+        {% endfor %}
+        <a class="ws-mi add" href="{{ add_new_href }}"><span class="lg">+</span> Add new website</a>
+      </div>
+    </details>
 
     <div class="navlbl">Demo</div>
     <nav class="nav">
@@ -144,7 +171,7 @@
 
   <div class="main">
     <div class="topbar">
-      <div class="crumb">{{ active.name }} / <b>Channels</b></div>
+      <div class="crumb">{{ active.name }} / <b>{{ 'Set up' if is_new else 'Channels' }}</b></div>
       <div class="grow"></div>
       <div class="searchbox">⌕ Search scenarios</div>
       <div class="pill-live"><span class="dot"></span> Engine live</div>
@@ -152,6 +179,22 @@
     </div>
 
     <div class="content">
+      {% if is_new %}
+      <div class="hdr">
+        <h1>Add a website</h1>
+        <p>Point a domain at apt. It scaffolds the same truth-gate, claims library, and cohort for the new tenant — a new brand on the same engine.</p>
+      </div>
+      <div class="onboard">
+        <label>Website domain</label>
+        <div class="onb-row"><input placeholder="acme.com" aria-label="Website domain"><a class="btn-primary" href="#">Connect →</a></div>
+        <div class="onb-steps">
+          <div class="onb-step"><b>1 · Point</b>Add a rewrite so apt sees the traffic.</div>
+          <div class="onb-step"><b>2 · Clone</b>apt scaffolds the gate rules, claims library, and cohort.</div>
+          <div class="onb-step"><b>3 · Launch</b>Curate scenarios and run channel tours.</div>
+        </div>
+        <p class="onb-note">Demo stub — real onboarding provisions the mounts + <code>rules/&lt;tenant&gt;.yaml</code> + a cohort. Today, Gauntlet and Planet ship.</p>
+      </div>
+      {% else %}
       <div class="hdr">
         <h1>Launch a demo tour</h1>
         <p>Pick how a visitor arrives at <b>{{ active.domain }}</b>. Each channel opens the same personalization engine with a different amount of data — and every claim on the page ships with a receipt.</p>
@@ -192,6 +235,7 @@
         Curated from <code>rules/demo_scenarios.yaml</code> · Prompt reference:
         <code>rules/design_prompts.yaml</code> ({{ prompt_reference_count }}) · same query params rebuild the replica and the consoles deterministically.
       </div>
+      {% endif %}
     </div>
   </div>
 </div>
