@@ -1,0 +1,59 @@
+{#- _collapse.html — shared collapsible-chapter CSS + JS (one source for every
+    sectioned console/guide page). Three summary flavors, matching each page
+    family's existing head markup:
+      details.sec  > summary.h        — console section cards
+      details.ch   > summary.ch-head  — engineer-console chapters
+      details.part > summary.part-h   — image-decisions guide parts
+    Content stays in the DOM when closed (tests grep page text); only the
+    presentation folds. Anchor clicks and #hash arrivals auto-expand their
+    target (and any ancestor folds) before the scroll. -#}
+<style>
+  details.sec>summary.h,details.ch>summary.ch-head,details.part>summary.part-h{cursor:pointer;list-style:none}
+  details.sec>summary.h::-webkit-details-marker,details.ch>summary.ch-head::-webkit-details-marker,details.part>summary.part-h::-webkit-details-marker{display:none}
+  details.sec>summary.h::after,details.ch>summary.ch-head::after,details.part>summary.part-h::after{content:"\25BE";margin-left:8px;color:var(--muted);font-size:11px;transition:transform .15s;flex:none}
+  details.sec:not([open])>summary.h::after,details.ch:not([open])>summary.ch-head::after,details.part:not([open])>summary.part-h::after{transform:rotate(-90deg)}
+  details.sec:not([open])>summary.h{border-bottom:0}
+  details.sec>summary.h:hover,details.ch>summary.ch-head:hover,details.part>summary.part-h:hover{background:#FAFBFC}
+</style>
+<script>
+(function () {
+  /* clicks on controls/links inside a summary act on the control, not the fold */
+  document.querySelectorAll('summary a, summary input, summary select, summary label, summary button').forEach(function (el) {
+    el.addEventListener('click', function (e) { e.stopPropagation(); });
+  });
+
+  function openChain(el) {
+    var opened = false;
+    if (el.tagName === 'DETAILS' && !el.open) { el.open = true; opened = true; }
+    var p = el.parentElement;
+    while (p) {
+      if (p.tagName === 'DETAILS' && !p.open) { p.open = true; opened = true; }
+      p = p.parentElement;
+    }
+    return opened;
+  }
+
+  /* in-page anchors (rail, tabs, drill links) expand their target BEFORE the
+     default scroll — el.open is set synchronously in the click handler, so the
+     browser computes the scroll position against the expanded layout */
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('a[href^="#"]') : null;
+    if (!a) return;
+    var id = a.getAttribute('href').slice(1);
+    var el = id && document.getElementById(id);
+    if (el) openChain(el);
+  });
+
+  /* arriving with a #hash (cross-page deep links) expands + re-scrolls */
+  function openHash(rescroll) {
+    var h = (location.hash || '').replace(/[^#\w-]/g, '');
+    if (!h || h === '#') return;
+    var el = document.querySelector(h);
+    if (el && openChain(el) && rescroll) {
+      requestAnimationFrame(function () { el.scrollIntoView(); });
+    }
+  }
+  window.addEventListener('hashchange', function () { openHash(false); });
+  openHash(true);
+})();
+</script>

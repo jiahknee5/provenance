@@ -220,12 +220,12 @@
 <div class="gd-main">
 
 <!-- ================= 1 · THE VISITOR ================= -->
-<section class="ch" id="ch-visitor">
-  <div class="ch-head">
+<details class="ch" id="ch-visitor" open>
+  <summary class="ch-head">
     <span class="num">1</span>
     <h2>The visitor — what the server starts with</h2>
     <span class="q">The pipeline only ever gets these four inputs. Everything below is derived from them.</span>
-  </div>
+  </summary>
   <div class="gd-entries">
     <span class="lbl">Simulate an entry</span>
     {% for label, url in entry_links_raw %}<a href="{{ url }}">{{ label }} →</a>{% endfor %}
@@ -241,15 +241,15 @@
     </div>
     {% endfor %}
   </div>
-</section>
+</details>
 
 <!-- ================= 2 · THE DECISIONS ================= -->
-<section class="ch" id="ch-pipeline">
-  <div class="ch-head">
+<details class="ch" id="ch-pipeline">
+  <summary class="ch-head">
     <span class="num">2</span>
     <h2>Process map — every decision, in order</h2>
     <span class="q">Thirteen stages run top to bottom. Pills show every branch a stage could take — the dark one was taken. Click a stage to drill into its evidence.</span>
-  </div>
+  </summary>
   <div class="pm" style="margin-top:14px">
   <div class="pm-flow">
     {% for s in pmap.stages %}
@@ -282,15 +282,15 @@
     {% endfor %}
   </div>
   </div>
-</section>
+</details>
 
 <!-- ================= 3 · THE DATA HELD ================= -->
-<section class="ch" id="ch-data">
-  <div class="ch-head">
+<details class="ch" id="ch-data">
+  <summary class="ch-head">
     <span class="num">3</span>
     <h2>Data held for this request</h2>
     <span class="q">Every signal with its source, vendor, and surface policy — say may be recited, allude only shapes, hold never ships.</span>
-  </div>
+  </summary>
   <div class="gd-grid">
   <div>
     <div class="sec" id="sec-entry">
@@ -385,15 +385,15 @@
       {% endfor %}
     </table>
   </div>
-</section>
+</details>
 
 <!-- ================= 4 · WHAT SHIPPED ================= -->
-<section class="ch" id="ch-shipped">
-  <div class="ch-head">
+<details class="ch" id="ch-shipped">
+  <summary class="ch-head">
     <span class="num">4</span>
     <h2>What shipped on the page</h2>
     <span class="q">Every copy slot generic vs shipped, the hero background's full decisioning, and the section order — plus the say-level variants the policy blocked.</span>
-  </div>
+  </summary>
   <div class="gd-grid">
   <div>
     <div class="sec" id="sec-slots">
@@ -670,15 +670,15 @@
     </div>
   </div>
   </div>
-</section>
+</details>
 
 <!-- ================= 5 · AUDIT TRAIL ================= -->
-<section class="ch" id="ch-audit">
-  <div class="ch-head">
+<details class="ch" id="ch-audit">
+  <summary class="ch-head">
     <span class="num">5</span>
     <h2>Audit trail — why, and prove it</h2>
     <span class="q">The sales-psychology ranking behind the copy, and the deterministic trace: same inputs, same page, same decisions — replayable.</span>
-  </div>
+  </summary>
   <div class="gd-grid">
   <div>
     <div class="sec" id="sec-objections">
@@ -724,7 +724,7 @@
     </div>
   </div>
   </div>
-</section>
+</details>
 
 </div>
 </div>
@@ -746,6 +746,7 @@
   spy();
 })();
 </script>
+{% include "_collapse.html" %}
 </div>
 </div>
 </div>

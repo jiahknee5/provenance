@@ -85,8 +85,8 @@
 <!-- Sections — the per-section designer (S5, contract: designer-dom.md) -->
 {% include "_sd_designer.html" %}
 
-<div class="sec sd-devfold">
-  <div class="h">1 · Arrival &amp; attribution <span class="tag">{{ B.arrival.channel }}</span></div>
+<details class="sec sd-devfold">
+  <summary class="h">1 · Arrival &amp; attribution <span class="tag">{{ B.arrival.channel }}</span></summary>
   <div class="dec">{{ B.arrival.decision }}</div>
   <table class="ops">
     <thead><tr><th>Field</th><th>Value</th><th>Note</th></tr></thead>
@@ -100,10 +100,10 @@
       {% endfor %}
     </tbody>
   </table>
-</div>
+</details>
 
-<div class="sec">
-  <div class="h">2 · Location signal — Planet's differentiator <span class="tag">{{ B.location.mode }}</span></div>
+<details class="sec">
+  <summary class="h">2 · Location signal — Planet's differentiator <span class="tag">{{ B.location.mode }}</span></summary>
   <div class="dec">{{ B.location.decision }}</div>
   <table class="ops">
     <thead><tr><th>Field</th><th>Value</th><th>Note</th></tr></thead>
@@ -118,10 +118,10 @@
     </tbody>
   </table>
   {% if B.location.why %}<div class="dec" style="border-top:1px solid var(--line);font-weight:400;color:var(--muted)">{{ B.location.why }}</div>{% endif %}
-</div>
+</details>
 
-<div class="sec sd-devfold">
-  <div class="h">3 · Audience read <span class="tag">{{ B.audience_read.segment }}</span></div>
+<details class="sec sd-devfold">
+  <summary class="h">3 · Audience read <span class="tag">{{ B.audience_read.segment }}</span></summary>
   <div class="dec">{{ B.audience_read.decision }}</div>
   <table class="ops">
     <thead><tr><th>Signal</th><th>Read</th></tr></thead>
@@ -132,10 +132,10 @@
       {% endfor %}
     </tbody>
   </table>
-</div>
+</details>
 
-<div class="sec sd-devfold">
-  <div class="h">4 · Objection stack <span class="tag">{{ B.objections|length }} ranked</span></div>
+<details class="sec sd-devfold">
+  <summary class="h">4 · Objection stack <span class="tag">{{ B.objections|length }} ranked</span></summary>
   {% if B.objections %}
   <table class="ops">
     <thead><tr><th>#</th><th>Objection</th><th>Why now</th><th>Slot</th><th>Copy response</th><th>Decision</th></tr></thead>
@@ -155,10 +155,10 @@
   {% else %}
   <div class="empty">No ranked objections — generic proof and CTAs ship.</div>
   {% endif %}
-</div>
+</details>
 
-<div class="sec">
-  <div class="h">5 · Copy decisions <span class="tag">{{ B.changed_count }}/{{ B.total_slots }} changed</span></div>
+<details class="sec">
+  <summary class="h">5 · Copy decisions <span class="tag">{{ B.changed_count }}/{{ B.total_slots }} changed</span></summary>
   <table class="ops">
     <thead><tr><th>Slot</th><th>Δ</th><th>Generic</th><th>Shipped</th><th>Why</th><th>Decision</th></tr></thead>
     <tbody>
@@ -174,10 +174,10 @@
       {% endfor %}
     </tbody>
   </table>
-</div>
+</details>
 
-<div class="sec">
-  <div class="h">6 · Visual decision</div>
+<details class="sec">
+  <summary class="h">6 · Visual decision</summary>
   <div class="dec">{{ B.visual.decision }}</div>
   <div class="dec" style="margin-top:8px;font-size:13px;color:var(--muted)">{{ B.visual.tier_summary }}</div>
   <table class="ops">
@@ -211,10 +211,10 @@
     <img class="hi-thumb" src="{{ B.visual.hero_motion_url }}" alt="Hero motion loop">
   </div>
   {% endif %}
-</div>
+</details>
 
-<div class="sec">
-  <div class="h">7 · CRM / lead context {% if B.lead %}<span class="tag">logged in</span>{% else %}<span class="tag">anonymous</span>{% endif %}</div>
+<details class="sec">
+  <summary class="h">7 · CRM / lead context {% if B.lead %}<span class="tag">logged in</span>{% else %}<span class="tag">anonymous</span>{% endif %}</summary>
   {% if B.lead %}
   <table class="ops">
     <thead><tr><th>Field</th><th>Value</th></tr></thead>
@@ -236,10 +236,10 @@
   {% else %}
   <div class="empty">No CRM record — toggle <b>Known lead</b> or log in on <a href="{{ g.page }}{{ qs }}">{{ g.page }}</a>.</div>
   {% endif %}
-</div>
+</details>
 
-<div class="sec">
-  <div class="h">8 · Steering vs saying <span class="tag">policy</span></div>
+<details class="sec">
+  <summary class="h">8 · Steering vs saying <span class="tag">policy</span></summary>
   <div class="steer-grid">
     <div class="steer-col say"><div class="cap">Say</div><ul>{% for x in B.steering.said %}<li>{{ x }}</li>{% endfor %}</ul></div>
     <div class="steer-col steer"><div class="cap">Steer</div><ul>{% for x in B.steering.steered %}<li>{{ x }}</li>{% endfor %}</ul></div>
@@ -250,9 +250,10 @@
     <tbody>{% for r in B.steering.rules %}<tr><td class="note">{{ r }}</td></tr>{% endfor %}</tbody>
   </table>
   <div class="foot-link"><a href="{{ g.dev }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}">Technical view →</a> for pipeline trace and engineering detail.</div>
-</div>
+</details>
 
 {% include "_sd_drawer.html" %}
+{% include "_collapse.html" %}
 </div>
 </div>
 </div>
