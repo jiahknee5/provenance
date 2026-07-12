@@ -22,6 +22,11 @@
     </div>
   </details>
 
+  {# mobile: the whole nav tree folds behind a "Menu ▾" bar (_apt_shell.html @media≤820);
+     desktop: the summary is hidden and the fold stays open — markup renders identically #}
+  <details class="m-menu" id="m-menu" open>
+  <summary class="m-menu-s">Menu</summary>
+  <div class="m-menu-body">
   {% if nav_tree %}
   {% for grp in nav_tree %}
   <details class="nav-group" {{ 'open' if active_group == grp.key else '' }}>
@@ -74,9 +79,23 @@
     <a href="{{ nav.replica }}"><span class="ic">↗</span> Open replica</a>
   </nav>
   {% endif %}
+  </div>
+  </details>
 
   <div class="foot">
     <span class="av">JC</span>
     <div class="nm">Demo operator<span>apt workspace</span></div>
   </div>
 </aside>
+<script>
+(function () {
+  /* the Menu fold ships open (desktop renders it as the plain sidebar tree);
+     on phones it starts collapsed and tracks viewport changes */
+  var m = document.getElementById('m-menu');
+  if (!m) return;
+  var mq = window.matchMedia('(max-width:820px)');
+  function sync() { m.open = !mq.matches; }
+  sync();
+  if (mq.addEventListener) mq.addEventListener('change', sync);
+})();
+</script>

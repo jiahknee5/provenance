@@ -50,6 +50,12 @@
   .pb-kv{display:grid;grid-template-columns:180px 1fr;gap:4px 12px;font-size:12.5px;margin-top:8px}
   .pb-kv .k{color:var(--muted);font-weight:700}
   .pb-kv .v{font-family:ui-monospace,Menlo,monospace;font-size:11.5px}
+  /* mobile: chapter key-value grids and intent cards stack */
+  @media(max-width:700px){
+    .in-kv,.pb-kv{grid-template-columns:1fr}
+    .in-kv .v,.pb-kv .v{margin-bottom:4px;word-break:break-word}
+    summary.ch-head{padding:14px 16px}
+  }
 </style>
 </head>
 <body>

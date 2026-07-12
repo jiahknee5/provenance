@@ -169,6 +169,31 @@
     }
     .chip:hover{color:#fff;border-color:var(--accent)}
     .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+    /* Mobile: the compact 100vh contract is desktop-only — lift the lock and let the
+       grid become scrolling cards (2-up on tablets, 1-up on phones), bigger type. */
+    @media(max-width:820px){
+      html,body{height:auto;overflow:auto}
+      .page{max-height:none;min-height:100vh;overflow:visible;padding:10px 12px 48px}
+      .top{flex-wrap:wrap;min-height:0;margin-bottom:10px}
+      h1{white-space:normal;font-size:15px;line-height:1.3}
+      .nav{flex-wrap:wrap}
+      .nav a{padding:7px 10px;font-size:11px}
+      .grid{grid-template-columns:1fr 1fr;grid-template-rows:none;grid-auto-rows:auto;gap:10px}
+      .type{font:700 13px/1.25 var(--sans)}
+      .config,.fit{white-space:normal;overflow:visible;text-overflow:clip;font-size:10.5px}
+      .meta{padding:7px 9px 6px}
+      .x-top{padding:6px 8px}
+      .x-meta b{font-size:11px}
+      .x-body{padding:6px 8px 4px}
+      .x-body p{font:12px/1.4 var(--ui);-webkit-line-clamp:4}
+      .x-cta{font-size:10.5px}
+      .preview .gen,.preview .per{white-space:normal;overflow:visible;text-overflow:clip;font-size:10.5px;line-height:1.35}
+      details.think summary{padding:8px 9px;font-size:10.5px}
+      details.think .tk-body{font:11px/1.5 var(--ui);bottom:34px}
+    }
+    @media(max-width:640px){
+      .grid{grid-template-columns:1fr}
+    }
   </style>
 </head>
 <body>

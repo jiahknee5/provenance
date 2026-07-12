@@ -155,6 +155,15 @@
       border-radius:20px;padding:7px 13px;backdrop-filter:blur(8px)}
     .aptchip .d{width:7px;height:7px;border-radius:50%;background:var(--yel);box-shadow:0 0 8px rgba(252,194,25,.8)}
     .aptchip:hover{color:#fff;border-color:var(--yel)}
+    /* mobile containment only — desktop brand-clone layout untouched */
+    @media(max-width:640px){
+      .gnav .in{flex-wrap:wrap;height:auto;min-height:56px;padding:10px 16px;gap:8px 14px}
+      .gnav .grp{flex-wrap:wrap;gap:6px 12px}
+      .gnav .vr{display:none}
+      .gnav .right{gap:10px}
+      .lg .pop{position:fixed;left:12px;right:12px;top:64px;width:auto}
+      table.tbl{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    }
   </style>
 </head>
 <body>
