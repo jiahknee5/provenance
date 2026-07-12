@@ -1,0 +1,210 @@
+{#- SkyFi engineer console — compact apt-shell console for /skyfi/dev.
+    Renders the SAME deterministic state as the replica (query params + cookie):
+    inputs, the decision pipeline (process map incl. the Location × industry stage
+    with the declared-AOI / arm-Ex branches), the signal ledger, the per-slot copy
+    decisions with the blocked say variants, and the full trace.
+    The per-section marketer designer arrives with the S5 rework (T-03). -#}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ g.dev }} — SkyFi replica decisions · apt</title>
+{% include "_apt_shell.html" %}
+<style>
+  main{max-width:1340px}
+  html{scroll-behavior:smooth}
+  .gd-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .gd-head h1{font-size:24px;margin:0}
+  .gd-tog{display:inline-flex;gap:3px;background:#F1F3F5;border-radius:9px;padding:3px;margin-left:auto}
+  .gd-tog a{font-size:13px;font-weight:600;color:var(--muted);padding:6px 14px;border-radius:7px;text-decoration:none}
+  .gd-tog a.on{background:#fff;color:var(--ink);box-shadow:var(--shadow)}
+  .gd-entries{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:14px 0 4px}
+  .gd-entries .lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .gd-entries a{font-size:12.5px;font-weight:600;border:1px solid var(--line);border-radius:8px;padding:6px 12px;text-decoration:none;background:#fff}
+  .gd-entries a:hover{border-color:var(--brand)}
+  .gd-inputs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+  @media(max-width:920px){.gd-inputs{grid-template-columns:1fr 1fr}}
+  .inp{border:1px solid var(--line);border-radius:11px;background:#fff;box-shadow:var(--shadow);padding:12px 14px}
+  .inp .l{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .inp .v{font-size:12.5px;font-weight:600;margin-top:5px;word-break:break-word}
+  .inp .f{font-size:11px;color:var(--muted);margin-top:5px}
+  .sec[id]{scroll-margin-top:16px}
+  .sec{border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:var(--shadow);overflow:hidden;margin-top:18px}
+  .sec .h{display:flex;align-items:center;gap:8px;padding:11px 15px;border-bottom:1px solid var(--line);font-size:13px;font-weight:700;color:var(--ink)}
+  .sec .h .tag{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:5px;padding:2px 8px;background:#F1F3F5;color:var(--muted)}
+  .sec .h .tag.skip{background:#FEF3E7;color:#B45309}
+  .kv{display:flex;gap:10px;padding:9px 15px;border-bottom:1px solid var(--line);font-size:13px;align-items:baseline}
+  .kv:last-child{border-bottom:0}
+  .kv .k{color:var(--muted);min-width:150px;flex:none}
+  .kv .v{color:var(--ink);font-weight:500;min-width:0;word-break:break-word}
+  .pol{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border-radius:4px;padding:1px 6px;margin-left:7px;vertical-align:1px}
+  .pol.say{background:#E7F7F0;color:#0B7A4B}
+  .pol.allude{background:#EAF1FF;color:#1B4DD1}
+  .pol.hold{background:#FDE8E8;color:#B42318}
+  .fired{box-shadow:inset 3px 0 0 var(--brand)}
+  .branches{display:flex;gap:6px;flex-wrap:wrap;padding:9px 15px;border-bottom:1px solid var(--line)}
+  .branches .b{font-size:11px;font-weight:600;border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--muted)}
+  .branches .b.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  table.led{width:100%;border-collapse:collapse;font-size:12.5px}
+  .led th{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;text-align:left;color:var(--muted);border-bottom:1px solid var(--line);padding:8px 15px;background:#F8FAFC}
+  .led td{border-bottom:1px solid var(--line2);padding:8px 15px;vertical-align:top}
+  .led tr:last-child td{border-bottom:0}
+  .slot{border-bottom:1px solid var(--line);padding:12px 15px}
+  .slot:last-child{border-bottom:0}
+  .slot .t{font-size:12.5px;font-weight:700}
+  .slot .row{display:grid;grid-template-columns:84px 1fr;gap:8px;font-size:12.5px;margin-top:7px}
+  .slot .row .l{color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding-top:1px}
+  .slot .row .txt{color:var(--ink)}
+  .slot .row .txt.gen{color:var(--muted)}
+  .slot .row .txt.blocked{color:#B42318;background:#FDF2F2;border:1px dashed #F4C7C7;border-radius:7px;padding:6px 9px;font-size:12px}
+  .slot .src{font-size:11px;color:var(--muted);margin-top:7px}
+  .aoi{border:1px solid #F2DDA4;background:#FFFBEB;border-radius:11px;padding:13px 15px;margin:12px 15px;font-size:12.5px}
+  .aoi b{display:block;font-size:12px;margin-bottom:5px}
+  .aoi .r{color:#92600A}
+</style>
+</head>
+<body>
+<div class="app">
+{% include "_apt_sidebar.html" %}
+<div class="main">
+<div class="topbar"><div class="crumb">{{ active.name }} / <b>Console</b></div><div class="grow"></div><a class="btn-primary" href="{{ nav.channels }}">Demo sitemap →</a></div>
+<div class="content" style="max-width:none">
+
+<div class="gd-head">
+  <h1>{{ g.dev }} — the decisions behind <a href="{{ g.page }}{{ qs }}" style="text-decoration:none">{{ g.page }}</a></h1>
+  <span class="gd-tog">
+    <a href="{{ toggle_anon }}" class="{{ 'on' if as_state == 'anon' else '' }}">Anonymous — no login</a>
+    <a href="{{ toggle_known }}" class="{{ 'on' if as_state != 'anon' else '' }}">Known ({{ page.identity.email if page.identity else sample_email }})</a>
+  </span>
+</div>
+<p style="color:var(--muted);font-size:14px;max-width:84ch;margin:4px 0 0">
+  The replica is rebuilt deterministically from (query params + login cookie). This console rebuilds
+  the <em>same</em> state: the inputs, every pipeline decision — including the <b>Location × industry</b>
+  stage, SkyFi's differentiator, with its <b>AOI policy</b> (basin/region scale; exact-AOI is hold, arm
+  <b>Ex</b>, unless declared first-party — then the receipt says <em>“you told us”</em>) — the data held,
+  and what shipped, with the say-level variants the surface policy blocks.</p>
+
+<div class="gd-entries">
+  <span class="lbl">Entry point</span>
+  {% for label, href in entry_links_raw %}<a href="{{ href }}">{{ label }}</a>{% endfor %}
+</div>
+
+<div class="gd-inputs">
+  {% for i in pmap.inputs %}
+  <div class="inp"><div class="l">{{ i.label }}</div><div class="v">{{ i.value }}</div><div class="f">feeds: {{ i.feeds }}</div></div>
+  {% endfor %}
+</div>
+
+{# ---- Tier routing summary ---- #}
+<div class="sec" id="sec-tier">
+  <div class="h">Tier routing<span class="tag">tier {{ page.tier }} · {{ page.tier_label }}</span></div>
+  <div class="kv"><div class="k">Network</div><div class="v">{{ page.det.network_type or 'private / unreachable' }}</div></div>
+  <div class="kv"><div class="k">Confidence</div><div class="v">location={{ page.confidence.location }} · company={{ page.confidence.company }} · industry={{ page.confidence.industry }}</div></div>
+</div>
+
+{# ---- Location × industry + the AOI policy (the SkyFi differentiator) ---- #}
+<div class="sec" id="sec-location">
+  <div class="h">Location signal — Location × industry &amp; the AOI policy<span class="tag">{{ page.location.mode }}</span></div>
+  <div class="branches">
+    {% for s in pmap.stages if s.id == 'location' %}{% for b in s.branches %}<span class="b {{ 'on' if b.taken else '' }}">{{ b.label }}</span>{% endfor %}{% endfor %}
+  </div>
+  <div class="kv"><div class="k">Decision</div><div class="v">{{ page.location.line or 'no location claim ships' }}<span class="pol {{ page.location.policy }}">{{ page.location.policy }}</span></div></div>
+  <div class="kv"><div class="k">Rule</div><div class="v">{{ page.location.rule }}<span class="why" style="display:block;color:var(--muted);font-weight:400;font-size:12px;margin-top:3px">{{ page.location.why }}</span></div></div>
+  {% if page.location.receipt %}
+  <div class="aoi">
+    <b>Declared-AOI receipt — why exact scale is allowed here</b>
+    {{ page.location.receipt.aoi_label }} · registered {{ page.location.receipt.registered }} · {{ page.location.receipt.source }}
+    <div class="r">{{ page.location.receipt.say_reason }}</div>
+  </div>
+  {% endif %}
+  {% if page.location.blocked_say %}
+  <div class="kv"><div class="k">Blocked (arm Ex)</div><div class="v" style="color:#B42318">“{{ page.location.blocked_say }}”<span class="pol hold">hold</span></div></div>
+  {% endif %}
+</div>
+
+{# ---- Process map — every stage, every branch ---- #}
+<div class="sec" id="sec-entry">
+  <div class="h">Process map — every stage, every branch</div>
+  {% for s in pmap.stages %}
+  <div style="border-bottom:1px solid var(--line)">
+    <div class="kv" style="border-bottom:0"><div class="k">{{ loop.index }} · {{ s.title }}</div>
+      <div class="v">{{ s.output }}{% if s.skipped %}<span class="pol hold" style="background:#FEF3E7;color:#B45309">skipped — {{ s.skip_reason }}</span>{% endif %}
+        <span class="why" style="display:block;color:var(--muted);font-weight:400;font-size:12px;margin-top:3px">{{ s.rule }}</span></div></div>
+    {% if s.branches %}<div class="branches" style="border-bottom:0;padding-top:0">{% for b in s.branches %}<span class="b {{ 'on' if b.taken else '' }}">{{ b.label }}</span>{% endfor %}</div>{% endif %}
+    <details style="padding:0 15px 10px"><summary style="font-size:11px;color:var(--muted);cursor:pointer">drill-down ({{ s.detail | length }} rows)</summary>
+      {% for r in s.detail %}<div class="kv {{ 'fired' if r.fired else '' }}" style="padding-left:6px"><div class="k">{{ r.k }}</div><div class="v">{{ r.v }}{% if r.pol %}<span class="pol {{ r.pol }}">{{ r.pol }}</span>{% endif %}</div></div>{% endfor %}
+    </details>
+  </div>
+  {% endfor %}
+</div>
+
+{# ---- CRM record ---- #}
+<div class="sec" id="sec-crm">
+  <div class="h">CRM record{% if page.identity %}<span class="tag">{{ page.identity.via }}</span>{% else %}<span class="tag skip">anonymous</span>{% endif %}</div>
+  {% if page.identity and page.identity.kind == 'cohort' %}
+  <div class="kv"><div class="k">Person</div><div class="v">{{ page.identity.view.name }} · {{ page.identity.view.linkedin.title }}<span class="pol say">say</span></div></div>
+  <div class="kv"><div class="k">Archetype</div><div class="v">{{ page.identity.archetype.label }} — {{ page.identity.archetype.reason }}<span class="pol allude">allude</span></div></div>
+  {% if page.identity.view.declared.aoi %}
+  <div class="kv"><div class="k">Declared AOI</div><div class="v">{{ page.identity.view.declared.aoi.label }}<span class="pol say">say</span></div></div>
+  {% endif %}
+  {% elif page.identity %}
+  <div class="kv"><div class="k">Resolved</div><div class="v">{{ page.identity.email }} → {{ page.identity.resolved.company or '—' }}</div></div>
+  {% else %}
+  <div class="kv"><div class="k">Anonymous — no login</div><div class="v">log in as {{ sample_email }} to unlock the CRM path</div></div>
+  {% endif %}
+</div>
+
+{# ---- Signal ledger ---- #}
+<div class="sec" id="sec-ledger">
+  <div class="h">Signal ledger<span class="tag">{{ page.ledger | length }} rows</span></div>
+  <table class="led">
+    <thead><tr><th>Signal</th><th>Value</th><th>Source</th><th>Vendor</th><th>Disposition</th></tr></thead>
+    <tbody>
+      {% for r in page.ledger %}
+      <tr><td>{{ r.label }}</td><td>{{ r.value }}</td><td>{{ r.source }}</td><td>{{ r.vendor }}</td>
+          <td><span class="pol {{ r.policy if r.policy in ('say','allude','hold') else 'allude' }}">{{ r.disposition }}</span></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{# ---- Per-slot copy decisions + blocked say variants ---- #}
+<div class="sec" id="sec-slots">
+  <div class="h">Per-slot copy decision<span class="tag">{{ page.copy_diff | selectattr('changed') | list | length }} of {{ page.copy_diff | length }} personalized</span></div>
+  {% for d in page.copy_diff %}
+  <div class="slot">
+    <div class="t">{{ d.label }}<span class="pol {{ d.policy }}">{{ d.policy }}</span>{% if not d.changed %}<span class="pol" style="background:#F1F3F5;color:var(--muted)">generic</span>{% endif %}</div>
+    <div class="row"><div class="l">Generic</div><div class="txt gen">{{ d.generic or '(empty)' }}</div></div>
+    <div class="row"><div class="l">Shipped</div><div class="txt">{{ d.shipped or '(empty)' }}</div></div>
+    {% if d.blocked_say %}
+    <div class="row"><div class="l">Blocked</div><div class="txt blocked">Blocked — the say variant the policy holds: “{{ d.blocked_say }}”</div></div>
+    {% endif %}
+    <div class="src">source: {{ d.source }} — {{ d.why }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+{# ---- Hero background ---- #}
+<div class="sec" id="sec-hero-image">
+  <div class="h">Hero background<span class="tag">{{ page.hero_image.receipt.source if page.hero_image.receipt else 'gradient' }}</span></div>
+  <div class="kv"><div class="k">Status</div><div class="v">{{ page.hero_image.status or 'ready' }} · intent {{ page.hero_image.receipt.intent_id if page.hero_image.receipt else '—' }}</div></div>
+  <div class="kv"><div class="k">Workflow</div><div class="v">realtime — S02 is the live beat: first visit generates (~2 s gradient→swap), cached by key thereafter; offline the deterministic gradient ships at $0</div></div>
+</div>
+
+{# ---- Trace — every stage ---- #}
+<div class="sec" id="sec-trace">
+  <div class="h">Trace — every stage<span class="tag">{{ page.trace | length }} entries</span></div>
+  {% for t in page.trace %}
+  <div class="kv"><div class="k">{{ t.stage }}</div>
+    <div class="v">{{ t.output }}<span class="pol {{ t.disposition if t.disposition in ('say','allude','hold') else 'allude' }}">{{ t.disposition }}</span>
+      <span class="why" style="display:block;color:var(--muted);font-weight:400;font-size:12px;margin-top:3px">{{ t.rule }} — {{ t.why }}</span></div></div>
+  {% endfor %}
+</div>
+
+<div class="foothint">Deterministic rebuild: same query params + cookie → same page, same trace. The marketer's per-section designer replaces this list view with the S5 rework.</div>
+</div>
+</div>
+</div>
+</body>
+</html>

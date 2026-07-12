@@ -210,10 +210,16 @@ def test_seed_completeness_planet():
 
 
 # --------------------------------------------------------------------------- #
-# 4 · SkyFi stub — empty is valid until T-07 seeds it
+# 4 · SkyFi — seeded by T-07 (was an empty stub in W0; now asserted like the others)
 # --------------------------------------------------------------------------- #
-def test_skyfi_stub_is_empty_not_raising():
-    assert SR.list_sections("skyfi") == []
-    assert SR.list_text_targets("skyfi") == []
-    assert SR.list_image_targets("skyfi") == []
+def test_round_trip_skyfi_sections():
+    secs = SR.list_sections("skyfi")
+    assert [s["id"] for s in secs] == ["hero", "location", "how", "pricing", "compare", "cta"]
+    loc = SR.get_section("skyfi", "location")
+    assert loc["region"] == "location"
+    assert [t["slot_id"] for t in loc["text_targets"]] == ["hero_location"]
+    hero = SR.get_section("skyfi", "hero")
+    assert [t["surface_id"] for t in hero["image_targets"]] == ["hero", "og"]
+    # empty prebuild manifest by design (S02 realtime beat) → all image workflows realtime
+    assert {t["workflow"] for t in SR.list_image_targets("skyfi")} == {"realtime"}
     assert isinstance(SR.registry_version("skyfi"), str) and SR.registry_version("skyfi")

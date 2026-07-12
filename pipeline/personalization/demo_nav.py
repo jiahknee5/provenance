@@ -15,9 +15,11 @@ from starlette.requests import Request
 
 from app.gauntlet import MOUNTS as GAUNTLET_MOUNTS
 from app.planet import MOUNTS as PLANET_MOUNTS
+from app.skyfi import MOUNTS as SKYFI_MOUNTS
 from pipeline.personalization import cohort as CO
 from pipeline.personalization import design_prompts as DP
 from pipeline.personalization import planet_cohort as PCO
+from pipeline.personalization import skyfi_cohort as SCO
 
 SCENARIOS_PATH = Path(__file__).resolve().parents[2] / "rules" / "demo_scenarios.yaml"
 _HUB_PATH = "/apt/demo"
@@ -65,6 +67,7 @@ _CHANNEL_LONG: dict[str, str] = {
 # Sidebar account-switcher swatch per tenant (bg, initial).
 _TENANT_LOGO: dict[str, tuple[str, str]] = {
     "gauntlet": ("#111827", "G"), "planet": ("#0b6b3a", "P"),
+    "skyfi": ("#060b16", "S"),
 }
 
 _TENANT_META: dict[str, dict[str, str]] = {
@@ -82,7 +85,18 @@ _TENANT_META: dict[str, dict[str, str]] = {
         "audience_business": "Enterprise",
         "audience_consumer": "Self-serve",
     },
+    "skyfi": {
+        "name": "SkyFi",
+        "domain": "skyfi.com",
+        "tagline": "On-demand satellite imagery — location × industry at basin scale.",
+        "audience_business": "Business",
+        "audience_consumer": "Personal",
+    },
 }
+
+# The shell + dropdown enumerate tenants from config — adding a tenant here (plus its
+# MOUNTS branch below) is the whole registration; no template or route special-casing.
+_TENANTS: tuple[str, ...] = tuple(_TENANT_META)
 
 _IDENTITY_AS: dict[str, str] = {
     "anon": "anon",
@@ -100,6 +114,7 @@ def _magic_tokens() -> dict[str, str]:
     return {
         "liam": CO.magic_token(CO.BY_ID["liam"]),
         "kofi": PCO.magic_token(PCO.BY_ID["kofi"]),
+        "ingrid": SCO.magic_token(SCO.BY_ID["ingrid"]),
     }
 
 
@@ -114,6 +129,8 @@ def _resolve_templates(text: str) -> str:
 def _mounts_for(tenant: str) -> dict[str, str]:
     if tenant == "planet":
         return PLANET_MOUNTS["portal"]
+    if tenant == "skyfi":
+        return SKYFI_MOUNTS["portal"]
     return GAUNTLET_MOUNTS["portal"]
 
 
@@ -228,9 +245,11 @@ def _tenant_section(tenant: str, data: dict[str, Any]) -> dict[str, Any]:
     m = _mounts_for(tenant)
     logo_bg, logo_ch = _TENANT_LOGO[tenant]
     channels = []
+    ads_variant_counts = {"gauntlet": "12 variants", "planet": "12 variants",
+                          "skyfi": "6 variants"}
     for ch in _CHANNEL_ORDER:
         count = len([s for s in data["scenarios"] if s["tenant"] == tenant and s["channel"] == ch])
-        count_label = "12 variants" if ch == "ads" else (
+        count_label = ads_variant_counts.get(tenant, "ads") if ch == "ads" else (
             f"{count} scenario" if count == 1 else f"{count} scenarios")
         channels.append({
             "id": ch,
@@ -312,7 +331,7 @@ def console_shell_ctx(active_site: str, active_nav: str, *,
     Returns the fields _apt_sidebar.html reads: brand, active (current website),
     tenants (dropdown options), add_new_href, nav, active_nav.
     """
-    all_t = ("gauntlet", "planet")
+    all_t = _TENANTS
     meta = _TENANT_META[active_site]
     bg, ch = _TENANT_LOGO[active_site]
     m = _mounts_for(active_site)
@@ -410,7 +429,7 @@ def build_channel_gallery_view(
     cards = [_gallery_card(s, mounts) for s in rows]
     tab_base = gallery_path
     switch_hrefs = {
-        t: _channel_gallery_href(t, channel, _mounts_for(t)) for t in ("gauntlet", "planet")
+        t: _channel_gallery_href(t, channel, _mounts_for(t)) for t in _TENANTS
     }
     return {
         **console_shell_ctx(tenant, "channels", switch_hrefs=switch_hrefs),

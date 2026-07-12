@@ -1,10 +1,13 @@
-# Demo navigation scenarios — visitor tour plane (Gauntlet + Planet).
+# Demo navigation scenarios — visitor tour plane (Gauntlet + Planet + SkyFi).
 # Loader: pipeline/personalization/demo_nav.py
 # NOT the legacy bandit catalog in demo_scenarios.py.
+# skyfi rows (WF-DESIGN-S01…S10) are seeded by T-08; the tenant entry here makes the
+# /apt/demo dropdown + shell pick the tenant up by config (T-07).
 version: 1
 tenants:
   - gauntlet
   - planet
+  - skyfi
 
 scenarios:
   # ── Gauntlet · Direct ──────────────────────────────────────────────
