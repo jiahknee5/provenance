@@ -1,0 +1,1 @@
+{"ts":"2026-07-12T06:54:43Z","pass":true,"assertions":[{"assert":"all_build_tasks_done","pass":true},{"assert":"full_suite_green","pass":true},{"assert":"wf_design_30_active","pass":true},{"assert":"no_legacy_chrome","pass":true},{"assert":"secret_scan_clean","pass":true}]}

@@ -26,3 +26,6 @@ Zero prod changes since baseline (canaries: /apt/demo 200+shell, /skyfiapt 404, 
 
 ## Iteration 3 — 2026-07-12T08:1x UTC
 Zero prod changes (2nd consecutive) — /apt/demo 200, /skyfiapt 404 (R36 open on prod), designer sd-* not yet deployed (expected). Local build far ahead: W1 complete + T-05 merged (gate 370, origin c16ce1f) — prod deploy comes at W5/T-10. Lengthening loop wait per pacing rule.
+
+## Iteration 4 — 2026-07-12T10:2x UTC
+Prod unchanged (3rd consecutive; /apt/demo 200, /skyfiapt 404). Local: W0-W3 COMPLETE (10/12 tasks, gate 408, WF-DESIGN 30/30 green, origin 8835c50); T-09 legacy retirement running in main tree. Deploy lands at T-10 — the next iteration after it should see: /skyfiapt 200, sd-* designer markers on /dev/business consoles, legacy chrome gone. Keeping long waits.

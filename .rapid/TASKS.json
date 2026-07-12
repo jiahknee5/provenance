@@ -61,7 +61,7 @@
     "tests/test_decision_pool.py"
    ],
    "verify": "5 contract invariants green incl. 0-lie-servable + lift>control",
-   "status": "pending"
+   "status": "done"
   },
   {
    "id": "T-03",
@@ -79,7 +79,7 @@
     "pipeline/personalization/*_dev_business.py"
    ],
    "verify": "sd-* testids render per section; Q1-Q10 controls in one card; console tests green",
-   "status": "pending"
+   "status": "done"
   },
   {
    "id": "T-04",
@@ -98,7 +98,7 @@
     "app/templates/*_dev_business.html"
    ],
    "verify": "sd-graph/sd-evals/sd-observe/sd-ab/sd-drift render real data per section",
-   "status": "pending"
+   "status": "done"
   },
   {
    "id": "T-05",
@@ -117,7 +117,7 @@
     "tests/test_generative_text.py"
    ],
    "verify": "planted lie/superlative/competitor/hold 0-servable (real Gate); deterministic cache replay",
-   "status": "pending"
+   "status": "done"
   },
   {
    "id": "T-06",
@@ -138,7 +138,7 @@
     "tests/test_image_costs.py"
    ],
    "verify": "caps enforced; realtime cost-logged; offline fallback deterministic",
-   "status": "pending"
+   "status": "done"
   },
   {
    "id": "T-07",
@@ -160,7 +160,28 @@
     "tests/test_skyfi_site.py"
    ],
    "verify": "parallel to test_planet_site.py; flows through shell+dropdown by config only",
-   "status": "pending"
+   "status": "done"
+  },
+  {
+   "id": "T-07b",
+   "name": "skyfi-designer-parity",
+   "spec_ref": "S5,S0",
+   "prd_ref": "R32,R39",
+   "wave": "W3",
+   "mode": "swarm-member (worktree)",
+   "depends_on": [
+    "T-04",
+    "T-07"
+   ],
+   "description": "Extend the per-section designer (_designer_view + _sd_designer/_sd_drawer) to the skyfi tenant: skyfi_dev_business.py view + template + route (replace the 302\u2192/dev redirect); registry rules/skyfi_sections.yaml drives it; same sd-* DOM contract tests for skyfi.",
+   "touch": [
+    "pipeline/personalization/skyfi_dev_business.py",
+    "app/templates/skyfi_dev_business.html",
+    "app/skyfi.py",
+    "tests/test_designer_ui.py additions or new test_skyfi_designer.py"
+   ],
+   "verify": "sd-* contract green for skyfi; cohesion S0.1 no-concern-rendered-differently",
+   "status": "done"
   },
   {
    "id": "T-08",
@@ -183,7 +204,7 @@
     "tests/test_wf_design_*.py"
    ],
    "verify": "30/30 rows green against real Gate offline",
-   "status": "pending"
+   "status": "done"
   },
   {
    "id": "T-09",
@@ -202,7 +223,7 @@
     "tests updates"
    ],
    "verify": "no route renders legacy chrome; zero orphan routes; full gate green; property tests untouched",
-   "status": "pending"
+   "status": "done"
   },
   {
    "id": "T-10",
@@ -220,7 +241,7 @@
     ".rapid/RETRO.md"
    ],
    "verify": "prod sweep green; report written",
-   "status": "pending"
+   "status": "in_progress"
   }
  ]
 }
