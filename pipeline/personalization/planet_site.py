@@ -112,7 +112,7 @@ def _campaign_intent(campaign: str) -> str | None:
 # built on the nine researched Planet market segments
 # (docs/research/planet-market-segments.md §2 + §5).
 #
-# Categories on /ads + /ads-lp:
+# Categories on the /ads grid:
 #   vertical — six vertical segments matched via geo/delivery-style targeting
 #              (agriculture, defense, insurance, forestry, energy, civil government)
 #   audience — six audience/behavioral plays (maritime interest, crisis retarget,
@@ -502,7 +502,7 @@ def variant_landing_url(variant: dict, page_path: str = "/planet") -> str:
 
 
 def ad_grid_sections() -> list[dict]:
-    """Grouped grid data for /ads + /ads-lp: two categories × 6 variants each."""
+    """Grouped grid data for the /ads grid: two categories × 6 variants each."""
     by_cat: dict[str, list[dict]] = {c["key"]: [] for c in AD_CATEGORIES}
     for v in AD_VARIANTS:
         by_cat[v["category"]].append(v)
@@ -1718,7 +1718,7 @@ def build_page(request, email: str | None = None, overrides: dict | None = None)
                 "login_email": ident["email"] if ident else "",
                 "first": ident["first"] if ident and ident.get("first") else "",
                 "known": bool(ident),
-                "ads": None, "ads_lp": None},
+                "ads": None},
         "login_state": login_state,
         "ad_variant": ad_variant,
         "audience_route": aud_route,

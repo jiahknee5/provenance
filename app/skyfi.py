@@ -13,8 +13,9 @@
                           drawer + dev/audit fold — same visitor state as /skyfi/dev.
   GET  /skyfi/direct    — direct-entry scenario gallery (demo_nav, config-driven)
   GET  /skyfi/email     — email-entry scenario gallery
-  GET  /skyfi/ads       — JUST the X ad variations: all 6 full X-post mockups
-                          (each with the marketer "The thinking" affordance)
+  GET  /skyfi/ads       — the unified X-ads grid (shared ads_grid.html, gauntlet
+                          layout): per-card meta, mini X-post, UTM, hero shift,
+                          and the marketer "The thinking" affordance
   GET  /skyfi/ad?v=…    — one X ad mockup + the six-beat thinking panel
                           (no match → redirect to /skyfi/ads)
 
@@ -228,27 +229,14 @@ def _render_ad(request: Request, m: dict[str, str]) -> HTMLResponse:
 
 
 def _render_ads(request: Request, m: dict[str, str]) -> HTMLResponse:
-    """JUST the X ad variations — all 6 full X-post mockups (SkyFi verticals).
+    """The unified X-ads grid (shared ads_grid.html — gauntlet layout, SkyFi accents).
     ?v= / ?campaign= keeps single-ad rendering working on this path too."""
     variant = _resolve_single_variant(request)
     if variant is not None:
         return _render_ad(request, m)
-    variants = []
-    for v in SS.AD_VARIANTS:
-        variants.append({
-            "variant": v,
-            "landing_url": SS.variant_landing_url(v, m["page"]),
-            "single_url": f"{m['ad']}?v={v['variant_id']}",
-            "explainer": AE.explainer_for("skyfi", v, page_path=m["page"],
-                                          dev_path=m["dev"]),
-        })
-    sections = [{"label": "SkyFi verticals", "category": "vertical", "variants": variants}]
-    return templates.TemplateResponse(request, "skyfi_ads.html", {
-        "demo_flow_active": "scenario",
-        "sections": sections,
-        "demo_hub_path": "/apt/demo",
-        "g": m,
-    })
+    from pipeline.personalization import demo_nav as _NAV
+    return templates.TemplateResponse(request, "ads_grid.html",
+                                      _NAV.build_ads_grid_view("skyfi", m))
 
 
 def _hero_image_json(request: Request, m: dict[str, str]) -> dict:

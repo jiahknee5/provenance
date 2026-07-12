@@ -1,20 +1,25 @@
-{#- 12-variant X.com ad grid — one per real X Ads Manager targeting type.
-    Compact 100vh layout: 6×2 (wide) or 4×3 (laptop). Category via left border. -#}
+{#- The ONE shared X-ads grid — the gauntlet ad-lp layout parameterized per tenant
+    (W6-E). Compact 100vh landing-page-preview grid: dark page, category color-coded
+    left borders + tags, per-card X-ad meta (targeting type, config, audience fit),
+    mini X-post preview, UTM string, generic→personalized HERO SHIFT, and the W6-A
+    "The thinking" details affordance. Brand tokens, grid geometry, and sections come
+    from demo_nav.build_ads_grid_view(tenant, mount). -#}
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Gauntlet X Ads — 12 Targeting Types</title>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <title>{{ page_title }}</title>
+  <link href="{{ brand.fonts_href }}" rel="stylesheet">
   <style>
     :root{
-      --bg:#0b0a08; --panel:#12100c; --line:#26221a; --line2:#37311f;
-      --gold:#c9a24b; --gold-t:#d5b269; --ink:#f4f2ed; --body:#a9a49a; --dim:#7d786e;
-      --sans:'Archivo','Inter',sans-serif; --ui:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
+      --bg:{{ brand.bg }}; --line2:{{ brand.line2 }};
+      --accent:{{ brand.accent }}; --accent-t:{{ brand.accent_t }}; --ink:{{ brand.ink }};
+      {#- brand font stacks contain quotes — |safe keeps autoescape from mangling the CSS
+          (server-authored constants from demo_nav._ADS_GRID_BRANDS, never user input) -#}
+      --sans:{{ brand.sans|safe }}; --ui:{{ brand.ui|safe }}; --mono:{{ brand.mono|safe }};
       --x-bg:#15202b; --x-line:#38444d; --x-muted:#8899a6;
       --card-bg:#fff; --card-ink:#0f1419; --card-muted:#536471;
-      --cat-demo:#3b82f6; --cat-aud:#a855f7;
     }
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%;overflow:hidden}
@@ -32,16 +37,16 @@
     }
     h1{font:600 13px/1 var(--sans);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .nav{display:flex;gap:6px;flex-shrink:0}
-    .nav a{font:600 10px var(--ui);border:1px solid var(--line2);border-radius:5px;padding:3px 8px;color:var(--gold-t);white-space:nowrap}
-    .nav a:hover{border-color:var(--gold);color:#fff}
+    .nav a{font:600 10px var(--ui);border:1px solid var(--line2);border-radius:5px;padding:3px 8px;color:var(--accent-t);white-space:nowrap}
+    .nav a:hover{border-color:var(--accent);color:#fff}
     .grid{
       flex:1 1 auto;min-height:0;
       display:grid;gap:8px;
-      grid-template-columns:repeat(6,1fr);
-      grid-template-rows:repeat(2,1fr);
+      grid-template-columns:repeat({{ grid.cols_wide }},1fr);
+      grid-template-rows:repeat({{ grid.rows_wide }},1fr);
     }
     @media(max-width:1279px){
-      .grid{grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(3,1fr)}
+      .grid{grid-template-columns:repeat({{ grid.cols_laptop }},1fr);grid-template-rows:repeat({{ grid.rows_laptop }},1fr)}
     }
     .card{
       background:var(--card-bg);
@@ -54,9 +59,7 @@
       position:relative;
     }
     .card-link{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
-    .card:hover{border-color:var(--gold);box-shadow:0 4px 18px rgba(0,0,0,.32)}
-    .card.cat-demographic{border-left:3px solid var(--cat-demo)}
-    .card.cat-audience{border-left:3px solid var(--cat-aud)}
+    .card:hover{border-color:var(--accent);box-shadow:0 4px 18px rgba(0,0,0,.32)}
     .meta{
       flex:0 0 auto;
       padding:5px 7px 4px;
@@ -67,10 +70,8 @@
       display:inline-block;
       font:700 8px var(--ui);
       letter-spacing:.05em;text-transform:uppercase;
-      color:#fff;border-radius:3px;padding:1px 5px;margin-bottom:3px;
+      border-radius:3px;padding:1px 5px;margin-bottom:3px;
     }
-    .cat-demographic .cat-tag{background:var(--cat-demo)}
-    .cat-audience .cat-tag{background:var(--cat-aud)}
     .type{font:700 11px/1.2 var(--sans);color:var(--card-ink);margin-bottom:2px}
     .config{
       font:10px/1.25 var(--mono);color:var(--card-muted);
@@ -95,7 +96,7 @@
     .av{
       width:18px;height:18px;border-radius:50%;
       display:flex;align-items:center;justify-content:center;
-      font:700 7px var(--ui);color:#fff;flex-shrink:0;
+      font:700 7px var(--ui);flex-shrink:0;
     }
     .x-meta{min-width:0;flex:1}
     .x-meta b{display:block;font:600 10px/1.1 var(--ui);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -110,13 +111,13 @@
       display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
       overflow:hidden;
     }
-    .x-body .trig{color:var(--gold-t);font-weight:500}
+    .x-body .trig{color:var(--accent-t);font-weight:500}
     .x-foot{
       flex:0 0 auto;
       padding:0 6px 4px;
       display:flex;align-items:center;gap:6px;min-width:0;
     }
-    .x-cta{font:700 9px var(--ui);color:var(--gold-t);white-space:nowrap;flex-shrink:0}
+    .x-cta{font:700 9px var(--ui);color:var(--accent-t);white-space:nowrap;flex-shrink:0}
     .utm{
       font:8px var(--mono);color:var(--x-muted);
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;
@@ -135,44 +136,50 @@
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
     }
     .preview .gen{color:#6d6960;text-decoration:line-through}
-    .preview .per{color:var(--gold-t);font-weight:600}
+    .preview .per{color:var(--accent-t);font-weight:600}
     .preview .arr{display:none}
     /* --- "The thinking" affordance: summary strip + upward overlay (keeps 100vh grid) --- */
     details.think{flex:0 0 auto;border-top:1px solid #eff3f4;background:var(--card-bg)}
     details.think summary{
       cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;
-      padding:3px 7px;font:700 9px var(--ui);color:var(--cat-demo);
+      padding:3px 7px;font:700 9px var(--ui);
     }
-    .cat-audience details.think summary{color:var(--cat-aud)}
     details.think summary::-webkit-details-marker{display:none}
     details.think summary:hover{color:var(--card-ink)}
     details.think .tk-body{
       position:absolute;left:4px;right:4px;bottom:22px;z-index:6;
-      background:#0f1419;color:#e7e9ea;border:1px solid var(--gold);
+      background:#0f1419;color:#e7e9ea;border:1px solid var(--accent);
       border-radius:6px;padding:7px 8px;box-shadow:0 8px 22px rgba(0,0,0,.5);
       font:9.5px/1.45 var(--ui);
     }
-    details.think .tk-body a{display:inline-block;margin-top:4px;font:700 9px var(--ui);color:var(--gold-t)}
+    details.think .tk-body a{display:inline-block;margin-top:4px;font:700 9px var(--ui);color:var(--accent-t)}
     details.think .tk-body a:hover{color:#fff}
+    /* Category color coding — left border + tag + thinking accent per catalog section. */
+    {% for cat in cats %}
+    .card.cat-{{ cat.key }}{border-left:3px solid {{ cat.color }}}
+    .cat-{{ cat.key }} .cat-tag{background:{{ cat.color }};color:{{ cat.ink }}}
+    .cat-{{ cat.key }} details.think summary{color:{{ cat.color }}}
+    .cat-{{ cat.key }} details.think summary:hover{color:var(--card-ink)}
+    {% endfor %}
     .chip{
       position:fixed;right:8px;bottom:6px;
-      font:600 9px var(--ui);color:#cfcabf;
-      background:rgba(18,16,12,.92);border:1px solid var(--line2);
+      font:600 9px var(--ui);color:{{ brand.chip_ink }};
+      background:{{ brand.chip_bg }};border:1px solid var(--line2);
       border-radius:12px;padding:4px 9px;
     }
-    .chip:hover{color:#fff;border-color:var(--gold)}
+    .chip:hover{color:#fff;border-color:var(--accent)}
     .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
   </style>
 </head>
 <body>
 <div class="page">
   <header class="top">
-    <h1>X Ads Manager Targeting — 12 Variants</h1>
+    <h1>{{ heading }}</h1>
     <nav class="nav">
       <a href="{{ demo_hub_path }}">← Demo sitemap</a>
       <a href="{{ g.page }}">Landing</a>
       <a href="{{ g.dev }}">/dev</a>
-      <a href="{{ g.image_decisions }}">Image decisions</a>
+      {% if g.image_decisions %}<a href="{{ g.image_decisions }}">Image decisions</a>{% endif %}
       <a href="/showcase">Showcase</a>
     </nav>
   </header>
@@ -181,20 +188,19 @@
     {% for sec in sections %}
     {% for item in sec.variants %}
     {% set v = item.variant %}
-    {% set loop_idx = loop.index0 %}
     <div class="card cat-{{ sec.category }}">
-    <a class="card-link" href="{{ item.landing_url }}" title="{{ v.x_targeting_type }} — open personalized landing page">
+    <a class="card-link" href="{{ item.landing_url }}" title="{{ item.type_label }} — open personalized landing page">
       <div class="meta">
         {% if loop.first %}
         <span class="cat-tag">{{ sec.label }}</span>
         {% endif %}
-        <div class="type">{{ v.x_targeting_type }}</div>
-        <div class="config" title="{{ v.x_targeting_example }}">{{ v.x_targeting_example }}</div>
-        <div class="fit">Best for <b>{{ v.audience_fit_label }}</b></div>
+        <div class="type">{{ item.type_label }}</div>
+        <div class="config" title="{{ item.config_label }}">{{ item.config_label }}</div>
+        <div class="fit">Best for <b>{{ item.fit_label }}</b></div>
       </div>
       <div class="x-wrap">
         <div class="x-top">
-          <div class="av" style="background:{{ v.ad.accent }}">{{ v.ad.avatar }}</div>
+          <div class="av" style="background:{{ v.ad.accent or brand.accent }};color:{{ brand.avatar_ink }}">{{ v.ad.avatar or brand.avatar_fallback }}</div>
           <div class="x-meta">
             <b>{{ v.ad.display }}</b>
             <span>@{{ v.ad.handle }} · Promoted</span>
