@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64" role="img" aria-label="Apt app icon">
+  <title>Apt — app icon</title>
+  <defs>
+    <linearGradient id="aptTile" x1="4" y1="60" x2="60" y2="4" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6ea8fe"/>
+      <stop offset=".55" stop-color="#8b7dff"/>
+      <stop offset="1" stop-color="#3ee0c8"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#aptTile)"/>
+  <g fill="none" stroke="#0b0f1a" stroke-width="6.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M15 34 L26 44 L48 17"/>
+    <path d="M38 15 L48 17 L46 27"/>
+  </g>
+</svg>
