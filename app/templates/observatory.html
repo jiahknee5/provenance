@@ -85,6 +85,12 @@
   .empty{max-width:620px;margin:80px auto;text-align:center;color:var(--mut)}
   .empty code{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:3px 8px;color:var(--accent)}
   .hint{color:var(--mut);font-size:12px;margin:6px 0 0}
+  /* mobile: node in/out panels stack; the graph keeps its own horizontal scroll */
+  @media(max-width:700px){
+    .io{grid-template-columns:1fr}
+    .ev{grid-template-columns:34px 70px 1fr;grid-auto-flow:dense}
+    .ev .etype{display:none}
+  }
 </style>
 </head>
 <body>
