@@ -241,7 +241,7 @@
     ".rapid/RETRO.md"
    ],
    "verify": "prod sweep green; report written",
-   "status": "in_progress"
+   "status": "done"
   }
  ]
 }

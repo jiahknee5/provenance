@@ -29,3 +29,6 @@ Zero prod changes (2nd consecutive) — /apt/demo 200, /skyfiapt 404 (R36 open o
 
 ## Iteration 4 — 2026-07-12T10:2x UTC
 Prod unchanged (3rd consecutive; /apt/demo 200, /skyfiapt 404). Local: W0-W3 COMPLETE (10/12 tasks, gate 408, WF-DESIGN 30/30 green, origin 8835c50); T-09 legacy retirement running in main tree. Deploy lands at T-10 — the next iteration after it should see: /skyfiapt 200, sd-* designer markers on /dev/business consoles, legacy chrome gone. Keeping long waits.
+
+## Iteration 5 (SHIP verification) — 2026-07-12T07:3x UTC
+THE DEPLOY LANDED. All baseline gaps RESOLVED on prod: R30 registry (designer staging live) · R31 gen text (offline pools baked) · R32/R33 designer (sd-sections 5/6/6 across gauntlet/planet/skyfi) · R34 pillar panels (ab/drift/graph/cost per section) · R36 /skyfiapt 200 (portal rewrite f457bbd) · R37 30/30 matrix green · R38/R39 legacy plane 404 + one design system + zero orphans. R35/R35a held throughout ($0.039 real spend today, everything ledgered). Remaining honest gap: S02 realtime beat not yet exercised end-to-end on prod (test-proven; first real visitor triggers it). Build: 12/12 tasks, 0 reverts, suite 569/0.

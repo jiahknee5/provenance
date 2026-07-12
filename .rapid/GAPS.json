@@ -1,0 +1,14 @@
+[
+  {
+    "id": "GAP-CONF-T-01",
+    "type": "conformance",
+    "severity": "MAJOR",
+    "pillar": "Spec Compliance",
+    "spec_ref": "S1",
+    "task": "T-01",
+    "description": "Module T-01 marked done but fails traceability: prd_ref R30 not found in 01-intake/PRD-ENHANCED.md",
+    "source": "module-conformance-hook (R8)",
+    "ts": "2026-07-12T04:33:47Z",
+    "status": "open"
+  }
+]

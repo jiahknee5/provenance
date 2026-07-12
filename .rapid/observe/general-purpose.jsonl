@@ -1,0 +1,4 @@
+{"t":"2026-07-12T04:02:39Z","seq":12,"agent":"general-purpose","role":"general-purpose","event":"STOP","detail":"SubagentStop turn ended","phase":"P4"}
+{"t":"2026-07-12T04:23:27Z","seq":30,"agent":"general-purpose","role":"general-purpose","event":"STOP","detail":"SubagentStop turn ended","phase":"P5"}
+{"t":"2026-07-12T04:34:28Z","seq":47,"agent":"general-purpose","role":"general-purpose","event":"STOP","detail":"SubagentStop turn ended","phase":"P6"}
+{"t":"2026-07-12T06:46:59Z","seq":158,"agent":"general-purpose","role":"general-purpose","event":"STOP","detail":"SubagentStop turn ended","phase":"P6"}
