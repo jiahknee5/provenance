@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="apt concept 1: truth boundary">
+  <!-- CONCEPT 1 — "Truth boundary" (chosen primary). The outline diamond is the truth
+       boundary; the solid diamond is the personalized claim, structurally inside it.
+       A refinement of the existing ~ glyph into precise geometry: stroke 4.5, inner
+       diamond ~46% visual scale, rounded joins, optically centered.
+       Variants shipped as ../logo-mark.svg (brand blue), ../logo-mark-dark.svg (white),
+       ../favicon.svg (white on gradient chip, rounded 14/64). -->
+  <defs>
+    <linearGradient id="c1g" x1="7" y1="7" x2="57" y2="57" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2E6FF5"/>
+      <stop offset="1" stop-color="#1B4DD1"/>
+    </linearGradient>
+  </defs>
+  <path d="M32 7 57 32 32 57 7 32Z" fill="none" stroke="url(#c1g)" stroke-width="4.5" stroke-linejoin="round"/>
+  <path d="M32 20.5 43.5 32 32 43.5 20.5 32Z" fill="url(#c1g)" stroke="url(#c1g)" stroke-width="2" stroke-linejoin="round"/>
+</svg>

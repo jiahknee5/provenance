@@ -2,7 +2,9 @@
    tenants[], add_new_href, nav_tree (3-level marketer IA), active_group, active_sub,
    nav (flat fallback used by topbars). #}
 <aside class="side">
-  <div class="brand"><span class="mk">◈</span> {{ brand | default('apt') }}</div>
+  {# apt truth-boundary mark (original, W7-A) inlined so it renders on every mount style
+     (/static vs portal-prefixed static). Asset twins: /static/apt/logo-mark*.svg #}
+  <div class="brand"><span class="mk" aria-hidden="true"><svg viewBox="0 0 64 64" width="16" height="16" focusable="false"><path d="M32 9 55 32 32 55 9 32Z" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round"/><path d="M32 21 43 32 32 43 21 32Z" fill="#fff" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg></span> {{ brand | default('apt') }}</div>
 
   <div class="navlbl">Website</div>
   <details class="ws-dd">

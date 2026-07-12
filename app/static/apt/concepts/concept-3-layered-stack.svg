@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="apt concept 3: layered variants">
+  <!-- CONCEPT 3 — "Layered variants". Three stacked diamond layers = the A/B variant pool;
+       the top layer is solid = the one actually served. Lower layers fade with depth.
+       Full 45-degree diamonds keep it in the truth-boundary geometry family (deliberately
+       not the flattened-parallelogram "layers" cliche). -->
+  <defs>
+    <linearGradient id="c3g" x1="19" y1="10" x2="45" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2E6FF5"/>
+      <stop offset="1" stop-color="#1B4DD1"/>
+    </linearGradient>
+  </defs>
+  <path d="M19 49 32 61.5 45 49" fill="none" stroke="#2E6FF5" stroke-opacity=".28"
+        stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M19 37 32 49.5 45 37" fill="none" stroke="#2E6FF5" stroke-opacity=".55"
+        stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M32 10 45 23 32 36 19 23Z" fill="url(#c3g)" stroke="url(#c3g)"
+        stroke-width="3" stroke-linejoin="round"/>
+</svg>

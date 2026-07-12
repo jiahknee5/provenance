@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="apt concept 2: receipt dot">
+  <!-- CONCEPT 2 — "Receipt dot" (mark-only variant). A rounded-square claim tile whose
+       top-right corner is completed by a warm-gold provenance dot (#c9a24b — the replicas'
+       provenance-dot motif): every claim tile carries its receipt. The wordmark variant
+       (apt + superscript gold dot after the t) is shown in the design preview as styled
+       Inter 800 text. -->
+  <defs>
+    <linearGradient id="c2g" x1="12" y1="15" x2="52" y2="51" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2E6FF5"/>
+      <stop offset="1" stop-color="#1B4DD1"/>
+    </linearGradient>
+  </defs>
+  <path d="M52 28.5 V43 A8 8 0 0 1 44 51 H20 A8 8 0 0 1 12 43 V23 A8 8 0 0 1 20 15 H38.5"
+        fill="none" stroke="url(#c2g)" stroke-width="4.5" stroke-linecap="round"/>
+  <circle cx="49.5" cy="17.5" r="5.5" fill="#c9a24b"/>
+</svg>

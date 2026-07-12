@@ -2,6 +2,11 @@
    mounts don't serve the shared stylesheet, so each page carries its own. Page-specific
    card CSS stays in the page. #}
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+{# apt favicons (W7-A). static_prefix: "/static" locally/Railway; portal mounts pass
+   "/<tenant>apt/static", which the portal rewrites back to /static. #}
+<link rel="icon" type="image/svg+xml" href="{{ static_prefix }}/apt/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ static_prefix }}/apt/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="{{ static_prefix }}/apt/apple-touch-icon.png">
 <style>
   :root{
     --bg:#f4f6fa; --surface:#fff; --ink:#0f1729; --body:#3f4a5c; --muted:#71809a;
