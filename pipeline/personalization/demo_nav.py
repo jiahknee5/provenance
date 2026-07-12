@@ -409,8 +409,11 @@ def build_channel_gallery_view(
     gallery_path = f"{mounts['page']}/{channel}"
     cards = [_gallery_card(s, mounts) for s in rows]
     tab_base = gallery_path
+    switch_hrefs = {
+        t: _channel_gallery_href(t, channel, _mounts_for(t)) for t in ("gauntlet", "planet")
+    }
     return {
-        "demo_flow_active": "scenario",
+        **console_shell_ctx(tenant, "channels", switch_hrefs=switch_hrefs),
         "hub_path": _HUB_PATH,
         "tenant": tenant,
         "tenant_name": meta["name"],
