@@ -28,16 +28,29 @@
     <summary class="navlbl">{{ grp.group }} <span class="gtw">▾</span></summary>
     <nav class="nav">
     {% for it in grp['items'] %}
-    {% if it.children %}
+    {% if it.children or it.clusters %}
     <details class="nav-branch" {{ 'open' if active_group == grp.key else '' }}>
       <summary>
         <a class="{{ 'on' if active_sub == it.id else '' }}" href="{{ it.href }}"><span class="ic">{{ it.icon }}</span> {{ it.label }}</a>
         <span class="tw">▾</span>
       </summary>
       <div class="nav-kids">
+        {% if it.clusters %}
+        {% for cl in it.clusters %}
+        {% if cl.label %}<div class="kid-cap">{{ cl.label }}</div>{% endif %}
+        {% for kid in cl.kids %}
+        {% if kid.planned %}
+        <span class="kid planned">{{ kid.label }} <em>planned</em></span>
+        {% else %}
+        <a class="kid {{ 'on' if active_sub == kid.id else '' }}" href="{{ kid.href }}">{{ kid.label }}</a>
+        {% endif %}
+        {% endfor %}
+        {% endfor %}
+        {% else %}
         {% for kid in it.children %}
         <a class="kid {{ 'on' if active_sub == kid.id else '' }}" href="{{ kid.href }}">{{ kid.label }}</a>
         {% endfor %}
+        {% endif %}
       </div>
     </details>
     {% else %}

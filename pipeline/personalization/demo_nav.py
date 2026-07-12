@@ -354,10 +354,45 @@ def console_shell_ctx(active_site: str, active_nav: str, *,
     # named the way a marketer names them (platform hint where one exists).
     _mk_label = {"direct": "Direct traffic", "search": "Organic search",
                  "ads": "Paid ads · X", "email": "Email · HubSpot"}
-    channel_children = [
-        {"id": c, "label": _mk_label[c],
-         "href": _channel_gallery_href(active_site, c, m)}
-        for c in _CHANNEL_ORDER
+    def _ads_scenario_href(source: str) -> str | None:
+        """Landing URL of this tenant's seeded ads scenario for a platform, if one exists."""
+        for s in load_scenarios()["scenarios"]:
+            if (s.get("tenant") == active_site
+                    and str(s.get("channel", "")).startswith("ads")
+                    and (s.get("query_params") or {}).get("utm_source") == source):
+                return resolve_scenario_urls(s, m)["landing_url"]
+        return None
+
+    # Channels organized by SIGNAL CLASS (what arrives with the click), not by logo.
+    # Only real destinations are links; unbuilt platforms render as honest "planned" chips.
+    meta_href = _ads_scenario_href("meta")
+    google_ads_href = _ads_scenario_href("google")
+    channel_clusters = [
+        {"label": None, "kids": [
+            {"id": "direct", "label": "Direct traffic",
+             "href": _channel_gallery_href(active_site, "direct", m)},
+        ]},
+        {"label": "Search", "kids": [
+            {"id": "search", "label": "Organic search",
+             "href": _channel_gallery_href(active_site, "search", m)},
+        ] + ([{"id": "search-paid", "label": "Paid search · Google Ads",
+               "href": google_ads_href}] if google_ads_href else
+             [{"id": "search-paid", "label": "Paid search · Google Ads", "planned": True}])},
+        {"label": "Social ads", "kids": [
+            {"id": "ads", "label": "X Ads",
+             "href": _channel_gallery_href(active_site, "ads", m)},
+        ] + ([{"id": "ads-meta", "label": "Meta (FB · IG)", "href": meta_href}]
+             if meta_href else
+             [{"id": "ads-meta", "label": "Meta (FB · IG)", "planned": True}])
+          + [{"id": "ads-linkedin", "label": "LinkedIn", "planned": True}]},
+        {"label": "Other ads", "kids": [
+            {"id": "ads-display", "label": "Display / retargeting", "planned": True},
+            {"id": "ads-video", "label": "YouTube / video", "planned": True},
+        ]},
+        {"label": None, "kids": [
+            {"id": "email", "label": "Email · HubSpot",
+             "href": _channel_gallery_href(active_site, "email", m)},
+        ]},
     ]
     # Level 3 under Personalization → Page sections: the sections this website's
     # registry actually declares — the nav mirrors the designer, per tenant.
@@ -371,7 +406,7 @@ def console_shell_ctx(active_site: str, active_nav: str, *,
         {"group": "Campaigns", "key": "channels", "items": [
             {"id": "start", "icon": "◧", "label": "Overview", "href": f"{_HUB_PATH}?site={active_site}"},
             {"id": "channel-galleries", "icon": "▤", "label": "Channels",
-             "href": f"{_HUB_PATH}?site={active_site}", "children": channel_children},
+             "href": f"{_HUB_PATH}?site={active_site}", "clusters": channel_clusters},
         ]},
         {"group": "Personalization", "key": "consoles", "items": [
             {"id": "designer", "icon": "◨", "label": "Page sections",
