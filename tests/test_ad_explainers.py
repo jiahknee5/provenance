@@ -220,13 +220,16 @@ def test_gauntlet_ad_lp_cards_have_thinking_details():
     assert '/gauntlet/ad?v=v01' in t and '/gauntlet/ad?v=v12' in t
 
 
-def test_planet_ads_and_ads_lp_cards_have_thinking_details():
+def test_planet_ads_grid_cards_have_thinking_details():
+    # W6-E: one unified grid — /ads carries the thinking affordance per card and
+    # /ads-lp is a 302 into it (the separate LP-preview page is gone).
     ads = _text(c.get("/planet/ads"))
     assert ads.count("The thinking") >= 12
     assert "Full six-beat panel →" in ads
-    lp = _text(c.get("/planet/ads-lp"))
-    assert lp.count("The thinking") >= 12
-    assert '/planet/ad?v=v07' in lp
+    assert '/planet/ad?v=v07' in ads
+    resp = c.get("/planet/ads-lp", follow_redirects=False)
+    assert resp.status_code == 302
+    assert resp.headers["location"] == "/planet/ads"
 
 
 def test_skyfi_ads_grid_shows_all_six_mockups_with_thinking():
@@ -238,7 +241,9 @@ def test_skyfi_ads_grid_shows_all_six_mockups_with_thinking():
         assert v["ad"]["trigger"] in t, f"missing ad copy for {v['id']}"
         assert SS.variant_landing_url(v, "/skyfi") in t
     assert t.count("The thinking") >= 6
-    assert "skyfi.com" in t and "Promoted" in t
+    # W6-E: shared compact grid — the X-post identity line replaces the old
+    # full-mockup's link-card domain footer.
+    assert "@skyfi" in t and "Promoted" in t
 
 
 def test_skyfi_ads_route_with_v_param_renders_single_mockup():
@@ -258,12 +263,11 @@ def test_skyfi_portal_mount_ads_links_stay_under_prefix():
 
 
 def test_grid_pages_keep_their_contracts():
-    # gauntlet ad-lp still shows the hero-shift previews and generic headline
-    t = _text(c.get("/gauntlet/ad-lp"))
-    assert GS.generic_hero_headline() in t
-    # planet /ads still has no landing-page hero-shift previews
-    ads = _text(c.get("/planet/ads"))
-    assert "Hero shift" not in ads
-    # planet /ads-lp still never carries full X ad copy
-    lp = _text(c.get("/planet/ads-lp"))
-    assert "Every field in the corn belt, imaged today." not in lp
+    # W6-E unified contract: ALL THREE tenant grids share the gauntlet ad-lp layout —
+    # each shows the generic→personalized hero shift alongside the ad meta + X post.
+    for path, site in (("/gauntlet/ad-lp", GS), ("/planet/ads", PLS), ("/skyfi/ads", SS)):
+        t = _text(c.get(path))
+        assert "Hero shift" in t, path
+        assert site.generic_hero_headline() in t, path
+        for v in site.AD_VARIANTS:
+            assert site.variant_hero_headline(v) in t, f"{path} missing hero for {v['id']}"

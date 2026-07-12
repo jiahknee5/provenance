@@ -267,6 +267,17 @@ def generic_hero_headline() -> str:
     return GENERIC["hero"]["h1_pre"] + GENERIC["hero"]["h1_blue"]
 
 
+def variant_hero_headline(variant: dict) -> str:
+    """The personalized hero headline this ad's click ships (real page overrides)."""
+    p = variant["page"]
+    return p["h1_pre"] + p["h1_blue"]
+
+
+def ad_grid_sections() -> list[dict]:
+    """Grid data for /ads — the single vertical-creatives category (6 variants)."""
+    return [{"category": "vertical", "label": "SkyFi verticals", "variants": AD_VARIANTS}]
+
+
 # --------------------------------------------------------------------------- #
 # The generic page — product-shaped claims only (brand ref: skyfi-brand.md).
 # --------------------------------------------------------------------------- #

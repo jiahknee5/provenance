@@ -538,3 +538,125 @@ def build_channel_gallery_view(
         "card_count": len(cards),
         "mounts": mounts,
     }
+
+
+# --------------------------------------------------------------------------- #
+# Shared X-ads grid (W6-E) — ONE template (app/templates/ads_grid.html) renders the
+# gauntlet ad-lp layout for every tenant. Brand tokens below are read from each
+# tenant's established ad-page palette (gauntlet_ad_lp / planet_ads / skyfi_ads);
+# category colors match the catalogs' section keys. Nothing here invents copy —
+# every card field reads from the live AD_VARIANTS catalogs + W6-A explainers.
+# --------------------------------------------------------------------------- #
+_ADS_GRID_BRANDS: dict[str, dict[str, Any]] = {
+    "gauntlet": {
+        "fonts_href": ("https://fonts.googleapis.com/css2?family=Archivo:wght@600;700"
+                       "&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400"
+                       "&display=swap"),
+        "sans": "'Archivo','Inter',sans-serif", "ui": "'Inter',sans-serif",
+        "mono": "'JetBrains Mono',monospace",
+        "bg": "#0b0a08", "line2": "#37311f",
+        "accent": "#c9a24b", "accent_t": "#d5b269", "ink": "#f4f2ed",
+        "chip_bg": "rgba(18,16,12,.92)", "chip_ink": "#cfcabf",
+        "avatar_ink": "#fff", "avatar_fallback": "GA",
+        "cats": {"demographic": {"color": "#3b82f6", "ink": "#fff"},
+                 "audience": {"color": "#a855f7", "ink": "#fff"}},
+        "heading": "X Ads Manager Targeting — 12 Variants",
+        "page_title": "Gauntlet X Ads — 12 Targeting Types",
+    },
+    "planet": {
+        "fonts_href": ("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700"
+                       "&family=JetBrains+Mono:wght@400&display=swap"),
+        "sans": "'Montserrat',sans-serif", "ui": "'Montserrat',sans-serif",
+        "mono": "'JetBrains Mono',monospace",
+        "bg": "#07090a", "line2": "#1f3355",
+        "accent": "#009da5", "accent_t": "#00cbe6", "ink": "#eef3f9",
+        "chip_bg": "rgba(8,14,26,.92)", "chip_ink": "#c2cddb",
+        "avatar_ink": "#fff", "avatar_fallback": "PL",
+        "cats": {"vertical": {"color": "#3fa34d", "ink": "#fff"},
+                 "audience": {"color": "#8a5cf6", "ink": "#fff"}},
+        "heading": "Planet X Ads — 12 Targeting Types",
+        "page_title": "Planet X Ads — 12 Targeting Types",
+    },
+    "skyfi": {
+        "fonts_href": ("https://fonts.googleapis.com/css2?family=Hanken+Grotesk:"
+                       "wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap"),
+        "sans": "'Hanken Grotesk',sans-serif", "ui": "'Hanken Grotesk',sans-serif",
+        "mono": "'DM Mono',monospace",
+        "bg": "#060b16", "line2": "#1f3355",
+        "accent": "#fcc219", "accent_t": "#ffd75e", "ink": "#eef3f9",
+        "chip_bg": "rgba(8,14,26,.92)", "chip_ink": "#c2cddb",
+        "avatar_ink": "#171203", "avatar_fallback": "SF",
+        "cats": {"vertical": {"color": "#fcc219", "ink": "#171203"}},
+        "heading": "SkyFi X Ads — 6 Vertical Creatives",
+        "page_title": "SkyFi X Ads — 6 Vertical Creatives",
+    },
+}
+
+
+def build_ads_grid_view(tenant: str, m: dict[str, str], *,
+                        dev_sample: str | None = None) -> dict[str, Any]:
+    """Context for the ONE shared X-ads grid template (ads_grid.html).
+
+    Per card: real targeting meta, the mini X-post, the UTM string, the
+    generic→personalized hero shift, and the condensed W6-A thinking affordance
+    linking to the single-ad page. Grid geometry adapts to the variant count
+    (12 → 6×2 wide / 4×3 laptop; 6 → 3×2 wide / 2×3 laptop).
+    """
+    from pipeline.personalization import ad_explainers as AE
+    from pipeline.personalization import gauntlet_site as GS
+    from pipeline.personalization import planet_site as PLS
+    from pipeline.personalization import skyfi_site as SS
+
+    site = {"gauntlet": GS, "planet": PLS, "skyfi": SS}[tenant]
+    brand = _ADS_GRID_BRANDS[tenant]
+    generic_hero = site.generic_hero_headline()
+    sections: list[dict[str, Any]] = []
+    total = 0
+    for sec in site.ad_grid_sections():
+        items: list[dict[str, Any]] = []
+        for v in sec["variants"]:
+            if tenant == "skyfi":
+                # SkyFi's catalog has no X Ads Manager targeting config — the six
+                # creatives are vertical-led; segment + audience route are the
+                # real fields (same framing skyfi_ads.html used).
+                type_label = "Vertical creative"
+                config_label = f"{v['segment']} · route {v['audience']}"
+                fit_label = f"the {v['segment']} vertical"
+            else:
+                type_label = v["x_targeting_type"]
+                config_label = v["x_targeting_example"]
+                fit_label = v["audience_fit_label"]
+            items.append({
+                "variant": v,
+                "type_label": type_label,
+                "config_label": config_label,
+                "fit_label": fit_label,
+                "landing_url": site.variant_landing_url(v, m["page"]),
+                "generic_hero": generic_hero,
+                "personal_hero": site.variant_hero_headline(v),
+                "single_url": f"{m['ad']}?v={v['variant_id']}",
+                "explainer": AE.explainer_for(tenant, v, page_path=m["page"],
+                                              dev_path=m["dev"]),
+            })
+        total += len(items)
+        sections.append({"label": sec["label"], "category": sec["category"],
+                         "variants": items})
+    cols_wide = 6 if total >= 10 else 3
+    cols_laptop = 4 if total >= 10 else 2
+    grid = {
+        "cols_wide": cols_wide, "rows_wide": -(-total // cols_wide),
+        "cols_laptop": cols_laptop, "rows_laptop": -(-total // cols_laptop),
+    }
+    return {
+        "page_title": brand["page_title"],
+        "heading": brand["heading"],
+        "brand": brand,
+        "cats": [{"key": k, **c} for k, c in brand["cats"].items()],
+        "grid": grid,
+        "sections": sections,
+        "generic_hero": generic_hero,
+        "g": m,
+        "dev_sample": dev_sample or m["dev"],
+        "demo_hub_path": _HUB_PATH,
+        "demo_flow_active": "scenario",
+    }

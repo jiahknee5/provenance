@@ -115,13 +115,7 @@ def _console_cards(m: dict[str, str], qs: str, as_state: str) -> list[dict]:
             "href": m["ads"],
             "kind": "secondary",
         })
-    if m.get("ads_lp"):
-        cards.append({
-            "title": "LP variants",
-            "desc": "Compact landing-page previews for every ad variant.",
-            "href": m["ads_lp"],
-            "kind": "secondary",
-        })
+    # ads_lp is a 302 alias of the /ads grid now (one grid per tenant) — no card.
     if m.get("ad_lp"):
         cards.append({
             "title": "X ads grid",

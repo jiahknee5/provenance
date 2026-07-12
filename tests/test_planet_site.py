@@ -1,6 +1,7 @@
 """Planet replica (/planet + /planet/dev) — entry classification, tier routing determinism,
 the LOCATION signal (the Planet differentiator), the no-hold-fact invariant, the login
-unlock, the /ads vs /ads-lp split, and /planet/dev trace completeness.
+unlock, the unified /ads grid (W6-E: shared gauntlet-layout template, /ads-lp folded
+in as a 302), and /planet/dev trace completeness.
 
 All offline: the test client's host is not a public IP, so scene.reverse_ip() returns {}
 and the IP layer routes tier 0 deterministically. Private-IP overrides exercise the ?ip=
@@ -322,7 +323,9 @@ def test_dev_page_renders_the_process_map():
 def test_showcase_card_publishes_the_entry_links():
     t = c.get("/showcase").text
     assert "Planet replica" in t
-    assert 'href="/planetapt"' in t and "/planetapt/ads" in t and "/planetapt/ads-lp" in t
+    # W6-E: one X-ads grid per tenant — the separate LP-variants entry is gone.
+    assert 'href="/planetapt"' in t and "/planetapt/ads" in t
+    assert "/planetapt/ads-lp" not in t
     assert PS.sample_login_email() in t
 
 
@@ -393,12 +396,13 @@ def test_defense_variant_carries_theater_guardrail_note():
 
 
 # --------------------------------------------------------------------------- #
-# 7 · The /ads vs /ads-lp split
+# 7 · The unified /ads grid (W6-E: shared gauntlet-layout template; /ads-lp is a
+#     302 into it — one grid per tenant carries ad copy AND the hero shift)
 # --------------------------------------------------------------------------- #
 V01_TRIGGER = "Every field in the corn belt, imaged today."
 
 
-def test_ads_grid_shows_all_twelve_full_x_mockups():
+def test_ads_grid_shows_all_twelve_variants_with_hero_shift():
     for path in ("/planet/ads", "/planetapt/ads"):
         r = c.get(path)
         assert r.status_code == 200, path
@@ -408,34 +412,29 @@ def test_ads_grid_shows_all_twelve_full_x_mockups():
             assert v["ad"]["trigger"] in t, f"{path} missing ad copy for {v['id']}"
         assert "Location targeting" in t and "Follower look-alikes targeting" in t
         assert "Promoted" in t
-        # /ads is JUST the X ads — no landing-page hero-shift previews here
-        assert "Hero shift" not in t
-
-
-def test_ads_lp_grid_shows_twelve_compact_landing_previews():
-    for path in ("/planet/ads-lp", "/planetapt/ads-lp"):
-        r = c.get(path)
-        assert r.status_code == 200, path
-        t = _page_text(r)
+        # W6-E unified contract: the grid ALSO carries the generic→personalized
+        # hero shift that used to live on the separate /ads-lp page.
         assert "Hero shift" in t
         assert PS.generic_hero_headline() in t
         for v in PS.AD_VARIANTS:
             assert PS.variant_hero_headline(v) in t, f"{path} missing personalized hero for {v['id']}"
-        assert "emphasis" in t and "hero → " in t          # section-order + table deltas
-        # /ads-lp is JUST the landing previews — the full X ad copy lives on /ads
-        assert V01_TRIGGER not in t
 
 
-def test_ads_and_ads_lp_cross_link_and_click_through():
+def test_ads_lp_redirects_into_the_unified_grid():
+    # /ads-lp is redundant now (one grid per tenant) — it 302s to /ads on both mounts.
+    for path, target in (("/planet/ads-lp", "/planet/ads"),
+                         ("/planetapt/ads-lp", "/planetapt/ads")):
+        resp = c.get(path, follow_redirects=False)
+        assert resp.status_code == 302, path
+        assert resp.headers["location"] == target
+
+
+def test_ads_grid_cards_click_through_to_landing_urls():
     ads = c.get("/planet/ads").text
-    lp = c.get("/planet/ads-lp").text
-    assert '/planet/ads-lp' in ads
-    assert '/planet/ads' in lp
     # every card clicks through to its personalized landing URL
     for v in PS.AD_VARIANTS:
         landing = PS.variant_landing_url(v, "/planet")
         assert landing in html.unescape(ads)
-        assert landing in html.unescape(lp)
 
 
 def test_ad_single_mockup_and_redirect():
@@ -467,10 +466,9 @@ def test_crop_belt_vs_maritime_feel_like_different_products():
 
 
 def test_portal_mount_ads_links_stay_under_prefix():
-    for path in ("/planetapt/ads", "/planetapt/ads-lp"):
-        t = c.get(path).text
-        assert 'href="/planetapt?' in t, path
-        assert 'href="/planet?' not in t, path
+    t = c.get("/planetapt/ads").text
+    assert 'href="/planetapt?' in t
+    assert 'href="/planet?' not in t
 
 
 # --------------------------------------------------------------------------- #

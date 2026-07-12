@@ -9,8 +9,11 @@
   GET  /planet/dev      — the decisioning companion (incl. the Location signal stage)
   GET  /planet/dev/business — marketing/sales narrative (same state as /planet/dev)
   GET  /planet/dev/image-decisions — hero image decision guide
-  GET  /planet/ads      — JUST the X ad variations: all 12 full X-post mockups
-  GET  /planet/ads-lp   — the landing-page variations in small form: 12 compact LP previews
+  GET  /planet/ads      — the unified X-ads grid (shared ads_grid.html, gauntlet
+                          layout): per-card targeting meta, mini X-post, UTM string,
+                          generic→personalized hero shift, thinking affordance
+  GET  /planet/ads-lp   — 302 → /planet/ads (one grid per tenant; the old separate
+                          LP-preview page is folded into the grid)
   GET  /planet/ad?v=…   — one X ad mockup (no match → redirect to /planet/ads);
                           /planet/ads?v=… renders the same single mockup
 
@@ -78,7 +81,6 @@ def entry_links(m: dict[str, str]) -> list[tuple[str, str]]:
     page = m["page"]
     return [
         ("X ads", m["ads"]),
-        ("LP variants", m["ads_lp"]),
         ("Ad", f"{page}?utm_source=x&utm_medium=paid&utm_campaign=x-location-crop-belts&utm_content=v01"),
         ("Email", f"{page}?utm_source=hubspot&utm_medium=email&utm_campaign=crisis-responders&e="
                   + PS.sample_magic_token()),
@@ -164,7 +166,6 @@ def _render_planet(request: Request, m: dict[str, str]) -> HTMLResponse:
     email = _cookie_email(request)
     page = _page_with_mount_urls(PS.build_page(request, email=email or None), m)
     page["nav"]["ads"] = m["ads"]
-    page["nav"]["ads_lp"] = m["ads_lp"]
     return templates.TemplateResponse(request, "planet_site.html", {
         "page": page, "qs": _qs(request), "dev_qs": _qs(request), "g": m,
         "hero_api_url": m["hero_api"],
@@ -196,7 +197,7 @@ def _render_ad(request: Request, m: dict[str, str]) -> HTMLResponse:
 
 
 def _render_ads(request: Request, m: dict[str, str]) -> HTMLResponse:
-    """JUST the X ad variations — a grid of all 12 full X-post mockups.
+    """The unified X-ads grid (shared ads_grid.html — gauntlet layout, planet accents).
     ?v= / ?campaign= keeps single-ad rendering working on this path too."""
     variant = _resolve_single_variant(request)
     if variant is not None:
@@ -207,55 +208,14 @@ def _render_ads(request: Request, m: dict[str, str]) -> HTMLResponse:
                                           dev_path=m["dev"]),
             "g": m,
         })
-    sections = []
-    for sec in PS.ad_grid_sections():
-        variants = []
-        for v in sec["variants"]:
-            variants.append({
-                "variant": v,
-                "landing_url": PS.variant_landing_url(v, m["page"]),
-                "single_url": f"{m['ad']}?v={v['variant_id']}",
-                "explainer": AE.explainer_for("planet", v, page_path=m["page"],
-                                              dev_path=m["dev"]),
-            })
-        sections.append({"label": sec["label"], "category": sec["category"], "variants": variants})
-    return templates.TemplateResponse(request, "planet_ads.html", {
-        "demo_flow_active": "scenario",
-        "sections": sections,
-        "demo_hub_path": "/apt/demo",
-        "g": m,
-    })
+    from pipeline.personalization import demo_nav as _NAV
+    return templates.TemplateResponse(request, "ads_grid.html",
+                                      _NAV.build_ads_grid_view("planet", m))
 
 
-def _render_ads_lp(request: Request, m: dict[str, str]) -> HTMLResponse:
-    """The landing-page variations in SMALL FORM — 12 compact LP preview cards."""
-    sections = []
-    for sec in PS.ad_grid_sections():
-        variants = []
-        for v in sec["variants"]:
-            vp = v["page"]
-            order = vp.get("order") or PS.ORDER_BY_AUDIENCE[v["audience"]]
-            variants.append({
-                "variant": v,
-                "landing_url": PS.variant_landing_url(v, m["page"]),
-                "generic_hero": PS.generic_hero_headline(),
-                "personal_hero": PS.variant_hero_headline(v),
-                "sub": vp["sub"],
-                "order": order,
-                "emphasis": vp.get("compare_emphasis") or "—",
-                "cta_primary": vp["cta_primary"],
-                "single_url": f"{m['ad']}?v={v['variant_id']}",
-                "explainer": AE.explainer_for("planet", v, page_path=m["page"],
-                                              dev_path=m["dev"]),
-            })
-        sections.append({"label": sec["label"], "category": sec["category"], "variants": variants})
-    return templates.TemplateResponse(request, "planet_ad_lp.html", {
-        "demo_flow_active": "scenario",
-        "sections": sections,
-        "generic_hero": PS.generic_hero_headline(),
-        "default_order": PS.DEFAULT_ORDER,
-        "g": m,
-    })
+def _render_ads_lp(request: Request, m: dict[str, str]) -> RedirectResponse:
+    """The old separate LP-preview page is folded into the /ads grid — 302 there."""
+    return RedirectResponse(m["ads"], status_code=302)
 
 
 def _dev_email_and_page(request: Request, m: dict[str, str]) -> tuple[str, str | None, dict, str]:
@@ -375,8 +335,8 @@ def _register_mount(m: dict[str, str]) -> None:
     def planet_ads(request: Request) -> HTMLResponse:
         return _render_ads(request, m)
 
-    @app.get(ads_lp, response_class=HTMLResponse)
-    def planet_ads_lp(request: Request) -> HTMLResponse:
+    @app.get(ads_lp)
+    def planet_ads_lp(request: Request) -> RedirectResponse:
         return _render_ads_lp(request, m)
 
     @app.get(m["direct_gallery"], response_class=HTMLResponse)

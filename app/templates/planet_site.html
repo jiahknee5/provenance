@@ -191,7 +191,6 @@
     <span class="grp"><span class="lbl">Programs</span><a href="#research">Research</a><a href="#cta">Trial</a></span>
     <span class="right">
       {% if page.nav.ads %}<a href="{{ page.nav.ads }}" style="font:500 12px var(--ui);color:var(--dim);margin-right:4px" title="12 X.com ad variants">X ads</a>{% endif %}
-      {% if page.nav.ads_lp %}<a href="{{ page.nav.ads_lp }}" style="font:500 12px var(--ui);color:var(--dim);margin-right:4px" title="12 landing-page variations">LP variants</a>{% endif %}
       <a class="apply" href="#cta">Start Free Trial</a>
       {% if page.nav.known %}
       <span class="lg"><span class="who">{{ 'Hi ' + page.nav.first if page.nav.first else page.nav.login_email }}</span>{% if page.login_state %}<a class="out" href="{{ g.logout }}?next={{ g.page }}{{ qs|urlencode }}">Logout</a>{% endif %}</span>

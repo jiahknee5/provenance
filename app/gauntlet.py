@@ -138,32 +138,14 @@ def _render_gauntlet(request: Request, m: dict[str, str]) -> HTMLResponse:
 
 
 def _render_ad_lp(request: Request, m: dict[str, str]) -> HTMLResponse:
-    sections = []
-    for sec in GS.ad_grid_sections():
-        variants = []
-        for v in sec["variants"]:
-            variants.append({
-                "variant": v,
-                "landing_url": GS.variant_landing_url(v, m["page"]),
-                "generic_hero": GS.generic_hero_headline(),
-                "personal_hero": GS.variant_hero_headline(v),
-                "single_url": f"{m['ad']}?v={v['variant_id']}",
-                "explainer": AE.explainer_for("gauntlet", v, page_path=m["page"],
-                                              dev_path=m["dev"]),
-            })
-        sections.append({"label": sec["label"], "category": sec["category"], "variants": variants})
+    from pipeline.personalization import demo_nav as _NAV
     dev_sample = (
         f"{m['dev']}?utm_source=x&utm_medium=paid"
         f"&utm_campaign=x-keyword-ai-hiring&utm_content=v09&as=anon"
     )
-    return templates.TemplateResponse(request, "gauntlet_ad_lp.html", {
-        "sections": sections,
-        "generic_hero": GS.generic_hero_headline(),
-        "g": m,
-        "dev_sample": dev_sample,
-        "demo_hub_path": "/apt/demo",
-        "demo_flow_active": "scenario",
-    })
+    return templates.TemplateResponse(
+        request, "ads_grid.html",
+        _NAV.build_ads_grid_view("gauntlet", m, dev_sample=dev_sample))
 
 
 def _render_ad(request: Request, m: dict[str, str]) -> HTMLResponse:
