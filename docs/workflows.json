@@ -186,6 +186,1266 @@
         {"step": 8, "action": "optional", "target": "staged drawer prebuild toggle", "expected": "Client-side diff only"},
         {"step": 9, "action": "compare", "target": "/dev/business?as=anon direct", "expected": "Direct · anon row in Delivery"}
       ]
+    },
+    {
+      "id": "WF-DESIGN-G01",
+      "title": "GauntletAI · direct · cold anon, no signals (tier 0) — hero sub (text)",
+      "tenant": "gauntlet",
+      "matrix": {
+        "channel": "direct",
+        "element": "hero sub (text)",
+        "mode": "det",
+        "workflow": "realtime",
+        "latency": "0 ms",
+        "strategy": "neutral-baseline",
+        "guardrail": "say only what's provable with zero data"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "direct visit (no referrer/UTM)",
+          "proc": "classify_entry + resolve signals — cold anon, no signals (tier 0)",
+          "out": "entry ctx: channel=direct, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): hero sub (text) (mode=det, workflow=realtime)",
+          "proc": "strategy=neutral-baseline; the Gate bounds the candidate set — say only what's provable with zero data",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "deterministic slot-fill at request time (0 ms, $0)",
+          "out": "personalized hero sub (text) shipped (0 ms)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "With zero signals the hero sub ships the neutral baseline — nothing unprovable ships."
+        }
+      ],
+      "golden": "With zero signals the hero sub ships the neutral baseline — nothing unprovable ships.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_g01_direct_cold_anon_neutral_hero"
+    },
+    {
+      "id": "WF-DESIGN-G02",
+      "title": "GauntletAI · direct · corporate IP (Apple netblock), anon B2B — hero sub + prove intro (text)",
+      "tenant": "gauntlet",
+      "matrix": {
+        "channel": "direct",
+        "element": "hero sub + prove intro (text)",
+        "mode": "det",
+        "workflow": "realtime",
+        "latency": "0 ms",
+        "strategy": "firmographic-allude",
+        "guardrail": "employer alluded, never recited (hold)"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "direct visit (no referrer/UTM)",
+          "proc": "classify_entry + resolve signals — corporate IP (Apple netblock), anon B2B",
+          "out": "entry ctx: channel=direct, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): hero sub + prove intro (text) (mode=det, workflow=realtime)",
+          "proc": "strategy=firmographic-allude; the Gate bounds the candidate set — employer alluded, never recited (hold)",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "deterministic slot-fill at request time (0 ms, $0)",
+          "out": "personalized hero sub + prove intro (text) shipped (0 ms)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "Corporate-IP arrival personalizes hero sub + prove intro at allude — the employer is never recited."
+        }
+      ],
+      "golden": "Corporate-IP arrival personalizes hero sub + prove intro at allude — the employer is never recited.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_g02_direct_corporate_ip_allude"
+    },
+    {
+      "id": "WF-DESIGN-G03",
+      "title": "GauntletAI · search · organic Google, intent-neutral — hero headline (text)",
+      "tenant": "gauntlet",
+      "matrix": {
+        "channel": "search",
+        "element": "hero headline (text)",
+        "mode": "det",
+        "workflow": "realtime",
+        "latency": "0 ms",
+        "strategy": "authority",
+        "guardrail": "no comparative vs a CS degree"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "organic search arrival (ref/referer)",
+          "proc": "classify_entry + resolve signals — organic Google, intent-neutral",
+          "out": "entry ctx: channel=search, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): hero headline (text) (mode=det, workflow=realtime)",
+          "proc": "strategy=authority; the Gate bounds the candidate set — no comparative vs a CS degree",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "deterministic slot-fill at request time (0 ms, $0)",
+          "out": "personalized hero headline (text) shipped (0 ms)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "Organic search gets an evidence-led headline with no comparative against a CS degree."
+        }
+      ],
+      "golden": "Organic search gets an evidence-led headline with no comparative against a CS degree.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_g03_search_organic_authority_headline"
+    },
+    {
+      "id": "WF-DESIGN-G04",
+      "title": "GauntletAI · ads-x · v09 keyword 'AI hiring' — hero headline + hero image",
+      "tenant": "gauntlet",
+      "matrix": {
+        "channel": "ads-x",
+        "element": "hero headline + hero image",
+        "mode": "det-text/gen-image",
+        "workflow": "image-prebuilt",
+        "latency": "0 ms",
+        "strategy": "message-match",
+        "guardrail": "image must_avoid real logos"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "X ad click (utm_source=x, utm_medium=paid)",
+          "proc": "classify_entry + resolve signals — v09 keyword 'AI hiring'",
+          "out": "entry ctx: channel=ads-x, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): hero headline + hero image (mode=det-text/gen-image, workflow=image-prebuilt)",
+          "proc": "strategy=message-match; the Gate bounds the candidate set — image must_avoid real logos",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "instant paint from the prebuilt image cache via warm_hero_cache (0 ms, $0/visit)",
+          "out": "personalized hero headline + hero image shipped (0 ms)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "v09 arrival message-matches the headline and paints the prebuilt hero image in 0 ms; real logos excluded by must_avoid."
+        }
+      ],
+      "golden": "v09 arrival message-matches the headline and paints the prebuilt hero image in 0 ms; real logos excluded by must_avoid.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_g04_ads_x_v09_prebuilt_hero_image"
+    },
+    {
+      "id": "WF-DESIGN-G05",
+      "title": "GauntletAI · ads-google · search-ad 'switch into AI' — hero sub (text)",
+      "tenant": "gauntlet",
+      "matrix": {
+        "channel": "ads-google",
+        "element": "hero sub (text)",
+        "mode": "gen",
+        "workflow": "text-prebuilt",
+        "latency": "0 ms",
+        "strategy": "loss-aversion-honest",
+        "guardrail": "candidate pool Gate-cleared; no superlative"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "Google search-ad click (utm_medium=cpc)",
+          "proc": "classify_entry + resolve signals — search-ad 'switch into AI'",
+          "out": "entry ctx: channel=ads-google, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): hero sub (text) (mode=gen, workflow=text-prebuilt)",
+          "proc": "strategy=loss-aversion-honest; the Gate bounds the candidate set — candidate pool Gate-cleared; no superlative",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "serve from the warm_copy_cache prebuilt Gate-cleared pool (0 ms, $0/visit)",
+          "out": "personalized hero sub (text) shipped (0 ms)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "The hero sub serves only from a Gate-cleared prebuilt generative pool — a superlative candidate is 0-servable."
+        }
+      ],
+      "golden": "The hero sub serves only from a Gate-cleared prebuilt generative pool — a superlative candidate is 0-servable.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_g05_ads_google_gen_prebuilt_hero_sub"
+    },
+    {
+      "id": "WF-DESIGN-G06",
+      "title": "GauntletAI · ads-meta · broad-audience awareness — section backdrop image",
+      "tenant": "gauntlet",
+      "matrix": {
+        "channel": "ads-meta",
+        "element": "section backdrop image",
+        "mode": "gen",
+        "workflow": "image-realtime",
+        "latency": "~2 s gradient→swap",
+        "strategy": "curiosity",
+        "guardrail": "tier-gated; gradient fallback offline"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "Meta awareness-ad click (utm_medium=paid)",
+          "proc": "classify_entry + resolve signals — broad-audience awareness",
+          "out": "entry ctx: channel=ads-meta, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): section backdrop image (mode=gen, workflow=image-realtime)",
+          "proc": "strategy=curiosity; the Gate bounds the candidate set — tier-gated; gradient fallback offline",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "async gradient→swap via Nano Banana (~2 s, cache by key, cost-logged; never blocks paint)",
+          "out": "personalized section backdrop image shipped (~2 s gradient→swap)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "Meta awareness arrival gets a realtime Nano Banana backdrop (~2 s gradient→swap); offline the deterministic gradient ships at $0."
+        }
+      ],
+      "golden": "Meta awareness arrival gets a realtime Nano Banana backdrop (~2 s gradient→swap); offline the deterministic gradient ships at $0.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_g06_ads_meta_realtime_backdrop"
+    },
+    {
+      "id": "WF-DESIGN-G07",
+      "title": "GauntletAI · email · HubSpot cohort — Liam (magic token) — hero eyebrow 'Welcome back, Liam'",
+      "tenant": "gauntlet",
+      "matrix": {
+        "channel": "email",
+        "element": "hero eyebrow 'Welcome back, Liam'",
+        "mode": "det",
+        "workflow": "realtime",
+        "latency": "0 ms",
+        "strategy": "commitment-open-loop",
+        "guardrail": "say-level name (token); abandoned-app fact = hold"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "email click (utm_medium=email, token/login identity)",
+          "proc": "classify_entry + resolve signals — HubSpot cohort — Liam (magic token)",
+          "out": "entry ctx: channel=email, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): hero eyebrow 'Welcome back, Liam' (mode=det, workflow=realtime)",
+          "proc": "strategy=commitment-open-loop; the Gate bounds the candidate set — say-level name (token); abandoned-app fact = hold",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "deterministic slot-fill at request time (0 ms, $0)",
+          "out": "personalized hero eyebrow 'Welcome back, Liam' shipped (0 ms)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "Liam's magic token says his name at say level; the abandoned-application fact stays hold and never ships."
+        }
+      ],
+      "golden": "Liam's magic token says his name at say level; the abandoned-application fact stays hold and never ships.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_g07_email_liam_token_eyebrow"
+    },
+    {
+      "id": "WF-DESIGN-G08",
+      "title": "GauntletAI · email · known exec — Maya (logged in) — prove card (peer-logo, text+logo)",
+      "tenant": "gauntlet",
+      "matrix": {
+        "channel": "email",
+        "element": "prove card (peer-logo, text+logo)",
+        "mode": "det",
+        "workflow": "image-prebuilt",
+        "latency": "0 ms",
+        "strategy": "social-proof-peer-matched",
+        "guardrail": "all peer logos Gate-cleared"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "email click (utm_medium=email, token/login identity)",
+          "proc": "classify_entry + resolve signals — known exec — Maya (logged in)",
+          "out": "entry ctx: channel=email, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): prove card (peer-logo, text+logo) (mode=det, workflow=image-prebuilt)",
+          "proc": "strategy=social-proof-peer-matched; the Gate bounds the candidate set — all peer logos Gate-cleared",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "instant paint from the prebuilt image cache via warm_hero_cache (0 ms, $0/visit)",
+          "out": "personalized prove card (peer-logo, text+logo) shipped (0 ms)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "Maya's prove card shows only Gate-cleared peer logos from the prebuilt set."
+        }
+      ],
+      "golden": "Maya's prove card shows only Gate-cleared peer logos from the prebuilt set.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_g08_email_maya_peer_logos"
+    },
+    {
+      "id": "WF-DESIGN-G09",
+      "title": "GauntletAI · direct · returning known, high intent — cta (text)",
+      "tenant": "gauntlet",
+      "matrix": {
+        "channel": "direct",
+        "element": "cta (text)",
+        "mode": "gen",
+        "workflow": "realtime-by-key",
+        "latency": "<100 ms",
+        "strategy": "scarcity-honest",
+        "guardrail": "a scarcity claim must be a provable deadline or it's dropped"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "direct visit (no referrer/UTM)",
+          "proc": "classify_entry + resolve signals — returning known, high intent",
+          "out": "entry ctx: channel=direct, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): cta (text) (mode=gen, workflow=realtime-by-key)",
+          "proc": "strategy=scarcity-honest; the Gate bounds the candidate set — a scarcity claim must be a provable deadline or it's dropped",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "generate once, then serve from realtime cache-by-visit-key (<100 ms, replay identical)",
+          "out": "personalized cta (text) shipped (<100 ms)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "The generative CTA serves cache-by-key (<100 ms); a scarcity claim without a provable deadline is dropped from the pool."
+        }
+      ],
+      "golden": "The generative CTA serves cache-by-key (<100 ms); a scarcity claim without a provable deadline is dropped from the pool.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_g09_direct_known_gen_cta_by_key"
+    },
+    {
+      "id": "WF-DESIGN-G10",
+      "title": "GauntletAI · ads-x · v03 cost-objection creative — challenger body (text)",
+      "tenant": "gauntlet",
+      "matrix": {
+        "channel": "ads-x",
+        "element": "challenger body (text)",
+        "mode": "det",
+        "workflow": "realtime",
+        "latency": "0 ms",
+        "strategy": "objection-reframe",
+        "guardrail": "reframe at allude; blocked_say recite console-only"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "X ad click (utm_source=x, utm_medium=paid)",
+          "proc": "classify_entry + resolve signals — v03 cost-objection creative",
+          "out": "entry ctx: channel=ads-x, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): challenger body (text) (mode=det, workflow=realtime)",
+          "proc": "strategy=objection-reframe; the Gate bounds the candidate set — reframe at allude; blocked_say recite console-only",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "deterministic slot-fill at request time (0 ms, $0)",
+          "out": "personalized challenger body (text) shipped (0 ms)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "v03 cost-objection arrival gets the reframe at allude; the blocked_say recite exists only on the console."
+        }
+      ],
+      "golden": "v03 cost-objection arrival gets the reframe at allude; the blocked_say recite exists only on the console.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_g10_ads_x_v03_objection_reframe"
+    },
+    {
+      "id": "WF-DESIGN-P01",
+      "title": "Planet · direct · self-serve cold (tier 0) — hero (text)",
+      "tenant": "planet",
+      "matrix": {
+        "channel": "direct",
+        "element": "hero (text)",
+        "mode": "det",
+        "workflow": "realtime",
+        "latency": "0 ms",
+        "strategy": "neutral-baseline",
+        "guardrail": "no region line ships without confidence"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "direct visit (no referrer/UTM)",
+          "proc": "classify_entry + resolve signals — self-serve cold (tier 0)",
+          "out": "entry ctx: channel=direct, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): hero (text) (mode=det, workflow=realtime)",
+          "proc": "strategy=neutral-baseline; the Gate bounds the candidate set — no region line ships without confidence",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "deterministic slot-fill at request time (0 ms, $0)",
+          "out": "personalized hero (text) shipped (0 ms)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "Cold self-serve visit ships the neutral hero — no region line without confidence."
+        }
+      ],
+      "golden": "Cold self-serve visit ships the neutral hero — no region line without confidence.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_p01_direct_cold_neutral_hero"
+    },
+    {
+      "id": "WF-DESIGN-P02",
+      "title": "Planet · direct · ag enterprise, Midwest IP — location line + region backdrop",
+      "tenant": "planet",
+      "matrix": {
+        "channel": "direct",
+        "element": "location line + region backdrop",
+        "mode": "det-text/gen-image",
+        "workflow": "image-prebuilt",
+        "latency": "0 ms",
+        "strategy": "location-relevance",
+        "guardrail": "region scale only; city/field = hold"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "direct visit (no referrer/UTM)",
+          "proc": "classify_entry + resolve signals — ag enterprise, Midwest IP",
+          "out": "entry ctx: channel=direct, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): location line + region backdrop (mode=det-text/gen-image, workflow=image-prebuilt)",
+          "proc": "strategy=location-relevance; the Gate bounds the candidate set — region scale only; city/field = hold",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "instant paint from the prebuilt image cache via warm_hero_cache (0 ms, $0/visit)",
+          "out": "personalized location line + region backdrop shipped (0 ms)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "Midwest ag arrival gets the location line + prebuilt top-crop-belt backdrop in 0 ms; region scale only, city/field held."
+        }
+      ],
+      "golden": "Midwest ag arrival gets the location line + prebuilt top-crop-belt backdrop in 0 ms; region scale only, city/field held.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_p02_direct_ag_midwest_prebuilt_region_backdrop"
+    },
+    {
+      "id": "WF-DESIGN-P03",
+      "title": "Planet · ads-x · v01 crop-belts creative — hero headline + location line",
+      "tenant": "planet",
+      "matrix": {
+        "channel": "ads-x",
+        "element": "hero headline + location line",
+        "mode": "det",
+        "workflow": "realtime",
+        "latency": "0 ms",
+        "strategy": "message-match",
+        "guardrail": "theater-line for defense, never visitor loc"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "X ad click (utm_source=x, utm_medium=paid)",
+          "proc": "classify_entry + resolve signals — v01 crop-belts creative",
+          "out": "entry ctx: channel=ads-x, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): hero headline + location line (mode=det, workflow=realtime)",
+          "proc": "strategy=message-match; the Gate bounds the candidate set — theater-line for defense, never visitor loc",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "deterministic slot-fill at request time (0 ms, $0)",
+          "out": "personalized hero headline + location line shipped (0 ms)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "v01 crop-belts ad message-matches headline + location line; defense theater copy never uses visitor location."
+        }
+      ],
+      "golden": "v01 crop-belts ad message-matches headline + location line; defense theater copy never uses visitor location.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_p03_ads_x_v01_crop_belts_match"
+    },
+    {
+      "id": "WF-DESIGN-P04",
+      "title": "Planet · ads-x · v02 defense/sovereign — hero image (theater, not visitor region)",
+      "tenant": "planet",
+      "matrix": {
+        "channel": "ads-x",
+        "element": "hero image (theater, not visitor region)",
+        "mode": "gen",
+        "workflow": "image-realtime",
+        "latency": "~2 s",
+        "strategy": "authority",
+        "guardrail": "uses AOR/theater, never the visitor's location"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "X ad click (utm_source=x, utm_medium=paid)",
+          "proc": "classify_entry + resolve signals — v02 defense/sovereign",
+          "out": "entry ctx: channel=ads-x, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): hero image (theater, not visitor region) (mode=gen, workflow=image-realtime)",
+          "proc": "strategy=authority; the Gate bounds the candidate set — uses AOR/theater, never the visitor's location",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "async gradient→swap via Nano Banana (~2 s, cache by key, cost-logged; never blocks paint)",
+          "out": "personalized hero image (theater, not visitor region) shipped (~2 s)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "The defense hero image is generated for the AOR/theater in realtime — never the visitor's region."
+        }
+      ],
+      "golden": "The defense hero image is generated for the AOR/theater in realtime — never the visitor's region.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_p04_ads_x_v02_defense_theater_image"
+    },
+    {
+      "id": "WF-DESIGN-P05",
+      "title": "Planet · search · organic, region resolves — location line",
+      "tenant": "planet",
+      "matrix": {
+        "channel": "search",
+        "element": "location line",
+        "mode": "det",
+        "workflow": "realtime",
+        "latency": "0 ms",
+        "strategy": "location-relevance",
+        "guardrail": "default daily-coverage line at region scale"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "organic search arrival (ref/referer)",
+          "proc": "classify_entry + resolve signals — organic, region resolves",
+          "out": "entry ctx: channel=search, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): location line (mode=det, workflow=realtime)",
+          "proc": "strategy=location-relevance; the Gate bounds the candidate set — default daily-coverage line at region scale",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "deterministic slot-fill at request time (0 ms, $0)",
+          "out": "personalized location line shipped (0 ms)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "Organic search with region resolve ships the daily-coverage location line at region scale."
+        }
+      ],
+      "golden": "Organic search with region resolve ships the daily-coverage location line at region scale.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_p05_search_region_location_line"
+    },
+    {
+      "id": "WF-DESIGN-P06",
+      "title": "Planet · email · crisis-responders — Kofi (token) — hero eyebrow + cta",
+      "tenant": "planet",
+      "matrix": {
+        "channel": "email",
+        "element": "hero eyebrow + cta",
+        "mode": "det",
+        "workflow": "realtime",
+        "latency": "0 ms",
+        "strategy": "reciprocity-relief-context",
+        "guardrail": "relief-org context; income/PII = hold"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "email click (utm_medium=email, token/login identity)",
+          "proc": "classify_entry + resolve signals — crisis-responders — Kofi (token)",
+          "out": "entry ctx: channel=email, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): hero eyebrow + cta (mode=det, workflow=realtime)",
+          "proc": "strategy=reciprocity-relief-context; the Gate bounds the candidate set — relief-org context; income/PII = hold",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "deterministic slot-fill at request time (0 ms, $0)",
+          "out": "personalized hero eyebrow + cta shipped (0 ms)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "Kofi's crisis-responder email personalizes eyebrow + CTA in relief context; income/PII stays hold."
+        }
+      ],
+      "golden": "Kofi's crisis-responder email personalizes eyebrow + CTA in relief context; income/PII stays hold.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_p06_email_kofi_crisis_relief"
+    },
+    {
+      "id": "WF-DESIGN-P07",
+      "title": "Planet · email · enterprise agronomy — Amara (login) — prove intro (text)",
+      "tenant": "planet",
+      "matrix": {
+        "channel": "email",
+        "element": "prove intro (text)",
+        "mode": "gen",
+        "workflow": "text-prebuilt",
+        "latency": "0 ms",
+        "strategy": "authority",
+        "guardrail": "Gate-bounded; declared goals say-level"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "email click (utm_medium=email, token/login identity)",
+          "proc": "classify_entry + resolve signals — enterprise agronomy — Amara (login)",
+          "out": "entry ctx: channel=email, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): prove intro (text) (mode=gen, workflow=text-prebuilt)",
+          "proc": "strategy=authority; the Gate bounds the candidate set — Gate-bounded; declared goals say-level",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "serve from the warm_copy_cache prebuilt Gate-cleared pool (0 ms, $0/visit)",
+          "out": "personalized prove intro (text) shipped (0 ms)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "Amara's prove intro serves from a Gate-cleared prebuilt generative pool; declared goals ride at say level."
+        }
+      ],
+      "golden": "Amara's prove intro serves from a Gate-cleared prebuilt generative pool; declared goals ride at say level.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_p07_email_amara_gen_prebuilt_prove_intro"
+    },
+    {
+      "id": "WF-DESIGN-P08",
+      "title": "Planet · ads-meta · awareness, long-tail region — section backdrop image",
+      "tenant": "planet",
+      "matrix": {
+        "channel": "ads-meta",
+        "element": "section backdrop image",
+        "mode": "gen",
+        "workflow": "image-realtime",
+        "latency": "~2–3 s swap",
+        "strategy": "curiosity",
+        "guardrail": "long-tail region → realtime; common → prebuilt"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "Meta awareness-ad click (utm_medium=paid)",
+          "proc": "classify_entry + resolve signals — awareness, long-tail region",
+          "out": "entry ctx: channel=ads-meta, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): section backdrop image (mode=gen, workflow=image-realtime)",
+          "proc": "strategy=curiosity; the Gate bounds the candidate set — long-tail region → realtime; common → prebuilt",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "async gradient→swap via Nano Banana (~2 s, cache by key, cost-logged; never blocks paint)",
+          "out": "personalized section backdrop image shipped (~2–3 s swap)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "Long-tail region backdrop generates realtime (~2–3 s swap); common regions stay prebuilt at 0 ms."
+        }
+      ],
+      "golden": "Long-tail region backdrop generates realtime (~2–3 s swap); common regions stay prebuilt at 0 ms.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_p08_ads_meta_longtail_realtime_backdrop"
+    },
+    {
+      "id": "WF-DESIGN-P09",
+      "title": "Planet · direct · corporate IP, insurance cat-risk — compare emphasis (text)",
+      "tenant": "planet",
+      "matrix": {
+        "channel": "direct",
+        "element": "compare emphasis (text)",
+        "mode": "det",
+        "workflow": "realtime",
+        "latency": "0 ms",
+        "strategy": "loss-aversion",
+        "guardrail": "no competitor named; comparatives blocked"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "direct visit (no referrer/UTM)",
+          "proc": "classify_entry + resolve signals — corporate IP, insurance cat-risk",
+          "out": "entry ctx: channel=direct, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): compare emphasis (text) (mode=det, workflow=realtime)",
+          "proc": "strategy=loss-aversion; the Gate bounds the candidate set — no competitor named; comparatives blocked",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "deterministic slot-fill at request time (0 ms, $0)",
+          "out": "personalized compare emphasis (text) shipped (0 ms)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "Insurance cat-risk emphasis shifts the compare section with no competitor named — comparatives are structurally blocked."
+        }
+      ],
+      "golden": "Insurance cat-risk emphasis shifts the compare section with no competitor named — comparatives are structurally blocked.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_p09_direct_insurance_no_competitor"
+    },
+    {
+      "id": "WF-DESIGN-P10",
+      "title": "Planet · direct · returning known — cta (text)",
+      "tenant": "planet",
+      "matrix": {
+        "channel": "direct",
+        "element": "cta (text)",
+        "mode": "gen",
+        "workflow": "realtime-by-key",
+        "latency": "<100 ms",
+        "strategy": "scarcity-honest",
+        "guardrail": "provable deadline only"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "direct visit (no referrer/UTM)",
+          "proc": "classify_entry + resolve signals — returning known",
+          "out": "entry ctx: channel=direct, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): cta (text) (mode=gen, workflow=realtime-by-key)",
+          "proc": "strategy=scarcity-honest; the Gate bounds the candidate set — provable deadline only",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "generate once, then serve from realtime cache-by-visit-key (<100 ms, replay identical)",
+          "out": "personalized cta (text) shipped (<100 ms)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "The generative CTA serves cache-by-key; only a provable deadline may carry scarcity."
+        }
+      ],
+      "golden": "The generative CTA serves cache-by-key; only a provable deadline may carry scarcity.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_p10_direct_known_gen_cta_by_key"
+    },
+    {
+      "id": "WF-DESIGN-S01",
+      "title": "SkyFi · direct · cold anon (tier 0) — hero (text)",
+      "tenant": "skyfi",
+      "matrix": {
+        "channel": "direct",
+        "element": "hero (text)",
+        "mode": "det",
+        "workflow": "realtime",
+        "latency": "0 ms",
+        "strategy": "neutral-baseline",
+        "guardrail": "no location/sector claim without confidence"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "direct visit (no referrer/UTM)",
+          "proc": "classify_entry + resolve signals — cold anon (tier 0)",
+          "out": "entry ctx: channel=direct, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): hero (text) (mode=det, workflow=realtime)",
+          "proc": "strategy=neutral-baseline; the Gate bounds the candidate set — no location/sector claim without confidence",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "deterministic slot-fill at request time (0 ms, $0)",
+          "out": "personalized hero (text) shipped (0 ms)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "Cold visit ships the neutral hero — no location or sector claim without confidence."
+        }
+      ],
+      "golden": "Cold visit ships the neutral hero — no location or sector claim without confidence.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_s01_direct_cold_neutral_hero"
+    },
+    {
+      "id": "WF-DESIGN-S02",
+      "title": "SkyFi · direct · mining operator, AZ IP + PDL sector — hero sub + region×sector backdrop",
+      "tenant": "skyfi",
+      "matrix": {
+        "channel": "direct",
+        "element": "hero sub + region×sector backdrop",
+        "mode": "det-text/gen-image",
+        "workflow": "image-realtime",
+        "latency": "~2 s gradient→swap, cached by key",
+        "strategy": "location-relevance",
+        "guardrail": "basin/region scale; exact mine = hold (arm Ex)"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "direct visit (no referrer/UTM)",
+          "proc": "classify_entry + resolve signals — mining operator, AZ IP + PDL sector",
+          "out": "entry ctx: channel=direct, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): hero sub + region×sector backdrop (mode=det-text/gen-image, workflow=image-realtime)",
+          "proc": "strategy=location-relevance; the Gate bounds the candidate set — basin/region scale; exact mine = hold (arm Ex)",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "async gradient→swap via Nano Banana (~2 s, cache by key, cost-logged; never blocks paint)",
+          "out": "personalized hero sub + region×sector backdrop shipped (~2 s gradient→swap, cached by key)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "AZ mining operator watches the region×sector backdrop generate live (~2 s gradient→swap, cached by key); basin scale only — the exact mine is hold (arm Ex)."
+        }
+      ],
+      "golden": "AZ mining operator watches the region×sector backdrop generate live (~2 s gradient→swap, cached by key); basin scale only — the exact mine is hold (arm Ex).",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_s02_direct_mining_realtime_region_sector_backdrop"
+    },
+    {
+      "id": "WF-DESIGN-S03",
+      "title": "SkyFi · ads-x · paid 'monitor your site' — hero headline + hero image",
+      "tenant": "skyfi",
+      "matrix": {
+        "channel": "ads-x",
+        "element": "hero headline + hero image",
+        "mode": "det-text/gen-image",
+        "workflow": "image-realtime",
+        "latency": "~2 s",
+        "strategy": "message-match",
+        "guardrail": "generated backdrop is region-generic, license-safe"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "X ad click (utm_source=x, utm_medium=paid)",
+          "proc": "classify_entry + resolve signals — paid 'monitor your site'",
+          "out": "entry ctx: channel=ads-x, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): hero headline + hero image (mode=det-text/gen-image, workflow=image-realtime)",
+          "proc": "strategy=message-match; the Gate bounds the candidate set — generated backdrop is region-generic, license-safe",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "async gradient→swap via Nano Banana (~2 s, cache by key, cost-logged; never blocks paint)",
+          "out": "personalized hero headline + hero image shipped (~2 s)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "Paid 'monitor your site' arrival gets a message-matched headline + realtime region-generic, license-safe backdrop."
+        }
+      ],
+      "golden": "Paid 'monitor your site' arrival gets a message-matched headline + realtime region-generic, license-safe backdrop.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_s03_ads_x_monitor_site_realtime_hero"
+    },
+    {
+      "id": "WF-DESIGN-S04",
+      "title": "SkyFi · ads-google · 'satellite imagery on demand' — hero sub (text)",
+      "tenant": "skyfi",
+      "matrix": {
+        "channel": "ads-google",
+        "element": "hero sub (text)",
+        "mode": "gen",
+        "workflow": "text-prebuilt",
+        "latency": "0 ms",
+        "strategy": "authority",
+        "guardrail": "Gate-bounded; no 'clearest/best' superlative"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "Google search-ad click (utm_medium=cpc)",
+          "proc": "classify_entry + resolve signals — 'satellite imagery on demand'",
+          "out": "entry ctx: channel=ads-google, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): hero sub (text) (mode=gen, workflow=text-prebuilt)",
+          "proc": "strategy=authority; the Gate bounds the candidate set — Gate-bounded; no 'clearest/best' superlative",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "serve from the warm_copy_cache prebuilt Gate-cleared pool (0 ms, $0/visit)",
+          "out": "personalized hero sub (text) shipped (0 ms)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "The hero sub serves only from a Gate-cleared prebuilt generative pool — no 'clearest/best' superlative can ship."
+        }
+      ],
+      "golden": "The hero sub serves only from a Gate-cleared prebuilt generative pool — no 'clearest/best' superlative can ship.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_s04_ads_google_gen_prebuilt_hero_sub"
+    },
+    {
+      "id": "WF-DESIGN-S05",
+      "title": "SkyFi · search · organic, region resolves — location line (text)",
+      "tenant": "skyfi",
+      "matrix": {
+        "channel": "search",
+        "element": "location line (text)",
+        "mode": "det",
+        "workflow": "realtime",
+        "latency": "0 ms",
+        "strategy": "location-relevance",
+        "guardrail": "region scale; declared-AOI = say, else hold"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "organic search arrival (ref/referer)",
+          "proc": "classify_entry + resolve signals — organic, region resolves",
+          "out": "entry ctx: channel=search, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): location line (text) (mode=det, workflow=realtime)",
+          "proc": "strategy=location-relevance; the Gate bounds the candidate set — region scale; declared-AOI = say, else hold",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "deterministic slot-fill at request time (0 ms, $0)",
+          "out": "personalized location line (text) shipped (0 ms)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "Organic search ships the region-scale location line; a declared AOI is say, everything else holds."
+        }
+      ],
+      "golden": "Organic search ships the region-scale location line; a declared AOI is say, everything else holds.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_s05_search_region_location_line"
+    },
+    {
+      "id": "WF-DESIGN-S06",
+      "title": "SkyFi · email · construction/EPC — known account — prove card (project-region, text)",
+      "tenant": "skyfi",
+      "matrix": {
+        "channel": "email",
+        "element": "prove card (project-region, text)",
+        "mode": "det",
+        "workflow": "realtime",
+        "latency": "0 ms",
+        "strategy": "social-proof-sector-peer",
+        "guardrail": "peer refs Gate-cleared"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "email click (utm_medium=email, token/login identity)",
+          "proc": "classify_entry + resolve signals — construction/EPC — known account",
+          "out": "entry ctx: channel=email, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): prove card (project-region, text) (mode=det, workflow=realtime)",
+          "proc": "strategy=social-proof-sector-peer; the Gate bounds the candidate set — peer refs Gate-cleared",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "deterministic slot-fill at request time (0 ms, $0)",
+          "out": "personalized prove card (project-region, text) shipped (0 ms)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "The construction/EPC prove card shows Gate-cleared sector-peer references only."
+        }
+      ],
+      "golden": "The construction/EPC prove card shows Gate-cleared sector-peer references only.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_s06_email_construction_peer_card"
+    },
+    {
+      "id": "WF-DESIGN-S07",
+      "title": "SkyFi · email · defense/gov — cleared contact — hero eyebrow + cta",
+      "tenant": "skyfi",
+      "matrix": {
+        "channel": "email",
+        "element": "hero eyebrow + cta",
+        "mode": "det",
+        "workflow": "realtime",
+        "latency": "0 ms",
+        "strategy": "authority",
+        "guardrail": "strict hold: AOR framing, never a specific asset"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "email click (utm_medium=email, token/login identity)",
+          "proc": "classify_entry + resolve signals — defense/gov — cleared contact",
+          "out": "entry ctx: channel=email, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): hero eyebrow + cta (mode=det, workflow=realtime)",
+          "proc": "strategy=authority; the Gate bounds the candidate set — strict hold: AOR framing, never a specific asset",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "deterministic slot-fill at request time (0 ms, $0)",
+          "out": "personalized hero eyebrow + cta shipped (0 ms)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "Defense/gov contact gets AOR-framed eyebrow + CTA under strict hold — never a specific asset."
+        }
+      ],
+      "golden": "Defense/gov contact gets AOR-framed eyebrow + CTA under strict hold — never a specific asset.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_s07_email_defense_strict_hold"
+    },
+    {
+      "id": "WF-DESIGN-S08",
+      "title": "SkyFi · ads-meta · awareness, rare sector×region — section backdrop image",
+      "tenant": "skyfi",
+      "matrix": {
+        "channel": "ads-meta",
+        "element": "section backdrop image",
+        "mode": "gen",
+        "workflow": "image-realtime",
+        "latency": "~2–3 s swap",
+        "strategy": "curiosity",
+        "guardrail": "long-tail → realtime; anti-surveillance mood rules"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "Meta awareness-ad click (utm_medium=paid)",
+          "proc": "classify_entry + resolve signals — awareness, rare sector×region",
+          "out": "entry ctx: channel=ads-meta, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): section backdrop image (mode=gen, workflow=image-realtime)",
+          "proc": "strategy=curiosity; the Gate bounds the candidate set — long-tail → realtime; anti-surveillance mood rules",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "async gradient→swap via Nano Banana (~2 s, cache by key, cost-logged; never blocks paint)",
+          "out": "personalized section backdrop image shipped (~2–3 s swap)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "Rare sector×region backdrop generates realtime under anti-surveillance mood rules; long-tail never blocks paint."
+        }
+      ],
+      "golden": "Rare sector×region backdrop generates realtime under anti-surveillance mood rules; long-tail never blocks paint.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_s08_ads_meta_rare_sector_realtime_backdrop"
+    },
+    {
+      "id": "WF-DESIGN-S09",
+      "title": "SkyFi · direct · declared first-party AOI (their own asset) — hero image (their basin)",
+      "tenant": "skyfi",
+      "matrix": {
+        "channel": "direct",
+        "element": "hero image (their basin)",
+        "mode": "gen",
+        "workflow": "image-realtime",
+        "latency": "~2 s",
+        "strategy": "location-relevance",
+        "guardrail": "exact-AOI allowed because declared; receipt says 'you told us'"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "direct visit (no referrer/UTM)",
+          "proc": "classify_entry + resolve signals — declared first-party AOI (their own asset)",
+          "out": "entry ctx: channel=direct, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): hero image (their basin) (mode=gen, workflow=image-realtime)",
+          "proc": "strategy=location-relevance; the Gate bounds the candidate set — exact-AOI allowed because declared; receipt says 'you told us'",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "async gradient→swap via Nano Banana (~2 s, cache by key, cost-logged; never blocks paint)",
+          "out": "personalized hero image (their basin) shipped (~2 s)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "The declared first-party AOI renders exact — allowed because they told us; the receipt says so."
+        }
+      ],
+      "golden": "The declared first-party AOI renders exact — allowed because they told us; the receipt says so.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_s09_direct_declared_aoi_exact_allowed"
+    },
+    {
+      "id": "WF-DESIGN-S10",
+      "title": "SkyFi · direct · returning known, insurance cat-risk — compare emphasis (text)",
+      "tenant": "skyfi",
+      "matrix": {
+        "channel": "direct",
+        "element": "compare emphasis (text)",
+        "mode": "gen",
+        "workflow": "realtime-by-key",
+        "latency": "<100 ms",
+        "strategy": "loss-aversion",
+        "guardrail": "no competitor; comparatives blocked"
+      },
+      "nodes": [
+        {
+          "node": "arrive",
+          "in": "direct visit (no referrer/UTM)",
+          "proc": "classify_entry + resolve signals — returning known, insurance cat-risk",
+          "out": "entry ctx: channel=direct, audience route"
+        },
+        {
+          "node": "decide",
+          "in": "registry target(s): compare emphasis (text) (mode=gen, workflow=realtime-by-key)",
+          "proc": "strategy=loss-aversion; the Gate bounds the candidate set — no competitor; comparatives blocked",
+          "out": "cleared decision (blocked candidates structurally absent)"
+        },
+        {
+          "node": "serve",
+          "in": "cleared decision + cache",
+          "proc": "generate once, then serve from realtime cache-by-visit-key (<100 ms, replay identical)",
+          "out": "personalized compare emphasis (text) shipped (<100 ms)"
+        },
+        {
+          "node": "prove",
+          "in": "shipped element",
+          "proc": "receipt {source, policy, gate_verdict, cache_key, mode, workflow} + cost row when generated",
+          "out": "The insurance CTA serves generative cache-by-key with competitors and comparatives structurally blocked."
+        }
+      ],
+      "golden": "The insurance CTA serves generative cache-by-key with competitors and comparatives structurally blocked.",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_s10_direct_known_insurance_gen_cta"
     }
   ]
 }
