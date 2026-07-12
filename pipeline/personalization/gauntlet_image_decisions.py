@@ -481,15 +481,22 @@ WARM_KNOWN_EMAIL = "maya.chen@gauntletai.com"
 
 
 def demo_cache_states() -> list[tuple[str, dict, str | None] | tuple[str, dict, str | None, str]]:
-    """The demo states the warm script pre-generates — single source of truth
-    is the version-controlled manifest rules/gauntlet_prebuild.yaml.
+    """Every catalogued demo state × surface — single source of truth is the
+    version-controlled manifest rules/gauntlet_prebuild.yaml.
 
     scripts/warm_hero_cache.py and the /dev/business console read the same
     manifest, so the guide, the console, and the warmer can never drift apart.
-    Default content: all 12 catalogued X ad variants plus direct/search/email
-    entries, each as anonymous and as the known cohort login, per surface."""
+    Under S3.3 [PANEL] only the `prebuild: true` short lists are baked by the
+    warm script (PB.prebuild_states, K=8/target); the guide's inventory shows
+    ALL catalogued states — unflagged ones generate realtime on first visit,
+    governed by the daily spend ceiling."""
     from pipeline.personalization import prebuild as PB
-    return PB.prebuild_states()
+    out: list[tuple[str, dict, str | None, str]] = []
+    for r in PB.manifest_all_states():
+        sid = r["surface_id"]
+        label = r["label"] if sid == IG.DEFAULT_SURFACE_ID else f"{r['label']} · {sid}"
+        out.append((label, r["params"], r["email"], sid))
+    return out
 
 
 def cache_inventory() -> dict:

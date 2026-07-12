@@ -35,6 +35,7 @@ from pipeline.personalization import planet_site as PS
 # version-controlled manifest rules/gauntlet_prebuild.yaml (per-surface prebuild
 # flag), shared with the /dev/image-decisions guide and the /dev/business
 # console so they can't drift.
+from pipeline.personalization import prebuild as PB
 from pipeline.personalization.planet_image_decisions import demo_cache_states as _planet_states
 from pipeline.personalization.prebuild import prebuild_states as _gauntlet_states
 
@@ -55,6 +56,30 @@ class _Req:
         self.cookies = {}
 
 
+def check_caps() -> int:
+    """S3.3 deploy-gate check: FAIL (exit 1) when any prebuild manifest exceeds
+    K=8 flagged states/target, 24 baked images/tenant, or 80 global. No API calls."""
+    paths = PB.manifest_paths()
+    total = 0
+    for p in paths:
+        tenant, counts = PB._flagged_counts(p)
+        tenant_total = sum(counts.values())
+        total += tenant_total
+        per_surface = ", ".join(f"{sid}={n}" for sid, n in sorted(counts.items()))
+        print(f"[{tenant}] {p.name}: {tenant_total} flagged ({per_surface}) "
+              f"— caps {PB.CAP_STATES_PER_TARGET}/target, {PB.CAP_IMAGES_PER_TENANT}/tenant")
+    print(f"global flagged: {total} (cap {PB.CAP_IMAGES_GLOBAL})")
+    violations = PB.check_prebuild_caps(paths)
+    for v in violations:
+        print(f"CAP VIOLATION: {v}", file=sys.stderr)
+    if violations:
+        print("prebuild cap check FAILED — trim prebuild flags in rules/*_prebuild.yaml "
+              "(S3.3: demo_scenarios states fill the K slots first).", file=sys.stderr)
+        return 1
+    print("prebuild cap check OK")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Warm image cache for all demo states and surfaces")
     parser.add_argument("--dry-run", action="store_true", help="List states without API calls")
@@ -64,7 +89,13 @@ def main(argv: list[str] | None = None) -> int:
                         help="Which demo to warm (default: gauntlet)")
     parser.add_argument("--motion", action="store_true",
                         help="Also warm hero motion loops (Planet only; no-op if motion disabled)")
+    parser.add_argument("--check", action="store_true",
+                        help="Validate rules/*_prebuild.yaml against the S3.3 caps "
+                             "(K=8/target, 24/tenant, 80 global) — no API calls; exit 1 on violation")
     args = parser.parse_args(argv)
+
+    if args.check:
+        return check_caps()
 
     states_fn, build_page, tenant = _TENANTS[args.tenant]
     states = states_fn()
@@ -102,8 +133,11 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  MISS   {label} ({resolved['tier']}) surface={surface_id} disk={key[:12]}…"
                   + ("  [dup key]" if dup else ""))
             continue
+        # workflow="prebuilt": deploy-time bake — exempt from the S3.3 realtime
+        # daily ceiling (the warm run is the budgeted prebuild spend).
         img = IG.resolve_surface_image(page, surface_id=surface_id,
-                                       generate=True, tenant=tenant)
+                                       generate=True, tenant=tenant,
+                                       workflow="prebuilt")
         src = (img.get("receipt") or {}).get("source")
         if src == "generated":
             print(f"  OK     {label} ({resolved['tier']}) surface={surface_id} → {img.get('url')}")

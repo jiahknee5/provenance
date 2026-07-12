@@ -13,6 +13,9 @@ PYTHONPATH=. uv run pytest tests/test_api_costs.py tests/test_brain_simulator.py
   tests/test_planet_site.py tests/test_planet_hero_image.py tests/test_planet_motion.py \
   tests/test_demo_nav.py tests/test_design_prompts.py tests/test_apt_dev_hub.py -q
 
+echo "Checking prebuild manifest caps (S3.3: K=8/target, 24/tenant, 80 global)…"
+PYTHONPATH=. uv run python -m scripts.warm_hero_cache --check
+
 echo "Deploying to Railway…"
 railway up --detach
 
