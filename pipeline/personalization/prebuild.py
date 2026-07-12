@@ -23,7 +23,14 @@ import yaml
 from pipeline.personalization import cohort as CO
 from pipeline.personalization import gauntlet_site as GS
 
-MANIFEST_PATH = Path(__file__).resolve().parents[2] / "rules" / "gauntlet_prebuild.yaml"
+RULES_DIR = Path(__file__).resolve().parents[2] / "rules"
+MANIFEST_PATH = RULES_DIR / "gauntlet_prebuild.yaml"
+
+# S3.3 [PANEL — locked] hard prebuild caps: prebuilt = explicitly flagged states
+# only. scripts/warm_hero_cache.py --check FAILS the deploy gate on violation.
+CAP_STATES_PER_TARGET = 8    # K states per image target
+CAP_IMAGES_PER_TENANT = 24   # baked images per tenant
+CAP_IMAGES_GLOBAL = 80       # baked images across all tenants
 
 _cache: dict[str, dict] = {}
 
@@ -105,6 +112,71 @@ def manifest_all_states(manifest: dict | None = None) -> list[dict]:
     for sid in manifest_surface_ids(m):
         out.extend(manifest_states(m, surface_id=sid))
     return out
+
+
+def manifest_paths(rules_dir: Path | None = None) -> list[Path]:
+    """Every version-controlled prebuild manifest (rules/*_prebuild.yaml)."""
+    return sorted((rules_dir or RULES_DIR).glob("*_prebuild.yaml"))
+
+
+def _flagged_counts(path: Path) -> tuple[str, dict[str, int]]:
+    """(tenant, {surface_id: prebuild-flagged count}) from raw YAML — no catalog
+    resolution, so the cap check never depends on ad/cohort lookups."""
+    data = yaml.safe_load(path.read_text()) or {}
+    tenant = data.get("tenant") or path.stem.replace("_prebuild", "")
+    if data.get("surfaces"):
+        lists = {sid: list(states or []) for sid, states in data["surfaces"].items()}
+    else:
+        lists = {"hero": list(data.get("states") or [])}
+    counts = {
+        sid: sum(1 for s in states if s.get("prebuild", True))
+        for sid, states in lists.items()
+    }
+    return tenant, counts
+
+
+def _registry_target_cap(tenant: str, surface_id: str) -> int:
+    """Per-target cap: the S3.3 hard K, tightened by a registry prebuilt_states_cap."""
+    cap = CAP_STATES_PER_TARGET
+    try:
+        from pipeline.personalization import sections as SEC
+        for target in SEC.list_image_targets(tenant):
+            if target.get("surface_id") == surface_id and target.get("prebuilt_states_cap"):
+                cap = min(cap, int(target["prebuilt_states_cap"]))
+    except FileNotFoundError:
+        pass  # tenant without a section registry — hard cap only
+    return cap
+
+
+def check_prebuild_caps(paths: list[Path] | None = None) -> list[str]:
+    """Validate prebuild manifests against the S3.3 [PANEL — locked] hard caps.
+
+    Returns a list of violation strings — empty means every manifest is within
+    K=8 flagged states per image target, 24 baked images per tenant, and 80
+    baked images globally. scripts/warm_hero_cache.py --check exits 1 on any
+    violation (wired into deploy/railway.sh — fail-loud deploy gate).
+    """
+    violations: list[str] = []
+    global_total = 0
+    for p in (paths if paths is not None else manifest_paths()):
+        tenant, counts = _flagged_counts(p)
+        tenant_total = sum(counts.values())
+        global_total += tenant_total
+        for sid, n in counts.items():
+            cap = _registry_target_cap(tenant, sid)
+            if n > cap:
+                violations.append(
+                    f"{p.name}: surface {sid!r} flags {n} prebuild states — "
+                    f"cap {cap}/target (S3.3)")
+        if tenant_total > CAP_IMAGES_PER_TENANT:
+            violations.append(
+                f"{p.name}: tenant {tenant!r} flags {tenant_total} baked images — "
+                f"cap {CAP_IMAGES_PER_TENANT}/tenant (S3.3)")
+    if global_total > CAP_IMAGES_GLOBAL:
+        violations.append(
+            f"prebuild manifests flag {global_total} baked images across all tenants — "
+            f"cap {CAP_IMAGES_GLOBAL} global (S3.3)")
+    return violations
 
 
 def prebuild_states(manifest: dict | None = None,

@@ -27,6 +27,7 @@ from pipeline.observability import api_costs as AC
 from pipeline.personalization import gauntlet_site as GS
 from pipeline.personalization import image_intents as II
 from pipeline.personalization import scene as SC
+from pipeline.personalization import sections as SEC
 from pipeline.personalization.brain_simulator import (
     BrainSimulatorScorer,
     GeneratedCandidate,
@@ -64,6 +65,13 @@ _PII_WORDS = (
 DEFAULT_IMAGE_TENANT = "gauntlet"
 DEFAULT_SURFACE_ID = "hero"
 
+# S3.3 [PANEL — locked]: realtime generation is governed by a per-tenant daily
+# spend ceiling (default $5/day at ~$0.039/gen), env-overridable. Past the
+# ceiling a realtime target serves its neutral prebuilt/gradient fallback —
+# logged to the api_costs ledger, never silent.
+REALTIME_CEILING_ENV = "APT_REALTIME_CEILING_USD"
+DEFAULT_REALTIME_CEILING_USD = 5.0
+
 _SURFACE_DEFAULTS: dict[str, dict] = {
     "hero": {
         "label": "Hero background",
@@ -100,23 +108,64 @@ def _tenant_config(tenant: str | None = None) -> dict:
     return load_image_config(tenant or DEFAULT_IMAGE_TENANT)
 
 
+def _registry_image_targets(tenant: str | None = None) -> list[dict]:
+    """Registered image targets from rules/<tenant>_sections.yaml (S3/T-06).
+
+    The section registry is the data model both lanes read: any surface_id it
+    declares must resolve through this lane. Missing registry file → [] (a
+    tenant without a registry keeps the pre-registry hero/og behavior); an
+    INVALID registry raises — fail loud, never silently unpersonalized.
+    """
+    t = tenant or DEFAULT_IMAGE_TENANT
+    try:
+        return SEC.list_image_targets(t)
+    except FileNotFoundError:
+        return []
+
+
+def _registry_image_target(surface_id: str, tenant: str | None = None) -> dict | None:
+    for target in _registry_image_targets(tenant):
+        if target.get("surface_id") == surface_id:
+            return target
+    return None
+
+
 def surface_spec(surface_id: str, *, tenant: str | None = None) -> dict:
-    """Marketer-facing surface metadata + prompt overrides from tenant config."""
+    """Marketer-facing surface metadata + prompt overrides from tenant config.
+
+    Resolution order: built-in defaults → rules/<tenant>_image.yaml surfaces →
+    registry image_target (label for registry-only surfaces + workflow /
+    section_id / prebuilt_states_cap always, so targets beyond hero/og resolve
+    with their registered metadata).
+    """
     config = _tenant_config(tenant)
     yaml_surfaces = (config.get("surfaces") or {})
     base = dict(_SURFACE_DEFAULTS.get(surface_id, _SURFACE_DEFAULTS["hero"]))
     base.update(yaml_surfaces.get(surface_id) or {})
+    reg = _registry_image_target(surface_id, tenant=tenant)
+    if reg:
+        if (surface_id not in _SURFACE_DEFAULTS
+                and surface_id not in yaml_surfaces and reg.get("label")):
+            base["label"] = reg["label"]
+        base["workflow"] = reg.get("workflow")
+        base["section_id"] = reg.get("section_id")
+        base["prebuilt_states_cap"] = reg.get("prebuilt_states_cap")
     base["id"] = surface_id
     return base
 
 
 def list_surface_ids(*, tenant: str | None = None) -> list[str]:
-    """Ordered surface ids for a tenant — hero first, then config extras."""
+    """Ordered surface ids for a tenant — hero first, config extras, then any
+    registry image_targets beyond hero/og (sections.list_image_targets)."""
     config = _tenant_config(tenant)
     yaml_ids = list((config.get("surfaces") or {}).keys())
     out = [DEFAULT_SURFACE_ID]
     for sid in yaml_ids:
         if sid not in out:
+            out.append(sid)
+    for target in _registry_image_targets(tenant):
+        sid = target.get("surface_id")
+        if sid and sid not in out:
             out.append(sid)
     return out
 
@@ -174,6 +223,41 @@ def _api_url() -> str:
 
 def _model() -> str:
     return (os.environ.get("IMAGE_GEN_MODEL") or DEFAULT_MODEL).strip()
+
+
+def realtime_ceiling_usd() -> float:
+    """Per-tenant realtime daily spend ceiling (S3.3) — env-overridable, fail-loud."""
+    raw = (os.environ.get(REALTIME_CEILING_ENV) or "").strip()
+    if not raw:
+        return DEFAULT_REALTIME_CEILING_USD
+    try:
+        return float(raw)
+    except ValueError:
+        raise ValueError(f"{REALTIME_CEILING_ENV} must be a number, got {raw!r}")
+
+
+def realtime_spend_today_usd(tenant: str | None = None) -> float:
+    """Today's estimated spend for a tenant from the api_costs ledger (UTC day)."""
+    return float(AC.summarize(tenant=tenant or DEFAULT_IMAGE_TENANT)["today_cost_usd"])
+
+
+def _record_ceiling_block(*, tenant: str | None, model: str, cache_key: str,
+                          surface_id: str, spend: float, ceiling: float) -> None:
+    """Ledger row for a ceiling-blocked realtime generate — logged, not silent."""
+    _, use_gemini = _resolve_api_url()
+    vendor = GEMINI_VENDOR if use_gemini else VENDOR
+    AC.record_call(
+        tenant=tenant or DEFAULT_IMAGE_TENANT,
+        service=AC.service_for_vendor(vendor, use_gemini=use_gemini),
+        model=model,
+        operation="realtime_ceiling_block",
+        cache_key=cache_key,
+        status="blocked",
+        images_generated=0,
+        estimated_cost_usd=0.0,
+        extra={"ceiling_usd": ceiling, "spend_today_usd": round(spend, 6),
+               "surface_id": surface_id},
+    )
 
 
 def build_image_ctx(page: dict) -> dict:
@@ -985,8 +1069,13 @@ def _resolve_prompts(ctx: dict, *, tenant: str | None = None,
 
 def get_surface_image(ctx: dict, *, surface_id: str = DEFAULT_SURFACE_ID,
                       generate: bool = False,
-                      tenant: str | None = None) -> dict:
-    """Resolve an image surface receipt using two-tier base + delta cache strategy."""
+                      tenant: str | None = None,
+                      workflow: str = "realtime") -> dict:
+    """Resolve an image surface receipt using two-tier base + delta cache strategy.
+
+    ``workflow`` is the CALL mode, not the target's registry declaration: every
+    runtime generate is a realtime spend governed by the S3.3 per-tenant daily
+    ceiling. Only the deploy-time warm script passes workflow="prebuilt"."""
     resolved = _resolve_prompts(ctx, tenant=tenant, surface_id=surface_id)
     base_structured = resolved["display_structured"]
     gen_prompt = resolved["gen_prompt"]
@@ -1039,6 +1128,26 @@ def get_surface_image(ctx: dict, *, surface_id: str = DEFAULT_SURFACE_ID,
             **_receipt_extras(base_structured, tier_fields),
         }
 
+    # S3.3 [PANEL]: past the per-tenant daily ceiling, a realtime generate is
+    # refused — serve the neutral prebuilt base when one is baked, else the
+    # gallery/gradient fallback. The refusal is cost-logged (never silent).
+    if workflow != "prebuilt":
+        ceiling = realtime_ceiling_usd()
+        spend = realtime_spend_today_usd(tenant)
+        if spend >= ceiling:
+            _record_ceiling_block(tenant=tenant, model=model, cache_key=gen_disk_key,
+                                  surface_id=surface_id, spend=spend, ceiling=ceiling)
+            cached_base = _load_cached(base_disk_key)
+            if cached_base:
+                tier_fields["tokens_saved_estimate"] = _estimate_tokens_saved(
+                    len(resolved["full_prompt"]), 0, cache_hit=True)
+                return {**cached_base, **tier_fields,
+                        "fallback_chain": ["cache_miss", "realtime_ceiling", "prebuilt_base"]}
+            return _gallery_receipt(ctx, structured=base_structured, prompt=gen_prompt,
+                                    cache_key=gen_disk_key, model=model,
+                                    fallback_chain=["cache_miss", "realtime_ceiling"],
+                                    tier_fields=tier_fields)
+
     # d. Generate base first if miss (when delta needed, base still cached separately)
     if tier == "base+delta" and not _load_cached(base_disk_key):
         _generate_and_cache(ctx, resolved["base_structured"], base_prompt,
@@ -1070,11 +1179,13 @@ def get_hero_image(ctx: dict, *, generate: bool = False,
 
 def resolve_surface_image(page: dict, *, surface_id: str = DEFAULT_SURFACE_ID,
                           generate: bool = False,
-                          tenant: str | None = None) -> dict:
+                          tenant: str | None = None,
+                          workflow: str = "realtime") -> dict:
     """Page-facing wrapper → {status, fallback, url?, receipt, dev, surface_id}."""
     ctx = build_image_ctx(page)
     receipt = get_surface_image(ctx, surface_id=surface_id,
-                                generate=generate, tenant=tenant)
+                                generate=generate, tenant=tenant,
+                                workflow=workflow)
     source = receipt.get("source", "gradient")
     url = receipt.get("url")
     if source == "pending":

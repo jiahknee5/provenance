@@ -703,11 +703,16 @@ def test_prebuild_manifest_loads_and_warm_script_uses_it():
     assert len(rows) == 30  # 12 ad variants × 2 identities + direct/search/email × 2
     assert all(set(r) >= {"id", "label", "params", "email", "prebuild", "surface_id"} for r in rows)
     all_rows = PB.manifest_all_states()
-    assert len(all_rows) == 60  # 30 states × 2 surfaces
     assert {r["surface_id"] for r in all_rows} == {"hero", "og"}
-    # default content: everything prebuilt, matching the historical warm list
+    # S3.3 [PANEL — locked] (T-06 reconciliation): prebuilt = explicitly flagged
+    # short lists only — K=8/target, 24/tenant, 80 global; demo_scenarios states
+    # fill the K slots first; og carries its own explicit list (no hero mirror).
     states = PB.prebuild_states()
-    assert len(states) == 60
+    assert 0 < len(states) <= PB.CAP_IMAGES_PER_TENANT
+    for sid in ("hero", "og"):
+        flagged = [s for s in states if s[3] == sid]
+        assert 0 < len(flagged) <= PB.CAP_STATES_PER_TARGET, sid
+    assert PB.check_prebuild_caps() == []
     labels = [s[0] for s in states]
     assert "ad v09 · anon" in labels and "email · known" in labels
     assert "ad v09 · anon · og" in labels
@@ -726,7 +731,7 @@ def test_prebuild_manifest_loads_and_warm_script_uses_it():
     assert rc == 0
     out = buf.getvalue()
     assert "surface=hero" in out and "surface=og" in out
-    assert "demo states to warm: 60" in out
+    assert f"demo states to warm: {len(states)}" in out
 
 
 def test_console_delivery_inventory_reads_manifest_states():
