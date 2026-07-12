@@ -25,7 +25,7 @@ app = FastAPI(title="Provenance — Helix Analytics demo", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=str(APP_DIR / "static")), name="static")
 
 # The "Apt" landing concept — mocks, pitch deck & brand sheet — served as a static
-# site at /landing/ (html=True serves index.html for the directory root).
-_LANDING_DIR = REPO_DIR / "landing"
-if _LANDING_DIR.is_dir():
-    app.mount("/landing", StaticFiles(directory=str(_LANDING_DIR), html=True), name="landing")
+# site at /apt/ (html=True serves index.html for the directory root).
+_APT_DIR = REPO_DIR / "apt"
+if _APT_DIR.is_dir():
+    app.mount("/apt", StaticFiles(directory=str(_APT_DIR), html=True), name="apt")
