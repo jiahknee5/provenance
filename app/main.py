@@ -24,20 +24,8 @@ from pipeline.generation import recipients as rec
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
-    """The main page — an Attio-landing-style home featuring the live demo (the front door)."""
-    return templates.TemplateResponse(request, "home.html", {})
-
-
-@app.get("/talk")
-def talk():
-    """Internal enablement deck (GTM-is-engineering / trust-is-the-last-edge), served from static."""
-    return RedirectResponse("/static/talk/deck.html")
-
-
-@app.get("/guide")
-def guide():
-    """Engineering writeup: the copy-research swarm → the two-axis Gate (verify_copy/message/sequence)."""
-    return RedirectResponse("/static/mockups/copy-research-guide.html")
+    """The front door is the demo sitemap (R38: the legacy Attio-style home is retired)."""
+    return RedirectResponse("/apt/demo")
 
 
 @app.get("/lead", response_class=HTMLResponse)
@@ -85,14 +73,12 @@ from app import funnel as _funnel  # noqa: E402,F401
 from app import personalize as _personalize  # noqa: E402,F401
 from app import cohort as _cohort  # noqa: E402,F401
 from app import google_login as _google_login  # noqa: E402,F401
-from app import demo as _demo  # noqa: E402,F401
 from app import workspace as _workspace  # noqa: E402,F401
 from app import agent as _agent  # noqa: E402,F401
 from app import sources as _sources  # noqa: E402,F401
 from app import composer as _composer  # noqa: E402,F401
 from app import policies as _policies  # noqa: E402,F401
 from app import graph as _graph  # noqa: E402,F401
-from app import help as _help  # noqa: E402,F401
 from app import archive as _archive  # noqa: E402,F401
 from app import gauntlet as _gauntlet  # noqa: E402,F401
 from app import planet as _planet  # noqa: E402,F401

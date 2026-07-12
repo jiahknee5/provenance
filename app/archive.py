@@ -33,12 +33,6 @@ ARCHIVE = [
         {"name": "Lead form", "route": "/lead", "by": None,
          "desc": "The lead-capture form that seeds a record."},
     ]},
-    {"group": "Internal decks", "note": "Reference material, not product surfaces.", "items": [
-        {"name": "Enablement deck", "route": "/talk", "by": None,
-         "desc": "GTM-is-engineering / trust-is-the-last-edge — the internal narrative."},
-        {"name": "Engineering writeup", "route": "/guide", "by": None,
-         "desc": "The copy-research swarm → the two-axis Gate (verify_copy / message / sequence)."},
-    ]},
 ]
 
 

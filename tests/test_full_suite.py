@@ -29,9 +29,9 @@ TPL = pathlib.Path(__file__).resolve().parents[1] / "app" / "templates"
 
 # Surfaces on the Quiet-Workspace shell.
 SHELL_PAGES = ["workspace", "records", "records_new", "composer", "optimizer", "agent",
-               "assurance", "sources", "demo", "demo_monitor"]
+               "assurance", "sources"]
 SHELL_ROUTES = ["/workspace", "/records", "/records/new", "/composer", "/optimizer", "/agent",
-                "/assurance", "/sources", "/demo", "/demo/monitor"]
+                "/assurance", "/sources"]
 # All legacy/lab routes (now light) — param routes filled with valid demo values.
 TOKEN = __import__("pipeline.personalization.cohort", fromlist=["x"]).magic_token(
     __import__("pipeline.personalization.cohort", fromlist=["x"]).COHORT[1])
@@ -121,16 +121,6 @@ def test_create_then_undo_removes_record():
     rid = re.search(r'name="rid" value="([^"]+)"', r.text).group(1)
     c.post("/records/undo", data={"rid": rid})
     assert "Temp Undo" not in c.get("/records?view=all").text
-
-
-def test_demo_live_renders_inspector_overrides_and_real_imagery():
-    """The by-IP landing: IP + manual overrides, allude/say toggle, the captured-data
-    inspector, and real licensed imagery with attribution."""
-    t = c.get("/demo/live").text
-    assert 'id="ip-in"' in t and 'id="sel-loc"' in t and 'id="sel-ind"' in t   # IP + manual overrides
-    assert 'id="seg-policy"' in t                                              # allude/say toggle
-    assert 'class="lv-hero"' in t and "Everything captured" in t and 'id="cap-body"' in t
-    assert "license" in t.lower() and ("staticflickr" in t or "wikimedia" in t)  # real CC photo
 
 
 def test_scene_engine_deterministic_and_sourced():
@@ -307,11 +297,6 @@ def test_tier3_competitor_agent_is_gated():
     assert d["blocked_example"]["ok"] is False                         # the named-competitor arm is blocked
 
 
-def test_demo_live_has_creative_controls():
-    t = c.get("/demo/live").text
-    assert 'id="sel-angle"' in t and 'id="img-pick"' in t and 'id="ai-go"' in t and "Creative agents" in t
-
-
 def test_policies_corpus_and_claims_model():
     """Policies lead with the corpus (cite-or-don't-say) + an approved/forbidden claim list."""
     t = c.get("/policies").text
@@ -356,19 +341,6 @@ def test_corpus_files_are_grounded_and_served():
     assert c.get("/policies/corpus/nope-not-real").status_code == 404   # unknown slug is honest
 
 
-def test_help_aligns_with_the_app():
-    """Help is organized to mirror the nav and documents the real surfaces — incl. Policies + graph."""
-    idx = c.get("/help")
-    assert idx.status_code == 200
-    for cat in ("Core workflow", "Live demo", "Lab", "provenance"):   # nav-aligned categories
-        assert cat in idx.text
-    # the two surfaces that existed but were undocumented now have articles, pointing at real routes
-    pol = c.get("/help/surface-policies").text
-    assert "corpus" in pol.lower() and 'href="/policies"' in pol
-    gr = c.get("/help/surface-graph").text
-    assert "decision tree" in gr.lower() and 'href="/graph"' in gr
-
-
 def test_archive_moves_noncore_surfaces_off_the_nav():
     """Non-core/lab surfaces are off the sidebar and collected in /archive; routes still resolve."""
     assert c.get("/archive").status_code == 200
@@ -384,35 +356,10 @@ def test_archive_moves_noncore_surfaces_off_the_nav():
     assert 'href="/inspector"' not in sidebar
 
 
-def test_integrations_show_base_vs_connect():
-    """Landing + Help show the built-in enrichment base vs the connectable stack (data + value each)."""
-    assert "/help/integrations" in c.get("/").text           # landing links to the detail
-    t = c.get("/help/integrations")
-    assert t.status_code == 200
-    assert "Built in" in t.text and "Connect your stack" in t.text
-    assert "People Data Labs" in t.text and "Reverse-IP" in t.text   # the wired base
-    assert "HubSpot" in t.text and "Clay" in t.text and "Vector" in t.text  # connectable
-    assert "What it adds" in t.text and "Why it matters" in t.text   # per-integration data + value, as table columns
-
-
-def test_version_tag_and_whats_new_in_foot():
-    """The bottom-left carries a version/build tag + a What's new link to the changelog."""
-    shell = c.get("/workspace").text
-    assert 'class="q-ver"' in shell and "v0.9" in shell          # version/build tag
-    assert 'href="/help/whats-new"' in shell                     # What's new link
-    wn = c.get("/help/whats-new")
-    assert wn.status_code == 200 and "apt" in wn.text and "v0.9" in wn.text  # the changelog renders
-
-
 def test_graph_page_embeds_the_exhibit():
     r = c.get("/graph")
     assert r.status_code == 200
     assert "/static/mockups/decision-tree.html" in r.text and "Agent graph" in r.text
-
-
-def test_api_aicopy_gate_verified():
-    d = c.get("/api/demo/aicopy?industry=energy&region=Texas&angle=peer").json()
-    assert d["headline"] and isinstance(d["checks"], list) and d["blocked_example"]["ok"] is False
 
 
 def test_resolve_ip_is_honest_offline():
@@ -432,11 +379,6 @@ def test_resolve_email_first_party_lane():
     d = SC.resolve_email("jordan@gauntletai.com")
     assert d["company"] and d["tier"] >= 1 and d["confidence"]["company"] == "high"
     assert d["captured"] and all(r["policy"] == "say" for r in d["captured"] if r["label"] != "Personalization tier")
-
-
-def test_api_demo_scene_preview():
-    d = c.get("/api/demo/scene?region=Texas&industry=energy").json()
-    assert d["industry"] == "energy" and "Texas" in d["sub"]
 
 
 def test_skip_link_and_main_landmark():
@@ -507,14 +449,6 @@ def test_cloner_injects_per_placement_with_markers():
         cloner.fetch_raw = orig
 
 
-def test_focus_drilldown_renders_receipt():
-    html = c.get("/demo?scenario=B&v=B2").text
-    assert "Receipt" in html and "Maps to" in html
-    assert "Data used" in html and "Optimizes" in html
-    # numbered data rows tie back to the overlay markers
-    assert 'class="rcv"' in html
-
-
 def test_blocked_arm_provably_never_selected():
     # the optimizer surface shows the blocked arm at 0× and never a winner
     t = c.get("/optimizer").text
@@ -574,15 +508,7 @@ def test_shell_pages_carry_no_off_token_raw_hex():
     assert not offenders, f"raw hex outside the token set: {offenders}"
 
 
-def test_home_is_attio_landing_featuring_the_demo():
-    html = c.get("/").text
-    assert 'class="q-display"' in html and 'class="q-hero"' in html  # the big attio hero
-    assert 'class="q-showtabs"' in html and 'id="showframe"' in html  # tabbed product showcase
-    assert 'href="/demo"' in html and 'href="/workspace"' in html  # demo is the front door
-    assert "prove every move" in html.lower()
-
-
 def test_pages_lead_with_the_proves_spine_line():
     for route in ["/workspace", "/records", "/composer", "/optimizer", "/agent",
-                  "/assurance", "/sources", "/demo"]:
+                  "/assurance", "/sources"]:
         assert "Proves:" in c.get(route).text, f"{route} missing its 'Proves:' spine line"

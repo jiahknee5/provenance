@@ -5,7 +5,6 @@
   <nav>
     {% set p = request.url.path %}
     <a href="/workspace" class="{{ 'on' if p in ['/workspace','/records'] else '' }}">App ↗</a>
-    <a href="/demo" class="{{ 'on' if p.startswith('/demo') else '' }}">Demo</a>
     <a href="/personalize" class="{{ 'on' if p == '/personalize' else '' }}">Personalize</a>
     <a href="/inspector" class="{{ 'on' if p == '/inspector' else '' }}">Inspector</a>
     <a href="/observatory" class="{{ 'on' if p == '/observatory' else '' }}">Observatory</a>
