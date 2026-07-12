@@ -1,0 +1,364 @@
+# GauntletAI — action-driven hero image personalization (tenant config).
+# Loaded by pipeline.personalization.image_intents.load_image_config("gauntlet").
+# See docs/04-workflow/ACTION-IMAGE-PERSONALIZATION.md for the repeatable framework.
+
+tenant: gauntlet
+product_context: "AI engineering talent program marketing site"
+
+# Opt-in: set enabled: true to activate best-of-N brain scoring (shared module with Planet).
+brain_simulator:
+  enabled: false
+
+motion:
+  enabled: false
+
+brand:
+  accent_color: "#c9a227"
+  name: GauntletAI
+  must_avoid_additions: []
+
+# Industry → environment type (allude only — never company names).
+industry_env:
+  technology: "modern enterprise engineering workspace"
+  financial services: "regulated fintech engineering floor"
+  healthcare: "health-tech engineering operations center"
+  retail: "commerce platform engineering hub"
+  manufacturing: "industrial IoT engineering lab"
+  general: "professional engineering workspace"
+
+# Visual metaphors for objection themes — abstract only, never literal objection text.
+objection_metaphors:
+  open_market_hire: "empty interview chair beside a glowing terminal — hiring stall abstract"
+  ten_weeks_long: "compressed timeline contrast — hourglass beside sustained observation metaphor"
+  placement_fees: "investment vs idle pilot — stalled dashboard beside active deployment glow"
+  internal_upskill: "split path — team learning lane beside net-new hire lane, abstract"
+  wrong_stack: "multi-stack production floor — adaptability under pressure, abstract"
+  bootcamp_burned: "weekend cert vs sustained shipping — contrast before/after, abstract"
+  no_time_away: "calendar tension beside immersive cohort energy — trade-off abstract"
+  ld_budget_committed: "course stack fading, team champions returning with shipped systems"
+  six_weeks_revert: "fading slide deck beside persistent production deployment"
+  roi_unproven: "ROI clarity — team transformation with measurable deployment metaphor"
+  need_hires_not_training: "hire track emphasis — proven engineer shipping under scrutiny"
+  cant_take_10_weeks: "full-time immersion trade — terminal glow at dusk, abstract"
+  selection_rate_low: "high bar selection — many paths, one lit proving ground"
+  already_senior: "senior engineer at terminal shipping — capstone energy, not classroom"
+  learn_on_job: "ticket queue beside production pressure terminal — gap revealed abstract"
+  opportunity_cost: "sideline observer vs active shipper — career leap abstract"
+
+# Ad variant → message-match visual metaphor (abstract).
+ad_metaphors:
+  x-keyword: "abstract interview room dissolving into sustained proof observation"
+  x-event: "conference hallway leading to immersive cohort transformation"
+  x-engager: "familiar proof-model milestone path continuing forward"
+  x-interest: "engineer selection gauntlet — lit proving ground ahead"
+  x-conversation: "scaling team velocity — collaborative AI shipping floor"
+  x-location: "tech-hub engineering floor under production pressure"
+  x-device: "desktop due-diligence environment — proof surviving scrutiny"
+  x-age: "senior engineer capstone terminal — career leap energy"
+  x-lookalike: "talent density — elite builder observation environment"
+  x-movies: "documentary viewer becoming shipper — terminal activation"
+  x-language: "direct US engineering path — clean minimal workspace"
+  x-gender: "merit-only selection — execution-focused proving ground"
+
+# Intent taxonomy — each maps visitor context to a visual strategy supporting the page CTA.
+intents:
+  - id: peer_proof
+    brain_target: trust
+    brain_regions: [ppa, ofc_stability, fusiform, intraparietal]
+    conversion_goal: "Trust → click CTA"
+    design_principles:
+      - "Matched-peer environment without literal faces"
+      - "Social proof via workspace cues, not testimonials"
+      - "Single focal point — processing fluency"
+      - "Dark moody base; gold accent zone for headline legibility"
+    sales_technique: "matched-peer social proof (Cialdini)"
+    allowed_signals: [industry, audience_route, network_corporate, ad_variant]
+    blocked_signals: [visitor_name, company_name, exact_city, income, gender, age]
+    composition_template: >-
+      Wide cinematic backdrop: {environment} at dusk, warm monitor glow suggesting
+      peers already shipping — empty foreground for headline overlay, gold accent rim light.
+    color_rules: "Dark charcoal base, warm gold accent ({accent_color}), muted teal secondary"
+    visual_metaphor: "industry-matched engineering floor — capability implied by environment"
+    mood: "credible, peer-aligned, calm confidence"
+
+  - id: loss_avoidance
+    brain_target: change_legibility
+    brain_regions: [mt, v3a, intraparietal, amygdala_threat_proxy]
+    conversion_goal: "Urgency → apply/hire"
+    design_principles:
+      - "Abstract loss frame — stalled state, not fear-mongering"
+      - "Before/after contrast without literal people"
+      - "Empty chair or idle dashboard as focal metaphor"
+      - "Supports headline; does not compete for attention"
+    sales_technique: "loss aversion / cost of inaction (prospect theory)"
+    allowed_signals: [top_objection, audience_route, ad_variant]
+    blocked_signals: [invented_urgency, surveillance, literal_objection_text]
+    composition_template: >-
+      Split-tone wide backdrop: left — dim stalled dashboard or empty chair; right —
+      warm gold deployment glow. Abstract only. Foreground dark for headline.
+    color_rules: "Cool desaturated stall zone vs warm gold ({accent_color}) resolution zone"
+    visual_metaphor: "{objection_metaphor}"
+    mood: "urgent but dignified — opportunity closing, not panic"
+
+  - id: authority
+    brain_target: authority
+    brain_regions: [ppa, intraparietal, dlpfc_structure, fusiform]
+    conversion_goal: "B2B hire decision"
+    design_principles:
+      - "Demo-day / production deploy metaphor"
+      - "Scrutiny and observation — buyers evaluating proof"
+      - "Clean hierarchy, one focal point"
+      - "Enterprise gravitas without logo wall"
+    sales_technique: "authority + scrutiny framing (B2B committee buy-in)"
+    allowed_signals: [audience_route_b2b_hire, ad_device, ad_lookalike, tier_2+]
+    blocked_signals: [fake_logos, named_executives, company_names]
+    composition_template: >-
+      Wide stage-like engineering demo environment — observation gallery implied by lighting,
+      production deploy screens glowing gold, abstract audience silhouettes without faces.
+    color_rules: "Deep navy-charcoal, gold spotlight ({accent_color}), crisp white highlights"
+    visual_metaphor: "demo-day scrutiny — capability observed under production pressure"
+    mood: "evaluative, serious, proof-first"
+
+  - id: aspiration
+    brain_target: approach
+    brain_regions: [ventral_striatum, ofc_warmth, fusiform, ppa_depth]
+    conversion_goal: "Individual Challenger apply"
+    design_principles:
+      - "Engineer at terminal shipping — capstone energy"
+      - "Individual determination, not classroom"
+      - "Warm gold terminal glow as aspiration anchor"
+      - "Clean composition — one hero focal point"
+    sales_technique: "identity aspiration + self-selection (Challenger route)"
+    allowed_signals: [audience_route_individual, ad_interest, ad_age, ad_movies]
+    blocked_signals: [age_recitation, gender, income, employer]
+    composition_template: >-
+      Single engineer silhouette (no face detail) at a glowing terminal shipping code —
+      capstone energy, stacks of abstract deployed systems in soft focus behind.
+    color_rules: "Dark workspace, terminal gold ({accent_color}), energetic teal code accents"
+    visual_metaphor: "career leap — shipping AI-native systems under real pressure"
+    mood: "determined, immersive, forward-leaning"
+
+  - id: roi_clarity
+    brain_target: trust
+    brain_regions: [ppa, ofc_stability, dlpfc_structure, ventral_striatum]
+    conversion_goal: "HR/L&D buy-in"
+    design_principles:
+      - "Team transformation visual — champions returning"
+      - "Abstract ROI — shipped systems not spreadsheets"
+      - "Warm, organizational scale without headcount claims"
+      - "Gold accent zone for headline support"
+    sales_technique: "organizational ROI + champion return (HR/L&D buyer)"
+    allowed_signals: [ad_event, audience_fit_hr, ld_budget_objection]
+    blocked_signals: [dollar_amounts, income, company_name]
+    composition_template: >-
+      Team transformation arc: engineers returning from immersive cohort to internal
+      AI champions — abstract silhouettes, shipped pipeline glow, no org chart text.
+    color_rules: "Organizational warm neutrals, gold champion highlight ({accent_color})"
+    visual_metaphor: "L&D spend becomes internal AI champions — not certificate stack"
+    mood: "practical, transformative, board-ready"
+
+  - id: retarget_warm
+    brain_target: approach
+    brain_regions: [ventral_striatum, ofc_warmth, intraparietal, ppa]
+    conversion_goal: "Post-engager click"
+    design_principles:
+      - "Familiar brand moment — continuation not restart"
+      - "Warm welcome-back energy without naming visitor"
+      - "Echo prior engagement (selection rate, proof model)"
+      - "Single focal point, dark moody base"
+    sales_technique: "consistency + continuation (Cialdini commitment)"
+    allowed_signals: [ad_engager, hubspot_abandoned, channel_ad]
+    blocked_signals: [behavioral_surveillance, visit_count, abandoned_step_text]
+    composition_template: >-
+      Warm continuation scene — familiar Gauntlet gold accent on proof-model imagery,
+      path forward lit, prior context implied by glowing milestone markers not text.
+    color_rules: "Warm return palette anchored on brand gold ({accent_color})"
+    visual_metaphor: "pick up where you left off — path continues forward"
+    mood: "welcoming, familiar, low-friction"
+
+  - id: message_match
+    brain_target: message_match
+    brain_regions: [clip_alignment, fusiform, v4, intraparietal]
+    conversion_goal: "Ad click-through"
+    design_principles:
+      - "Visual echoes ad promise (Cialdini consistency)"
+      - "Keyword/hiring → interview room abstract"
+      - "No text in image — promise via metaphor only"
+      - "Headline-supporting hierarchy"
+    sales_technique: "message-match / consistency principle"
+    allowed_signals: [ad_variant, utm_campaign, ad_keyword, ad_targeting_type]
+    blocked_signals: [ad_copy_literal, company_names, PII]
+    composition_template: >-
+      Visual continuation of ad promise: {ad_metaphor} — abstract interview-to-proof
+      transition, gold accent linking ad click to landing headline zone.
+    color_rules: "Ad-aligned mood with Gauntlet gold bridge ({accent_color})"
+    visual_metaphor: "{ad_metaphor}"
+    mood: "consistent, expected, trust-building"
+
+# Deterministic intent selection — primary_rules = elif chain; fallback_rules = additive.
+selection:
+  loss_avoidance_objections:
+    - open_market_hire
+    - placement_fees
+    - cant_take_10_weeks
+
+  primary_rules:
+    - when:
+        ad_variant_id: x-keyword
+        top_objection: open_market_hire
+      picks:
+        - intent_id: message_match
+          rank: 1
+          why: "keyword ad promise + #1 objection open_market_hire → visual continuity"
+          signals_used: [ad_keyword, objection_open_market_hire]
+        - intent_id: peer_proof
+          rank: 2
+          why: "hire-track trust gap → matched-peer environment"
+          signals_used: [audience_route_b2b_hire, objection_open_market_hire]
+
+    - when:
+        ad_variant_id: x-event
+        top_objection: ld_budget_committed
+      picks:
+        - intent_id: roi_clarity
+          rank: 1
+          why: "HR event ad + L&D budget objection → team transformation ROI visual"
+          signals_used: [ad_event, objection_ld_budget_committed]
+
+    - when:
+        ad_variant_id: x-interest
+        audience_route: individual
+      picks:
+        - intent_id: aspiration
+          rank: 1
+          why: "interest-targeted ad + individual route → Challenger apply energy"
+          signals_used: [ad_interest, audience_route_individual]
+
+    - when:
+        ad_variant_id: x-engager
+      picks:
+        - intent_id: retarget_warm
+          rank: 1
+          why: "post-engager retarget → continuation not restart"
+          signals_used: [ad_engager]
+
+  fallback_rules:
+    - when:
+        ad_variant_id: $present
+      picks:
+        - intent_id: message_match
+          rank: 1
+          why: "paid ad variant {ad_variant_id} → message-match visual continuity"
+          signals_used: ["ad_{ad_variant_suffix}", channel_ad]
+
+    - when:
+        audience_route: b2b_hire
+      picks:
+        - intent_id: authority
+          rank: $next
+          why: "B2B hire route → scrutiny/observation metaphor"
+          signals_used: [audience_route_b2b_hire]
+
+    - when:
+        audience_route: b2b_upskill
+      picks:
+        - intent_id: roi_clarity
+          rank: $next
+          why: "B2B upskill route → team transformation visual"
+          signals_used: [audience_route_b2b_upskill]
+
+    - when:
+        audience_route: individual
+      picks:
+        - intent_id: aspiration
+          rank: $next
+          why: "individual route → Challenger aspiration"
+          signals_used: [audience_route_individual]
+
+    - when:
+        top_objection: $present
+      picks:
+        - intent_id: loss_avoidance
+          rank: $next
+          why: "top objection {top_objection} → abstract loss-frame metaphor"
+          signals_used: ["objection_{top_objection}"]
+          when_objection_loss: true
+        - intent_id: peer_proof
+          rank: $next
+          why: "top objection {top_objection} → peer-trust environment"
+          signals_used: ["objection_{top_objection}"]
+          when_objection_loss: false
+
+    - when: {}
+      picks:
+        - intent_id: peer_proof
+          rank: 1
+          why: "neutral context → credible peer environment default"
+          signals_used: [default_peer_proof]
+
+# Intent → page CTA linkage (pairs with build_page hero CTAs).
+action_map:
+  default: program_overview
+  cta_keywords:
+    challenger: challenger_cta
+    apply: challenger_cta
+    upskill: catalyst_cta
+    catalyst: catalyst_cta
+    hire: hire_cta
+  route_defaults:
+    individual: challenger_cta
+    b2b_upskill: catalyst_cta
+    b2b_hire: hire_cta
+  objection_pairs:
+    open_market_hire: hire_cta
+    ten_weeks_long: hire_cta
+    placement_fees: hire_cta
+    ld_budget_committed: catalyst_cta
+    no_time_away: catalyst_cta
+    roi_unproven: catalyst_cta
+    cant_take_10_weeks: challenger_cta
+    selection_rate_low: challenger_cta
+    already_senior: challenger_cta
+
+# Prompt assembly defaults (merged with intent templates).
+prompt_defaults:
+  must_include:
+    - "cinematic wide 16:9 hero backdrop"
+    - "dark moody atmosphere supporting headline overlay"
+    - "warm gold accent lighting ({accent_color})"
+    - "single clear focal point — processing fluency"
+  must_avoid:
+    - "NO faces of real people or identifiable individuals"
+    - "NO company logos or brand marks"
+    - "NO text, words, letters, or numbers in the image"
+    - "NO visitor names, employer names, or PII"
+    - "NO surveillance, creepy, or behavioral-tracking imagery"
+    - "NO literal objection quotes or ad copy as text overlay"
+    - "NO maps, addresses, or exact city landmarks"
+    - "NO demographic or compensation modeling cues"
+
+# Image surfaces — each gets its own resolve path, cache keys, and prompt shape.
+# Hero is the page backdrop; og is the Open Graph / social share thumbnail.
+surfaces:
+  hero:
+    label: "Hero background"
+    placement: "Full-width hero section backdrop"
+    prompt_opener: "Cinematic wide hero backdrop for a {product}."
+  og:
+    label: "Open Graph / social preview"
+    placement: "Link share unfurl (Twitter, LinkedIn, Slack)"
+    prompt_opener: "Open Graph social preview card (1200×630) for a {product} — shareable link thumbnail."
+    must_include:
+      - "1200x630 social card aspect ratio with safe center crop margins"
+      - "bold single focal subject readable at thumbnail size"
+      - "dark moody atmosphere with warm gold accent ({accent_color})"
+      - "single clear focal point — processing fluency"
+    composition_suffix: >-
+      Framed as a social share thumbnail with centered focal subject and generous
+      safe margins for platform crop — no text overlay.
+
+# Tier gates for personalization layers (surface policy alignment).
+guardrails:
+  tier_gates:
+    industry: 2
+    region_mood: 1

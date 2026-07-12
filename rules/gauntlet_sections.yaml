@@ -1,0 +1,147 @@
+# GauntletAI — section registry (S1/R30, contract: 04-spec/contracts/registry-schema.md).
+# T-01 behavior-neutral seed (Art IV): mirrors today's hardcoded slot() ids in
+# pipeline/personalization/gauntlet_site.py build_page and the hero/og image surfaces.
+# DESCRIPTIVE ONLY at this wave — build_page does not read this file yet.
+#
+# policy = the highest surface level the slot ships TODAY (say-level branches exist
+# for hero_eyebrow/hero_sub via login identity + declared goal; everything else allude).
+# All text targets are deterministic ($0, realtime) — the current provable path.
+# Image workflows: prebuilt because rules/gauntlet_prebuild.yaml flags hero+og states.
+
+version: 1
+tenant: gauntlet
+sections:
+  - id: hero
+    label: "Hero"
+    region: hero
+    personalize: true
+    goal: "Message-match the first screen to the arrival — campaign creative, identity, or firmographics."
+    channels: [direct, search, ads, email]
+    text_targets:
+      - slot_id: hero_eyebrow
+        label: "Hero eyebrow"
+        mode: deterministic
+        workflow: realtime
+        strategy: message-match
+        policy: say
+        source: catalog
+        claims: []
+        prompt: ""
+      - slot_id: hero_sub
+        label: "Hero headline + sub"
+        mode: deterministic
+        workflow: realtime
+        strategy: objection-reframe
+        policy: say
+        source: catalog
+        claims: []
+        prompt: ""
+      - slot_id: hero_cta
+        label: "Hero CTAs"
+        mode: deterministic
+        workflow: realtime
+        strategy: message-match
+        policy: allude
+        source: catalog
+        claims: []
+        prompt: ""
+    image_targets:
+      - surface_id: hero
+        label: "Hero background"
+        workflow: prebuilt
+        intent_rules: inherit
+        guardrails: inherit
+        prebuilt_states_cap: 8
+      - surface_id: og
+        label: "Open Graph / social preview"
+        workflow: prebuilt
+        intent_rules: inherit
+        guardrails: inherit
+        prebuilt_states_cap: 8
+    guardrails: {}
+    evals: [gate_pass, hold_never_ships, brain_score]
+  - id: prove
+    label: "How We Prove"
+    region: prove
+    personalize: true
+    goal: "Frame the proof model for the visitor's industry or the ad promise they clicked."
+    channels: [direct, search, ads, email]
+    text_targets:
+      - slot_id: prove_intro
+        label: "How We Prove intro"
+        mode: deterministic
+        workflow: realtime
+        strategy: message-match
+        policy: allude
+        source: catalog
+        claims: []
+        prompt: ""
+    image_targets: []
+    guardrails: {}
+    evals: [gate_pass, hold_never_ships]
+  - id: challenger
+    label: "Challenger callout"
+    region: challenger
+    personalize: true
+    goal: "Meet the individual-track visitor's objection in the callout body."
+    channels: [direct, search, ads, email]
+    text_targets:
+      - slot_id: challenger_body
+        label: "Challenger callout"
+        mode: deterministic
+        workflow: realtime
+        strategy: objection-reframe
+        policy: allude
+        source: catalog
+        claims: []
+        prompt: ""
+    image_targets: []
+    guardrails: {}
+    evals: [gate_pass, hold_never_ships]
+  - id: compare
+    label: "Hire vs Catalyst comparison"
+    region: compare
+    personalize: true
+    goal: "Emphasize the column and stat that match the audience — same facts for everyone."
+    channels: [direct, search, ads, email]
+    text_targets:
+      - slot_id: compare_emphasis
+        label: "Comparison table emphasis"
+        mode: deterministic
+        workflow: realtime
+        strategy: message-match
+        policy: allude
+        source: catalog
+        claims: []
+        prompt: ""
+      - slot_id: numbers_order
+        label: "Stats emphasis order"
+        mode: deterministic
+        workflow: realtime
+        strategy: message-match
+        policy: allude
+        source: catalog
+        claims: []
+        prompt: ""
+    image_targets: []
+    guardrails: {}
+    evals: [gate_pass, hold_never_ships]
+  - id: cta
+    label: "Final CTA"
+    region: cta
+    personalize: true
+    goal: "Steer the close with behavioral context — alluded to, never itemized."
+    channels: [direct, search, ads, email]
+    text_targets:
+      - slot_id: final_cta
+        label: "Final CTA block"
+        mode: deterministic
+        workflow: realtime
+        strategy: objection-reframe
+        policy: allude
+        source: catalog
+        claims: []
+        prompt: ""
+    image_targets: []
+    guardrails: {}
+    evals: [gate_pass, hold_never_ships]

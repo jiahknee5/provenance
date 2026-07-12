@@ -1,0 +1,100 @@
+<!doctype html>
+<!-- apt. — mockup gallery. apt brand identity (Proof Seal, Fraunces, Bone/Ink/Brass/Green) with live scaled previews. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>apt. — Design Mockups</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%231A150F'/%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%23F4EFE5' stroke-width='3.2'/%3E%3Ccircle cx='32' cy='32' r='7.4' fill='%23C79A55'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1A150F;--ink-soft:#463B2C;--bone:#F4EFE5;--bone-2:#FBF8F1;--pine:#1F4E3B;--brass:#B4894C;
+    --stone:#7A6F5C;--line:#E4DDCD;--line-2:#DDD4C2}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:16px;line-height:1.55;
+    color:var(--ink);background:var(--bone);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  .serif{font-family:'Fraunces',Georgia,serif;font-optical-sizing:auto}
+  .mono{font-family:'IBM Plex Mono',monospace}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+  /* top lockup */
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:22px 0;border-bottom:1px solid var(--line)}
+  .lockup{display:flex;align-items:center;gap:12px}
+  .lockup svg{width:34px;height:34px;display:block}
+  .wm{font-family:'Fraunces',serif;font-weight:600;font-optical-sizing:auto;font-size:27px;line-height:1;letter-spacing:-.02em}
+  .wm .dot{color:var(--pine)}
+  .topbar .meta{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--stone);letter-spacing:.06em}
+  header{padding:56px 0 10px;text-align:center}
+  .kick{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--brass)}
+  h1{font-family:'Fraunces',serif;font-optical-sizing:auto;font-size:clamp(32px,5vw,54px);font-weight:500;letter-spacing:-.02em;margin:16px 0 0;line-height:1.05}
+  h1 .dot{color:var(--pine)}
+  .sub{color:var(--ink-soft);max-width:58ch;margin:18px auto 0;font-size:17.5px}
+  .note{margin-top:14px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--stone);letter-spacing:.04em}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;padding:42px 0 80px}
+  @media(max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:660px){.grid{grid-template-columns:1fr}}
+  .card{display:block;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--bone-2);color:inherit;text-decoration:none;
+    transition:.25s cubic-bezier(.16,1,.3,1)}
+  .card:hover{transform:translateY(-3px);box-shadow:0 18px 40px -16px rgba(26,21,15,.22);border-color:var(--line-2)}
+  .thumb{position:relative;height:230px;overflow:hidden;background:var(--bone);border-bottom:1px solid var(--line)}
+  .thumb iframe{width:1280px;height:880px;border:0;transform:scale(.31);transform-origin:top left;pointer-events:none}
+  .thumb .open{position:absolute;right:10px;top:10px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--bone);
+    background:rgba(26,21,15,.82);padding:5px 10px;border-radius:999px;opacity:0;transition:.2s}
+  .card:hover .open{opacity:1}
+  .body{padding:15px 18px 18px}
+  .tag{font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--brass);display:flex;align-items:center;gap:8px}
+  .pdot{width:7px;height:7px;border-radius:50%;background:var(--pine);display:inline-block}
+  .name{font-family:'Fraunces',serif;font-size:20px;font-weight:500;margin-top:7px}
+  .desc{color:var(--ink-soft);font-size:13.5px;margin-top:5px;line-height:1.5}
+  footer{border-top:1px solid var(--line);padding:26px 0 56px;color:var(--stone);font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.04em;text-align:center}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="lockup">
+        <svg viewBox="0 0 120 120" aria-label="apt"><circle cx="60" cy="60" r="46" fill="none" stroke="#1A150F" stroke-width="4.5"/><circle cx="60" cy="60" r="37.5" fill="none" stroke="#B4894C" stroke-width="1.4"/><g stroke="#B4894C" stroke-width="1.4" stroke-linecap="round"><line x1="60" y1="10.5" x2="60" y2="16.5"/><line x1="60" y1="103.5" x2="60" y2="109.5"/><line x1="10.5" y1="60" x2="16.5" y2="60"/><line x1="103.5" y1="60" x2="109.5" y2="60"/></g><circle cx="60" cy="60" r="13" fill="#1F4E3B"/></svg>
+        <span class="wm">apt<span class="dot">.</span></span>
+      </div>
+      <div class="meta">DESIGN MOCKUPS — v1 · 2026</div>
+    </div>
+
+    <header>
+      <div class="kick">Design exploration</div>
+      <h1>Six directions — Attio meets Liquid Glass<span class="dot">.</span></h1>
+      <p class="sub">One product, six visual treatments — from clean Attio minimalism to Apple Liquid Glass, and five hybrids that blend them. The apt. identity throughout: Proof Seal, Fraunces, and the proof-dot system. Click any to open it full-screen.</p>
+      <div class="note">Live previews · each is a self-contained page with autostart + scroll-reveal motion</div>
+    </header>
+
+    <div class="grid">
+      <a class="card" href="m1-frosted-light.html">
+        <div class="thumb"><iframe src="m1-frosted-light.html" loading="lazy" tabindex="-1" scrolling="no"></iframe><span class="open">OPEN ↗</span></div>
+        <div class="body"><div class="tag"><span class="pdot"></span> Hybrid · light</div><div class="name">Frosted Light</div><div class="desc">Attio minimalism on warm bone with light frosted-glass panels. Airy, archival.</div></div>
+      </a>
+      <a class="card" href="m2-glass-showcase.html">
+        <div class="thumb"><iframe src="m2-glass-showcase.html" loading="lazy" tabindex="-1" scrolling="no"></iframe><span class="open">OPEN ↗</span></div>
+        <div class="body"><div class="tag"><span class="pdot"></span> Hybrid · light</div><div class="name">Glass Showcase</div><div class="desc">Attio's centered hero + the tabbed product showcase rebuilt as liquid glass.</div></div>
+      </a>
+      <a class="card" href="m5-split-receipt.html">
+        <div class="thumb"><iframe src="m5-split-receipt.html" loading="lazy" tabindex="-1" scrolling="no"></iframe><span class="open">OPEN ↗</span></div>
+        <div class="body"><div class="tag"><span class="pdot"></span> Hybrid · split</div><div class="name">Split Receipt</div><div class="desc">Attio editorial left, a glass verification-receipt certificate on the right.</div></div>
+      </a>
+      <a class="card" href="m4-bento-glass.html">
+        <div class="thumb"><iframe src="m4-bento-glass.html" loading="lazy" tabindex="-1" scrolling="no"></iframe><span class="open">OPEN ↗</span></div>
+        <div class="body"><div class="tag"><span class="pdot"></span> Hybrid · light</div><div class="name">Bento Glass</div><div class="desc">Attio bento grid — light glass cards plus one carved-hardware metric.</div></div>
+      </a>
+      <a class="card" href="m3-dark-spotlight.html">
+        <div class="thumb"><iframe src="m3-dark-spotlight.html" loading="lazy" tabindex="-1" scrolling="no"></iframe><span class="open">OPEN ↗</span></div>
+        <div class="body"><div class="tag"><span class="pdot" style="background:#C79A55"></span> Hybrid · dark</div><div class="name">Dark Spotlight</div><div class="desc">Attio typographic discipline on a quiet warm-ink glass canvas.</div></div>
+      </a>
+      <a class="card" href="m0-liquid-glass.html">
+        <div class="thumb"><iframe src="m0-liquid-glass.html" loading="lazy" tabindex="-1" scrolling="no"></iframe><span class="open">OPEN ↗</span></div>
+        <div class="body"><div class="tag"><span class="pdot" style="background:#C79A55"></span> Pure · dark</div><div class="name">Liquid Glass</div><div class="desc">Full Apple Liquid Glass — warm-ink refracting backdrop, floating receipt lens.</div></div>
+      </a>
+    </div>
+  </div>
+  <footer>apt. design mockups · derived from the Provenance product thesis · unlisted · noindex</footer>
+</body>
+</html>

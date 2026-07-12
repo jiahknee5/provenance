@@ -104,9 +104,29 @@ class Recorder:
 _REC: Optional[Recorder] = None
 _PHASE: str = ""
 
+# capture mode: collect emitted events in memory (for per-case eval graph logs) without
+# writing the deterministic ledger. Independent of the file Recorder.
+_CAPTURE: Optional[list] = None
+_CAP_SEQ: int = 0
+
 
 def active() -> bool:
     return _REC is not None
+
+
+def start_capture() -> None:
+    """Begin collecting emitted events in memory (e.g. one eval case's graph log)."""
+    global _CAPTURE, _CAP_SEQ
+    _CAPTURE = []
+    _CAP_SEQ = 0
+
+
+def stop_capture() -> list:
+    """Return the events emitted since start_capture() and clear the buffer."""
+    global _CAPTURE
+    evs = _CAPTURE or []
+    _CAPTURE = None
+    return evs
 
 
 def start_run(run_id: str, phases: Optional[list[str]] = None,
@@ -138,8 +158,27 @@ def set_phase(name: str) -> None:
 
 def emit(lane: str, event: str, node: str = "", detail: str = "", tool: str = "",
          input: Any = None, decision: Any = None, output: Any = None, **extra) -> int:
-    """No-op unless a Recorder is active (so tests / plain runs are untouched)."""
-    if _REC is None:
-        return 0
-    return _REC.emit(lane, event, node=node, detail=detail, tool=tool, input=input,
-                     decision=decision, output=output, phase=_PHASE, **extra)
+    """No-op unless a file Recorder or in-memory capture is active (so tests / plain runs
+    are untouched). When capturing (and no Recorder), build a lightweight in-memory record."""
+    if _REC is not None:
+        return _REC.emit(lane, event, node=node, detail=detail, tool=tool, input=input,
+                         decision=decision, output=output, phase=_PHASE, **extra)
+    if _CAPTURE is not None:
+        if event not in VOCAB:
+            raise ValueError(f"unknown observe event {event!r} (vocabulary is closed)")
+        global _CAP_SEQ
+        _CAP_SEQ += 1
+        rec = {"seq": _CAP_SEQ, "lane": lane, "node": node or lane, "event": event,
+               "detail": detail}
+        if tool:
+            rec["tool"] = tool
+        if input is not None:
+            rec["input"] = input
+        if decision is not None:
+            rec["decision"] = decision
+        if output is not None:
+            rec["output"] = output
+        rec.update(extra)
+        _CAPTURE.append(rec)
+        return _CAP_SEQ
+    return 0

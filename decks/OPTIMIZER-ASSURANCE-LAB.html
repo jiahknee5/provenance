@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Provenance — Optimizer Assurance Lab (A/B)</title>
+<style>
+  :root{--bg:#0b1018;--panel:#121a27;--panel2:#0f1622;--line:#1f2c3e;--ink:#dbe6f2;--mut:#7e8ea3;
+        --accent:#4cc4d4;--green:#2bb673;--amber:#d98a16;--red:#e0524a;--blue:#6b7cff}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14.5px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  a{color:var(--accent);text-decoration:none}
+  header.top{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--panel2);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+  header .brand{font-weight:700}.brand .dot{color:var(--accent)} .navsub{color:var(--mut);font-weight:400}
+  header nav{margin-left:auto;display:flex;gap:14px;font-size:13px;flex-wrap:wrap}
+  header nav a{color:var(--mut)} header nav a.on{color:var(--accent);font-weight:600}
+  .wrap{padding:20px 20px 70px;max-width:1180px;margin:0 auto}
+
+  /* section structure */
+  .sec{margin:34px 0 0} .sec:first-of-type{margin-top:18px}
+  .seclabel{font-size:12px;text-transform:uppercase;letter-spacing:.14em;color:var(--accent);font-weight:700;margin-bottom:3px}
+  .sech{font-size:21px;font-weight:700;color:var(--ink);margin:0 0 4px;letter-spacing:-.01em}
+  .secsub{color:var(--mut);font-size:13.5px;margin:0 0 14px;max-width:80ch}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:12px}
+  .plain{font-size:14px;color:#c8d4e2;margin:7px 0}.plain b{color:var(--ink)}
+  .hint{color:var(--mut);font-size:12.5px}
+
+  /* the bottom line */
+  .bl{background:linear-gradient(135deg,#10202e,#0d1622);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:12px;padding:20px 22px}
+  .bl h1{font-size:23px;line-height:1.3;margin:0 0 8px;font-weight:750;letter-spacing:-.01em}
+  .bl h1 .hl{color:var(--accent)}
+  .bl p{margin:0;color:#aebccd;font-size:14.5px;max-width:90ch}
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+  @media(max-width:820px){.tiles{grid-template-columns:repeat(2,1fr)}}
+  .tile{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:14px 15px}
+  .tile .big{font-size:30px;font-weight:800;line-height:1;letter-spacing:-.02em}
+  .tile .big.g{color:var(--green)}.tile .big.r{color:var(--red)}.tile .big.a{color:var(--amber)}.tile .big.c{color:var(--accent)}
+  .tile .lab{margin-top:7px;font-size:12.5px;color:#b9c6d6;font-weight:600}
+  .tile .sub{margin-top:3px;font-size:11.5px;color:var(--mut)}
+
+  /* opportunity cards */
+  .opp{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:820px){.opp{grid-template-columns:1fr}}
+  .opp .card{margin:0}
+  .opp h3{margin:0 0 2px;font-size:15.5px;color:var(--ink)} .opp .who{font-size:12px;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+  .opp .impact{margin-top:9px;font-size:13px;color:var(--green);font-weight:600}
+
+  /* funnel readiness */
+  .frow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #16202e;font-size:13.5px}
+  .frow:last-child{border:none} .frow .fname{flex:1}.frow .fname b{color:var(--ink)} .frow .fkpi{color:var(--mut);font-size:12.5px;width:200px}
+  @media(max-width:700px){.frow .fkpi{display:none}}
+  .pill{font-size:11px;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap;text-transform:uppercase;letter-spacing:.03em}
+  .pill.live{background:#0f2a1e;color:var(--green);border:1px solid #1f5e44}
+  .pill.static{background:#2e2410;color:var(--amber);border:1px solid #5a4520}
+  .pill.unmeasured{background:#2e1514;color:var(--red);border:1px solid #5a2a2a}
+
+  /* first wave cards */
+  .wave{display:grid;gap:12px}
+  .wstep{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px 17px}
+  .wstep .head{display:flex;align-items:flex-start;gap:13px}
+  .wstep .num{flex:none;width:32px;height:32px;border-radius:9px;background:#15324a;border:1px solid var(--accent);color:#eaf6ff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px}
+  .wstep h4{margin:1px 0 0;font-size:16px;color:var(--ink);flex:1}
+  .wstep .tag{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;border-radius:5px;padding:3px 8px;align-self:center}
+  .tag.stepchange{background:#15324a;color:#9fe6f0;border:1px solid var(--accent)}
+  .tag.blindspot{background:#2e2410;color:var(--amber);border:1px solid #5a4520}
+  .tag.guardrail{background:#2e1514;color:#f0a59f;border:1px solid #5a2a2a}
+  .wstep p.what{margin:10px 0 11px;font-size:13.8px;color:#cdd9e7}
+  .badges{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .b{font-size:11.5px;border-radius:6px;padding:3px 9px;border:1px solid var(--line);color:#b9c6d6}
+  .b .k{color:var(--mut);font-size:10px;text-transform:uppercase;letter-spacing:.04em;margin-right:5px}
+  .b.impact{color:var(--green);border-color:#1f5e44}.b.impact .k{color:#3f7d63}
+  .b.eff{color:#9fd6df}.b.risk-low{color:var(--green)}.b.risk-med{color:var(--amber);border-color:#5a4520}
+  .wstep details{margin-top:10px}.wstep summary{color:var(--accent);font-size:12.5px;cursor:pointer}
+  .wstep details .wiring{margin-top:7px;font-size:12px;color:#9fb0c4;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:8px 11px}
+  .wstep code{font:11.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:#9fd6df;background:#0c1420;border:1px solid var(--line);border-radius:4px;padding:0 4px}
+
+  /* trust story */
+  .two{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;align-items:start}
+  @media(max-width:900px){.two{grid-template-columns:1fr}}
+  .measures{display:inline-block;background:#15324a;border:1px solid var(--accent);color:#eaf6ff;border-radius:6px;padding:1px 8px;font-size:11px;font-weight:600;margin-right:8px}
+  .reading{font-size:14px;color:var(--ink);margin:10px 0 0;padding:11px 14px;background:var(--panel2);border:1px solid var(--line);border-radius:9px}
+  .callout{background:#0f1d18;border:1px solid #1f5e44;border-radius:9px;padding:11px 14px;font-size:13.5px;margin:9px 0;color:#cfe6da}
+  .callout.bad{background:#1d1212;border-color:#5a2a2a;color:#e8c4c0}
+  table.evt{width:100%;border-collapse:collapse;font-size:12.5px}
+  table.evt th{text-align:left;color:var(--mut);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;padding:8px;border-bottom:1px solid var(--line)}
+  table.evt > tbody > tr > td{padding:9px 8px;border-bottom:1px solid #16202e;vertical-align:top}
+  .cutrow td{background:#160f12}
+  td.cuttest{font-weight:700;color:#f0a59f;white-space:nowrap}
+
+  /* backlog */
+  .grouphd{font-size:12.5px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin:16px 0 6px;padding-top:6px}
+  .stat{font-size:11px;font-weight:700;border-radius:5px;padding:1px 7px;white-space:nowrap}
+  .stat.ready{background:#0f2a1e;color:var(--green);border:1px solid #1f5e44}
+  .stat.quick{background:#15324a;color:#9fe6f0;border:1px solid var(--accent)}
+  .stat.watch{background:#2e2410;color:var(--amber);border:1px solid #5a4520}
+  .impactcell{color:var(--green);font-weight:600;white-space:nowrap} .impactcell.flat{color:var(--mut)}
+  .conf{font-size:11px;color:var(--mut)}
+  .foot{color:var(--mut);font-size:12.5px;border-top:1px solid var(--line);margin-top:34px;padding-top:16px}
+  .ann{color:var(--mut);font-size:11.5px}
+</style>
+</head>
+<body>
+<header class="top">
+  <span class="brand"><span class="dot">◈</span> Provenance <span class="navsub">· Optimizer Assurance Lab — A/B</span></span>
+  <nav>
+    <a href="/">Form</a><a href="/inspector">Inspector</a><a href="/observatory">Observatory</a>
+    <a href="/assurance">Assurance</a><a href="/funnel">Funnel</a><a href="/personalize">Personalize</a>
+    <a class="on" href="#">Optimizer A/B</a>
+  </nav>
+</header>
+
+<div class="wrap">
+
+  <!-- ============ THE BOTTOM LINE ============ -->
+  <div class="bl">
+    <h1>The fastest growth isn't a clever headline — it's <span class="hl">switching on self-optimization for two funnels that are flying blind</span>.</h1>
+    <p>We pressure-tested 68 ways to lift conversion across both products. 62 are honest enough to run. The biggest wins aren't risky rewrites — they're turning the engine on where it's currently off, plus a handful of safe, compounding tweaks. Every number below has already been fact-checked down to what's realistic for <i>our</i> buyers.</p>
+  </div>
+
+  <div class="tiles">
+    <div class="tile"><div class="big g">62<span style="font-size:18px;color:var(--mut)"> / 68</span></div><div class="lab">ideas ready to test</div><div class="sub">cleared the honesty &amp; truth-boundary check</div></div>
+    <div class="tile"><div class="big r">6</div><div class="lab">cut before they could mislead</div><div class="sub">promised things we can't prove</div></div>
+    <div class="tile"><div class="big a">2</div><div class="lab">funnels not yet self-optimizing</div><div class="sub">the single biggest opportunity</div></div>
+    <div class="tile"><div class="big c">~3–10%</div><div class="lab">realistic lift per test</div><div class="sub">honest, bankable — not vendor hype</div></div>
+  </div>
+
+  <!-- ============ 1 · WHERE THE GROWTH IS ============ -->
+  <div class="sec">
+    <div class="seclabel">1 · Where the growth is</div>
+    <div class="sech">The biggest lever in each product</div>
+    <p class="secsub">Two different audiences, two different bottlenecks. Fix the bottleneck before polishing the copy.</p>
+
+    <div class="opp">
+      <div class="card">
+        <div class="who">Helix — hospitals &amp; health systems</div>
+        <h3>The lead form is the choke point</h3>
+        <p class="plain">9 fields, 5 of them drop-downs, and no trust signal at the moment someone decides to submit. Shorten it to what the engine actually needs, and put your SOC 2 / HIPAA proof right where the decision happens.</p>
+        <div class="impact">↑ Realistic: ~8–12% more completed forms</div>
+      </div>
+      <div class="card">
+        <div class="who">Academy — career-switchers</div>
+        <h3>The education funnel doesn't learn yet</h3>
+        <p class="plain">Its buttons, proof, and headlines are hard-coded — the self-optimizing engine never touches them. Wiring this funnel onto the engine is worth more than any single clever line, because it improves on its own from then on.</p>
+        <div class="impact">↑ Step-change: a static funnel becomes a learning one</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <p class="plain" style="margin-top:0"><b>Which steps are already optimizing — and which are blind.</b> Green steps improve themselves; amber steps are frozen; red steps we can't even see yet.</p>
+      <div class="frow"><span class="fname"><b>Education — email gate</b></span><span class="fkpi">email-capture rate</span><span class="pill unmeasured">Not measured</span></div>
+      <div class="frow"><span class="fname"><b>Education — landing &amp; signup</b></span><span class="fkpi">landing → signup click</span><span class="pill static">Static</span></div>
+      <div class="frow"><span class="fname"><b>Helix — lead form</b></span><span class="fkpi">form completion</span><span class="pill static">Static</span></div>
+      <div class="frow"><span class="fname"><b>Helix — personalized page &amp; headlines</b></span><span class="fkpi">page → assessment click</span><span class="pill live">Self-optimizing</span></div>
+      <div class="frow"><span class="fname"><b>Helix — thank-you &amp; booked pages</b></span><span class="fkpi">momentum to next step</span><span class="pill static">Static</span></div>
+      <p class="hint" style="margin-top:10px"><b>Why the small numbers add up:</b> these are deliberately honest, low-single-digit lifts. But a few percent at each of six steps compounds — and flipping the two static/blind funnels onto the engine is a one-time step-change, not a tweak.</p>
+    </div>
+  </div>
+
+  <!-- ============ 2 · DO THIS FIRST ============ -->
+  <div class="sec">
+    <div class="seclabel">2 · Do this first</div>
+    <div class="sech">The 6-test launch plan</div>
+    <p class="secsub">Ordered by fastest, safest, lowest-effort first. Each is framed as a business change; open "how it's wired" for the engineering.</p>
+
+    <div class="wave">
+      <div class="wstep">
+        <div class="head"><div class="num">1</div><h4>Lead with your hardest number, by buyer type</h4><span class="tag">Quick win</span></div>
+        <p class="what">For clinical-ops buyers, test a headline that opens with the proof — "Reduce average length of stay by 1.2 days" — instead of a soft promise. It uses a claim we've already verified, so it's safe by construction.</p>
+        <div class="badges"><span class="b impact"><span class="k">Lifts</span>page → assessment</span><span class="b"><span class="k">Realistic</span>0–4%</span><span class="b eff"><span class="k">Effort</span>S</span><span class="b risk-low"><span class="k">Risk</span>Low</span></div>
+        <details><summary>How it's wired</summary><div class="wiring">One new headline option added to the clinops set; the engine auto-checks it against the Gate and starts testing it as a third arm — no other code change.</div></details>
+      </div>
+
+      <div class="wstep">
+        <div class="head"><div class="num">2</div><h4>"Your" → "My" on the assessment button</h4><span class="tag">Quick win</span></div>
+        <p class="what">Test first-person button copy ("Start <b>my</b> ROI assessment"). A small, near-free swap — but let the engine decide per buyer, since it can read as too casual for CFOs and security leads.</p>
+        <div class="badges"><span class="b impact"><span class="k">Lifts</span>page → assessment</span><span class="b"><span class="k">Realistic</span>0–6%</span><span class="b eff"><span class="k">Effort</span>S</span><span class="b risk-low"><span class="k">Risk</span>Low</span></div>
+        <details><summary>How it's wired</summary><div class="wiring">Button text becomes a tested variant on the personalized page; the engine keeps a separate score per buyer segment and down-weights "my" where it underperforms.</div></details>
+      </div>
+
+      <div class="wstep">
+        <div class="head"><div class="num">3</div><h4>Switch on self-optimization for the education funnel</h4><span class="tag stepchange">Step-change</span></div>
+        <p class="what">The education landing buttons are fixed text today. Make them something the engine can test and improve. This is the highest-leverage move in the plan — the funnel starts getting better on its own, and it's the audience where the evidence transfers best.</p>
+        <div class="badges"><span class="b impact"><span class="k">Lifts</span>landing → signup</span><span class="b"><span class="k">Realistic</span>+5–7%</span><span class="b eff"><span class="k">Effort</span>M</span><span class="b risk-low"><span class="k">Risk</span>Low</span></div>
+        <details><summary>How it's wired</summary><div class="wiring">Convert the per-archetype CTA from a fixed string to a small set of options the engine selects from, rewarded on the signup click that's already logged. This stands up the education bandit for the first time.</div></details>
+      </div>
+
+      <div class="wstep">
+        <div class="head"><div class="num">4</div><h4>Start measuring the entry gate at all</h4><span class="tag blindspot">Fix the blind spot</span></div>
+        <p class="what">The email gate isn't even tracked today, so we can't tell how many people get through it. Add the tracking first, then test a clearer button ("Build my page" instead of "Go"). The real win is finally being able to see — and improve — the very top of the funnel.</p>
+        <div class="badges"><span class="b impact"><span class="k">Lifts</span>email-capture</span><span class="b"><span class="k">Realistic</span>+3–12%</span><span class="b eff"><span class="k">Effort</span>M</span><span class="b risk-low"><span class="k">Risk</span>Low</span></div>
+        <details><summary>How it's wired</summary><div class="wiring">Add an enter-rate event to the gate, then a small button-text test on top. The new copy makes no factual claim, so it clears the Gate trivially.</div></details>
+      </div>
+
+      <div class="wstep">
+        <div class="head"><div class="num">5</div><h4>Put your trust badges where the decision happens</h4><span class="tag">Quick win</span></div>
+        <p class="what">Show SOC 2 / HIPAA / "deployed across 12 systems" right next to the lead form — these are real, verified claims, and SOC 2 is a genuine procurement gate for health systems. Strongest for security and quality buyers.</p>
+        <div class="badges"><span class="b impact"><span class="k">Lifts</span>form completion</span><span class="b"><span class="k">Realistic</span>+5–8%</span><span class="b eff"><span class="k">Effort</span>M</span><span class="b risk-low"><span class="k">Risk</span>Low</span></div>
+        <details><summary>How it's wired</summary><div class="wiring">A proof strip sourced from the same verified claims the product already uses; the engine learns which proof to lead with per buyer. Nothing un-provable can appear.</div></details>
+      </div>
+
+      <div class="wstep">
+        <div class="head"><div class="num">6</div><h4>Reassure at the submit button — but test the wording carefully</h4><span class="tag guardrail">Guardrail test</span></div>
+        <p class="what">Add a short reassurance line above submit. Test positive framing ("2 min · no sales call") against a "we never sell your data" line — because negative wording like that has been measured <i>cutting</i> conversion ~19% elsewhere. The point of this test is to catch the version that backfires before it ships.</p>
+        <div class="badges"><span class="b impact"><span class="k">Lifts</span>form completion</span><span class="b"><span class="k">Realistic</span>−5 to +10%</span><span class="b eff"><span class="k">Effort</span>S</span><span class="b risk-med"><span class="k">Risk</span>Medium</span></div>
+        <details><summary>How it's wired</summary><div class="wiring">Three variants {none, positive, "never sell"} as a context feature, each routed through the Gate so the wording must stay operationally true of the flow.</div></details>
+      </div>
+    </div>
+    <p class="hint" style="margin-top:6px"><b>One rule across all six:</b> reward the engine on the deepest signal you trust (a booked assessment or enrollment over a raw click), so it never learns to win a vanity metric at the funnel's expense.</p>
+  </div>
+
+  <!-- ============ 3 · WHY YOU CAN TRUST THESE NUMBERS ============ -->
+  <div class="sec">
+    <div class="seclabel">3 · Why you can trust these numbers</div>
+    <div class="sech">We deflate the hype before you spend a sprint on it</div>
+    <p class="secsub">This is the same discipline that keeps the product honest, pointed at our own growth roadmap: nothing goes on the list that we can't stand behind.</p>
+
+    <div class="card">
+      <p class="plain" style="margin-top:0"><span class="measures">The honesty check</span>We didn't just brainstorm 68 ideas — we adversarially fact-checked every high-stakes one. The famous "+90% from one word" CRO numbers are business-to-consumer outliers or mis-attributed; the chart below shows what was <b>claimed</b> versus what's <b>realistic</b> for hospital buyers and career-switchers. The gap is the hype we removed so you don't pay for it in a wasted test.</p>
+      <div class="two">
+        <div><div id="bars"></div></div>
+        <div>
+          <div class="reading">Fact-checking <b>cut 6 of 68 ideas outright</b> and pulled <b>nearly every</b> remaining lift down to low single digits. Most-deflated: the classic first-person-button and field-cut claims — real in retail checkout, largely absent on a captive sign-up gate or a multi-stakeholder hospital form.</div>
+          <p class="hint" style="margin-top:10px">The most over-claimed idea promised +8–25% from a "free · no-obligation · 15-minute" assessment button — <b style="color:var(--red)">cut to zero</b>, because none of that is true (the product is priced per record and the "15 minutes" was invented). We won't ship a claim we can't back, even to win a click.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="plain" style="margin-top:0"><b>The 6 ideas we cut — and why.</b> Each one would have put a claim in front of a customer that we can't prove. That's the same line the product itself never crosses.</p>
+      <table class="evt"><thead><tr><th>The idea</th><th>Why we cut it</th></tr></thead><tbody>
+        <tr class="cutrow"><td class="cuttest">"Free, 15-min, no-obligation" button</td><td>The product is priced per record and the 15-minute figure was invented — none of it is provable.</td></tr>
+        <tr class="cutrow"><td class="cuttest">"The info you already shared"</td><td>Implies the visitor gave us consent, but some of that data was purchased / enriched — a claim we don't have.</td></tr>
+        <tr class="cutrow"><td class="cuttest">"Shorten your patients' stays by 1.2 days"</td><td>Turns an <i>average</i> result into a personal promise to one reader — over-claiming.</td></tr>
+        <tr class="cutrow"><td class="cuttest">"N independent sources on file"</td><td>The count was inflated (claims share sources), and self-rendered receipts aren't truly "independent."</td></tr>
+        <tr class="cutrow"><td class="cuttest">"92% finish — across 600+ enrollments"</td><td>Mixes two different denominators (graduates hired vs. students enrolled) — not a clean stat.</td></tr>
+        <tr class="cutrow"><td class="cuttest">"We'll be in touch within one business day"</td><td>An SLA the operations team may not actually hit; softened to "shortly."</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+
+  <!-- ============ 4 · THE ONE BIG IDEA ============ -->
+  <div class="sec">
+    <div class="seclabel">4 · The one big idea</div>
+    <div class="sech">Transparency is a dial, not a free win</div>
+    <p class="secsub">Showing your proof builds trust — up to a point. Past that point it backfires. The engine should find the right setting per audience, and the creepy setting should be locked out of reach.</p>
+    <div class="card">
+      <div class="callout"><b>Turning the dial up helps with cautious buyers.</b> Showing the verified sources behind each claim reassures risk-averse hospital buyers — it's third-party-style proof a plain marketing sentence isn't. Worth roughly <b>+3–12%</b> for those segments.</div>
+      <div class="callout bad"><b>Turning it too far backfires.</b> Telling a visitor "we noticed you're a [title] at [company] — even though you never filled out a form" reads as surveillance and depresses conversion. It's the one setting that crosses from "helpful" to "creepy."</div>
+      <p class="plain"><b>The control:</b> let the engine optimize the safe range of personalization, and <b>lock the "creepy" setting out of reach entirely</b> — the same way the product makes an unprovable claim unreachable, not merely discouraged. Reward on the booking or enrollment, with a penalty for unsubscribes, so a creepy-but-clicky variant gets punished, not rewarded.</p>
+    </div>
+  </div>
+
+  <!-- ============ 5 · THE FULL BACKLOG ============ -->
+  <div class="sec">
+    <div class="seclabel">5 · The full test backlog</div>
+    <div class="sech">All 62 ready tests, organized by funnel step</div>
+    <p class="secsub">Business view. "Realistic impact" is the fact-checked number, not the original claim. Status: <span class="stat quick">Quick win</span> low effort · <span class="stat ready">Ready</span> needs build · <span class="stat watch">Watch</span> has a downside to catch.</p>
+
+    <div class="card">
+      <div class="grouphd">Helix — lead form (biggest lever)</div>
+      <table class="evt"><thead><tr><th>Change</th><th>What it moves</th><th>Realistic impact</th><th>Effort</th><th>Status</th></tr></thead><tbody>
+        <tr><td>Shorten the form to 4 fields (keep what the engine needs)</td><td>form completion</td><td class="impactcell">+8–12%</td><td>M</td><td><span class="stat ready">Ready</span></td></tr>
+        <tr><td>Add SOC 2 / HIPAA proof strip beside the form</td><td>form completion</td><td class="impactcell">+5–8%</td><td>M</td><td><span class="stat quick">Quick win</span></td></tr>
+        <tr><td>Headline that names the deliverable / buyer role</td><td>form completion</td><td class="impactcell">+2–8%</td><td>S</td><td><span class="stat quick">Quick win</span></td></tr>
+        <tr><td>Reassurance line above submit (test the wording)</td><td>form completion</td><td class="impactcell flat">−5 to +10%</td><td>S</td><td><span class="stat watch">Watch</span></td></tr>
+        <tr><td>Button: "Send me the report" → "Get my ROI report"</td><td>form completion</td><td class="impactcell flat">~flat</td><td>S</td><td><span class="stat quick">Quick win</span></td></tr>
+      </tbody></table>
+
+      <div class="grouphd">Helix — personalized page &amp; headlines (already self-optimizing)</div>
+      <table class="evt"><thead><tr><th>Change</th><th>What it moves</th><th>Realistic impact</th><th>Effort</th><th>Status</th></tr></thead><tbody>
+        <tr><td>Lead clinical-ops headline with the hard LOS number</td><td>page → assessment</td><td class="impactcell">0–4%</td><td>S</td><td><span class="stat quick">Quick win</span></td></tr>
+        <tr><td>"Start your" → "Start my ROI assessment"</td><td>page → assessment</td><td class="impactcell">0–6%</td><td>S</td><td><span class="stat quick">Quick win</span></td></tr>
+        <tr><td>CFO headline: "Stop overpaying — cut total cost 47%"</td><td>page → assessment</td><td class="impactcell flat">−5 to +10%</td><td>S</td><td><span class="stat ready">Ready</span></td></tr>
+        <tr><td>Security headline as a question ("Will it pass review?")</td><td>page → assessment</td><td class="impactcell flat">~0</td><td>S</td><td><span class="stat ready">Ready</span></td></tr>
+      </tbody></table>
+
+      <div class="grouphd">Helix — thank-you &amp; booked pages</div>
+      <table class="evt"><thead><tr><th>Change</th><th>What it moves</th><th>Realistic impact</th><th>Effort</th><th>Status</th></tr></thead><tbody>
+        <tr><td>Stronger next-step button on the thank-you page</td><td>thanks → page</td><td class="impactcell">+1–3%</td><td>S</td><td><span class="stat quick">Quick win</span></td></tr>
+        <tr><td>Self-schedule / add-to-calendar on the booked page</td><td>fewer no-shows</td><td class="impactcell">+2–8%</td><td>M</td><td><span class="stat ready">Ready</span></td></tr>
+      </tbody></table>
+
+      <div class="grouphd">Academy — landing &amp; signup (switch on self-optimization)</div>
+      <table class="evt"><thead><tr><th>Change</th><th>What it moves</th><th>Realistic impact</th><th>Effort</th><th>Status</th></tr></thead><tbody>
+        <tr><td>Put the CTA buttons on the engine (first-person + outcome)</td><td>landing → signup</td><td class="impactcell">+5–7%</td><td>M</td><td><span class="stat ready">Ready</span></td></tr>
+        <tr><td>Lead the hero with "+$38K median, even if non-tech"</td><td>landing → signup</td><td class="impactcell">+3–12%</td><td>S</td><td><span class="stat quick">Quick win</span></td></tr>
+        <tr><td>Let the engine pick proof format (stats vs. story)</td><td>landing → signup</td><td class="impactcell">+1–5%</td><td>M</td><td><span class="stat ready">Ready</span></td></tr>
+        <tr><td>Mirror the visitor's own stated goal in the sub-headline</td><td>landing → signup</td><td class="impactcell">+3–12%</td><td>S</td><td><span class="stat quick">Quick win</span></td></tr>
+        <tr><td>Optimize personalization depth (safe range only)</td><td>landing → signup</td><td class="impactcell">+1–6%</td><td>M</td><td><span class="stat ready">Ready</span></td></tr>
+      </tbody></table>
+
+      <div class="grouphd">Academy — email gate (start measuring it)</div>
+      <table class="evt"><thead><tr><th>Change</th><th>What it moves</th><th>Realistic impact</th><th>Effort</th><th>Status</th></tr></thead><tbody>
+        <tr><td>Button: "Go" → "Build my page" (+ add tracking)</td><td>email-capture</td><td class="impactcell">+3–12%</td><td>M</td><td><span class="stat watch">Watch</span></td></tr>
+        <tr><td>Add a "no spam / page-only" reassurance line</td><td>email-capture</td><td class="impactcell">+2–6%</td><td>S</td><td><span class="stat quick">Quick win</span></td></tr>
+        <tr><td>Fix the error that sends real members to demo accounts</td><td>email-capture</td><td class="impactcell">+5–12%</td><td>S</td><td><span class="stat quick">Quick win</span></td></tr>
+      </tbody></table>
+      <p class="ann">Showing the highest-value tests per step; the full 62 with citations and engineering wiring are in <code style="color:#9fd6df">docs/AB-TEST-OPPORTUNITIES.md</code>.</p>
+    </div>
+  </div>
+
+  <!-- appendix -->
+  <div class="sec">
+    <div class="card"><details><summary style="color:var(--accent);cursor:pointer;font-size:13.5px">▸ Appendix — how this list was produced</summary>
+      <div class="plain" style="margin-top:11px">
+        <p><b>Fan-out:</b> a research swarm of 10 parallel lanes proposed 68 ship-ready tests — 5 covering specific pages (entry gate, education landing, Helix form, Helix page, thank-you/booked) and 5 covering cross-cutting levers (headlines, buttons, form design, social proof, and the transparency dial).</p>
+        <p><b>Fact-check:</b> every high-impact idea was handed to a skeptic whose job was to disprove it — checking the cited evidence is real (1,057 source look-ups), that it transfers to our buyers rather than retail shoppers, and that the wording stays inside the product's truth boundary. Result: 6 cut, nearly all lifts corrected down.</p>
+        <p><b>Why the deflation:</b> public conversion-rate evidence is overwhelmingly retail/e-commerce; the headline numbers are single-test outliers or mis-attributed. Our buyers are multi-stakeholder, risk-averse health systems and self-selected career-switchers — so the honest expectation is smaller, compounding wins.</p>
+        <p class="hint">Full report: <code style="color:#9fd6df">docs/AB-TEST-OPPORTUNITIES.md</code> · source run <code style="color:#9fd6df">wf_232c4b39-b48</code>.</p>
+      </div>
+    </details></div>
+  </div>
+
+  <div class="foot">Provenance · Optimizer Assurance Lab — the same honesty discipline that keeps the product's claims provable, applied to the growth roadmap. Every test on this page is one we'd stand behind.</div>
+</div>
+
+<script id="bardata" type="application/json">
+[
+  {"id":"Edu CTA on engine","claimed":16.5,"corrected":6,"cut":false},
+  {"id":"Salary-anchor hero","claimed":14,"corrected":7.5,"cut":false},
+  {"id":"Shorten the form","claimed":27,"corrected":10,"cut":false},
+  {"id":"Trust strip on form","claimed":7,"corrected":6.5,"cut":false},
+  {"id":"\"Your\"→\"My\" button","claimed":12,"corrected":3,"cut":false},
+  {"id":"Friction-verb button","claimed":5,"corrected":1.5,"cut":false},
+  {"id":"Reassurance line","claimed":16.5,"corrected":2.5,"cut":false},
+  {"id":"\"Free 15-min\" button","claimed":16.5,"corrected":0,"cut":true}
+]
+</script>
+<script>
+(function(){
+  const DATA = JSON.parse(document.getElementById('bardata').textContent);
+  const W=560,H=300,padL=34,padB=86,padT=10,maxY=30;
+  const n=DATA.length, slot=(W-padL-8)/n, bw=Math.min(17, slot/2.6);
+  const y=v=> (H-padB) - (Math.min(maxY,Math.max(0,v))/maxY)*(H-padB-padT);
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px">`;
+  [0,10,20,30].forEach(t=>{ const yy=y(t);
+    s+=`<line x1="${padL}" y1="${yy}" x2="${W-4}" y2="${yy}" stroke="#1f2c3e"/>`;
+    s+=`<text x="${padL-6}" y="${yy+3}" font-size="9" fill="#7e8ea3" text-anchor="end">${t}%</text>`; });
+  DATA.forEach((d,i)=>{
+    const cx=padL+8+i*slot;
+    s+=`<rect x="${cx}" y="${y(d.claimed)}" width="${bw}" height="${(H-padB)-y(d.claimed)}" fill="#d98a16" opacity="0.85" rx="1"/>`;
+    const col = d.cut ? '#e0524a' : '#4cc4d4';
+    const ch = Math.max(1.5,(H-padB)-y(d.corrected));
+    s+=`<rect x="${cx+bw+2}" y="${y(d.corrected)}" width="${bw}" height="${ch}" fill="${col}" rx="1"/>`;
+    if(d.cut) s+=`<text x="${cx+bw}" y="${y(0)-3}" font-size="8.5" fill="#e0524a" text-anchor="middle">cut</text>`;
+    s+=`<text x="${cx+bw}" y="${H-padB+12}" font-size="8.5" fill="#9aa7b6" text-anchor="end" transform="rotate(-38 ${cx+bw} ${H-padB+12})">${d.id}</text>`;
+  });
+  s+=`<rect x="${padL}" y="${padT}" width="9" height="9" fill="#d98a16" opacity="0.85"/><text x="${padL+13}" y="${padT+8}" font-size="10.5" fill="#aeb9c7">what was claimed</text>`;
+  s+=`<rect x="${padL+118}" y="${padT}" width="9" height="9" fill="#4cc4d4"/><text x="${padL+131}" y="${padT+8}" font-size="10.5" fill="#aeb9c7">realistic for our buyers</text>`;
+  s+=`</svg>`;
+  document.getElementById('bars').innerHTML=s;
+})();
+</script>
+</body>
+</html>

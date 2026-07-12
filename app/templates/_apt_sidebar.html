@@ -1,0 +1,40 @@
+{# Shared apt console-shell sidebar. Reads: brand, active {logo_bg,logo_ch,name,domain},
+   tenants[], add_new_href, nav{channels,consoles,observatory,costs,replica}, active_nav. #}
+<aside class="side">
+  <div class="brand"><span class="mk">◈</span> {{ brand | default('apt') }}</div>
+
+  <div class="navlbl">Website</div>
+  <details class="ws-dd">
+    <summary>
+      <span class="lg" style="background:{{ active.logo_bg }}">{{ active.logo_ch }}</span>
+      <div class="nm">{{ active.name }}<span>{{ active.domain }}</span></div>
+      <span class="cv">▾</span>
+    </summary>
+    <div class="ws-menu">
+      {% for t in tenants %}
+      <a class="ws-mi {{ 'on' if t.active else '' }}" href="{{ t.href }}">
+        <span class="lg" style="background:{{ t.logo_bg }}">{{ t.logo_ch }}</span> {{ t.name }}
+        {% if t.active %}<span class="ck">✓</span>{% endif %}
+      </a>
+      {% endfor %}
+      <a class="ws-mi add" href="{{ add_new_href }}"><span class="lg">+</span> Add new website</a>
+    </div>
+  </details>
+
+  <div class="navlbl">Demo</div>
+  <nav class="nav">
+    <a class="{{ 'on' if active_nav == 'channels' else '' }}" href="{{ nav.channels }}"><span class="ic">◧</span> Channels</a>
+    <a class="{{ 'on' if active_nav == 'consoles' else '' }}" href="{{ nav.consoles }}"><span class="ic">◑</span> Consoles</a>
+    <a class="{{ 'on' if active_nav == 'observatory' else '' }}" href="{{ nav.observatory }}"><span class="ic">◔</span> Observatory</a>
+    <a class="{{ 'on' if active_nav == 'costs' else '' }}" href="{{ nav.costs }}"><span class="ic">$</span> Costs</a>
+  </nav>
+  <div class="navlbl">Live page</div>
+  <nav class="nav">
+    <a href="{{ nav.replica }}"><span class="ic">↗</span> Open replica</a>
+  </nav>
+
+  <div class="foot">
+    <span class="av">JC</span>
+    <div class="nm">Demo operator<span>apt workspace</span></div>
+  </div>
+</aside>

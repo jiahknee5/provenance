@@ -1,0 +1,241 @@
+{#- /ads — 12 full-fidelity X.com promoted-post mockups in a grid. Marketer metadata
+    sits outside each post; the card itself matches real X timeline styling (2025/26). -#}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Planet X Ads — 12 Targeting Types</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#07090a; --line:#16233a; --line2:#1f3355;
+      --blu:#009da5; --blu-t:#00cbe6; --ink:#eef3f9; --dim:#68798e;
+      --sans:'Montserrat',sans-serif; --ui:'Montserrat',sans-serif; --mono:'JetBrains Mono',monospace;
+      --cat-vert:#3fa34d; --cat-aud:#8a5cf6;
+      /* X.com dark-timeline tokens (computed from x.com/Planet, Jul 2026) */
+      --x-font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      --x-bg:#000; --x-post-bg:#000; --x-text:#e7e9ea; --x-muted:#71767b;
+      --x-link:#1d9bf0; --x-border:#2f3336; --x-card-bg:#16181c;
+      --x-hover:rgba(231,233,234,.1);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--ink);font:13px/1.45 var(--ui);-webkit-font-smoothing:antialiased;padding:18px 22px 40px}
+    a{color:inherit;text-decoration:none}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}
+    h1{font:600 18px/1 var(--sans);color:#fff}
+    .sub{font:12px var(--ui);color:var(--dim);margin:6px 0 16px}
+    .nav{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap}
+    .nav a{font:600 11px var(--ui);border:1px solid var(--line2);border-radius:5px;padding:4px 10px;color:var(--blu-t);white-space:nowrap}
+    .nav a:hover{border-color:var(--blu);color:#fff}
+    .cat{margin:18px 0 10px;display:flex;align-items:center;gap:10px}
+    .cat .tag{font:700 10px var(--ui);letter-spacing:.06em;text-transform:uppercase;color:#fff;border-radius:4px;padding:2px 8px}
+    .cat.vertical .tag{background:var(--cat-vert)}
+    .cat.audience .tag{background:var(--cat-aud)}
+    .cat .n{font:11px var(--mono);color:var(--dim)}
+    .grid{display:grid;gap:20px;grid-template-columns:repeat(auto-fill,minmax(520px,1fr))}
+    @media(max-width:560px){.grid{grid-template-columns:1fr}}
+
+    /* --- ad-manager chrome (outside the X post) --- */
+    .ad-slot{display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0a1018}
+    .ad-slot.cat-vertical{border-top:3px solid var(--cat-vert)}
+    .ad-slot.cat-audience{border-top:3px solid var(--cat-aud)}
+    .ad-manager{padding:8px 12px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--line);font:10px var(--mono);color:var(--dim)}
+    .ad-manager-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
+    .ad-manager-type{font:600 11.5px var(--sans);color:#fff}
+    .ad-manager-seg{font:10px var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--blu-t)}
+    .ad-manager-config{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+    .ad-manager-utms{display:flex;gap:4px;flex-wrap:wrap}
+    .ad-manager-utms span{border:1px solid var(--line2);border-radius:3px;padding:1px 6px;font-size:9px}
+    .ad-slot-foot{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-top:1px solid var(--line);background:rgba(255,255,255,.02);font:10.5px var(--ui);color:var(--dim)}
+    .ad-slot-foot b{color:var(--ink);font-weight:600}
+    .ad-slot-foot a{color:var(--blu-t);font-weight:600}
+    .ad-slot-foot a:hover{color:#fff}
+
+    /* --- X.com post (dark timeline) --- */
+    .x-post-link{display:block;background:var(--x-post-bg);transition:background .12s}
+    .x-post-link:hover{background:var(--x-hover)}
+    article.x-post{
+      display:grid;grid-template-columns:52px 1fr;gap:0 12px;
+      padding:12px 16px 4px;font-family:var(--x-font);color:var(--x-text);
+      max-width:598px;width:100%;
+    }
+    .x-avatar-col{padding-top:2px}
+    .x-avatar{
+      width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+      font:700 13px var(--x-font);color:#fff;flex-shrink:0;
+    }
+    .x-main{min-width:0}
+    .x-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:2px}
+    .x-names{display:flex;flex-wrap:wrap;align-items:baseline;gap:0;line-height:20px;font-size:15px}
+    .x-display{font-weight:700;color:var(--x-text);margin-right:2px}
+    .x-verified{display:inline-flex;vertical-align:text-bottom;margin:0 2px 0 0}
+    .x-verified svg{width:18px;height:18px;display:block}
+    .x-handle,.x-dot,.x-time{color:var(--x-muted);font-weight:400}
+    .x-handle{margin-left:2px}
+    .x-dot{margin:0 2px}
+    .x-promoted{
+      font:13px/1.3 var(--x-font);color:var(--x-muted);margin:0 0 8px;
+    }
+    .x-more{
+      flex-shrink:0;width:34px;height:34px;border:none;background:transparent;border-radius:9999px;
+      display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--x-muted);
+    }
+    .x-more:hover{background:var(--x-hover);color:var(--x-link)}
+    .x-more svg{width:18px;height:18px}
+    .x-text{
+      font:15px/20px var(--x-font);color:var(--x-text);white-space:pre-wrap;word-wrap:break-word;
+      margin-bottom:12px;
+    }
+    .x-text a.x-mention{color:var(--x-link)}
+    .x-card{
+      display:block;border:1px solid var(--x-border);border-radius:16px;overflow:hidden;
+      margin-bottom:12px;background:var(--x-card-bg);transition:background .12s;
+    }
+    .x-card:hover{background:rgba(22,24,28,.85)}
+    .x-card-img{
+      height:130px;background:linear-gradient(135deg,#0d1a24 0%,#0a2a30 45%,#009da5 100%);
+      position:relative;overflow:hidden;
+    }
+    .x-card-img::after{
+      content:'';position:absolute;inset:0;
+      background:linear-gradient(90deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.15) 48%,rgba(0,157,165,.35) 100%);
+    }
+    .x-card-img-label{
+      position:absolute;left:12px;bottom:10px;right:12px;z-index:1;
+      font:700 13px/1.25 var(--x-font);color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6);
+    }
+    .x-card-body{padding:10px 12px 12px;border-top:1px solid var(--x-border)}
+    .x-card-domain{font:13px var(--x-font);color:var(--x-muted);margin-bottom:2px}
+    .x-card-title{
+      font:15px/1.3 var(--x-font);color:var(--x-text);font-weight:400;
+      display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+    }
+    .x-card-desc{
+      font:13px/1.35 var(--x-font);color:var(--x-muted);margin-top:4px;
+      display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+    }
+    .x-actions{
+      display:flex;align-items:center;justify-content:space-between;
+      max-width:425px;margin:2px 0 8px -8px;
+    }
+    .x-actions button{
+      display:inline-flex;align-items:center;gap:4px;border:none;background:transparent;
+      color:var(--x-muted);font:13px var(--x-font);padding:8px;border-radius:9999px;cursor:default;
+    }
+    .x-actions button:hover{background:var(--x-hover)}
+    .x-actions svg{width:18px;height:18px;flex-shrink:0}
+    .x-actions .x-count{font-size:13px;min-width:0}
+    .chip{position:fixed;right:12px;bottom:10px;font:600 10px var(--ui);color:#c2cddb;background:rgba(8,14,26,.92);border:1px solid var(--line2);border-radius:12px;padding:5px 10px}
+    .chip:hover{color:#fff;border-color:var(--blu)}
+  </style>
+</head>
+<body>
+<header class="top">
+  <h1>Planet X Ads — 12 Targeting Types, 9 Market Segments</h1>
+  <nav class="nav">
+    <a href="{{ demo_hub_path }}">← Demo sitemap</a>
+    <a href="{{ g.page }}">Landing</a>
+    <a href="{{ g.ads_lp }}">LP variants</a>
+    <a href="{{ g.dev }}">/dev</a>
+    <a href="{{ g.image_decisions }}">Image decisions</a>
+    <a href="/showcase">Showcase</a>
+  </nav>
+</header>
+<p class="sub">Each card is a full-fidelity X promoted post (dark timeline styling). Click the link
+preview to open its message-matched landing URL. LP previews live on
+<a href="{{ g.ads_lp }}" style="color:var(--blu-t)">{{ g.ads_lp }}</a>.</p>
+
+{% for sec in sections %}
+<div class="cat {{ sec.category }}">
+  <span class="tag">{{ sec.label }}</span>
+  <span class="n">{{ sec.variants|length }} variants</span>
+</div>
+<div class="grid">
+  {% for item in sec.variants %}
+  {% set v = item.variant %}
+  <div class="ad-slot cat-{{ sec.category }}">
+    <div class="ad-manager">
+      <div class="ad-manager-top">
+        <span class="ad-manager-type">{{ v.x_targeting_type }}</span>
+        <span class="ad-manager-seg">{{ v.segment }}</span>
+      </div>
+      <div class="ad-manager-config" title="{{ v.x_targeting_example }}">X config: {{ v.x_targeting_example }}</div>
+      <div class="ad-manager-utms">
+        <span>utm_source=x</span>
+        <span>utm_medium=paid</span>
+        <span>utm_campaign={{ v.utm_campaign }}</span>
+        <span>utm_content={{ v.variant_id }}</span>
+      </div>
+    </div>
+    <a class="x-post-link" href="{{ item.landing_url }}">
+      <article class="x-post" aria-label="Promoted post from {{ v.ad.display }}">
+        <div class="x-avatar-col">
+          <div class="x-avatar" style="background:{{ v.ad.accent }}">{{ v.ad.avatar }}</div>
+        </div>
+        <div class="x-main">
+          <div class="x-header">
+            <div class="x-names">
+              <span class="x-display">{{ v.ad.display }}</span>
+              <span class="x-verified" aria-label="Verified account">
+                <svg viewBox="0 0 22 22" aria-hidden="true"><path fill="#e7b638" d="M20.396 11c-.018-.646-.215-1.279-.57-1.836-.354-.557-.852-1.03-1.44-1.366-1.44-.96-3.338-1.04-4.86-.2-.49.28-.926.655-1.28 1.1-.72.9-1.12 2.05-1.1 3.22.02 1.17.46 2.28 1.22 3.15.76.87 1.84 1.38 2.98 1.42 1.14.04 2.26-.38 3.1-1.16.84-.78 1.34-1.88 1.38-3.04.04-1.16-.34-2.28-1.04-3.14-.35-.43-.78-.8-1.28-1.1-.49-.3-1.04-.5-1.62-.58-.58-.08-1.18-.04-1.74.12-.56.16-1.08.44-1.52.82-.44.38-.8.84-1.06 1.36-.26.52-.42 1.1-.46 1.68-.04.58.04 1.16.24 1.7.2.54.52 1.02.94 1.4.42.38.92.66 1.46.82.54.16 1.12.2 1.68.12.56-.08 1.1-.28 1.58-.58.48-.3.9-.68 1.24-1.12.34-.44.6-.94.76-1.48.16-.54.22-1.1.18-1.66-.04-.56-.18-1.1-.42-1.6-.24-.5-.58-.94-1-1.28-.42-.34-.92-.58-1.46-.7-.54-.12-1.1-.12-1.64 0-.54.12-1.04.36-1.46.7-.42.34-.76.78-1 1.28-.24.5-.38 1.04-.42 1.6-.04.56.02 1.12.18 1.66.16.54.42 1.04.76 1.48.34.44.76.82 1.24 1.12.48.3 1.02.5 1.58.58.56.08 1.14.04 1.68-.12.54-.16 1.04-.44 1.46-.82.42-.38.74-.86.94-1.4.2-.54.28-1.12.24-1.7-.04-.58-.2-1.16-.46-1.68-.26-.52-.62-.98-1.06-1.36-.44-.38-.96-.66-1.52-.82-.56-.16-1.16-.2-1.74-.12-.58.08-1.13.28-1.62.58-.49.3-.93.67-1.28 1.1-.7.86-1.08 1.98-1.04 3.14.04 1.16.54 2.26 1.38 3.04.84.78 1.96 1.2 3.1 1.16 1.14-.04 2.22-.55 2.98-1.42.76-.87 1.2-1.98 1.22-3.15.02-1.17-.38-2.32-1.1-3.22-.35-.45-.79-.82-1.28-1.1-1.52-.84-3.42-.76-4.86.2-.59.34-1.09.81-1.44 1.37-.35.56-.55 1.19-.57 1.84 0 .65.18 1.28.52 1.84.34.56.82 1.03 1.4 1.36 1.16.72 2.66.72 3.82 0 .58-.33 1.06-.8 1.4-1.36.34-.56.52-1.19.52-1.84z"/><path fill="#fff" d="M9.5 14.2 6.8 11.5l1.1-1.1 1.6 1.6 4.2-4.2 1.1 1.1z"/></svg>
+              </span>
+              <span class="x-handle">@{{ v.ad.handle }}</span>
+              <span class="x-dot">·</span>
+              <span class="x-time">2h</span>
+            </div>
+            <button type="button" class="x-more" tabindex="-1" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+            </button>
+          </div>
+          <p class="x-promoted">Promoted</p>
+          <div class="x-text">{{ v.ad.trigger }} {{ v.ad.body }} {{ v.ad.proof }}</div>
+          <div class="x-card">
+            <div class="x-card-img" style="background:linear-gradient(135deg,#0d1a24 0%,{{ v.ad.accent }}88 55%,{{ v.ad.accent }} 100%)">
+              <div class="x-card-img-label">{{ v.page.h1_pre }}{{ v.page.h1_blue }}</div>
+            </div>
+            <div class="x-card-body">
+              <div class="x-card-domain">planet.com</div>
+              <div class="x-card-title">{{ v.page.h1_pre }}{{ v.page.h1_blue }}</div>
+              <div class="x-card-desc">{{ v.ad.cta_label }}</div>
+            </div>
+          </div>
+          <div class="x-actions x-engagement-bar" role="group" aria-label="Post engagement">
+            <button type="button" tabindex="-1" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M1.751 10c0-4.42 3.58-8 8-8h4.5c4.42 0 8 3.58 8 8 0 4.42-3.58 8-8 8h-4.5c-4.42 0-8-3.58-8-8z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 10h8M8 14h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              <span class="x-count">18</span>
+            </button>
+            <button type="button" tabindex="-1" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5c-2.209 0-4-1.79-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM16.5 6H11V4h5.5c2.209 0 4 1.79 4 4v8.45l2.068-1.93 1.364 1.46-4.432 4.14-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2z"/></svg>
+              <span class="x-count">42</span>
+            </button>
+            <button type="button" tabindex="-1" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"/></svg>
+              <span class="x-count">1.2K</span>
+            </button>
+            <button type="button" tabindex="-1" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <span class="x-count">84K</span>
+            </button>
+            <button type="button" tabindex="-1" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5z"/></svg>
+            </button>
+            <button type="button" tabindex="-1" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.59l5.7 5.7-1.41 1.42L13 6.41V16h-2V6.41l-3.29 3.3-1.41-1.42L12 2.59zM5 18h14v2H5v-2z"/></svg>
+            </button>
+          </div>
+        </div>
+      </article>
+    </a>
+    <div class="ad-slot-foot">
+      <span>Best for <b>{{ v.audience_fit_label }}</b></span>
+      <a href="{{ item.single_url }}">Full mockup →</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endfor %}
+
+<a class="chip" href="{{ g.dev }}">decisions → {{ g.dev }}</a>
+</body>
+</html>

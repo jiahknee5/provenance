@@ -1,0 +1,568 @@
+# Design prompt database — reference catalog for image prompts (and future copy slots).
+# Loader: pipeline/personalization/design_prompts.py
+# Runtime image generation still uses rules/*_image.yaml via image_gen (v1 unchanged).
+version: 1
+
+meta:
+  description: >-
+    Human-editable reference database of assembled image prompts with resolved examples.
+    Copy lane entries document slot assembly (no LLM prompts today). Image entries
+    mirror intent templates in rules/gauntlet_image.yaml and rules/planet_image.yaml
+    without duplicating full YAML — use source_rules + example_resolved for staging.
+  consumers:
+    - image_gen
+    - marketer_console
+    - demo_nav
+    - warm_hero_cache
+  copy_path_note: >-
+    Gauntlet/Planet replica copy is deterministic slot substitution (GENERIC + ad_variant.page
+    + objection reframes). No prompt strings — see kind=copy_slot entries for slot references.
+  placeholders:
+    product: "product_context from tenant image YAML"
+    intent_id: "primary intent id from selection"
+    conversion_goal: "intent.conversion_goal"
+    sales_technique: "intent.sales_technique"
+    environment: "industry_env[industry] — tier ≥ 2 only"
+    region: "geo-IP region label — tier ≥ 1, allude-only mood"
+    objection_metaphor: "objection_metaphors[top_objection]"
+    ad_metaphor: "ad_metaphors[ad_variant_id]"
+    accent_color: "brand.accent_color"
+    audience_route: "b2b_hire | b2b_upskill | individual | enterprise | selfserve | research | neutral"
+    channel: "ad | email | search | direct"
+
+tenants:
+  gauntlet:
+    source_rules: rules/gauntlet_image.yaml
+    surfaces:
+      hero:
+        intents:
+          - peer_proof
+          - message_match
+          - authority
+          - aspiration
+          - loss_avoidance
+        entry_ids:
+          - gauntlet.hero.peer_proof.direct
+          - gauntlet.hero.peer_proof.email
+          - gauntlet.hero.message_match.ad
+          - gauntlet.hero.authority.direct
+          - gauntlet.hero.aspiration.ad
+          - gauntlet.hero.loss_avoidance.ad
+      og:
+        intents:
+          - message_match
+        entry_ids:
+          - gauntlet.og.message_match.ad
+  planet:
+    source_rules: rules/planet_image.yaml
+    surfaces:
+      hero:
+        intents:
+          - regional_truth
+          - change_proof
+        entry_ids:
+          - planet.hero.regional_truth.tier0
+          - planet.hero.regional_truth.region
+          - planet.hero.change_proof.tier0
+          - planet.hero.change_proof.region
+      motion:
+        intents:
+          - regional_truth
+        entry_ids:
+          - planet.motion.regional_truth.timelapse
+
+entries:
+  # ── Gauntlet · hero · peer_proof ─────────────────────────────────────
+  - id: gauntlet.hero.peer_proof.direct
+    kind: image
+    tenant: gauntlet
+    surface: hero
+    intent: peer_proof
+    channel: direct
+    audience: any
+    sales_technique: "matched-peer social proof (Cialdini)"
+    data_signals:
+      - channel
+      - audience_route
+      - tier
+    guardrails:
+      tier_gates:
+        industry: 2
+        region_mood: 1
+      must_avoid: from rules/gauntlet_image.yaml prompt_defaults.must_avoid
+    prompt_template: |
+      Cinematic wide hero backdrop for a {product}.
+      Primary intent: {intent_id} — {conversion_goal}.
+      Sales technique: {sales_technique}.
+      Composition: Wide cinematic backdrop: {environment} at dusk, warm monitor glow suggesting
+      peers already shipping — empty foreground for headline overlay, gold accent rim light.
+      Visual metaphor: industry-matched engineering floor — capability implied by environment
+      Mood: {mood}. Accent color {accent_color}.
+      Must include: {must_include}.
+      Must avoid: {must_avoid}.
+      Drives action: {drives_action}.
+    example_page_params: {}
+    example_resolved: >-
+      Cinematic wide hero backdrop for a AI engineering talent program marketing site. Primary intent: peer_proof — Trust → click CTA. Sales technique: matched-peer social proof (Cialdini). Composition: Wide cinematic backdrop: professional engineering workspace at dusk, warm monitor glow suggesting peers already shipping — empty foreground for headline overlay, gold accent rim light. Visual metaphor: industry-matched engineering floor — capability implied by environment Mood: credible, peer-aligned, calm confidence. Accent color #c9a227. audience_route (allude): neutral. Must include: cinematic wide 16:9 hero backdrop; dark moody atmosphere supporting headline overlay; warm gold accent lighting (#c9a227); single clear focal point — processing fluency; conversion goal: Trust → click CTA. Must avoid: NO faces of real people or identifiable individuals; NO company logos or brand marks; NO text, words, letters, or numbers in the image; NO visitor names, employer names, or PII; NO surveillance, creepy, or behavioral-tracking imagery; NO literal objection quotes or ad copy as text overlay; NO maps, addresses, or exact city landmarks; NO demographic or compensation modeling cues. Drives action: hire_cta.
+    provenance:
+      source_rules: rules/gauntlet_image.yaml
+      deterministic: true
+    brain_sim:
+      enabled: false
+      scoring_note: Gauntlet brain_simulator disabled by default
+    load_policy: warm
+
+  - id: gauntlet.hero.peer_proof.email
+    kind: image
+    tenant: gauntlet
+    surface: hero
+    intent: peer_proof
+    channel: email
+    audience: any
+    sales_technique: "matched-peer social proof (Cialdini)"
+    catalog_intent: true
+    data_signals:
+      - channel
+      - utm_medium
+    guardrails:
+      tier_gates:
+        industry: 2
+        region_mood: 1
+      must_avoid: from rules/gauntlet_image.yaml prompt_defaults.must_avoid
+    prompt_template: |
+      Same assembly as peer_proof direct — channel classified as email via utm_medium.
+      Intent catalog reference; live email visitors may route to authority when audience_route=b2b_hire.
+    example_image_ctx:
+      channel: email
+      ad_variant_id: null
+      audience: neutral
+      audience_route: neutral
+      industry: general
+      region: null
+      tier: 0
+      top_objection: null
+      top_objections: []
+      cta_primary: Explore the program
+      _hold: {}
+    example_resolved: >-
+      Cinematic wide hero backdrop for a AI engineering talent program marketing site. Primary intent: peer_proof — Trust → click CTA. Sales technique: matched-peer social proof (Cialdini). Composition: Wide cinematic backdrop: professional engineering workspace at dusk, warm monitor glow suggesting peers already shipping — empty foreground for headline overlay, gold accent rim light. Visual metaphor: industry-matched engineering floor — capability implied by environment Mood: credible, peer-aligned, calm confidence. Accent color #c9a227. audience_route (allude): neutral. Must include: cinematic wide 16:9 hero backdrop; dark moody atmosphere supporting headline overlay; warm gold accent lighting (#c9a227); single clear focal point — processing fluency; conversion goal: Trust → click CTA. Must avoid: NO faces of real people or identifiable individuals; NO company logos or brand marks; NO text, words, letters, or numbers in the image; NO visitor names, employer names, or PII; NO surveillance, creepy, or behavioral-tracking imagery; NO literal objection quotes or ad copy as text overlay; NO maps, addresses, or exact city landmarks; NO demographic or compensation modeling cues. Drives action: program_overview.
+    provenance:
+      source_rules: rules/gauntlet_image.yaml
+      deterministic: true
+    brain_sim:
+      enabled: false
+      scoring_note: catalog_intent reference — not live selection path
+    load_policy: warm
+
+  # ── Gauntlet · hero · message_match (ad) ─────────────────────────────
+  - id: gauntlet.hero.message_match.ad
+    kind: image
+    tenant: gauntlet
+    surface: hero
+    intent: message_match
+    channel: ad
+    audience: business
+    sales_technique: "message-match / consistency principle"
+    data_signals:
+      - ad_variant_id
+      - utm_campaign
+      - utm_content
+      - top_objection
+      - audience_route
+    guardrails:
+      tier_gates:
+        industry: 2
+        region_mood: 1
+      must_avoid: from rules/gauntlet_image.yaml prompt_defaults.must_avoid
+    prompt_template: |
+      Cinematic wide hero backdrop for a {product}.
+      Primary intent: message_match — {conversion_goal}.
+      Composition: Visual continuation of ad promise: {ad_metaphor} — abstract interview-to-proof
+      transition, gold accent linking ad click to landing headline zone.
+      Visual metaphor: {ad_metaphor}
+    example_page_params:
+      utm_source: x
+      utm_medium: paid
+      utm_campaign: x-keyword-ai-hiring
+      utm_content: v09
+    example_resolved: >-
+      Cinematic wide hero backdrop for a AI engineering talent program marketing site. Primary intent: message_match — Ad click-through. Sales technique: message-match / consistency principle. Composition: Visual continuation of ad promise: abstract interview room dissolving into sustained proof observation — abstract interview-to-proof transition, gold accent linking ad click to landing headline zone. Visual metaphor: abstract interview room dissolving into sustained proof observation Mood: consistent, expected, trust-building. Accent color #c9a227. Secondary intent cue: peer_proof. ad_message_match (allude): abstract interview room dissolving into sustained proof observation. objection_theme (allude): empty interview chair beside a glowing terminal — hiring stall abstract. audience_route (allude): b2b_hire. Must include: cinematic wide 16:9 hero backdrop; dark moody atmosphere supporting headline overlay; warm gold accent lighting (#c9a227); single clear focal point — processing fluency; conversion goal: Ad click-through; secondary visual cue: industry-matched engineering floor — capability implied by environment. Must avoid: NO faces of real people or identifiable individuals; NO company logos or brand marks; NO text, words, letters, or numbers in the image; NO visitor names, employer names, or PII; NO surveillance, creepy, or behavioral-tracking imagery; NO literal objection quotes or ad copy as text overlay; NO maps, addresses, or exact city landmarks; NO demographic or compensation modeling cues. Drives action: hire_cta.
+    provenance:
+      source_rules: rules/gauntlet_image.yaml
+      deterministic: true
+    brain_sim:
+      enabled: false
+      scoring_note: Gauntlet default — enable in gauntlet_image.yaml for best-of-N
+    load_policy: prebuild
+
+  # ── Gauntlet · hero · authority (direct corp IP) ─────────────────────
+  - id: gauntlet.hero.authority.direct
+    kind: image
+    tenant: gauntlet
+    surface: hero
+    intent: authority
+    channel: direct
+    audience: business
+    sales_technique: "authority + scrutiny framing (B2B committee buy-in)"
+    data_signals:
+      - audience_route
+      - network_corporate
+      - tier
+    guardrails:
+      tier_gates:
+        industry: 2
+        region_mood: 1
+      must_avoid: from rules/gauntlet_image.yaml prompt_defaults.must_avoid
+    prompt_template: |
+      Cinematic wide hero backdrop for a {product}.
+      Primary intent: authority — {conversion_goal}.
+      Composition: Wide stage-like engineering demo environment — observation gallery implied by lighting,
+      production deploy screens glowing gold, abstract audience silhouettes without faces.
+    example_page_params:
+      ip: "17.253.144.10"
+    example_resolved: >-
+      Cinematic wide hero backdrop for a AI engineering talent program marketing site. Primary intent: authority — B2B hire decision. Sales technique: authority + scrutiny framing (B2B committee buy-in). Composition: Wide stage-like engineering demo environment — observation gallery implied by lighting, production deploy screens glowing gold, abstract audience silhouettes without faces. Visual metaphor: demo-day scrutiny — capability observed under production pressure Mood: evaluative, serious, proof-first. Accent color #c9a227. Secondary intent cue: peer_proof. industry (allude): modern enterprise engineering workspace. objection_theme (allude): hire track emphasis — proven engineer shipping under scrutiny. audience_route (allude): b2b_hire. Must include: cinematic wide 16:9 hero backdrop; dark moody atmosphere supporting headline overlay; warm gold accent lighting (#c9a227); single clear focal point — processing fluency; conversion goal: B2B hire decision; secondary visual cue: industry-matched engineering floor — capability implied by environment. Must avoid: NO faces of real people or identifiable individuals; NO company logos or brand marks; NO text, words, letters, or numbers in the image; NO visitor names, employer names, or PII; NO surveillance, creepy, or behavioral-tracking imagery; NO literal objection quotes or ad copy as text overlay; NO maps, addresses, or exact city landmarks; NO demographic or compensation modeling cues. Drives action: hire_cta.
+    provenance:
+      source_rules: rules/gauntlet_image.yaml
+      deterministic: true
+    brain_sim:
+      enabled: false
+      scoring_note: authority brain_target maps to scrutiny regions when enabled
+    load_policy: warm
+
+  # ── Gauntlet · hero · aspiration (ad) ────────────────────────────────
+  - id: gauntlet.hero.aspiration.ad
+    kind: image
+    tenant: gauntlet
+    surface: hero
+    intent: aspiration
+    channel: ad
+    audience: consumer
+    sales_technique: "identity aspiration + self-selection (Challenger route)"
+    data_signals:
+      - ad_variant_id
+      - audience_route
+      - top_objection
+    guardrails:
+      tier_gates:
+        industry: 2
+        region_mood: 1
+      must_avoid: from rules/gauntlet_image.yaml prompt_defaults.must_avoid
+    prompt_template: |
+      Cinematic wide hero backdrop for a {product}.
+      Primary intent: aspiration — {conversion_goal}.
+      Composition: Single engineer silhouette (no face detail) at a glowing terminal shipping code —
+      capstone energy, stacks of abstract deployed systems in soft focus behind.
+    example_page_params:
+      utm_source: x
+      utm_medium: paid
+      utm_campaign: x-interest-ai-ml
+      utm_content: v11
+    example_resolved: >-
+      Cinematic wide hero backdrop for a AI engineering talent program marketing site. Primary intent: aspiration — Individual Challenger apply. Sales technique: identity aspiration + self-selection (Challenger route). Composition: Single engineer silhouette (no face detail) at a glowing terminal shipping code — capstone energy, stacks of abstract deployed systems in soft focus behind. Visual metaphor: career leap — shipping AI-native systems under real pressure Mood: determined, immersive, forward-leaning. Accent color #c9a227. ad_message_match (allude): engineer selection gauntlet — lit proving ground ahead. objection_theme (allude): full-time immersion trade — terminal glow at dusk, abstract. audience_route (allude): individual. Must include: cinematic wide 16:9 hero backdrop; dark moody atmosphere supporting headline overlay; warm gold accent lighting (#c9a227); single clear focal point — processing fluency; conversion goal: Individual Challenger apply. Must avoid: NO faces of real people or identifiable individuals; NO company logos or brand marks; NO text, words, letters, or numbers in the image; NO visitor names, employer names, or PII; NO surveillance, creepy, or behavioral-tracking imagery; NO literal objection quotes or ad copy as text overlay; NO maps, addresses, or exact city landmarks; NO demographic or compensation modeling cues. Drives action: challenger_cta.
+    provenance:
+      source_rules: rules/gauntlet_image.yaml
+      deterministic: true
+    brain_sim:
+      enabled: false
+      scoring_note: approach brain_target when simulator enabled
+    load_policy: prebuild
+
+  # ── Gauntlet · hero · loss_avoidance (ad catalog) ───────────────────
+  - id: gauntlet.hero.loss_avoidance.ad
+    kind: image
+    tenant: gauntlet
+    surface: hero
+    intent: loss_avoidance
+    channel: ad
+    audience: business
+    sales_technique: "loss aversion / cost of inaction (prospect theory)"
+    catalog_intent: true
+    data_signals:
+      - top_objection
+      - ad_variant_id
+      - industry
+      - region
+      - audience_route
+    guardrails:
+      tier_gates:
+        industry: 2
+        region_mood: 1
+      must_avoid: from rules/gauntlet_image.yaml prompt_defaults.must_avoid
+    prompt_template: |
+      Cinematic wide hero backdrop for a {product}.
+      Primary intent: loss_avoidance — {conversion_goal}.
+      Composition: Split-tone wide backdrop: left — dim stalled dashboard or empty chair; right —
+      warm gold deployment glow. Visual metaphor: {objection_metaphor}
+    example_image_ctx:
+      channel: ad
+      ad_variant_id: x-keyword
+      audience: companies
+      audience_route: b2b_hire
+      industry: technology
+      region: Pacific
+      tier: 2
+      top_objection: open_market_hire
+      top_objections:
+        - open_market_hire
+      cta_primary: Hire Proven Talent
+      _hold: {}
+    example_resolved: >-
+      Cinematic wide hero backdrop for a AI engineering talent program marketing site. Primary intent: loss_avoidance — Urgency → apply/hire. Sales technique: loss aversion / cost of inaction (prospect theory). Composition: Split-tone wide backdrop: left — dim stalled dashboard or empty chair; right — warm gold deployment glow. Abstract only. Foreground dark for headline. Visual metaphor: empty interview chair beside a glowing terminal — hiring stall abstract Mood: urgent but dignified — opportunity closing, not panic. Accent color #c9a227. industry (allude): modern enterprise engineering workspace. region_mood (allude): Pacific regional tone — no landmarks. ad_message_match (allude): abstract interview room dissolving into sustained proof observation. objection_theme (allude): empty interview chair beside a glowing terminal — hiring stall abstract. audience_route (allude): b2b_hire. Must include: cinematic wide 16:9 hero backdrop; dark moody atmosphere supporting headline overlay; warm gold accent lighting (#c9a227); single clear focal point — processing fluency; conversion goal: Urgency → apply/hire. Must avoid: NO faces of real people or identifiable individuals; NO company logos or brand marks; NO text, words, letters, or numbers in the image; NO visitor names, employer names, or PII; NO surveillance, creepy, or behavioral-tracking imagery; NO literal objection quotes or ad copy as text overlay; NO maps, addresses, or exact city landmarks; NO demographic or compensation modeling cues. Drives action: hire_cta.
+    provenance:
+      source_rules: rules/gauntlet_image.yaml
+      deterministic: true
+    brain_sim:
+      enabled: false
+      scoring_note: change_legibility brain_target — loss-frame metaphor
+    load_policy: live
+
+  # ── Gauntlet · og surface ─────────────────────────────────────────────
+  - id: gauntlet.og.message_match.ad
+    kind: image
+    tenant: gauntlet
+    surface: og
+    intent: message_match
+    channel: ad
+    audience: business
+    sales_technique: "message-match / consistency principle"
+    data_signals:
+      - ad_variant_id
+      - surface_id
+    guardrails:
+      tier_gates:
+        industry: 2
+        region_mood: 1
+      must_avoid: from rules/gauntlet_image.yaml surfaces.og + prompt_defaults
+    prompt_template: |
+      Open Graph social preview card (1200×630) for a {product} — shareable link thumbnail.
+      Primary intent: {intent_id} — {conversion_goal}.
+      Composition: {composition} Framed as a social share thumbnail with centered focal subject
+      and generous safe margins for platform crop — no text overlay.
+    example_page_params:
+      utm_source: x
+      utm_medium: paid
+      utm_campaign: x-keyword-ai-hiring
+      utm_content: v09
+    example_resolved: >-
+      Open Graph social preview card (1200×630) for a AI engineering talent program marketing site — shareable link thumbnail.. Primary intent: message_match — Ad click-through. Sales technique: message-match / consistency principle. Composition: Visual continuation of ad promise: abstract interview room dissolving into sustained proof observation — abstract interview-to-proof transition, gold accent linking ad click to landing headline zone. Framed as a social share thumbnail with centered focal subject and generous safe margins for platform crop — no text overlay. Visual metaphor: abstract interview room dissolving into sustained proof observation Mood: consistent, expected, trust-building. Accent color #c9a227. Secondary intent cue: peer_proof. ad_message_match (allude): abstract interview room dissolving into sustained proof observation. objection_theme (allude): empty interview chair beside a glowing terminal — hiring stall abstract. audience_route (allude): b2b_hire. Must include: 1200x630 social card aspect ratio with safe center crop margins; bold single focal subject readable at thumbnail size; dark moody atmosphere with warm gold accent (#c9a227); single clear focal point — processing fluency; conversion goal: Ad click-through; secondary visual cue: industry-matched engineering floor — capability implied by environment. Must avoid: NO faces of real people or identifiable individuals; NO company logos or brand marks; NO text, words, letters, or numbers in the image; NO visitor names, employer names, or PII; NO surveillance, creepy, or behavioral-tracking imagery; NO literal objection quotes or ad copy as text overlay; NO maps, addresses, or exact city landmarks; NO demographic or compensation modeling cues. Drives action: hire_cta.
+    provenance:
+      source_rules: rules/gauntlet_image.yaml
+      deterministic: true
+    brain_sim:
+      enabled: false
+      scoring_note: og surface uses surface_spec must_include overrides
+    load_policy: prebuild
+
+  # ── Planet · hero · regional_truth ───────────────────────────────────
+  - id: planet.hero.regional_truth.tier0
+    kind: image
+    tenant: planet
+    surface: hero
+    intent: regional_truth
+    channel: direct
+    audience: any
+    sales_technique: "truthful message-match on geography (daily-coverage claim)"
+    data_signals:
+      - tier
+      - audience_route
+    guardrails:
+      tier_gates:
+        industry: 2
+        region_mood: 1
+      must_avoid: from rules/planet_image.yaml prompt_defaults.must_avoid
+    prompt_template: |
+      Cinematic wide hero backdrop for a {product}.
+      Primary intent: regional_truth — {conversion_goal}.
+      Composition: Wide cinematic satellite view: {environment}, cloud-free, softly lit from orbit —
+      empty upper third for headline overlay, bright blue accent glow along one edge.
+    example_page_params: {}
+    example_resolved: >-
+      Cinematic wide hero backdrop for a daily satellite Earth-imagery platform marketing site. Primary intent: regional_truth — Trust → primary CTA. Sales technique: truthful message-match on geography (daily-coverage claim). Composition: Wide cinematic satellite view: cloud-free satellite mosaic of varied terrain — coast, fields, mountains, cloud-free, softly lit from orbit — empty upper third for headline overlay, bright blue accent glow along one edge. Visual metaphor: the visitor's kind of ground, already imaged today — capability implied by coverage Mood: calm, planetary, quietly confident. Accent color #3ba1ff. audience_route (allude): neutral. Must include: cinematic wide 16:9 hero backdrop; satellite-view aesthetic at region/landscape scale; dark deep-space atmosphere supporting headline overlay; bright blue accent lighting (#3ba1ff); single clear focal point — processing fluency; conversion goal: Trust → primary CTA. Must avoid: NO faces of real people or identifiable individuals; NO company logos or brand marks; NO text, words, letters, or numbers in the image; NO visitor names, employer names, or PII; NO surveillance, creepy, or behavioral-tracking imagery; NO street-level or property-scale detail — region/landscape scale only; NO identifiable private homes, vehicles, or individual people seen from above; NO crosshairs, targeting reticles, or weapon imagery; NO literal objection quotes or ad copy as text overlay; NO maps with addresses or exact city landmarks; NO crosshairs, targeting reticles on civilian areas, or weapon imagery. Drives action: sales_cta.
+    provenance:
+      source_rules: rules/planet_image.yaml
+      deterministic: true
+    brain_sim:
+      enabled: true
+      scoring_note: Planet default — Tribe v2 or proxy_v1 best-of-N
+    load_policy: warm
+
+  - id: planet.hero.regional_truth.region
+    kind: image
+    tenant: planet
+    surface: hero
+    intent: regional_truth
+    channel: direct
+    audience: any
+    sales_technique: "truthful message-match on geography (daily-coverage claim)"
+    tribe_region: Virginia
+    data_signals:
+      - region_mood
+      - tier
+    guardrails:
+      tier_gates:
+        industry: 2
+        region_mood: 1
+      must_avoid: from rules/planet_image.yaml prompt_defaults.must_avoid
+    prompt_template: |
+      Same regional_truth template with region_mood layer:
+      {region} regional tone — no landmarks
+    example_page_params:
+      ip: "8.8.8.8"
+    example_resolved: >-
+      Cinematic wide hero backdrop for a daily satellite Earth-imagery platform marketing site. Primary intent: regional_truth — Trust → primary CTA. Sales technique: truthful message-match on geography (daily-coverage claim). Composition: Wide cinematic satellite view: cloud-free satellite mosaic of varied terrain — coast, fields, mountains, cloud-free, softly lit from orbit — empty upper third for headline overlay, bright blue accent glow along one edge. Visual metaphor: the visitor's kind of ground, already imaged today — capability implied by coverage Mood: calm, planetary, quietly confident. Accent color #3ba1ff. region_mood (allude): Virginia regional tone — no landmarks. audience_route (allude): neutral. Must include: cinematic wide 16:9 hero backdrop; satellite-view aesthetic at region/landscape scale; dark deep-space atmosphere supporting headline overlay; bright blue accent lighting (#3ba1ff); single clear focal point — processing fluency; conversion goal: Trust → primary CTA. Must avoid: NO faces of real people or identifiable individuals; NO company logos or brand marks; NO text, words, letters, or numbers in the image; NO visitor names, employer names, or PII; NO surveillance, creepy, or behavioral-tracking imagery; NO street-level or property-scale detail — region/landscape scale only; NO identifiable private homes, vehicles, or individual people seen from above; NO crosshairs, targeting reticles, or weapon imagery; NO literal objection quotes or ad copy as text overlay; NO maps with addresses or exact city landmarks; NO crosshairs, targeting reticles on civilian areas, or weapon imagery. Drives action: sales_cta.
+    provenance:
+      source_rules: rules/planet_image.yaml
+      deterministic: true
+    brain_sim:
+      enabled: true
+      scoring_note: region_mood layer requires tier ≥ 1
+    load_policy: warm
+
+  # ── Planet · hero · change_proof ─────────────────────────────────────
+  - id: planet.hero.change_proof.tier0
+    kind: image
+    tenant: planet
+    surface: hero
+    intent: change_proof
+    channel: any
+    audience: business
+    sales_technique: "loss aversion / cost of not watching (prospect theory)"
+    catalog_intent: true
+    data_signals:
+      - top_objection
+      - audience_route
+    guardrails:
+      tier_gates:
+        industry: 2
+        region_mood: 1
+      must_avoid: from rules/planet_image.yaml prompt_defaults.must_avoid
+    prompt_template: |
+      Cinematic wide hero backdrop for a {product}.
+      Primary intent: change_proof — {conversion_goal}.
+      Composition: Split-tone satellite backdrop: {objection_metaphor} — one clean seam between
+      the before state and the after state, analytic accent on the change only.
+    example_image_ctx:
+      channel: direct
+      ad_variant_id: null
+      audience: companies
+      audience_route: enterprise
+      industry: general
+      region: null
+      tier: 0
+      top_objection: cloud_cover
+      top_objections:
+        - cloud_cover
+      cta_primary: Start trial
+      _hold: {}
+    example_resolved: >-
+      Cinematic wide hero backdrop for a daily satellite Earth-imagery platform marketing site. Primary intent: change_proof — Urgency → act while change is small. Sales technique: loss aversion / cost of not watching (prospect theory). Composition: Split-tone satellite backdrop: cloud shadow sliding off a field grid as the next daily pass clears it — one clean seam between the before state and the after state, analytic accent on the change only. Visual metaphor: cloud shadow sliding off a field grid as the next daily pass clears it Mood: urgent but dignified — the window is open, not closing in panic. Accent color #3ba1ff. objection_theme (allude): cloud shadow sliding off a field grid as the next daily pass clears it. audience_route (allude): enterprise. Must include: cinematic wide 16:9 hero backdrop; satellite-view aesthetic at region/landscape scale; dark deep-space atmosphere supporting headline overlay; bright blue accent lighting (#3ba1ff); single clear focal point — processing fluency; conversion goal: Urgency → act while change is small. Must avoid: NO faces of real people or identifiable individuals; NO company logos or brand marks; NO text, words, letters, or numbers in the image; NO visitor names, employer names, or PII; NO surveillance, creepy, or behavioral-tracking imagery; NO street-level or property-scale detail — region/landscape scale only; NO identifiable private homes, vehicles, or individual people seen from above; NO crosshairs, targeting reticles, or weapon imagery; NO literal objection quotes or ad copy as text overlay; NO maps with addresses or exact city landmarks; NO crosshairs, targeting reticles on civilian areas, or weapon imagery. Drives action: trial_cta.
+    provenance:
+      source_rules: rules/planet_image.yaml
+      deterministic: true
+    brain_sim:
+      enabled: true
+      scoring_note: change_legibility brain_target — MT/V3A proxy regions
+    load_policy: live
+
+  - id: planet.hero.change_proof.region
+    kind: image
+    tenant: planet
+    surface: hero
+    intent: change_proof
+    channel: any
+    audience: business
+    sales_technique: "loss aversion / cost of not watching (prospect theory)"
+    catalog_intent: true
+    tribe_region: Michigan
+    data_signals:
+      - top_objection
+      - region_mood
+      - industry
+      - tier
+    guardrails:
+      tier_gates:
+        industry: 2
+        region_mood: 1
+      must_avoid: from rules/planet_image.yaml prompt_defaults.must_avoid
+    prompt_template: |
+      change_proof with region_mood + industry layers at tier ≥ 2.
+    example_image_ctx:
+      channel: direct
+      ad_variant_id: null
+      audience: companies
+      audience_route: enterprise
+      industry: agriculture
+      region: Michigan
+      tier: 2
+      top_objection: cloud_cover
+      top_objections:
+        - cloud_cover
+      cta_primary: Start trial
+      _hold: {}
+    example_resolved: >-
+      Cinematic wide hero backdrop for a daily satellite Earth-imagery platform marketing site. Primary intent: change_proof — Urgency → act while change is small. Sales technique: loss aversion / cost of not watching (prospect theory). Composition: Split-tone satellite backdrop: cloud shadow sliding off a field grid as the next daily pass clears it — one clean seam between the before state and the after state, analytic accent on the change only. Visual metaphor: cloud shadow sliding off a field grid as the next daily pass clears it Mood: urgent but dignified — the window is open, not closing in panic. Accent color #3ba1ff. industry (allude): satellite quilt of field polygons and center-pivot circles in seasonal color. region_mood (allude): Michigan regional tone — no landmarks. objection_theme (allude): cloud shadow sliding off a field grid as the next daily pass clears it. audience_route (allude): enterprise. Must include: cinematic wide 16:9 hero backdrop; satellite-view aesthetic at region/landscape scale; dark deep-space atmosphere supporting headline overlay; bright blue accent lighting (#3ba1ff); single clear focal point — processing fluency; conversion goal: Urgency → act while change is small. Must avoid: NO faces of real people or identifiable individuals; NO company logos or brand marks; NO text, words, letters, or numbers in the image; NO visitor names, employer names, or PII; NO surveillance, creepy, or behavioral-tracking imagery; NO street-level or property-scale detail — region/landscape scale only; NO identifiable private homes, vehicles, or individual people seen from above; NO crosshairs, targeting reticles, or weapon imagery; NO literal objection quotes or ad copy as text overlay; NO maps with addresses or exact city landmarks; NO crosshairs, targeting reticles on civilian areas, or weapon imagery. Drives action: trial_cta.
+    provenance:
+      source_rules: rules/planet_image.yaml
+      deterministic: true
+    brain_sim:
+      enabled: true
+      scoring_note: tier-2 delta adds industry + region_mood layers
+    load_policy: live
+
+  # ── Planet · motion surface ───────────────────────────────────────────
+  - id: planet.motion.regional_truth.timelapse
+    kind: image
+    tenant: planet
+    surface: motion
+    intent: regional_truth
+    channel: any
+    audience: any
+    sales_technique: "truthful message-match on geography (daily-coverage claim)"
+    data_signals:
+      - motion_metaphor
+      - base_hero_prompt
+    guardrails:
+      tier_gates:
+        industry: 2
+        region_mood: 1
+      must_avoid: from rules/planet_image.yaml motion.framing honesty note
+    prompt_template: |
+      {base_hero_prompt} Temporal progression ({motion_metaphor}): {frame_directive}
+      Frame {n} of {frames} — satellite change-over-time loop, not neuro-stimulation.
+    example_page_params: {}
+    example_resolved: >-
+      Base hero prompt from regional_truth intent + motion_gen.build_frame_prompts() appends
+      pan_left temporal directives per frame. See pipeline/personalization/motion_gen.py.
+    provenance:
+      source_rules: rules/planet_image.yaml
+      deterministic: true
+    brain_sim:
+      enabled: true
+      scoring_note: per-frame scoring when brain_sim enabled
+    load_policy: warm
+
+  # ── Copy slot reference (no LLM prompt) ──────────────────────────────
+  - id: gauntlet.copy.hero.headline
+    kind: copy_slot
+    tenant: gauntlet
+    surface: hero
+    intent: null
+    channel: any
+    audience: any
+    slot_id: sections.hero.headline
+    data_signals:
+      - ad_variant.page.headline
+      - identity
+      - objection reframe
+    guardrails:
+      policy: say | allude | hold per build_page slot chain
+    prompt_template: null
+    example_resolved: null
+    provenance:
+      source_rules: pipeline/personalization/gauntlet_site.py
+      deterministic: true
+    brain_sim:
+      enabled: false
+      scoring_note: copy path has no brain simulator
+    load_policy: fallback

@@ -1,0 +1,7 @@
+# SkyFi — section registry (S1/R30, contract: 04-spec/contracts/registry-schema.md).
+# Minimal valid stub: seeded by T-07 (skyfi-tenant, W1). Until then
+# list_sections('skyfi') returns [] instead of raising.
+
+version: 1
+tenant: skyfi
+sections: []
