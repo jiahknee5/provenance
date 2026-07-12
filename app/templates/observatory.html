@@ -3,11 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>apt Observatory</title>
+<title>apt — observatory</title>
+{% include "_apt_shell.html" %}
 <style>
   :root{
-    --bg:#ffffff; --panel:#ffffff; --panel2:#f1f3f5; --line:#e5e9ef; --ink:#1a1c20;
-    --mut:#6b7480; --accent:#2e6ff5; --green:#2bb673; --amber:#d98a16; --red:#e0524a;
+    --panel:#fff; --panel2:var(--line2); --mut:var(--muted); --accent:var(--brand);
+    --green:#2bb673; --amber:#d98a16; --red:#e0524a;
     --library:#2e6ff5; --gate:#1b4dd1; --optimizer:#6b4bd6; --drift:#d98a16;
     --website:#2bb673; --assurance:#e0524a; --run:#6b7480;
   }
@@ -85,12 +86,17 @@
   .empty code{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:3px 8px;color:var(--accent)}
   .hint{color:var(--mut);font-size:12px;margin:6px 0 0}
 </style>
-<link rel="stylesheet" href="/static/atlas.css">
 </head>
 <body>
-{% set subtitle = "Observatory" %}
-{% include "_nav.html" %}
-
+<div class="app">
+  {% include "_apt_sidebar.html" %}
+  <div class="main">
+    <div class="topbar">
+      <div class="crumb">apt / <b>Observatory</b></div>
+      <div class="grow"></div>
+      <span class="pill-live"><span class="dot"></span> Seeded replay</span>
+    </div>
+    <div class="content" style="max-width:1500px">
 {% if empty %}
 <div class="empty">
   <h2 style="color:var(--ink)">No traced run yet</h2>
@@ -386,5 +392,8 @@ document.getElementById('showcache').addEventListener('change',()=>{cursor=0;ren
 poll().then(()=>{ if(events.length){ cursor=0; renderTimeline(); } setInterval(poll, 2000); });
 </script>
 {% endif %}
+    </div>
+  </div>
+</div>
 </body>
 </html>
