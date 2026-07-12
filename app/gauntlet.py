@@ -158,6 +158,7 @@ def _render_ad_lp(request: Request, m: dict[str, str]) -> HTMLResponse:
         "g": m,
         "dev_sample": dev_sample,
         "demo_hub_path": "/apt/demo",
+        "demo_flow_active": "scenario",
     })
 
 
@@ -211,6 +212,7 @@ def _render_dev(request: Request, m: dict[str, str]) -> HTMLResponse:
         "entry_links_raw": entry_links(m),
         "sample_email": GS.sample_login_email(),
         "static_prefix": m["static"],
+        "demo_flow_active": "engineer",
         "g": m})
 
 
@@ -241,6 +243,7 @@ def _render_dev_business(request: Request, m: dict[str, str]) -> HTMLResponse:
         "sample_email": GS.sample_login_email(),
         "static_prefix": m["static"],
         "demo_hub_path": "/apt/demo",
+        "demo_flow_active": "marketer",
         "g": m})
 
 

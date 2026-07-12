@@ -300,6 +300,7 @@ def build_channel_gallery_view(
     cards = [_gallery_card(s, mounts) for s in rows]
     tab_base = gallery_path
     return {
+        "demo_flow_active": "scenario",
         "hub_path": _HUB_PATH,
         "tenant": tenant,
         "tenant_name": meta["name"],

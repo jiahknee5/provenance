@@ -22,9 +22,10 @@ def test_apt_dev_hub_defaults_to_gauntlet():
     assert 'href="/gauntletapt/dev' in t
     assert "Marketer console" in t
     assert "Engineer console" in t
-    m_pos = t.find("Marketer console")
-    e_pos = t.find("Engineer console")
-    assert m_pos < e_pos
+    # The shared flow diagram also names both consoles, but above the cards; scope the
+    # ordering assertion to the console-card grid so it tests card IA (marketer first).
+    grid = t[t.find('class="hub-grid"'):]
+    assert grid.find("Marketer console") < grid.find("Engineer console")
 
 
 def test_apt_dev_hub_site_planet():

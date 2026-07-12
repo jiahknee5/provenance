@@ -156,8 +156,11 @@ def test_wf_demo_006_hub_site_switch_preserves_as():
 
 def test_apt_dev_hub_marketer_console_first():
     t = c.get("/apt/dev").text
-    m_pos = t.find("Marketer console")
-    e_pos = t.find("Engineer console")
+    # Scope to the console-card grid: the shared flow diagram also names both consoles,
+    # but above the cards. This tests card IA (marketer first), not the nav element.
+    grid = t[t.find('class="hub-grid"'):]
+    m_pos = grid.find("Marketer console")
+    e_pos = grid.find("Engineer console")
     assert m_pos != -1 and e_pos != -1
     assert m_pos < e_pos
 

@@ -213,6 +213,7 @@ def _render_ads(request: Request, m: dict[str, str]) -> HTMLResponse:
             })
         sections.append({"label": sec["label"], "category": sec["category"], "variants": variants})
     return templates.TemplateResponse(request, "planet_ads.html", {
+        "demo_flow_active": "scenario",
         "sections": sections,
         "demo_hub_path": "/apt/demo",
         "g": m,
@@ -239,6 +240,7 @@ def _render_ads_lp(request: Request, m: dict[str, str]) -> HTMLResponse:
             })
         sections.append({"label": sec["label"], "category": sec["category"], "variants": variants})
     return templates.TemplateResponse(request, "planet_ad_lp.html", {
+        "demo_flow_active": "scenario",
         "sections": sections,
         "generic_hero": PS.generic_hero_headline(),
         "default_order": PS.DEFAULT_ORDER,
@@ -271,6 +273,7 @@ def _render_dev(request: Request, m: dict[str, str]) -> HTMLResponse:
     as_state, email, page, qs = _dev_email_and_page(request, m)
     toggle_anon, toggle_known = _dev_toggles(m["dev"], qs, as_state)
     return templates.TemplateResponse(request, "planet_dev.html", {
+        "demo_flow_active": "engineer",
         "page": page, "pmap": PS.process_map(page),
         "as_state": as_state,
         "qs": qs, "toggle_anon": toggle_anon,
@@ -299,6 +302,7 @@ def _render_dev_business(request: Request, m: dict[str, str]) -> HTMLResponse:
     biz_path = m["dev_business"]
     toggle_anon, toggle_known = _dev_toggles(biz_path, qs, as_state)
     return templates.TemplateResponse(request, "planet_dev_business.html", {
+        "demo_flow_active": "marketer",
         "page": page, "biz": PDB.build_business_dev_view(page),
         "as_state": as_state,
         "qs": qs, "toggle_anon": toggle_anon,
