@@ -61,6 +61,9 @@
   .sd-gnode.skip{opacity:.55}
   .sd-gnode summary{cursor:pointer;padding:4px 9px;font-size:11px;font-weight:600;color:var(--ink);list-style-position:inside}
   .sd-gnode .gio{padding:5px 9px;border-top:1px dashed var(--line);font-size:10.5px;color:#475569;line-height:1.5}
+  .sd-gnode .gio .tools{color:var(--muted);padding-top:3px}
+  .sd-gnode summary .lane{font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;border-radius:4px;padding:1px 6px;background:#F1F3F5;color:var(--muted);margin:0 4px}
+  .sd-ab-paused{color:#c0354b;font-weight:700}
   .sd-obs{width:100%;border-collapse:collapse;font-size:11px}
   .sd-obs td{padding:3px 6px;border-bottom:1px dashed var(--line);vertical-align:top}
   .sd-obs tr:last-child td{border-bottom:0}
@@ -110,7 +113,7 @@
       <span class="sd-badge gate {{ t.gate.status }}" data-testid="sd-gate-{{ t.slot_id }}" title="{{ t.gate.reason }}">gate: {{ t.gate.status }}</span>
       <span class="sd-badge lat {{ t.latency.cls }}" data-testid="sd-latency-{{ t.slot_id }}">{{ t.latency.label }}</span>
       <span class="sd-badge cost" data-testid="sd-cost-{{ t.slot_id }}">{{ t.cost }}</span>
-      <span class="sd-badge drift" data-testid="sd-drift-{{ t.slot_id }}">drift: {{ t.drift.status }} · rules {{ t.drift.rules_version[:8] }}</span>
+      <span class="sd-badge drift" data-testid="sd-drift-{{ t.slot_id }}" title="{{ t.drift.note }}">drift: {{ t.drift.status }} · rules {{ t.drift.rules_version[:8] }}</span>
     </div>
     <div class="sd-ctls">
       <label class="sd-ctl">How the words are made
@@ -169,11 +172,21 @@
         </div>
       </details>
       <details class="sd-panel" data-testid="sd-ab-{{ t.slot_id }}">
-        <summary>A/B — posteriors per route</summary>
+        <summary>A/B — posteriors per route{{ ' · seeded' if t.ab.seeded else '' }}</summary>
         <div class="bd">
+          {% if t.ab.seeded %}
+          {% for r in t.ab.rows %}
+          <div class="sd-kv"><span>{{ r.route }}</span><span>top arm {{ r.top_arm }} · posterior mean {{ '%.3f'|format(r.mean) }} · {{ r.arms }} arm(s) · {{ r.cell_note }}</span></div>
+          {% endfor %}
+          <div class="sd-kv"><span>lift vs control</span><span>{{ t.ab.lift_label }}</span></div>
+          {% if t.ab.paused %}
+          <div class="sd-kv"><span>paused</span><span class="sd-ab-paused">arm {{ t.ab.paused|join(', ') }} — {{ t.ab.pause_note }}</span></div>
+          {% endif %}
+          {% else %}
           {% for r in t.ab.routes %}
           <div class="sd-kv"><span>{{ r }}</span><span>no posterior yet · lift vs control —</span></div>
           {% endfor %}
+          {% endif %}
           <div class="sd-note">{{ t.ab.note }}</div>
         </div>
       </details>
@@ -190,7 +203,7 @@
       <span class="sd-badge gate {{ t.gate.status }}" data-testid="sd-gate-{{ t.surface_id }}" title="{{ t.gate.reason }}">gate: {{ t.gate.status }}</span>
       <span class="sd-badge lat {{ t.latency.cls }}" data-testid="sd-latency-{{ t.surface_id }}">{{ t.latency.label }}</span>
       <span class="sd-badge cost" data-testid="sd-cost-{{ t.surface_id }}">{{ t.cost }}</span>
-      <span class="sd-badge drift" data-testid="sd-drift-{{ t.surface_id }}">drift: {{ t.drift.status }} · rules {{ t.drift.rules_version[:8] }}</span>
+      <span class="sd-badge drift" data-testid="sd-drift-{{ t.surface_id }}" title="{{ t.drift.note }}">drift: {{ t.drift.status }} · rules {{ t.drift.rules_version[:8] }}</span>
     </div>
     <div class="sd-imgrid">
       <div class="thumb">
@@ -253,9 +266,14 @@
       <summary>Agent graph — how this section decided</summary>
       <div class="bd sd-graph-nodes">
         {% for n in s.graph %}
-        <details class="sd-gnode{{ ' skip' if n.skipped else '' }}">
-          <summary>{{ n.title }} → {{ 'skipped' if n.skipped else n.outcome }}</summary>
-          <div class="gio"><b>in:</b> visit signals · <b>decision:</b> {{ 'skipped' if n.skipped else n.outcome }} · <b>out:</b> {{ '—' if n.skipped else (n.why or '—') }}</div>
+        <details class="sd-gnode" data-sd-node="{{ n.id }}">
+          <summary>{{ n.label }}<span class="lane">{{ n.lane }}</span>→ {{ n.outcome }}</summary>
+          <div class="gio">
+            <div><b>in:</b> {{ n.input }}</div>
+            <div><b>decision:</b> {{ n.decision }}</div>
+            <div><b>out:</b> {{ n.output }}</div>
+            <div class="tools">tools: {{ n.tools|join(' · ') }}</div>
+          </div>
         </details>
         {% endfor %}
       </div>
@@ -276,7 +294,8 @@
           <tr><td class="seq">{{ row.seq }}</td><td class="ev">{{ row.event }}</td><td>{{ row.detail }}</td></tr>
           {% endfor %}
         </table>
-        <div class="sd-note">per-section event rows for this request — the live poll-since-seq stream lands with the observability wave</div>
+        <div class="sd-kv" data-testid="sd-cost-row-{{ s.id }}"><span>api cost</span><span>{{ s.cost.label }}</span></div>
+        <div class="sd-note">event rows derived from this request's real build — seq is monotonic across the visit's sections; cost is the api-cost ledger summed by this section's cache keys</div>
       </div>
     </details>
   </div>

@@ -84,10 +84,15 @@ class DecisionPool:
                  posteriors: Optional[dict[str, PosteriorStore]] = None,
                  holdout_frac: float = LIVE_HOLDOUT,
                  persist: bool = True,
-                 rng: Optional[random.Random] = None):
+                 rng: Optional[random.Random] = None,
+                 routes: tuple[str, ...] = ROUTES):
         self.gate = gate
         self.candidates = candidates
         self.channel = channel
+        # the tenant's audience_route vocabulary — defaults to the pinned gauntlet set;
+        # a tenant whose _audience_route speaks differently (planet: enterprise/selfserve/
+        # research/neutral) injects its own. Same pinned semantics: segment = audience_route.
+        self.routes = tuple(routes)
         self.db_path = Path(db_path) if db_path else DB_PATH
         self.holdout_frac = holdout_frac
         self.persist = persist
@@ -185,7 +190,7 @@ class DecisionPool:
             })
             if not cleared:
                 continue                                  # never constructed into the pool
-            for cell in ROUTES + (ALL_CELL,):
+            for cell in self.routes + (ALL_CELL,):
                 pool.add(cell, vid)
             self._variants[vid] = v
             self._receipts[vid] = self._build_receipt(
@@ -238,8 +243,8 @@ class DecisionPool:
         visit_key) + posterior state — same key replays the same variant (Art IV) — and
         the control/bandit split is the deterministic assign_control slice. Records a
         PENDING impression (live.py reward model). Returns None only on an empty pool."""
-        if route not in ROUTES:
-            raise ValueError(f"route {route!r} not in {ROUTES}")
+        if route not in self.routes:
+            raise ValueError(f"route {route!r} not in {self.routes}")
         self.cleared_pool(tenant, section_id, target_id)
         pid = self.pool_id(tenant, section_id, target_id)
         pool = self._pools[pid]

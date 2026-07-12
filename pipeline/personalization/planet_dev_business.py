@@ -10,6 +10,7 @@ from __future__ import annotations
 from pipeline.observability import api_costs as AC
 from pipeline.personalization import image_gen as IG
 from pipeline.personalization import planet_site as PS
+from pipeline.personalization import section_obs as OBS
 from pipeline.personalization import sections as SEC
 
 _AUDIENCE_LABELS = {
@@ -515,7 +516,6 @@ def _steering_vs_saying(page: dict) -> dict:
 # --------------------------------------------------------------------------- #
 _SD_TENANT = "planet"
 _SD_ROUTES = ["enterprise", "selfserve", "research", "neutral"]
-_SD_IMAGE_STAGES = {"heroimg", "imgsurfaces", "brainsim", "heromotion"}
 _SD_STRATEGIES = ["objection-reframe", "social-proof", "authority", "scarcity-honest",
                   "loss-aversion", "location-relevance", "message-match", "neutral"]
 _SD_LAWFUL = {
@@ -587,6 +587,7 @@ def _sd_text_target(t: dict, d: dict | None, rules_version: str) -> dict:
             "mode": mode, "workflow": workflow,
             "rules_version": rules_version,
         },
+        "held_say": bool((d or {}).get("blocked_say")),
         "ab": {"routes": _SD_ROUTES,
                "note": "posteriors per route arrive with the per-decision pool — "
                        "a random-control holdout measures lift"},
@@ -594,50 +595,42 @@ def _sd_text_target(t: dict, d: dict | None, rules_version: str) -> dict:
     }
 
 
-def _sd_evals(sec: dict, brain: dict) -> list[dict]:
-    out = []
-    for e in sec.get("evals") or []:
-        if e == "gate_pass":
-            status = "pass — a blocked variant can never ship (structural)"
-        elif e == "hold_never_ships":
-            status = "enforced — hold facts never reach the page (property-tested)"
-        elif e == "brain_score":
-            bs = brain.get("brain_score")
-            status = (f"{bs:.2f} · {brain.get('brain_simulator') or 'proxy_v1'}"
-                      if bs is not None else "scored at generation time (best-of-N)")
-        else:
-            status = "tracked"
-        out.append({"id": e, "label": e.replace("_", " "), "status": status})
-    return out
-
-
 def _designer_view(page: dict) -> dict:
-    """Everything the per-section designer cards need (read-only this wave)."""
+    """Everything the per-section designer cards need (read-only this wave).
+
+    T-04: the graph/evals/observe/ab/drift panels + the cost row are built by
+    pipeline/personalization/section_obs.py from this request's real build, the live
+    api-cost ledger, and the seeded per-decision pool campaign (labeled seeded)."""
     secs = SEC.list_sections(_SD_TENANT)
     rules_version = SEC.registry_version(_SD_TENANT)
     diff_by_slot = {d.get("slot"): d for d in page.get("copy_diff", [])}
-    pmap = PS.process_map(page)
     per_gen = AC.estimate_cost(service="gemini_image", model=IG.DEFAULT_MODEL,
                                images_generated=1)
     hi = page.get("hero_image") or {}
     hid = hi.get("dev") or (IG.hero_image_dev_panel(hi) if hi else {})
     brain = (hid.get("brain") or page.get("brain_sim") or {})
+    entry = page["entry"]
+    route = page.get("audience", "neutral")
+    tier, tier_label = page.get("tier", 0), page.get("tier_label", "neutral")
+    entry_signals = " · ".join(f"{s['label']}={s['value']}" for s in entry["signals"]
+                               if s["value"] != "—")
+    gate_rules_version = OBS.seeded_campaign(_SD_TENANT,
+                                             tuple(_SD_ROUTES))["gate_rules_version"]
 
     seq = 0
     out_sections: list[dict] = []
     for sec in secs:
-        observe: list[dict] = []
         text_targets: list[dict] = []
+        diff_rows: list[dict] = []
         for t in sec.get("text_targets") or []:
             d = diff_by_slot.get(t["slot_id"])
+            if d:
+                diff_rows.append(d)
             tt = _sd_text_target(t, d, rules_version)
-            seq += 1
-            observe.append({
-                "seq": seq, "event": f"copy.decide {t['slot_id']}",
-                "detail": f"{tt['policy_live']} · "
-                          + ("rewrote copy" if tt["changed"] else "default shipped")
-                          + (" · 1 say-variant held" if (d or {}).get("blocked_say") else ""),
-            })
+            tt["ab"] = OBS.ab_panel(_SD_TENANT, sec["id"], t["slot_id"], _SD_ROUTES,
+                                    kind="text")
+            tt["drift"] = OBS.drift_status(_SD_TENANT, sec["id"], t["slot_id"],
+                                           rules_version, _SD_ROUTES, kind="text")
             text_targets.append(tt)
 
         image_targets: list[dict] = []
@@ -646,7 +639,7 @@ def _designer_view(page: dict) -> dict:
             workflow = t.get("workflow", "realtime")
             is_hero = surf == "hero" and bool(hi)
             receipt = (hid.get("receipt") or {}) if is_hero else {}
-            tier = (hid.get("tier") or {}) if is_hero else {}
+            tier_i = (hid.get("tier") or {}) if is_hero else {}
             guard = (hid.get("guardrails") or {}) if is_hero else {}
             applied, blocked_g = guard.get("applied") or [], guard.get("blocked") or []
             if workflow == "prebuilt":
@@ -660,11 +653,6 @@ def _designer_view(page: dict) -> dict:
                                   + (f" · {len(blocked_g)} blocked" if blocked_g else ""))
                        if is_hero else "registry target — not rendered on this page yet"}
             source = receipt.get("source", "gradient") if is_hero else "—"
-            seq += 1
-            observe.append({
-                "seq": seq, "event": f"image.resolve {surf}",
-                "detail": f"{source} · {workflow}",
-            })
             sel = (hid.get("intent_selection") or {}) if is_hero else {}
             image_targets.append({
                 "surface_id": surf,
@@ -687,26 +675,24 @@ def _designer_view(page: dict) -> dict:
                     "policy": "allude",
                     "gate_verdict": verdict["status"],
                     "claim_ids": "—",
-                    "cache_key": tier.get("base_cache_key") or "—",
+                    "cache_key": tier_i.get("base_cache_key") or "—",
                     "mode": "generative", "workflow": workflow,
                     "rules_version": rules_version,
                 },
-                "ab": {"routes": _SD_ROUTES,
-                       "note": "posteriors per route arrive with the per-decision pool — "
-                               "a random-control holdout measures lift"},
-                "drift": {"status": "active", "rules_version": rules_version},
+                "ab": OBS.ab_panel(_SD_TENANT, sec["id"], surf, _SD_ROUTES, kind="image"),
+                "drift": OBS.drift_status(_SD_TENANT, sec["id"], surf, rules_version,
+                                          _SD_ROUTES, kind="image"),
             })
 
-        has_images = bool(sec.get("image_targets"))
-        nodes = []
-        for s in pmap["stages"]:
-            if s["id"] in _SD_IMAGE_STAGES and not has_images:
-                continue
-            outcome = s["output"]
-            if s["id"] == "tier":  # console vocabulary, not "tier N" jargon
-                outcome = f"confidence {page.get('tier', 0)} · {page.get('tier_label', 'neutral')}"
-            nodes.append({"id": s["id"], "title": s["title"], "outcome": outcome,
-                          "why": s["why"], "skipped": s["skipped"]})
+        held_count = sum(1 for d in diff_rows if d.get("blocked_say"))
+        changed_count = sum(1 for tt in text_targets if tt["changed"])
+        sec_cost = OBS.cost_row(sec["id"], [it["receipt"]["cache_key"]
+                                            for it in image_targets])
+        observe, seq = OBS.ledger_rows(
+            seq, section_id=sec["id"], entry_channel=entry.get("channel", "direct"),
+            route=route, tier_label=str(tier_label), text_targets=text_targets,
+            image_targets=image_targets, cost=sec_cost,
+            registry_version=rules_version)
 
         out_sections.append({
             "id": sec["id"],
@@ -717,9 +703,16 @@ def _designer_view(page: dict) -> dict:
             "channels": sec.get("channels") or [],
             "text_targets": text_targets,
             "image_targets": image_targets,
-            "graph": nodes,
-            "evals": _sd_evals(sec, brain),
+            "graph": OBS.flow_nodes(
+                entry_channel=entry.get("channel", "direct"),
+                entry_signals=entry_signals, route=route, tier=tier,
+                tier_label=str(tier_label), text_targets=text_targets,
+                image_targets=image_targets, held_count=held_count,
+                changed_count=changed_count, cost=sec_cost,
+                rules_version=gate_rules_version, registry_version=rules_version),
+            "evals": OBS.eval_rows(sec, text_targets, diff_rows, brain, image_targets),
             "observe": observe,
+            "cost": sec_cost,
         })
 
     channel = page["entry"].get("channel", "direct")
