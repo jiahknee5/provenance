@@ -12,8 +12,11 @@ from app.gauntlet import MOUNTS as GAUNTLET_MOUNTS
 from app.gauntlet import entry_links as gauntlet_entry_links
 from app.planet import MOUNTS as PLANET_MOUNTS
 from app.planet import entry_links as planet_entry_links
+from app.skyfi import MOUNTS as SKYFI_MOUNTS
+from app.skyfi import entry_links as skyfi_entry_links
 from pipeline.personalization import gauntlet_site as GS
 from pipeline.personalization import planet_site as PS
+from pipeline.personalization import skyfi_site as SS
 
 _SITES: tuple[dict, ...] = (
     {
@@ -34,6 +37,16 @@ _SITES: tuple[dict, ...] = (
         "entry_links": planet_entry_links,
         "mounts": PLANET_MOUNTS["portal"],
     },
+    {
+        "id": "skyfi",
+        "name": "SkyFi",
+        "domain": "skyfi.com",
+        "tagline": "On-demand satellite imagery — location × industry at basin scale; "
+                   "exact-AOI only when declared first-party.",
+        "sample_email": SS.sample_login_email,
+        "entry_links": skyfi_entry_links,
+        "mounts": SKYFI_MOUNTS["portal"],
+    },
 )
 _BY_ID = {s["id"]: s for s in _SITES}
 _DEFAULT = "gauntlet"
@@ -53,7 +66,7 @@ def _qs(request: Request, *, site: str, as_state: str | None = None, drop: tuple
 
 def _as_state(request: Request, site: dict) -> str:
     forced = request.query_params.get("as", "").strip()
-    cookie_name = "gauntlet_email" if site["id"] == "gauntlet" else "planet_email"
+    cookie_name = f"{site['id']}_email"
     cookie = (request.cookies.get(cookie_name) or "").strip()
     if forced == "anon":
         return "anon"
@@ -81,18 +94,20 @@ def _console_cards(m: dict[str, str], qs: str, as_state: str) -> list[dict]:
             "kind": "primary",
         },
         {
-            "title": "Image decisions",
-            "desc": "Pipeline guide — intents, guardrails, pre-cached vs live inventory.",
-            "href": m["image_decisions"],
-            "kind": "secondary",
-        },
-        {
             "title": "Live replica",
             "desc": "The personalized page a visitor sees — same query params, no console chrome.",
             "href": f"{m['page']}{qs}",
             "kind": "secondary",
         },
     ]
+    # Image-decisions guide only where the tenant ships one (mount key = config).
+    if m.get("image_decisions"):
+        cards.insert(2, {
+            "title": "Image decisions",
+            "desc": "Pipeline guide — intents, guardrails, pre-cached vs live inventory.",
+            "href": m["image_decisions"],
+            "kind": "secondary",
+        })
     if m.get("ads"):
         cards.append({
             "title": "X ads grid",

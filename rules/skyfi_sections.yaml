@@ -1,7 +1,157 @@
 # SkyFi — section registry (S1/R30, contract: 04-spec/contracts/registry-schema.md).
-# Minimal valid stub: seeded by T-07 (skyfi-tenant, W1). Until then
-# list_sections('skyfi') returns [] instead of raising.
+# T-07 descriptive seed (Art IV): mirrors the slot() ids skyfi_site.build_page records
+# in copy_diff and the hero/og image surfaces — no slot missing, none invented.
+#
+# The location section is SkyFi's differentiator (hero_location — location × industry
+# at BASIN/REGION scale; exact-AOI is hold, arm Ex, unless declared first-party → say
+# with the "you told us" receipt — the S09 flip).
+# Image workflows: realtime everywhere — rules/skyfi_prebuild.yaml is empty by design
+# (S02 is the signature realtime beat). Generative slots land with T-05/T-08 wiring.
 
 version: 1
 tenant: skyfi
-sections: []
+sections:
+  - id: hero
+    label: "Hero"
+    region: hero
+    personalize: true
+    goal: "Message-match the first screen to the arrival — campaign creative, identity, or firmographics."
+    channels: [direct, search, ads, email]
+    text_targets:
+      - slot_id: hero_eyebrow
+        label: "Hero eyebrow"
+        mode: deterministic
+        workflow: realtime
+        strategy: message-match
+        policy: say
+        source: catalog
+        claims: []
+        prompt: ""
+      - slot_id: hero_sub
+        label: "Hero headline + sub"
+        mode: deterministic
+        workflow: realtime
+        strategy: message-match
+        policy: say
+        source: catalog
+        claims: []
+        prompt: ""
+      - slot_id: hero_cta
+        label: "Hero CTAs"
+        mode: deterministic
+        workflow: realtime
+        strategy: message-match
+        policy: allude
+        source: catalog
+        claims: []
+        prompt: ""
+    image_targets:
+      - surface_id: hero
+        label: "Hero backdrop (region×sector)"
+        workflow: realtime
+        intent_rules: inherit
+        guardrails: inherit
+        prebuilt_states_cap: 8
+      - surface_id: og
+        label: "Open Graph / social preview"
+        workflow: realtime
+        intent_rules: inherit
+        guardrails: inherit
+        prebuilt_states_cap: 8
+    guardrails: {}
+    evals: [gate_pass, hold_never_ships]
+  - id: location
+    label: "Location line (AOI policy)"
+    region: location
+    personalize: true
+    goal: "Location × industry at basin/region scale — exact-AOI is hold (arm Ex) unless declared first-party, then say with the 'you told us' receipt (S09)."
+    channels: [direct, search, ads, email]
+    text_targets:
+      - slot_id: hero_location
+        label: "Hero location line"
+        mode: deterministic
+        workflow: realtime
+        strategy: location-relevance
+        policy: allude
+        source: catalog
+        claims: []
+        prompt: ""
+    image_targets: []
+    guardrails: {}
+    evals: [gate_pass, hold_never_ships]
+  - id: how
+    label: "How it works"
+    region: how
+    personalize: true
+    goal: "Frame the AOI-to-answer flow for the visitor's sector, region archive, or the ad promise they clicked."
+    channels: [direct, search, ads, email]
+    text_targets:
+      - slot_id: how_intro
+        label: "How-it-works intro"
+        mode: deterministic
+        workflow: realtime
+        strategy: message-match
+        policy: allude
+        source: catalog
+        claims: []
+        prompt: ""
+    image_targets: []
+    guardrails: {}
+    evals: [gate_pass, hold_never_ships]
+  - id: pricing
+    label: "Pricing / AOI callout"
+    region: pricing
+    personalize: true
+    goal: "Meet the budget-conscious where they are; a declared AOI may be referenced because they told us."
+    channels: [direct, search, ads, email]
+    text_targets:
+      - slot_id: pricing_body
+        label: "Pricing / AOI callout"
+        mode: deterministic
+        workflow: realtime
+        strategy: social-proof
+        policy: allude
+        source: catalog
+        claims: []
+        prompt: ""
+    image_targets: []
+    guardrails: {}
+    evals: [gate_pass, hold_never_ships]
+  - id: compare
+    label: "Existing imagery vs new tasking"
+    region: compare
+    personalize: true
+    goal: "Emphasize the column that matches the audience or sector — same facts for everyone."
+    channels: [direct, search, ads, email]
+    text_targets:
+      - slot_id: compare_emphasis
+        label: "Comparison table emphasis"
+        mode: deterministic
+        workflow: realtime
+        strategy: loss-aversion
+        policy: allude
+        source: catalog
+        claims: []
+        prompt: ""
+    image_targets: []
+    guardrails: {}
+    evals: [gate_pass, hold_never_ships]
+  - id: cta
+    label: "Final CTA"
+    region: cta
+    personalize: true
+    goal: "Steer the close with behavioral or location context — alluded to, never itemized; a declared AOI may be recited."
+    channels: [direct, search, ads, email]
+    text_targets:
+      - slot_id: final_cta
+        label: "Final CTA block"
+        mode: deterministic
+        workflow: realtime
+        strategy: scarcity-honest
+        policy: allude
+        source: catalog
+        claims: []
+        prompt: ""
+    image_targets: []
+    guardrails: {}
+    evals: [gate_pass, hold_never_ships]

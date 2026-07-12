@@ -96,6 +96,7 @@ from app import help as _help  # noqa: E402,F401
 from app import archive as _archive  # noqa: E402,F401
 from app import gauntlet as _gauntlet  # noqa: E402,F401
 from app import planet as _planet  # noqa: E402,F401
+from app import skyfi as _skyfi  # noqa: E402,F401
 from app import apt_dev as _apt_dev  # noqa: E402,F401
 from app import apt_demo as _apt_demo  # noqa: E402,F401
 from app import mockups as _mockups  # noqa: E402,F401

@@ -1,0 +1,51 @@
+# SkyFi — tenant compliance rules (versioned). Loaded by pipeline.gate.rules.RulesEngine.
+# "Tenant = config," not a rebuild: same engine as helix/academy, SkyFi-specific rules.
+#
+# The signature rule set encodes the anti-surveillance ceiling in the COPY gate too:
+# exact-AOI / "we can see your site" recitations are hard-blocked; the only honest path
+# to exact scale is a declared first-party AOI, which the location stage (not copy
+# improvisation) handles with a "you told us" receipt.
+
+tenant: skyfi
+
+# MLR / legal holds — flip `active: true` to enforce. Keyed by claim_id.
+holds:
+  - id: provider_capacity_hold
+    claim_id: c_provider_capacity
+    active: false
+    verdict: red
+    reason: "Hold pending provider-network capacity substantiation review"
+
+# Hard blocks — pattern match against claim text (case-insensitive substring/regex).
+blocks:
+  - id: no_guaranteed_outcomes
+    pattern: "guarantee"
+    verdict: red
+    reason: "FTC: no guaranteed delivery windows or business outcomes"
+  - id: unsubstantiated_superlative
+    pattern: "(#1|best-in-class|number one|the best|world.?s best|clearest|sharpest imagery)"
+    verdict: red
+    reason: "Unsubstantiated superlative without a cited source (S04/S10 guardrail)"
+  - id: competitor_disparagement
+    pattern: "(beats |worse than|inferior to|better than (planet|maxar|airbus|blacksky))"
+    verdict: red
+    reason: "Competitor disparagement without substantiation — comparatives blocked"
+  - id: exact_aoi_surveillance
+    pattern: "(your exact (site|pit|facility|building)|we can see your|here.?s your (site|facility|installation|building)|no need to tell us where)"
+    verdict: red
+    reason: "Anti-surveillance ceiling (arm Ex): exact-AOI / specific-asset recitation never ships — only a declared first-party AOI unlocks exact scale, via the location stage receipt"
+  - id: defense_asset_reference
+    pattern: "(your (base|installation|garrison)|tomorrow.?s pass covers your)"
+    verdict: red
+    reason: "Defense/gov strict hold: AOR/theater framing only, never a specific asset"
+
+# Disclaimers — claims carrying these rule_tags require a disclaimer (amber, not blocked).
+disclaimers:
+  - id: delivery_window_disclaimer
+    rule_tag: delivery_window
+    verdict: amber
+    reason: "Delivery-window claims are provider pass-dependent — require a qualifier"
+  - id: resolution_disclaimer
+    rule_tag: resolution_class
+    verdict: amber
+    reason: "Resolution-class claims require the provider/licensing qualifier"

@@ -1,0 +1,12 @@
+# SkyFi — image prebuild manifest (per surface).
+# EMPTY BY DESIGN (T-07 / S6): S02 is the tenant's signature REAL-TIME beat — the
+# region×sector backdrop generates on first visit (~2 s gradient→swap, cached by key,
+# cost-logged once per cache_key per R35a). Nothing is baked into the deploy image, so
+# the demo always shows the live generation path. Contrast: gauntlet_prebuild.yaml
+# (instant-paint prebuilt states). Loaded by
+# pipeline.personalization.prebuild.load_prebuild_manifest(path=rules/skyfi_prebuild.yaml).
+
+tenant: skyfi
+known_email: noor.haddad@terrafirmepc.com
+
+states: []

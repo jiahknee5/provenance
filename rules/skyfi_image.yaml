@@ -1,0 +1,235 @@
+# SkyFi (skyfi.com) — action-driven hero image personalization (tenant config).
+# Loaded by pipeline.personalization.image_intents.load_image_config("skyfi").
+# The aesthetic is the brand (skyfi-brand.md): space-dark #060b16 base, signal-yellow
+# #fcc219 accents, imagery-forward — REGION × SECTOR at basin/landscape scale.
+# Signature guardrail baked into every intent: basin/region scale only; exact-AOI /
+# specific-asset pinpointing never renders unless declared first-party (S09); defense
+# gets the AOR register. All image workflows are REALTIME — see rules/skyfi_prebuild.yaml
+# (empty by design; S02 is the live beat). Framework: ACTION-IMAGE-PERSONALIZATION.md
+
+tenant: skyfi
+product_context: "on-demand satellite imagery & SAR ordering platform marketing site"
+
+# Brain simulator stays off for this tenant — Planet carries that demo beat.
+brain_simulator:
+  enabled: false
+
+brand:
+  accent_color: "#fcc219"
+  name: SkyFi
+  must_avoid_additions:
+    - "NO exact-site or specific-asset pinpointing — basin/region/landscape scale only (arm Ex)"
+    - "NO identifiable private property, vehicles, or individual people seen from above"
+    - "NO crosshairs, targeting reticles, or weapon imagery"
+    - "NO surveillance mood — coverage confidence, never watched-from-above menace"
+
+# Industry → environment type (allude only — never company names). Keys match
+# scene.py's reverse-IP industry buckets; values are region×sector satellite descriptors.
+industry_env:
+  technology: "satellite view of a metro tech corridor at dusk — grid geometry, warm window light"
+  energy: "high-oblique satellite view of an energy basin — corridors crossing open terrain"
+  agriculture: "satellite quilt of field polygons and center-pivot circles in seasonal color"
+  mining: "satellite view of a terraced open-pit district in mineral tones — basin scale, no single pit resolved"
+  logistics: "satellite view of a port and intermodal yard — containers as texture"
+  healthcare: "satellite view of a river city grid at dawn — calm civic geometry"
+  manufacturing: "satellite view of an industrial district beside rail lines"
+  construction: "satellite view of a growing urban edge — new blocks mid-build at district scale"
+  general: "cloud-free satellite mosaic of varied terrain — coast, basins, mountains"
+
+# Ad variant → message-match visual metaphor (basin-scale, license-safe, region-generic).
+ad_metaphors:
+  x-mining: "terraced mining basin from orbit in copper and rust tones — district scale, no single pit resolved"
+  x-construction: "urban growth corridor from above with district-scale build progress implied by texture"
+  x-agriculture: "crop-quilt mosaic with a soft seasonal gradient sweeping across the basin"
+  x-insurance: "split-frame coastal region — intact left, post-storm right, analytic tint on the change"
+  x-energy: "pipeline corridor crossing desert terrain at basin scale, ROW softly implied"
+  x-defense: "dusk-lit littoral theater with a calm telemetry grid — map-room register, no assets resolved"
+
+# Intent taxonomy — region×sector visual strategies supporting the page CTA.
+intents:
+  - id: basin_truth
+    brain_target: attention
+    conversion_goal: "Trust → browse the archive"
+    design_principles:
+      - "The visitor's kind of ground at basin/landscape scale — never site scale"
+      - "Archive-coverage confidence: the region is already searchable"
+      - "Single focal point — processing fluency"
+      - "Space-dark base; signal-yellow accent zone for headline legibility"
+    sales_technique: "truthful location×industry relevance (archive-coverage claim)"
+    allowed_signals: [region_mood, industry, audience_route, ad_variant]
+    blocked_signals: [exact_site, specific_asset, visitor_name, company_name, PII]
+    composition_template: >-
+      Wide cinematic satellite view: {environment}, cloud-free, softly lit from orbit —
+      empty upper third for headline overlay, signal-yellow accent glow along one edge.
+    color_rules: "Space-dark base (#060b16), signal-yellow accent ({accent_color}), true-color terrain"
+    visual_metaphor: "the visitor's kind of ground, already in the archive — capability implied by coverage"
+    mood: "calm, planetary, quietly confident"
+
+  - id: order_flow_match
+    brain_target: message_match
+    conversion_goal: "Ad click-through continuity → order flow"
+    design_principles:
+      - "Visual echoes the ad promise (consistency principle)"
+      - "Sector-matched basin metaphor — pit district, build corridor, crop quilt"
+      - "No text in image — promise via landform and accent only"
+    sales_technique: "message-match / consistency principle"
+    allowed_signals: [ad_variant, utm_campaign, region_mood]
+    blocked_signals: [ad_copy_literal, company_names, PII, site_scale]
+    composition_template: >-
+      Visual continuation of the ad promise: {ad_metaphor} — landscape-scale satellite
+      aesthetic, signal-yellow accent linking ad click to landing headline zone.
+    color_rules: "Ad-aligned regional palette with SkyFi yellow bridge ({accent_color})"
+    visual_metaphor: "{ad_metaphor}"
+    mood: "consistent, expected, trust-building"
+
+  - id: before_after_archive
+    brain_target: change_legibility
+    conversion_goal: "Claims / underwriting buy-in"
+    design_principles:
+      - "Before/after seam — the archive already holds the before-state"
+      - "Loss frame without fear-mongering: evidence, not drama"
+      - "Analytic accent on the delta only"
+    sales_technique: "loss aversion, honest (the before-picture exists)"
+    allowed_signals: [audience_route, industry, region_mood]
+    blocked_signals: [property_scale, dollar_amounts, company_name, PII, disaster_porn]
+    composition_template: >-
+      Split-tone satellite backdrop of one coastal or riverine region — a clean seam
+      between the before state and the after state, yellow analytic accent on the change.
+    color_rules: "Muted true-color base, signal-yellow analytic delta ({accent_color})"
+    visual_metaphor: "the before-picture already in the archive — evidence, not estimates"
+    mood: "assured, evidentiary, patient"
+
+  - id: aor_authority
+    brain_target: authority
+    conversion_goal: "Mission / program decision"
+    design_principles:
+      - "Map-room gravitas: theater-scale littoral at dusk"
+      - "AOR register — NEVER the visitor's own location or a specific asset"
+      - "Subtle telemetry grid implies coverage, not surveillance"
+    sales_technique: "authority + commercial-augmentation framing"
+    allowed_signals: [audience_route_enterprise, ad_defense]
+    blocked_signals: [visitor_location, named_installations, crosshairs, weapons, company_names]
+    composition_template: >-
+      Dusk-lit satellite view of a strategic littoral theater — abstract coastline and
+      port geometry, faint telemetry grid overlay, yellow accent on the analytic layer.
+    color_rules: "Deep dusk navy, signal-yellow analytic overlay ({accent_color})"
+    visual_metaphor: "the theater under commercial coverage — map-room, not spy-cam"
+    mood: "evaluative, strategic, composed"
+
+  - id: declared_aoi_proof
+    brain_target: trust
+    conversion_goal: "Declared-AOI reorder (first-party)"
+    design_principles:
+      - "THE ONE exception to the scale ceiling: a first-party declared AOI (S09)"
+      - "Their own boundary, crisply outlined — because they drew it"
+      - "The receipt says 'you told us' — honesty is the aesthetic"
+    sales_technique: "first-party continuation — declared asset, zero inference"
+    allowed_signals: [declared_aoi, region_mood]
+    blocked_signals: [inferred_location, third_party_assets, PII]
+    composition_template: >-
+      One crisply outlined AOI glowing in signal-yellow inside a wider basin mosaic —
+      the declared boundary rendered with pride, the surrounding region softly dimmed.
+    color_rules: "Space-dark mosaic, declared boundary in signal-yellow ({accent_color})"
+    visual_metaphor: "the boundary they drew themselves — exact because declared, never inferred"
+    mood: "personal, earned, precise"
+
+# Deterministic intent selection — primary_rules = elif chain; fallback_rules = additive.
+selection:
+  primary_rules:
+    - when:
+        ad_variant_id: x-defense
+      picks:
+        - intent_id: aor_authority
+          rank: 1
+          why: "defense ad → AOR/theater register, never the visitor's location"
+          signals_used: [ad_defense, audience_route_enterprise]
+
+    - when:
+        ad_variant_id: x-insurance
+      picks:
+        - intent_id: before_after_archive
+          rank: 1
+          why: "insurance ad → the before-picture is already in the archive"
+          signals_used: [ad_insurance]
+
+    - when:
+        ad_variant_id: $present
+      picks:
+        - intent_id: order_flow_match
+          rank: 1
+          why: "paid ad variant {ad_variant_id} → message-match visual continuity"
+          signals_used: ["ad_{ad_variant_suffix}", channel_ad]
+        - intent_id: basin_truth
+          rank: 2
+          why: "the visitor's basin is already in the archive — coverage as trust"
+          signals_used: [region_mood]
+
+  fallback_rules:
+    - when:
+        audience_route: enterprise
+      picks:
+        - intent_id: aor_authority
+          rank: $next
+          why: "enterprise route → program-scale gravitas at theater scale"
+          signals_used: [audience_route_enterprise]
+
+    - when:
+        industry: mining
+      picks:
+        - intent_id: basin_truth
+          rank: $next
+          why: "mining sector resolved → the operating basin, already imaged"
+          signals_used: [industry_mining]
+
+    - when:
+        industry: insurance
+      picks:
+        - intent_id: before_after_archive
+          rank: $next
+          why: "insurance sector → before-picture evidence framing"
+          signals_used: [industry_insurance]
+
+    - when: {}
+      picks:
+        - intent_id: basin_truth
+          rank: 1
+          why: "neutral context → archive coverage is the default true story"
+          signals_used: [default_basin_truth]
+
+# Intent → page CTA linkage (pairs with build_page hero CTAs).
+action_map:
+  default: browse_imagery
+  cta_keywords:
+    tasking: tasking_cta
+    task: tasking_cta
+    browse: browse_cta
+    price: pricing_cta
+    ops: tasking_cta
+  route_defaults:
+    enterprise: tasking_cta
+    selfserve: browse_cta
+
+# Prompt assembly defaults (merged with intent templates).
+prompt_defaults:
+  must_include:
+    - "cinematic wide 16:9 hero backdrop"
+    - "satellite-view aesthetic at basin/region/landscape scale"
+    - "space-dark atmosphere (#060b16) supporting headline overlay"
+    - "signal-yellow accent lighting ({accent_color})"
+    - "single clear focal point — processing fluency"
+  must_avoid:
+    - "NO faces of real people or identifiable individuals"
+    - "NO company logos or brand marks"
+    - "NO text, words, letters, or numbers in the image"
+    - "NO visitor names, employer names, or PII"
+    - "NO surveillance, creepy, or behavioral-tracking imagery"
+    - "NO exact-site or specific-asset detail — basin/region scale only"
+    - "NO identifiable private homes, vehicles, or individual people seen from above"
+    - "NO crosshairs, targeting reticles, or weapon imagery"
+    - "NO maps with addresses or exact city landmarks"
+
+# Tier gates for personalization layers (surface policy alignment).
+guardrails:
+  tier_gates:
+    industry: 2
+    region_mood: 1
