@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apt — Mock 4 · Provable</title>
+<style>
+  :root{
+    --bg:#f4f8f8; --card:#ffffff; --ink:#12252a; --muted:#557079; --line:#dce8e9;
+    --brand:#0e7c86; --brand2:#0a5560; --brand-soft:#e6f2f2;
+    --green:#1f9d57; --amber:#d98a16; --red:#d23b3b;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+  nav{display:flex;justify-content:space-between;align-items:center;background:var(--card);border-bottom:1px solid var(--line)}
+  nav .in{max-width:1080px;margin:0 auto;padding:16px 28px;display:flex;justify-content:space-between;align-items:center;width:100%}
+  .brand{font-weight:800;font-size:20px;color:var(--brand2);display:flex;align-items:center;gap:9px;letter-spacing:-.01em}
+  .brand .seal{width:24px;height:24px;border-radius:7px;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:13px;font-weight:900}
+  nav .links a{color:var(--muted);font-size:14px;margin-left:24px}
+  nav .links a:hover{color:var(--ink)}
+  .btn{display:inline-block;font-weight:700;font-size:14px;padding:11px 19px;border-radius:9px;cursor:pointer;border:1px solid transparent}
+  .btn.solid{background:var(--brand);color:#fff}.btn.solid:hover{background:var(--brand2)}
+  .btn.line{border-color:var(--line);color:var(--brand2);background:var(--card)}.btn.line:hover{border-color:var(--brand)}
+  /* hero */
+  .hero{display:grid;grid-template-columns:1.02fr .98fr;gap:44px;align-items:center;padding:56px 0}
+  .pill{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--brand2);background:var(--brand-soft);
+    border:1px solid #cde5e5;padding:6px 13px;border-radius:999px;margin-bottom:22px}
+  h1{font-size:clamp(38px,5.6vw,58px);line-height:1.04;letter-spacing:-.025em;font-weight:800;margin:0 0 18px}
+  h1 u{text-decoration:none;color:var(--brand);border-bottom:4px solid var(--amber)}
+  .sub{font-size:18.5px;color:var(--muted);max-width:52ch;margin:0 0 26px}
+  .sub b{color:var(--ink)}
+  .heroactions{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .under{font-size:12.5px;color:var(--muted);margin-top:16px;display:flex;align-items:center;gap:8px}
+  .under .dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+  /* ledger card */
+  .ledger{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 20px 50px -24px rgba(10,85,96,.35);overflow:hidden}
+  .ledger .lh{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line);font-size:13px;color:var(--muted)}
+  .ledger .lh b{color:var(--brand2)}
+  .ledger .body{padding:18px}
+  .ledger .h{font-size:19px;font-weight:800;letter-spacing:-.01em;margin-bottom:12px;line-height:1.3}
+  .claim{display:inline;padding:2px 5px;border-radius:5px;border-bottom:2px solid transparent}
+  .claim.green{background:rgba(31,157,87,.12);border-color:var(--green)}
+  .claim.amber{background:rgba(217,138,22,.16);border-color:var(--amber)}
+  .claim.red{background:rgba(210,59,59,.12);border-color:var(--red);text-decoration:line-through;color:#a33}
+  .ledger .rows{margin-top:16px;border-top:1px solid var(--line)}
+  .lrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+  .lrow:last-child{border-bottom:0}
+  .pill2{font-size:11px;font-weight:800;padding:2px 9px;border-radius:999px;white-space:nowrap}
+  .pill2.g{background:rgba(31,157,87,.16);color:var(--green)}
+  .pill2.a{background:rgba(217,138,22,.18);color:var(--amber)}
+  .pill2.r{background:rgba(210,59,59,.16);color:var(--red)}
+  .lrow .src{color:var(--muted);font-size:12px;margin-left:auto}
+  /* sections */
+  section{padding:74px 0}
+  .eyebrow{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--brand);margin:0 0 14px}
+  h2{font-size:clamp(30px,4.4vw,44px);line-height:1.08;letter-spacing:-.02em;margin:0 0 14px;max-width:22ch}
+  .lede{font-size:18px;color:var(--muted);max-width:60ch}
+  .lede b{color:var(--ink)}
+  .center{text-align:center}.center h2,.center .lede{margin-left:auto;margin-right:auto}
+  /* problem */
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:36px}
+  .pcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px}
+  .pcard h3{font-size:20px;margin:0 0 14px}
+  .pcard .row{display:flex;gap:11px;padding:11px 0;border-top:1px solid var(--line);font-size:15px;color:var(--muted)}
+  .pcard .row i{font-style:normal;font-weight:800;flex-shrink:0}
+  .pcard.bad{border-top:4px solid var(--red)} .pcard.bad .row i{color:var(--red)}
+  .pcard.good{border-top:4px solid var(--brand)} .pcard.good .row i{color:var(--brand)} .pcard.good .row{color:var(--ink)}
+  /* value */
+  .band{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px}
+  .vcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px;text-align:center}
+  .vcard .big{font-size:50px;font-weight:800;color:var(--brand);letter-spacing:-.03em;line-height:1}
+  .vcard .lbl{font-weight:700;margin-top:10px}
+  .vcard .d{font-size:13.5px;color:var(--muted);margin-top:6px}
+  /* how */
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:40px;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .st{padding:26px 22px;border-right:1px solid var(--line);position:relative}
+  .st:last-child{border-right:0}
+  .st .n{width:32px;height:32px;border-radius:9px;background:var(--brand-soft);color:var(--brand2);font-weight:900;display:grid;place-items:center;margin-bottom:14px}
+  .st h3{font-size:17px;margin:0 0 8px;letter-spacing:-.01em}
+  .st p{font-size:13.5px;color:var(--muted);margin:0}
+  .st .chip{display:inline-block;margin-top:12px;font-size:11px;font-weight:700;color:var(--brand);background:var(--brand-soft);padding:3px 9px;border-radius:999px}
+  /* cta */
+  .final{margin:10px auto 90px}
+  .finalbox{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border-radius:24px;padding:56px 40px;text-align:center}
+  .finalbox h2{color:#fff;margin:0 auto 12px}
+  .finalbox p{font-size:18px;opacity:.92;max-width:54ch;margin:0 auto 26px}
+  .finalbox .btn.white{background:#fff;color:var(--brand2)}
+  .finalbox .btn.ghostw{border-color:rgba(255,255,255,.5);color:#fff}
+  footer{border-top:1px solid var(--line);padding:26px 0;color:var(--muted);font-size:13px;background:var(--card)}
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  @media(max-width:840px){.hero,.two,.band,.steps{grid-template-columns:1fr}.st{border-right:0;border-bottom:1px solid var(--line)}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="in">
+    <div class="brand"><span class="seal">✓</span> Apt</div>
+    <div class="links">
+      <a href="#problem">Problem</a>
+      <a href="#solution">Solution</a>
+      <a href="#how">How it works</a>
+      <a class="btn solid" href="#cta" style="margin-left:24px">Request access</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <span class="pill">✓ apt — perfectly fitted, and provably true</span>
+      <h1>Landing pages <u>apt</u> for every visitor — and proven true for every claim.</h1>
+      <p class="sub">Static pages don’t reach your audience, and “personalization” tools invent claims to sound like they do. <b>Apt</b> does both jobs honestly: a page fitted to each visitor, where <b>every claim is cited or killed</b> before it ships.</p>
+      <div class="heroactions">
+        <a class="btn solid" href="#cta">Make my pages apt →</a>
+        <a class="btn line" href="#how">How it works</a>
+      </div>
+      <p class="under"><span class="dot"></span> Every live claim on this page is verified against a source · powered by the Provenance Gate</p>
+    </div>
+
+    <div class="ledger" aria-hidden="true">
+      <div class="lh"><span>◷ Ag-biotech VP · from paid search “trial reporting”</span><b>Apt · live page</b></div>
+      <div class="body">
+        <div class="h">Cut field-trial reporting from <span class="claim green">6 weeks to 6 days</span> — the way <span class="claim green">HelixBio</span> did.</div>
+        <p style="font-size:13.5px;color:var(--muted);margin:0 0 4px">Built for ag-biotech ops teams. <span class="claim amber">Rated #1 by analysts</span> · <span class="claim red">guarantees FDA approval</span></p>
+        <div class="rows">
+          <div class="lrow"><span class="pill2 g">VERIFIED</span> “6 weeks → 6 days” <span class="src">↳ HelixBio case study, p.4</span></div>
+          <div class="lrow"><span class="pill2 g">VERIFIED</span> “HelixBio customer” <span class="src">↳ signed MSA 2025-11</span></div>
+          <div class="lrow"><span class="pill2 a">HELD</span> “#1 by analysts” <span class="src">↳ awaiting citation</span></div>
+          <div class="lrow"><span class="pill2 r">KILLED</span> “guarantees FDA approval” <span class="src">↳ unprovable — removed</span></div>
+        </div>
+      </div>
+    </div>
+  </header>
+</div>
+
+<section id="problem" style="background:var(--card);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+  <div class="wrap center">
+    <p class="eyebrow">The problem</p>
+    <h2>Static pages don’t reach anyone. Fake personalization reaches them dishonestly.</h2>
+    <p class="lede">You’re stuck between a frozen page that speaks to no one and AI copy that will say anything to convert — including things you can’t stand behind. Neither is apt.</p>
+    <div class="two" style="text-align:left">
+      <div class="pcard bad">
+        <h3>The static page</h3>
+        <div class="row"><i>✕</i> One message for every audience — reaches none of them.</div>
+        <div class="row"><i>✕</i> Can’t adapt to who arrived or why.</div>
+        <div class="row"><i>✕</i> Every edit is a sprint; every test is a quarter.</div>
+        <div class="row"><i>✕</i> High CAC, low relevance, wasted spend.</div>
+      </div>
+      <div class="pcard bad" style="border-top-color:var(--amber)">
+        <h3 style="color:var(--amber)">Ungoverned “AI personalization”</h3>
+        <div class="row" style="color:var(--amber)"><i style="color:var(--amber)">!</i> Personalizes by inventing claims that fit the reader.</div>
+        <div class="row" style="color:var(--amber)"><i style="color:var(--amber)">!</i> No citation, no proof, no legal hold.</div>
+        <div class="row" style="color:var(--amber)"><i style="color:var(--amber)">!</i> One hallucination away from a false promise.</div>
+        <div class="row" style="color:var(--amber)"><i style="color:var(--amber)">!</i> Trust — and brand — at risk on every send.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="solution">
+  <div class="wrap center">
+    <p class="eyebrow">The solution</p>
+    <h2>Hyper-personalized pages that are apt — fitted, likely, and proven.</h2>
+    <p class="lede">Apt tailors each page to the visitor most apt to act, then runs every claim through the Provenance Gate: cited or killed. You get the lift of true 1:1 personalization with none of the risk — sharper targeting, higher CTA, lower CAC.</p>
+    <div class="band">
+      <div class="vcard"><div class="big">▲ CTA</div><div class="lbl">Higher click-through</div><div class="d">The page makes the case each visitor came to hear.</div></div>
+      <div class="vcard"><div class="big">▼ CAC</div><div class="lbl">Lower acquisition cost</div><div class="d">Paid traffic converts more, for the same spend.</div></div>
+      <div class="vcard"><div class="big">100%</div><div class="lbl">Claims proven</div><div class="d">Nothing personalized ships without a citation.</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="how" style="background:var(--card);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+  <div class="wrap center">
+    <p class="eyebrow">How it works</p>
+    <h2>Understand the apt. Build to fit. Gate the truth. Optimize.</h2>
+    <p class="lede">Four stages produce a page that’s apt on every meaning of the word — suited to the visitor, likely to convert, and safe to publish.</p>
+    <div class="steps" style="text-align:left">
+      <div class="st"><div class="n">1</div><h3>Understand the apt</h3><p>Resolve the visitor into a segment from source, firmographics, intent &amp; CRM — model what they’re apt to want.</p></div>
+      <div class="st"><div class="n">2</div><h3>Assemble the page</h3><p>Draft the fitted headline, proof, offer &amp; CTA from your claims library — one page per visitor.</p></div>
+      <div class="st"><div class="n">3</div><h3>Gate every claim</h3><p>Each claim is decomposed and must cite a source. Unprovable claims are killed before publish.<span class="chip">✓ cited or killed</span></p></div>
+      <div class="st"><div class="n">4</div><h3>Optimize in truth</h3><p>A truth-bounded optimizer keeps what lifts CTA — only among Gate-passed claims. Re-verifies on source change.<span class="chip">✓ can’t pick a lie</span></p></div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap final">
+  <div class="finalbox">
+    <p class="eyebrow" style="color:#bfe7e7">Ready when you are</p>
+    <h2>Personalization your legal team will sign off on.</h2>
+    <p>Give every visitor a page that’s apt for them — perfectly fitted, likely to convert, and provable line by line.</p>
+    <div class="heroactions" style="justify-content:center">
+      <a class="btn white" href="#">Make my pages apt →</a>
+      <a class="btn ghostw" href="#">Request access</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="brand" style="font-size:16px"><span class="seal" style="width:20px;height:20px;font-size:11px">✓</span> Apt <span style="color:var(--muted);font-weight:400;font-size:12px">by Provenance</span></div>
+    <div>Marketing you can prove · © 2026 · Mock 4 — Provable</div>
+  </div>
+</footer>
+
+</body>
+</html>
