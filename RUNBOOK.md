@@ -70,3 +70,25 @@ form → **enrich** (connectors fan out) → **Enrichment Gate** (allow-listed s
 basis + freshness + consent → usable/disclaimer/blocked) → **synthesize** a profile DB →
 **personalize** (only gated facts reach the copy, each with its receipt) → **fact audit**
 (the Assurance Lab proves the gate blocks disallowed/stale/PHI/non-consent facts — property E1).
+
+## Optional: Gauntlet hero image generation (async, provenance-tagged)
+The Gauntlet replica (`/gauntlet`, `/gauntletapt`) ships a CSS gradient instantly; hero images
+generate server-side only when requested via the async API (never blocking page HTML). The
+action-image framework is tenant-configurable — see `docs/04-workflow/ACTION-IMAGE-PERSONALIZATION.md`
+(Gauntlet = `rules/gauntlet_image.yaml`; onboarding template = `rules/_image_template.yaml`).
+
+Offline / no key: curated gallery (`scene.image_for`) → CSS gradient fallback.
+
+```bash
+# OpenAI-compatible text-to-image endpoint (Nano Banana / Gemini Flash Image / etc.)
+export IMAGE_GEN_API_KEY=your-key          # or NANO_BANANA_API_KEY
+export IMAGE_GEN_API_URL=https://api.example.com/v1/images/generations  # optional
+export IMAGE_GEN_MODEL=gemini-2.5-flash-image                            # optional
+```
+
+Cached artifacts: `data/demo/image_cache/` (manifest + `images/` served at `/static/generated/`).
+Same prompt + model → same cache key → same image (Art IV). Full receipt on `/dev`.
+
+**Two-tier caching:** segment bases are pre-generatable (`python -m scripts.pregen_segment_images --dry-run`
+lists ~16 keys for Gauntlet ad variants + audience routes). Tier-2 deltas (objection, industry,
+region, archetype) append only when signals exist — see `docs/04-workflow/ACTION-IMAGE-PERSONALIZATION.md` §8.

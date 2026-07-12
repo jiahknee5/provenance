@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>/apt/dev — ops hub — Product tour</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#faf9f7;--panel:#ffffff;--panel2:#f6f4f0;--ink:#1a1f36;--muted:#697386;
+    --line:#e3e8ee;--accent:#635bff;--accent2:#0a2540;--chip-bg:#f0f3f9;--chip-fg:#3c4257;
+    --radius:12px;--shadow:0 1px 3px rgba(50,50,93,.08),0 4px 12px rgba(50,50,93,.06);
+    --sans:'Source Sans 3',Georgia,serif;--mono:'Source Sans 3',Georgia,serif;--display:'Fraunces',Georgia,serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--sans);font-size:14px;line-height:1.5;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1140px;margin:0 auto;padding:24px 28px 80px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:20px;font-size:12px;color:var(--muted)}
+  .topbar strong{color:var(--ink)}
+  .chip{display:inline-block;font-family:var(--mono);font-size:10.5px;font-weight:500;color:var(--chip-fg);background:var(--chip-bg);border-radius:6px;padding:3px 8px;border:1px solid var(--line)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .btn{display:inline-block;font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .vfoot{position:fixed;bottom:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 20px;background:var(--panel);border-top:1px solid var(--line);font-size:11px;z-index:99;flex-wrap:wrap}
+  .vbadge{font-weight:700;padding:5px 12px;border-radius:999px;background:#635bff;color:#fff}
+  .vnav a{color:var(--muted);margin:0 2px;font-weight:600}
+  .vnav a.on{color:var(--accent)}
+  
+  .hero{padding:56px 0 36px;border-bottom:1px solid var(--line);margin-bottom:36px}
+  .hero .kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:12px}
+  .hero h1{font-family:var(--display);font-size:clamp(36px,4.5vw,48px);font-weight:600;line-height:1.12;letter-spacing:-.02em;max-width:18ch}
+  .hero p{font-size:18px;color:var(--muted);max-width:52ch;margin-top:16px;line-height:1.65}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+<style>
+  .site-tog{display:flex;gap:24px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:32px}
+  .site-tog a{font-family:var(--display);font-size:20px;color:var(--muted);text-decoration:none;padding-bottom:12px;border-bottom:2px solid transparent;margin-bottom:-13px}
+  .site-tog a.on{color:var(--ink);border-color:var(--accent)}
+  .meta-row{display:flex;gap:16px;align-items:center;margin-bottom:28px;flex-wrap:wrap}
+  .meta-row p{font-size:15px;color:var(--muted);max-width:50ch;line-height:1.6}
+  .id-tog a{font-size:13px;font-weight:600;margin-right:12px;color:var(--muted);text-decoration:none;padding:6px 0;border-bottom:2px solid transparent}
+  .id-tog a.on{color:var(--accent);border-color:var(--accent)}
+  .hub-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin:32px 0}
+  .hub-card{display:block;padding:32px 28px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);color:inherit;text-decoration:none}
+  .hub-card h2{font-family:var(--display);font-size:22px;margin-bottom:10px}
+  .hub-card p{font-size:14px;color:var(--muted);line-height:1.6}
+  .hub-card .go{font-size:13px;font-weight:600;color:var(--accent);margin-top:16px}
+  .entries{padding:24px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel2)}
+</style>
+<div class="topbar"><span>Mockup · <strong>Ops hub</strong></span><a href="/apt/demo">Demo sitemap →</a></div>
+<div class="hero">
+  <div class="kicker">Personalization consoles</div>
+  <h1>One hub for both live replicas.</h1>
+  <p>Pick a site, preview identity, open the engineer or marketer console.</p>
+</div>
+<nav class="site-tog"><a href="#" class="on">GauntletAI</a><a href="#">Planet</a></nav>
+<div class="meta-row">
+  <p>AI hiring fellowship — entry channel × IP tier × CRM identity.</p>
+  <nav class="id-tog"><a href="#">Anonymous</a><a href="#" class="on">Known (maya.chen@gauntletai.com)</a></nav>
+</div>
+<div class="hub-grid"><a class="hub-card" href="/gauntletapt/dev/business"><h2>Marketer console</h2><p>Campaign-ops view — workflow, copy slots, image guardrails, staged YAML diffs.</p><span class="go">Open →</span></a><a class="hub-card" href="/gauntletapt/dev"><h2>Engineer console</h2><p>Full decision trace, 11-stage process map, plain-English story, audit ledger.</p><span class="go">Open →</span></a><a class="hub-card" href="/gauntletapt/image-decisions"><h2>Image decisions</h2><p>Pipeline guide — intents, guardrails, pre-cached vs live inventory.</p><span class="go">Open →</span></a><a class="hub-card" href="/gauntletapt"><h2>Live replica</h2><p>The personalized page a visitor sees — same query params, no console chrome.</p><span class="go">Open →</span></a><a class="hub-card" href="/gauntletapt/ad-lp"><h2>X ads grid</h2><p>All 12 paid-social mockups with per-variant landing links.</p><span class="go">Open →</span></a></div>
+<div class="entries">
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px">Simulate an entry for GauntletAI</div>
+  <div class="chips"><a class="chip" href="/gauntletapt">Direct →</a> <a class="chip" href="/gauntletapt?utm_source=hubspot&utm_medium=email">Email UTMs →</a> <a class="chip" href="/gauntletapt?utm_source=x&utm_medium=paid&utm_campaign=x-keyword-ai-hiring&utm_content=v09">X ad v09 →</a> <a class="chip" href="/gauntletapt?ref=google">Search →</a> <span class="chip">then log in as maya.chen@gauntletai.com</span></div>
+</div>
+</div>
+<footer class="vfoot">
+  <span class="vbadge">Variant B — Product tour</span>
+  <nav class="vnav"><a href="/apt/mockups/hub-a">A</a> · <a href="/apt/mockups/hub-b" class="on">B</a> · <a href="/apt/mockups/hub-c">C</a> · <a href="/apt/mockups">All mockups</a></nav>
+</footer>
+</body>
+</html>

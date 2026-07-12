@@ -58,7 +58,20 @@ def site(request: Request, token: str):
     if not r:
         return HTMLResponse("<h2>Link not found.</h2>", status_code=404)
     c = ctx()
-    variant = _variant_for(r.segment, c.winner(r.segment))
+    # ONLINE serving: settle stale no-clicks, then ASSIGN this visitor to a policy + arm —
+    # mostly the Thompson `bandit` pick from posteriors that real clicks update, but a small
+    # `control` holdout gets a random cleared arm so the bandit's lift stays measurable.
+    # Either way the pool is Gate-cleared (the lie is unservable). Record the impression
+    # (arm + policy) so a click rewards exactly what this visitor saw. Falls back to the
+    # demo's static learned winner only if the live pool has no arm for the segment.
+    c.live.settle()
+    served, policy = c.live.assign(r.segment)
+    if served:
+        c.live.record_impression(r.recipient_id, r.segment, served, policy=policy)
+        arm = c.live.arm_label(served)
+    else:
+        arm = c.winner(r.segment)
+    variant = _variant_for(r.segment, arm)
     data = render_site_data(c.gate, c.library, r, variant)
     # touchpoint T5: load the gated profile (enrich on demand for the seeded recipients)
     store = ProfileStore()
@@ -76,8 +89,13 @@ def site_cta(request: Request, token: str):
     r = rec.by_token(token)
     if not r:
         return HTMLResponse("<h2>Link not found.</h2>", status_code=404)
-    arm = ctx().winner(r.segment)
-    vid = f"{r.segment}__website__{arm}"
+    # A REAL click is the reward signal: resolve this visitor's pending impression to
+    # reward 1 and update the live posteriors online, so the next visitor in this segment
+    # is served what just converted. vid is the exact arm they saw (not a static winner).
+    c = ctx()
+    served = c.live.reward_click(r.recipient_id)
+    arm = c.live.arm_label(served) if served else c.winner(r.segment)
+    vid = served or f"{r.segment}__website__{arm}"
     conn = connect()
     try:
         conn.execute("INSERT INTO cta_events (recipient_id,channel,campaign,variant_id,clicked,ts) "

@@ -1,0 +1,508 @@
+{% extends "base.html" %}
+{% block title %}Hero image decisions — {{ brand_name }} · apt{% endblock %}
+{% block content %}
+<style>
+  main{max-width:1080px}
+  .id-head{margin-bottom:8px}
+  .id-head h1{font-size:26px;margin:0 0 6px;line-height:1.2}
+  .id-head .sub{font-size:14px;color:var(--muted);max-width:72ch;line-height:1.55;margin:0}
+  .id-links{display:flex;flex-wrap:wrap;gap:12px;margin:14px 0 16px;font-size:13px}
+  .id-links a{font-weight:600;color:var(--brand);text-decoration:none}
+  .id-nav{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px}
+  .id-nav a{font-size:12.5px;font-weight:600;text-decoration:none;color:var(--brand);border:1px solid var(--line);border-radius:8px;padding:6px 12px;background:#fff}
+  .part{margin-bottom:28px}
+  .part-h{display:flex;align-items:baseline;gap:10px;margin:0 0 12px}
+  .part-h .num{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--brand);background:#e8efff;padding:3px 8px;border-radius:5px}
+  .part-h h2{font-size:20px;margin:0}
+  .sec{border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px}
+  .sec .h{padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px;font-weight:700;color:var(--ink);display:flex;gap:8px;align-items:center}
+  .sec .h code{margin-left:auto;font-size:10px;font-weight:600;color:var(--muted)}
+  .sec .b{padding:12px 14px;font-size:13px;line-height:1.55}
+  .mermaid-wrap{padding:14px;background:#FAFBFC;border-radius:0}
+  table.id{width:100%;border-collapse:collapse;font-size:12.5px}
+  table.id th{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);text-align:left;padding:8px 14px;border-bottom:1px solid var(--line);background:#FAFBFC}
+  table.id td{padding:8px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.id tr:last-child td{border-bottom:0}
+  table.id td.mono{font-family:ui-monospace,Menlo,monospace;font-size:11.5px}
+  .sig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px 14px}
+  @media(max-width:760px){.sig-grid{grid-template-columns:1fr}}
+  .sig{border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:#FAFBFC;font-size:12.5px}
+  .sig .lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  .sig .src{font-size:11px;color:var(--muted);margin-top:4px}
+  .pipe-step{padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px}
+  .pipe-step:last-child{border-bottom:0}
+  .pipe-step .n{font-size:10px;font-weight:800;color:var(--brand);text-transform:uppercase;letter-spacing:.05em}
+  .pipe-step .sum{font-weight:600;margin:4px 0}
+  .pipe-step .det{font-size:12px;color:var(--muted);line-height:1.5}
+  .intent-card{border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
+  .intent-card .top{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .intent-card .top h3{margin:0;font-size:16px;flex:1;text-transform:capitalize}
+  .intent-card .tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:3px 8px;border-radius:5px}
+  .intent-card .tag.goal{background:#e7f6ee;color:#0a8a4f}
+  .intent-card .tag.act{background:#e8efff;color:#1d4ed8}
+  .intent-card .body{padding:12px 14px;font-size:13px;line-height:1.55}
+  .intent-card .row{margin-bottom:10px}
+  .intent-card .row .k{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:3px}
+  .intent-card .why{background:#FAFBFC;border-top:1px solid var(--line);padding:12px 14px}
+  .intent-card .why .k{font-weight:700;margin-bottom:6px}
+  .intent-card .live{padding:10px 14px;border-top:1px solid var(--line)}
+  .intent-card .live a{font-weight:600;color:var(--brand);text-decoration:none;font-size:13px}
+  .thumb{height:88px;border-radius:8px 8px 0 0;position:relative;overflow:hidden}
+  .thumb img{width:100%;height:100%;object-fit:cover}
+  .thumb .note{position:absolute;bottom:4px;right:6px;font-size:9px;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,.7);background:rgba(0,0,0,.4);padding:2px 6px;border-radius:4px}
+  .ex-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:12px 14px}
+  @media(max-width:900px){.ex-grid{grid-template-columns:1fr}}
+  .ex-card{border:1px solid var(--line);border-radius:10px;background:#FAFBFC;overflow:hidden;font-size:12.5px}
+  .ex-card .meta{padding:10px 12px}
+  .ex-card .t{font-weight:700}.ex-card .s{font-size:11px;color:var(--muted)}
+  .ex-card dl{margin:8px 0 0;display:grid;grid-template-columns:auto 1fr;gap:3px 8px;font-size:11.5px}
+  .ex-card dt{color:var(--muted);font-weight:600}.ex-card dd{margin:0}
+  .ex-card .links{margin-top:8px;display:flex;gap:10px;flex-wrap:wrap}
+  .ex-card .links a{font-weight:600;color:var(--brand);text-decoration:none;font-size:12px}
+  .tier-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 14px}
+  @media(max-width:700px){.tier-cols{grid-template-columns:1fr}}
+  .tier-col{border:1px solid var(--line);border-radius:9px;padding:12px;background:#FAFBFC;font-size:12.5px;line-height:1.5}
+  .tier-col .cap{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--brand);margin-bottom:8px}
+  .tier-col ul{margin:6px 0 0;padding-left:18px}
+  .prove-infer{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 14px}
+  @media(max-width:700px){.prove-infer{grid-template-columns:1fr}}
+  .prove-infer .col{font-size:13px;line-height:1.5}
+  .prove-infer .cap{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+  .prove-infer .col.yes .cap{color:#0a8a4f}.prove-infer .col.no .cap{color:#c0354b}
+  .cmp-pair{padding:12px 14px;border-bottom:1px solid var(--line)}
+  .cmp-pair:last-child{border-bottom:0}
+  .cmp-pair .t{font-weight:700;font-size:13px}.cmp-pair .s{font-size:12px;color:var(--muted);margin:2px 0 10px}
+  .cmp-duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:700px){.cmp-duo{grid-template-columns:1fr}}
+  ul.principles{margin:4px 0 0;padding-left:18px;font-size:12.5px}
+  /* Part 6 · cache decision graph — mirrors the /dev process-map language */
+  .cg{padding:4px 0 10px}
+  .cg-stage{display:grid;grid-template-columns:44px minmax(180px,.85fr) 1.4fr;gap:0 12px;padding:11px 15px 11px 0;position:relative}
+  .cg-stage + .cg-stage{border-top:1px dashed var(--line)}
+  @media(max-width:920px){.cg-stage{grid-template-columns:44px 1fr;row-gap:6px}.cg-right{grid-column:2}}
+  .cg-rail{position:relative;display:flex;justify-content:center}
+  .cg-rail::before{content:"";position:absolute;top:-12px;bottom:-12px;left:50%;width:2px;background:#E4E8EC}
+  .cg-stage:first-child .cg-rail::before{top:12px}
+  .cg-stage:last-child .cg-rail::before{bottom:auto;height:14px}
+  .cg-rail .n{position:relative;z-index:1;width:24px;height:24px;border-radius:7px;background:var(--ink);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;flex:none;margin-top:1px}
+  .cg-left .nm{font-weight:700;font-size:13px}
+  .cg-left .code{font-size:10.5px;color:var(--muted);font-family:ui-monospace,Menlo,monospace;margin-top:2px;word-break:break-word}
+  .cg-reads{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:5px}
+  .cg-reads .chip{font-size:10.5px;font-weight:600;color:#475569;background:#F6F8FA;border:1px solid var(--line);border-radius:5px;padding:1px 7px;font-family:ui-monospace,Menlo,monospace}
+  .cg-branches{display:grid;gap:5px;margin-bottom:6px}
+  .cg-branches .br{display:flex;gap:8px;align-items:baseline}
+  .cg-branches .b{font-size:10.5px;font-weight:700;border-radius:6px;padding:2px 9px;border:1px solid var(--line);color:var(--muted);background:#fff;white-space:nowrap;flex:none}
+  .cg-branches .b.pre{background:#e7f6ee;border-color:#bfe6d0;color:#0a8a4f}
+  .cg-branches .b.live{background:#fdf3e2;border-color:#ecd9ad;color:#8a5a0a}
+  .cg-branches .desc{font-size:11.5px;color:var(--muted);line-height:1.45}
+  .cg-out{font-size:12.5px;font-weight:600;color:var(--ink)}
+  .cg-out::before{content:"→ ";color:var(--muted);font-weight:400}
+  .cg-note{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.45}
+  .inv-status{font-size:10.5px;font-weight:700;border-radius:5px;padding:2px 8px;white-space:nowrap}
+  .inv-status.hit{background:#e7f6ee;color:#0a8a4f}
+  .inv-status.miss{background:#fdf3e2;color:#8a5a0a}
+  .cand-scenario{padding:14px;border-bottom:1px solid var(--line)}
+  .cand-scenario:last-child{border-bottom:0}
+  .cand-scenario .t{font-weight:700;font-size:14px;margin:0 0 2px}
+  .cand-scenario .s{font-size:12px;color:var(--muted);margin:0 0 12px}
+  .cand-meta{font-size:12px;color:var(--muted);margin-bottom:10px}
+  .cand-meta code{font-size:11px}
+  .cand-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+  .cand-card{border:1px solid var(--line);border-radius:10px;background:#FAFBFC;overflow:hidden;font-size:12px}
+  .cand-card.selected{border-color:#0a8a4f;box-shadow:0 0 0 1px #0a8a4f33}
+  .cand-card.rejected{opacity:.92}
+  .cand-card .img{height:110px;background:#0a0e14;position:relative;overflow:hidden}
+  .cand-card .img img{width:100%;height:100%;object-fit:cover}
+  .cand-card .badge{position:absolute;top:6px;left:6px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:3px 7px;border-radius:4px}
+  .cand-card .badge.selected{background:#0a8a4f;color:#fff}
+  .cand-card .badge.rejected{background:#6b7280;color:#fff}
+  .cand-card .body{padding:10px 12px;line-height:1.45}
+  .cand-card .score{font-weight:700;font-size:13px;margin-bottom:4px}
+  .cand-card .delta{font-size:11px;color:#c0354b;font-weight:600}
+  .cand-card .prompt{font-size:11px;color:var(--muted);margin-top:8px;max-height:72px;overflow:auto;line-height:1.4}
+  .cand-card .regions{font-size:10px;font-family:ui-monospace,Menlo,monospace;color:var(--muted);margin-top:6px}
+  .cand-empty{padding:16px 14px;font-size:13px;color:var(--muted);line-height:1.55;background:#FAFBFC;border-radius:8px;margin:12px 14px}
+  .cand-summary{font-size:12.5px;color:var(--muted);padding:0 14px 12px}
+</style>
+
+<div class="id-head">
+  <h1>How hero images are decided — and why it converts</h1>
+  <p class="sub">Educational guide for marketers and ops: deterministic pipeline from visitor signals → visual intent → structured prompt → cache → render. Every decision is receipted on <a href="{{ provenance.dev_path }}">{{ provenance.dev_path }}</a> panel {{ provenance.dev_panel }}.</p>
+</div>
+
+<div class="id-links">
+  <a href="{{ g.page }}">Live replica →</a>
+  <a href="{{ g.dev }}">Technical /dev →</a>
+  <a href="{{ g.dev_business }}">Marketing /dev/business →</a>
+  <a href="{{ g.ad_lp }}">X ads grid →</a>
+</div>
+
+<nav class="id-nav">
+  <a href="#part-1">1 · Pipeline</a>
+  <a href="#part-2">2 · Why each intent</a>
+  <a href="#part-3">3 · Two-tier tokens</a>
+  <a href="#part-brain">Brain simulator</a>
+  <a href="#part-4">4 · Provenance</a>
+  <a href="#part-5">5 · Live examples</a>
+  <a href="#part-decided">Decided vs rejected</a>
+  <a href="#part-6">6 · Pre-cached vs live</a>
+</nav>
+
+<section class="part" id="part-1">
+  <div class="part-h"><span class="num">Part 1</span><h2>The decision pipeline</h2></div>
+
+  <div class="sec">
+    <div class="h">Flow — signals to hero render</div>
+    <div class="mermaid-wrap">
+      <pre class="mermaid">
+flowchart LR
+  S[Signals in] --> I[Intent select]
+  I --> T{Two-tier?}
+  T -->|base only| P1[Base prompt]
+  T -->|delta| P2[Base + delta]
+  P1 --> G[Guardrails]
+  P2 --> G
+  G --> C{Cache hit?}
+  C -->|yes| R[Receipt + URL]
+  C -->|no| K{API key?}
+  K -->|no| F[Gallery / gradient]
+  K -->|yes| A[Generate + cache]
+  A --> R
+  R --> H[Gradient then image swap]
+      </pre>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="h">1 · Signals in</div>
+    <div class="sig-grid">
+      {% for s in signals_in %}
+      <div class="sig">
+        <div class="lbl">{{ s.label }}</div>
+        <div class="src">{{ s.source }}</div>
+        <div>{{ s.examples }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% for step in pipeline %}
+  {% if step.id != 'signals' %}
+  <div class="sec">
+    <div class="h">{{ loop.index }} · {{ step.label }} <code>{{ step.code }}</code></div>
+    <div class="pipe-step">
+      <div class="sum">{{ step.summary }}</div>
+      <div class="det">{{ step.detail }}</div>
+      {% if step.id == 'intent' %}
+      <table class="id" style="margin-top:12px">
+        <thead><tr><th>Intent</th><th>Conversion goal</th><th>Sales technique</th><th>Mood</th><th>Visual metaphor</th></tr></thead>
+        <tbody>
+          {% for row in intent_table %}
+          <tr>
+            <td class="mono">{{ row.id }}</td>
+            <td>{{ row.goal }}</td>
+            <td>{{ row.technique }}</td>
+            <td>{{ row.mood }}</td>
+            <td>{{ row.metaphor }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+      {% if step.id == 'guardrails' %}
+      <p style="margin-top:10px;font-weight:600">We never put in images:</p>
+      <ul class="principles">
+        {% for item in guardrails.must_avoid %}<li>{{ item }}</li>{% endfor %}
+      </ul>
+      <p style="font-size:12px;color:var(--muted);margin-top:8px">Tier gates: industry ≥ tier {{ guardrails.tier_gates.industry|default(2) }}, region ≥ tier {{ guardrails.tier_gates.region_mood|default(1) }}.</p>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+  {% endfor %}
+</section>
+
+<section class="part" id="part-2">
+  <div class="part-h"><span class="num">Part 2</span><h2>Why each intent helps the conversion goal</h2></div>
+
+  {% for card in intents %}
+  <article class="intent-card" id="intent-{{ card.id }}">
+    <div class="top">
+      <h3>{{ card.id|replace('_', ' ') }}</h3>
+      <span class="tag goal">{{ card.conversion_goal }}</span>
+      <span class="tag act">→ {{ card.drives_action }} ({{ card.drives_action_label }})</span>
+    </div>
+    <div class="body">
+      <div class="row"><div class="k">Sales / marketing technique</div>{{ card.sales_technique }}</div>
+      <div class="row"><div class="k">What the visitor should feel</div>{{ card.visitor_feels }}</div>
+      <div class="row"><div class="k">Example visual metaphor</div><em>{{ card.visual_metaphor }}</em></div>
+      <div class="row"><div class="k">Design principles</div>
+        <ul class="principles">{% for p in card.design_principles %}<li>{{ p }}</li>{% endfor %}</ul>
+      </div>
+    </div>
+    <div class="why">
+      <div class="k">Why it works</div>
+      {{ card.why_it_works }}
+    </div>
+    <div class="live">
+      <a href="{{ card.live_url }}">See it live →</a>
+      <span style="font-size:11px;color:var(--muted);margin-left:8px">{{ card.live_label }}</span>
+    </div>
+  </article>
+  {% endfor %}
+</section>
+
+<section class="part" id="part-3">
+  <div class="part-h"><span class="num">Part 3</span><h2>Two-tier token strategy</h2></div>
+  <div class="sec">
+    <div class="h">Segment base + personalization delta</div>
+    <div class="tier-cols">
+      <div class="tier-col">
+        <div class="cap">{{ two_tier.tier1.label }}</div>
+        <p>{{ two_tier.tier1.token_note }}</p>
+        <ul>{% for k in two_tier.tier1.cache_key_patterns %}<li><code>{{ k }}</code></li>{% endfor %}</ul>
+        <p>Layers: {% for l in two_tier.tier1.layers %}<code>{{ l }}</code>{% if not loop.last %}, {% endif %}{% endfor %}</p>
+      </div>
+      <div class="tier-col">
+        <div class="cap">{{ two_tier.tier2.label }}</div>
+        <p>{{ two_tier.tier2.token_note }}</p>
+        <ul>{% for s in two_tier.tier2.signals %}<li>{{ s }}</li>{% endfor %}</ul>
+      </div>
+    </div>
+    <table class="id">
+      <thead><tr><th>Resolution step</th></tr></thead>
+      <tbody>{% for r in two_tier.resolution %}<tr><td>{{ r }}</td></tr>{% endfor %}</tbody>
+    </table>
+    <div class="b" style="border-top:1px solid var(--line)">Pre-generate segment bases: <code>{{ two_tier.pregen_cmd }}</code></div>
+  </div>
+</section>
+
+<section class="part" id="part-brain">
+  <div class="part-h"><span class="num">Brain</span><h2>Brain simulator (Tribe v2)</h2></div>
+  <div class="sec">
+    <p style="margin-bottom:12px"><strong>{{ brain_simulator.honest_framing }}</strong></p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px">{{ brain_simulator.backend_note }}
+      {% if brain_simulator.enabled %}<span style="color:var(--brand);font-weight:600"> · Enabled</span>{% else %} · <strong>Disabled by default</strong> — opt in via <code>brain_simulator.enabled: true</code>{% endif %}</p>
+    <div class="h">Generate → score → select</div>
+    <ol class="principles">{% for step in brain_simulator.loop %}<li>{{ step }}</li>{% endfor %}</ol>
+    <p style="font-size:12px;color:var(--muted);margin-top:8px">Override: <code>{{ brain_simulator.env_var }}</code></p>
+  </div>
+  <div class="sec">
+    <div class="h">Intent → brain_target mapping (ready when enabled)</div>
+    <table class="id">
+      <thead><tr><th>Intent</th><th>brain_target</th><th>Regions</th></tr></thead>
+      <tbody>
+        {% for row in brain_simulator.intent_mapping %}
+        <tr>
+          <td class="mono">{{ row.intent_id }}</td>
+          <td><code>{{ row.brain_target }}</code></td>
+          <td class="mono" style="font-size:11px">{{ row.brain_regions }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="sec">
+    <div class="h">Example receipt snippet</div>
+    <pre class="mono" style="font-size:11px;background:#f4f6f9;padding:12px;border-radius:8px;overflow:auto">{{ brain_simulator.example_receipt | tojson(indent=2) }}</pre>
+  </div>
+</section>
+
+<section class="part" id="part-4">
+  <div class="part-h"><span class="num">Part 4</span><h2>Provenance &amp; trust</h2></div>
+  <div class="sec">
+    <div class="h">{{ provenance.dev_panel }} on <a href="{{ provenance.dev_path }}#sec-hero-image">{{ provenance.dev_path }}</a></div>
+    <div class="prove-infer">
+      <div class="col yes">
+        <div class="cap">What we can prove</div>
+        <ul>{% for item in provenance.proved %}<li>{{ item }}</li>{% endfor %}</ul>
+      </div>
+      <div class="col no">
+        <div class="cap">What we infer</div>
+        <ul>{% for item in provenance.inferred %}<li>{{ item }}</li>{% endfor %}</ul>
+      </div>
+    </div>
+    <div class="b" style="border-top:1px solid var(--line)">
+      Config: <code>{{ provenance.config_path }}</code> · Full spec: <code>{{ provenance.framework_doc }}</code>
+    </div>
+  </div>
+</section>
+
+<section class="part" id="part-5">
+  <div class="part-h"><span class="num">Part 5</span><h2>Live examples</h2></div>
+
+  <div class="sec">
+    <div class="h">Keyword ad · HR event · engineer interest</div>
+    <div class="ex-grid">
+      {% for ex in live_examples %}
+      <div class="ex-card">
+        <div class="thumb" style="background:{{ ex.thumb_gradient }}">
+          {% if ex.thumb_url %}<img src="{{ ex.thumb_url }}" alt="" loading="lazy">{% endif %}
+          <span class="note">{{ ex.source }}</span>
+        </div>
+        <div class="meta">
+          <div class="t">{{ ex.title }}</div>
+          <div class="s">{{ ex.subtitle }}</div>
+          <dl>
+            <dt>Intent</dt><dd><code>{{ ex.intent_id }}</code></dd>
+            <dt>drives_action</dt><dd><code>{{ ex.drives_action }}</code></dd>
+            <dt>Goal</dt><dd>{{ ex.conversion_goal }}</dd>
+            <dt>Tier</dt><dd><code>{{ ex.tier }}</code></dd>
+          </dl>
+          <div class="links">
+            <a href="{{ ex.landing_url }}">Landing →</a>
+            <a href="{{ ex.dev_url }}">Receipt →</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="h">Side-by-side pairs — contrasting strategies</div>
+    {% for pair in comparisons %}
+    <div class="cmp-pair">
+      <div class="t">{{ pair.title }}</div>
+      <div class="s">{{ pair.subtitle }}</div>
+      <div class="cmp-duo">
+        {% for side in [pair.left, pair.right] %}
+        <div class="ex-card">
+          <div class="thumb" style="background:{{ side.thumb_gradient }}">
+            {% if side.thumb_url %}<img src="{{ side.thumb_url }}" alt="" loading="lazy">{% endif %}
+            <span class="note">{{ side.source }}</span>
+          </div>
+          <div class="meta">
+            <dl>
+              <dt>Intent</dt><dd><code>{{ side.intent_id }}</code></dd>
+              <dt>drives_action</dt><dd><code>{{ side.drives_action }}</code></dd>
+              <dt>Why</dt><dd style="font-size:11px">{{ side.why }}</dd>
+            </dl>
+            <div class="links">
+              <a href="{{ side.landing_url }}">Landing →</a>
+              <a href="{{ side.dev_url }}">Receipt →</a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="part" id="part-decided">
+  <div class="part-h"><span class="num">Gallery</span><h2>Decided vs rejected — best-of-N provenance</h2></div>
+  <p class="sub" style="margin:0 0 14px;font-size:13px;color:var(--muted);max-width:78ch;line-height:1.55">
+    {{ decided_rejected.honest_framing }}
+  </p>
+  <p class="cand-summary">{{ decided_rejected.with_data_count }} of {{ decided_rejected.total_scenarios }} demo scenarios have full candidate galleries.</p>
+
+  <div class="sec">
+    <div class="h">Candidate galleries — winner + rejected</div>
+    {% for sc in decided_rejected.scenarios %}
+    <article class="cand-scenario">
+      <div class="t">{{ sc.title }}</div>
+      <div class="s">{{ sc.subtitle }} · intent <code>{{ sc.intent_id }}</code></div>
+      {% if sc.has_candidates %}
+      <div class="cand-meta">
+        <code>{{ sc.brain_target }}</code> · {{ sc.brain_simulator or 'proxy_v1' }}
+        · N={{ sc.candidates_evaluated }} · winner index {{ sc.winner_index }}
+        · <a href="{{ sc.dev_url }}">Receipt →</a>
+      </div>
+      <div class="cand-grid">
+        {% for c in sc.candidates %}
+        <div class="cand-card {{ c.badge }}">
+          <div class="img">
+            {% if c.image_url %}<img src="{{ c.image_url }}" alt="Candidate {{ c.index }}" loading="lazy">{% endif %}
+            <span class="badge {{ c.badge }}">{{ c.badge }}</span>
+          </div>
+          <div class="body">
+            <div class="score">brain_score {{ '%.3f'|format(c.brain_score) if c.brain_score is not none else '—' }}</div>
+            {% if c.delta_vs_winner is not none %}
+            <div class="delta">{{ '%+.3f'|format(c.delta_vs_winner) }} vs winner</div>
+            {% endif %}
+            {% if c.brain_region_scores %}
+            <div class="regions">{% for k, v in c.brain_region_scores.items() %}{{ k }}={{ '%.2f'|format(v) }}{% if not loop.last %} · {% endif %}{% endfor %}</div>
+            {% endif %}
+            <div class="prompt">{{ c.prompt }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="cand-empty">
+        {{ decided_rejected.empty_hint|safe }}
+        · <a href="{{ sc.landing_url }}">Landing</a>
+        · <a href="{{ sc.dev_url }}">Receipt</a>
+      </div>
+      {% endif %}
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="part" id="part-6">
+  <div class="part-h"><span class="num">Part 6</span><h2>Pre-cached vs live — the cache decision graph</h2></div>
+
+  <div class="sec">
+    <div class="h">What "pre-cached" and "live" mean here</div>
+    <div class="b">{{ precached.preamble }}</div>
+  </div>
+
+  <div class="sec">
+    <div class="h">Decision graph — request to pixel <code>image_gen.get_hero_image()</code></div>
+    <div class="cg">
+      {% for s in precached.graph %}
+      <div class="cg-stage">
+        <div class="cg-rail"><span class="n">{{ loop.index }}</span></div>
+        <div class="cg-left">
+          <div class="nm">{{ s.label }}</div>
+          <div class="code">{{ s.code }}</div>
+        </div>
+        <div class="cg-right">
+          {% if s.reads %}<div class="cg-reads">{% for r in s.reads %}<span class="chip">{{ r }}</span>{% endfor %}</div>{% endif %}
+          {% if s.branches %}
+          <div class="cg-branches">
+            {% for b in s.branches %}
+            <div class="br"><span class="b{{ ' ' + b.kind if b.kind }}">{{ b.label }}</span><span class="desc">{{ b.desc }}</span></div>
+            {% endfor %}
+          </div>
+          {% endif %}
+          <div class="cg-out">{{ s.output }}</div>
+          {% if s.note %}<div class="cg-note">{{ s.note }}</div>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="h">Warmed demo states — live cache status <code>{{ precached.inventory.cached }}/{{ precached.inventory.total }} pre-cached right now</code></div>
+    <table class="id">
+      <thead><tr><th>State</th><th>Tier</th><th>Disk key</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for row in precached.inventory.rows %}
+        <tr>
+          <td>{{ row.label }}</td>
+          <td class="mono">{{ row.tier }}</td>
+          <td class="mono">{{ row.disk_key }}</td>
+          <td><span class="inv-status {{ 'hit' if row.cached else 'miss' }}">{{ row.status }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="b" style="border-top:1px solid var(--line)">
+      Operational rule: after adding ad variants or demo states, run
+      <code>{{ precached.ops_rule }}</code> before deploying — the warmed cache ships inside
+      the Docker image (a <code>.dockerignore</code> exception for <code>data/demo/image_cache/</code>),
+      because Railway's filesystem is ephemeral and a deploy wipes anything generated at runtime.
+    </div>
+  </div>
+</section>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true, theme: 'neutral', securityLevel: 'loose' });
+</script>
+{% endblock %}

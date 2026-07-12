@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>apt — {{ tenant_name }} {{ channel_label }}</title>
+{% include "_apt_shell.html" %}
+<style>
+  .aud-tog{display:inline-flex;gap:3px;background:var(--line2);border-radius:9px;padding:3px;margin-bottom:20px}
+  .aud-tog a{font-size:13px;font-weight:600;color:var(--muted);padding:6px 14px;border-radius:7px}
+  .aud-tog a.on{background:#fff;color:var(--ink);box-shadow:var(--sh)}
+  .card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:8px}
+  @media(max-width:760px){.card-grid{grid-template-columns:1fr}}
+  .scenario-card{border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:var(--sh);padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+  .scenario-card.featured{border-color:#cfe0ff;background:linear-gradient(180deg,#fafcff 0%,#fff 100%)}
+  .scenario-card h2{font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+  .scenario-card .story{font-size:13px;line-height:1.5;color:var(--body)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{font-size:11px;font-weight:600;color:var(--body);background:var(--line2);border-radius:6px;padding:2px 8px}
+  .card-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .card-links a{font-size:12.5px;font-weight:600;border:1px solid var(--line);border-radius:8px;padding:6px 12px;background:#fff;color:var(--body)}
+  .card-links a.primary{border-color:var(--brand);color:var(--brand)}
+  .card-links a:hover{border-color:var(--brand)}
+  .empty{padding:24px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+<div class="app">
+  {% include "_apt_sidebar.html" %}
+  <div class="main">
+    <div class="topbar">
+      <div class="crumb">{{ tenant_name }} / Channels / <b>{{ channel_label }}</b></div>
+      <div class="grow"></div>
+      <span class="pill-live"><span class="dot"></span> Engine live</span>
+      <a class="btn-primary" href="{{ nav.replica }}">Open replica ↗</a>
+    </div>
+
+    <div class="content">
+      <div class="hdr">
+        <h1>{{ title }}</h1>
+        <p><b>{{ tenant_name }}</b> · {{ desc }}</p>
+      </div>
+
+      <nav class="aud-tog" aria-label="Audience segment">
+        <a href="{{ tab_all_href }}" class="{{ 'on' if audience == 'all' else '' }}">All</a>
+        <a href="{{ tab_business_href }}" class="{{ 'on' if audience == 'business' else '' }}">{{ audience_business }}</a>
+        <a href="{{ tab_consumer_href }}" class="{{ 'on' if audience == 'consumer' else '' }}">{{ audience_consumer }}</a>
+      </nav>
+
+      {% if cards %}
+      <div class="card-grid">
+        {% for card in cards %}
+        <article class="scenario-card {{ 'featured' if card.featured else '' }}" id="scenario-{{ card.id }}">
+          {% if channel == 'email' and card.email_preview %}
+          {% include "demo_email_card.html" %}
+          {% else %}
+          <h2>{{ card.title }}</h2>
+          <p class="story">{{ card.story }}</p>
+          {% endif %}
+          <div class="chips">
+            {% for chip in card.chips %}<span class="chip">{{ chip }}</span>{% endfor %}
+          </div>
+          <div class="card-links">
+            <a class="primary" href="{{ card.landing_url }}">Open landing →</a>
+            <a href="{{ card.console_deep_link }}">Engineer console</a>
+            <a href="{{ card.console_business_link }}">Marketer console</a>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="empty">No scenarios for this audience tab. Try the other segment.</p>
+      {% endif %}
+
+      <p class="foothint">
+        Curated from <code>rules/demo_scenarios.yaml</code> · same query params rebuild the replica and consoles deterministically.
+      </p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

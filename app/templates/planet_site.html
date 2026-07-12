@@ -1,0 +1,414 @@
+{#- Pixel-faithful replica of a planet.com-style marketing site whose copy blocks are live
+    personalization slots. Standalone on purpose — it must look like Planet's deep-space
+    marketing site, not the apt shell. Slots that were personalized carry a subtle blue
+    provenance dot linking to /planet/dev. Same structure before/after login; only slot
+    contents + order change. The hero location line is the Planet differentiator. -#}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Planet - Image the World Every Day</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* Palette + type taken from live planet.com computed styles (Gotham SSm → Montserrat
+       fallback; teal #009DA5 logo/accents, bright cyan #00CBE6 interactive, near-black #07090A nav). */
+    :root{
+      --bg:#07090a; --bg2:#0a0f11; --panel:#0e1518; --line:#1a2428; --line2:#26343a;
+      --blu:#009da5; --blu-t:#00cbe6; --ink:#f4f7f8; --body:#a7b4b9; --dim:#6e7c82;
+      --sans:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --ui:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;
+    }
+    .planet-wm{height:26px;width:auto;display:block}
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--ui);-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:1080px;margin:0 auto;padding:0 32px}
+    .mono{font-family:var(--mono);text-transform:uppercase;letter-spacing:.14em}
+    /* provenance dot — the subtle receipt on every personalized slot */
+    sup.pv{margin-left:5px;vertical-align:super;line-height:0}
+    sup.pv a{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--blu);opacity:.55;box-shadow:0 0 0 3px rgba(0,157,165,.16)}
+    sup.pv a:hover{opacity:1}
+    /* ---- nav ---- */
+    nav.gnav{position:sticky;top:0;z-index:40;background:#07090a;border-bottom:1px solid rgba(255,255,255,.08)}
+    .gnav .in{max-width:1280px;margin:0 auto;display:flex;align-items:center;gap:28px;height:80px;padding:0 32px}
+    .gnav .logo{display:flex;align-items:center;color:#fff}
+    .gnav .logo .planet-wm{height:30px}
+    .gnav .grp{display:flex;align-items:center;gap:22px}
+    .gnav .grp .lbl{font:600 12px var(--sans);letter-spacing:.01em;color:var(--blu)}
+    .gnav .grp a{font:600 15px var(--ui);color:#fff}
+    .gnav .grp a:hover{color:var(--blu-t)}
+    .gnav .vr{width:1px;height:24px;background:rgba(255,255,255,.18)}
+    .gnav .right{margin-left:auto;display:flex;align-items:center;gap:20px}
+    .gnav .apply{font:600 15px var(--ui);color:#fff;border:1px solid #fff;border-radius:6px;padding:12px 26px;transition:all .18s}
+    .gnav .apply:hover{background:#fff;color:#07090a}
+    /* login */
+    .lg{position:relative}
+    .lg summary{list-style:none;cursor:pointer;font:500 14px var(--ui);color:#dfe8f2;display:flex;align-items:center;gap:5px}
+    .lg summary::-webkit-details-marker{display:none}
+    .lg summary .car{font-size:10px;opacity:.7}
+    .lg .pop{position:absolute;right:0;top:34px;background:#0b1422;border:1px solid var(--line2);border-radius:10px;padding:16px;width:290px;box-shadow:0 18px 50px rgba(0,0,0,.6)}
+    .lg .pop p{font:11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:9px}
+    .lg .pop input{width:100%;font:13.5px var(--ui);color:var(--ink);background:#070d17;border:1px solid var(--line2);border-radius:6px;padding:10px 11px;margin-bottom:9px;outline:none}
+    .lg .pop input:focus{border-color:var(--blu)}
+    .lg .pop button{width:100%;font:600 13px var(--ui);color:#04121f;background:var(--blu);border:0;border-radius:6px;padding:10px;cursor:pointer}
+    .lg .pop .hint{font:10.5px var(--ui);letter-spacing:0;text-transform:none;color:var(--dim);margin:9px 0 0}
+    .lg .who{font:500 14px var(--ui);color:var(--blu-t)}
+    .lg .out{font:12px var(--ui);color:var(--dim);margin-left:9px}
+    .lg .out:hover{color:var(--ink)}
+    /* ---- hero ---- */
+    .hero{position:relative;min-height:640px;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;
+      background:
+        radial-gradient(1100px 480px at 18% 8%, rgba(43,94,158,.22), transparent 60%),
+        radial-gradient(900px 520px at 82% 20%, rgba(30,60,110,.24), transparent 55%),
+        radial-gradient(1400px 700px at 50% 110%, rgba(10,18,32,.9), transparent 70%),
+        linear-gradient(180deg,#0b1424 0%,#070d17 45%,#04070d 100%);
+      background-size:cover;background-position:center center}
+    .hero.has-img::before{opacity:.35}
+    .hero.img-loading::after{content:"";position:absolute;bottom:24px;left:50%;transform:translateX(-50%);
+      width:8px;height:8px;border-radius:50%;background:var(--blu);opacity:.45;animation:heroPulse 1.4s ease-in-out infinite;z-index:3}
+    @keyframes heroPulse{0%,100%{opacity:.25;transform:translateX(-50%) scale(.85)}50%{opacity:.7;transform:translateX(-50%) scale(1)}}
+    @media (prefers-reduced-motion:reduce){
+      .hero.img-loading::after{animation:none;opacity:.35}
+      .hero.has-img{transition:none}
+    }
+    .hero.has-img{transition:background-image .6s ease}
+    .hero.has-motion .hero-motion-layer{opacity:1}
+    .hero-motion-layer{position:absolute;inset:0;z-index:0;opacity:0;transition:opacity .6s ease;
+      background-size:cover;background-position:center center;pointer-events:none}
+    .hero-motion-layer img{width:100%;height:100%;object-fit:cover;display:block}
+    .hero-motion-fallback{position:absolute;inset:0;z-index:0;background-size:cover;background-position:center}
+    @media (prefers-reduced-motion:reduce){
+      .hero.has-motion .hero-motion-layer{display:none}
+    }
+    .hero::before{content:"";position:absolute;inset:0;opacity:.5;
+      background-image:radial-gradient(rgba(255,255,255,.045) 1px, transparent 1.4px);background-size:26px 26px}
+    .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,7,13,.35),rgba(4,7,13,.66) 78%,var(--bg))}
+    .hero .in{position:relative;z-index:2;padding:96px 28px 110px;max-width:980px}
+    .hero .mark{display:flex;align-items:center;justify-content:center;margin-bottom:34px}
+    .hero .mark .planet-wm{height:34px}
+    .hero .eyebrow{font:600 13px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--blu-t);margin-bottom:22px;min-height:15px}
+    .hero h1{font:200 clamp(46px,7.4vw,84px)/1.08 var(--sans);letter-spacing:0;color:#fff;max-width:15ch;margin:0 auto}
+    .hero h1 .au{color:var(--blu-t)}
+    .hero .sub{font:400 17px/1.65 var(--ui);color:#c3d0de;max-width:620px;margin:26px auto 0}
+    .hero .loc{display:inline-flex;align-items:center;gap:8px;margin-top:22px;font:500 13.5px var(--mono);
+      letter-spacing:.06em;color:var(--blu-t);border:1px solid var(--line2);border-radius:20px;
+      padding:8px 18px;background:rgba(0,157,165,.07)}
+    .hero .loc .orb{width:8px;height:8px;border-radius:50%;background:var(--blu);box-shadow:0 0 10px rgba(0,157,165,.9);flex:none}
+    .hero .ctas{display:flex;gap:14px;justify-content:center;margin-top:40px;flex-wrap:wrap}
+    .btn{display:inline-block;font:600 15px var(--ui);letter-spacing:0;text-transform:none;border-radius:6px;padding:14px 30px;transition:all .18s}
+    .btn.blue{background:var(--blu);color:#fff}
+    .btn.blue:hover{background:var(--blu-t);color:#07090a}
+    .btn.ghost{border:1px solid var(--blu-t);color:#fff;background:transparent}
+    .btn.ghost:hover{background:var(--blu-t);color:#07090a}
+    /* ---- sections ---- */
+    section.blk{border-top:1px solid rgba(255,255,255,.05);padding:110px 0}
+    .sec-h{text-align:center;max-width:860px;margin:0 auto}
+    .sec-h h2{font:300 clamp(32px,4.6vw,50px)/1.14 var(--sans);letter-spacing:0;color:#fff}
+    .sec-h h2 .au{color:var(--blu-t)}
+    .sec-h .rule{width:56px;height:2px;background:var(--blu);opacity:.85;margin:26px auto 0}
+    .sec-h .intro{font:400 16.5px/1.7 var(--ui);color:var(--body);max-width:640px;margin:26px auto 0}
+    /* prove cards */
+    .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:56px}
+    @media(max-width:920px){.cards{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:560px){.cards{grid-template-columns:1fr}}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:26px 22px}
+    .card h3{font:500 11.5px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--blu-t);margin-bottom:15px}
+    .card p{font:400 13.5px/1.65 var(--ui);color:var(--body)}
+    /* research callout */
+    .chal{max-width:760px;margin:0 auto;text-align:center;border:1px solid var(--line2);border-radius:12px;padding:58px 48px;
+      background:linear-gradient(180deg,rgba(0,157,165,.06),rgba(0,157,165,.015))}
+    .chal.hot{border-color:rgba(0,157,165,.55);box-shadow:0 0 60px rgba(0,157,165,.09)}
+    .chal .eye{font:500 11px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--blu-t)}
+    .chal h2{font:300 clamp(28px,3.6vw,42px)/1.16 var(--sans);color:#fff;margin-top:16px}
+    .chal p{font:400 16px/1.7 var(--ui);color:var(--body);max-width:520px;margin:18px auto 0}
+    .chal .btn{margin-top:30px}
+    /* comparison table */
+    .cmp{margin-top:64px;border:1px solid var(--line2);border-radius:10px;overflow:hidden}
+    table.tbl{width:100%;border-collapse:collapse}
+    .tbl th,.tbl td{border:1px solid var(--line);padding:20px 22px;vertical-align:middle}
+    .tbl th{background:#081020}
+    .tbl thead .name{font:600 26px var(--sans);color:#fff}
+    .tbl thead .tag{font:400 12px var(--ui);color:var(--body);margin-top:7px}
+    .tbl td.lbl{font:500 10.5px var(--mono);letter-spacing:.15em;text-transform:uppercase;color:var(--dim);width:172px;background:#060a12}
+    .tbl td.val{font:400 14px/1.6 var(--ui);color:#cfdae6;text-align:center}
+    .tbl .em{box-shadow:inset 3px 0 0 var(--blu), inset -3px 0 0 var(--blu);background:rgba(0,157,165,.05)}
+    th.em .name{color:var(--blu-t)}
+    .tbl .ctarow td{text-align:center;padding:30px 22px}
+    /* numbers */
+    .nums{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:64px;text-align:center}
+    @media(max-width:680px){.nums{grid-template-columns:1fr}}
+    .nums b{display:block;font:600 clamp(42px,5.4vw,60px)/1 var(--sans);color:var(--blu-t)}
+    .nums span{display:block;font:500 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--body);margin-top:14px}
+    .dl{text-align:center;margin-top:56px}
+    .trusted{border-top:1px solid rgba(255,255,255,.05);margin-top:96px;padding-top:64px;text-align:center}
+    .trusted .t{font:500 10.5px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+    .trusted .logos{display:flex;gap:52px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:34px}
+    .trusted .logos span{font:600 19px var(--sans);color:#5e6f84;letter-spacing:.01em}
+    /* final cta */
+    .fin{text-align:center;padding:120px 0 100px}
+    .fin h2{font:200 clamp(34px,5vw,58px)/1.1 var(--sans);color:#fff}
+    .fin .sub{font:400 17px var(--ui);color:var(--body);margin-top:18px}
+    .fin .ctas{display:flex;gap:14px;justify-content:center;margin-top:38px;flex-wrap:wrap}
+    .fin .note{display:inline-block;border:1px solid var(--line2);border-radius:8px;background:var(--panel);padding:18px 34px;margin-top:56px}
+    .fin .note .l1{font:500 12px var(--mono);letter-spacing:.12em;color:var(--blu-t)}
+    .fin .note .l2{font:400 11.5px var(--mono);letter-spacing:.1em;color:var(--dim);margin-top:7px}
+    /* footer */
+    footer.gf{border-top:1px solid rgba(255,255,255,.06);padding:74px 0 0;background:#03060b}
+    .gf .cols{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:36px}
+    @media(max-width:760px){.gf .cols{grid-template-columns:1fr 1fr}}
+    .gf .fl{display:flex;align-items:center}
+    .gf .fl .planet-wm{height:26px}
+    .gf h4{font:500 16px var(--ui);color:#fff;margin-bottom:22px}
+    .gf ul{list-style:none}
+    .gf ul a{display:block;font:400 11px var(--mono);letter-spacing:.13em;text-transform:uppercase;color:#7d8ba0;padding:6px 0}
+    .gf ul a:hover{color:var(--blu-t)}
+    .gf .bar{border-top:1px solid rgba(255,255,255,.06);margin-top:64px;padding:26px 0;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+    .gf .bar .c{font:400 12px var(--mono);letter-spacing:.08em;color:#7d8ba0;text-transform:uppercase}
+    .gf .bar .coords{margin-left:auto;font:400 11px var(--mono);letter-spacing:.1em;color:#7d8ba0}
+    /* the tiny apt chip → /planet/dev */
+    .aptchip{position:fixed;right:16px;bottom:16px;z-index:50;display:flex;align-items:center;gap:7px;
+      font:600 11px var(--ui);color:#c2cddb;background:rgba(8,14,26,.92);border:1px solid var(--line2);
+      border-radius:20px;padding:7px 13px;backdrop-filter:blur(8px)}
+    .aptchip .d{width:7px;height:7px;border-radius:50%;background:var(--blu);box-shadow:0 0 8px rgba(0,157,165,.8)}
+    .aptchip:hover{color:#fff;border-color:var(--blu)}
+  </style>
+</head>
+<body>
+{% set S = page.sections %}
+{# Real planet.com wordmark (captured from live site): teal #009DA5 orbit + white "planet" + teal dot. #}
+{% set logo %}<svg class="planet-wm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240.12 117.28" role="img" aria-label="Planet"><path fill="#009da5" d="M58.64 117.28A58.64 58.64 0 1 1 115 42.37a2.11 2.11 0 0 1-4 1.17 54.43 54.43 0 1 0 .15 29.67 2.11 2.11 0 0 1 4.06 1.12 58.8 58.8 0 0 1-56.57 42.95"/><path fill="#fff" d="M40.84 40.83H41a6 6 0 0 1 6 6h.12a14.33 14.33 0 0 1 12.06-6.12c11.5 0 17.56 9.24 17.56 18.3 0 8.57-6.43 17.38-17.13 17.38-7.1 0-10.65-3.61-11.93-5.75h-.14v17.57a6.69 6.69 0 0 1-6.69-6.69V40.83zm17.89 5.65c-6.67 0-11.32 5.75-11.32 12 0 6.85 5.08 12.06 11.5 12.06A11.54 11.54 0 0 0 70.36 58.6c0-6.06-4.71-12.12-11.63-12.12m30.78 29.01h-6.36V30.21h6.36zm36.05 0v-5.26h-.12c-2.45 4.16-6.91 6.12-11.5 6.12-11.44 0-18-8.75-18-17.69 0-8.26 5.81-18 18-18 4.71 0 9.06 2 11.5 5.69h.12v-4.76h6.36v33.9zm-11.63-29c-7.83 0-11.63 6.79-11.63 12.12 0 6.12 4.83 11.93 11.57 11.93a11.84 11.84 0 0 0 11.81-11.94c0-7.22-5.2-12.12-11.75-12.12zm49.87 29V57.07c0-2.63 0-10.59-8.44-10.59-5.32 0-8.93 3.73-8.93 10.53v18.48h-6.36v-33.9H146v3.61h.12a12 12 0 0 1 9.88-4.53c5.26 0 9.55 2.26 12 6.06a16.53 16.53 0 0 1 2.14 8.69v20.07zm61.44 0a6.36 6.36 0 0 1-6.36-6.36V47.4h-4.59v-5.81h4.59V30.21a6.36 6.36 0 0 1 6.36 6.36v5h5.57v5.83h-5.57zm-14.02-17.44a17.32 17.32 0 1 0-34.64.43q0 .87.08 1.72A18.26 18.26 0 0 0 195 76.3a18.73 18.73 0 0 0 14.76-7.06l-5-2.94a13.05 13.05 0 0 1-9.8 4.29c-5.18 0-10.74-3.15-12-9.29H211c.1-.43.22-2.15.22-3.25M183 56.4a11 11 0 0 1 21.91 0z"/><path fill="#009da5" d="M240.12 72.16a3.42 3.42 0 1 1-3.42-3.35 3.38 3.38 0 0 1 3.42 3.35"/></svg>{% endset %}
+
+<nav class="gnav">
+  <div class="in">
+    <a class="logo" href="{{ g.page }}{{ qs }}">{{ logo }}</a>
+    <span class="grp"><span class="lbl">Products</span><a href="#compare">Monitoring</a><a href="#compare">Tasking</a></span>
+    <span class="vr"></span>
+    <span class="grp"><span class="lbl">Programs</span><a href="#research">Research</a><a href="#cta">Trial</a></span>
+    <span class="right">
+      {% if page.nav.ads %}<a href="{{ page.nav.ads }}" style="font:500 12px var(--ui);color:var(--dim);margin-right:4px" title="12 X.com ad variants">X ads</a>{% endif %}
+      {% if page.nav.ads_lp %}<a href="{{ page.nav.ads_lp }}" style="font:500 12px var(--ui);color:var(--dim);margin-right:4px" title="12 landing-page variations">LP variants</a>{% endif %}
+      <a class="apply" href="#cta">Start Free Trial</a>
+      {% if page.nav.known %}
+      <span class="lg"><span class="who">{{ 'Hi ' + page.nav.first if page.nav.first else page.nav.login_email }}</span>{% if page.login_state %}<a class="out" href="{{ g.logout }}?next={{ g.page }}{{ qs|urlencode }}">Logout</a>{% endif %}</span>
+      {% else %}
+      <details class="lg">
+        <summary>Login <span class="car">▾</span></summary>
+        <div class="pop">
+          <p>Log in with your email</p>
+          <form method="post" action="{{ g.login }}">
+            <input type="hidden" name="next" value="{{ g.page }}{{ qs }}">
+            <input name="email" type="email" placeholder="you@company.com" required autocomplete="off">
+            <button type="submit">Log in</button>
+          </form>
+          <div class="hint">Demo: any cohort email unlocks the CRM path — the same page, re-personalized.</div>
+        </div>
+      </details>
+      {% endif %}
+    </span>
+  </div>
+</nav>
+
+{% for sec in page.order %}
+{% if sec == 'hero' %}
+<header class="hero{% if page.hero_image.motion_url %} has-motion{% elif page.hero_image.url %} has-img{% elif page.hero_image.status == 'pending' %} img-loading{% endif %}"
+  {% if page.hero_image.url and not page.hero_image.motion_url %}style="background-image:linear-gradient(180deg,rgba(4,7,13,.72),rgba(4,7,13,.82)),url('{{ page.hero_image.url }}')"{% endif %}
+  id="planet-hero"
+  data-hero-api="{{ hero_api_url }}"
+  data-hero-status="{{ page.hero_image.status }}"
+  data-motion-url="{{ page.hero_image.motion_url or '' }}"
+  data-motion-status="{{ page.hero_image.motion_status or '' }}"
+  data-still-url="{{ page.hero_image.still_url or page.hero_image.url or '' }}">
+  {% if page.hero_image.motion_url %}
+  <div class="hero-motion-layer" aria-hidden="true">
+    <img src="{{ page.hero_image.motion_url }}" alt="" loading="eager">
+  </div>
+  {% elif page.hero_image.url %}
+  <div class="hero-motion-fallback" aria-hidden="true" style="background-image:linear-gradient(180deg,rgba(4,7,13,.72),rgba(4,7,13,.82)),url('{{ page.hero_image.url }}')"></div>
+  {% endif %}
+  <div class="in">
+    <div class="mark">{{ logo }}</div>
+    <div class="eyebrow">{% if S.hero.eyebrow %}{{ S.hero.eyebrow }}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="personalized — see why on {{ g.dev }}"></a></sup>{% endif %}</div>
+    <h1>{{ S.hero.h1_pre }}<span class="au">{{ S.hero.h1_blue }}</span></h1>
+    <p class="sub">{{ S.hero.sub }}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="personalized — see why on {{ g.dev }}"></a></sup></p>
+    {% if S.hero.location_line %}
+    <div class="loc"><span class="orb"></span>{{ S.hero.location_line }}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}#sec-location" title="location signal — see the decision on {{ g.dev }}"></a></sup></div>
+    {% endif %}
+    <div class="ctas">
+      <a class="btn blue" href="#cta">{{ S.hero.cta_primary }}</a>
+      <a class="btn ghost" href="#cta">{{ S.hero.cta_secondary }}</a>
+    </div>
+  </div>
+</header>
+
+{% elif sec == 'prove' %}
+<section class="blk" id="prove">
+  <div class="wrap">
+    <div class="sec-h">
+      <h2>{{ S.prove.h_pre }}<span class="au">{{ S.prove.h_blue }}</span></h2>
+      <div class="rule"></div>
+      <p class="intro">{{ S.prove.intro }}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="personalized — see why on {{ g.dev }}"></a></sup></p>
+    </div>
+    <div class="cards">
+      {% for title, body in S.prove.cards %}
+      <div class="card"><h3>{{ title }}</h3><p>{{ body }}</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% elif sec == 'research' %}
+<section class="blk" id="research">
+  <div class="wrap">
+    <div class="chal {{ 'hot' if S.research.emphasis else '' }}">
+      <div class="eye">{{ S.research.eyebrow }}</div>
+      <h2>{{ S.research.heading }}</h2>
+      <p>{{ S.research.body }}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="personalized — see why on {{ g.dev }}"></a></sup></p>
+      <a class="btn blue" href="#cta">{{ S.research.cta }}</a>
+    </div>
+  </div>
+</section>
+
+{% elif sec == 'compare' %}
+<section class="blk" id="compare">
+  <div class="wrap">
+    <div class="sec-h">
+      <h2>Look Broader. Look Closer.</h2>
+      <p class="intro">Watch everything with daily monitoring. Inspect anything with on-demand tasking.</p>
+    </div>
+    <div class="cmp">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th style="width:172px;background:#060a12"></th>
+            <th class="{{ 'em' if S.compare.emphasis == 'monitor' else '' }}"><div class="name">Monitoring</div><div class="tag">PlanetScope — Daily, Everywhere{% if S.compare.emphasis == 'monitor' %}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="emphasis personalized — see why on {{ g.dev }}"></a></sup>{% endif %}</div></th>
+            <th class="{{ 'em' if S.compare.emphasis == 'task' else '' }}"><div class="name">Tasking</div><div class="tag">SkySat + Pelican — Closer, On Demand{% if S.compare.emphasis == 'task' %}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="emphasis personalized — see why on {{ g.dev }}"></a></sup>{% endif %}</div></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for label, monitor_val, task_val in S.compare.rows %}
+          <tr class="{{ 'row-em' if S.compare.row_emphasis == label else '' }}">
+            <td class="lbl">{{ label }}{% if S.compare.row_emphasis == label %}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="row emphasized for objection reframe"></a></sup>{% endif %}</td>
+            <td class="val {{ 'em' if S.compare.emphasis == 'monitor' else '' }}">{{ monitor_val }}</td>
+            <td class="val {{ 'em' if S.compare.emphasis == 'task' else '' }}">{{ task_val }}</td>
+          </tr>
+          {% endfor %}
+          <tr class="ctarow">
+            <td class="lbl" style="border-bottom:0"></td>
+            <td class="{{ 'em' if S.compare.emphasis == 'monitor' else '' }}"><a class="btn blue" href="#cta">Start Monitoring</a></td>
+            <td class="{{ 'em' if S.compare.emphasis == 'task' else '' }}"><a class="btn ghost" href="#cta">Task a Satellite</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+{% elif sec == 'numbers' %}
+<section class="blk" id="numbers">
+  <div class="wrap">
+    <div class="sec-h"><h2>By the <span class="au">numbers</span></h2><div class="rule"></div></div>
+    <div class="nums">
+      {% for n, label in S.numbers.stats %}
+      <div><b>{{ n }}</b><span>{{ label }}</span></div>
+      {% endfor %}
+    </div>
+    <div class="dl"><a class="btn blue" href="#cta">Download Platform Overview</a></div>
+    <div class="trusted">
+      <div class="t">Trusted by organizations like</div>
+      <div class="logos">{% for co in S.numbers.trusted %}<span>{{ co }}</span>{% endfor %}</div>
+    </div>
+  </div>
+</section>
+
+{% elif sec == 'cta' %}
+<section class="blk" id="cta" style="border-bottom:0;padding:0">
+  <div class="wrap">
+    <div class="fin">
+      <h2>{{ S.cta.heading }}</h2>
+      <p class="sub">{{ S.cta.sub }}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="personalized — see why on {{ g.dev }}"></a></sup></p>
+      <div class="ctas">
+        <a class="btn blue" href="#">{{ S.cta.cta_primary }}</a>
+        <a class="btn ghost" href="#">{{ S.cta.cta_secondary }}</a>
+      </div>
+      <div class="note">
+        <div class="l1">Daily 3 m monitoring &nbsp;·&nbsp; 50 cm tasking on demand</div>
+        <div class="l2">30-day free trial · no credit card</div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endfor %}
+
+<footer class="gf">
+  <div class="wrap">
+    <div class="cols">
+      <div><span class="fl">{{ logo }}</span></div>
+      <div><h4>Products</h4><ul><li><a href="#compare">PlanetScope</a></li><li><a href="#compare">SkySat &amp; Pelican</a></li><li><a href="#">Tanager Hyperspectral</a></li><li><a href="#">Planetary Variables</a></li></ul></div>
+      <div><h4>Industries</h4><ul><li><a href="#">Agriculture</a></li><li><a href="#">Defense &amp; Intelligence</a></li><li><a href="#">Civil Government</a></li><li><a href="#">Insurance</a></li></ul></div>
+      <div><h4>About</h4><ul><li><a href="#">About Planet</a></li><li><a href="#research">Education &amp; Research</a></li><li><a href="#">Disaster Data</a></li><li><a href="#">Privacy Policy</a></li></ul></div>
+    </div>
+    <div class="bar">
+      <span class="c">Copyright 2026. Planet Labs PBC. All rights reserved.</span>
+      <span class="coords">37° 46' 30" N &nbsp;·&nbsp; 122° 23' 42" W</span>
+    </div>
+  </div>
+</footer>
+
+<a class="aptchip" href="{{ g.dev }}{{ dev_qs }}" title="every decision behind this page"><span class="d"></span> personalized by apt — see {{ g.dev }}</a>
+<script>
+(function(){
+  var hero=document.getElementById('planet-hero');
+  if(!hero) return;
+  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var grad='radial-gradient(1100px 480px at 18% 8%, rgba(43,94,158,.22), transparent 60%),'
+    +'radial-gradient(900px 520px at 82% 20%, rgba(30,60,110,.24), transparent 55%),'
+    +'radial-gradient(1400px 700px at 50% 110%, rgba(10,18,32,.9), transparent 70%),'
+    +'linear-gradient(180deg,#0b1424 0%,#070d17 45%,#04070d 100%)';
+  function applyStill(url){
+    if(!url) return;
+    hero.classList.remove('img-loading');
+    hero.classList.add('has-img');
+    hero.style.backgroundImage='linear-gradient(180deg,rgba(4,7,13,.72),rgba(4,7,13,.82)),url('+JSON.stringify(url)+'),'+grad;
+    hero.style.backgroundSize='cover,cover';
+    hero.style.backgroundPosition='center center,center center';
+  }
+  function applyMotion(url,still){
+    if(!url||reduce) return applyStill(still);
+    hero.classList.remove('img-loading');
+    hero.classList.add('has-motion');
+    var layer=hero.querySelector('.hero-motion-layer');
+    if(!layer){
+      layer=document.createElement('div');
+      layer.className='hero-motion-layer';
+      layer.setAttribute('aria-hidden','true');
+      var img=document.createElement('img');
+      img.alt='';
+      layer.appendChild(img);
+      hero.insertBefore(layer,hero.firstChild);
+    }
+    layer.querySelector('img').src=url;
+    if(still){
+      hero.style.backgroundImage='linear-gradient(180deg,rgba(4,7,13,.72),rgba(4,7,13,.82)),url('+JSON.stringify(still)+')';
+    }
+  }
+  var motionUrl=hero.dataset.motionUrl;
+  var stillUrl=hero.dataset.stillUrl;
+  if(motionUrl){ applyMotion(motionUrl,stillUrl); }
+  else if(hero.dataset.heroStatus==='pending'){
+    var api=hero.dataset.heroApi+location.search;
+    fetch(api).then(function(r){return r.json();}).then(function(d){
+      if(d&&d.motion_url) applyMotion(d.motion_url,d.url||d.still_url);
+      else if(d&&d.url) applyStill(d.url);
+      else hero.classList.remove('img-loading');
+    }).catch(function(){hero.classList.remove('img-loading');});
+  }
+})();
+</script>
+</body>
+</html>

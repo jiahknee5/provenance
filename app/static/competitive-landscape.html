@@ -1,0 +1,240 @@
+<!doctype html>
+<!--
+  Provenance — Competitive Landscape (16-company field map)
+  Generated 2026-06-23, expanded 2026-06-24 from two research swarms (9 agents) + adversarial fact-check.
+  House style: white + navy, single blue ramp, action titles, source lines.
+  Companion to COMPETITIVE-LANDSCAPE.md (full sourcing + case-study appendix).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><!-- unlisted internal doc: reachable by link, not crawled -->
+<title>Provenance — Competitive Landscape</title>
+<style>
+  :root{
+    --navy:#0e2440; --navy2:#1c3a5e; --ink:#1a2433; --mut:#5b6b80;
+    --line:#dce3ec; --bg:#ffffff; --panel:#f6f8fb;
+    --b1:#eaf1fb; --b2:#c7dbf6; --b3:#7aa9ee; --b4:#3b7ae0; --b5:#1f5bc4; --b6:#143f8f;
+    --good:#1f7a4d; --warn:#b06a00; --bad:#a8324a;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px}
+  header.top{background:var(--navy);color:#fff;padding:46px 0 40px}
+  .kicker{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#9db8db;font-weight:700}
+  header.top h1{margin:.35em 0 .25em;font-size:32px;line-height:1.14;font-weight:800;letter-spacing:-.01em}
+  header.top p{margin:0;color:#cdd9e8;max-width:820px;font-size:15.5px}
+  header.top .meta{margin-top:18px;font-size:12.5px;color:#8fa9cc}
+  section{padding:40px 0;border-bottom:1px solid var(--line)}
+  .atitle{font-size:13px;letter-spacing:.04em;color:var(--b5);font-weight:800;text-transform:uppercase;margin:0 0 6px}
+  h2{margin:0 0 16px;font-size:24px;line-height:1.2;font-weight:800;color:var(--navy);letter-spacing:-.01em}
+  h3{margin:0 0 8px;font-size:17px;color:var(--navy);font-weight:800}
+  p{margin:.5em 0}
+  .lead{font-size:17px;color:var(--ink)}
+  .mut{color:var(--mut)}
+  .src{font-size:11.5px;color:var(--mut);margin-top:10px;font-style:italic}
+  /* rings */
+  .rings{margin:6px 0 2px}
+  .ring{border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:0 0 0 0}
+  .ring + .ring{margin-top:-6px}
+  .ring3{background:#fbfcfe}
+  .ring2{background:var(--panel);margin:14px 10px 0;border-color:var(--b2)}
+  .ring1{background:var(--b1);margin:14px 22px 0;border-color:var(--b3)}
+  .ring .rl{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+  .ring.ring1 .rl{color:var(--b6)}
+  .ring .rc{font-size:14px;margin-top:4px}
+  .ring b{color:var(--navy)}
+  .star{background:var(--navy);color:#fff;border-radius:10px;padding:12px 14px;margin:12px 30px 0;font-weight:700;font-size:14.5px}
+  .star span{color:#9fc0f2}
+  .cau{font-size:12.5px;color:var(--bad);margin-top:12px;text-align:center;font-weight:600}
+  /* table */
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:4px;min-width:920px}
+  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+  thead th{background:var(--navy);color:#fff;font-weight:700;font-size:11.5px;position:sticky;top:0}
+  tbody th{background:var(--panel);color:var(--navy);font-weight:700;white-space:nowrap}
+  tr.us td,tr.us th{background:#eef5ff}
+  tr.us th{color:var(--b6)}
+  tr.compl th{border-left:3px solid var(--b3)}
+  tr.comp th{border-left:3px solid var(--bad)}
+  .yes{color:var(--good);font-weight:700}
+  .no{color:var(--bad);font-weight:700}
+  .na{color:var(--mut)}
+  .gate-y{background:#e7f4ec;color:var(--good);font-weight:800;text-align:center}
+  .gate-n{background:#fbecf0;color:var(--bad);font-weight:700;text-align:center}
+  .gate-c{background:#fff5e8;color:var(--warn);font-weight:700;text-align:center}
+  caption{caption-side:top;text-align:left;font-size:12px;color:var(--mut);margin-bottom:6px}
+  /* tier cards */
+  .tier{margin-top:10px}
+  .tierhdr{display:flex;align-items:center;gap:10px;margin:18px 0 8px}
+  .pill{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:4px 10px;border-radius:20px}
+  .pill.comp{background:#fdeaf0;color:var(--bad)}
+  .pill.compl{background:var(--b1);color:var(--b6)}
+  .pill.meas{background:#eef7f1;color:var(--good)}
+  .tierhdr .d{font-size:13px;color:var(--mut)}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .card{border:1px solid var(--line);border-radius:10px;padding:13px 14px;font-size:13px}
+  .card h4{margin:0 0 4px;font-size:14px;color:var(--navy)}
+  .card .meta{font-size:11px;color:var(--mut);margin-bottom:6px}
+  .card p{margin:0;font-size:12.5px}
+  .card .flag{display:inline-block;margin-top:7px;font-size:11px;font-weight:700;color:var(--bad)}
+  .card .flag.ok{color:var(--good)}
+  /* win list */
+  .wins{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
+  .win{border:1px solid var(--line);border-left:4px solid var(--b5);border-radius:8px;padding:13px 15px}
+  .win h4{margin:0 0 4px;font-size:14.5px;color:var(--navy)}
+  .win p{margin:0;font-size:13px;color:var(--mut)}
+  .pull{background:var(--navy);color:#fff;border-radius:12px;padding:22px 24px;margin-top:8px;font-size:18px;line-height:1.4;font-weight:600}
+  .pull b{color:#9fc0f2}
+  .chips span{display:inline-block;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:5px 12px;margin:4px 6px 0 0;font-size:12.5px}
+  .chips b{color:var(--navy)}
+  .chips span.open{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .ev{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:6px}
+  .stat{border:1px solid var(--line);border-radius:10px;padding:16px;text-align:center}
+  .stat .n{font-size:30px;font-weight:800;color:var(--b6);line-height:1}
+  .stat .l{font-size:12.5px;color:var(--mut);margin-top:6px}
+  ol.impl{margin:6px 0 0;padding-left:20px}
+  ol.impl li{margin:8px 0}
+  ol.impl b{color:var(--navy)}
+  footer{padding:26px 0 50px;color:var(--mut);font-size:12px}
+  @media(max-width:820px){
+    .cards,.wins,.ev{grid-template-columns:1fr}
+    .ring2,.ring1,.star{margin-left:0;margin-right:0}
+    header.top h1{font-size:25px}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="kicker">Provenance · Competitive Landscape · 16-company field map · Jun 2026</div>
+    <h1>De-anonymization exists. Bandits exist. AI content generation is everywhere.<br>One thing is missing from all 16 competitors — and it's the one we built.</h1>
+    <p>Across measurement, the data/identity layer, and the personalization arena, not a single company gates what its AI <em>says</em> against a verifiable source and shows the visitor the receipt. That enforced truth-boundary — provenance + receipts + a managed creepiness ceiling — is the uncontested axis Provenance owns.</p>
+    <div class="meta">Two research swarms · 9 agents · ~2,000+ web look-ups · adversarial fact-check · companion: COMPETITIVE-LANDSCAPE.md</div>
+  </div>
+</header>
+
+<!-- RINGS -->
+<section><div class="wrap">
+  <div class="atitle">The field, in three rings around us</div>
+  <h2>Two rings are complements; the inner ring is the fight — and none of it can prove what it generates</h2>
+  <div class="rings">
+    <div class="ring ring3">
+      <div class="rl">Ring 3 · Measurement — "did the spend work?" (retrospective, aggregate, causal)</div>
+      <div class="rc"><b>Haus · Measured</b> — zero personalization. They measure our lift downstream and proved "rigor sells." → <b>Complements.</b></div>
+    </div>
+    <div class="ring ring2">
+      <div class="rl">Ring 2 · Data / Identity — the inputs personalization consumes</div>
+      <div class="rc"><b>Attio</b> (CRM / system of record) · <b>RB2B, Vector</b> (person-level de-anon) · <b>Clay</b> (enrichment) · <b>Default</b> (routing) → <b>Complements / inputs we'd consume.</b></div>
+    </div>
+    <div class="ring ring1">
+      <div class="rl">Ring 1 · Personalization &amp; Generation — the competitive arena</div>
+      <div class="rc"><b>Ploy · Mutiny · Optimizely · Webflow Optimize · VWO · Dynamic Yield · HubSpot Breeze · 6sense · Demandbase · Qualified · Warmly</b> → <b>Competitors. None has a truth-gate.</b></div>
+      <div class="star">★ PROVENANCE — the only one with an <span>enforcing provenance gate + verification receipts + a managed creepiness ceiling</span></div>
+    </div>
+    <div class="cau">11x · Warmly = cautionary tales — unverified AI claims already drawing fire (fabricated customers, stale-data emails).</div>
+  </div>
+  <p class="src">Koala dropped — acquired by Cursor, product shut down Sep 2025. Relationships are assessed per-company in the master table below.</p>
+</div></section>
+
+<!-- MASTER TABLE -->
+<section><div class="wrap">
+  <div class="atitle">The whole field, one table</div>
+  <h2>Real-time, de-anon, generation, bandits — all common. The truth-gate column is empty except ours</h2>
+  <div class="scroll">
+  <table>
+    <caption>✓ = yes · ✗ = no · grade on truth-gate: <b style="color:var(--good)">YES</b> enforced+receipts · <b style="color:var(--warn)">~</b> partial/advisory · <b style="color:var(--bad)">✗</b> none</caption>
+    <thead><tr>
+      <th>Company</th><th>Category</th><th>Real-time on-site</th><th>De-anon grain</th><th>Generates content</th><th>Bandit / ML</th><th>Truth-gate?</th><th>To us</th>
+    </tr></thead>
+    <tbody>
+      <tr class="us"><th>Provenance (us)</th><td>Truth-bounded personalization</td><td>Yes (edge)</td><td>token→person · IP→co · cold geo</td><td>Yes (gated)</td><td>Contextual bandit + tier</td><td class="gate-y">YES</td><td>—</td></tr>
+      <tr class="comp"><th>Ploy</th><td>Agentic site+ID+ABM+ads+AEO</td><td>Batch-drafted</td><td>IP→co, partner-net→person</td><td>Yes</td><td>A/B + AEO</td><td class="gate-n">✗</td><td>Competitor</td></tr>
+      <tr class="comp"><th>Mutiny</th><td>B2B personalization → AI GTM agent</td><td>Yes (segment)</td><td>IP→co</td><td>Yes (decks, ROI calc)</td><td>"bandit-like" routing</td><td class="gate-n">✗</td><td>Competitor #1</td></tr>
+      <tr class="comp"><th>Optimizely</th><td>Experimentation + Opal AI</td><td>Yes (1:1)</td><td>behavioral/ABM seg</td><td>Yes (Opal)</td><td>Contextual MABs</td><td class="gate-n">✗</td><td>Competitor (heaviest)</td></tr>
+      <tr class="comp"><th>Webflow Optimize</th><td>AI website CRO (ex-Intellimize)</td><td>Yes ("to 1:1")</td><td>behavioral/ABM seg</td><td>No (swaps variants)</td><td>"Continuous Conversion"</td><td class="gate-n">✗</td><td>Adjacent→overlap</td></tr>
+      <tr class="comp"><th>VWO</th><td>Horizontal CRO + Copilot</td><td>Partial (rules)</td><td>device/geo rules</td><td>Yes (Copilot)</td><td>Bayesian MAB</td><td class="gate-n">✗</td><td>Partial competitor</td></tr>
+      <tr class="comp"><th>Dynamic Yield</th><td>B2C personalization + recs</td><td>Yes</td><td>behavioral + card-spend</td><td>Recommends</td><td>Contextual bandits</td><td class="gate-n">✗</td><td>Adjacent (B2C)</td></tr>
+      <tr class="comp"><th>HubSpot Breeze</th><td>CRM AI + Content Agent</td><td>Yes (CRM)</td><td>contact (CRM)</td><td>Yes (pages, blogs)</td><td>scores/learns</td><td class="gate-n">✗</td><td>Competitor (gen)</td></tr>
+      <tr class="comp"><th>6sense</th><td>ABM intent + AI Email Agents</td><td>Email</td><td>company/account</td><td>Yes (email)</td><td>predictive</td><td class="gate-c">~</td><td>Input + competitor</td></tr>
+      <tr class="comp"><th>Demandbase</th><td>ABM + Agentbase + DSP</td><td>Site personalization</td><td>company (person via RB2B)</td><td>Partially</td><td>orchestration</td><td class="gate-n">✗</td><td>Input + competitor</td></tr>
+      <tr class="comp"><th>Qualified →SFDC</th><td>On-site AI SDR (Piper)</td><td>Yes (chat/voice)</td><td>reverse-API + CRM (acct)</td><td>Yes (offers)</td><td>—</td><td class="gate-n">✗</td><td>Adjacent competitor</td></tr>
+      <tr class="comp"><th>Warmly</th><td>De-anon + AI chat + outbound</td><td>Yes</td><td>person + company</td><td>Yes</td><td>—</td><td class="gate-n">✗</td><td>Closest on ID; inverse gov.</td></tr>
+      <tr class="compl"><th>Attio</th><td>AI-native CRM (record)</td><td>No</td><td>— (CRM records)</td><td>Into CRM only</td><td>—</td><td class="gate-c">~</td><td>Complement / data layer</td></tr>
+      <tr class="compl"><th>RB2B</th><td>Person-level web de-anon</td><td>Yes (reveal)</td><td>person (US)</td><td>No</td><td>—</td><td class="na">n/a</td><td>Input / complement</td></tr>
+      <tr class="compl"><th>Vector</th><td>Contact de-anon → ad audiences</td><td>Yes (reveal)</td><td>person/contact</td><td>No</td><td>—</td><td class="na">n/a</td><td>Complement→adjacent</td></tr>
+      <tr class="compl"><th>Clay</th><td>GTM enrichment + Claygent</td><td>No (batch)</td><td>company-level</td><td>Yes (outbound copy)</td><td>—</td><td class="gate-c">~</td><td>Complement / input</td></tr>
+      <tr class="compl"><th>Default</th><td>Inbound routing + scheduling</td><td>Yes</td><td>form-fill only</td><td>No (routes)</td><td>—</td><td class="na">n/a</td><td>Adjacent / complement</td></tr>
+      <tr class="compl"><th>Haus</th><td>Causal measurement (geo)</td><td>No</td><td>none (cookieless)</td><td>No</td><td>causal econometrics</td><td class="na">n/a</td><td>Complement (measures us)</td></tr>
+      <tr class="compl"><th>Measured</th><td>Incrementality + MMM</td><td>No</td><td>none (aggregate)</td><td>No</td><td>Bayesian MMM</td><td class="na">n/a</td><td>Complement (measures us)</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="src">All figures vendor-reported or third-party estimates. Corrected premises: Measured independent (not acquired by Cynch.ai); Haus CEO Zach Epstein; Attio founders Sharp + Christie; Koala defunct; 11x customer/revenue claims found inflated; Qualified acquired by Salesforce; Intellimize = Webflow Optimize.</p>
+</div></section>
+
+<!-- WIN -->
+<section><div class="wrap">
+  <div class="atitle">Why the gate is the moat — not the bandit, not de-anon</div>
+  <h2>Every primitive is commoditized; the enforced combination is not</h2>
+  <div class="wins">
+    <div class="win"><h4>De-anon is not novel</h4><p>Mutiny, Warmly, RB2B, Vector, Qualified all resolve visitors live. We add the <b>tokenized-link → individual</b> tier (Mutiny/most are company-level only).</p></div>
+    <div class="win"><h4>Bandits are not novel</h4><p>Optimizely (Contextual MABs) and Dynamic Yield ship them. Ours selects a <b>personalization tier under a creepiness ceiling</b> — which none surface.</p></div>
+    <div class="win"><h4>Generation is not novel</h4><p>Ploy, Mutiny, Optimizely Opal, VWO Copilot, HubSpot Breeze, 6sense all generate copy. None gate it against a verifiable source.</p></div>
+    <div class="win"><h4>The enforced truth-gate IS novel</h4><p>Across 16 companies the "trust" stories are statistical significance, brand-consistency, or "grounded + a human reviewer." <b>None withholds an unprovable claim by construction. None shows a receipt.</b></p></div>
+  </div>
+  <div class="pull">Mutiny generates ROI calculators with no source trace. HubSpot Breeze ships generated landing pages. 6sense sends "grounded" emails a human skims.<br><b>We can't say anything we can't prove — and we show the receipt.</b></div>
+</div></section>
+
+<!-- WHITE SPACE -->
+<section><div class="wrap">
+  <div class="atitle">The white space, stress-tested</div>
+  <h2>The market is racing toward the exact danger our gate removes</h2>
+  <p class="lead">The "trust" language already in market is <em>not</em> claim provenance:</p>
+  <div class="chips">
+    <span><b>Optimizely / VWO:</b> statistical significance — a variant <i>won</i>, not that a claim is <i>true</i></span>
+    <span><b>Mutiny:</b> "grounded in brand" — sounds like us, not provable</span>
+    <span><b>6sense / Opal / Copilot:</b> "grounded + human review" — a reviewer, not a gate</span>
+    <span><b>Attio / Clay:</b> advisory citations — descriptive, internal, never withholds</span>
+    <span class="open">UNCLAIMED → enforced provenance + visible receipts + creepiness ceiling, at render</span>
+  </div>
+  <p>HubSpot Breeze and 6sense are wiring LLMs into customer-facing generation with no verification layer. <b>11x</b> already drew a public scandal — fabricated customers, a prospect congratulated on a 3-year-stale funding round — for exactly the unverified-claim failure our gate prevents. As generation scales, "verifiable claim" moves from nicety to <b>procurement/legal requirement</b> — acutely for our Helix B2B-healthcare tenant, where SOC2/HIPAA/MLR holds already gate claims. That's the tailwind; the gate is the moat.</p>
+</div></section>
+
+<!-- EVIDENCE -->
+<section><div class="wrap">
+  <div class="atitle">The evidence asymmetry</div>
+  <h2>Measurement publishes causal proof; the generators publish speed</h2>
+  <div class="ev">
+    <div class="stat"><div class="n">16</div><div class="l">competitors surveyed across measurement, identity, and personalization</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">with an enforcing truth-gate + receipts on AI-generated personalized claims</div></div>
+    <div class="stat"><div class="n">2</div><div class="l">cautionary tales already public (11x fabrication scandal; Warmly aggressive de-anon)</div></div>
+  </div>
+  <p class="src">Full case-study appendix (Haus 28+, Measured 20+, Mutiny verified-vs-flagged, Optimizely/Intellimize/DY/VWO, Qualified, Clay, etc. with source URLs) in COMPETITIVE-LANDSCAPE.md §9.</p>
+</div></section>
+
+<!-- IMPLICATIONS -->
+<section style="border-bottom:none"><div class="wrap">
+  <div class="atitle">So what</div>
+  <h2>Six moves this read implies</h2>
+  <ol class="impl">
+    <li><b>Fight in Ring 1, against Mutiny and Ploy; partner-frame Rings 2–3.</b> Beat the entrenched #1 (Mutiny: logos, $72M, deep plumbing) on <i>trust</i>, not personalization breadth.</li>
+    <li><b>Lead every demo with the receipt.</b> Same personalized page — ours with a source-tagged verification receipt, theirs without. Sharpest against Mutiny's ROI calculators, Breeze's generated pages, 6sense's "grounded" emails.</li>
+    <li><b>Use the foils.</b> Warmly = aggressive de-anon, no creepiness ceiling (governance contrast). 11x = the live accuracy scandal. Both make the gate concrete.</li>
+    <li><b>Don't claim the bandit or de-anon as the moat.</b> They exist elsewhere. The moat is the enforced truth-gate + receipts + tiered creepiness ceiling — and the <i>combination</i>.</li>
+    <li><b>Integrate the data layer.</b> Attio (CRM lookup + receipt write-back), RB2B/Vector (identity inputs), Clay (enrichment), Haus/Measured (downstream lift proof) are partnerships, not fights.</li>
+    <li><b>Move now.</b> Ploy raised $27M in months; Qualified→Salesforce; Mutiny pivoting; HubSpot/6sense shipping generation. The truth-gate is durable <i>because</i> it's the hard part everyone is skipping.</li>
+  </ol>
+</div></section>
+
+<footer><div class="wrap">
+  Two research swarms · 9 agents · ~2,000+ web look-ups · adversarial fact-check on every high-impact claim. Company figures are vendor-reported or third-party estimates unless a primary source is cited. Corrected premises: Measured independent (not acquired by Cynch.ai); Haus CEO Zach Epstein; Mud\Wtr/Mountain Dew not Haus customers; ploy.ai ≠ ploy.io; Attio founders Sharp + Christie; Koala defunct (Cursor acq.); 11x customer/revenue claims inflated; Qualified acquired by Salesforce; Intellimize = Webflow Optimize. Companion: COMPETITIVE-LANDSCAPE.md.
+</div></footer>
+
+</body>
+</html>

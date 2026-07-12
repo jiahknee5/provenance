@@ -1,0 +1,593 @@
+<!doctype html>
+<!-- apt. — "Glass Showcase on Light". BLEND: Attio's clean page structure
+     (warm bone nav, oversized Fraunces hero, pill eyebrow, ink/ghost CTAs,
+     scroll-reveal motion) with Apple "Liquid Glass" for the product showcase frame
+     (real backdrop-filter blur+saturate, specular rim, layered shadows) sitting over a
+     warm bone/brass gradient band. Tabs are glass segments; a floating glass receipt lens
+     overlaps the app-mock corner. apt. brand skin — proof-dot system. Self-contained. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>apt — Every word, apt.</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%231A150F'/%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%23F4EFE5' stroke-width='3.2'/%3E%3Ccircle cx='32' cy='32' r='7.4' fill='%23C79A55'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* warm bone base + Proven Green (verified) and Brass (hairlines) accents, used sparingly */
+    --bg:#F4EFE5; --soft:#EFE9DC; --ink:#1A150F; --ink2:#463B2C; --mut:#7A6F5C;
+    --line:#E4DDCD; --line2:#DDD4C2; --black:#1A150F; --card:#FBF8F1;
+    --pine:#1F4E3B; --pine2:#2E6B52;             /* verified / proof */
+    --brass:#B4894C; --brass2:#C79A55;           /* hairlines, ticks */
+    --ok:#1F4E3B; --okbg:#e7f0ea; --no:#8a662f; --nobg:#f3ead9;
+    --radius:12px; --shadow:0 1px 2px rgba(26,21,15,.05),0 12px 40px -12px rgba(26,21,15,.14);
+
+    /* liquid-glass recipe, retuned for a WARM bone page (frost reads against the bone/brass band) */
+    --r:24px; --spring:cubic-bezier(.22,1.2,.36,1);
+    --gfill:linear-gradient(160deg,rgba(255,253,248,.76),rgba(251,248,241,.52));
+    --gspec:inset 0 1px 0 rgba(255,255,255,.85), inset 0 0 0 1px rgba(255,253,248,.50);
+    --grim:0 1px 0 rgba(180,137,76,.12);
+    --gamb:0 30px 70px -22px rgba(70,59,44,.28);
+    --gchroma:0 14px 44px -18px rgba(180,137,76,.24);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);
+    font:16px/1.55 "Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-optical-sizing:auto;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  a{color:inherit;text-decoration:none}
+  .serif{font-family:"Fraunces",Georgia,serif;font-optical-sizing:auto}
+  code{font-family:"IBM Plex Mono",monospace;font-size:.9em;color:var(--pine)}
+  .wrap{max-width:1140px;margin:0 auto;padding:0 24px}
+  .sec{max-width:1140px;margin:0 auto;padding:0 24px}
+
+  /* nav — clean warm-bone Attio bar */
+  nav{position:sticky;top:0;z-index:50;background:rgba(244,239,229,.82);backdrop-filter:saturate(180%) blur(12px);-webkit-backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line)}
+  nav .row{display:flex;align-items:center;gap:34px;height:64px;max-width:1140px;margin:0 auto;padding:0 24px}
+  /* apt. wordmark lockup: proof seal + Fraunces 600 wordmark, green proof-dot period */
+  .logo{display:flex;align-items:center;gap:10px}
+  .logo .mk{width:26px;height:26px;display:block;flex:none}
+  .logo .wm{font-family:"Fraunces",Georgia,serif;font-optical-sizing:auto;font-weight:600;font-size:25px;line-height:1;letter-spacing:-.02em;color:var(--ink)}
+  .logo .wm .dot{color:var(--pine)}
+  .nlinks{display:flex;gap:26px;font-size:14.5px;color:var(--ink2);font-weight:500}
+  .nlinks a:hover{color:var(--ink)}
+  .caret{font-size:10px;color:var(--mut);margin-left:3px;vertical-align:1px}
+  .nav-r{margin-left:auto;display:flex;align-items:center;gap:12px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:"Inter",sans-serif;font-weight:600;font-size:14.5px;border-radius:10px;padding:9px 16px;border:1px solid transparent;cursor:pointer;transition:.15s;white-space:nowrap}
+  .btn.dark{background:var(--ink);color:var(--bg)}
+  .btn.dark:hover{background:#2c241a}
+  .btn.proof{background:var(--pine);color:#fff}
+  .btn.proof:hover{background:var(--pine2)}
+  .btn.proof .pd{width:8px;height:8px;border-radius:50%;background:#fff;flex:none}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line2)}
+  .btn.ghost:hover{border-color:var(--brass);background:var(--card)}
+  .btn.lg{padding:12px 22px;font-size:15.5px;border-radius:11px}
+  @media(max-width:820px){.nlinks{display:none}}
+
+  /* hero — warm Attio-bone, oversized Fraunces centered */
+  .hero{text-align:center;padding:84px 0 8px;position:relative;isolation:isolate}
+  .pill{display:inline-flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line2);border-radius:999px;padding:6px 7px 6px 8px;font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.04em;color:var(--ink2);font-weight:500;box-shadow:0 1px 2px rgba(26,21,15,.04)}
+  .pill .arc{width:9px;height:9px;border-radius:50%;background:var(--pine);box-shadow:0 0 6px rgba(31,78,59,.45)}
+  .pill .go{color:var(--mut);background:var(--soft);border-radius:999px;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:12px}
+  h1.disp{font-family:"Fraunces",Georgia,serif;font-optical-sizing:auto;font-size:clamp(40px,6.6vw,86px);line-height:.99;font-weight:500;letter-spacing:-.025em;margin:26px auto 0;max-width:13ch;color:var(--ink)}
+  h1.disp .dot{color:var(--pine)}
+  .sub{margin:22px auto 0;max-width:50ch;font-size:clamp(17px,1.6vw,21px);line-height:1.5;color:var(--ink2);font-weight:450}
+  .hero-cta{display:flex;gap:12px;justify-content:center;margin-top:30px}
+  .micro{margin-top:16px;font-size:13px;color:var(--mut)}
+
+  /* ===== GLASS SHOWCASE — the centerpiece ===== */
+  /* soft tinted band: a gentle cool gradient strip so the frosted frame reads as glass */
+  .stage{position:relative;margin-top:56px;padding:60px 0 78px;isolation:isolate}
+  .band{position:absolute;inset:0;z-index:-2;overflow:hidden;
+    background:linear-gradient(180deg,#F4EFE5 0%,#F3EDE0 22%,#EFE8D8 50%,#F4EEE2 80%,#F4EFE5 100%)}
+  /* faint warm bone/brass orbs that the frost refracts */
+  .band::before,.band::after{content:"";position:absolute;border-radius:50%;filter:blur(70px);opacity:.5}
+  .band::before{width:560px;height:560px;left:-120px;top:-60px;background:radial-gradient(circle,rgba(199,154,85,.34),transparent 70%)}
+  .band::after{width:520px;height:520px;right:-130px;bottom:-120px;background:radial-gradient(circle,rgba(180,137,76,.26),transparent 72%)}
+  .band .hair{position:absolute;inset:0;
+    background:linear-gradient(180deg,transparent,rgba(180,137,76,.07) 50%,transparent);
+    -webkit-mask:linear-gradient(#000,#000);mask:linear-gradient(#000,#000)}
+
+  /* shared glass surface */
+  .glass{position:relative;background:var(--gfill);
+    backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);
+    border-radius:var(--r);box-shadow:var(--gspec),var(--grim),var(--gamb),var(--gchroma);
+    isolation:isolate}
+  /* specular top-highlight lens */
+  .glass::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;
+    background:linear-gradient(180deg,rgba(255,255,255,.55),transparent 22%),
+               radial-gradient(120% 60% at 18% 0%,rgba(255,255,255,.4),transparent 58%)}
+  .glass>*{position:relative;z-index:1}
+
+  .showcase{max-width:1000px;margin:0 auto;position:relative}
+
+  /* tabs as glass segments (active = brighter frost) */
+  .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-width:560px;margin:0 auto 22px;
+    padding:6px;border-radius:16px;
+    background:linear-gradient(160deg,rgba(255,253,248,.58),rgba(251,248,241,.34));
+    backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);
+    box-shadow:var(--gspec),var(--gchroma)}
+  .tab{position:relative;padding:9px 8px;text-align:center;font-family:"Inter",sans-serif;font-size:13.5px;font-weight:600;color:var(--mut);cursor:pointer;
+    border-radius:11px;transition:.2s var(--spring);user-select:none}
+  .tab:hover{color:var(--ink2)}
+  .tab.on{color:var(--ink);
+    background:linear-gradient(160deg,rgba(255,253,248,.96),rgba(251,248,241,.72));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 6px 18px -8px rgba(180,137,76,.34),0 0 0 1px rgba(255,253,248,.6)}
+  /* active tab carries a green proof-dot accent */
+  .tab.on::before{content:"";position:absolute;left:11px;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:50%;background:var(--pine);box-shadow:0 0 5px rgba(31,78,59,.5)}
+
+  /* the glass app frame */
+  .frame{border-radius:22px;overflow:visible;position:relative}
+  .appwin{border-radius:22px;overflow:hidden}
+  .appbar{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid rgba(180,137,76,.16);
+    background:linear-gradient(180deg,rgba(255,253,248,.5),rgba(251,248,241,.2))}
+  .dots{display:flex;gap:6px}.dots i{width:10px;height:10px;border-radius:50%;background:rgba(122,111,92,.30);display:block;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
+  .appbar .crumb{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink2);margin-left:6px;font-weight:400;letter-spacing:.02em}
+  .appbody{display:grid;grid-template-columns:212px 1fr;min-height:352px}
+  .side{border-right:1px solid rgba(180,137,76,.16);padding:16px 13px;
+    background:linear-gradient(180deg,rgba(255,253,248,.34),rgba(251,248,241,.12))}
+  .side .grp{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin:6px 4px 8px;font-weight:500}
+  .side .it{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:11px;font-size:13.5px;color:var(--ink2);font-weight:500}
+  .side .it.on{background:linear-gradient(160deg,rgba(255,253,248,.92),rgba(251,248,241,.62));color:var(--ink);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 0 0 1px rgba(255,253,248,.5),0 4px 12px -8px rgba(180,137,76,.34)}
+  .side .it .d{width:7px;height:7px;border-radius:50%;background:rgba(122,111,92,.35)}
+  .side .it.on .d{background:var(--pine);box-shadow:0 0 6px rgba(31,78,59,.5)}
+  .main{padding:22px 26px}
+
+  /* personalize mock */
+  .ph{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+  .tag{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:500;padding:4px 11px;border-radius:999px;letter-spacing:.04em;box-shadow:inset 0 1px 0 rgba(255,255,255,.7)}
+  .tag.known{background:rgba(31,78,59,.12);color:var(--pine)}
+  .tag.tier{background:rgba(255,253,248,.7);color:var(--ink2);box-shadow:inset 0 0 0 1px rgba(180,137,76,.22)}
+  .mh{font-family:"Fraunces",Georgia,serif;font-optical-sizing:auto;font-size:25px;font-weight:500;letter-spacing:-.01em;color:var(--ink);line-height:1.18;margin-top:8px}
+  .mh em{font-style:normal;color:var(--pine);font-weight:600}
+  .mp{color:var(--ink2);font-size:13.5px;margin-top:10px;max-width:46ch}
+  .claimrow{display:flex;align-items:center;gap:11px;margin-top:12px;padding:11px 13px;border-radius:13px;
+    background:rgba(255,253,248,.55);box-shadow:inset 0 0 0 1px rgba(180,137,76,.14),inset 0 1px 0 rgba(255,255,255,.7)}
+  .claimrow .ck{width:8px;height:8px;border-radius:50%;background:var(--pine);box-shadow:0 0 5px rgba(31,78,59,.5),inset 0 1px 0 rgba(255,255,255,.3);flex:none;font-size:0;color:transparent}
+  .claimrow .ct{font-size:13.5px;color:var(--ink)}
+  .claimrow .src{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink2);background:rgba(255,253,248,.7);box-shadow:inset 0 0 0 1px rgba(180,137,76,.2);border-radius:7px;padding:3px 8px;font-weight:400;letter-spacing:.02em}
+  .claimrow.blocked{background:rgba(180,137,76,.07);box-shadow:inset 0 0 0 1px rgba(180,137,76,.24)}
+  .claimrow.blocked .ck{background:var(--brass);box-shadow:0 0 5px rgba(180,137,76,.5)}
+  .claimrow.blocked .ct{color:var(--mut);text-decoration:line-through}
+
+  /* receipt card (inside Receipts panel) */
+  .receiptcard{border-radius:14px;background:rgba(255,253,248,.6);box-shadow:inset 0 0 0 1px rgba(180,137,76,.18),inset 0 1px 0 rgba(255,255,255,.8);padding:15px 17px}
+  .receiptcard .rh{display:flex;align-items:center;gap:9px;font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:500;color:var(--ink);letter-spacing:.06em;text-transform:uppercase}
+  .seal{width:18px;height:18px;border-radius:50%;background:none;border:1.6px solid var(--brass);display:flex;align-items:center;justify-content:center;position:relative;font-size:0;color:transparent;flex:none}
+  .seal::after{content:"";width:7px;height:7px;border-radius:50%;background:var(--pine);box-shadow:0 0 4px rgba(31,78,59,.5)}
+  .rrow{display:flex;justify-content:space-between;gap:12px;font-size:12.5px;padding:9px 0;border-bottom:1px dashed rgba(180,137,76,.22)}
+  .rrow:last-child{border-bottom:none}
+  .rrow .k{color:var(--mut);font-family:"IBM Plex Mono",monospace;font-size:11.5px}
+  .rrow .v{color:var(--ink);font-weight:600;text-align:right}
+  .rrow .v small{display:block;color:var(--mut);font-weight:400;font-size:11px;font-family:"IBM Plex Mono",monospace}
+
+  /* optimize (bandit) */
+  .arms{display:flex;flex-direction:column;gap:11px;margin-top:6px}
+  .arm{display:flex;align-items:center;gap:12px;font-size:13px}
+  .arm .nm{width:128px;color:var(--ink2);font-weight:600}
+  .arm .bar{flex:1;height:9px;border-radius:999px;background:rgba(122,111,92,.16);overflow:hidden}
+  .arm .bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--pine),var(--pine2));transition:width .9s cubic-bezier(.16,1,.3,1)}
+  .arm .pct{width:42px;text-align:right;color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono",monospace}
+  .arm.win .nm{color:var(--ink)}
+  .arm.held .bar i{background:repeating-linear-gradient(45deg,rgba(180,137,76,.24),rgba(180,137,76,.24) 5px,rgba(180,137,76,.09) 5px,rgba(180,137,76,.09) 10px)}
+  .arm.held .pct{color:var(--mut)}
+
+  /* FLOATING GLASS RECEIPT LENS — overlaps the app corner to prove depth */
+  .lens{position:absolute;width:278px;right:-18px;bottom:-34px;z-index:6;padding:16px 17px;border-radius:18px;
+    box-shadow:var(--gspec),0 30px 70px -18px rgba(70,59,44,.42),0 12px 40px -16px rgba(180,137,76,.34);
+    animation:floaty 7s ease-in-out infinite}
+  .lens .rh{display:flex;align-items:center;gap:9px;font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:500;color:var(--ink);letter-spacing:.06em;text-transform:uppercase}
+  @media(max-width:880px){.lens{position:static;width:auto;margin:26px auto 0;animation:none}}
+  @media(max-width:620px){.appbody{grid-template-columns:1fr}.side{display:none}}
+
+  .glabel{text-align:center;color:var(--mut);font-size:12px;margin-top:30px;letter-spacing:.01em}
+
+  /* proof band */
+  .proof{padding:64px 0 8px;text-align:center}
+  .proof .lab{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--brass);font-weight:500}
+  .proof h3{font-family:"Fraunces",Georgia,serif;font-optical-sizing:auto;font-size:clamp(22px,3vw,32px);font-weight:500;letter-spacing:-.01em;margin-top:12px;color:var(--ink)}
+  .proof p{color:var(--ink2);max-width:54ch;margin:12px auto 0;font-size:16px}
+
+  /* features */
+  .feat{padding:54px 0}
+  .feat .row{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+  .feat .row.flip .txt{order:2}
+  .kicker{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;display:inline-flex;align-items:center;gap:8px;color:var(--brass)}
+  .kicker .d{width:7px;height:7px;border-radius:50%;background:var(--pine);box-shadow:0 0 5px rgba(31,78,59,.45)}
+  .feat h2{font-family:"Fraunces",Georgia,serif;font-optical-sizing:auto;font-size:clamp(26px,3.4vw,40px);font-weight:500;letter-spacing:-.012em;margin-top:14px;line-height:1.1;color:var(--ink)}
+  .feat .ft{color:var(--ink2);font-size:17px;margin-top:14px;max-width:42ch}
+  .ulist{margin-top:18px;display:flex;flex-direction:column;gap:10px}
+  .ulist li{list-style:none;display:flex;gap:10px;align-items:center;font-size:14.5px;color:var(--ink2)}
+  .ulist .ck{width:8px;height:8px;border-radius:50%;background:var(--pine);box-shadow:0 0 5px rgba(31,78,59,.45);flex:none;font-size:0;color:transparent}
+  .mini{border:1px solid var(--line2);border-radius:16px;background:var(--card);box-shadow:var(--shadow);overflow:hidden}
+  .mini .mb{padding:18px 20px}
+  .mini .side{border:none;background:none;padding:0}
+  @media(max-width:840px){.feat .row{grid-template-columns:1fr;gap:26px}.feat .row.flip .txt{order:0}}
+
+  /* compare strip */
+  .cmp{max-width:760px;margin:8px auto 0;border:1px solid var(--line2);border-radius:14px;overflow:hidden}
+  .cmp .h{display:grid;grid-template-columns:1.4fr 1fr 1fr;background:var(--soft);font-size:12.5px;font-weight:600;color:var(--ink2)}
+  .cmp .h div{padding:12px 16px}
+  .cmp .h .us{color:var(--ink);background:var(--card);border-left:1px solid var(--line)}
+  .crow{display:grid;grid-template-columns:1.4fr 1fr 1fr;border-top:1px solid var(--line);font-size:13.5px}
+  .crow div{padding:12px 16px;display:flex;align-items:center}
+  .crow .lab{color:var(--ink2)}
+  .crow .them{color:var(--mut)}
+  .crow .us{color:var(--ink);font-weight:600;background:#FBF8F1;border-left:1px solid var(--line)}
+  .crow .us::before{content:"✓ ";color:var(--pine);font-weight:800;margin-right:5px}
+  .crow .them.no::before{content:"✕ ";color:var(--brass);font-weight:800;margin-right:5px}
+
+  /* final cta */
+  .final{margin:70px auto 0;text-align:center;background:var(--ink);border-radius:26px;padding:64px 24px;color:var(--bg);max-width:1140px}
+  .final h2{font-family:"Fraunces",Georgia,serif;font-optical-sizing:auto;font-size:clamp(30px,4.4vw,52px);font-weight:500;letter-spacing:-.018em;line-height:1.04;max-width:18ch;margin:0 auto;color:var(--bg)}
+  .final h2 .dot{color:var(--brass2)}
+  .final p{color:#C2B7A2;margin:18px auto 0;max-width:46ch;font-size:17px}
+  .final .hero-cta{margin-top:28px}
+  .final .btn.ghost{background:transparent;color:var(--bg);border-color:#4a3f30}
+  .final .btn.ghost:hover{background:#28201700;background:rgba(244,239,229,.06);border-color:var(--brass)}
+  .final .btn.light{background:var(--bg);color:var(--ink)}
+
+  /* footer */
+  footer{margin-top:72px;border-top:1px solid var(--line);padding:52px 0 60px}
+  .fgrid{display:grid;grid-template-columns:1.6fr repeat(4,1fr);gap:28px}
+  .fcol h4{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:14px;font-weight:700}
+  .fcol a{display:block;color:var(--ink2);font-size:14px;padding:5px 0}
+  .fcol a:hover{color:var(--ink)}
+  .fbrand p{color:var(--ink2);font-size:14px;margin-top:12px;max-width:30ch}
+  .fbar{display:flex;justify-content:space-between;align-items:center;margin-top:40px;padding-top:22px;border-top:1px solid var(--line);color:var(--mut);font-size:13px;flex-wrap:wrap;gap:12px}
+  @media(max-width:840px){.fgrid{grid-template-columns:1fr 1fr;gap:24px}.fbrand{grid-column:1/-1}}
+
+  /* --- Attio-style motion: hero autostarts on load · everything below reveals on scroll --- */
+  .reveal{opacity:0;transform:translateY(12px) scale(.985);
+    transition:opacity .72s cubic-bezier(.16,1,.3,1),transform .72s cubic-bezier(.16,1,.3,1);will-change:opacity,transform}
+  .reveal.in{opacity:1;transform:none}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  @media(prefers-reduced-motion:reduce){
+    .reveal{opacity:1!important;transform:none!important;transition:none!important}
+    .lens{animation:none!important}
+    .band::before,.band::after{animation:none}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="row">
+    <a class="logo" href="#" aria-label="apt">
+      <svg class="mk" viewBox="0 0 120 120" aria-hidden="true">
+        <circle cx="60" cy="60" r="46" fill="none" stroke="#1A150F" stroke-width="4.5"/>
+        <circle cx="60" cy="60" r="37.5" fill="none" stroke="#B4894C" stroke-width="1.4"/>
+        <g stroke="#B4894C" stroke-width="1.4" stroke-linecap="round"><line x1="60" y1="10.5" x2="60" y2="16.5"/><line x1="60" y1="103.5" x2="60" y2="109.5"/><line x1="10.5" y1="60" x2="16.5" y2="60"/><line x1="103.5" y1="60" x2="109.5" y2="60"/></g>
+        <circle cx="60" cy="60" r="13" fill="#1F4E3B"/>
+      </svg>
+      <span class="wm">apt<span class="dot">.</span></span>
+    </a>
+    <div class="nlinks">
+      <a href="#">Platform<span class="caret">▾</span></a>
+      <a href="#">Resources<span class="caret">▾</span></a>
+      <a href="#">Customers</a>
+      <a href="#">Pricing</a>
+    </div>
+    <div class="nav-r">
+      <a class="btn ghost" href="#">Sign in</a>
+      <a class="btn dark" href="#">Start for free</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO — warm Attio-bone above the fold -->
+<header class="hero sec">
+  <span class="pill"><span class="arc"></span> CAN'T SAY WHAT IT CAN'T PROVE <span class="go">→</span></span>
+  <h1 class="disp">Every word, apt<span class="dot">.</span></h1>
+  <p class="sub">apt is the truth-bounded personalization engine. It says the apt thing to every visitor, learns what converts, and ships a receipt with every claim — it can't say what it can't prove.</p>
+  <div class="hero-cta">
+    <a class="btn dark lg" href="#">Start for free</a>
+    <a class="btn proof lg" href="#"><span class="pd"></span> See a receipt</a>
+    <a class="btn ghost lg" href="#">Talk to sales</a>
+  </div>
+  <div class="micro">No credit card · Every claim gated to a source on day one</div>
+</header>
+
+<!-- GLASS SHOWCASE — the centerpiece, sits over a soft tinted band so the frost reads as glass -->
+<section class="stage">
+  <div class="band" aria-hidden="true"><span class="hair"></span></div>
+  <div class="sec">
+    <div class="showcase">
+      <!-- glass segmented tabs -->
+      <div class="tabs" role="tablist">
+        <div class="tab on" data-t="p1" role="tab">Personalize</div>
+        <div class="tab" data-t="p2" role="tab">Truth gate</div>
+        <div class="tab" data-t="p3" role="tab">Optimize</div>
+        <div class="tab" data-t="p4" role="tab">Receipts</div>
+      </div>
+
+      <!-- glass frame + floating receipt lens overlapping the corner -->
+      <div class="frame">
+        <div class="appwin glass">
+          <div class="appbar"><span class="dots"><i></i><i></i><i></i></span><span class="crumb">apt — live visit · acme-bio.com/r/ax9f2</span></div>
+
+          <!-- Panel 1: Personalize -->
+          <div class="panel on" id="p1">
+            <div class="appbody">
+              <aside class="side">
+                <div class="grp">Resolved at the edge</div>
+                <div class="it on"><span class="d"></span>Sarah Chen · R&amp;D Dir.</div>
+                <div class="it"><span class="d"></span>Acme Bio · 1,200 ppl</div>
+                <div class="it"><span class="d"></span>Segment · clinops</div>
+                <div class="grp" style="margin-top:14px">Tier</div>
+                <div class="it on"><span class="d"></span>Tier 2 · contextual</div>
+                <div class="it"><span class="d"></span>Tier 4 · held out</div>
+              </aside>
+              <div class="main">
+                <div class="ph"><span class="tag known">Known visitor · 100% match</span><span class="tag tier">Tier 2</span></div>
+                <div class="mh">Hi Sarah — here's how Acme Bio cuts <em>assay turnaround by 40%</em></div>
+                <p class="mp">Tailored to a clinical-ops lead at a 1,200-person bio. Hero, proof, and CTA are picked for this segment — every figure below traces to a verified source.</p>
+                <div class="claimrow"><span class="ck">✓</span><span class="ct">Reduce average length of stay 1.2 days</span><span class="src">c_los</span></div>
+                <div class="claimrow"><span class="ck">✓</span><span class="ct">SOC 2 Type II · HIPAA</span><span class="src">c_soc2</span></div>
+                <div class="claimrow blocked"><span class="ck">✕</span><span class="ct">"Trusted by 500+ hospitals" — unprovable</span><span class="src">held out</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel 2: Truth gate -->
+          <div class="panel" id="p2" hidden>
+            <div class="appbody">
+              <aside class="side">
+                <div class="grp">CONSTITUTION gate</div>
+                <div class="it on"><span class="d"></span>Claims library</div>
+                <div class="it"><span class="d"></span>Source bindings</div>
+                <div class="it"><span class="d"></span>Legal holds</div>
+              </aside>
+              <div class="main">
+                <div class="ph"><span class="tag known">can't say what it can't prove</span></div>
+                <div class="mh">Every variant is checked against a source before it can render.</div>
+                <p class="mp">The gate maps each claim to a <code>claim_id</code> with a verifiable source. Unprovable or on-hold claims are unreachable by construction — not by hoping a reviewer catches them.</p>
+                <div class="claimrow"><span class="ck">✓</span><span class="ct">"Reduce LOS by 1.2 days"</span><span class="src">→ UTK trial</span></div>
+                <div class="claimrow"><span class="ck">✓</span><span class="ct">"Deployed at 40+ orgs"</span><span class="src">→ CRM</span></div>
+                <div class="claimrow blocked"><span class="ck">✕</span><span class="ct">"Cut TCO 47%"</span><span class="src">legal hold</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel 3: Optimize (bandit) -->
+          <div class="panel" id="p3" hidden>
+            <div class="appbody">
+              <aside class="side">
+                <div class="grp">Contextual bandit</div>
+                <div class="it on"><span class="d"></span>clinops · tier 2</div>
+                <div class="it"><span class="d"></span>Reward · booked</div>
+                <div class="it"><span class="d"></span>Creepiness ceiling</div>
+              </aside>
+              <div class="main">
+                <div class="ph"><span class="tag tier">Learning per segment</span></div>
+                <div class="mh">It learns which provable framing converts — and how far to personalize.</div>
+                <div class="arms" style="margin-top:18px">
+                  <div class="arm win"><span class="nm">Specificity arm</span><span class="bar"><i style="width:64%"></i></span><span class="pct">64%</span></div>
+                  <div class="arm"><span class="nm">Outcome arm</span><span class="bar"><i style="width:28%"></i></span><span class="pct">28%</span></div>
+                  <div class="arm held"><span class="nm">Tier 4 (held out)</span><span class="bar"><i style="width:8%"></i></span><span class="pct">—</span></div>
+                </div>
+                <p class="mp" style="margin-top:16px">Reward is the booked outcome, not the click. Tier 4 (high-PII) stays out of the live pool — the creepiness ceiling is enforced, not hoped for.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel 4: Receipts -->
+          <div class="panel" id="p4" hidden>
+            <div class="appbody">
+              <aside class="side">
+                <div class="grp">Shown to the visitor</div>
+                <div class="it on"><span class="d"></span>Verification receipt</div>
+                <div class="it"><span class="d"></span>Lawful basis</div>
+                <div class="it"><span class="d"></span>What we withheld</div>
+              </aside>
+              <div class="main">
+                <div class="ph"><span class="tag known">Receipt · visible on the page</span></div>
+                <div class="receiptcard">
+                  <div class="rh"><span class="seal">✓</span> Why you're seeing this — verified</div>
+                  <div class="rrow"><span class="k">Length-of-stay claim</span><span class="v">Verified<small>University trial · 2026</small></span></div>
+                  <div class="rrow"><span class="k">SOC 2 / HIPAA</span><span class="v">Verified<small>audit report on file</small></span></div>
+                  <div class="rrow"><span class="k">Personalized using</span><span class="v">Company + role<small>tier 2 · contextual</small></span></div>
+                  <div class="rrow"><span class="k">Withheld</span><span class="v">1 claim<small>on legal hold</small></span></div>
+                </div>
+                <p class="mp" style="margin-top:14px">The receipt makes honesty a visible, costly signal. Nobody else in the category shows it.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- floating glass receipt lens, overlapping the corner -->
+        <div class="lens glass" aria-hidden="true">
+          <div class="rh"><span class="seal">✓</span> Why you're seeing this — verified</div>
+          <div class="rrow"><span class="k">Length-of-stay</span><span class="v">Verified<small>university trial</small></span></div>
+          <div class="rrow"><span class="k">SOC 2 / HIPAA</span><span class="v">Verified<small>audit on file</small></span></div>
+          <div class="rrow"><span class="k">Personalized using</span><span class="v">Company + role<small>tier 2</small></span></div>
+          <div class="rrow"><span class="k">Withheld</span><span class="v">1 claim<small>legal hold</small></span></div>
+        </div>
+      </div>
+
+      <div class="glabel">Liquid-glass showcase · frosted frame, glass tabs, and a floating receipt lens over a cool band — the proof, made of glass.</div>
+    </div>
+  </div>
+</section>
+
+<!-- PROOF BAND -->
+<section class="proof sec">
+  <div class="lab">Built for teams who can't afford to be wrong</div>
+  <h3>We don't show logos we can't prove. Neither does your website.</h3>
+  <p>Regulated B2B, healthcare, education — anywhere a personalized claim becomes a procurement or legal question. If it can't be sourced, it's held out. apt can't say what it can't prove.</p>
+</section>
+
+<!-- FEATURES -->
+<section class="feat sec">
+  <div class="row">
+    <div class="txt">
+      <span class="kicker"><span class="d"></span> Edge resolver</span>
+      <h2>Know who's reading before the page paints.</h2>
+      <p class="ft">A tokenized link resolves to a known contact. An IP resolves to a company. Everyone else gets clean geo + device. Identity is decided at the edge, in milliseconds.</p>
+      <ul class="ulist">
+        <li><span class="ck">✓</span> Tokenized link → the exact person, 100% match</li>
+        <li><span class="ck">✓</span> IP → company firmographics for ABM</li>
+        <li><span class="ck">✓</span> Cold visitor → geo + device, no guesswork</li>
+      </ul>
+    </div>
+    <div class="mini"><div class="mb">
+      <div class="side">
+        <div class="it on"><span class="d"></span>/r/ax9f2 → Sarah Chen</div>
+        <div class="it"><span class="d"></span>IP 4.21.x → Acme Bio</div>
+        <div class="it"><span class="d"></span>cold → San Diego · iOS</div>
+      </div>
+      <p class="mp" style="margin-top:12px">Resolved server-side, before first byte ships.</p>
+    </div></div>
+  </div>
+
+  <div class="row flip" style="margin-top:52px">
+    <div class="txt">
+      <span class="kicker"><span class="d"></span> Truth gate</span>
+      <h2>Say only what you can prove.</h2>
+      <p class="ft">Every claim is bound to a source. The CONSTITUTION gate makes an unprovable or on-hold claim impossible to render — the boundary holds by construction, not by review.</p>
+      <ul class="ulist">
+        <li><span class="ck">✓</span> Each claim maps to a verifiable <code>claim_id</code></li>
+        <li><span class="ck">✓</span> Legal holds suppress claims instantly</li>
+        <li><span class="ck">✓</span> Variants that can't clear the gate never ship</li>
+      </ul>
+    </div>
+    <div class="mini"><div class="mb">
+      <div class="claimrow"><span class="ck">✓</span><span class="ct">Reduce LOS 1.2 days</span><span class="src">verified</span></div>
+      <div class="claimrow" style="margin-top:10px"><span class="ck">✓</span><span class="ct">SOC 2 · HIPAA</span><span class="src">verified</span></div>
+      <div class="claimrow blocked" style="margin-top:10px"><span class="ck">✕</span><span class="ct">"#1 in the market"</span><span class="src">blocked</span></div>
+    </div></div>
+  </div>
+
+  <div class="row" style="margin-top:52px">
+    <div class="txt">
+      <span class="kicker"><span class="d"></span> Receipts &amp; ceiling</span>
+      <h2>Show the proof. Cap the creepiness.</h2>
+      <p class="ft">A contextual bandit learns which provable framing converts per segment — rewarded on the booked outcome, not the click. The personalization tier is a dial, with the high-PII tier held out by design.</p>
+      <ul class="ulist">
+        <li><span class="ck">✓</span> Per-segment framing, learned not guessed</li>
+        <li><span class="ck">✓</span> Visible verification receipt on the page</li>
+        <li><span class="ck">✓</span> Tier 4 held out — creepiness ceiling enforced</li>
+      </ul>
+    </div>
+    <div class="mini"><div class="mb">
+      <div class="receiptcard">
+        <div class="rh"><span class="seal">✓</span> Why you're seeing this</div>
+        <div class="rrow"><span class="k">Claims</span><span class="v">3 verified</span></div>
+        <div class="rrow"><span class="k">Personalized using</span><span class="v">Company + role</span></div>
+        <div class="rrow"><span class="k">Withheld</span><span class="v">1 (on hold)</span></div>
+      </div>
+    </div></div>
+  </div>
+</section>
+
+<!-- COMPARE -->
+<section class="proof sec" style="padding-top:30px">
+  <h3 style="margin-bottom:22px">Personalization is everywhere. Provable personalization isn't.</h3>
+  <div class="cmp">
+    <div class="h"><div>Capability</div><div>Other platforms</div><div class="us">apt.</div></div>
+    <div class="crow"><div class="lab">Tailors the page per visitor</div><div class="them">Yes</div><div class="us">Yes</div></div>
+    <div class="crow"><div class="lab">Generates personalized copy</div><div class="them">Yes</div><div class="us">Yes</div></div>
+    <div class="crow"><div class="lab">Every claim bound to a source</div><div class="them no">No</div><div class="us">Enforced</div></div>
+    <div class="crow"><div class="lab">Verification receipt shown to visitor</div><div class="them no">No</div><div class="us">Shown</div></div>
+    <div class="crow"><div class="lab">Creepiness ceiling enforced</div><div class="them no">No</div><div class="us">By design</div></div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final">
+  <h2>The website that can't say what it can't prove<span class="dot">.</span></h2>
+  <p>Turn every visit into a tailored, verifiable experience — every word apt, and every claim carrying its receipt.</p>
+  <div class="hero-cta">
+    <a class="btn light lg" href="#">Start for free</a>
+    <a class="btn proof lg" href="#"><span class="pd"></span> See a receipt</a>
+    <a class="btn ghost lg" href="#">Talk to sales</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="fgrid">
+      <div class="fbrand fcol">
+        <a class="logo" href="#" aria-label="apt">
+          <svg class="mk" viewBox="0 0 120 120" aria-hidden="true">
+            <circle cx="60" cy="60" r="46" fill="none" stroke="#1A150F" stroke-width="4.5"/>
+            <circle cx="60" cy="60" r="37.5" fill="none" stroke="#B4894C" stroke-width="1.4"/>
+            <g stroke="#B4894C" stroke-width="1.4" stroke-linecap="round"><line x1="60" y1="10.5" x2="60" y2="16.5"/><line x1="60" y1="103.5" x2="60" y2="109.5"/><line x1="10.5" y1="60" x2="16.5" y2="60"/><line x1="103.5" y1="60" x2="109.5" y2="60"/></g>
+            <circle cx="60" cy="60" r="13" fill="#1F4E3B"/>
+          </svg>
+          <span class="wm">apt<span class="dot">.</span></span>
+        </a>
+        <p>Truth-bounded personalization. Say the apt thing, prove every word.</p>
+      </div>
+      <div class="fcol"><h4>Platform</h4><a href="#">Edge resolver</a><a href="#">Truth gate</a><a href="#">Contextual bandit</a><a href="#">Receipts</a></div>
+      <div class="fcol"><h4>Solutions</h4><a href="#">B2B healthcare</a><a href="#">Education</a><a href="#">Regulated GTM</a><a href="#">ABM</a></div>
+      <div class="fcol"><h4>Resources</h4><a href="#">Docs</a><a href="#">Constitution</a><a href="#">Security</a><a href="#">Changelog</a></div>
+      <div class="fcol"><h4>Company</h4><a href="#">About</a><a href="#">Customers</a><a href="#">Pricing</a><a href="#">Contact</a></div>
+    </div>
+    <div class="fbar"><span>© 2026 apt.</span><span>SOC 2 Type II · HIPAA-ready · CAN-SPAM / CASL bound</span></div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Hero set autostarts on load; the rest reveal on scroll.
+  var heroSel = ['.hero .pill','.hero h1','.hero .sub','.hero .hero-cta','.hero .micro','.stage'];
+  var restSel = ['.proof .lab','.proof h3','.proof p','.feat .row','.cmp .h','.cmp .crow','.final h2','.final p','.final .hero-cta','footer .fcol'];
+
+  var hero = [];
+  heroSel.forEach(function(s){ document.querySelectorAll(s).forEach(function(e){ hero.push(e); }); });
+  var rest = [];
+  restSel.forEach(function(s){ document.querySelectorAll(s).forEach(function(e){ rest.push(e); }); });
+
+  hero.concat(rest).forEach(function(e){ e.classList.add('reveal'); });
+
+  if(reduce){ hero.concat(rest).forEach(function(e){ e.classList.add('in'); }); }
+  else {
+    rest.forEach(function(e){
+      var sibs = [].slice.call(e.parentNode.children).filter(function(c){ return c.classList.contains('reveal'); });
+      var i = sibs.indexOf(e);
+      if(i > 0) e.style.transitionDelay = (i * 70) + 'ms';
+    });
+
+    // AUTOSTART: reveal the hero on load, staggered top-to-bottom
+    window.addEventListener('load', function(){
+      hero.forEach(function(e, i){ setTimeout(function(){ e.classList.add('in'); }, 70 + i * 95); });
+    });
+
+    // SCROLL-TRIGGERED: reveal the rest as they enter the viewport
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+    rest.forEach(function(e){ io.observe(e); });
+  }
+
+  // Tabs (+ animate the bandit bars filling when the Optimize panel is shown)
+  function fillBars(panel){
+    panel.querySelectorAll('.arm .bar i').forEach(function(b){
+      var target = b.style.width || getComputedStyle(b).width;
+      b.style.width = '0'; void b.offsetWidth; b.style.width = target;
+    });
+  }
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('on'); });
+      document.querySelectorAll('.panel').forEach(function(x){ x.classList.remove('on'); x.hidden = true; });
+      t.classList.add('on');
+      var p = document.getElementById(t.dataset.t);
+      p.classList.add('on'); p.hidden = false;
+      if(!reduce) fillBars(p);
+    });
+  });
+})();
+</script>
+</body>
+</html>

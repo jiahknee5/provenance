@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Provenance · Enablement — GTM is an Engineering Problem</title>
+<style>
+:root{
+  --bg:#ffffff; --soft:#f7f7f5; --ink:#18181b; --ink2:#52525b; --mut:#8b8b90;
+  --line:#ececec; --line2:#e3e3e0; --black:#111113; --card:#ffffff;
+  --g1:#2dd4bf; --g2:#3b82f6; --g3:#8b5cf6;
+  --ok:#16794a; --ok-bg:#e7f6ee; --bad:#b42318; --bad-bg:#fdecec; --hold:#9a6b00; --hold-bg:#fbf3e0;
+  --radius:14px; --shadow:0 1px 2px rgba(16,24,40,.04),0 18px 50px -18px rgba(16,24,40,.16);
+  --mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--sans);background:#0c0c0f;color:var(--ink);overflow:hidden}
+
+/* ---- stage ---- */
+.deck{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 120% at 50% -10%,#1a1a22 0%,#0a0a0d 60%)}
+.slide{position:absolute;width:min(1180px,94vw);height:min(680px,90vh);background:var(--bg);
+  border-radius:18px;box-shadow:0 30px 90px -30px rgba(0,0,0,.7);overflow:hidden;
+  display:none;flex-direction:column;padding:0}
+.slide.active{display:flex;animation:in .35s ease}
+@keyframes in{from{opacity:0;transform:translateY(8px) scale(.995)}to{opacity:1;transform:none}}
+
+/* ---- chevron rail ---- */
+.rail{height:46px;flex:0 0 auto;display:flex;align-items:center;gap:0;padding:0 26px;
+  background:linear-gradient(90deg,#eef2ff,#f3eeff 50%,#eafcf8);border-bottom:1px solid var(--line)}
+.rail .ch{display:flex;align-items:center;gap:8px;color:#c3c6d4;font:600 10px/1 var(--sans);
+  letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+.rail .ch::after{content:"›";font-size:15px;margin:0 10px;color:#cdd0dc}
+.rail .ch:last-child::after{content:""}
+.rail .ch.on{color:var(--ink)}
+.rail .ch.on .dot{background:var(--g3)}
+.rail .dot{width:6px;height:6px;border-radius:50%;background:#cdd0dc}
+
+/* ---- header ---- */
+.head{padding:30px 46px 6px}
+.kicker{font:700 11px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--mut);margin-bottom:12px;display:flex;gap:10px;align-items:center}
+.kicker .pill{background:var(--ink);color:#fff;border-radius:20px;padding:3px 9px;font-size:10px;letter-spacing:.1em}
+h1{font-size:33px;line-height:1.1;letter-spacing:-.02em;font-weight:680;color:var(--ink)}
+h1 em{font-style:normal;background:linear-gradient(90deg,var(--g1),var(--g2) 45%,var(--g3));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--ink2);font-size:15px;margin-top:10px;max-width:62ch;line-height:1.5}
+
+/* ---- body ---- */
+.body{flex:1;padding:18px 46px 30px;display:flex;gap:26px;min-height:0}
+.col{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px}
+.body.center{align-items:center;justify-content:center;text-align:center;flex-direction:column}
+
+/* ---- cards: Clay vs Provenance ---- */
+.card{border:1px solid var(--line2);border-radius:var(--radius);padding:18px 18px 16px;background:var(--card);box-shadow:var(--shadow)}
+.tag{display:inline-flex;align-items:center;gap:7px;font:700 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;padding:5px 9px;border-radius:8px;margin-bottom:11px}
+.tag.clay{background:#f1f1f4;color:#3f3f46}
+.tag.prov{background:linear-gradient(90deg,#e9fbf6,#eef0ff);color:#0e6f59;border:1px solid #cdeee6}
+.card.prov{border-color:#cbeae2;background:linear-gradient(180deg,#fcfffe,#f6fffb)}
+.card h3{font-size:15px;font-weight:650;margin-bottom:8px;letter-spacing:-.01em}
+.card p{font-size:13.5px;line-height:1.5;color:var(--ink2)}
+.card .lead{color:var(--ink);font-weight:600}
+ul.tight{list-style:none;display:flex;flex-direction:column;gap:7px;margin-top:4px}
+ul.tight li{font-size:13px;line-height:1.45;color:var(--ink2);padding-left:18px;position:relative}
+ul.tight li::before{content:"›";position:absolute;left:2px;color:var(--g3);font-weight:700}
+
+/* ---- stat cards ---- */
+.stats{display:flex;flex-direction:column;gap:14px;justify-content:center}
+.stat{border:1px solid var(--line2);border-radius:var(--radius);padding:16px 20px;background:var(--card);box-shadow:var(--shadow)}
+.stat .n{font:700 30px/1 var(--sans);letter-spacing:-.02em;color:var(--ink)}
+.stat .l{font:600 11px/1.3 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-top:7px}
+.attrib{font:600 10px/1 var(--mono);letter-spacing:.12em;color:var(--mut);text-transform:uppercase;background:#f1f1f4;padding:5px 9px;border-radius:7px;align-self:flex-start}
+
+/* ---- footer ---- */
+.foot{position:absolute;bottom:0;left:0;right:0;height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 46px;border-top:1px solid var(--line);font:600 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--mut);background:#fff}
+.foot .bf{display:flex;align-items:center;gap:8px}
+.bf .glyph{width:14px;height:14px;border-radius:4px;background:linear-gradient(135deg,var(--g1),var(--g3))}
+
+/* ---- progress dots ---- */
+.nav{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:20}
+.nav b{width:7px;height:7px;border-radius:50%;background:#3a3a44;cursor:pointer;transition:.2s}
+.nav b.on{background:linear-gradient(135deg,var(--g1),var(--g3));width:20px;border-radius:5px}
+.hint{position:fixed;bottom:13px;right:16px;color:#5a5a66;font:600 10px/1 var(--mono);letter-spacing:.1em;z-index:20}
+.counter{position:fixed;top:14px;right:18px;color:#6a6a76;font:600 11px/1 var(--mono);z-index:20}
+
+/* ---- divider slide ---- */
+.divider{background:linear-gradient(135deg,#101014,#191922);color:#fff}
+.divider .num{font:700 120px/1 var(--mono);background:linear-gradient(135deg,var(--g1),var(--g3));-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-.04em}
+.divider h1{color:#fff;font-size:44px}
+.divider .sub{color:#a9a9b6;font-size:17px}
+.divider .foot{background:transparent;border-color:#26262e;color:#7a7a86}
+
+/* ---- decay svg ---- */
+.viz{flex:1;display:flex;align-items:center;justify-content:center}
+svg{max-width:100%;height:auto;overflow:visible}
+.axislbl{font:600 9px/1 var(--mono);letter-spacing:.1em;fill:var(--mut);text-transform:uppercase}
+.note{font:600 11px/1 var(--mono);fill:var(--ink2)}
+
+/* ---- loop boxes ---- */
+.loop{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.lbox{flex:1;min-width:0;border:1px solid var(--line2);border-radius:11px;padding:11px 8px;text-align:center;background:#fff;font-size:12px;font-weight:600;color:var(--ink);position:relative;box-shadow:var(--shadow)}
+.lbox small{display:block;color:var(--mut);font-weight:500;font-size:10.5px;margin-top:3px}
+.lbox.hot{background:linear-gradient(180deg,#eef0ff,#f3eeff);border-color:#d8d3f5}
+.arrow{align-self:center;color:#cdd0dc;font-size:16px;padding:0 4px}
+
+/* ---- ladder ---- */
+.ladder{display:flex;flex-direction:column;gap:9px}
+.rung{display:flex;align-items:center;gap:14px;border:1px solid var(--line2);border-radius:12px;padding:12px 16px;background:#fff;box-shadow:var(--shadow)}
+.rung .lv{font:700 11px/1 var(--mono);letter-spacing:.08em;color:var(--mut);width:58px;flex:0 0 auto;text-transform:uppercase}
+.rung .tx{font-size:13.5px;color:var(--ink2)}
+.rung .tx b{color:var(--ink)}
+.rung.top{border-color:#bfe9dd;background:linear-gradient(90deg,#f4fffb,#f7f4ff);box-shadow:0 18px 40px -18px rgba(139,92,246,.35)}
+.rung.top .lv{color:var(--ok)}
+.rung.faded{opacity:.5}
+
+/* ---- field table ---- */
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line)}
+th{font:700 10px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+td{color:var(--ink2)}
+td.co{color:var(--ink);font-weight:600}
+.yes{color:var(--ok);font-weight:700}.no{color:var(--mut)}
+.gatecol{background:linear-gradient(180deg,#fcfbff,#f7f4ff)}
+th.gatecol{color:var(--g3)}
+tr.us td{background:#f4fffb}
+tr.us td.co{color:var(--ok)}
+
+/* ---- flywheel ---- */
+.fw text{font-family:var(--sans)}
+
+/* ---- demo receipt ---- */
+.demo{display:flex;gap:22px;flex:1;min-height:0}
+.browser{flex:1.3;border:1px solid var(--line2);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;background:#fff}
+.bbar{height:34px;background:var(--soft);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:7px;padding:0 12px}
+.bbar i{width:10px;height:10px;border-radius:50%;background:#dcdcd8;display:inline-block}
+.bbar .url{margin-left:8px;font:600 11px/1 var(--mono);color:var(--mut);background:#fff;border:1px solid var(--line);border-radius:7px;padding:5px 10px;flex:1}
+.bpage{padding:18px 20px;display:flex;flex-direction:column;gap:11px}
+.who{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--ink2)}
+.who b{color:var(--ink)}
+.av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--g2),var(--g3));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
+.hero{font-size:18px;font-weight:680;letter-spacing:-.01em;line-height:1.25}
+.claim{display:flex;align-items:flex-start;gap:9px;font-size:12.5px;padding:8px 11px;border-radius:9px;border:1px solid var(--line2)}
+.claim .mk{font-weight:800;flex:0 0 auto}
+.claim.ok{background:var(--ok-bg);border-color:#cbe8d8}.claim.ok .mk{color:var(--ok)}
+.claim.bad{background:var(--bad-bg);border-color:#f0cfca;color:#7c2018}.claim.bad .mk{color:var(--bad)}
+.claim.hold{background:var(--hold-bg);border-color:#ecdcae;color:#6b4e0a}.claim.hold .mk{color:var(--hold)}
+.claim code{font:600 10px/1 var(--mono);color:var(--mut);margin-left:auto;white-space:nowrap}
+.receipt{flex:1;border:1px solid #cbeae2;border-radius:14px;background:linear-gradient(180deg,#fcfffe,#f4fffb);padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow)}
+.receipt .rt{font:700 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ok);display:flex;align-items:center;gap:7px}
+.rrow{font-size:12px;color:var(--ink2);border-bottom:1px dashed #d9ece5;padding-bottom:8px}
+.rrow b{color:var(--ink);display:block;font-size:12.5px;margin-bottom:2px}
+.rrow.held b{color:var(--hold)}
+
+.legend{display:flex;gap:14px;margin-top:8px;flex-wrap:wrap}
+.legend span{font:600 11px/1 var(--mono);color:var(--mut);display:flex;align-items:center;gap:6px}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+.tealdot{background:var(--g1)}.violetdot{background:var(--g3)}.graydot{background:#c3c6d4}
+
+@media (max-width:720px){.body{flex-direction:column;overflow:auto}h1{font-size:24px}.slide{height:94vh}}
+</style>
+</head>
+<body>
+<div class="deck" id="deck"></div>
+<div class="counter" id="counter">01 / 18</div>
+<div class="nav" id="nav"></div>
+<div class="hint">← → or space</div>
+
+<script>
+const PH = ["Intro","Thesis","Ladder","Loop","Challenges","Gap · Next","Demo"];
+function rail(active){
+  return `<div class="rail">${PH.map(p=>`<div class="ch ${p===active?'on':''}"><span class="dot"></span>${p}</div>`).join("")}</div>`;
+}
+function foot(n){
+  return `<div class="foot"><div class="bf"><span class="glyph"></span>Provenance · Enablement</div><div>GTM is an Engineering Problem · Trust is the Last Edge</div></div>`;
+}
+function slide(phase,inner){ return `<div class="slide">${rail(phase)}${inner}${foot()}</div>`; }
+
+const SLIDES = [
+
+/* S1 — TITLE */
+slide("Intro",`
+<div class="body center">
+  <div class="kicker"><span class="pill">Internal Enablement</span> Adapted from Clay @ LangChain Interrupt 26</div>
+  <h1 style="font-size:46px;max-width:18ch">GTM is an engineering problem — and <em>trust is the last edge</em></h1>
+  <p class="sub" style="font-size:18px;margin-top:18px">How the team running <b>350M go-to-market agents a month</b> thinks about production scale — and exactly where <b>Provenance</b> adds the one thing the whole field is skipping.</p>
+  <div class="legend" style="margin-top:26px">
+     <span><i class="graydot"></i> what Clay / the market already learned</span>
+     <span><i class="violetdot"></i> where we add value</span>
+  </div>
+</div>`),
+
+/* S2 — WHAT CLAY DOES + SCALE */
+slide("Intro",`
+<div class="head"><div class="kicker">The benchmark · attributed to Clay</div>
+<h1>Clay is GTM infrastructure — at a scale worth respecting</h1></div>
+<div class="body">
+  <div class="col">
+    <div class="card"><span class="tag clay">◷ Clay learned</span>
+      <p class="lead">Clay is "the creative tool for growth."</p>
+      <p>Build lists of companies &amp; people → enrich with 150+ data providers &amp; AI agents → orchestrate into CRM enrichment and outbound. Their agent <b>Claygent</b> runs the research.</p>
+    </div>
+    <div class="card prov"><span class="tag prov">➜ where we add value</span>
+      <p>Clay works the <b>input side</b> — who to talk to, researched in batch. <b>Provenance works the activation side</b> — the website itself, the instant a real person arrives. Clay picks <i>who</i>. We govern <i>what is true to say</i>. We're the surface Clay hands off to.</p>
+    </div>
+  </div>
+  <div class="col stats">
+    <div class="attrib">Clay · reported at Interrupt 26</div>
+    <div class="stat"><div class="n">350M+</div><div class="l">GTM agents / month</div></div>
+    <div class="stat"><div class="n">40M · 900M</div><div class="l">companies · contacts</div></div>
+    <div class="stat"><div class="n">Trillions</div><div class="l">tokens / week</div></div>
+  </div>
+</div>`),
+
+/* S3 — THESIS: decay curves */
+slide("Thesis",`
+<div class="head"><div class="kicker">The thesis</div>
+<h1>No creative advantage lasts forever — except <em>proof</em></h1>
+<p class="sub">Clay: the fastest to iterate wins ("GTM alpha"). Ours: when generation went free, the floor rose for every word on every page — so the only line that doesn't decay is the one you can prove.</p></div>
+<div class="body">
+  <div class="viz">
+  <svg viewBox="0 0 560 300" width="640">
+    <line x1="50" y1="250" x2="540" y2="250" stroke="#e3e3e0"/>
+    <line x1="50" y1="30" x2="50" y2="250" stroke="#e3e3e0"/>
+    <text x="46" y="20" class="axislbl" text-anchor="start">Effectiveness</text>
+    <text x="540" y="268" class="axislbl" text-anchor="end">Time →</text>
+    ${[{x:70,c:"#2dd4bf"},{x:170,c:"#3b82f6"},{x:270,c:"#8b5cf6"},{x:370,c:"#f59e0b"}].map(s=>`
+      <path d="M${s.x} 250 C ${s.x+6} 70, ${s.x+10} 60, ${s.x+14} 60 C ${s.x+40} 60, ${s.x+70} 230, ${s.x+95} 248" fill="none" stroke="${s.c}" stroke-width="2.5" opacity=".85"/>
+      <circle cx="${s.x+14}" cy="60" r="3.5" fill="${s.c}"/>
+      <text x="${s.x+14}" y="50" class="axislbl" text-anchor="middle" style="font-size:7px">new play</text>`).join("")}
+    <path d="M50 235 C 200 232, 360 215, 540 120" fill="none" stroke="#111113" stroke-width="3.5" stroke-dasharray="0"/>
+    <text x="544" y="118" class="note" text-anchor="start" style="fill:#8b5cf6">proof ↑</text>
+    <text x="300" y="290" class="axislbl" text-anchor="middle">every clever framing decays as it's copied — provability is the line still climbing</text>
+  </svg>
+  </div>
+</div>`),
+
+/* S4 — MATURITY LADDER */
+slide("Ladder",`
+<div class="head"><div class="kicker">The maturity ladder · Clay's three levels, redrawn for trust</div>
+<h1>Most of the market is stuck at level 2 — <em>a reviewer is not a gate</em></h1></div>
+<div class="body">
+  <div class="col" style="flex:.9">
+    <div class="ladder">
+      <div class="rung faded"><span class="lv">Clay L1</span><span class="tx">Individual AI literacy — sellers use ChatGPT/Claude for copy &amp; call analysis</span></div>
+      <div class="rung faded"><span class="lv">Clay L2</span><span class="tx">Centralize it — workspace skills, auto post-call notes</span></div>
+      <div class="rung faded"><span class="lv">Clay L3</span><span class="tx">Advantages competitors <b>can't copy</b> (e.g. target firms whose engineers starred your repo)</span></div>
+    </div>
+    <p class="sub" style="margin-top:4px">Clay: most teams stuck at L1 — polishing copy is low-leverage. <b>Fix targeting, not prose.</b></p>
+  </div>
+  <div class="col">
+    <div class="ladder">
+      <div class="rung"><span class="lv">Trust 1</span><span class="tx"><b>Personalize &amp; hope</b> — generate, ship, hope nothing's false</span></div>
+      <div class="rung"><span class="lv">Trust 2</span><span class="tx"><b>Review before send</b> — human / LLM judge checks. <i>6sense, Mutiny, Optimizely live here.</i></span></div>
+      <div class="rung top"><span class="lv">Trust 3</span><span class="tx"><b>Gate by construction + show the receipt</b> — an unprovable claim is <i>impossible to render.</i> Empty rung. Ours.</span></div>
+    </div>
+    <p class="sub" style="margin-top:4px"><b>A reviewer is sometimes tired, fast, or wrong.</b> Level 3 is the only rung where being wrong is structurally impossible.</p>
+  </div>
+</div>`),
+
+/* S5 — TWO LOOPS */
+slide("Loop",`
+<div class="head"><div class="kicker">The loop · "this looks like an engineering challenge"</div>
+<h1>Same rigor, different clock — a market loop vs. a <em>per-visit</em> loop</h1></div>
+<div class="body">
+  <div class="col">
+    <span class="tag clay" style="align-self:flex-start">◷ Clay · the agentic GTM loop · runs 350M× / month</span>
+    <div class="loop">
+      <div class="lbox">Scan<small>the market</small></div><div class="arrow">→</div>
+      <div class="lbox">Find<small>signals</small></div><div class="arrow">→</div>
+      <div class="lbox hot">Score<small>accounts</small></div><div class="arrow">→</div>
+      <div class="lbox">Act<small>right time</small></div><div class="arrow">→</div>
+      <div class="lbox">Learn<small>outcomes</small></div>
+    </div>
+    <p class="sub">Run across a whole market and marketing becomes engineering — overnight, in batch.</p>
+  </div>
+  <div class="col">
+    <span class="tag prov" style="align-self:flex-start">➜ Provenance · the per-visit loop · runs in milliseconds, on the page</span>
+    <div class="loop">
+      <div class="lbox">Resolve<small>who's reading</small></div><div class="arrow">→</div>
+      <div class="lbox hot">Gate<small>what's allowed</small></div><div class="arrow">→</div>
+      <div class="lbox">Personalize<small>framing+tier</small></div><div class="arrow">→</div>
+      <div class="lbox">Receipt<small>show proof</small></div><div class="arrow">→</div>
+      <div class="lbox">Learn<small>booked outcome</small></div>
+    </div>
+    <p class="sub">Same engineering applied to a <b>single visit</b> on a paint-time budget. That clock is why our four challenges <i>invert</i>.</p>
+  </div>
+</div>`),
+
+/* S6 — DIVIDER */
+`<div class="slide divider">${rail("Challenges")}
+<div class="body center">
+  <div class="num">4</div>
+  <h1>Four challenges at production scale</h1>
+  <p class="sub" style="max-width:60ch">Clay's spine — infrastructure, throughput, cost, quality. Watch every one <em style="color:#a78bfa;font-style:normal">invert</em> at the edge.</p>
+</div>
+<div class="foot"><div class="bf"><span class="glyph"></span>Provenance · Enablement</div><div>Infrastructure · Throughput · Cost · Quality</div></div></div>`,
+
+/* S7 — C1 INFRASTRUCTURE */
+slide("Challenges",`
+<div class="head"><div class="kicker">Challenge 1 · Infrastructure</div>
+<h1>Clay's agents spend their time <em>waiting</em>. Ours can't wait at all.</h1></div>
+<div class="body">
+  <div class="col">
+    <div class="card"><span class="tag clay">◷ Clay learned</span>
+      <h3>Durable workflow execution</h3>
+      <ul class="tight">
+        <li>Agents mostly <b>wait</b> on browsers, APIs, inference</li>
+        <li>Lambda billed wall-time → paying agents to wait was too expensive</li>
+        <li>Moved to ECS → traded cost for reliability; re-architected for host failure</li>
+        <li>Right shape: <b>queues + checkpointing</b> (LangGraph / LangSmith)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card prov"><span class="tag prov">➜ where we add value</span>
+      <h3>Decide before the page paints</h3>
+      <ul class="tight">
+        <li>Provenance runs <b>before the first byte of HTML</b></li>
+        <li>Resolve identity · gate every claim · pick framing — <b>server-side, tens of ms</b></li>
+        <li>No queue, no "retry tomorrow" — miss paint = generic page</li>
+        <li>So the gate must be <b>precomputed</b>, not reasoned live → Challenge 2</li>
+      </ul>
+      <p style="margin-top:10px"><b style="color:var(--ink)">The inverse constraint:</b> not "durably run a long agent" but "finish identity + gate + bandit inside one page load."</p>
+    </div>
+  </div>
+</div>`),
+
+/* S8 — C2 THROUGHPUT */
+slide("Challenges",`
+<div class="head"><div class="kicker">Challenge 2 · Throughput &amp; the scarce resource</div>
+<h1>Their scarce resource is GPUs. Ours is <em>attention in one paint.</em></h1></div>
+<div class="body">
+  <div class="col">
+    <div class="card"><span class="tag clay">◷ Clay learned</span>
+      <h3>Back-pressure, like TCP/IP</h3>
+      <ul class="tight">
+        <li>Dedicated inference, but <b>spiky</b> workloads</li>
+        <li>Push as much as possible; dial back the instant you hit limits</li>
+        <li>Measured <b>4–10× throughput</b> vs. a naive system</li>
+        <li>Built <b>fairness</b> so one whale can't crowd out a new customer</li>
+      </ul>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card prov"><span class="tag prov">➜ where we add value</span>
+      <h3>Minimize live work, not maximize throughput</h3>
+      <ul class="tight">
+        <li>One shot, once — no throttle-and-retry on a human's attention</li>
+        <li>Slow "is this claim true?" work happens <b>offline, ahead of time</b></li>
+        <li>At render the gate is a near-<b>O(1) lookup</b> — cleared / on-hold / blocked</li>
+        <li>Clay <b>maximizes safe push</b>; we <b>minimize what happens while they wait</b></li>
+      </ul>
+    </div>
+  </div>
+</div>`),
+
+/* S9 — C3 COST */
+slide("Challenges",`
+<div class="head"><div class="kicker">Challenge 3 · Cost</div>
+<h1>Bound the work — and for us, the bound is also a <em>trust</em> bound</h1></div>
+<div class="body">
+  <div class="col">
+    <div class="card"><span class="tag clay">◷ Clay learned</span>
+      <h3>Caching + bounded research</h3>
+      <ul class="tight">
+        <li>Cache strategy is huge — <b>up to ~70% savings</b> (e.g. Anthropic)</li>
+        <li><b>Bound retries &amp; tool calls</b> before they sprawl</li>
+        <li>Forcing a return after N steps often beats running to completion — <i>with your evals</i></li>
+        <li>"Without traces, cost optimization is guesswork"</li>
+      </ul>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card prov"><span class="tag prov">➜ where we add value</span>
+      <h3>Same caching — but the bound protects truth too</h3>
+      <ul class="tight">
+        <li>A claim too slow / strained to source is a claim we <b>don't render</b></li>
+        <li>"Bound the work" and "only say what we can cleanly prove" = <b>one discipline</b></li>
+        <li>The claims library is the <b>cache <i>and</i> the proof store</b></li>
+        <li>"Without traces it's guesswork" → that trace <b>is the receipt</b></li>
+      </ul>
+    </div>
+  </div>
+</div>`),
+
+/* S10 — C4 QUALITY */
+slide("Challenges",`
+<div class="head"><div class="kicker">Challenge 4 · Quality — "if the agents aren't good, nothing else matters"</div>
+<h1>Their eval asks "did it convert." Ours asks "could it <em>name its source.</em>"</h1></div>
+<div class="body">
+  <div class="col">
+    <div class="card"><span class="tag clay">◷ Clay learned</span>
+      <h3>Context + evals + an iteration surface</h3>
+      <ul class="tight">
+        <li>Quality starts with <b>great context</b> — web + proprietary GTM data, kept agent-accessible</li>
+        <li><b>Offline &amp; online evals</b>, harness tuned for GTM</li>
+        <li>Quality is a <b>product problem</b>: an agent builder to test before market scale</li>
+      </ul>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card prov"><span class="tag prov">➜ where we add value</span>
+      <h3>Provability first, conversion second</h3>
+      <ul class="tight">
+        <li>We share it all — context, offline + online evals, pre-live iteration</li>
+        <li>But a page that converts on an <b>unprovable</b> claim is a <b>failure</b> (the 11x scenario)</li>
+        <li>Bandit rewarded on the <b>booked outcome, not the click</b></li>
+        <li>High-PII tier <b>held out by design</b> — creepiness ceiling enforced, not hoped</li>
+      </ul>
+    </div>
+  </div>
+</div>`),
+
+/* S11 — THE GAP / FIELD MAP */
+slide("Gap · Next",`
+<div class="head"><div class="kicker">The white space · 16 companies surveyed</div>
+<h1>Every primitive exists. One column is empty across <em>all of them.</em></h1></div>
+<div class="body"><div class="col">
+  <table>
+    <tr><th class="co">Company</th><th>Real-time on-site</th><th>De-anon grain</th><th>Generates copy</th><th>Bandit / ML</th><th class="gatecol">Truth-gate + receipt</th></tr>
+    <tr><td class="co">Mutiny</td><td class="yes">Yes</td><td>company</td><td class="yes">Yes</td><td>segment-routing</td><td class="gatecol no">No — brand-grounding</td></tr>
+    <tr><td class="co">Optimizely</td><td class="yes">Yes</td><td>behavioral/ABM</td><td class="yes">Opal</td><td class="yes">Contextual MAB</td><td class="gatecol no">No — significance ≠ truth</td></tr>
+    <tr><td class="co">6sense</td><td>email</td><td>account</td><td class="yes">Yes</td><td>predictive</td><td class="gatecol no">No — "grounded" + reviewer</td></tr>
+    <tr><td class="co">Warmly</td><td class="yes">Yes</td><td>person+company</td><td class="yes">Yes</td><td>—</td><td class="gatecol no">No — geo-fence, no ceiling</td></tr>
+    <tr><td class="co">Attio</td><td>No</td><td>CRM record</td><td>into CRM</td><td>—</td><td class="gatecol no">Closest — but advisory, internal</td></tr>
+    <tr class="us"><td class="co">Provenance</td><td class="yes">Yes (edge)</td><td>token→person</td><td class="yes">Yes (gated)</td><td class="yes">Bandit + tier</td><td class="gatecol"><b class="yes">YES — enforced + shown</b></td></tr>
+  </table>
+  <p class="sub" style="margin-top:14px">Every trust story in the field is one of four: <b>statistical significance</b> (won ≠ true) · <b>brand consistency</b> (sounds like us) · <b>grounding + a reviewer</b> (level 2) · <b>advisory citations</b> that never withhold. <b style="color:var(--ink)">None withholds by construction. None shows the visitor a receipt.</b> That axis is uncontested — and it's ours.</p>
+</div></div>`),
+
+/* S12 — FLYWHEEL */
+slide("Gap · Next",`
+<div class="head"><div class="kicker">What's next</div>
+<h1>Clay builds a GTM-intelligence flywheel. Ours is a <em>trust</em> flywheel.</h1>
+<p class="sub">Clay's <b>Audiences</b> aggregates GTM data → agent memory → recommends plays. Ours: every gated claim becomes a reusable, audited source-binding that compounds.</p></div>
+<div class="body">
+  <div class="viz">
+  <svg class="fw" viewBox="0 0 600 280" width="660">
+    <defs><marker id="ah" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#8b5cf6"/></marker></defs>
+    <circle cx="300" cy="140" r="92" fill="none" stroke="#ece9fb" stroke-width="26"/>
+    <path d="M300 48 A92 92 0 0 1 392 140" fill="none" stroke="#8b5cf6" stroke-width="3" marker-end="url(#ah)"/>
+    <path d="M392 140 A92 92 0 0 1 300 232" fill="none" stroke="#3b82f6" stroke-width="3" marker-end="url(#ah)"/>
+    <path d="M300 232 A92 92 0 0 1 208 140" fill="none" stroke="#2dd4bf" stroke-width="3" marker-end="url(#ah)"/>
+    <path d="M208 140 A92 92 0 0 1 300 48" fill="none" stroke="#8b5cf6" stroke-width="3" marker-end="url(#ah)"/>
+    ${[["Prove a claim",300,40,"#8b5cf6"],["Bind to source",420,140,"#3b82f6"],["Render + receipt",300,248,"#2dd4bf"],["Reuse & compound",180,140,"#8b5cf6"]].map(([t,x,y,c])=>`
+      <circle cx="${x}" cy="${y}" r="6" fill="${c}"/>
+      <text x="${x}" y="${y< 140? y-12 : y+20}" text-anchor="middle" font-size="13" font-weight="650" fill="#18181b">${t}</text>`).join("")}
+    <text x="300" y="135" text-anchor="middle" font-size="13" font-weight="700" fill="#8b5cf6">CLAIMS</text>
+    <text x="300" y="152" text-anchor="middle" font-size="13" font-weight="700" fill="#8b5cf6">LIBRARY</text>
+  </svg>
+  </div>
+  <div class="col" style="flex:.7;justify-content:center">
+    <div class="card prov"><span class="tag prov">➜ trust intelligence</span>
+      <p>Each proven claim makes the next page <b>cheaper to assemble</b> and faster to gate. Every receipt is a costly honesty signal to the visitor <b>and</b> an audit artifact for legal &amp; procurement.</p>
+      <p style="margin-top:8px"><b style="color:var(--ink)">Clay knows which play to run. We know what we're allowed to say — and get more fluent at proving it every cycle.</b></p>
+    </div>
+  </div>
+</div>`),
+
+/* S13 — DEMO: RESOLVE */
+slide("Demo",`
+<div class="head"><div class="kicker">Live product · 1 of 4 — Resolve</div>
+<h1>Before the page paints, we know who's reading</h1></div>
+<div class="body"><div class="demo">
+  <div class="browser">
+    <div class="bbar"><i></i><i></i><i></i><span class="url">acme-bio.com/r/ax9f2</span></div>
+    <div class="bpage">
+      <div class="who"><span class="av">SC</span><div><b>Sarah Chen</b> · R&amp;D Director<br><span style="color:var(--mut)">Acme Bio · 1,200 people · segment <b style="color:var(--ink)">clinops</b></span></div></div>
+      <div class="claim ok"><span class="mk">✓</span> Tokenized link → the exact person · <b>100% match</b><code>/r/ax9f2</code></div>
+      <div class="claim ok"><span class="mk">✓</span> IP → company firmographics for ABM<code>4.21.x → Acme Bio</code></div>
+      <div class="claim hold"><span class="mk">○</span> Cold visitor → clean geo + device, no guesswork<code>fallback</code></div>
+    </div>
+  </div>
+  <div class="col" style="flex:.85;justify-content:center">
+    <div class="card prov"><span class="tag prov">➜ edge resolver</span>
+      <p>Identity is decided <b>server-side, in milliseconds</b>, before the first byte ships. A tokenized link resolves to the person; an IP to the company; everyone else gets a clean cold experience.</p>
+    </div>
+  </div>
+</div></div>`),
+
+/* S14 — DEMO: GATE */
+slide("Demo",`
+<div class="head"><div class="kicker">Live product · 2 of 4 — Gate</div>
+<h1>It can't say what it can't prove — <em>structurally</em></h1></div>
+<div class="body"><div class="demo">
+  <div class="browser">
+    <div class="bbar"><i></i><i></i><i></i><span class="url">acme-bio.com/r/ax9f2 · CONSTITUTION gate</span></div>
+    <div class="bpage">
+      <div class="hero">Hi Sarah — how Acme Bio cuts assay turnaround by 40%</div>
+      <div class="claim ok"><span class="mk">✓</span> Cuts average length of stay by 1.2 days<code>c_los → UTK trial '26</code></div>
+      <div class="claim ok"><span class="mk">✓</span> SOC 2 Type II · HIPAA<code>c_soc2 → audit on file</code></div>
+      <div class="claim bad"><span class="mk">✕</span> "Trusted by 500+ hospitals" — <b>unprovable, not on page</b><code>blocked</code></div>
+      <div class="claim hold"><span class="mk">⏸</span> "Cut TCO 47%" — suppressed instantly<code>legal hold</code></div>
+    </div>
+  </div>
+  <div class="col" style="flex:.85;justify-content:center">
+    <div class="card prov"><span class="tag prov">➜ the truth-gate</span>
+      <p>Each claim maps to a <b>claim_id → verifiable source</b>. Unprovable or on-hold claims are <b>unreachable by construction</b> — not greyed out, not flagged for a reviewer. <b style="color:var(--ink)">Structurally absent.</b> Legal holds suppress without a redeploy.</p>
+    </div>
+  </div>
+</div></div>`),
+
+/* S15 — DEMO: PERSONALIZE */
+slide("Demo",`
+<div class="head"><div class="kicker">Live product · 3 of 4 — Personalize under a ceiling</div>
+<h1>It learns which <em>provable</em> framing converts — and how far to go</h1></div>
+<div class="body"><div class="demo">
+  <div class="browser">
+    <div class="bbar"><i></i><i></i><i></i><span class="url">contextual bandit · clinops · tier 2</span></div>
+    <div class="bpage">
+      <div class="who"><div><b>Reward = booked outcome</b> <span style="color:var(--mut)">(not the click)</span></div></div>
+      <div class="claim ok"><span class="mk">▲</span> Specificity arm<code>64%</code></div>
+      <div class="claim hold"><span class="mk">▽</span> Outcome arm<code>28%</code></div>
+      <div class="claim bad"><span class="mk">⛔</span> Tier 4 · high-PII — <b>held out of live pool</b><code>ceiling</code></div>
+    </div>
+  </div>
+  <div class="col" style="flex:.85;justify-content:center">
+    <div class="card prov"><span class="tag prov">➜ creepiness ceiling</span>
+      <p>A contextual bandit picks framing <b>and the personalization tier</b> per segment — learned, not guessed. The high-PII tier stays out of the live pool <b>by design</b>: the ceiling is enforced, not hoped for. The reward is the meeting booked, not the click earned.</p>
+    </div>
+  </div>
+</div></div>`),
+
+/* S16 — DEMO: RECEIPT */
+slide("Demo",`
+<div class="head"><div class="kicker">Live product · 4 of 4 — Receipt</div>
+<h1>The thing no competitor will show you — proof, <em>on the page</em></h1></div>
+<div class="body"><div class="demo">
+  <div class="receipt">
+    <div class="rt">✓ Why you're seeing this — verified</div>
+    <div class="rrow"><b>Length-of-stay claim</b>Verified · University trial · 2026</div>
+    <div class="rrow"><b>SOC 2 / HIPAA</b>Verified · audit report on file</div>
+    <div class="rrow"><b>Personalized using</b>Company + role · tier 2 · contextual</div>
+    <div class="rrow held"><b>Withheld</b>1 claim on legal hold</div>
+  </div>
+  <div class="col" style="flex:1;justify-content:center">
+    <div class="card prov"><span class="tag prov">➜ the receipt</span>
+      <p class="lead">The receipt makes honesty a visible, costly signal.</p>
+      <p style="margin-top:8px">Three claims verified, each with its source. What we personalized on. What we withheld, and why. <b style="color:var(--ink)">Nobody else in the category shows it</b> — and the whole sequence finished before the page did.</p>
+    </div>
+  </div>
+</div></div>`),
+
+/* S17 — RECAP */
+slide("Demo",`
+<div class="head"><div class="kicker">Recap</div>
+<h1>Same discipline as the best in the world — <em>one more axiom</em></h1></div>
+<div class="body"><div class="col" style="justify-content:center;gap:14px">
+  <div class="card"><span class="tag clay">1 · GTM is an engineering problem</span><p>Clay proved it at 350M agents/month — infrastructure, throughput, cost, quality. Those four are ours too.</p></div>
+  <div class="card prov"><span class="tag prov">2 · at the edge, every challenge inverts</span><p>Clay's agents wait — ours can't. Clay maximizes throughput — we minimize live work. Clay bounds cost — we bound cost <i>and</i> trust. Clay evals for conversion — we eval for <b>provability first</b>.</p></div>
+  <div class="card prov"><span class="tag prov">3 · the field stops at level 2</span><p><b>A reviewer is not a gate.</b> Our one added axiom — can't say what it can't prove, and prove it with a receipt — is the only line on the chart that doesn't decay.</p></div>
+</div></div>`),
+
+/* S18 — CLOSE */
+`<div class="slide divider">${rail("Demo")}
+<div class="body center">
+  <h1 style="font-size:40px;max-width:20ch">Personalization is everywhere.<br><em style="background:linear-gradient(90deg,#2dd4bf,#8b5cf6);-webkit-background-clip:text;background-clip:text;color:transparent;font-style:normal">Provable personalization isn't.</em></h1>
+  <p class="sub" style="margin-top:20px">Same engineering rigor as the best in the world. One thing we refuse to ship without.</p>
+  <div class="legend" style="margin-top:30px">
+    <span style="color:#8a8a96">Source: Jeff Barg, Clay · LangChain Interrupt 26 · youtu.be/LmQtSORYPfw</span>
+  </div>
+</div>
+<div class="foot"><div class="bf"><span class="glyph"></span>Provenance · Enablement</div><div>Thank you</div></div></div>`,
+
+];
+
+/* ---- render + nav ---- */
+const deck=document.getElementById('deck');
+deck.innerHTML=SLIDES.join("");
+const slides=[...deck.querySelectorAll('.slide')];
+const nav=document.getElementById('nav');
+const counter=document.getElementById('counter');
+let i=0;
+slides.forEach((_,k)=>{const b=document.createElement('b');b.onclick=()=>go(k);nav.appendChild(b);});
+const dots=[...nav.children];
+function go(n){i=Math.max(0,Math.min(slides.length-1,n));
+  slides.forEach((s,k)=>s.classList.toggle('active',k===i));
+  dots.forEach((d,k)=>d.classList.toggle('on',k===i));
+  counter.textContent=String(i+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');
+  if(history.replaceState)history.replaceState(null,'','#'+(i+1));}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(i+1);}
+  if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(i-1);}
+  if(e.key==='Home')go(0); if(e.key==='End')go(slides.length-1);
+});
+deck.addEventListener('click',e=>{if(e.target.closest('.nav'))return;const r=deck.getBoundingClientRect();(e.clientX-r.left)>r.width/2?go(i+1):go(i-1);});
+const start=parseInt((location.hash||'').replace('#',''),10);
+go(Number.isFinite(start)&&start>0?start-1:0);
+</script>
+</body>
+</html>

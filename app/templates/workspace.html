@@ -1,0 +1,60 @@
+{% extends "shell.html" %}
+{% block title %}apt — Home{% endblock %}
+{% block crumb %}<i class="ph ph-house"></i> Home{% endblock %}
+{% block content %}
+  <div class="q-pagehead">
+    <div>
+      <span class="q-pill b" style="margin-bottom:10px"><span class="d"></span>Provable</span>
+      <h1>Your revenue, provable.</h1>
+      <p class="q-muted" style="margin:5px 0 0"><b style="color:var(--slate)">Proves:</b> every record, message, and metric traces back to a verified source.</p>
+    </div>
+    <div class="sp">
+      <details class="q-dd">
+        <summary class="q-btn outline"><i class="ph ph-funnel"></i> Filter{% if view!='all' %} · on{% endif %} <i class="ph ph-caret-down" style="font-size:12px"></i></summary>
+        <div class="q-menu">
+          {% for k,label,pred in views %}<a href="/workspace?view={{ k }}&sort={{ sort }}" class="{{ 'on' if k==view else '' }}">{{ label }}</a>{% endfor %}
+        </div>
+      </details>
+      <a class="q-btn ink" href="/records/new"><i class="ph ph-plus"></i> New record</a>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px">
+    <div class="q-stat"><div class="k">Records</div><div class="v">{{ stats.records }}</div><div class="sub">in pipeline</div></div>
+    <div class="q-stat"><div class="k">Qualified</div><div class="v">{{ stats.qualified }}</div><div class="sub">SQL + MQL</div></div>
+    <div class="q-stat"><div class="k">Customers</div><div class="v">{{ stats.customers }}</div><div class="sub">won</div></div>
+    <div class="q-stat"><div class="k">Provenance</div><div class="v" style="color:var(--g)">100%</div><div class="sub">facts with a source</div></div>
+  </div>
+
+  <div class="q-panel">
+    <div class="q-toolbar">
+      <span class="h">Pipeline{% if view!='all' %} · {{ rows|length }} shown{% endif %}</span>
+      <span class="sp">
+        <details class="q-dd">
+          <summary class="q-btn outline"><i class="ph ph-faders-horizontal"></i> Sort <i class="ph ph-caret-down" style="font-size:12px"></i></summary>
+          <div class="q-menu">
+            {% for k,label,spec in sorts %}<a href="/workspace?view={{ view }}&sort={{ k }}" class="{{ 'on' if k==sort else '' }}">{{ label }}</a>{% endfor %}
+          </div>
+        </details>
+        <a class="q-btn ghost" href="/workspace?view={{ view }}&sort={{ sort }}"><i class="ph ph-arrows-clockwise"></i> Refresh</a>
+        <a class="q-btn signal" href="/records/new"><i class="ph ph-plus"></i> Add deal</a>
+      </span>
+    </div>
+    <table class="q-table">
+      <thead><tr><th>Record</th><th>Company</th><th>Title</th><th>Industry</th><th>Stage</th><th>Score</th><th>Source</th></tr></thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td><span class="q-rec"><span class="av" style="background:{{ r.avc }}">{{ r.av }}</span>{{ r.name }}</span></td>
+          <td>{{ r.company }}</td>
+          <td class="q-muted">{{ r.title }}</td>
+          <td class="q-muted">{{ r.industry }}</td>
+          <td><span class="q-pill {{ r.lifecycle_cls }}"><span class="d"></span>{{ r.lifecycle_lbl }}</span></td>
+          <td>{{ r.score }}</td>
+          <td class="q-muted">{{ r.source }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
