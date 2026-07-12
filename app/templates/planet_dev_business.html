@@ -53,6 +53,7 @@
 </style>
 
 {% set B = biz %}
+{% set SD = biz.designer %}
 </head>
 <body>
 <div class="app">
@@ -67,6 +68,9 @@
       <a href="{{ toggle_anon }}" class="{{ 'on' if as_state == 'anon' else '' }}">Anonymous</a>
       <a href="{{ toggle_known }}" class="{{ 'on' if as_state != 'anon' else '' }}">Known lead</a>
     </span>
+    <label class="sd-devtog" data-testid="sd-devtoggle" title="Fold in the engineer console's trace and audit sections">
+      <input type="checkbox" id="sd-devtoggle-input"> Developer / audit
+    </label>
     <a href="{{ g.dev }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}">Technical view →</a>
     <a href="{{ g.image_decisions }}">Image decisions guide →</a>
   </div>
@@ -78,7 +82,10 @@
   {% for label, url in entry_links_raw %}<a href="{{ url }}">{{ label }} →</a>{% endfor %}
 </div>
 
-<div class="sec">
+<!-- Sections — the per-section designer (S5, contract: designer-dom.md) -->
+{% include "_sd_designer.html" %}
+
+<div class="sec sd-devfold">
   <div class="h">1 · Arrival &amp; attribution <span class="tag">{{ B.arrival.channel }}</span></div>
   <div class="dec">{{ B.arrival.decision }}</div>
   <table class="ops">
@@ -113,7 +120,7 @@
   {% if B.location.why %}<div class="dec" style="border-top:1px solid var(--line);font-weight:400;color:var(--muted)">{{ B.location.why }}</div>{% endif %}
 </div>
 
-<div class="sec">
+<div class="sec sd-devfold">
   <div class="h">3 · Audience read <span class="tag">{{ B.audience_read.segment }}</span></div>
   <div class="dec">{{ B.audience_read.decision }}</div>
   <table class="ops">
@@ -127,7 +134,7 @@
   </table>
 </div>
 
-<div class="sec">
+<div class="sec sd-devfold">
   <div class="h">4 · Objection stack <span class="tag">{{ B.objections|length }} ranked</span></div>
   {% if B.objections %}
   <table class="ops">
@@ -242,8 +249,10 @@
     <thead><tr><th>Rule</th></tr></thead>
     <tbody>{% for r in B.steering.rules %}<tr><td class="note">{{ r }}</td></tr>{% endfor %}</tbody>
   </table>
-  <div class="foot-link"><a href="{{ g.dev }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}">Technical view →</a> for pipeline trace, signal ledger, and engineering detail.</div>
+  <div class="foot-link"><a href="{{ g.dev }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}">Technical view →</a> for pipeline trace and engineering detail.</div>
 </div>
+
+{% include "_sd_drawer.html" %}
 </div>
 </div>
 </div>
