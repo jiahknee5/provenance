@@ -126,6 +126,7 @@ def _render_skyfi(request: Request, m: dict[str, str]) -> HTMLResponse:
     return templates.TemplateResponse(request, "skyfi_site.html", {
         "page": page, "qs": _qs(request), "dev_qs": _qs(request), "g": m,
         "hero_api_url": m["hero_api"],
+        "static_prefix": m["static"],  # brand SVG under app/static/skyfi/ per mount
     })
 
 
