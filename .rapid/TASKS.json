@@ -1,0 +1,226 @@
+{
+ "project": "apt-section-designer",
+ "spec": "04-spec/spec.md",
+ "prd": "docs/01-intake/PRD-SECTION-DESIGNER.md",
+ "contracts": [
+  "04-spec/contracts/registry-schema.md",
+  "04-spec/contracts/decision-pool.md",
+  "04-spec/contracts/designer-dom.md"
+ ],
+ "fanout_cap": "4 implementors + 1 watchdog",
+ "tasks": [
+  {
+   "id": "T-00",
+   "name": "eval-harness",
+   "spec_ref": "ALL",
+   "prd_ref": "ALL",
+   "wave": "W0",
+   "mode": "long-running",
+   "depends_on": [],
+   "description": "Materialize the immutable WF-DESIGN suite + S0-S8 acceptance stubs from docs/workflows.json (one exec per node); real Gate, no mocks; lock .rapid/EVAL/. The 5 existing property tests stay untouched (Art VII).",
+   "touch": [
+    "docs/workflows.json",
+    "tests/test_wf_design_*.py",
+    ".rapid/EVAL/"
+   ],
+   "verify": "pytest tests/test_wf_design_* -q (stubs collected, xfail until built)",
+   "status": "done"
+  },
+  {
+   "id": "T-01",
+   "name": "section-registry",
+   "spec_ref": "S1",
+   "prd_ref": "R30",
+   "wave": "W0",
+   "mode": "long-running",
+   "depends_on": [
+    "T-00"
+   ],
+   "description": "rules/{gauntlet,planet,skyfi}_sections.yaml + pipeline/personalization/sections.py per contracts/registry-schema.md; behavior-neutral seed mirroring current slots+surfaces.",
+   "touch": [
+    "rules/*_sections.yaml",
+    "pipeline/personalization/sections.py",
+    "tests/test_sections_registry.py"
+   ],
+   "verify": "registry round-trip green; build_page byte-identical before/after (Art IV)",
+   "status": "done"
+  },
+  {
+   "id": "T-02",
+   "name": "decision-pool",
+   "spec_ref": "S4",
+   "prd_ref": "R34",
+   "wave": "W1",
+   "mode": "long-running (strongest slot)",
+   "depends_on": [
+    "T-01"
+   ],
+   "description": "pipeline/personalization/decision_pool.py per contracts/decision-pool.md: cleared_pool (structural, Art II), pick (Thompson, audience_route keying + _all fallback <30), reward/settle/lift, on_claims_invalidated surgical pause, receipt.",
+   "touch": [
+    "pipeline/personalization/decision_pool.py",
+    "tests/test_decision_pool.py"
+   ],
+   "verify": "5 contract invariants green incl. 0-lie-servable + lift>control",
+   "status": "pending"
+  },
+  {
+   "id": "T-03",
+   "name": "designer-ui",
+   "spec_ref": "S5",
+   "prd_ref": "R32,R33",
+   "wave": "W1",
+   "mode": "swarm-member (worktree)",
+   "depends_on": [
+    "T-01"
+   ],
+   "description": "Rework marketer console into per-section designer per contracts/designer-dom.md; staged drawer targets rules/<tenant>_sections.yaml; dev/audit toggle folds engineer trace.",
+   "touch": [
+    "app/templates/*_dev_business.html",
+    "pipeline/personalization/*_dev_business.py"
+   ],
+   "verify": "sd-* testids render per section; Q1-Q10 controls in one card; console tests green",
+   "status": "pending"
+  },
+  {
+   "id": "T-04",
+   "name": "per-section-obs",
+   "spec_ref": "S4,S5",
+   "prd_ref": "R34",
+   "wave": "W2",
+   "mode": "long-running",
+   "depends_on": [
+    "T-02",
+    "T-03"
+   ],
+   "description": "Per-section agent graph (observatory node contract), evals, event ledger, cost row (api_costs by cache_key), A/B + drift panels \u2014 scoped by section id, from real runs (Art I).",
+   "touch": [
+    "pipeline/personalization/*_dev_business.py",
+    "app/templates/*_dev_business.html"
+   ],
+   "verify": "sd-graph/sd-evals/sd-observe/sd-ab/sd-drift render real data per section",
+   "status": "pending"
+  },
+  {
+   "id": "T-05",
+   "name": "generative-text",
+   "spec_ref": "S2",
+   "prd_ref": "R31",
+   "wave": "W2",
+   "mode": "long-running",
+   "depends_on": [
+    "T-02"
+   ],
+   "description": "Wire ai_copy\u2192verify_copy\u2192build_action_pool as the opt-in text mode; prebuilt via scripts/warm_copy_cache.py + realtime cache-by-key; $0 offline default.",
+   "touch": [
+    "pipeline/personalization/creative.py wiring",
+    "scripts/warm_copy_cache.py",
+    "tests/test_generative_text.py"
+   ],
+   "verify": "planted lie/superlative/competitor/hold 0-servable (real Gate); deterministic cache replay",
+   "status": "pending"
+  },
+  {
+   "id": "T-06",
+   "name": "image-lane-generalize",
+   "spec_ref": "S3",
+   "prd_ref": "R35,R35a",
+   "wave": "W1",
+   "mode": "swarm-member (worktree)",
+   "depends_on": [
+    "T-01"
+   ],
+   "description": "Surfaces beyond hero+og from image_targets; prebuild caps K=8/target, 24/tenant, 80 global + $5/day/tenant realtime ceiling (PANEL); warm script fails gate on cap violation; S02 realtime beat; cost-log regression test (record_call per _call_image_api incl 429).",
+   "touch": [
+    "pipeline/personalization/image_gen.py",
+    "pipeline/personalization/prebuild.py",
+    "rules/*_prebuild.yaml",
+    "scripts/warm_hero_cache.py",
+    "tests/test_image_costs.py"
+   ],
+   "verify": "caps enforced; realtime cost-logged; offline fallback deterministic",
+   "status": "pending"
+  },
+  {
+   "id": "T-07",
+   "name": "skyfi-tenant",
+   "spec_ref": "S6",
+   "prd_ref": "R36",
+   "wave": "W1",
+   "mode": "swarm-member (worktree)",
+   "depends_on": [
+    "T-01"
+   ],
+   "description": "SkyFi replica (skyfi_site.html standalone style/logo/palette) + skyfi_site.py + skyfi_cohort.py + MOUNTS + rules/skyfi_*.yaml + tenant meta; basin-scale guardrail, exact-AOI hold-unless-declared (S09 flip).",
+   "touch": [
+    "app/skyfi.py",
+    "app/templates/skyfi_site.html",
+    "pipeline/personalization/skyfi_site.py",
+    "pipeline/personalization/skyfi_cohort.py",
+    "rules/skyfi_*.yaml",
+    "tests/test_skyfi_site.py"
+   ],
+   "verify": "parallel to test_planet_site.py; flows through shell+dropdown by config only",
+   "status": "pending"
+  },
+  {
+   "id": "T-08",
+   "name": "wf-design-matrix",
+   "spec_ref": "S7",
+   "prd_ref": "R37",
+   "wave": "W3",
+   "mode": "swarm per-row (batches of 4)",
+   "depends_on": [
+    "T-02",
+    "T-03",
+    "T-04",
+    "T-05",
+    "T-06",
+    "T-07"
+   ],
+   "description": "30 scenarios (G/P/S 01-10) into rules/demo_scenarios.yaml + one WF-DESIGN test per row, incl. the S02 realtime beat and each tenant's signature guardrail as property tests.",
+   "touch": [
+    "rules/demo_scenarios.yaml",
+    "tests/test_wf_design_*.py"
+   ],
+   "verify": "30/30 rows green against real Gate offline",
+   "status": "pending"
+  },
+  {
+   "id": "T-09",
+   "name": "single-design-retire-legacy",
+   "spec_ref": "S8,S0",
+   "prd_ref": "R38,R39",
+   "wave": "W4",
+   "mode": "long-running, keep-or-revert per route",
+   "depends_on": [
+    "T-03"
+   ],
+   "description": "Remove base.html/_nav.html chrome; retire ~30 legacy routes (fold assurance/optimizer/drift\u2192S4 panels, inspector/graph\u2192per-section obs, enrichment-catalog\u2192Data panel); replicas + ad mockups keep external styling; cohesion sweep S0.1.",
+   "touch": [
+    "app/*.py route removals",
+    "app/templates/ legacy deletions",
+    "tests updates"
+   ],
+   "verify": "no route renders legacy chrome; zero orphan routes; full gate green; property tests untouched",
+   "status": "pending"
+  },
+  {
+   "id": "T-10",
+   "name": "ship",
+   "spec_ref": "S0.1",
+   "prd_ref": "R39",
+   "wave": "W5",
+   "mode": "orchestrator",
+   "depends_on": [
+    "T-08",
+    "T-09"
+   ],
+   "description": "Full suite \u2192 railway up --ci (retry \u22648) \u2192 prod verification vs johnnycchung.com \u2192 morning report (.rapid/RETRO.md: per-wave results, VERIFY layers, gaps, cost actuals vs ceiling, cohesion sweep).",
+   "touch": [
+    ".rapid/RETRO.md"
+   ],
+   "verify": "prod sweep green; report written",
+   "status": "pending"
+  }
+ ]
+}
