@@ -25,6 +25,8 @@ are what the build proves.
 | /workspace, /records* | retire | apt shell consoles |
 | /inspector, /graph, /agent | retire | per-section agent graph + observability (T-04) |
 | /assurance, /optimizer, /funnel | retire | per-decision pillar panels (S4) |
-| /personalize, /composer, /policies, /help*, /archive, /sources, /showcase*, /admin/landings, /lp, /google* | retire | designer Data panel + docs |
+| /personalize, /composer, /policies, /help*, /archive, /sources, /admin/landings, /lp, /google* | retire | designer Data panel + docs |
+| /showcase/{slug}, /showcase/{slug}/production, /showcase/{slug}/observability | **RETIRED (T-09 G1)** | tour narrative → /apt/demo; per-decision observability → per-section consoles (S4/T-04). Deleted `use_case.html`, `use_case_rich.html`, `pipeline/personalization/showcase.py`. |
+| /showcase (index) | **KEPT — exception (T-09 G1)** | Locked deploy-gate tests (`test_gauntlet_site.py`/`test_planet_site.py::test_showcase_card_publishes_the_entry_links`, part of the 408 gate baseline) pin the index's replica entry-link content; gate tests win over retirement. Index trimmed to the two replica cards (live-demo card + use-case grid removed); standalone apt styling, no legacy chrome. Reachable via /apt galleries' footer links. |
 | /enrichment-catalog | fold | section Data panel note |
 | / (home), /lead, /submit, /site/<token>* | KEEP if property tests exercise them (property tests win over retirement — T-09 logs exceptions here) |
