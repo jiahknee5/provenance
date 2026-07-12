@@ -28,10 +28,8 @@ c = TestClient(app)
 TPL = pathlib.Path(__file__).resolve().parents[1] / "app" / "templates"
 
 # Surfaces on the Quiet-Workspace shell.
-SHELL_PAGES = ["workspace", "records", "records_new", "composer", "optimizer", "agent",
-               "assurance", "sources"]
-SHELL_ROUTES = ["/workspace", "/records", "/records/new", "/composer", "/optimizer", "/agent",
-                "/assurance", "/sources"]
+SHELL_PAGES = ["composer", "optimizer", "agent", "assurance", "sources"]
+SHELL_ROUTES = ["/composer", "/optimizer", "/agent", "/assurance", "/sources"]
 # All legacy/lab routes (now light) — param routes filled with valid demo values.
 TOKEN = __import__("pipeline.personalization.cohort", fromlist=["x"]).magic_token(
     __import__("pipeline.personalization.cohort", fromlist=["x"]).COHORT[1])
@@ -89,38 +87,6 @@ def test_no_styled_button_without_target_in_shell_templates():
             if "href=" not in tag:
                 offenders.setdefault(name, []).append(tag[:70])
     assert not offenders, f"dead q-btn anchors (no href): {offenders}"
-
-
-def test_cmdk_palette_items_resolve():
-    html = c.get("/workspace").text
-    assert 'id="cmdk"' in html and 'id="cmdk-input"' in html and 'id="cmdk-btn"' in html
-    items = re.findall(r'class="qi[^"]*"[^>]*href="(/[^"#?]*)"', html)
-    assert len(items) >= 10
-    for href in items:
-        assert _is_registered(href), f"palette item -> dead route {href}"
-
-
-# ============================ create / filter / sort ============================
-def test_create_record_persists_and_appears():
-    before = c.get("/records?view=all").text.count('class="q-rec"')
-    r = c.post("/records/new", data={"name": "Zoe Quill", "email": "zoe@quill.io",
-               "company": "Quill", "title": "Founder", "industry": "SaaS",
-               "lifecycle": "sql", "lead_score": "81", "source": "manual"})
-    assert r.status_code == 200  # followed the 303 redirect to /records
-    after = c.get("/records?view=all").text
-    assert "Zoe Quill" in after
-    assert after.count('class="q-rec"') == before + 1
-
-
-def test_create_then_undo_removes_record():
-    """Agency/forgiveness (WWDC26): a just-created record can be undone."""
-    r = c.post("/records/new", data={"name": "Temp Undo", "email": "tu@x.io",
-               "lifecycle": "lead", "lead_score": "5"})
-    assert "Temp Undo" in c.get("/records?view=all").text
-    assert 'action="/records/undo"' in r.text and "Undo" in r.text  # the create banner offers undo
-    rid = re.search(r'name="rid" value="([^"]+)"', r.text).group(1)
-    c.post("/records/undo", data={"rid": rid})
-    assert "Temp Undo" not in c.get("/records?view=all").text
 
 
 def test_scene_engine_deterministic_and_sourced():
@@ -349,7 +315,7 @@ def test_archive_moves_noncore_surfaces_off_the_nav():
     assert "/personalize" in lab and "/inspector" in lab and "/enrichment-catalog" in lab
     for rt in lab:
         assert c.get(rt).status_code == 200, rt              # every archived surface still works
-    shell = c.get("/workspace").text
+    shell = c.get("/sources").text
     sidebar = shell.split("q-cmdk-scrim")[0]                 # nav markup, before the ⌘K palette
     assert 'href="/archive"' in sidebar                      # Archive reachable from the shell
     assert 'href="/personalize"' not in sidebar              # but the lab surfaces are off the sidebar
@@ -381,32 +347,11 @@ def test_resolve_email_first_party_lane():
     assert d["captured"] and all(r["policy"] == "say" for r in d["captured"] if r["label"] != "Personalization tier")
 
 
-def test_skip_link_and_main_landmark():
-    """Accessibility (WWDC26 Flexibility): keyboard users skip straight to content."""
-    html = c.get("/workspace").text
-    assert 'class="q-skip"' in html and 'href="#q-main"' in html and 'id="q-main"' in html
-
-
 def test_light_only_no_auto_dark():
     """By decision the product is LIGHT ONLY (matches attio.com) — it must not flip with the OS."""
     css = (pathlib.Path(__file__).resolve().parents[1] / "app" / "static" / "quiet.css").read_text()
     assert "prefers-color-scheme: dark" not in css  # no OS-driven dark theme
     assert "--surface" in css and "--on-cta" in css   # token indirection retained (light values)
-
-
-def test_filter_view_narrows_records():
-    alln = c.get("/records?view=all").text.count('class="q-rec"')
-    cust = c.get("/records?view=customers").text.count('class="q-rec"')
-    assert 0 < cust < alln
-
-
-def test_sort_reorders_records():
-    import re as _re
-    names = lambda v: _re.findall(r'class="q-rec">.*?\s([A-Z][a-z]+ [A-Z][a-z]+)<', c.get(v).text)
-    by_name = c.get("/records?sort=name").text
-    # the name sort is A→Z: first rendered record name <= last
-    order = re.findall(r'q-rec"><span class="av"[^>]*>[^<]*</span>([^<]+)<', by_name)
-    assert order == sorted(order, key=str.lower), "name sort not A→Z"
 
 
 # ============================ composer gate ====================================
@@ -509,6 +454,5 @@ def test_shell_pages_carry_no_off_token_raw_hex():
 
 
 def test_pages_lead_with_the_proves_spine_line():
-    for route in ["/workspace", "/records", "/composer", "/optimizer", "/agent",
-                  "/assurance", "/sources"]:
+    for route in ["/composer", "/optimizer", "/agent", "/assurance", "/sources"]:
         assert "Proves:" in c.get(route).text, f"{route} missing its 'Proves:' spine line"

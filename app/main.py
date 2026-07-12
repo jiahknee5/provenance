@@ -73,7 +73,6 @@ from app import funnel as _funnel  # noqa: E402,F401
 from app import personalize as _personalize  # noqa: E402,F401
 from app import cohort as _cohort  # noqa: E402,F401
 from app import google_login as _google_login  # noqa: E402,F401
-from app import workspace as _workspace  # noqa: E402,F401
 from app import agent as _agent  # noqa: E402,F401
 from app import sources as _sources  # noqa: E402,F401
 from app import composer as _composer  # noqa: E402,F401

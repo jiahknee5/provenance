@@ -18,8 +18,6 @@
   <aside class="q-side">
     <div class="q-ws"><span class="av"><img src="/static/brand/apt-mark-dark.svg" alt="" width="15" height="15"></span>apt<i class="ph ph-caret-up-down ch"></i></div>
     <nav class="q-nav">
-      <a class="q-ni {{ 'on' if p in ['/workspace','/'] else '' }}" href="/workspace"><i class="ph ph-house"></i>Home</a>
-      <a class="q-ni {{ 'on' if p.startswith('/records') or p=='/workspace' else '' }}" href="/records"><i class="ph ph-table"></i>Records</a>
       <a class="q-ni {{ 'on' if p.startswith('/composer') else '' }}" href="/composer"><i class="ph ph-pen-nib"></i>Composer</a>
       <a class="q-ni {{ 'on' if p.startswith('/optimizer') else '' }}" href="/optimizer"><i class="ph ph-trend-up"></i>Optimizer</a>
       <a class="q-ni {{ 'on' if p.startswith('/agent') else '' }}" href="/agent"><i class="ph ph-sparkle"></i>Agent</a>
@@ -55,8 +53,6 @@
     </div>
     <div class="qlist" id="cmdk-list">
       <a class="qi ask" data-kind="ask" data-keep="1" href="/agent"><i class="ph ph-sparkle"></i><span class="lab">Ask the agent&hellip;</span><span class="hint">⏎</span></a>
-      <a class="qi" data-label="home workspace records pipeline" href="/workspace"><i class="ph ph-house"></i>Home<span class="hint">go</span></a>
-      <a class="qi" data-label="records people companies deals table" href="/records"><i class="ph ph-table"></i>Records<span class="hint">go</span></a>
       <a class="qi" data-label="composer message copy outreach gate write" href="/composer"><i class="ph ph-pen-nib"></i>Composer<span class="hint">go</span></a>
       <a class="qi" data-label="optimizer bandit experiment variant winner lift" href="/optimizer"><i class="ph ph-trend-up"></i>Optimizer<span class="hint">go</span></a>
       <a class="qi" data-label="agent navigator ask deterministic" href="/agent"><i class="ph ph-sparkle"></i>Agent<span class="hint">go</span></a>

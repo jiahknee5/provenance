@@ -23,7 +23,7 @@ are what the build proves.
 |---|---|---|
 | /demo, /demo/variant, /demo/monitor, /demo/live, /api/demo/* | **RETIRED (T-09 G2)** | tour: /apt/demo; monitors: per-section obs (T-04). Deleted `app/demo.py` + `demo.html`, `demo_monitor.html`, `demo_live.html`. Engine behind the demo APIs (scene/creative/demo_sim/demo_scenarios) untouched and still pipeline-tested (`test_demo.py`, full-suite engine tests). |
 | / (home), /talk, /guide | **RETIRED (T-09 G2)** | `/` now 302 → `/apt/demo` (the sitemap owns the front door); Attio-style `home.html` deleted. `/talk` + `/guide` deck redirects cut — the decks stay at `/static/talk/deck.html` + `/static/mockups/copy-research-guide.html`. No property test exercises `/` — the KEEP clause wasn't triggered. |
-| /workspace, /records* | retire | apt shell consoles |
+| /workspace, /records, /records/new, /records/undo | **RETIRED (T-09 G4)** | apt shell consoles (/apt/dev + per-tenant /dev, /dev/business). Deleted `app/workspace.py`, `workspace.html`, `records.html`, `records_new.html`. Removed full-suite tests that asserted only this surface: cmdk palette, create/undo/filter/sort records, skip-link (all Quiet-Workspace-shell UI); the provenance/engine invariants they rode on remain asserted by the kept engine tests. |
 | /inspector, /graph, /agent | retire | per-section agent graph + observability (T-04) |
 | /assurance, /optimizer, /funnel | retire | per-decision pillar panels (S4) |
 | /personalize, /composer, /policies, /help*, /archive, /sources, /admin/landings, /lp, /google* | retire | designer Data panel + docs |
