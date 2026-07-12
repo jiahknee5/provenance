@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>/apt/demo — sitemap — Product tour</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#faf9f7;--panel:#ffffff;--panel2:#f6f4f0;--ink:#1a1f36;--muted:#697386;
+    --line:#e3e8ee;--accent:#635bff;--accent2:#0a2540;--chip-bg:#f0f3f9;--chip-fg:#3c4257;
+    --radius:12px;--shadow:0 1px 3px rgba(50,50,93,.08),0 4px 12px rgba(50,50,93,.06);
+    --sans:'Source Sans 3',Georgia,serif;--mono:'Source Sans 3',Georgia,serif;--display:'Fraunces',Georgia,serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--sans);font-size:14px;line-height:1.5;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1140px;margin:0 auto;padding:24px 28px 80px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:20px;font-size:12px;color:var(--muted)}
+  .topbar strong{color:var(--ink)}
+  .chip{display:inline-block;font-family:var(--mono);font-size:10.5px;font-weight:500;color:var(--chip-fg);background:var(--chip-bg);border-radius:6px;padding:3px 8px;border:1px solid var(--line)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .btn{display:inline-block;font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .vfoot{position:fixed;bottom:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 20px;background:var(--panel);border-top:1px solid var(--line);font-size:11px;z-index:99;flex-wrap:wrap}
+  .vbadge{font-weight:700;padding:5px 12px;border-radius:999px;background:#635bff;color:#fff}
+  .vnav a{color:var(--muted);margin:0 2px;font-weight:600}
+  .vnav a.on{color:var(--accent)}
+  
+  .hero{padding:56px 0 36px;border-bottom:1px solid var(--line);margin-bottom:36px}
+  .hero .kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:12px}
+  .hero h1{font-family:var(--display);font-size:clamp(36px,4.5vw,48px);font-weight:600;line-height:1.12;letter-spacing:-.02em;max-width:18ch}
+  .hero p{font-size:18px;color:var(--muted);max-width:52ch;margin-top:16px;line-height:1.65}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+<style>
+  .tenant{margin-bottom:48px}
+  .tenant-hdr{margin-bottom:8px}
+  .tenant-hdr h2{font-family:var(--display);font-size:28px;font-weight:600;letter-spacing:-.02em}
+  .tenant-hdr .dom{font-size:14px;color:var(--muted);margin-left:8px}
+  .tenant-tag{font-size:16px;color:var(--muted);line-height:1.65;margin-bottom:24px;max-width:58ch}
+  .aud-note{font-size:13px;color:var(--muted);margin-bottom:20px}
+  .ch-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+  @media(max-width:700px){.ch-grid{grid-template-columns:1fr}}
+  .ch-tile{display:block;padding:28px 26px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);color:inherit;text-decoration:none;box-shadow:var(--shadow);transition:transform .2s}
+  .ch-tile:hover{transform:translateY(-2px);text-decoration:none;border-color:var(--accent)}
+  .ch-tile .lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--accent)}
+  .ch-tile h3{font-family:var(--display);font-size:22px;margin:10px 0 8px;font-weight:600}
+  .ch-tile p{font-size:14px;color:var(--muted);line-height:1.55}
+  .ch-tile .cnt{font-size:12px;color:var(--accent2);margin-top:14px;font-weight:600}
+</style>
+<div class="topbar"><span>Mockup · <strong>Demo sitemap</strong></span><span>/apt/demo</span></div>
+<div class="hero">
+  <div class="kicker">Visitor demo tour</div>
+  <h1>Pick a tenant.<br>Pick a channel.</h1>
+  <p>Curated galleries and landing URLs — same deterministic personalization engine as production.</p>
+</div>
+<p style="margin-bottom:32px"><a href="/apt/dev">Ops consoles → /apt/dev</a></p>
+<section class="tenant">
+  <div class="tenant-hdr"><h2>GauntletAI</h2><span class="dom">gauntletai.com</span></div>
+  <div class="tenant-body">
+    <p class="tenant-tag">AI hiring fellowship — entry channel × IP tier × CRM identity.</p>
+    <p class="aud-note">Audience tabs: <strong>Companies</strong> · <strong>Individuals</strong></p>
+    <div class="ch-grid"><a class="ch-tile" href="/gauntletapt/ad-lp">
+      <div class="lbl">GauntletAI</div>
+      <h3>Ads</h3>
+      <p>Paid social — UTM stack + variant message-match.</p>
+      <div class="cnt">3 scenarios</div>
+    </a><a class="ch-tile" href="/gauntletapt/direct">
+      <div class="lbl">GauntletAI</div>
+      <h3>Direct</h3>
+      <p>Typed URL — IP tier and network type only.</p>
+      <div class="cnt">3 scenarios</div>
+    </a><a class="ch-tile" href="/gauntletapt/email">
+      <div class="lbl">GauntletAI</div>
+      <h3>Email</h3>
+      <p>HubSpot cohort — magic token or logged-in CRM.</p>
+      <div class="cnt">2 scenarios</div>
+    </a><a class="ch-tile" href="/gauntletapt?ref=google">
+      <div class="lbl">GauntletAI</div>
+      <h3>Search</h3>
+      <p>Organic referrer — intent-neutral entry.</p>
+      <div class="cnt">1 scenario</div>
+    </a></div>
+  </div>
+</section>
+<section class="tenant">
+  <div class="tenant-hdr"><h2>Planet</h2><span class="dom">planet.com</span></div>
+  <div class="tenant-body">
+    <p class="tenant-tag">Earth observation — location signal on channel, IP, and identity.</p>
+    <p class="aud-note">Audience tabs: <strong>Enterprise</strong> · <strong>Self-serve</strong></p>
+    <div class="ch-grid"><a class="ch-tile" href="/planetapt/ads">
+      <div class="lbl">Planet</div>
+      <h3>Ads</h3>
+      <p>Paid social — UTM stack + variant message-match.</p>
+      <div class="cnt">2 scenarios</div>
+    </a><a class="ch-tile" href="/planetapt/direct">
+      <div class="lbl">Planet</div>
+      <h3>Direct</h3>
+      <p>Typed URL — IP tier and network type only.</p>
+      <div class="cnt">2 scenarios</div>
+    </a><a class="ch-tile" href="/planetapt/email">
+      <div class="lbl">Planet</div>
+      <h3>Email</h3>
+      <p>HubSpot cohort — magic token or logged-in CRM.</p>
+      <div class="cnt">2 scenarios</div>
+    </a><a class="ch-tile" href="/planetapt?ref=google">
+      <div class="lbl">Planet</div>
+      <h3>Search</h3>
+      <p>Organic referrer — intent-neutral entry.</p>
+      <div class="cnt">1 scenario</div>
+    </a></div>
+  </div>
+</section>
+<p style="font-size:12px;color:var(--muted);margin-top:20px">Catalog: <code>rules/demo_scenarios.yaml</code> · Prompt ref: <code>rules/design_prompts.yaml</code></p>
+</div>
+<footer class="vfoot">
+  <span class="vbadge">Variant B — Product tour</span>
+  <nav class="vnav"><a href="/apt/mockups/sitemap-a">A</a> · <a href="/apt/mockups/sitemap-b" class="on">B</a> · <a href="/apt/mockups/sitemap-c">C</a> · <a href="/apt/mockups">All mockups</a></nav>
+</footer>
+</body>
+</html>

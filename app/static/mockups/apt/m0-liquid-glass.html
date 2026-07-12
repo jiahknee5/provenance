@@ -1,0 +1,256 @@
+<!doctype html>
+<!-- apt — Liquid Glass mockup. Apple/visionOS "Spatial Liquid Glass": real backdrop blur+saturate,
+     specular rim highlights, layered chromatic shadows, continuous radii, over a vibrant refracting backdrop.
+     Path B (glass) for floating layers · Path A (carved hardware) for the opaque data card. Self-contained.
+     Skinned to the apt. brand: warm Ink ground, Bone text, Proven-Green proof dot, Brass hairlines. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>apt — Liquid Glass</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%231A150F'/%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%23F4EFE5' stroke-width='3.2'/%3E%3Ccircle cx='32' cy='32' r='7.4' fill='%23C79A55'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* apt warm-ink dark palette */
+    --ink:#F4EFE5;                          /* Bone — primary text on this dark mockup */
+    --mut:rgba(244,239,229,.64); --faint:rgba(244,239,229,.42);
+    --bone-2:#FBF8F1; --brass:#B4894C; --brass-2:#C79A55; --pine:#1F4E3B; --pine-2:#2E6B52;
+    --glass:rgba(247,242,232,.09); --glass-2:rgba(247,242,232,.055);
+    --spec:inset 0 1px 0 rgba(255,250,240,.40), inset 0 0 0 1px rgba(199,154,85,.16);
+    --amb:0 24px 60px -18px rgba(8,5,2,.72);
+    --chroma:0 12px 40px -16px rgba(70,52,28,.40);
+    --r:28px;
+    --spring:cubic-bezier(.22,1.2,.36,1); /* overshoot, spring-like */
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font:16px/1.5 'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    color:var(--ink);background:#0F0B07;overflow-x:hidden;-webkit-font-smoothing:antialiased;
+    letter-spacing:-.01em;min-height:100%}
+
+  .serif{font-family:'Fraunces',Georgia,serif;font-optical-sizing:auto}
+  .mono{font-family:'IBM Plex Mono',monospace}
+
+  /* --- vibrant warm-ink background the glass refracts --- */
+  .bg{position:fixed;inset:0;z-index:-3;background:
+     radial-gradient(120% 120% at 50% -10%, #2a2114 0%, #15100a 48%, #0c0805 100%)}
+  .orb{position:fixed;border-radius:50%;filter:blur(84px);opacity:.45;z-index:-2;will-change:transform}
+  .o1{width:560px;height:560px;left:-120px;top:-80px;background:radial-gradient(circle,#7a5e34,transparent 72%);animation:drift1 18s var(--spring) infinite alternate}
+  .o2{width:620px;height:620px;right:-160px;top:-40px;background:radial-gradient(circle,#4a3a22,transparent 72%);animation:drift2 22s ease-in-out infinite alternate}
+  .o3{width:520px;height:520px;left:18%;bottom:-220px;background:radial-gradient(circle,#234a3a,transparent 72%);animation:drift3 20s ease-in-out infinite alternate}
+  .o4{width:420px;height:420px;right:14%;bottom:-160px;background:radial-gradient(circle,#8a6a3c,transparent 74%);animation:drift1 26s ease-in-out infinite alternate}
+  @keyframes drift1{to{transform:translate(60px,40px) scale(1.08)}}
+  @keyframes drift2{to{transform:translate(-50px,30px) scale(1.05)}}
+  @keyframes drift3{to{transform:translate(40px,-50px) scale(1.1)}}
+  /* fine grain for realism */
+  .grain{position:fixed;inset:0;z-index:-1;opacity:.05;pointer-events:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")}
+
+  .stage{max-width:1120px;margin:0 auto;padding:22px 24px 80px;position:relative}
+
+  /* --- shared glass (warm-tinted frost) --- */
+  .glass{position:relative;background:linear-gradient(160deg,var(--glass),var(--glass-2));
+    backdrop-filter:blur(26px) saturate(150%);-webkit-backdrop-filter:blur(26px) saturate(150%);
+    border-radius:var(--r);box-shadow:var(--spec),var(--amb),var(--chroma);isolation:isolate;overflow:hidden}
+  /* top specular lens highlight */
+  .glass::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    background:linear-gradient(180deg,rgba(255,250,240,.18),transparent 26%),
+               radial-gradient(120% 60% at 20% 0%,rgba(255,247,232,.14),transparent 60%)}
+
+  /* --- floating nav (Z-50 lens) --- */
+  nav{display:flex;align-items:center;gap:20px;padding:10px 12px 10px 18px;border-radius:999px;margin:8px auto 0;max-width:760px;
+    animation:floatin .9s var(--spring) both}
+  nav.glass{border-radius:999px}
+  .brand{display:flex;align-items:center;gap:11px}
+  .brand .mk{width:26px;height:26px;display:block}
+  .brand .wm{font-family:'Fraunces',serif;font-weight:600;font-optical-sizing:auto;font-size:21px;line-height:1;letter-spacing:-.02em;color:var(--ink)}
+  .brand .wm .dot{color:var(--brass-2)}
+  .nlinks{display:flex;gap:20px;margin-left:6px;font-size:14px;color:var(--mut)}
+  .nlinks a{color:inherit;text-decoration:none}.nlinks a:hover{color:var(--ink)}
+  .nav-cta{margin-left:auto;display:flex;gap:8px}
+  .btn{font-family:'Inter',sans-serif;font-size:14px;font-weight:600;border:none;cursor:pointer;border-radius:999px;padding:9px 16px;color:var(--ink);
+    background:linear-gradient(160deg,rgba(247,242,232,.14),rgba(247,242,232,.05));box-shadow:var(--spec);transition:.25s var(--spring)}
+  .btn:hover{transform:translateY(-1px);background:linear-gradient(160deg,rgba(247,242,232,.22),rgba(247,242,232,.09))}
+  /* primary adapted for dark mockup: Bone bg / Ink text */
+  .btn.solid{background:linear-gradient(160deg,#FBF8F1,#EFE9DC);color:#1A150F;box-shadow:var(--spec),0 8px 24px -8px rgba(8,5,2,.55)}
+  .btn.solid:hover{background:linear-gradient(160deg,#fff,#F4EFE5)}
+  /* proof button: Pine bg / white + white dot */
+  .btn.proof{background:linear-gradient(160deg,#2E6B52,#1F4E3B);color:#fff;box-shadow:var(--spec),0 8px 24px -8px rgba(31,78,59,.5);display:inline-flex;align-items:center;gap:9px}
+  .btn.proof .pdot{width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 6px rgba(255,255,255,.5)}
+  @media(max-width:720px){.nlinks{display:none}}
+
+  /* --- hero copy --- */
+  .hero{text-align:center;padding:54px 0 34px}
+  .eyebrow{display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);padding:8px 15px;border-radius:999px;
+    background:rgba(247,242,232,.06);box-shadow:var(--spec);backdrop-filter:blur(12px);animation:floatin .9s .05s var(--spring) both}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--pine-2);box-shadow:0 0 8px rgba(46,107,82,.6)}
+  h1{font-family:'Fraunces',Georgia,serif;font-optical-sizing:auto;font-size:clamp(38px,6vw,72px);line-height:1.02;font-weight:500;letter-spacing:-.03em;margin:20px auto 0;max-width:14ch;
+    color:var(--bone-2);
+    animation:rise 1s .08s var(--spring) both}
+  h1 .dot{color:var(--brass-2)}
+  .sub{margin:20px auto 0;max-width:48ch;font-size:clamp(16px,1.7vw,20px);color:var(--mut);animation:rise 1s .16s var(--spring) both}
+  .hero .cta{display:flex;gap:12px;justify-content:center;margin-top:28px;animation:rise 1s .24s var(--spring) both}
+  .btn.lg{padding:13px 24px;font-size:15.5px}
+
+  /* --- composition: main glass app + floating receipt lens + carved card --- */
+  .compose{position:relative;margin-top:18px;min-height:430px}
+  .app{max-width:840px;margin:0 auto;animation:rise 1.1s .3s var(--spring) both;float:none}
+  .app .bar{display:flex;align-items:center;gap:8px;padding:13px 16px;border-bottom:1px solid rgba(199,154,85,.18)}
+  .dots{display:flex;gap:7px}.dots i{width:11px;height:11px;border-radius:50%;background:rgba(247,242,232,.20);box-shadow:var(--spec)}
+  .url{margin-left:8px;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.02em;color:var(--faint)}
+  .appbody{display:grid;grid-template-columns:210px 1fr;min-height:330px}
+  .side{padding:16px 14px;border-right:1px solid rgba(199,154,85,.14)}
+  .side .g{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:4px 6px 8px;font-weight:500}
+  .it{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:11px;font-size:13.5px;color:var(--mut);font-weight:500}
+  .it.on{background:rgba(247,242,232,.09);box-shadow:var(--spec);color:var(--ink)}
+  .it .d{width:7px;height:7px;border-radius:50%;background:rgba(244,239,229,.28)}
+  .it.on .d{background:var(--pine-2);box-shadow:0 0 6px rgba(46,107,82,.6)}
+  .main{padding:24px 26px}
+  .chips{display:flex;gap:8px;margin-bottom:12px}
+  .chip{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;font-weight:500;padding:5px 11px;border-radius:999px;box-shadow:var(--spec);text-transform:uppercase}
+  .chip.k{background:rgba(31,78,59,.28);color:#9fd6bd}
+  .chip.t{background:rgba(247,242,232,.06);color:rgba(244,239,229,.62)}
+  .mh{font-family:'Fraunces',Georgia,serif;font-optical-sizing:auto;font-size:25px;font-weight:500;letter-spacing:-.015em;line-height:1.18;color:var(--bone-2)}
+  .mh em{font-style:italic;font-weight:500;color:var(--brass-2)}
+  .mp{color:var(--mut);font-size:13.5px;margin-top:9px;max-width:44ch}
+  .claim{display:flex;align-items:center;gap:11px;margin-top:12px;padding:11px 13px;border-radius:13px;
+    background:rgba(247,242,232,.05);box-shadow:inset 0 0 0 1px rgba(199,154,85,.14)}
+  .claim .ck{width:13px;height:13px;border-radius:50%;flex:none;background:var(--pine-2);box-shadow:0 0 8px rgba(46,107,82,.55),inset 0 0 0 1px rgba(159,214,189,.5)}
+  .claim .ct{font-size:13.5px}
+  .claim .src{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.04em;color:var(--mut);padding:3px 9px;border-radius:7px;box-shadow:inset 0 0 0 1px rgba(199,154,85,.22);font-weight:500;text-transform:uppercase}
+  .claim.no{opacity:.85;background:rgba(180,137,76,.07)}
+  .claim.no .ck{background:var(--brass);box-shadow:0 0 8px rgba(180,137,76,.45),inset 0 0 0 1px rgba(199,154,85,.6)}
+  .claim.no .ct{color:var(--faint)}
+  .claim.no .src{box-shadow:inset 0 0 0 1px rgba(180,137,76,.4);color:var(--brass-2)}
+
+  /* floating receipt LENS — Z-50, the glassiest element, overlaps the app to prove depth */
+  .receipt{position:absolute;width:286px;right:-6px;bottom:-26px;padding:16px 17px;border-radius:22px;z-index:5;
+    box-shadow:var(--spec),0 30px 70px -18px rgba(8,5,2,.82),0 12px 40px -14px rgba(70,52,28,.44);
+    animation:floaty 7s ease-in-out infinite, rise 1.1s .5s var(--spring) both}
+  .receipt .rh{display:flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:500;color:var(--ink)}
+  .receipt .seal{width:20px;height:20px;border-radius:7px;background:radial-gradient(circle at 50% 50%,#2E6B52,#1F4E3B);display:flex;align-items:center;justify-content:center;box-shadow:var(--spec)}
+  .receipt .seal .pdot{width:7px;height:7px;border-radius:50%;background:#cfeede;box-shadow:0 0 5px rgba(159,214,189,.7)}
+  .rr{display:flex;justify-content:space-between;gap:12px;font-size:12px;padding:9px 0;border-bottom:1px solid rgba(199,154,85,.14)}
+  .rr:last-child{border-bottom:none}.rr .k{color:var(--faint)}
+  .rr .v{text-align:right;font-weight:600;font-size:11px}
+  .rr .v .tag{display:block;font-family:'IBM Plex Mono',monospace;color:#9fd6bd;font-weight:500;font-size:9.5px;letter-spacing:.06em;margin-bottom:2px;text-transform:uppercase}
+  .rr .v.held .tag{color:var(--brass-2)}
+  .rr .v small{display:block;color:var(--faint);font-weight:500;font-size:10.5px}
+
+  /* carved hardware card (Path A) — opaque data card for contrast */
+  .carved{position:absolute;left:-8px;top:46px;width:208px;padding:16px 17px;border-radius:18px;z-index:4;
+    background:linear-gradient(180deg,#1c1610,#120d08);box-shadow:inset 0 0 0 1px rgba(199,154,85,.16),0 22px 48px -16px rgba(0,0,0,.72);
+    animation:floaty 8s ease-in-out .4s infinite, rise 1.1s .42s var(--spring) both}
+  .carved .lab{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-weight:500}
+  .carved .num{font-family:'Fraunces',Georgia,serif;font-optical-sizing:auto;font-size:36px;font-weight:500;font-feature-settings:"tnum";letter-spacing:-.02em;margin-top:6px;color:var(--brass-2)}
+  .carved .sub2{font-size:11.5px;color:var(--mut);margin-top:4px}
+  .spark{display:flex;align-items:flex-end;gap:3px;height:30px;margin-top:12px}
+  .spark i{flex:1;border-radius:3px 3px 0 0;background:linear-gradient(180deg,#2E6B52,#1F4E3B);box-shadow:0 0 6px rgba(31,78,59,.4)}
+  @media(max-width:880px){.carved{display:none}.receipt{right:50%;transform:translateX(50%);bottom:-40px}}
+
+  /* command palette glass chip */
+  .cmdk{display:flex;align-items:center;gap:10px;max-width:430px;margin:46px auto 0;padding:13px 16px;border-radius:16px;
+    animation:rise 1s .6s var(--spring) both}
+  .cmdk .q{color:var(--faint);font-size:14px;flex:1}
+  .cmdk kbd{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;padding:3px 8px;border-radius:7px;color:var(--mut);box-shadow:inset 0 0 0 1px rgba(199,154,85,.22)}
+
+  .glabel{text-align:center;color:var(--faint);font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.06em;margin-top:34px;text-transform:uppercase}
+
+  /* motion */
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+  @keyframes floatin{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+  @keyframes rise{from{opacity:0;transform:translateY(22px) scale(.985)}to{opacity:1;transform:none}}
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important}
+    .orb{opacity:.7}
+  }
+</style>
+</head>
+<body>
+  <div class="bg"></div>
+  <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="orb o4"></div>
+  <div class="grain"></div>
+
+  <div class="stage">
+    <nav class="glass">
+      <div class="brand">
+        <svg class="mk" viewBox="0 0 120 120" aria-label="apt">
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#F4EFE5" stroke-width="4.5"/>
+          <circle cx="60" cy="60" r="37.5" fill="none" stroke="#C79A55" stroke-width="1.4"/>
+          <g stroke="#C79A55" stroke-width="1.4" stroke-linecap="round">
+            <line x1="60" y1="10.5" x2="60" y2="16.5"/><line x1="60" y1="103.5" x2="60" y2="109.5"/>
+            <line x1="10.5" y1="60" x2="16.5" y2="60"/><line x1="103.5" y1="60" x2="109.5" y2="60"/>
+          </g>
+          <circle cx="60" cy="60" r="13" fill="#C79A55"/>
+        </svg>
+        <span class="wm">apt<span class="dot">.</span></span>
+      </div>
+      <div class="nlinks"><a href="#">Platform</a><a href="#">Receipts</a><a href="#">Pricing</a><a href="#">Docs</a></div>
+      <div class="nav-cta"><button class="btn">Sign in</button><button class="btn solid">Start free</button></div>
+    </nav>
+
+    <section class="hero">
+      <span class="eyebrow"><span class="dot"></span> Can't say what it can't prove</span>
+      <h1>Every word, apt<span class="dot">.</span></h1>
+      <p class="sub">apt tailors every visit to who's reading, learns what converts, and never says a word it can't prove — and ships a receipt with every claim.</p>
+      <div class="cta"><button class="btn solid lg">Start for free</button><button class="btn proof lg"><span class="pdot"></span> See a receipt</button></div>
+    </section>
+
+    <div class="compose">
+      <!-- carved hardware data card (Path A) -->
+      <div class="carved">
+        <div class="lab">Lift · clinops</div>
+        <div class="num">+57%</div>
+        <div class="sub2">verified iROAS, tier 2</div>
+        <div class="spark"><i style="height:40%"></i><i style="height:55%"></i><i style="height:48%"></i><i style="height:70%"></i><i style="height:62%"></i><i style="height:85%"></i><i style="height:100%"></i></div>
+      </div>
+
+      <!-- main glass app (Path B) -->
+      <div class="app glass">
+        <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">acme-bio.com/r/ax9f2 · resolved at the edge</span></div>
+        <div class="appbody">
+          <aside class="side">
+            <div class="g">Resolved</div>
+            <div class="it on"><span class="d"></span>Sarah Chen · R&amp;D Dir.</div>
+            <div class="it"><span class="d"></span>Acme Bio · 1,200</div>
+            <div class="it"><span class="d"></span>Segment · clinops</div>
+            <div class="g" style="margin-top:14px">Tier</div>
+            <div class="it on"><span class="d"></span>T2 · contextual</div>
+            <div class="it"><span class="d"></span>T4 · held out</div>
+          </aside>
+          <div class="main">
+            <div class="chips"><span class="chip k">Known · 100% match</span><span class="chip t">Tier 2</span></div>
+            <div class="mh">Hi Sarah — here's how Acme Bio cuts <em>assay turnaround 40%</em></div>
+            <p class="mp">Hero, proof and CTA chosen for a clinical-ops lead. Every figure traces to a verified source.</p>
+            <div class="claim"><span class="ck"></span><span class="ct">Reduce average length of stay 1.2 days</span><span class="src">SOURCE · c_los §3 — VERIFIED</span></div>
+            <div class="claim"><span class="ck"></span><span class="ct">SOC 2 Type II · HIPAA</span><span class="src">SOURCE · soc2.pdf §4 — VERIFIED</span></div>
+            <div class="claim no"><span class="ck"></span><span class="ct">"Trusted by 500+ hospitals"</span><span class="src">UNPROVABLE · held out</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- floating receipt lens (Z-50, glassiest) -->
+      <div class="receipt glass">
+        <div class="rh"><span class="seal"><span class="pdot"></span></span> Why you're seeing this — verified</div>
+        <div class="rr"><span class="k">Length-of-stay</span><span class="v"><span class="tag">Verified</span><small>university trial</small></span></div>
+        <div class="rr"><span class="k">SOC 2 / HIPAA</span><span class="v"><span class="tag">Verified</span><small>audit on file</small></span></div>
+        <div class="rr"><span class="k">Personalized using</span><span class="v"><span class="tag">Company + role</span><small>tier 2</small></span></div>
+        <div class="rr"><span class="k">Withheld</span><span class="v held"><span class="tag">1 claim</span><small>legal hold</small></span></div>
+      </div>
+    </div>
+
+    <div class="cmdk glass">
+      <span class="seal" style="width:20px;height:20px;border-radius:6px;background:radial-gradient(circle at 50% 50%,#2E6B52,#1F4E3B);display:flex;align-items:center;justify-content:center;color:#cfeede;font-family:'IBM Plex Mono',monospace;font-size:11px">⌘</span>
+      <span class="q">Ask apt — "which framing converts for clinops?"</span>
+      <kbd>⌘K</kbd>
+    </div>
+
+    <div class="glabel">Liquid Glass · Path B floating lenses (nav, receipt, ⌘K) over a refracting backdrop · Path A carved data card</div>
+  </div>
+</body>
+</html>

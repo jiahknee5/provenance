@@ -1,0 +1,351 @@
+{
+  "locked": true,
+  "source": "docs/workflows.json (WF-DESIGN-*)",
+  "test_file": "tests/test_wf_design_matrix.py",
+  "ship_gate_rule": "all 30 active and green at W5",
+  "notes": "Rows activate as waves land: importorskip guards (module list per row) + the rules/demo_scenarios.yaml seed (T-08, W3). Never xfail, never weakened (Art VII).",
+  "rows": [
+    {
+      "id": "WF-DESIGN-G01",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_g01_direct_cold_anon_neutral_hero",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "sections",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-G02",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_g02_direct_corporate_ip_allude",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "sections",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-G03",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_g03_search_organic_authority_headline",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "sections",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-G04",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_g04_ads_x_v09_prebuilt_hero_image",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "sections",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-G05",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_g05_ads_google_gen_prebuilt_hero_sub",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "decision_pool",
+        "sections",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-G06",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_g06_ads_meta_realtime_backdrop",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "sections",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-G07",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_g07_email_liam_token_eyebrow",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "sections",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-G08",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_g08_email_maya_peer_logos",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "sections",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-G09",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_g09_direct_known_gen_cta_by_key",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "decision_pool",
+        "sections",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-G10",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_g10_ads_x_v03_objection_reframe",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "sections",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-P01",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_p01_direct_cold_neutral_hero",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "sections",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-P02",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_p02_direct_ag_midwest_prebuilt_region_backdrop",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "sections",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-P03",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_p03_ads_x_v01_crop_belts_match",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "sections",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-P04",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_p04_ads_x_v02_defense_theater_image",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "sections",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-P05",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_p05_search_region_location_line",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "sections",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-P06",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_p06_email_kofi_crisis_relief",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "sections",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-P07",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_p07_email_amara_gen_prebuilt_prove_intro",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "decision_pool",
+        "sections",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-P08",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_p08_ads_meta_longtail_realtime_backdrop",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "sections",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-P09",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_p09_direct_insurance_no_competitor",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "sections",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-P10",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_p10_direct_known_gen_cta_by_key",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "decision_pool",
+        "sections",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-S01",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_s01_direct_cold_neutral_hero",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "sections",
+        "skyfi",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-S02",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_s02_direct_mining_realtime_region_sector_backdrop",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "sections",
+        "skyfi",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-S03",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_s03_ads_x_monitor_site_realtime_hero",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "sections",
+        "skyfi",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-S04",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_s04_ads_google_gen_prebuilt_hero_sub",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "decision_pool",
+        "sections",
+        "skyfi",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-S05",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_s05_search_region_location_line",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "sections",
+        "skyfi",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-S06",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_s06_email_construction_peer_card",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "sections",
+        "skyfi",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-S07",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_s07_email_defense_strict_hold",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "sections",
+        "skyfi",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-S08",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_s08_ads_meta_rare_sector_realtime_backdrop",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "sections",
+        "skyfi",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-S09",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_s09_direct_declared_aoi_exact_allowed",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "sections",
+        "skyfi",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    },
+    {
+      "id": "WF-DESIGN-S10",
+      "test": "tests/test_wf_design_matrix.py::test_wf_design_s10_direct_known_insurance_gen_cta",
+      "status": "awaiting-wave",
+      "wave": "W3",
+      "guards": [
+        "decision_pool",
+        "sections",
+        "skyfi",
+        "rules/demo_scenarios.yaml (T-08)"
+      ]
+    }
+  ],
+  "invariants_active_today": [
+    {
+      "test": "tests/test_wf_design_matrix.py::test_r35a_every_image_call_cost_logged",
+      "status": "active",
+      "wave": "W0",
+      "covers": "S3.1/R35a cost-logging incl. 429"
+    },
+    {
+      "test": "tests/test_wf_design_matrix.py::test_hold_never_ships_gauntlet",
+      "status": "active",
+      "wave": "W0",
+      "covers": "hold-never-ships (gauntlet, all channels)"
+    },
+    {
+      "test": "tests/test_wf_design_matrix.py::test_hold_never_ships_planet",
+      "status": "active",
+      "wave": "W0",
+      "covers": "hold-never-ships (planet, all channels)"
+    },
+    {
+      "test": "tests/test_wf_design_matrix.py::test_gate_blocks_competitor_comparative_superlative",
+      "status": "active",
+      "wave": "W0",
+      "covers": "copy gate blocks superlative/comparative/competitor"
+    }
+  ]
+}

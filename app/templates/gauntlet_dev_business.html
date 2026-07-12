@@ -1,0 +1,804 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marketer console — Gauntlet personalization · apt</title>
+{% include "_apt_shell.html" %}
+<style>
+  main{max-width:1280px}
+  html{scroll-behavior:smooth}
+  .gb-head{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .gb-head h1{font-size:24px;margin:0;line-height:1.25}
+  .gb-head .links{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .gb-tog{display:inline-flex;gap:3px;background:#F1F3F5;border-radius:9px;padding:3px}
+  .gb-tog a{font-size:13px;font-weight:600;color:var(--muted);padding:6px 14px;border-radius:7px;text-decoration:none}
+  .gb-tog a.on{background:#fff;color:var(--ink);box-shadow:var(--shadow)}
+  .gb-meta{font-size:12.5px;color:var(--muted);margin:0 0 12px}
+  /* ---- left sidebar navigation (mirrors /dev) ---- */
+  .gd-layout{display:grid;grid-template-columns:200px minmax(0,1fr);gap:26px;align-items:start;margin-top:14px}
+  .gd-side{position:sticky;top:14px;display:flex;flex-direction:column;gap:2px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:10px 8px}
+  .gd-side .side-cap{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:6px 10px 4px}
+  .gd-side a + .side-cap{margin-top:10px;border-top:1px solid var(--line);padding-top:12px}
+  .gd-side a{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:600;color:var(--muted);padding:7px 10px;border-radius:8px;text-decoration:none;border:1px solid transparent}
+  .gd-side a .num{width:18px;height:18px;border-radius:5px;background:#E4E8EC;color:#475569;font-size:10px;font-weight:800;display:grid;place-items:center;flex:none}
+  .gd-side a:hover{color:var(--ink);background:#F6F8FA}
+  .gd-side a.on{color:var(--ink);background:#F1F3F5;border-color:var(--line)}
+  .gd-side a.on .num{background:var(--ink);color:#fff}
+  .gd-side a.page-link{color:var(--brand)}
+  .gd-side a.img-sub{padding-left:28px;font-size:11.5px;font-weight:600;color:#64748b}
+  .gd-side a.img-sub .num{display:none}
+  .gd-main{min-width:0}
+  @media(max-width:920px){
+    .gd-layout{grid-template-columns:1fr;gap:0}
+    .gd-side{position:sticky;top:0;z-index:60;flex-direction:row;flex-wrap:wrap;align-items:center;border-radius:0 0 12px 12px;margin:0 -8px;padding:8px}
+    .gd-side .side-cap{display:none}
+    .gd-side a + .side-cap{border:0;margin:0;padding:0}
+  }
+  .sec[id]{scroll-margin-top:16px}
+  .sec{border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px}
+  .sec .h{padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .sec .h .tag{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:5px;padding:2px 8px;background:#F1F3F5;color:var(--muted)}
+  .sec .sub{padding:8px 14px;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--line);background:#FAFBFC}
+  .sec .dec{padding:9px 14px;font-size:12.5px;font-weight:600;color:var(--ink);background:#FAFBFC;border-bottom:1px solid var(--line)}
+  table.ops{width:100%;border-collapse:collapse;font-size:12.5px;line-height:1.45}
+  table.ops th{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);text-align:left;padding:8px 14px;border-bottom:1px solid var(--line);background:#FAFBFC}
+  table.ops td{padding:8px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.ops tr:last-child td{border-bottom:0}
+  table.ops td.k{color:var(--muted);white-space:nowrap;width:150px;font-weight:600}
+  table.ops td.note{color:#475569;font-size:12px}
+  table.ops td.mono{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;word-break:break-word}
+  .pol{font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border-radius:4px;padding:2px 7px;white-space:nowrap;display:inline-block}
+  .pol.say{color:#0a8a4f;background:#e7f6ee}.pol.steer{color:#1d4ed8;background:#e8efff}
+  .pol.hold{color:#c0354b;background:#fcebed}.pol.observed{color:var(--muted);background:#F1F3F5}
+  .chg{font-size:9px;font-weight:800;text-transform:uppercase;border-radius:4px;padding:2px 6px}
+  .chg.yes{color:#0a8a4f;background:#e7f6ee}.chg.no{color:var(--muted);background:#F1F3F5}
+  .empty{padding:12px 14px;font-size:13px;color:var(--muted)}
+  .gb-entries{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0 4px}
+  .gb-entries .lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .gb-entries a{font-size:12.5px;font-weight:600;border:1px solid var(--line);border-radius:8px;padding:6px 12px;text-decoration:none;background:#fff}
+  .gb-channel{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 10px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#FAFBFC;font-size:12.5px}
+  .gb-channel a{font-weight:700;color:var(--brand);text-decoration:none;white-space:nowrap}
+  .gb-channel .meta{color:var(--muted)}
+  .gb-channel .meta b{color:var(--ink)}
+  .gb-channel .tag{margin-left:auto;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  .dp-ref{margin:0;padding:12px 14px;border-bottom:1px solid var(--line);background:#FCFBF5}
+  .dp-ref .cap{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px}
+  .dp-ref .row{padding:8px 0;border-top:1px dashed var(--line)}
+  .dp-ref .row:first-of-type{border-top:0;padding-top:0}
+  .dp-ref .id{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--ink);font-weight:600}
+  .dp-ref .meta{font-size:11px;color:var(--muted);margin:3px 0 6px}
+  .dp-ref .preview{font-size:11.5px;line-height:1.5;color:#475569}
+  .dp-ref .match{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#0a8a4f;background:#e7f6ee;border-radius:4px;padding:1px 6px;margin-left:6px}
+  .foot-link{padding:12px 14px;font-size:13px;border-top:1px solid var(--line);background:#FAFBFC}
+  .foot-link a{font-weight:600;color:var(--brand);text-decoration:none}
+  /* ---- overview ---- */
+  .tldr{display:grid;grid-template-columns:1.6fr 1fr;gap:0;border-bottom:1px solid var(--line)}
+  @media(max-width:920px){.tldr{grid-template-columns:1fr}}
+  .tldr .story{padding:14px 18px}
+  .tldr .story .cap{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px}
+  .tldr .story .row{display:flex;gap:10px;padding:6px 0;font-size:13.5px;line-height:1.55}
+  .tldr .story .row .lbl{flex:none;min-width:150px;font-weight:700;color:var(--ink);font-size:12px;padding-top:1px}
+  .tldr .story .row .txt{color:#333C45;min-width:0}
+  .tldr .legend{border-left:1px solid var(--line);background:#FAFBFC;padding:14px 16px}
+  @media(max-width:920px){.tldr .legend{border-left:0;border-top:1px solid var(--line)}}
+  .tldr .legend .cap{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px}
+  .tldr .legend .lrow{display:flex;gap:9px;padding:5px 0;font-size:12px;line-height:1.5;align-items:baseline}
+  .tldr .legend .lrow .pol{flex:none;margin-top:1px}
+  .tldr .legend .lrow .d{color:#475569;min-width:0}
+  .ov-nums{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+  @media(max-width:760px){.ov-nums{grid-template-columns:1fr 1fr}}
+  .ov-nums .cell{padding:14px 16px;border-right:1px solid var(--line)}
+  .ov-nums .cell:last-child{border-right:0}
+  @media(max-width:760px){.ov-nums .cell:nth-child(2){border-right:0}.ov-nums .cell:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+  .ov-nums .n{font-size:22px;font-weight:800;color:var(--ink);line-height:1.1}
+  .ov-nums .l{font-size:11px;color:var(--muted);font-weight:600;margin-top:3px}
+  /* ---- workflow tree ---- */
+  .wf{padding:6px 0}
+  .wf-stage{display:grid;grid-template-columns:44px minmax(170px,.8fr) 1.5fr;gap:0 12px;padding:11px 15px 11px 0;position:relative}
+  .wf-stage + .wf-stage{border-top:1px dashed var(--line)}
+  .wf-rail{position:relative}
+  .wf-rail::before{content:"";position:absolute;left:21px;top:-12px;bottom:-12px;width:2px;background:#E4E8EC}
+  .wf-stage:first-child .wf-rail::before{top:12px}
+  .wf-stage:last-child .wf-rail::before{bottom:auto;height:14px}
+  .wf-rail .n{position:relative;z-index:1;width:22px;height:22px;margin-left:11px;margin-top:1px;border-radius:7px;background:var(--ink);color:#fff;font-size:10px;font-weight:800;display:grid;place-items:center}
+  .wf-stage.skip .wf-rail .n{background:#C6CDD4}
+  .wf-stage.skip .wf-left,.wf-stage.skip .wf-right{opacity:.55}
+  .wf-left .nm{font-size:13px;font-weight:700;color:var(--ink)}
+  .wf-left .q{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.4}
+  .wf-branch{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:5px}
+  .wf-branch .b{font-size:10.5px;font-weight:600;border-radius:6px;padding:2px 9px;border:1px solid var(--line);color:var(--muted);background:#fff}
+  .wf-branch .b.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .wf-right .out{font-size:12.5px;font-weight:600;color:var(--ink)}
+  .wf-right .why{font-size:11.5px;color:#475569;margin-top:2px;line-height:1.45}
+  .wf-right .skipnote{font-size:11.5px;color:var(--muted);font-style:italic}
+  @media(max-width:920px){.wf-stage{grid-template-columns:44px 1fr;row-gap:6px}.wf-right{grid-column:2}}
+  /* ---- inputs strip ---- */
+  .in-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:12px 15px;border-bottom:1px solid var(--line);background:#FAFBFC}
+  @media(max-width:920px){.in-strip{grid-template-columns:1fr 1fr}}
+  .in-strip .card{border:1px solid var(--line);border-radius:9px;background:#fff;padding:9px 11px}
+  .in-strip .card .l{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  .in-strip .card .v{font-size:11.5px;font-family:ui-monospace,Menlo,monospace;color:var(--ink);margin:4px 0;word-break:break-word}
+  .in-strip .card .f{font-size:10.5px;color:var(--muted)}
+  /* ---- decision cards ---- */
+  .dc-rows .r{display:grid;grid-template-columns:190px 1fr auto;gap:10px;padding:8px 14px;border-bottom:1px solid var(--line);font-size:12.5px;align-items:baseline}
+  .dc-rows .r:last-child{border-bottom:0}
+  .dc-rows .r .k{color:var(--muted);font-weight:600}
+  .dc-rows .r.fired .k{color:var(--ink)}
+  .dc-rows .r.fired{background:#FCFBF5}
+  .dc-rows .r .v{color:#333C45;min-width:0;word-break:break-word}
+  @media(max-width:760px){.dc-rows .r{grid-template-columns:1fr;gap:3px}}
+  /* ---- copy cards ---- */
+  .cp-card{border-top:1px solid var(--line)}
+  .cp-card:first-of-type{border-top:0}
+  .cp-head{display:flex;align-items:center;gap:8px;padding:9px 14px;background:#FAFBFC;flex-wrap:wrap}
+  .cp-head .nm{font-size:12.5px;font-weight:700;color:var(--ink)}
+  .cp-head .src{font-size:11px;color:var(--muted)}
+  .cp-head .ctl{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--muted)}
+  .cp-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  @media(max-width:760px){.cp-grid{grid-template-columns:1fr}}
+  .cp-grid .col{padding:9px 14px;font-size:12.5px;line-height:1.5}
+  .cp-grid .col.gen{color:#475569;border-right:1px solid var(--line)}
+  @media(max-width:760px){.cp-grid .col.gen{border-right:0;border-bottom:1px dashed var(--line)}}
+  .cp-grid .col .cap{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:4px}
+  .cp-why{padding:7px 14px;font-size:11.5px;color:#475569;border-top:1px dashed var(--line)}
+  .cp-guards{padding:7px 14px;border-top:1px dashed var(--line);display:flex;flex-direction:column;gap:4px}
+  .cp-guards .g{font-size:11.5px;line-height:1.45;color:#475569;display:flex;gap:7px;align-items:baseline}
+  .cp-guards .g.blocked{color:#c0354b}
+  .cp-guards .g .dot{flex:none;width:6px;height:6px;border-radius:3px;background:#C6CDD4;position:relative;top:-1px}
+  .cp-guards .g.blocked .dot{background:#c0354b}
+  select.stg{font-size:11.5px;font-weight:600;border:1px solid var(--line);border-radius:7px;padding:3px 6px;background:#fff;color:var(--ink)}
+  /* ---- image cards ---- */
+  .im-tabs{display:flex;gap:6px;padding:8px 14px;border-bottom:1px solid var(--line);background:#FAFBFC;flex-wrap:wrap}
+  .im-tabs a{font-size:12px;font-weight:700;color:var(--muted);padding:5px 12px;border-radius:7px;text-decoration:none;border:1px solid transparent}
+  .im-tabs a:hover{color:var(--ink);background:#fff;border-color:var(--line)}
+  .im-surface-tag{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:5px;padding:2px 8px;background:#E8EFFf;color:#1d4ed8;margin-left:6px}
+  .im-grid{display:grid;grid-template-columns:250px 1fr;gap:0}
+  @media(max-width:860px){.im-grid{grid-template-columns:1fr}}
+  .im-thumb{padding:12px 14px;border-right:1px solid var(--line)}
+  @media(max-width:860px){.im-thumb{border-right:0;border-bottom:1px solid var(--line)}}
+  .im-thumb .ph{width:100%;aspect-ratio:16/9;border-radius:9px;border:1px solid var(--line);background:linear-gradient(135deg,#12100c 0%,#1e1a14 45%,#c9a22755 100%);object-fit:cover;display:block}
+  .im-thumb .st{margin-top:8px;font-size:11px;color:var(--muted)}
+  .im-body .blk{padding:9px 14px;border-bottom:1px dashed var(--line)}
+  .im-body .blk:last-child{border-bottom:0}
+  .im-body .blk .cap{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:5px}
+  .im-body .blk .txt{font-size:12.5px;color:#333C45;line-height:1.5}
+  .in-pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;border:1px solid var(--line);border-radius:7px;padding:3px 9px;background:#fff;color:var(--muted);margin:2px 4px 2px 0}
+  .in-pill.primary{background:var(--ink);border-color:var(--ink);color:#fff}
+  .avoid-list,.incl-list{margin:4px 0 0;padding-left:16px;font-size:11.5px;line-height:1.55;color:#475569}
+  .load-badge{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;border-radius:5px;padding:2px 8px}
+  .load-badge.pre-built{color:#0a8a4f;background:#e7f6ee}
+  .load-badge.warm{color:#946200;background:#fdf3dc}
+  .load-badge.live{color:#1d4ed8;background:#e8efff}
+  .load-badge.fallback-only{color:var(--muted);background:#F1F3F5}
+  /* ---- guardrail controls ---- */
+  .gr-row{display:flex;gap:10px;align-items:flex-start;padding:8px 14px;border-bottom:1px solid var(--line);font-size:12.5px}
+  .gr-row:last-child{border-bottom:0}
+  .gr-row input[type=checkbox]{margin-top:2px;accent-color:var(--ink)}
+  .gr-row .t{min-width:0;line-height:1.45;color:#333C45}
+  .gr-row .t .scope{display:block;font-size:10.5px;color:var(--muted);margin-top:1px}
+  .gr-row .lock{margin-left:auto;flex:none;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:#F1F3F5;border-radius:4px;padding:2px 7px}
+  .gr-row.off .t{text-decoration:line-through;opacity:.55}
+  .steer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+  @media(max-width:760px){.steer-grid{grid-template-columns:1fr}}
+  .steer-col{padding:10px 14px;border-right:1px solid var(--line);font-size:12.5px}
+  .steer-col:last-child{border-right:0}
+  .steer-col .cap{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+  .steer-col.say .cap{color:#0a8a4f}.steer-col.steer .cap{color:#1d4ed8}.steer-col.hold .cap{color:#c0354b}
+  .steer-col ul{margin:0;padding-left:16px;line-height:1.5}
+  /* ---- staged changes drawer ---- */
+  #staged-changes{position:fixed;right:18px;bottom:18px;z-index:120;width:min(460px,calc(100vw - 36px));border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:0 12px 40px rgba(15,23,42,.18)}
+  #staged-changes .bar{display:flex;align-items:center;gap:9px;padding:10px 14px;cursor:pointer}
+  #staged-changes .bar .cnt{width:20px;height:20px;border-radius:6px;background:var(--ink);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center}
+  #staged-changes .bar .ttl{font-size:12.5px;font-weight:700;color:var(--ink)}
+  #staged-changes .bar .hint{margin-left:auto;font-size:11px;color:var(--muted)}
+  #staged-changes .body{display:none;border-top:1px solid var(--line);max-height:min(430px,60vh);overflow:auto}
+  #staged-changes.open .body{display:block}
+  #staged-changes .item{padding:8px 14px;border-bottom:1px dashed var(--line);font-size:12px;line-height:1.45}
+  #staged-changes .item b{color:var(--ink)}
+  #staged-changes pre{margin:0;padding:12px 14px;font-family:ui-monospace,Menlo,monospace;font-size:11px;line-height:1.55;background:#0F1419;color:#D7DEE6;white-space:pre-wrap;word-break:break-word}
+  #staged-changes .actions{display:flex;gap:8px;align-items:center;padding:10px 14px;border-top:1px solid var(--line);background:#FAFBFC}
+  #staged-changes .actions button{font-size:12px;font-weight:700;border:1px solid var(--line);border-radius:8px;padding:6px 12px;background:#fff;cursor:pointer}
+  #staged-changes .actions button.primary{background:var(--ink);border-color:var(--ink);color:#fff}
+  #staged-changes .note{padding:0 14px 12px;font-size:10.5px;color:var(--muted);line-height:1.5;background:#FAFBFC}
+  #staged-changes.empty .bar .cnt{background:#C6CDD4}
+  .stg-mark{display:none;font-size:9px;font-weight:800;text-transform:uppercase;color:#946200;background:#fdf3dc;border-radius:4px;padding:1px 6px}
+  .staged .stg-mark{display:inline-block}
+</style>
+
+{% set B = biz %}
+{% set C = biz.console %}
+</head>
+<body>
+<div class="app">
+{% include "_apt_sidebar.html" %}
+<div class="main">
+<div class="topbar"><div class="crumb">{{ active.name }} / <b>Console</b></div><div class="grow"></div><a class="btn-primary" href="{{ nav.channels }}">Demo sitemap →</a></div>
+<div class="content" style="max-width:none">
+<div class="gb-head">
+  <h1>Marketer console — <a href="{{ g.page }}{{ qs }}" style="text-decoration:none">{{ g.page }}</a></h1>
+  <div class="links">
+    <span class="gb-tog">
+      <a href="{{ toggle_anon }}" class="{{ 'on' if as_state == 'anon' else '' }}">Anonymous</a>
+      <a href="{{ toggle_known }}" class="{{ 'on' if as_state != 'anon' else '' }}">Known lead</a>
+    </span>
+  </div>
+</div>
+<p class="gb-meta">Review what the live page decided for this visit — and stage changes to the rules that decide the next one.
+  The live page rewrote {{ B.changed_count }} of {{ B.total_slots }} copy slots. Engineering trace on the
+  <a href="{{ g.dev }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}">technical view</a>.</p>
+
+<div class="gb-channel">
+  <a href="{{ demo_hub_path }}">← Demo sitemap</a>
+  <span class="meta">Channel <b>{{ C.channel_context.channel_label }}</b>{% if C.channel_context.utm_campaign %} · {{ C.channel_context.utm_campaign }}{% endif %}{% if C.channel_context.ad_variant %} · ad {{ C.channel_context.ad_variant }}{% if C.channel_context.ad_targeting %} ({{ C.channel_context.ad_targeting }}){% endif %}{% endif %}</span>
+  <span class="tag">visit context</span>
+</div>
+
+<div class="gd-layout">
+<aside class="gd-side" id="gb-nav">
+  <div class="side-cap">Console</div>
+  <a href="#b-overview" data-ch="b-overview"><span class="num">1</span>Overview</a>
+  <a href="#b-workflow" data-ch="b-workflow"><span class="num">2</span>Workflow</a>
+  <a href="#b-data" data-ch="b-data"><span class="num">3</span>Data in</a>
+  <a href="#b-decisions" data-ch="b-decisions"><span class="num">4</span>Decisions</a>
+  <div class="side-cap">Copy</div>
+  <a href="#b-copy" data-ch="b-copy"><span class="num">5</span>Copy</a>
+  <div class="side-cap">Images</div>
+  <a href="#img-hero" data-ch="img-hero"><span class="num">6</span>Images</a>
+  {% for im in C.image_cards %}
+  <a href="#img-{{ im.id }}" class="img-sub" data-ch="img-{{ im.id }}">{{ im.label }}</a>
+  {% endfor %}
+  <a href="#b-guardrails" data-ch="b-guardrails"><span class="num">7</span>Guardrails</a>
+  <a href="#b-delivery" data-ch="b-delivery"><span class="num">8</span>Delivery</a>
+  <div class="side-cap">Other views</div>
+  <a href="{{ g.dev }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}" class="page-link">Technical view →</a>
+  <a href="{{ g.image_decisions }}" class="page-link">Image decisions guide →</a>
+  <a href="{{ g.page }}{{ qs }}" class="page-link">Live page →</a>
+</aside>
+<div class="gd-main">
+
+<div class="gb-entries">
+  <span class="lbl">Simulate entry</span>
+  {% for label, url in entry_links_raw %}<a href="{{ url }}">{{ label }} →</a>{% endfor %}
+</div>
+
+<!-- 1 · Overview -->
+<div class="sec" id="b-overview">
+  <div class="h">1 · Overview <span class="tag">this visit</span></div>
+  <div class="tldr">
+    <div class="story">
+      <div class="cap">This visit, in plain English</div>
+      {% for s in story %}
+      <div class="row"><span class="lbl">{{ s.label }}</span><span class="txt">{{ s.text }}</span></div>
+      {% endfor %}
+    </div>
+    <div class="legend">
+      <div class="cap">Three words used everywhere below</div>
+      <div class="lrow"><span class="pol say">say</span><span class="d">they told us themselves (typed it, logged in) — the copy may quote it back.</span></div>
+      <div class="lrow"><span class="pol steer">steer</span><span class="d">inferred or bought data — it may shape tone, emphasis, and order, but is never quoted.</span></div>
+      <div class="lrow"><span class="pol hold">hold</span><span class="d">too invasive — never reaches their page. Shown in this console only so you can see what was blocked.</span></div>
+    </div>
+  </div>
+  <div class="ov-nums">
+    {% for n in C.overview.numbers %}
+    <div class="cell"><div class="n">{{ n.n }}</div><div class="l">{{ n.label }}</div></div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- 2 · Workflow -->
+<div class="sec" id="b-workflow">
+  <div class="h">2 · Workflow — the whole request as a decision tree <span class="tag">{{ C.workflow|length }} steps</span></div>
+  <div class="sub">Every branch each step could take stays visible; the dark pill is the path this visit actually took. Greyed steps were skipped — the full decision space is always on screen.</div>
+  <div class="wf">
+    {% for s in C.workflow %}
+    <div class="wf-stage{{ ' skip' if s.skipped else '' }}">
+      <div class="wf-rail"><div class="n">{{ loop.index }}</div></div>
+      <div class="wf-left">
+        <div class="nm">{{ s.title }}</div>
+        <div class="q">{{ s.question }}</div>
+      </div>
+      <div class="wf-right">
+        {% if s.branches %}
+        <div class="wf-branch">{% for b in s.branches %}<span class="b{{ ' on' if b.taken else '' }}">{{ b.label }}</span>{% endfor %}</div>
+        {% endif %}
+        {% if s.skipped %}
+        <div class="skipnote">skipped — {{ s.skip_reason }}</div>
+        {% else %}
+        <div class="out">→ {{ s.outcome }}</div>
+        <div class="why">{{ s.why }}</div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- 3 · Data in -->
+<div class="sec" id="b-data">
+  <div class="h">3 · Data in — everything the request carried <span class="tag">{{ C.signals|length }} signals</span></div>
+  <div class="in-strip">
+    {% for i in C.inputs %}
+    <div class="card"><div class="l">{{ i.label }}</div><div class="v">{{ i.value }}</div><div class="f">feeds: {{ i.feeds }}</div></div>
+    {% endfor %}
+  </div>
+  <table class="ops">
+    <thead><tr><th>Signal</th><th>Value</th><th>Source</th><th>Vendor</th><th>Policy</th></tr></thead>
+    <tbody>
+      {% for s in C.signals %}
+      <tr>
+        <td class="k">{{ s.label }}</td>
+        <td class="mono">{{ s.value }}</td>
+        <td class="note">{{ s.source }}</td>
+        <td class="note">{{ s.vendor }}</td>
+        <td>{% if s.policy %}<span class="pol {{ s.policy }}">{{ s.policy }}</span>{% else %}—{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Arrival card (kept from the classic log) -->
+<div class="sec">
+  <div class="h">Arrival &amp; attribution <span class="tag">{{ B.arrival.channel }}</span></div>
+  <div class="dec">{{ B.arrival.decision }}</div>
+  <table class="ops">
+    <thead><tr><th>Field</th><th>Value</th><th>Note</th></tr></thead>
+    <tbody>
+      {% for r in B.arrival.rows %}
+      <tr>
+        <td class="k">{{ r.label }}</td>
+        <td class="mono">{{ r.value }}</td>
+        <td class="note">{{ r.note or '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- 4 · Decisions -->
+<div class="sec" id="b-decisions" style="border:0;box-shadow:none;background:transparent;overflow:visible">
+  {% for d in C.decisions %}
+  <div class="sec">
+    <div class="h">{% if loop.first %}4 · Decisions — {% endif %}{{ d.title }}<span class="tag">{{ d.outcome }}</span></div>
+    <div class="sub">{{ d.subtitle }}{% if d.why %} · {{ d.why }}{% endif %}</div>
+    {% if d.branches %}
+    <div style="padding:9px 14px;border-bottom:1px solid var(--line)">
+      <div class="wf-branch" style="margin:0">{% for b in d.branches %}<span class="b{{ ' on' if b.taken else '' }}">{{ b.label }}</span>{% endfor %}</div>
+    </div>
+    {% endif %}
+    <div class="dc-rows">
+      {% for r in d.rows %}
+      <div class="r{{ ' fired' if r.fired else '' }}">
+        <span class="k">{{ r.label }}</span>
+        <span class="v">{{ r.value }}</span>
+        <span>{% if r.policy %}<span class="pol {{ r.policy }}">{{ r.policy }}</span>{% endif %}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- 5 · Copy -->
+<div class="sec" id="b-copy">
+  <div class="h">5 · Copy decisions — every slot, shipped vs generic <span class="tag">{{ B.changed_count }}/{{ B.total_slots }} changed</span></div>
+  <div class="sub">One card per copy slot: what the generic site says, what shipped for this visit, the rule that fired, and the guardrails on the slot. The policy control stages a change for review — nothing saves live.</div>
+  {% for cp in C.copy_cards %}
+  <div class="cp-card" data-guard-row>
+    <div class="cp-head">
+      <span class="nm">{{ cp.slot }}</span>
+      <span class="chg {{ 'yes' if cp.changed else 'no' }}">{{ 'changed' if cp.changed else 'default' }}</span>
+      <span class="pol {{ cp.policy }}">{{ cp.policy }}</span>
+      <span class="src">{{ cp.reason }}</span>
+      <span class="ctl">
+        <span class="stg-mark">staged</span>
+        policy
+        <select class="stg" data-stage="copy-policy" data-slot="{{ cp.slot_id }}" data-slot-label="{{ cp.slot }}" data-original="{{ cp.policy }}">
+          {% for p in ('say', 'steer', 'hold') %}
+          <option value="{{ p }}"{{ ' selected' if cp.policy == p else '' }}>{{ p }}</option>
+          {% endfor %}
+        </select>
+      </span>
+    </div>
+    <div class="cp-grid">
+      <div class="col gen"><div class="cap">Generic site</div>{{ cp.generic }}</div>
+      <div class="col"><div class="cap">Shipped this visit</div>{{ cp.shipped }}</div>
+    </div>
+    {% if cp.why %}<div class="cp-why">Why: {{ cp.why }}</div>{% endif %}
+    <div class="cp-guards">
+      {% for gu in cp.guards %}
+      <div class="g{{ ' blocked' if gu.kind == 'blocked' else '' }}"><span class="dot"></span>{{ gu.text }}</div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- 6 · Images -->
+{% if C.prompt_catalog.entries %}
+<div class="sec" id="b-prompt-ref">
+  <div class="h">Prompt reference — <code>{{ C.prompt_catalog.config_path }}</code> <span class="tag">{{ C.prompt_catalog.channel_label }}</span></div>
+  <div class="sub">Read-only catalog entries for this channel{% if C.prompt_catalog.primary_intent %} · primary intent <b>{{ C.prompt_catalog.primary_intent.replace('_', ' ') }}</b> highlighted{% endif %}. Staging still happens in the image cards below.</div>
+  <div class="dp-ref">
+    {% for ref in C.prompt_catalog.entries %}
+    <div class="row">
+      <div class="id">{{ ref.id }}{% if ref.matches_intent %}<span class="match">matches visit</span>{% endif %}</div>
+      <div class="meta">{{ ref.surface }} · {{ ref.intent.replace('_', ' ') }} · channel {{ ref.channel }}</div>
+      <div class="preview">{{ ref.resolved_preview }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+{% if C.image_cards|length > 1 %}
+<div class="im-tabs" id="b-images">
+  {% for im in C.image_cards %}
+  <a href="#img-{{ im.id }}">{{ im.label }}</a>
+  {% endfor %}
+</div>
+{% endif %}
+{% for im in C.image_cards %}
+<div class="sec" id="img-{{ im.id }}">
+  <div class="h">6 · Images — {{ im.label }} <span class="im-surface-tag">{{ im.id }}</span> <span class="tag">{{ im.source }}</span></div>
+  <div class="sub">{{ im.placement }}</div>
+  <div class="dec">{{ im.decision }}</div>
+  <div class="im-grid">
+    <div class="im-thumb">
+      {% if im.url %}
+      <img class="ph" src="{{ im.url }}" alt="{{ im.surface }} preview">
+      {% else %}
+      <div class="ph"></div>
+      {% endif %}
+      <div class="st">{{ im.tier_summary }}</div>
+      <div class="st" style="margin-top:10px" data-guard-row>
+        <span class="load-badge {{ im.load.status }}">{{ im.load.status }}</span>
+        <span class="stg-mark" style="margin-left:6px">staged</span>
+        <div style="margin-top:5px;line-height:1.5">{{ im.load.note }}</div>
+        <div style="margin-top:6px">
+          {% if im.load.state_id %}
+          <label style="display:flex;gap:7px;align-items:center;font-size:11.5px;color:var(--ink);font-weight:600">
+            <input type="checkbox" data-stage="prebuild" data-surface="{{ im.load.surface_id }}" data-state="{{ im.load.state_id }}" data-state-label="{{ im.load.state_label }}" data-original="{{ 'true' if im.load.prebuild else 'false' }}" {{ 'checked' if im.load.prebuild else '' }}>
+            pre-build this state before deploy
+          </label>
+          {% else %}
+          <span style="font-size:11px;color:var(--muted)">{{ im.load.state_label }} — add it to rules/gauntlet_prebuild.yaml to pre-build it</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="im-body">
+      <div class="blk">
+        <div class="cap">Intent selection — rule fired</div>
+        <div class="txt">{{ im.intent.rule_fired or '—' }}</div>
+        <div style="margin-top:6px">
+          {% for i in im.intent.intents %}
+          <span class="in-pill{{ ' primary' if i.primary else '' }}">#{{ i.rank }} {{ i.id.replace('_', ' ') }}</span>
+          {% endfor %}
+        </div>
+        {% for i in im.intent.intents %}
+        <div class="txt" style="font-size:11.5px;margin-top:4px;color:var(--muted)">#{{ i.rank }} {{ i.id.replace('_', ' ') }} — {{ i.why }}{% if i.signals %} · signals: {{ i.signals|join(', ') }}{% endif %}</div>
+        {% endfor %}
+      </div>
+      <div class="blk">
+        <div class="cap">Prompt assembly</div>
+        <div class="txt"><b>Metaphor</b> — {{ im.prompt.metaphor }}</div>
+        <div class="txt"><b>Composition</b> — {{ im.prompt.composition }}</div>
+        <div class="txt"><b>Mood</b> — {{ im.prompt.mood }}</div>
+        {% if im.prompt.must_include %}
+        <div class="txt" style="margin-top:5px"><b>Must include</b><ul class="incl-list">{% for x in im.prompt.must_include %}<li>{{ x }}</li>{% endfor %}</ul></div>
+        {% endif %}
+        {% if im.prompt.must_avoid %}
+        <div class="txt" style="margin-top:5px"><b>Must avoid</b><ul class="avoid-list">{% for x in im.prompt.must_avoid %}<li>{{ x }}</li>{% endfor %}</ul></div>
+        {% endif %}
+      </div>
+      <div class="blk">
+        <div class="cap">Guardrails on this image</div>
+        {% if im.guardrails.applied %}
+        <div class="txt">Applied: {{ im.guardrails.applied|join(' · ') }}</div>
+        {% endif %}
+        {% if im.guardrails.blocked %}
+        <div class="txt" style="color:#c0354b">Blocked: {{ im.guardrails.blocked|join(' · ') }}</div>
+        {% endif %}
+        {% if not im.guardrails.applied and not im.guardrails.blocked %}
+        <div class="txt">Baseline rules only — nothing extra fired for this visit.</div>
+        {% endif %}
+      </div>
+      <div class="blk">
+        <div class="cap">Two-tier cache</div>
+        <div class="txt">{{ im.tier.label }}{% if im.tier.tokens_saved %} · ~{{ im.tier.tokens_saved }} prompt tokens saved{% endif %}</div>
+        {% if im.tier.base_cache_key %}<div class="txt" style="font-family:ui-monospace,Menlo,monospace;font-size:11px">base: {{ im.tier.base_cache_key }}</div>{% endif %}
+        {% if im.tier.delta_cache_key %}<div class="txt" style="font-family:ui-monospace,Menlo,monospace;font-size:11px">delta: {{ im.tier.delta_cache_key }}</div>{% endif %}
+        {% if im.tier.delta_signals %}<div class="txt" style="font-size:11.5px">delta signals: {{ im.tier.delta_signals|join(', ') }}</div>{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="foot-link">Full methodology: <a href="{{ g.image_decisions }}">image decisions guide →</a></div>
+</div>
+{% endfor %}
+
+<!-- 7 · Guardrails -->
+<div class="sec" id="b-guardrails">
+  <div class="h">7 · Guardrails — the rules behind every prompt <span class="tag">{{ C.guardrails.fired_this_visit }} fired this visit</span></div>
+  <div class="sub">Loaded from <span style="font-family:ui-monospace,Menlo,monospace">{{ C.guardrails.config_path }}</span>. Unchecking a rule or changing a gate stages the exact config change for review — this console never writes.</div>
+
+  <div class="h" style="border-top:1px solid var(--line);font-size:12px">Image prompt safety — applies to every image surface</div>
+  {% for r in C.guardrails.image_rules %}
+  <div class="gr-row" data-guard-row>
+    <input type="checkbox" checked {% if r.locked %}disabled{% else %}data-stage="must-avoid" data-rule-id="{{ r.id }}" data-text="{{ r.text }}" data-original="true"{% endif %}>
+    <div class="t">{{ r.text }}<span class="scope">{{ r.scope }}</span></div>
+    <span class="stg-mark">staged</span>
+    {% if r.locked %}<span class="lock">always on — enforced in code</span>{% endif %}
+  </div>
+  {% endfor %}
+
+  <div class="h" style="border-top:1px solid var(--line);font-size:12px">Confidence gates — when inferred signals may shape imagery</div>
+  {% for gate in C.guardrails.tier_gates %}
+  <div class="gr-row" data-guard-row>
+    <div class="t"><b>{{ gate.key.replace('_', ' ') }}</b> — {{ gate.meaning }}<span class="scope">rules/gauntlet_image.yaml → guardrails.tier_gates</span></div>
+    <span class="stg-mark">staged</span>
+    <select class="stg" style="margin-left:auto" data-stage="tier-gate" data-gate="{{ gate.key }}" data-original="{{ gate.value }}">
+      {% for lvl in gate.levels %}
+      <option value="{{ lvl }}"{{ ' selected' if gate.value == lvl else '' }}>level {{ lvl }}+</option>
+      {% endfor %}
+    </select>
+  </div>
+  {% endfor %}
+
+  <div class="h" style="border-top:1px solid var(--line);font-size:12px">Per-intent blocked signals — never usable, per visual strategy</div>
+  <table class="ops">
+    <thead><tr><th>Intent</th><th>Blocked signals</th></tr></thead>
+    <tbody>
+      {% for ib in C.guardrails.intent_blocks %}
+      <tr><td class="k">{{ ib.intent.replace('_', ' ') }}</td><td class="note">{{ ib.blocked|join(', ') or '—' }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="h" style="border-top:1px solid var(--line);font-size:12px">Copy surface policy — enforced in code on every slot</div>
+  {% for r in C.guardrails.copy_rules %}
+  <div class="gr-row">
+    <input type="checkbox" checked disabled>
+    <div class="t">{{ r.text }}<span class="scope">{{ r.scope }}</span></div>
+    <span class="lock">always on — enforced in code</span>
+  </div>
+  {% endfor %}
+
+  <div class="h" style="border-top:1px solid var(--line);font-size:12px">Steering vs saying — this visit</div>
+  <div class="steer-grid">
+    <div class="steer-col say"><div class="cap">Say</div><ul>{% for x in B.steering.said %}<li>{{ x }}</li>{% endfor %}</ul></div>
+    <div class="steer-col steer"><div class="cap">Steer</div><ul>{% for x in B.steering.steered %}<li>{{ x }}</li>{% endfor %}</ul></div>
+    <div class="steer-col hold"><div class="cap">Hold</div><ul>{% for x in B.steering.held %}<li>{{ x }}</li>{% endfor %}</ul></div>
+  </div>
+</div>
+
+<!-- 8 · Delivery -->
+<div class="sec" id="b-delivery">
+  <div class="h">8 · Delivery — image load speed per demo state <span class="tag">{{ C.delivery.cached }}/{{ C.delivery.total }} cached</span></div>
+  <div class="sub">The prebuild manifest (<span style="font-family:ui-monospace,Menlo,monospace">{{ C.config_paths.prebuild }}</span>) decides which states get generated before deploy. Toggle a state to stage a manifest change; the warm script and this console read the same file.</div>
+  <div class="dc-rows">
+    {% for line in C.delivery.graph_summary %}
+    <div class="r"><span class="k">{% if loop.first %}How images load{% endif %}</span><span class="v">{{ line }}</span><span></span></div>
+    {% endfor %}
+  </div>
+  <table class="ops" style="border-top:1px solid var(--line)">
+    <thead><tr><th>Demo state</th><th>Surface</th><th>Prompt tier</th><th>Load policy</th><th>First paint</th><th>Pre-build</th></tr></thead>
+    <tbody>
+      {% for r in C.delivery.rows %}
+      <tr data-guard-row>
+        <td class="k">{{ r.label }}</td>
+        <td class="note">{{ r.surface_label }}</td>
+        <td class="note">{{ r.tier }}</td>
+        <td><span class="load-badge {{ r.status }}">{{ r.status }}</span></td>
+        <td class="note">{{ r.note }}</td>
+        <td>
+          <label style="display:inline-flex;gap:6px;align-items:center;font-size:11px;font-weight:600;color:var(--ink)">
+            <input type="checkbox" data-stage="prebuild" data-surface="{{ r.surface_id }}" data-state="{{ r.id }}" data-state-label="{{ r.label }}" data-original="{{ 'true' if r.prebuild else 'false' }}" {{ 'checked' if r.prebuild else '' }}>
+            <span class="stg-mark">staged</span>
+          </label>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="foot-link">Ops rule: run <span style="font-family:ui-monospace,Menlo,monospace">{{ C.delivery.ops_rule }}</span> before deploy so every <span style="font-family:ui-monospace,Menlo,monospace">prebuild: true</span> state ships baked-in.
+    Deep dive: <a href="{{ g.image_decisions }}#part-6">pre-cached vs live, in the image decisions guide →</a> ·
+    <a href="{{ g.dev }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}">Technical view →</a></div>
+</div>
+
+</div>
+</div>
+
+<!-- Staged changes drawer — client-side only, renders copyable config diffs -->
+<div id="staged-changes" class="empty" data-image-config="{{ C.config_paths.image }}" data-prebuild-config="{{ C.config_paths.prebuild }}">
+  <div class="bar" id="stg-bar">
+    <span class="cnt" id="stg-count">0</span>
+    <span class="ttl">Staged changes</span>
+    <span class="hint" id="stg-hint">toggle a guardrail or prebuild flag to stage a config diff</span>
+  </div>
+  <div class="body">
+    <div id="stg-items"></div>
+    <pre id="stg-patch"># No staged changes yet.</pre>
+    <div class="actions">
+      <button class="primary" id="stg-copy">Copy patch</button>
+      <button id="stg-clear">Clear all</button>
+      <span style="font-size:11px;color:var(--muted)" id="stg-copied"></span>
+    </div>
+    <div class="note">Staged only — nothing is saved server-side (same inputs always render the same page).
+      Apply by editing the file(s) above in the repo and deploying; the warm script picks up prebuild changes on the next <span style="font-family:ui-monospace,Menlo,monospace">railway up</span>.</div>
+  </div>
+</div>
+
+<script>
+(function () {
+  /* ---- scroll spy ---- */
+  var links = Array.prototype.slice.call(document.querySelectorAll('#gb-nav a[data-ch]'));
+  var sections = links.map(function (a) { return document.getElementById(a.getAttribute('data-ch')); });
+  function spy() {
+    var current = sections[0];
+    for (var i = 0; i < sections.length; i++) {
+      if (sections[i] && sections[i].getBoundingClientRect().top <= 80) current = sections[i];
+    }
+    links.forEach(function (a) {
+      a.classList.toggle('on', current && a.getAttribute('data-ch') === current.id);
+    });
+  }
+  document.addEventListener('scroll', spy, { passive: true });
+  spy();
+
+  /* ---- staged changes (client-side only; renders copyable YAML diffs) ---- */
+  var drawer = document.getElementById('staged-changes');
+  var imageCfg = drawer.getAttribute('data-image-config');
+  var prebuildCfg = drawer.getAttribute('data-prebuild-config');
+  var staged = {};   // key -> {title, file, patch}
+
+  function patchFor(el) {
+    var kind = el.getAttribute('data-stage');
+    if (kind === 'must-avoid') {
+      var text = el.getAttribute('data-text');
+      if (el.checked) return null;
+      return {
+        title: 'Guardrail off: “' + text + '”',
+        file: imageCfg,
+        patch: '# ' + imageCfg + ' -> prompt_defaults.must_avoid — remove this line:\n-  - "' + text + '"',
+      };
+    }
+    if (kind === 'tier-gate') {
+      var orig = el.getAttribute('data-original');
+      if (el.value === orig) return null;
+      var gate = el.getAttribute('data-gate');
+      return {
+        title: 'Confidence gate: ' + gate.replace('_', ' ') + ' level ' + orig + '+ -> level ' + el.value + '+',
+        file: imageCfg,
+        patch: '# ' + imageCfg + ' -> guardrails.tier_gates\n-    ' + gate + ': ' + orig + '\n+    ' + gate + ': ' + el.value,
+      };
+    }
+    if (kind === 'prebuild') {
+      var origB = el.getAttribute('data-original') === 'true';
+      if (el.checked === origB) return null;
+      var state = el.getAttribute('data-state');
+      var surface = el.getAttribute('data-surface') || 'hero';
+      return {
+        title: 'Prebuild ' + (el.checked ? 'on' : 'off') + ': ' + surface + ' · ' + el.getAttribute('data-state-label'),
+        file: prebuildCfg,
+        patch: '# ' + prebuildCfg + ' -> surfaces.' + surface + ', entry `- id: ' + state + '`\n-    prebuild: ' + (origB ? 'true' : 'false') + '\n+    prebuild: ' + (el.checked ? 'true' : 'false'),
+      };
+    }
+    if (kind === 'copy-policy') {
+      var origP = el.getAttribute('data-original');
+      if (el.value === origP) return null;
+      return {
+        title: 'Copy policy: ' + el.getAttribute('data-slot-label') + ' ' + origP + ' -> ' + el.value,
+        file: 'pipeline/personalization/gauntlet_site.py',
+        patch: '# PROPOSAL — copy-slot surface policy is enforced in code today\n' +
+               '# (pipeline/personalization/gauntlet_site.py, the slot() calls — no YAML equivalent yet).\n' +
+               '#   ' + el.getAttribute('data-slot') + ': ' + origP + ' -> ' + el.value,
+      };
+    }
+    return null;
+  }
+
+  function keyFor(el) {
+    var surface = el.getAttribute('data-surface') || '';
+    return el.getAttribute('data-stage') + ':' +
+      (surface ? surface + ':' : '') +
+      (el.getAttribute('data-state') || el.getAttribute('data-gate') ||
+       el.getAttribute('data-rule-id') || el.getAttribute('data-slot') || '');
+  }
+
+  function render() {
+    var keys = Object.keys(staged);
+    var count = keys.length;
+    document.getElementById('stg-count').textContent = String(count);
+    document.getElementById('stg-hint').textContent = count
+      ? 'review the config diff below — applies via repo + deploy'
+      : 'toggle a guardrail or prebuild flag to stage a config diff';
+    drawer.classList.toggle('empty', count === 0);
+    drawer.classList.toggle('open', count > 0);
+    var items = document.getElementById('stg-items');
+    items.innerHTML = '';
+    var byFile = {};
+    keys.forEach(function (k) {
+      var c = staged[k];
+      var div = document.createElement('div');
+      div.className = 'item';
+      div.innerHTML = '<b></b> <span style="color:var(--muted)">· ' + c.file + '</span>';
+      div.querySelector('b').textContent = c.title;
+      items.appendChild(div);
+      (byFile[c.file] = byFile[c.file] || []).push(c.patch);
+    });
+    var patch = keys.length
+      ? Object.keys(byFile).map(function (f) { return byFile[f].join('\n\n'); }).join('\n\n')
+      : '# No staged changes yet.';
+    document.getElementById('stg-patch').textContent = patch;
+  }
+
+  function markRow(el) {
+    var row = el.closest('[data-guard-row]');
+    if (row) row.classList.toggle('staged', !!staged[keyFor(el)]);
+    if (el.getAttribute('data-stage') === 'must-avoid') {
+      var r = el.closest('.gr-row');
+      if (r) r.classList.toggle('off', !el.checked);
+    }
+  }
+
+  function onChange(e) {
+    var el = e.target;
+    if (!el.getAttribute || !el.getAttribute('data-stage')) return;
+    var kind = el.getAttribute('data-stage');
+    var change = patchFor(el);
+    var key = keyFor(el);
+    if (change) staged[key] = change; else delete staged[key];
+    if (kind === 'prebuild') {
+      // keep duplicate prebuild controls (image card + delivery table) in sync
+      var st = el.getAttribute('data-state');
+      var surf = el.getAttribute('data-surface') || 'hero';
+      document.querySelectorAll('[data-stage="prebuild"][data-state="' + st + '"][data-surface="' + surf + '"]').forEach(function (o) {
+        o.checked = el.checked;
+        markRow(o);
+      });
+    } else {
+      markRow(el);
+    }
+    render();
+  }
+  document.addEventListener('change', onChange);
+
+  document.getElementById('stg-bar').addEventListener('click', function () {
+    drawer.classList.toggle('open');
+  });
+  document.getElementById('stg-clear').addEventListener('click', function () {
+    Object.keys(staged).forEach(function (k) { delete staged[k]; });
+    document.querySelectorAll('[data-stage]').forEach(function (el) {
+      var kind = el.getAttribute('data-stage');
+      if (kind === 'must-avoid') el.checked = true;
+      if (kind === 'prebuild') el.checked = el.getAttribute('data-original') === 'true';
+      if (kind === 'tier-gate' || kind === 'copy-policy') el.value = el.getAttribute('data-original');
+      markRow(el);
+      var r = el.closest('.gr-row'); if (r) r.classList.remove('off');
+    });
+    render();
+  });
+  document.getElementById('stg-copy').addEventListener('click', function () {
+    var text = document.getElementById('stg-patch').textContent;
+    function done() {
+      var s = document.getElementById('stg-copied');
+      s.textContent = 'copied';
+      setTimeout(function () { s.textContent = ''; }, 1500);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done);
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta); done();
+    }
+  });
+  render();
+})();
+</script>
+</div>
+</div>
+</div>
+</body>
+</html>

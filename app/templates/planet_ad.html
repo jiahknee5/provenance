@@ -1,0 +1,176 @@
+{#- Single X.com promoted-post mockup — faithful dark-timeline styling. -#}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ variant.x_targeting_type }} — Planet X Ad</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#07090a; --line:#16233a; --line2:#1f3355;
+      --blu:#009da5; --blu-t:#00cbe6; --ink:#eef3f9; --dim:#68798e;
+      --sans:'Montserrat',sans-serif; --ui:'Montserrat',sans-serif; --mono:'JetBrains Mono',monospace;
+      --x-font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      --x-bg:#000; --x-post-bg:#000; --x-text:#e7e9ea; --x-muted:#71767b;
+      --x-link:#1d9bf0; --x-border:#2f3336; --x-card-bg:#16181c;
+      --x-hover:rgba(231,233,234,.1);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{min-height:100vh;background:var(--bg);color:var(--ink);font:13px/1.45 var(--ui);padding:24px}
+    a{color:inherit;text-decoration:none}
+    .shell{max-width:640px;margin:0 auto}
+    .back{font:12px var(--mono);color:var(--dim);margin-bottom:16px;display:inline-block}
+    .back:hover{color:var(--blu-t)}
+    .ad-manager{
+      padding:10px 14px;margin-bottom:12px;border:1px solid var(--line);border-radius:10px;
+      background:rgba(255,255,255,.03);font:10px var(--mono);color:var(--dim);
+    }
+    .ad-manager b{color:#fff;font:600 12px var(--sans)}
+    .ad-manager-config{margin:6px 0;word-break:break-word}
+    .ad-manager-utms{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+    .ad-manager-utms span{border:1px solid var(--line2);border-radius:3px;padding:1px 6px;font-size:9px}
+    .x-shell{border:1px solid var(--x-border);border-radius:16px;overflow:hidden;background:var(--x-post-bg)}
+    .x-post-link{display:block;transition:background .12s}
+    .x-post-link:hover{background:var(--x-hover)}
+    article.x-post{
+      display:grid;grid-template-columns:52px 1fr;gap:0 12px;
+      padding:16px 20px 8px;font-family:var(--x-font);color:var(--x-text);
+    }
+    .x-avatar-col{padding-top:2px}
+    .x-avatar{
+      width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+      font:700 13px var(--x-font);color:#fff;
+    }
+    .x-main{min-width:0}
+    .x-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:2px}
+    .x-names{display:flex;flex-wrap:wrap;align-items:baseline;gap:0;line-height:20px;font-size:15px}
+    .x-display{font-weight:700;color:var(--x-text);margin-right:2px}
+    .x-verified{display:inline-flex;vertical-align:text-bottom;margin:0 2px 0 0}
+    .x-verified svg{width:18px;height:18px;display:block}
+    .x-handle,.x-dot,.x-time{color:var(--x-muted);font-weight:400}
+    .x-handle{margin-left:2px}
+    .x-dot{margin:0 2px}
+    .x-promoted{font:13px/1.3 var(--x-font);color:var(--x-muted);margin:0 0 10px}
+    .x-more{
+      flex-shrink:0;width:34px;height:34px;border:none;background:transparent;border-radius:9999px;
+      display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--x-muted);
+    }
+    .x-more:hover{background:var(--x-hover);color:var(--x-link)}
+    .x-more svg{width:18px;height:18px}
+    .x-text{font:15px/20px var(--x-font);color:var(--x-text);white-space:pre-wrap;word-wrap:break-word;margin-bottom:14px}
+    .x-card{
+      display:block;border:1px solid var(--x-border);border-radius:16px;overflow:hidden;
+      margin-bottom:14px;background:var(--x-card-bg);transition:background .12s;
+    }
+    .x-card:hover{background:rgba(22,24,28,.85)}
+    .x-card-img{
+      height:160px;position:relative;overflow:hidden;
+      background:linear-gradient(135deg,#0d1a24 0%,{{ variant.ad.accent }}88 55%,{{ variant.ad.accent }} 100%);
+    }
+    .x-card-img::after{
+      content:'';position:absolute;inset:0;
+      background:linear-gradient(90deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.15) 48%,rgba(0,157,165,.35) 100%);
+    }
+    .x-card-img-label{
+      position:absolute;left:14px;bottom:12px;right:14px;z-index:1;
+      font:700 15px/1.25 var(--x-font);color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6);
+    }
+    .x-card-body{padding:12px 14px 14px;border-top:1px solid var(--x-border)}
+    .x-card-domain{font:13px var(--x-font);color:var(--x-muted);margin-bottom:2px}
+    .x-card-title{font:15px/1.35 var(--x-font);color:var(--x-text)}
+    .x-card-desc{font:13px/1.4 var(--x-font);color:var(--x-muted);margin-top:6px}
+    .x-actions{
+      display:flex;align-items:center;justify-content:space-between;
+      max-width:425px;margin:4px 0 10px -8px;
+    }
+    .x-actions button{
+      display:inline-flex;align-items:center;gap:4px;border:none;background:transparent;
+      color:var(--x-muted);font:13px var(--x-font);padding:8px;border-radius:9999px;cursor:default;
+    }
+    .x-actions button:hover{background:var(--x-hover)}
+    .x-actions svg{width:18px;height:18px;flex-shrink:0}
+    .x-actions .x-count{font-size:13px}
+    .hint{text-align:center;font:12px var(--ui);color:var(--dim);margin-top:16px}
+    .hint a{color:var(--blu-t)}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <a class="back" href="{{ g.ads }}">← All 12 ads</a>
+  <div class="ad-manager">
+    <b>{{ variant.x_targeting_type }}</b> · {{ variant.segment }} · {{ variant.audience_fit_label }}
+    <div class="ad-manager-config">X config: {{ variant.x_targeting_example }}</div>
+    <div class="ad-manager-utms">
+      <span>utm_source=x</span>
+      <span>utm_medium=paid</span>
+      <span>utm_campaign={{ variant.utm_campaign }}</span>
+      <span>utm_content={{ variant.variant_id }}</span>
+    </div>
+  </div>
+  <div class="x-shell">
+    <a class="x-post-link" href="{{ landing_url }}">
+      <article class="x-post" aria-label="Promoted post from {{ variant.ad.display }}">
+        <div class="x-avatar-col">
+          <div class="x-avatar" style="background:{{ variant.ad.accent }}">{{ variant.ad.avatar }}</div>
+        </div>
+        <div class="x-main">
+          <div class="x-header">
+            <div class="x-names">
+              <span class="x-display">{{ variant.ad.display }}</span>
+              <span class="x-verified" aria-label="Verified account">
+                <svg viewBox="0 0 22 22" aria-hidden="true"><path fill="#e7b638" d="M20.396 11c-.018-.646-.215-1.279-.57-1.836-.354-.557-.852-1.03-1.44-1.366-1.44-.96-3.338-1.04-4.86-.2-.49.28-.926.655-1.28 1.1-.72.9-1.12 2.05-1.1 3.22.02 1.17.46 2.28 1.22 3.15.76.87 1.84 1.38 2.98 1.42 1.14.04 2.26-.38 3.1-1.16.84-.78 1.34-1.88 1.38-3.04.04-1.16-.34-2.28-1.04-3.14-.35-.43-.78-.8-1.28-1.1-.49-.3-1.04-.5-1.62-.58-.58-.08-1.18-.04-1.74.12-.56.16-1.08.44-1.52.82-.44.38-.8.84-1.06 1.36-.26.52-.42 1.1-.46 1.68-.04.58.04 1.16.24 1.7.2.54.52 1.02.94 1.4.42.38.92.66 1.46.82.54.16 1.12.2 1.68.12.56-.08 1.1-.28 1.58-.58.48-.3.9-.68 1.24-1.12.34-.44.6-.94.76-1.48.16-.54.22-1.1.18-1.66-.04-.56-.18-1.1-.42-1.6-.24-.5-.58-.94-1-1.28-.42-.34-.92-.58-1.46-.7-.54-.12-1.1-.12-1.64 0-.54.12-1.04.36-1.46.7-.42.34-.76.78-1 1.28-.24.5-.38 1.04-.42 1.6-.04.56.02 1.12.18 1.66.16.54.42 1.04.76 1.48.34.44.76.82 1.24 1.12.48.3 1.02.5 1.58.58.56.08 1.14.04 1.68-.12.54-.16 1.04-.44 1.46-.82.42-.38.74-.86.94-1.4.2-.54.28-1.12.24-1.7-.04-.58-.2-1.16-.46-1.68-.26-.52-.62-.98-1.06-1.36-.44-.38-.96-.66-1.52-.82-.56-.16-1.16-.2-1.74-.12-.58.08-1.13.28-1.62.58-.49.3-.93.67-1.28 1.1-.7.86-1.08 1.98-1.04 3.14.04 1.16.54 2.26 1.38 3.04.84.78 1.96 1.2 3.1 1.16 1.14-.04 2.22-.55 2.98-1.42.76-.87 1.2-1.98 1.22-3.15.02-1.17-.38-2.32-1.1-3.22-.35-.45-.79-.82-1.28-1.1-1.52-.84-3.42-.76-4.86.2-.59.34-1.09.81-1.44 1.37-.35.56-.55 1.19-.57 1.84 0 .65.18 1.28.52 1.84.34.56.82 1.03 1.4 1.36 1.16.72 2.66.72 3.82 0 .58-.33 1.06-.8 1.4-1.36.34-.56.52-1.19.52-1.84z"/><path fill="#fff" d="M9.5 14.2 6.8 11.5l1.1-1.1 1.6 1.6 4.2-4.2 1.1 1.1z"/></svg>
+              </span>
+              <span class="x-handle">@{{ variant.ad.handle }}</span>
+              <span class="x-dot">·</span>
+              <span class="x-time">2h</span>
+            </div>
+            <button type="button" class="x-more" tabindex="-1" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+            </button>
+          </div>
+          <p class="x-promoted">Promoted</p>
+          <div class="x-text">{{ variant.ad.trigger }} {{ variant.ad.body }} {{ variant.ad.proof }}</div>
+          <div class="x-card">
+            <div class="x-card-img">
+              <div class="x-card-img-label">{{ variant.page.h1_pre }}{{ variant.page.h1_blue }}</div>
+            </div>
+            <div class="x-card-body">
+              <div class="x-card-domain">planet.com</div>
+              <div class="x-card-title">{{ variant.page.h1_pre }}{{ variant.page.h1_blue }}</div>
+              <div class="x-card-desc">{{ variant.ad.cta_label }}</div>
+            </div>
+          </div>
+          <div class="x-actions x-engagement-bar" role="group" aria-label="Post engagement">
+            <button type="button" tabindex="-1" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M1.751 10c0-4.42 3.58-8 8-8h4.5c4.42 0 8 3.58 8 8 0 4.42-3.58 8-8 8h-4.5c-4.42 0-8-3.58-8-8z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 10h8M8 14h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              <span class="x-count">18</span>
+            </button>
+            <button type="button" tabindex="-1" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5c-2.209 0-4-1.79-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM16.5 6H11V4h5.5c2.209 0 4 1.79 4 4v8.45l2.068-1.93 1.364 1.46-4.432 4.14-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2z"/></svg>
+              <span class="x-count">42</span>
+            </button>
+            <button type="button" tabindex="-1" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.798-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"/></svg>
+              <span class="x-count">1.2K</span>
+            </button>
+            <button type="button" tabindex="-1" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <span class="x-count">84K</span>
+            </button>
+            <button type="button" tabindex="-1" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5z"/></svg>
+            </button>
+            <button type="button" tabindex="-1" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.59l5.7 5.7-1.41 1.42L13 6.41V16h-2V6.41l-3.29 3.3-1.41-1.42L12 2.59zM5 18h14v2H5v-2z"/></svg>
+            </button>
+          </div>
+        </div>
+      </article>
+    </a>
+  </div>
+  <p class="hint">Click the post to open the message-matched landing page. LP previews:
+    <a href="{{ g.ads_lp }}">{{ g.ads_lp }}</a></p>
+</div>
+</body>
+</html>

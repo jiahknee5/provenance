@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Provenance — Copy that drives action, gated by what you can prove</title>
+<style>
+  :root{
+    --canvas:#ffffff; --ink:#14171a; --muted:#6b7280; --hair:#e6e8eb; --fill:#f6f7f9;
+    --signal:#3b5bdb; --signal-bg:#eef1fc;
+    --say:#15803d; --say-bg:#eaf5ec; --allude:#b45309; --allude-bg:#fbf1e3; --hold:#b91c1c; --hold-bg:#fbeaea;
+    --det:#0f172a; --det-bg:#eef0f3; --llm:#6d28d9; --llm-bg:#f1ebfb; --act:#0e7490; --act-bg:#e3f4f7;
+    --r:10px; --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#eceef1;color:var(--ink);font-family:var(--sans);line-height:1.5;
+       -webkit-font-smoothing:antialiased;padding:34px 18px}
+  .sheet{max-width:1000px;margin:0 auto;background:var(--canvas);border:1px solid var(--hair);
+         border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 30px rgba(0,0,0,.05);overflow:hidden}
+  header{padding:30px 36px 24px;border-bottom:1px solid var(--hair)}
+  .kicker{font:600 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--signal)}
+  h1{font-size:26px;line-height:1.22;margin:12px 0 0;letter-spacing:-.01em;max-width:24ch}
+  h1 b{color:var(--signal)}
+  .lede{color:var(--muted);font-size:14px;margin-top:11px;max-width:74ch}
+  .meta-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .chip{font:600 10.5px/1 var(--mono);padding:5px 9px;border-radius:20px;letter-spacing:.02em;
+        background:var(--fill);color:var(--ink);border:1px solid var(--hair)}
+  .chip.ok{background:var(--say-bg);color:var(--say);border-color:transparent}
+  .chip.live{background:var(--act-bg);color:var(--act);border-color:transparent}
+  section{padding:26px 36px;border-bottom:1px solid var(--hair)}
+  section:last-of-type{border-bottom:0}
+  .ex{font:600 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+  h2{font-size:18px;margin:2px 0 10px;letter-spacing:-.01em}
+  h3{font-size:14px;margin:18px 0 6px}
+  p{font-size:13.5px;margin:8px 0;max-width:78ch}
+  code{font-family:var(--mono);font-size:12px;background:var(--fill);padding:1px 5px;border-radius:5px;color:#334}
+  a{color:var(--signal);text-decoration:none} a:hover{text-decoration:underline}
+  ul{font-size:13.5px;margin:8px 0;padding-left:20px;max-width:78ch} li{margin:4px 0}
+  b.k{color:var(--ink)}
+  .mk{font:600 9.5px/1 var(--mono);padding:2px 6px;border-radius:5px;text-transform:uppercase;letter-spacing:.04em}
+  .mk.w{background:var(--say-bg);color:var(--say)} .mk.p{background:var(--act-bg);color:var(--act)}
+  .mk.new{background:var(--signal-bg);color:var(--signal)}
+
+  /* pipeline (the swarm) */
+  .flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:0;margin:14px 0 4px}
+  .fnode{flex:1 1 150px;min-width:150px;border:1px solid var(--hair);border-radius:var(--r);padding:11px 13px;
+         background:#fff;position:relative;margin:0 16px 12px 0}
+  .fnode:after{content:"→";position:absolute;right:-15px;top:50%;transform:translateY(-50%);color:#b6bcc4;font-size:15px}
+  .fnode.last:after{content:""}
+  .fnode .ft{font-size:12.5px;font-weight:600} .fnode .fd{font-size:11.5px;color:var(--muted);margin-top:4px}
+
+  /* two-axis cards */
+  .axes{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0 2px}
+  .axis{flex:1 1 300px;border:1px solid var(--hair);border-radius:var(--r);padding:13px 15px;background:var(--fill)}
+  .axis.say{border-left:3px solid var(--signal)} .axis.act{border-left:3px solid var(--act)}
+  .axis b{font-size:13px} .axis .d{font-size:12.5px;color:var(--muted);margin-top:4px}
+
+  /* shipped table */
+  table{width:100%;border-collapse:collapse;font-size:12.5px;margin:10px 0}
+  th{text-align:left;font:600 10px/1.3 var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--muted);
+     padding:8px 10px;border-bottom:1px solid var(--hair);vertical-align:bottom}
+  td{padding:9px 10px;border-bottom:1px solid var(--hair);vertical-align:top}
+  tr:last-child td{border-bottom:0}
+  td:first-child{font-weight:600;white-space:nowrap}
+
+  /* code/example block */
+  .demo{border:1px solid var(--hair);border-radius:var(--r);overflow:hidden;margin:12px 0}
+  .demo .dh{font:600 10.5px/1 var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);
+            padding:9px 13px;background:var(--fill);border-bottom:1px solid var(--hair)}
+  .demo pre{margin:0;padding:13px;font-family:var(--mono);font-size:11.5px;line-height:1.6;color:#1f2430;
+            overflow-x:auto;white-space:pre-wrap}
+  .v-ok{color:var(--say);font-weight:600} .v-no{color:var(--hold);font-weight:600}
+
+  .callout{border-left:3px solid var(--allude);background:var(--allude-bg);padding:11px 15px;border-radius:0 8px 8px 0;
+           color:#7a4a0c;font-size:12.5px;margin:12px 0}
+  .callout.g{border-left-color:var(--say);background:var(--say-bg);color:#155}
+  .links{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+  .links a{font:600 12px/1 var(--sans);border:1px solid var(--hair);border-radius:8px;padding:9px 13px;
+           background:#fff;display:inline-flex;align-items:center;gap:7px}
+  footer{padding:20px 36px;background:var(--fill);font-size:12px;color:var(--muted)}
+  footer b{color:var(--ink)}
+  @media(max-width:720px){.fnode:after{content:"↓";right:auto;left:50%;top:auto;bottom:-15px;transform:translateX(-50%)}}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <header>
+    <div class="kicker">Provenance · engineering writeup</div>
+    <h1>Copy that drives action, gated by <b>what you can prove</b>.</h1>
+    <p class="lede">How a research swarm on persuasive outreach became a wired, tested Gate — without ever letting the
+      product break its own promise: <i>can’t say what it can’t prove</i>. This page documents the whole loop, from
+      the question to the code that now runs on every line and every message.</p>
+    <div class="meta-row">
+      <span class="chip ok">✓ full suite: 144 passed</span>
+      <span class="chip">15-agent research swarm</span>
+      <span class="chip">2 Gate axes · 3 validators wired</span>
+      <span class="chip live">live: /graph · /policies</span>
+    </div>
+  </header>
+
+  <!-- 1 — THE SWARM -->
+  <section>
+    <p class="ex">Step 1 — the research</p>
+    <h2>A 15-agent swarm, then an adversarial fact-check</h2>
+    <p>The question: <b class="k">how do you write personalized copy that drives a customer to act?</b> Rather than
+      answer from memory, a workflow fanned out <b class="k">7 researchers</b> — one per dimension of action-driving
+      copy — each running real web searches, then <b class="k">pipelined each into an adversarial verifier</b> that
+      downgraded inflated single-vendor stats, then a synthesizer merged the verified findings into a playbook.</p>
+    <div class="flow">
+      <div class="fnode"><div class="ft">7 researchers</div><div class="fd">personalization · psychology · frameworks · cold-email data · CTA · voice/multichannel · anti-patterns</div></div>
+      <div class="fnode"><div class="ft">Adversarial verify</div><div class="fd">each dimension’s load-bearing claims fact-checked; round-number vendor stats downgraded</div></div>
+      <div class="fnode last"><div class="ft">Synthesize</div><div class="fd">one ranked playbook — directions kept, magnitudes flagged illustrative</div></div>
+    </div>
+    <h3>The robust, cross-source spine</h3>
+    <ul>
+      <li><b class="k">Relevance gates every other lever</b> — a signal you can’t verify reads as spam, and nothing else fires.</li>
+      <li><b class="k">One provable trigger</b>, not a merge tag; <b class="k">frame the cost of inaction</b>, not just the upside.</li>
+      <li><b class="k">Matched-peer proof</b> with a sharp number; <b class="k">one soft CTA</b>; <b class="k">don’t pitch first</b>; <b class="k">follow up</b>; <b class="k">never sound like a bot</b>.</li>
+    </ul>
+    <div class="callout"><b>Honest about the numbers (Constitution Art. I):</b> the principles are cross-source robust; the
+      reply/booking <i>magnitudes</i> are illustrative external benchmarks, not Provenance’s own metrics. The fact-check
+      dropped the inflated “5.2× signal lift” and “287% multichannel” figures as cross-stitched or untraceable.</div>
+  </section>
+
+  <!-- 2 — THE INSIGHT -->
+  <section>
+    <p class="ex">Step 2 — the insight</p>
+    <h2>The research’s #1 finding <i>is</i> the product thesis</h2>
+    <p>“Relevance you can’t verify reads as spam” is the same sentence as <i>“can’t say what it can’t prove.”</i> So the
+      decision tree runs as <b class="k">two passes on one spine</b> — permission, then action — and the Gate disposes on both.</p>
+    <div class="axes">
+      <div class="axis say"><b>Axis 1 — Permission · “what may I say?”</b><div class="d">Provable identity → personalization Tier 0·1·2·3, governed by say / allude / hold. Deterministic, cheap, itself provable. <span class="mk w">already wired</span></div></div>
+      <div class="axis act"><b>Axis 2 — Action · “what makes them act?”</b><div class="d">One trigger → loss-frame → matched-peer proof → one soft CTA — the play each tier earns, with the bot-fingerprint stripped. <span class="mk new">wired this work</span></div></div>
+    </div>
+    <p>The practical fallback you asked for is the spine of both passes: <b class="k">can’t resolve the company → don’t
+      guess a sector; step down the identity ladder to the individual</b> (role/seniority you can prove), then to an honest
+      neutral default. Identity degrades gracefully; it never fabricates upward.</p>
+    <div class="links" style="margin-top:12px">
+      <a href="/graph">▸ The live decision tree (visualized)</a>
+      <a href="/static/mockups/decision-tree.html">▸ Standalone full tree</a>
+    </div>
+  </section>
+
+  <!-- 3 — WHAT SHIPPED -->
+  <section>
+    <p class="ex">Step 3 — the implementation</p>
+    <h2>What got wired into the Gate</h2>
+    <p>The permission router (Pass 1) and the Gate’s provability checks (Axis A) already existed. This work added the
+      <b class="k">action layer</b> (Pass 2) and the <b class="k">persuasion-hygiene axis</b> (Axis B) — at the line, the
+      message, and the sequence scale — and enforced them where outbound copy actually flows.</p>
+    <table>
+      <thead><tr><th>What</th><th>Where (code)</th><th>What it does</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Loss-frame angle</td><td><code>creative.ANGLES</code></td>
+            <td>A <code>loss</code> cost-of-inaction angle that frames the status quo without inventing a number — provable by construction.</td>
+            <td><span class="mk w">wired</span></td></tr>
+        <tr><td>Gate · Axis A</td><td><code>creative.verify_copy</code></td>
+            <td>Per-line provability: blocks superlatives, comparatives, recited competitors, ungrounded numbers, reciting the company under <code>allude</code>.</td>
+            <td><span class="mk w">existing</span></td></tr>
+        <tr><td>Gate · Axis B (line)</td><td><code>creative.verify_copy</code></td>
+            <td>Per-line hygiene: blocks AI-tell phrases/words (delve, leverage, “hope this finds you well”…) and &gt;1 em-dash.</td>
+            <td><span class="mk new">added</span></td></tr>
+        <tr><td>Message Gate</td><td><code>creative.verify_message</code></td>
+            <td>One CTA · ≤125 words (cold) · no cold calendar link · ≤1 link · no spam-promise wording · every line clean. Numbers stay claim-gated, not checked here.</td>
+            <td><span class="mk new">added</span></td></tr>
+        <tr><td>Sequence Gate</td><td><code>creative.verify_sequence</code></td>
+            <td>Never single-touch; no follow-up repeats a prior step verbatim.</td>
+            <td><span class="mk new">added</span></td></tr>
+        <tr><td>Action-pool enforcement</td><td><code>variants.build_action_pool</code></td>
+            <td>A variant now enters the optimizer’s pool only if <code>claims_cleared AND message_ok</code>. Provable-but-spammy never ships.</td>
+            <td><span class="mk new">wired</span></td></tr>
+        <tr><td>Policy surface</td><td><code>/policies</code> · Anti-slop</td>
+            <td>The message rules publish as a <b>locked, platform-standard</b> card set (grounded in the real thresholds), alongside the AI-tell defaults.</td>
+            <td><span class="mk w">live</span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout g"><b>The truth boundary held (Art. II).</b> The message Gate is a uniform structural filter on
+      every variant — not a hand-coded exclusion. The planted-lie variant is independently blocked by the claim Gate, and
+      the unconstrained twin still admits it, so the “the bandit would pick the lie if allowed” proof is intact.</div>
+  </section>
+
+  <!-- 4 — IT WORKS -->
+  <section>
+    <p class="ex">Step 4 — verification</p>
+    <h2>Run, not just compiled</h2>
+    <p>Every layer was exercised, and the behavior locked by added tests (existing tests untouched — Art. VII). The
+      message Gate clears all honest variants (the cold meeting-ask is a <i>warning</i>, not a veto) and vetoes the spammy ones:</p>
+    <div class="demo">
+      <div class="dh">verify_message() — a spammy cold message</div>
+<pre>"We're the #1, best-in-class platform — guaranteed.
+ Grab time: https://calendly.com/me →   Also reply here →"
+
+<span class="v-no">✗ blocked</span>  2 CTAs — a message gets exactly one ask
+<span class="v-no">✗ blocked</span>  a calendar link in a cold first touch
+<span class="v-no">✗ blocked</span>  spam-promise wording (“guaranteed”)
+<span class="v-no">✗ blocked</span>  line fails the Gate (unprovable superlative)</pre>
+    </div>
+    <div class="demo">
+      <div class="dh">an honest variant — ships, with an advisory (not a veto)</div>
+<pre>"Hi {name}, … A verified cut in total cost of ownership.
+ Worth a 20-minute look for {company}? Book a demo →"
+
+<span class="v-ok">✓ ok</span>  words: 26 · one CTA · clean lines
+<span style="color:var(--allude)">⚑ advisory</span>  cold touch leads with a meeting ask — a soft
+            interest question lifts reply  (warns, doesn't block)</pre>
+    </div>
+    <ul>
+      <li><b class="k">Full suite: 144 passed</b>, 0 failed — including the optimizer/drift truth-boundary tests, unchanged.</li>
+      <li>New, additive tests cover the loss angle, the line/message/sequence Gate, and the locked policy rows.</li>
+    </ul>
+  </section>
+
+  <!-- 5 — HONEST EDGES -->
+  <section>
+    <p class="ex">Step 5 — honest edges (Art. VIII)</p>
+    <h2>Wired vs. policy-on-top</h2>
+    <ul>
+      <li><span class="mk w">wired</span> Pass-1 permission router · Gate Axis A (provability) · Gate Axis B at line + message + sequence scale · the loss angle · pool enforcement · the <code>/policies</code> anti-slop standard.</li>
+      <li><span class="mk p">policy-on-top</span> the <b>staged CTA escalation</b> (soft → time-ask by lead temperature) and the per-tier play <i>orchestration</i> are a framing layer, not a single wired selector. What’s enforced is the no-cold-calendar veto and the never-single-touch rule; the escalation is the lead-temperature policy above them.</li>
+    </ul>
+    <p>Numbers are deliberately <b class="k">not</b> checked by the message Gate — in outbound copy they’re claim-backed and
+      gated by the NLI claim Gate, so a real “30 EHR systems” ships while a fabricated stat is blocked one layer down.</p>
+  </section>
+
+  <footer>
+    <p style="margin:0 0 8px"><b>Grounded in real code.</b> <code>pipeline/personalization/creative.py</code>
+      (<code>ANGLES</code>, <code>verify_copy</code>, <code>verify_message</code>, <code>verify_sequence</code>),
+      <code>pipeline/generation/variants.py</code> (<code>build_action_pool</code>), and <code>app/policies.py</code>
+      (the anti-slop standard). Permission router + Axis A pre-existed; the action layer + Axis B were wired and tested here.</p>
+    <div class="links">
+      <a href="/graph">▸ Decision tree (live)</a>
+      <a href="/policies">▸ Policies — the Gate, published</a>
+      <a href="/static/mockups/decision-tree.html">▸ Full tree (standalone)</a>
+    </div>
+    <p style="margin:12px 0 0">Provenance — the GTM workspace that carries the source, basis, and surface policy behind every move. Real fields only; no fabricated claims.</p>
+  </footer>
+</div>
+</body>
+</html>

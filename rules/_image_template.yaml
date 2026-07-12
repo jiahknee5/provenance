@@ -1,0 +1,126 @@
+# Action-image personalization — blank tenant template.
+# Copy to rules/<company>_image.yaml and fill in each section.
+# Framework: docs/04-workflow/ACTION-IMAGE-PERSONALIZATION.md
+
+tenant: your_company_slug          # load via load_image_config("your_company_slug")
+product_context: "one-line description of the product/site for prompt preamble"
+
+brand:
+  accent_color: "#0066cc"           # hero accent — referenced in color_rules templates
+  name: Your Company
+  must_avoid_additions: []          # tenant-specific guardrails appended to global list
+  # Example: ["NO competitor logos", "NO medical device imagery"]
+
+# Industry key (from reverse-IP) → abstract environment descriptor (allude only).
+industry_env:
+  general: "professional workspace"
+  # technology: "modern engineering workspace"
+  # healthcare: "health-tech operations center"
+
+# Objection id → abstract visual metaphor (never literal objection text).
+objection_metaphors:
+  # price_too_high: "stalled initiative beside active deployment glow"
+  # need_more_proof: "empty evaluation room beside glowing proof terminal"
+
+# Ad variant id → message-match metaphor (when paid traffic carries a campaign id).
+ad_metaphors:
+  # x-keyword: "search intent dissolving into product proof environment"
+  # x-retarget: "familiar milestone path continuing forward"
+
+# Intent taxonomy — define 5–8 intents per company.
+# Required fields per intent: id, conversion_goal, sales_technique, composition_template,
+# visual_metaphor, mood, color_rules, design_principles (list).
+intents:
+  - id: peer_proof
+    conversion_goal: "Trust → click primary CTA"
+    design_principles:
+      - "Single focal point — processing fluency"
+      - "Social proof via environment cues, not faces"
+    sales_technique: "matched-peer social proof"
+    allowed_signals: [industry, audience_route, ad_variant]
+    blocked_signals: [visitor_name, company_name, PII]
+    composition_template: >-
+      Wide cinematic backdrop: {environment} at dusk — empty foreground for headline overlay.
+    color_rules: "Dark base, accent ({accent_color})"
+    visual_metaphor: "industry-matched workspace — capability implied by environment"
+    mood: "credible, calm confidence"
+
+  - id: message_match
+    conversion_goal: "Ad click-through continuity"
+    design_principles:
+      - "Visual echoes ad promise — no text in image"
+    sales_technique: "message-match / consistency"
+    allowed_signals: [ad_variant, utm_campaign]
+    blocked_signals: [ad_copy_literal, company_names, PII]
+    composition_template: "Visual continuation of ad promise: {ad_metaphor}"
+    color_rules: "Ad-aligned mood with brand accent ({accent_color})"
+    visual_metaphor: "{ad_metaphor}"
+    mood: "consistent, trust-building"
+
+# Deterministic selection rules — evaluated in order.
+selection:
+  loss_avoidance_objections: []     # objection ids that trigger loss_avoidance vs peer_proof
+
+  primary_rules:                    # elif chain — first match wins
+    - when:
+        ad_variant_id: x-keyword    # exact match on ctx.ad_variant_id
+        top_objection: price_too_high
+      picks:
+        - intent_id: message_match
+          rank: 1
+          why: "keyword ad + top objection → visual continuity"
+          signals_used: [ad_keyword, objection_price_too_high]
+
+  fallback_rules:                   # additive when primary_rules matched nothing
+    - when:
+        ad_variant_id: $present     # special: ad_variant_id is not null
+      picks:
+        - intent_id: message_match
+          rank: 1
+          why: "paid ad variant {ad_variant_id} → message-match"
+          signals_used: ["ad_{ad_variant_suffix}", channel_ad]
+
+    - when:
+        audience_route: b2b
+      picks:
+        - intent_id: peer_proof
+          rank: $next               # special: next available rank after existing picks
+          why: "B2B route → authority environment"
+          signals_used: [audience_route_b2b]
+
+    - when: {}                      # default — always matches
+      picks:
+        - intent_id: peer_proof
+          rank: 1
+          why: "neutral context → default credible environment"
+          signals_used: [default_peer_proof]
+
+# Maps image intent drives_action to page CTA slot ids (must match build_page).
+action_map:
+  default: program_overview
+  cta_keywords:                     # scanned in ctx.cta_primary (lowercase)
+    apply: primary_cta
+    demo: demo_cta
+  route_defaults:
+    b2b: hire_cta
+    individual: apply_cta
+  objection_pairs:                  # top_objection id → drives_action
+    # price_too_high: demo_cta
+
+prompt_defaults:
+  must_include:
+    - "cinematic wide 16:9 hero backdrop"
+    - "dark moody atmosphere supporting headline overlay"
+    - "accent color ({accent_color})"
+    - "single clear focal point"
+  must_avoid:
+    - "NO faces of real people or identifiable individuals"
+    - "NO company logos or brand marks"
+    - "NO text, words, letters, or numbers in the image"
+    - "NO visitor names, employer names, or PII"
+    - "NO surveillance or behavioral-tracking imagery"
+
+guardrails:
+  tier_gates:
+    industry: 2                     # strip industry layer when tier < 2
+    region_mood: 1                  # strip region layer when tier < 1

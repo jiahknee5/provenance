@@ -1,0 +1,33 @@
+# Keep the `railway up` upload context lean — mirrors .dockerignore intent.
+# Ship code + rules + app + the pre-generated hero image cache; drop everything heavy.
+.git/
+.venv/
+**/__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.playwright-mcp/
+.qa/
+docs/
+decks/
+architecture/
+team/
+mikhail/
+node_modules/
+# data/: only the hero image cache is needed at runtime (everything else is
+# reproducible or a local sqlite that Railway rebuilds).
+data/demo/provenance.sqlite
+data/demo/profiles.sqlite
+data/demo/customers.sqlite
+data/demo/*.sqlite-*
+data/demo/observe/
+data/demo/runs/
+data/demo/cache/
+data/demo/ledgers/
+data/demo/users.jsonl
+data/demo/eval_history.jsonl
+
+# Motion pregen PNG frames (~114MB) — production hero serves animated WebP under images/motion/
+data/demo/image_cache/images/motion_frames/
+.venv-local/
+/*.png

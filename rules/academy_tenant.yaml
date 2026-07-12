@@ -1,0 +1,46 @@
+# Academy tenant — an education / enrollment funnel on the Provenance engine.
+# "tenant = config": the engine (Gate, enrichment, personalization, observability) is shared;
+# this file defines the funnel, the people, the classes, and the surface-policy line.
+
+tenant: academy
+
+admissions_officers:
+  - name: Drew Rice
+    role: admissions
+    email: drew.rice@academy.example
+
+classes:
+  - id: intro_night
+    name: "Intro to AI Engineering — night cohort"
+    schedule: "Tue/Thu evenings"
+  - id: weekend_intensive
+    name: "Weekend Build Intensive"
+    schedule: "Saturdays"
+
+# the class login (see funnel.class_signup): a passwordless magic-link token, the SAME
+# opaque token the personalized website uses — one identity across the whole funnel.
+login:
+  type: magic_link
+  ties_to: customer_record
+  notes: "in-class text + voice Q&A authenticate with this token, attaching to the record"
+
+# Surface policy (the anti-creepiness control). by_source maps a touchpoint to what a 1:1
+# rep may do with the fact: say (reference directly) · allude (adjacent topic only) · hold.
+surface_policy:
+  consent_required: true
+  by_source:
+    web_form: say                 # they told us directly
+    class_signup: say
+    class_question_text: say      # they asked it on the record
+    class_question_voice: allude  # voice capture is more sensitive — don't recite it
+    ad: allude                    # behavioral — don't say "I saw you click our ad"
+    email: allude
+    web_return: allude
+    rep_note: allude              # don't quote your own notes back at them
+    external: allude              # 3rd-party / inferred
+  sensitive_keys: [health, family, finances_personal, religion, politics, immigration]
+  hold_sources: []
+
+# consent copy shown at class signup (recording disclosure for voice/text Q&A capture)
+consent:
+  class_recording: "Sessions may be recorded so we can follow up on your questions."
