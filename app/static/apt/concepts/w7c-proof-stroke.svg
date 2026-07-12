@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="apt">
+  <!-- apt "proof stroke" concept (W7-C, not shipped). One continuous stroke
+       draws the rounded-diamond boundary and exits past the right vertex as
+       a check tail: the boundary that certifies. Loses at 16px (documented
+       in the W7-C evaluation sheet); kept for the record. -->
+  <path fill="none" stroke="#0f1729" stroke-width="6.5" stroke-linejoin="miter" d="M32 9L13.95 27.05Q9 32 13.95 36.95L27.05 50.05Q32 55 36.95 50.05L58.45 28.55"/>
+</svg>

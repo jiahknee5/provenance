@@ -1,12 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="apt">
-  <!-- apt "truth boundary" mark (original). Outline diamond = the truth boundary;
-       solid inner diamond = the claim, structurally inside it. -->
-  <defs>
-    <linearGradient id="aptg" x1="7" y1="7" x2="57" y2="57" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#2E6FF5"/>
-      <stop offset="1" stop-color="#1B4DD1"/>
-    </linearGradient>
-  </defs>
-  <path d="M32 7 57 32 32 57 7 32Z" fill="none" stroke="url(#aptg)" stroke-width="4.5" stroke-linejoin="round"/>
-  <path d="M32 20.5 43.5 32 32 43.5 20.5 32Z" fill="url(#aptg)" stroke="url(#aptg)" stroke-width="2" stroke-linejoin="round"/>
+  <!-- apt "checked a" monogram (original, W7-C). Single-storey geometric a,
+       bowl R22/stroke 11 on the 64 grid; the counter is a negative-space
+       checkmark: two 45-degree strokes (band 7) clipped inside the round
+       r11 counter. Small = a normal a; at size, the proof reveals. -->
+  <path fill="#0f1729" fill-rule="evenodd" d="M43 10L54 10L54 54L43 54L43 51.053A22 22 0 1 1 43 12.947ZM21.045 32.995L28.8 40.75L42.041 27.509A11 11 0 0 0 37.293 22.357L28.8 30.85L23.265 25.315A11 11 0 0 0 21.045 32.995Z"/>
 </svg>

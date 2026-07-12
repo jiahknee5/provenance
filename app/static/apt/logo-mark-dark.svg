@@ -1,5 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="apt">
-  <!-- apt "truth boundary" mark — white, for dark surfaces. -->
-  <path d="M32 7 57 32 32 57 7 32Z" fill="none" stroke="#fff" stroke-width="4.5" stroke-linejoin="round"/>
-  <path d="M32 20.5 43.5 32 32 43.5 20.5 32Z" fill="#fff" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+  <!-- apt "checked a" monogram, white, for dark surfaces (W7-C). -->
+  <path fill="#fff" fill-rule="evenodd" d="M43 10L54 10L54 54L43 54L43 51.053A22 22 0 1 1 43 12.947ZM21.045 32.995L28.8 40.75L42.041 27.509A11 11 0 0 0 37.293 22.357L28.8 30.85L23.265 25.315A11 11 0 0 0 21.045 32.995Z"/>
 </svg>

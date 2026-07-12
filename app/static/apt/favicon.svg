@@ -1,13 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="apt">
-  <!-- apt app chip favicon: gradient rounded square (14/64 corners) + white truth-boundary
-       mark, weights bumped for 16-32px legibility. -->
-  <defs>
-    <linearGradient id="aptc" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#2E6FF5"/>
-      <stop offset="1" stop-color="#1B4DD1"/>
-    </linearGradient>
-  </defs>
+  <!-- apt app chip favicon (W7-C): gradient rounded square (14/64 corners)
+       + white checked-a monogram. Single evenodd path: renders identically
+       in browsers and CoreSVG (sips) - no masks. -->
+  <defs><linearGradient id="aptc" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#2E6FF5"/><stop offset="1" stop-color="#1B4DD1"/></linearGradient></defs>
   <rect width="64" height="64" rx="14" fill="url(#aptc)"/>
-  <path d="M32 12.5 51.5 32 32 51.5 12.5 32Z" fill="none" stroke="#fff" stroke-width="5.5" stroke-linejoin="round"/>
-  <path d="M32 23 41 32 32 41 23 32Z" fill="#fff" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+  <path fill="#fff" fill-rule="evenodd" d="M43 10L54 10L54 54L43 54L43 51.053A22 22 0 1 1 43 12.947ZM21.045 32.995L28.8 40.75L42.041 27.509A11 11 0 0 0 37.293 22.357L28.8 30.85L23.265 25.315A11 11 0 0 0 21.045 32.995Z"/>
 </svg>

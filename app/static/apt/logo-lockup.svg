@@ -1,29 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 164 64" role="img" aria-label="apt">
-  <!-- apt horizontal lockup: gradient app chip with white truth-boundary mark + original
-       hand-drawn heavy geometric lowercase "apt" (single-story a; not a traced font, so the
-       file is self-contained with no font dependency). Ink #0f1729 on transparent. -->
-  <defs>
-    <linearGradient id="aptl" x1="0" y1="6" x2="52" y2="58" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#2E6FF5"/>
-      <stop offset="1" stop-color="#1B4DD1"/>
-    </linearGradient>
-  </defs>
-  <!-- chip + mark -->
-  <g transform="translate(0 6) scale(0.8125)">
-    <rect width="64" height="64" rx="14" fill="url(#aptl)"/>
-    <path d="M32 12.5 51.5 32 32 51.5 12.5 32Z" fill="none" stroke="#fff" stroke-width="5.5" stroke-linejoin="round"/>
-    <path d="M32 23 41 32 32 41 23 32Z" fill="#fff" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
-  </g>
-  <!-- wordmark: x-height 30 (y 17-47), stem weight 8, 0.6 overshoot on bowls -->
-  <g fill="#0f1729">
-    <!-- a: bowl ring + right stem -->
-    <path fill-rule="evenodd" d="M81 16.4a15 15.6 0 1 0 0 31.2 15 15.6 0 1 0 0-31.2Zm0 7.5a7.5 8.1 0 1 1 0 16.2 7.5 8.1 0 1 1 0-16.2Z"/>
-    <rect x="88" y="17" width="8" height="30"/>
-    <!-- p: descender stem + bowl ring -->
-    <rect x="104" y="17" width="8" height="43.4"/>
-    <path fill-rule="evenodd" d="M119 16.4a15 15.6 0 1 0 0 31.2 15 15.6 0 1 0 0-31.2Zm0 7.5a7.5 8.1 0 1 1 0 16.2 7.5 8.1 0 1 1 0-16.2Z"/>
-    <!-- t: short-ascender stem + crossbar -->
-    <rect x="142" y="10.5" width="8" height="36.5"/>
-    <rect x="135" y="17" width="22.5" height="6.5"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 106 64" role="img" aria-label="apt">
+  <!-- apt wordmark lockup (original, W7-C). Wordmark-first system: the mark
+       IS the a, so the lockup is the wordmark alone (never pair chip +
+       wordmark side by side - the a would appear twice). 64-unit em,
+       x-height 32 (y18-50), circle bowls R16, stroke 11, crossbar 9.5
+       (optical), squared terminals, 6-unit letter gaps. The a carries the
+       negative-space check counter. Ink on transparent. -->
+  <path fill="#0f1729" fill-rule="evenodd" d="M25 18L36 18L36 50L25 50L25 49.199A16 16 0 1 1 25 18.801ZM15.02 34.452L18.545 37.977L24.564 31.958A5 5 0 0 0 22.406 29.617L18.545 33.477L16.029 30.961A5 5 0 0 0 15.02 34.452ZM42 18L53 18L53 18.801A16 16 0 1 1 53 49.199L53 63L42 63ZM53 34A5 5 0 1 0 63 34A5 5 0 1 0 53 34ZM85 10L96 10L96 18L102 18L102 27.5L96 27.5L96 50L85 50L85 27.5L78 27.5L78 18L85 18Z"/>
 </svg>

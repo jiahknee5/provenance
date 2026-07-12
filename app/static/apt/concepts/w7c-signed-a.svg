@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="apt">
+  <!-- apt "signed a" concept (W7-C, not shipped). Same geometric a with a
+       round counter; a detached gold receipt-dot square sits at the stem's
+       baseline terminal like a signature point. Mono fallback: the dot
+       becomes a knockout/outline square in the ink color. -->
+  <path fill="#0f1729" fill-rule="evenodd" d="M39 10L50 10L50 54L39 54L39 51.053A22 22 0 1 1 39 12.947ZM17 32A11 11 0 1 0 39 32A11 11 0 1 0 17 32Z"/>
+  <rect x="54" y="47" width="7" height="7" fill="#c9a24b"/>
+</svg>
