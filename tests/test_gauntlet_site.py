@@ -306,11 +306,12 @@ def test_dev_business_renders_story_sidebar_and_legend():
     assert "This visit, in plain English" in t
     for label in ("How they arrived", "What the network says", "Who they are", "What the page did"):
         assert label in t
-    # console sidebar navigation with anchors into all eight sections
+    # all eight sections render (the in-page rail that used to link them is
+    # gone — W8-A menu merge; the apt sidebar is the one menu)
     for anchor in ("b-overview", "b-workflow", "b-data", "b-decisions",
                    "b-copy", "img-hero", "b-guardrails", "b-delivery"):
-        assert f'id="{anchor}"' in t and f'href="#{anchor}"' in t, f"missing anchor: {anchor}"
-    assert 'id="img-og"' in t and 'href="#img-og"' in t
+        assert f'id="{anchor}"' in t, f"missing anchor: {anchor}"
+    assert 'id="img-og"' in t
     # the legend uses the business vocabulary (steer, not allude)
     assert "Three words used everywhere below" in t and ">steer<" in t
     p = c.get("/gauntletapt/dev/business?as=anon").text
@@ -597,11 +598,17 @@ def test_portal_dev_business_links_stay_under_prefix():
 # 8b · Marketer console (/dev/business rebuild)
 # --------------------------------------------------------------------------- #
 def test_console_sidebar_sections_render_on_both_mounts():
+    # W8-A menu merge: the in-page rail is gone (the apt sidebar is the one
+    # menu) — the eight chapters render as collapsed section cards in page
+    # order, so assert the sections themselves.
     for path in ("/dev/business", "/gauntletapt/dev/business"):
         t = c.get(f"{path}?as=anon").text
-        for section in ("Overview", "Workflow", "Data in", "Decisions",
-                        "Copy", "Images", "Guardrails", "Delivery"):
-            assert f"</span>{section}</a>" in t, f"{path} missing console nav: {section}"
+        for anchor, label in (("b-overview", "Overview"), ("b-workflow", "Workflow"),
+                              ("b-data", "Data in"), ("b-decisions", "Decisions"),
+                              ("b-copy", "Copy"), ("img-hero", "Images"),
+                              ("b-guardrails", "Guardrails"), ("b-delivery", "Delivery")):
+            assert f'id="{anchor}"' in t, f"{path} missing console section: {anchor}"
+            assert label in t, f"{path} missing console section label: {label}"
 
 
 def test_console_workflow_diagram_shows_branches_with_one_taken():

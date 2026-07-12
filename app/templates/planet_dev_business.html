@@ -59,7 +59,7 @@
 <div class="app">
 {% include "_apt_sidebar.html" %}
 <div class="main">
-<div class="topbar"><div class="crumb">{{ active.name }} / <b>Console</b></div><div class="grow"></div><a class="btn-primary" href="{{ nav.channels }}">Demo sitemap →</a></div>
+<div class="topbar"><div class="crumb">{{ active.name }} / <b>Page sections</b></div><div class="grow"></div></div>
 <div class="content" style="max-width:none">
 <div class="gb-head">
   <h1>Decision log — <a href="{{ g.page }}{{ qs }}" style="text-decoration:none">{{ g.page }}</a></h1>
@@ -77,12 +77,8 @@
 </div>
 <p class="gb-meta">{{ B.changed_count }} of {{ B.total_slots }} copy slots changed · same visitor state as <a href="{{ g.dev }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}">{{ g.dev }}</a></p>
 
-<div class="gb-entries">
-  <span class="lbl">Simulate entry</span>
-  {% for label, url in entry_links_raw %}<a href="{{ url }}">{{ label }} →</a>{% endfor %}
-</div>
-
-<!-- Sections — the per-section designer (S5, contract: designer-dom.md) -->
+<!-- Sections — the per-section designer (S5, contract: designer-dom.md).
+     Entry simulation lives on Personalization → Preview as visitor (W8-A). -->
 {% include "_sd_designer.html" %}
 
 <details class="sec sd-devfold">

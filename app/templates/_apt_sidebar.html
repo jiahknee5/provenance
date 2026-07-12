@@ -36,7 +36,9 @@
     <nav class="nav">
     {% for it in grp['items'] %}
     {% if it.children or it.clusters %}
-    <details class="nav-branch" {{ 'open' if active_group == grp.key else '' }}>
+    {# a branch unfolds only when the visitor is ON it (or one of its kids) —
+       everything else starts collapsed (W8-A: no menu-inside-a-menu) #}
+    <details class="nav-branch" {{ 'open' if active_sub == it.id or active_sub in it.sub_ids else '' }}>
       <summary>
         <a class="{{ 'on' if active_sub == it.id else '' }}" href="{{ it.href }}"><span class="ic">{{ it.icon }}</span> {{ it.label }}</a>
         <span class="tw">▾</span>

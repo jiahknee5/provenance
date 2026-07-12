@@ -470,8 +470,8 @@ def test_demo_hub_and_dev_hub_surface_skyfi():
     t = c.get("/apt/demo?site=skyfi").text
     assert "SkyFi" in t and 'href="/skyfiapt' in t
     hub = c.get("/apt/dev?site=skyfi").text
-    assert "/skyfiapt/dev" in hub
-    assert "Engineer console" in hub
+    assert "/skyfiapt/dev" in hub          # sidebar Page sections → /skyfiapt/dev/business
+    assert "Preview as visitor" in hub     # W8-A: /apt/dev is the Preview step now
     # the sidebar dropdown lists skyfi on the OTHER tenants' pages too (config-driven)
     g = c.get("/apt/dev?site=gauntlet").text
     assert "SkyFi" in g

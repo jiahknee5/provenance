@@ -3,18 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>apt — consoles</title>
+<title>apt — preview as visitor</title>
 {% include "_apt_shell.html" %}
 <style>
-  .hub-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:24px}
-  @media(max-width:760px){.hub-grid{grid-template-columns:1fr}}
-  .hub-card{display:flex;flex-direction:column;gap:6px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:var(--sh);padding:16px 18px;transition:border-color .14s,box-shadow .14s}
-  .hub-card:hover{border-color:var(--brand);box-shadow:var(--sh2)}
-  .hub-card.primary{border-color:#cfe0ff;background:linear-gradient(180deg,#fafcff 0%,#fff 100%)}
-  .hub-card .cap{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
-  .hub-card h2{font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
-  .hub-card p{font-size:12.5px;line-height:1.5;color:var(--body)}
-  .hub-card .go{margin-top:auto;padding-top:6px;font-size:12.5px;font-weight:700;color:var(--brand)}
+  .hub-live{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border:1px solid #cfe0ff;border-radius:14px;background:linear-gradient(180deg,#fafcff 0%,#fff 100%);box-shadow:var(--sh);padding:15px 18px;margin-bottom:14px}
+  .hub-live .txt{font-size:12.5px;line-height:1.5;color:var(--body);min-width:220px;flex:1}
+  .hub-live .txt b{color:var(--ink)}
+  .hub-live .btn-primary{white-space:nowrap}
   .hub-entries{border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:var(--sh);padding:15px 18px}
   .hub-entries .lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
   .hub-entries .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
@@ -30,34 +25,28 @@
   {% include "_apt_sidebar.html" %}
   <div class="main">
     <div class="topbar">
-      <div class="crumb">{{ active.name }} / <b>Consoles</b></div>
+      <div class="crumb">{{ active.name }} / <b>Preview as visitor</b></div>
       <div class="grow"></div>
       <span class="seg" aria-label="Identity preview">
         <a href="{{ toggle_anon }}" class="{{ 'on' if as_state == 'anon' else '' }}">Anonymous</a>
         <a href="{{ toggle_known }}" class="{{ 'on' if as_state != 'anon' else '' }}">Known</a>
       </span>
-      <a class="btn-primary" href="{{ demo_hub_path }}">Demo sitemap →</a>
     </div>
 
     <div class="content">
       <div class="hdr">
-        <h1>Personalization consoles</h1>
-        <p><b>{{ site_name }}</b> · {{ site_tagline }} Open the marketer or engineer console — each rebuilds deterministically from query params + login cookie. Identity preview: <b>{{ 'Anonymous — no login' if as_state == 'anon' else 'Known (' ~ sample_email ~ ')' }}</b>. Design exploration: <a href="/apt/mockups">UI mockups gallery →</a></p>
+        <h1>Preview as visitor</h1>
+        <p>See <b>{{ site_domain }}</b> exactly as a visitor sees it — same engine, same receipts.
+           Previewing as: <b>{{ 'Anonymous — no login' if as_state == 'anon' else 'Known (' ~ sample_email ~ ')' }}</b>.</p>
       </div>
 
-      <div class="hub-grid">
-        {% for card in console_cards %}
-        <a class="hub-card {{ card.kind }}" href="{{ card.href }}">
-          <div class="cap">{{ site_name }}</div>
-          <h2>{{ card.title }}</h2>
-          <p>{{ card.desc }}</p>
-          <span class="go">Open →</span>
-        </a>
-        {% endfor %}
+      <div class="hub-live">
+        <span class="txt"><b>Open the live page.</b> No simulated campaign — the visit carries only what a typed URL brings.</span>
+        <a class="btn-primary" href="{{ live_href }}">Open {{ site_domain }} →</a>
       </div>
 
       <div class="hub-entries">
-        <span class="lbl">Simulate an entry for {{ site_name }}</span>
+        <span class="lbl">Or arrive from a campaign</span>
         <div class="row">
           {% for label, url in entry_links %}<a href="{{ url }}">{{ label }} →</a>{% endfor %}
           <span class="lbl" style="margin-left:4px">then log in as</span>
@@ -65,7 +54,7 @@
         </div>
       </div>
 
-      <p class="hub-note">Consoles live at <code>{{ g.dev }}</code> and <code>{{ g.dev_business }}</code>. This hub routes you in with the right site and identity preview — it does not replace them.</p>
+      <p class="hub-note">Each entry opens the live page with that campaign's arrival signals. To see the decisions behind what shipped, use <b>Page sections</b> in the sidebar.</p>
     </div>
   </div>
 </div>

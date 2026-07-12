@@ -15,26 +15,8 @@
   .gb-tog a{font-size:13px;font-weight:600;color:var(--muted);padding:6px 14px;border-radius:7px;text-decoration:none}
   .gb-tog a.on{background:#fff;color:var(--ink);box-shadow:var(--shadow)}
   .gb-meta{font-size:12.5px;color:var(--muted);margin:0 0 12px}
-  /* ---- left sidebar navigation (mirrors /dev) ---- */
-  .gd-layout{display:grid;grid-template-columns:200px minmax(0,1fr);gap:26px;align-items:start;margin-top:14px}
-  .gd-side{position:sticky;top:14px;display:flex;flex-direction:column;gap:2px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:10px 8px}
-  .gd-side .side-cap{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:6px 10px 4px}
-  .gd-side a + .side-cap{margin-top:10px;border-top:1px solid var(--line);padding-top:12px}
-  .gd-side a{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:600;color:var(--muted);padding:7px 10px;border-radius:8px;text-decoration:none;border:1px solid transparent}
-  .gd-side a .num{width:18px;height:18px;border-radius:5px;background:#E4E8EC;color:#475569;font-size:10px;font-weight:800;display:grid;place-items:center;flex:none}
-  .gd-side a:hover{color:var(--ink);background:#F6F8FA}
-  .gd-side a.on{color:var(--ink);background:#F1F3F5;border-color:var(--line)}
-  .gd-side a.on .num{background:var(--ink);color:#fff}
-  .gd-side a.page-link{color:var(--brand)}
-  .gd-side a.img-sub{padding-left:28px;font-size:11.5px;font-weight:600;color:#64748b}
-  .gd-side a.img-sub .num{display:none}
-  .gd-main{min-width:0}
-  @media(max-width:920px){
-    .gd-layout{grid-template-columns:1fr;gap:0}
-    .gd-side{position:sticky;top:0;z-index:60;flex-direction:row;flex-wrap:wrap;align-items:center;border-radius:0 0 12px 12px;margin:0 -8px;padding:8px}
-    .gd-side .side-cap{display:none}
-    .gd-side a + .side-cap{border:0;margin:0;padding:0}
-  }
+  /* in-page rail removed (W8-A): the apt sidebar is the ONE menu — chapters are
+     the collapsed section cards themselves, in page order */
   .sec[id]{scroll-margin-top:16px}
   .sec{border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px}
   .sec .h{padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -196,7 +178,7 @@
 <div class="app">
 {% include "_apt_sidebar.html" %}
 <div class="main">
-<div class="topbar"><div class="crumb">{{ active.name }} / <b>Console</b></div><div class="grow"></div><a class="btn-primary" href="{{ nav.channels }}">Demo sitemap →</a></div>
+<div class="topbar"><div class="crumb">{{ active.name }} / <b>Page sections</b></div><div class="grow"></div></div>
 <div class="content" style="max-width:none">
 <div class="gb-head">
   <h1>Marketer console — <a href="{{ g.page }}{{ qs }}" style="text-decoration:none">{{ g.page }}</a></h1>
@@ -215,42 +197,12 @@
   <a href="{{ g.dev }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}">technical view</a>.</p>
 
 <div class="gb-channel">
-  <a href="{{ demo_hub_path }}">← Demo sitemap</a>
   <span class="meta">Channel <b>{{ C.channel_context.channel_label }}</b>{% if C.channel_context.utm_campaign %} · {{ C.channel_context.utm_campaign }}{% endif %}{% if C.channel_context.ad_variant %} · ad {{ C.channel_context.ad_variant }}{% if C.channel_context.ad_targeting %} ({{ C.channel_context.ad_targeting }}){% endif %}{% endif %}</span>
   <span class="tag">visit context</span>
 </div>
 
-<div class="gd-layout">
-<aside class="gd-side" id="gb-nav">
-  <div class="side-cap">Console</div>
-  <a href="#b-overview" data-ch="b-overview"><span class="num">1</span>Overview</a>
-  <a href="#b-workflow" data-ch="b-workflow"><span class="num">2</span>Workflow</a>
-  <a href="#b-data" data-ch="b-data"><span class="num">3</span>Data in</a>
-  <a href="#b-decisions" data-ch="b-decisions"><span class="num">4</span>Decisions</a>
-  <div class="side-cap">Sections</div>
-  {% for s in SD.sections %}
-  <a href="#sd-{{ s.id }}" class="img-sub" data-ch="sd-{{ s.id }}">{{ s.label }}</a>
-  {% endfor %}
-  <div class="side-cap">Copy</div>
-  <a href="#b-copy" data-ch="b-copy"><span class="num">5</span>Copy</a>
-  <div class="side-cap">Images</div>
-  <a href="#img-hero" data-ch="img-hero"><span class="num">6</span>Images</a>
-  {% for im in C.image_cards %}
-  <a href="#img-{{ im.id }}" class="img-sub" data-ch="img-{{ im.id }}">{{ im.label }}</a>
-  {% endfor %}
-  <a href="#b-guardrails" data-ch="b-guardrails"><span class="num">7</span>Guardrails</a>
-  <a href="#b-delivery" data-ch="b-delivery"><span class="num">8</span>Delivery</a>
-  <div class="side-cap">Other views</div>
-  <a href="{{ g.dev }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}" class="page-link">Technical view →</a>
-  <a href="{{ g.image_decisions }}" class="page-link">Image decisions guide →</a>
-  <a href="{{ g.page }}{{ qs }}" class="page-link">Live page →</a>
-</aside>
-<div class="gd-main">
-
-<div class="gb-entries">
-  <span class="lbl">Simulate entry</span>
-  {% for label, url in entry_links_raw %}<a href="{{ url }}">{{ label }} →</a>{% endfor %}
-</div>
+{# in-page rail + "Simulate entry" row removed (W8-A): the apt sidebar is the one
+   menu; entry simulation lives on Personalization → Preview as visitor #}
 
 <!-- 1 · Overview -->
 <details class="sec" id="b-overview">
@@ -599,32 +551,8 @@
     <a href="{{ g.dev }}{{ qs }}{% if qs %}&{% else %}?{% endif %}as={{ as_state }}">Technical view →</a></div>
 </details>
 
-</div>
-</div>
-
 {% include "_sd_drawer.html" %}
 {% include "_collapse.html" %}
-
-<script>
-(function () {
-  /* ---- scroll spy ---- */
-  var links = Array.prototype.slice.call(document.querySelectorAll('#gb-nav a[data-ch]'));
-  var sections = links.map(function (a) { return document.getElementById(a.getAttribute('data-ch')); });
-  function spy() {
-    var current = null;
-    for (var i = 0; i < sections.length; i++) {
-      if (!sections[i] || sections[i].offsetParent === null) continue;  // folded/hidden
-      if (current === null) current = sections[i];
-      if (sections[i].getBoundingClientRect().top <= 80) current = sections[i];
-    }
-    links.forEach(function (a) {
-      a.classList.toggle('on', current && a.getAttribute('data-ch') === current.id);
-    });
-  }
-  document.addEventListener('scroll', spy, { passive: true });
-  spy();
-})();
-</script>
 </div>
 </div>
 </div>

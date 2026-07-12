@@ -101,7 +101,9 @@
 </div>
 
 {% for s in SD.sections %}
-<details class="sec sd-card" id="sd-{{ s.id }}" data-testid="sd-section-{{ s.id }}" {{ 'open' if loop.first else '' }}>
+{# every card ships collapsed (W8-A) — _collapse.html auto-expands the #sd-{id}
+   deep-link target, so sidebar "Page sections" kids still land opened #}
+<details class="sec sd-card" id="sd-{{ s.id }}" data-testid="sd-section-{{ s.id }}">
   <summary class="h" data-guard-row>
     {{ s.label }}
     <span class="sd-region">{{ s.region }}</span>

@@ -411,7 +411,9 @@ def console_shell_ctx(active_site: str, active_nav: str, *,
         {"group": "Personalization", "key": "consoles", "items": [
             {"id": "designer", "icon": "◨", "label": "Page sections",
              "href": m["dev_business"], "children": section_children},
-            {"id": "engineer", "icon": "⌗", "label": "Decision trace", "href": m["dev"]},
+            # "Decision trace" (engineer console) left out of the marketer nav on
+            # purpose (W8-A menu merge): it stays one click away via the console's
+            # Developer/audit toggle and "Technical view →" link (R32).
             {"id": "hub", "icon": "◑", "label": "Preview as visitor", "href": f"{_OPS_HUB_PATH}?site={active_site}"},
             {"id": "playbook", "icon": "?", "label": "Playbook",
              "href": f"/apt/playbook?site={active_site}",
@@ -434,6 +436,14 @@ def console_shell_ctx(active_site: str, active_nav: str, *,
             {"id": "replica", "icon": "↗", "label": f"Open {meta['domain']}", "href": m["page"]},
         ]},
     ]
+    # Each branch knows its descendant ids so the sidebar can open ONLY the
+    # active trail — every other branch starts collapsed (W8-A menu merge).
+    for grp in nav_tree:
+        for it in grp["items"]:
+            sub_ids = [k["id"] for k in it.get("children", [])]
+            for cl in it.get("clusters", []):
+                sub_ids.extend(k["id"] for k in cl["kids"])
+            it["sub_ids"] = sub_ids
     # Back-compat: pages pass observatory/costs as active_nav.
     group_of = {"channels": "channels", "consoles": "consoles",
                 "observatory": "measure", "costs": "measure"}

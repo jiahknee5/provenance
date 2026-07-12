@@ -34,3 +34,23 @@ are what the build proves.
 | /lead, /submit, /site/{token}, /site/{token}/cta | **KEPT — exception (T-09)** | Property T4 (`test_website.py`, LOCKED) exercises this plane's engine (`app.site.render_site_data`), and the live-optimizer serving path (assign→impression→reward) runs through /site; /lead+/submit are its only entry. Restyled standalone (no legacy chrome). Root-cause fix riding along: `init_db` now migrates pre-tenant `impressions` tables (dev DBs died with `no such column: tenant` on every /site visit — pre-existing, confirmed on baseline). |
 | /help, /help/{slug} | **RETIRED (T-09 G3)** | Product docs now live in the repo corpus (`docs/`, RUNBOOK); the in-app corpus (`app/help_corpus.json`) + `help.html`/`help_article.html` deleted. **Pre-existing failure resolved here:** `test_full_suite.py::test_integrations_show_base_vs_connect` — root cause: the `integrations` article body used `type:"table"` blocks, but `help_article.html`'s renderer only implemented `p/h/ul/ol/note/kv/code`, so the table (People Data Labs / What it adds / Why it matters) silently rendered as nothing; the test asserted a renderer branch that never existed. The surface is retired, so test + route were removed together rather than implementing a `table` branch for a dead page. `test_help_aligns_with_the_app` + `test_version_tag_and_whats_new_in_foot` removed with it (assert only /help content). |
 | / (home), /lead, /submit, /site/<token>* | KEEP if property tests exercise them (property tests win over retirement — T-09 logs exceptions here) |
+
+## W8-A menu merge (2026-07-12, operator-directed)
+
+Operator call: "merge the menu-inside-a-menu; simplify; chronological marketer
+workflows; sections expandable but start hidden; HubSpot/X-Ads-friendly." One
+menu now: the apt sidebar. Test updates below are architecture updates of
+presentation-IA assertions only (none locked; engines untouched).
+
+| Surface | Disposition | Where the value lives now |
+|---|---|---|
+| /apt/dev console-launcher cards (Marketer/Engineer/replica/ads-grid `hub-grid`) | **REMOVED** | Duplicated the sidebar item-for-item. Page repurposed as **Preview as visitor** (identity toggle + entry chips + open-live CTA). Tests updated: `test_apt_dev_hub.py::test_apt_dev_hub_defaults_to_gauntlet`, `test_demo_nav.py::test_apt_dev_hub_is_preview_not_console_launcher` (was `_marketer_console_first`), `test_skyfi_site.py::test_demo_hub_and_dev_hub_surface_skyfi`. |
+| Gauntlet marketer console in-page rail (`gd-side`/`gb-nav`, 8 numbered links + Sections/Copy/Images/Other views) | **REMOVED** | The literal menu-inside-a-menu. Chapters are the collapsed section cards themselves, in page order; sd-* deep links from sidebar auto-expand via `_collapse.html`. Scroll-spy script deleted. Tests updated: `test_gauntlet_site.py::test_console_sidebar_sections_render_on_both_mounts`, `::test_dev_business_renders_story_sidebar_and_legend` (assert sections by id, not rail hrefs). |
+| "Simulate entry" chip row on all 3 marketer consoles | **MOVED** | Lives on Personalization → Preview as visitor (/apt/dev). |
+| "Demo sitemap →" topbar button on consoles + hub; "← Demo sitemap" in gauntlet channel strip | **REMOVED** | Sidebar Campaigns → Overview is the one route to /apt/demo. Tests updated: `test_demo_nav.py::test_apt_dev_hub_links_demo_sitemap`, `::test_marketer_console_channel_strip_and_prompt_catalog`. |
+| Sidebar "Decision trace" item | **REMOVED** | Engineer console stays one click away: console "Technical view →" + Developer/audit fold (R32). |
+| Sidebar branches auto-open for the whole active group | **CHANGED** | Branch opens only on the active trail (`sub_ids` computed in `demo_nav.console_shell_ctx`); everything else starts collapsed. |
+| First designer card ships `open` | **CHANGED** | All sd-cards start collapsed; `#sd-{id}` deep links auto-expand. DOM contract (sd-* testids) unchanged. |
+
+Engineer consoles (`/dev` pages) keep their own rails for now — technical
+audience, candidate for a later wave.

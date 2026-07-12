@@ -1,6 +1,10 @@
-"""Unified /apt/dev hub — site picker + links into each tenant's existing consoles.
+"""/apt/dev — "Preview as visitor" (W8-A menu merge).
 
-Does not replace /gauntletapt/dev or /planetapt/dev; those pages stay unchanged.
+Formerly a console-launcher menu (cards into each tenant's /dev surfaces); that
+duplicated the apt sidebar item-for-item, so the cards are gone. The page is now
+the PREVIEW step of the marketer workflow: pick an identity, simulate an entry
+channel, or open the live page. Consoles stay reachable from the sidebar
+("Page sections") and the console's own "Technical view →" link.
 """
 from __future__ import annotations
 
@@ -78,54 +82,6 @@ def _as_state(request: Request, site: dict) -> str:
 _DEMO_HUB_PATH = "/apt/demo"
 
 
-def _console_cards(m: dict[str, str], qs: str, as_state: str) -> list[dict]:
-    as_q = f"{qs}&as={as_state}" if "?" in qs else f"{qs}?as={as_state}"
-    cards = [
-        {
-            "title": "Marketer console",
-            "desc": "Campaign-ops view — workflow, copy slots, image guardrails, staged YAML diffs.",
-            "href": f"{m['dev_business']}{as_q}",
-            "kind": "primary",
-        },
-        {
-            "title": "Engineer console",
-            "desc": "Full decision trace, 11-stage process map, plain-English story, audit ledger.",
-            "href": f"{m['dev']}{as_q}",
-            "kind": "primary",
-        },
-        {
-            "title": "Live replica",
-            "desc": "The personalized page a visitor sees — same query params, no console chrome.",
-            "href": f"{m['page']}{qs}",
-            "kind": "secondary",
-        },
-    ]
-    # Image-decisions guide only where the tenant ships one (mount key = config).
-    if m.get("image_decisions"):
-        cards.insert(2, {
-            "title": "Image decisions",
-            "desc": "Pipeline guide — intents, guardrails, pre-cached vs live inventory.",
-            "href": m["image_decisions"],
-            "kind": "secondary",
-        })
-    if m.get("ads"):
-        cards.append({
-            "title": "X ads grid",
-            "desc": "All 12 paid-social mockups with per-variant landing links.",
-            "href": m["ads"],
-            "kind": "secondary",
-        })
-    # ads_lp is a 302 alias of the /ads grid now (one grid per tenant) — no card.
-    if m.get("ad_lp"):
-        cards.append({
-            "title": "X ads grid",
-            "desc": "12-variant catalog with message-match landing URLs.",
-            "href": m["ad_lp"],
-            "kind": "secondary",
-        })
-    return cards
-
-
 def build_hub_view(request: Request) -> dict:
     from pipeline.personalization import demo_nav as NAV
 
@@ -155,6 +111,6 @@ def build_hub_view(request: Request) -> dict:
         "toggle_known": toggle_known,
         "sample_email": sample_email,
         "entry_links": site["entry_links"](m),
-        "console_cards": _console_cards(m, qs, as_state),
+        "live_href": f"{m['page']}{qs}",
         "g": m,
     }

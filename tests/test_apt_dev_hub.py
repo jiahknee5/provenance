@@ -18,14 +18,13 @@ def test_apt_dev_hub_returns_200():
 
 
 def test_apt_dev_hub_defaults_to_gauntlet():
+    # W8-A menu merge: /apt/dev is "Preview as visitor" — the console-launcher
+    # cards are gone (they duplicated the apt sidebar item-for-item).
     t = c.get("/apt/dev").text
-    assert 'href="/gauntletapt/dev' in t
-    assert "Marketer console" in t
-    assert "Engineer console" in t
-    # The shared flow diagram also names both consoles, but above the cards; scope the
-    # ordering assertion to the console-card grid so it tests card IA (marketer first).
-    grid = t[t.find('class="hub-grid"'):]
-    assert grid.find("Marketer console") < grid.find("Engineer console")
+    assert "Preview as visitor" in t
+    assert 'href="/gauntletapt' in t          # live-page CTA targets the replica
+    assert "hub-grid" not in t                # no console-card menu-inside-a-menu
+    assert "Marketer console" not in t and "Engineer console" not in t
 
 
 def test_apt_dev_hub_site_planet():

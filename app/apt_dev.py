@@ -1,7 +1,7 @@
-"""Unified personalization console hub — one entry for Gauntlet + Planet /dev surfaces.
+"""/apt/dev — "Preview as visitor" (W8-A): identity + entry simulation.
 
-  GET /apt/dev — site picker at top; links into each tenant's existing consoles
-                 (/gauntletapt/dev, /planetapt/dev, etc.) without replacing them.
+  GET /apt/dev — pick an identity and an entry channel, open the live page as
+                 that visitor. Console links live in the apt sidebar, not here.
 
 Query params:
   site=gauntlet|planet  — which demo (default gauntlet)

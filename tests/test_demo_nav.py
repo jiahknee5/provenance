@@ -159,20 +159,22 @@ def test_wf_demo_006_hub_site_switch_preserves_as():
     assert "/gauntletapt/dev" in t and "as=known" in t
 
 
-def test_apt_dev_hub_marketer_console_first():
+def test_apt_dev_hub_is_preview_not_console_launcher():
+    # W8-A menu merge: /apt/dev no longer renders console-launcher cards (they
+    # duplicated the sidebar). It is the Preview step: live CTA + entry chips.
     t = c.get("/apt/dev").text
-    # Scope to the console-card grid: the shared flow diagram also names both consoles,
-    # but above the cards. This tests card IA (marketer first), not the nav element.
-    grid = t[t.find('class="hub-grid"'):]
-    m_pos = grid.find("Marketer console")
-    e_pos = grid.find("Engineer console")
-    assert m_pos != -1 and e_pos != -1
-    assert m_pos < e_pos
+    assert "Preview as visitor" in t
+    assert "hub-grid" not in t
+    assert "Marketer console" not in t and "Engineer console" not in t
+    assert "hub-live" in t                       # open-the-live-page CTA
+    assert "Or arrive from a campaign" in t      # entry simulation row
 
 
 def test_apt_dev_hub_links_demo_sitemap():
+    # Campaigns overview stays one canonical route away — via the sidebar tree
+    # (the redundant topbar "Demo sitemap →" button was removed in W8-A).
     t = c.get("/apt/dev").text
-    assert 'href="/apt/demo"' in t
+    assert 'href="/apt/demo?site=' in t
 
 
 def test_demo_sitemap_prompt_reference_count():
@@ -275,15 +277,15 @@ def test_wf_demo_010_prebuild_delivery_inventory():
 
 
 def test_marketer_console_channel_strip_and_prompt_catalog():
+    # W8-A menu merge: the console's in-page rail (side-cap groups) and its
+    # "← Demo sitemap" link are gone — the apt sidebar is the ONE menu. The
+    # visit-context strip and the prompt catalog stay.
     t = c.get(f"/gauntletapt/dev/business{V09_QS}&as=anon").text
-    assert 'href="/apt/demo"' in t
-    assert "← Demo sitemap" in t
     assert "visit context" in t
     assert "Prompt reference" in t
     assert "rules/design_prompts.yaml" in t
     assert "gauntlet.hero.message_match.ad" in t
-    assert 'class="side-cap">Copy</div>' in t
-    assert 'class="side-cap">Images</div>' in t
+    assert 'id="gb-nav"' not in t and 'class="side-cap"' not in t   # no menu-inside-a-menu
 
 
 def test_planet_ads_links_demo_sitemap():
