@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>apt — playbook</title>
+{% include "_apt_shell.html" %}
+<style>
+  /* playbook-specific styles layered on the shell */
+  .content{max-width:980px}
+  details.ch{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh);margin-bottom:18px;overflow:hidden}
+  summary.ch-head{display:flex;align-items:center;gap:12px;padding:16px 20px;flex-wrap:wrap}
+  summary.ch-head .num{width:28px;height:28px;border-radius:8px;background:var(--ink);color:#fff;font-size:13px;font-weight:800;display:grid;place-items:center;flex:none}
+  summary.ch-head h2{font-size:16.5px;font-weight:800;letter-spacing:-.01em}
+  summary.ch-head .q{font-size:12px;color:var(--muted);margin-left:auto;max-width:46ch;text-align:right}
+  @media(max-width:920px){summary.ch-head .q{display:none}}
+  .ch-body{padding:4px 20px 20px;border-top:1px solid var(--line2)}
+  .pb-badge{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;border-radius:5px;padding:2px 8px;flex:none}
+  .pb-badge.live{background:#e7f6ee;color:#0a8a4f}
+  .pb-badge.future{background:#fff4e5;color:#b36b00}
+  .pb-badge.pov{background:#efe9fd;color:#6d3fd4}
+  .pb-step{border:1px solid var(--line);border-radius:12px;margin-top:14px;overflow:hidden}
+  .pb-step .st-head{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#FAFBFC;border-bottom:1px solid var(--line2)}
+  .pb-step .st-head .n{width:22px;height:22px;border-radius:6px;background:var(--brand-t);color:var(--brand-d);font-size:11.5px;font-weight:800;display:grid;place-items:center;flex:none}
+  .pb-step .st-head h3{font-size:13.5px;font-weight:700}
+  .pb-step .bd{padding:12px 14px;font-size:13px;color:var(--body);line-height:1.55}
+  .pb-step .bd p{margin-bottom:8px}
+  .pb-step .bd p:last-child{margin-bottom:0}
+  .pb-default{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--ok);margin-right:6px}
+  .pb-custom{display:flex;align-items:flex-start;gap:8px;border-top:1px dashed var(--line);margin-top:10px;padding-top:10px;font-size:12px;color:var(--muted);line-height:1.5}
+  .pb-custom .chip{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;background:var(--brand-t);color:var(--brand-d);border-radius:5px;padding:2px 8px;flex:none;margin-top:1px}
+  .pb-custom code{background:var(--line2);padding:1px 5px;border-radius:4px;font-size:11px;font-family:ui-monospace,Menlo,monospace}
+  .pb-honesty{display:flex;gap:10px;align-items:flex-start;background:#fdf6e7;border:1px solid #f0dcae;border-radius:10px;padding:10px 14px;margin-top:12px;font-size:12.5px;color:#7a5a12;line-height:1.5}
+  .pb-honesty b{color:#8a6410}
+  .pb-note{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5}
+  ul.pb-list{margin:6px 0 0 18px;font-size:12.5px;color:var(--body);line-height:1.6}
+  details.sec{border:1px solid var(--line);border-radius:10px;margin-top:8px;overflow:hidden}
+  details.sec>summary.h{display:flex;align-items:center;gap:9px;padding:9px 12px;background:#FAFBFC;flex-wrap:wrap;border-bottom:1px solid var(--line2)}
+  details.sec>summary.h .iid{font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:700;color:var(--ink)}
+  details.sec>summary.h .tech{font-size:11.5px;color:var(--muted)}
+  .in-bd{padding:10px 12px;font-size:12.5px;color:var(--body);line-height:1.55}
+  .in-kv{display:grid;grid-template-columns:170px 1fr;gap:4px 12px;font-size:12px}
+  .in-kv .k{color:var(--muted);font-weight:700}
+  .in-kv .v code{background:var(--line2);padding:0 4px;border-radius:4px;font-size:11px;font-family:ui-monospace,Menlo,monospace}
+  .pb-strat{border:1px solid var(--line);border-radius:10px;margin-top:8px;padding:10px 12px}
+  .pb-strat .sk{font-size:12.5px;font-weight:800;color:var(--ink)}
+  .pb-strat .pr{font-size:12.5px;color:var(--body);margin-top:3px;line-height:1.5}
+  .pb-strat .ex{font-size:11.5px;color:var(--muted);margin-top:5px}
+  .pb-strat .ex code{background:var(--line2);padding:1px 5px;border-radius:4px;font-size:10.5px}
+  .pb-kv{display:grid;grid-template-columns:180px 1fr;gap:4px 12px;font-size:12.5px;margin-top:8px}
+  .pb-kv .k{color:var(--muted);font-weight:700}
+  .pb-kv .v{font-family:ui-monospace,Menlo,monospace;font-size:11.5px}
+</style>
+</head>
+<body>
+<div class="app">
+  {% include "_apt_sidebar.html" %}
+  <div class="main">
+    <div class="topbar">
+      <div class="crumb">apt / <b>Playbook</b> / {{ site_name }}</div>
+      <div class="grow"></div>
+      <a class="btn-primary" href="{{ designer_href }}">Open the designer ↗</a>
+    </div>
+    <div class="content">
+      <div class="hdr">
+        <h1>Playbook — how {{ site_name }}'s pages are made</h1>
+        <p>The default methodology behind every personalized image and every line of copy —
+           and exactly where each piece is customizable. Every fact on this page is rendered
+           from the same config the engine reads: <code>{{ files.image }}</code>,
+           <code>{{ files.sections }}</code>, and the strategy catalog in code.</p>
+        <p class="pb-note">Customize chips point at the designer control or the YAML key that owns
+           each block. Edits made in the designer <b>stage YAML diffs in the review drawer</b> —
+           nothing saves live until the diff ships.</p>
+      </div>
+
+      {# ================= Chapter 1 — How images are made ================= #}
+      <details class="ch" id="images">
+        <summary class="ch-head">
+          <span class="num">1</span>
+          <h2>How images are made</h2>
+          <span class="pb-badge live">Default methodology</span>
+          <span class="q">visitor signals → visual intent → structured prompt → guardrails → delivery</span>
+        </summary>
+        <div class="ch-body">
+
+          <div class="pb-step">
+            <div class="st-head"><span class="n">1</span><h3>Read the visitor's arrival signals</h3></div>
+            <div class="bd">
+              <p><span class="pb-default">Default</span> Every image decision starts from what
+                 the click itself carries: the entry channel (ad, email, search, direct), the ad
+                 variant if there is one, the network read (corporate netblock, industry, region
+                 — tier-gated by confidence), the audience route, and the ranked objection stack.
+                 Nothing is asked of the visitor and nothing personal is quoted.</p>
+              <div class="pb-custom"><span class="chip">Customize</span>
+                <span>Which channels a section personalizes on: the <code>channels</code> field per section in
+                <code>{{ files.sections }}</code> — staged as a YAML diff in the designer drawer.</span></div>
+            </div>
+          </div>
+
+          <div class="pb-step">
+            <div class="st-head"><span class="n">2</span><h3>Pick a visual strategy — the intent catalog</h3></div>
+            <div class="bd">
+              <p><span class="pb-default">Default</span> A deterministic rule chain (no AI in the
+                 routing) maps those signals to one of {{ site_name }}'s
+                 {{ intents|length }} visual intents below. Each intent is a conversion hypothesis:
+                 a sales technique, the action it drives, and a stimulation model —
+                 <b>predicted</b> attention/valence proxies, not a measurement.</p>
+              <div class="pb-honesty">
+                <b>Honesty note:</b>&nbsp;the brain fields below are <b>predicted response modeling —
+                not measured brain data</b>. Scores come from a tribe-v2-compatible simulator (or
+                off-the-shelf vision proxies): simulated predictions about attention and valence,
+                never a reading of any visitor's brain.
+              </div>
+              {% for i in intents %}
+              <details class="sec" id="intent-{{ i.id }}">
+                <summary class="h"><span class="iid">{{ i.id }}</span><span class="tech">{{ i.sales_technique }}</span></summary>
+                <div class="in-bd">
+                  <div class="in-kv">
+                    <span class="k">Drives the action</span><span class="v">{{ i.conversion_goal }}</span>
+                    <span class="k">Predicted attention/valence proxies</span>
+                    <span class="v"><code>{{ i.brain_target }}</code> target · regions {% for r in i.brain_regions %}<code>{{ r }}</code> {% endfor %}(simulated proxies — not measured)</span>
+                    <span class="k">Visual metaphor</span><span class="v">{{ i.visual_metaphor }}</span>
+                    <span class="k">Mood</span><span class="v">{{ i.mood }}</span>
+                    <span class="k">Color rules</span><span class="v">{{ i.color_rules }}</span>
+                    <span class="k">Composition</span><span class="v">{{ i.composition }}</span>
+                  </div>
+                  {% if i.design_principles %}
+                  <ul class="pb-list">{% for p in i.design_principles %}<li>{{ p }}</li>{% endfor %}</ul>
+                  {% endif %}
+                </div>
+              </details>
+              {% endfor %}
+              <div class="pb-custom"><span class="chip">Customize</span>
+                <span>The whole catalog is yours: add, retire, or reword intents under
+                <code>intents:</code> in <code>{{ files.image }}</code> — metaphors, moods,
+                selection rules, and per-intent signal allow/block lists all live there.</span></div>
+            </div>
+          </div>
+
+          <div class="pb-step">
+            <div class="st-head"><span class="n">3</span><h3>Assemble the structured prompt</h3></div>
+            <div class="bd">
+              <p><span class="pb-default">Default</span> The chosen intent is compiled into a
+                 structured prompt: the brand block (name + accent
+                 {% if accent_color %}<code>{{ accent_color }}</code>{% endif %}), the intent's
+                 composition template, and its color rules. It is <b>two-tier</b>: a shared base
+                 prompt per segment, plus a tier-2 personalization delta layered on only when the
+                 visitor's signals justify it — so most visitors share a cached base image and the
+                 delta stays small, auditable, and separately cached.</p>
+              <div class="pb-custom"><span class="chip">Customize</span>
+                <span><code>composition_template</code>, <code>color_rules</code>, and the brand block in
+                <code>{{ files.image }}</code>; per-surface prompt shape per image target in
+                <code>{{ files.sections }}</code>.</span></div>
+            </div>
+          </div>
+
+          <div class="pb-step">
+            <div class="st-head"><span class="n">4</span><h3>Guardrails — what an image may never do</h3></div>
+            <div class="bd">
+              <p><span class="pb-default">Default</span> Before anything generates, the prompt
+                 passes tier gates and a hard must-avoid scan. Tier gates hold personal-feeling
+                 layers back until network confidence earns them:
+                 {% for k, v in tier_gates.items() %}<code>{{ k }}</code> needs tier {{ v }}+{{ ", " if not loop.last }}{% endfor %}.
+                 The anti-surveillance hold is structural: anything the surface policy marks
+                 <code>hold</code> is stripped from the prompt, never softened.</p>
+              <ul class="pb-list">
+                {% for m in must_avoid %}<li>{{ m }}</li>{% endfor %}
+              </ul>
+              <div class="pb-custom"><span class="chip">Customize</span>
+                <span><code>must_avoid</code> and <code>guardrails.tier_gates</code> in
+                <code>{{ files.image }}</code>; per-target guardrails in <code>{{ files.sections }}</code>.
+                Loosening a global guardrail is a constitution-level change — the designer will not stage it.</span></div>
+            </div>
+          </div>
+
+          <div class="pb-step">
+            <div class="st-head"><span class="n">5</span><h3>Delivery — prebuilt vs realtime</h3></div>
+            <div class="bd">
+              <p><span class="pb-default">Default</span> Two ways an image reaches the page.
+                 <b>Prebuilt</b>: baked offline before deploy — 0&nbsp;ms on the visit, $0 per visit,
+                 hard-capped at {{ caps.states_per_target }} states per image target,
+                 {{ caps.images_per_tenant }} baked images per website, {{ caps.images_global }} global.
+                 <b>Realtime</b>: the page paints instantly with a brand gradient, then swaps in the
+                 generated image in ~2s; each generation costs about
+                 ${{ '%.3f'|format(caps.per_gen_usd) }} and is cached by key so it is paid once.
+                 A ${{ '%.0f'|format(caps.ceiling_usd) }}/day per-website spend ceiling backstops the
+                 realtime lane — past it, the neutral prebuilt/gradient ships instead. Every API call
+                 is cost-logged to the spend ledger, including failures.</p>
+              <div class="pb-custom"><span class="chip">Customize</span>
+                <span>The <code>sd-workflow</code> control on any image target in the designer
+                (prebuilt / realtime / live); which states get baked lives in the prebuild manifest
+                <code>{{ files.prebuild }}</code>.</span></div>
+            </div>
+          </div>
+
+          <div class="pb-step">
+            <div class="st-head"><span class="n">6</span><h3>Optional — best-of-N predicted-response scoring</h3></div>
+            <div class="bd">
+              <p><span class="pb-default">Default</span> Off by default
+                 {% if brain_sim_enabled %}(enabled for {{ site_name }}){% else %}({{ site_name }} currently has it off){% endif %}.
+                 When on, the engine generates N candidate images and a tribe-v2-compatible
+                 simulator scores each against the intent's predicted attention/valence proxies;
+                 the highest-scoring candidate ships and the score lands on the receipt.
+                 This is <b>simulated, predicted proxy stimulation modeling — not measured brain
+                 data</b>, and it is labeled that way everywhere it appears.</p>
+              <div class="pb-custom"><span class="chip">Customize</span>
+                <span><code>brain_simulator.enabled</code> in <code>{{ files.image }}</code> —
+                a one-line YAML flip, staged like everything else.</span></div>
+            </div>
+          </div>
+
+        </div>
+      </details>
+
+      {# ================= Chapter 2 — How copy is made ================= #}
+      <details class="ch" id="copy">
+        <summary class="ch-head">
+          <span class="num">2</span>
+          <h2>How copy is made</h2>
+          <span class="pb-badge live">Default methodology</span>
+          <span class="q">signal stack → route → objections → say/allude/hold → pre-authored reframes</span>
+        </summary>
+        <div class="ch-body">
+
+          <div class="pb-step">
+            <div class="st-head"><span class="n">1</span><h3>Default — deterministic slot-fill, provable by construction</h3></div>
+            <div class="bd">
+              <p><span class="pb-default">Default</span> Copy starts from the same shared signal
+                 stack as images, routes the visitor to an audience (hire / upskill / individual /
+                 neutral), ranks their likely objections, and then fills each named slot on the
+                 page from a pre-authored catalog. No AI writes at visit time, so the words are
+                 provable by construction and cost $0 — the same inputs always produce the same
+                 page, and every changed slot carries a receipt.</p>
+              <p>Every fact obeys a three-level surface policy per slot:
+                 <b>say</b> — first-party, declared facts may be quoted out loud;
+                 <b>allude</b> — inferred context (like an IP-derived industry) may steer the
+                 framing but is never quoted; <b>hold</b> — the fact never reaches the page at all.
+                 Objections are answered with pre-authored reframes written at the allude level.</p>
+              <div class="pb-custom"><span class="chip">Customize</span>
+                <span>The <code>sd-policy</code> control per text slot in the designer, backed by the
+                <code>policy</code> field per text target in <code>{{ files.sections }}</code>.</span></div>
+            </div>
+          </div>
+
+          <div class="pb-step">
+            <div class="st-head"><span class="n">2</span><h3>The five persuasion strategies</h3></div>
+            <div class="bd">
+              <p><span class="pb-default">Default</span> A strategy changes the <b>frame</b> —
+                 which provable claims lead, under what headline and call-to-action — and never the
+                 <b>facts</b>. Any claim the truth Gate blocks is dropped from every strategy alike.</p>
+              {% for s in strategies %}
+              <div class="pb-strat" id="strategy-{{ s.key }}">
+                <div class="sk">{{ s.label }}</div>
+                <div class="pr">{{ s.principle }}</div>
+                <div class="ex">Leads with: <code>{{ s.headline }}</code> · CTA <code>{{ s.cta }}</code>{% if s.lead %} · opens on claim <code>{{ s.lead }}</code>{% endif %}</div>
+              </div>
+              {% endfor %}
+              <div class="pb-custom"><span class="chip">Customize</span>
+                <span>The <code>sd-strategy</code> control per text slot in the designer, backed by the
+                <code>strategy</code> field in <code>{{ files.sections }}</code>.</span></div>
+            </div>
+          </div>
+
+          <div class="pb-step">
+            <div class="st-head"><span class="n">3</span><h3>Opt-in — the generative lane</h3></div>
+            <div class="bd">
+              <p><span class="pb-default">Default</span> Off unless you switch a slot's mode to
+                 generative. When you do: your prompt proposes candidate lines → <b>every candidate
+                 runs through the real truth Gate</b> (claims, hygiene, the per-line copy checks) →
+                 only cleared copy ever enters the servable pool → the pool is cached so an
+                 identical visit replays byte-identically. A candidate that recites a competitor,
+                 invents a number, or touches a held fact is structurally unservable — not
+                 filtered, excluded by construction. Prebuilt bakes the pool offline before deploy;
+                 realtime builds it on first visit and caches by key.</p>
+              <div class="pb-custom"><span class="chip">Customize</span>
+                <span><code>sd-mode</code> (deterministic ↔ generative), the <code>sd-prompt</code> box,
+                and <code>sd-workflow</code> (prebuilt / realtime) per text slot in the designer —
+                all staged to <code>{{ files.sections }}</code> in the drawer; nothing saves live.</span></div>
+            </div>
+          </div>
+
+          <div class="pb-step">
+            <div class="st-head"><span class="n">4</span><h3>Always on — long-running A/B + drift pause</h3></div>
+            <div class="bd">
+              <p><span class="pb-default">Default</span> Every decision (each slot, each image
+                 target) runs a long-lived A/B over its cleared pool, per audience route, with a
+                 random-control holdout so lift is measured, not asserted. If a source changes or a
+                 legal hold lands, drift monitoring re-verifies only the affected claims and pauses
+                 only the dependent variants — the rest of the page keeps optimizing.</p>
+              <div class="pb-custom"><span class="chip">Customize</span>
+                <span>Runs automatically per decision — no switch to flip. The posteriors, lift, and
+                any paused arms are readable on each section card in the designer.</span></div>
+            </div>
+          </div>
+
+        </div>
+      </details>
+
+      {# ================= Chapter 3 — Animated images ================= #}
+      <details class="ch" id="motion">
+        <summary class="ch-head">
+          <span class="num">3</span>
+          <h2>Animated images</h2>
+          <span class="pb-badge future">Future release</span>
+          <span class="q">shipped today on Planet's hero — a roadmap everywhere else</span>
+        </summary>
+        <div class="ch-body">
+
+          <div class="pb-step">
+            <div class="st-head"><span class="n">1</span><h3>What ships today — Planet's hero motion</h3></div>
+            <div class="bd">
+              <p><span class="pb-default">Shipped (Planet)</span> Planet's hero already animates:
+                 the engine renders a deterministic sequence of {{ planet_motion.frames or 4 }}
+                 keyframes from the same intent and the same guardrails as the still hero, then
+                 assembles them into a {{ planet_motion.assembly or 'animated_webp' }} loop
+                 ({{ planet_motion.duration_ms or 3000 }}&nbsp;ms{% if planet_motion.loop %}, looping{% endif %}),
+                 pre-generated offline so the page never waits. Motion adds the <b>time dimension</b>
+                 to the stimulation model — what moves (the intent's motion metaphor), how fast
+                 (frame pacing), and how long the loop runs are treated as <b>predicted</b>
+                 stimulation variables, exactly as simulated and exactly as labeled as the still
+                 scores: predicted response modeling, not measured brain data.</p>
+              <p class="pb-note">Config: the <code>motion:</code> block in <code>rules/planet_image.yaml</code>
+                 (enabled: {{ 'true' if planet_motion.enabled else 'false' }}, frames:
+                 {{ planet_motion.frames or 4 }}) · engine <code>pipeline/personalization/motion_gen.py</code>
+                 · pre-generation <code>scripts/pregen_motion_cache.py</code>.
+                 {% if planet_motion.framing %}The config's own framing line: “{{ planet_motion.framing.strip() }}”{% endif %}</p>
+            </div>
+          </div>
+
+          <div class="pb-step">
+            <div class="st-head"><span class="n">2</span><h3>Future release — where this goes next</h3></div>
+            <div class="bd">
+              <p><span class="pb-badge future">Future release</span> None of the items below is
+                 built today; they extend the shipped Planet methodology, unchanged in its
+                 guardrails and its honesty labeling:</p>
+              <ul class="pb-list">
+                <li>Per-section animated backdrops on all websites — every registered image target,
+                    not just the hero, able to carry a motion loop.</li>
+                <li>Realtime motion generation — the gradient→swap lane extended to loops, with the
+                    same caps, ceiling, and cost-logging as realtime stills.</li>
+                <li>Animated tier-2 delta layers — the personalization delta itself in motion,
+                    layered over a shared animated base.</li>
+              </ul>
+              <div class="pb-custom"><span class="chip">Customize</span>
+                <span>The <code>motion:</code> block in <code>rules/planet_image.yaml</code> is real and
+                editable today. {% if not site_motion_enabled and site != 'planet' %}For {{ site_name }}, the same block in
+                <code>{{ files.image }}</code> is a <b>future release</b> — it exists but does not animate yet.{% elif site == 'planet' %}This website (Planet) is the shipped preview.{% endif %}</span></div>
+            </div>
+          </div>
+
+        </div>
+      </details>
+
+      {# ================= Chapter 4 — AEO ================= #}
+      <details class="ch" id="aeo">
+        <summary class="ch-head">
+          <span class="num">4</span>
+          <h2>Personalization for AEO — Agent Engine Optimization</h2>
+          <span class="pb-badge pov">Roadmap · point of view</span>
+          <span class="q">a thesis about the next visitor — nothing in this chapter is built</span>
+        </summary>
+        <div class="ch-body">
+          <p class="pb-note" style="margin-top:12px"><b>Roadmap · point of view.</b> Everything below is
+             an approach we intend to take, framed as such — no sentence here describes a shipped
+             capability.</p>
+
+          <div class="pb-step">
+            <div class="st-head"><span class="n">1</span><h3>The thesis — the next visitor isn't always human</h3></div>
+            <div class="bd">
+              <p>Buying agents, research agents, and answer engines increasingly read pages, compare
+                 claims, and act on what they find. The approach: treat the agent as an audience,
+                 not an adversary. apt's architecture would suit this unusually well — here is the
+                 point of view, point by point.</p>
+              <ul class="pb-list">
+                <li><b>Detect the agent segment</b> the same way network type is detected today —
+                    on this roadmap, the agent simply becomes another <code>audience_route</code>,
+                    flowing through the exact routing the human segments use.</li>
+                <li><b>The receipt would be the AEO asset.</b> Agents rank what they can verify —
+                    a page where every claim carries a machine-readable source and Gate verdict is,
+                    in this view, exactly what answer engines could trust and cite.</li>
+                <li><b>The truth Gate as ranking advantage.</b> An apt page structurally cannot ship
+                    a claim the Gate blocks — so, as an approach, provability itself becomes the
+                    optimization target an agent would reward.</li>
+                <li><b>Personalizing for agents</b> would mean: structured claims, per-claim
+                    citations, deterministic replies (same input → same page — the property agents
+                    prize), and machine-legible provenance strips.</li>
+                <li><b>The same per-decision A/B machinery</b> could optimize per agent engine —
+                    segment = which engine is reading — inside the same truth boundary that governs
+                    every human variant.</li>
+              </ul>
+              <p style="margin-top:10px">The close, and the tagline it earns: <b>when the visitor is
+                 an AI, proof isn't a nicety — it's the ranking function.</b></p>
+              <div class="pb-custom"><span class="chip">Where this would live</span>
+                <span>No customize chip — this chapter is roadmap. The agent segment would slot into the
+                registry's channel/route vocabulary in <code>{{ files.sections }}</code>; the per-claim
+                receipts it depends on already ship on every page today.</span></div>
+            </div>
+          </div>
+
+        </div>
+      </details>
+
+      <div class="foothint">
+        Everything above renders from live config — <code>{{ files.image }}</code> ·
+        <code>{{ files.sections }}</code> · <code>{{ files.prebuild }}</code> ·
+        <code>pipeline/personalization/persuasion.py</code>. If the YAML changes, this page changes.
+      </div>
+    </div>
+  </div>
+</div>
+{% include "_collapse.html" %}
+</body>
+</html>
