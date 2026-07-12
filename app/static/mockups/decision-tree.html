@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Provenance — the decision tree: what you may say × what makes them act</title>
+<style>
+  :root{
+    --canvas:#ffffff; --ink:#14171a; --muted:#6b7280; --hair:#e6e8eb; --fill:#f6f7f9;
+    --signal:#3b5bdb; --signal-bg:#eef1fc;
+    --say:#15803d; --say-bg:#eaf5ec; --allude:#b45309; --allude-bg:#fbf1e3; --hold:#b91c1c; --hold-bg:#fbeaea;
+    --det:#0f172a; --det-bg:#eef0f3; --llm:#6d28d9; --llm-bg:#f1ebfb;
+    --act:#0e7490; --act-bg:#e3f4f7;
+    --r:10px; --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#eceef1;color:var(--ink);font-family:var(--sans);line-height:1.45;
+       -webkit-font-smoothing:antialiased;padding:34px 18px}
+  .sheet{max-width:1180px;margin:0 auto;background:var(--canvas);border:1px solid var(--hair);
+         border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 30px rgba(0,0,0,.05);overflow:hidden}
+  header{padding:26px 32px 20px;border-bottom:1px solid var(--hair)}
+  .kicker{font:600 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--signal)}
+  h1{font-size:23px;line-height:1.25;margin:11px 0 0;letter-spacing:-.01em;max-width:64ch}
+  h1 b{color:var(--signal)} h1 i{color:var(--act);font-style:normal}
+  .sub{color:var(--muted);font-size:13.5px;margin-top:8px;max-width:80ch}
+  .axes{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+  .axis{flex:1 1 320px;border:1px solid var(--hair);border-radius:var(--r);padding:11px 14px;background:var(--fill)}
+  .axis b{font-size:12.5px} .axis .d{font-size:12px;color:var(--muted);margin-top:3px}
+  .axis.say{border-left:3px solid var(--signal)} .axis.act{border-left:3px solid var(--act)}
+  section{padding:24px 32px;border-bottom:1px solid var(--hair)}
+  section:last-child{border-bottom:0}
+  .ex{font:600 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+  .ex span{color:var(--ink)}
+  .exsub{font-size:12.5px;color:var(--muted);margin:0 0 16px;max-width:84ch}
+
+  /* ---- status key: wired vs proposed (Article VIII — honest reporting) ---- */
+  .statuskey{display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:var(--muted);margin:2px 0 16px}
+  .statuskey span{display:inline-flex;align-items:center;gap:7px}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .dot.w{background:var(--say)} .dot.p{background:var(--act);outline:2px solid var(--act-bg)}
+  .mk{font:600 9.5px/1 var(--mono);padding:2px 6px;border-radius:5px;text-transform:uppercase;letter-spacing:.04em}
+  .mk.w{background:var(--say-bg);color:var(--say)} .mk.p{background:var(--act-bg);color:var(--act)}
+
+  /* ---- decision tree (nested guide-rails) ---- */
+  .tree{font-size:13px}
+  .node{position:relative;padding:9px 13px;border:1px solid var(--hair);border-radius:var(--r);
+        background:#fff;margin:7px 0;display:flex;gap:11px;align-items:flex-start}
+  .node .q{font-weight:600}
+  .node .meta{color:var(--muted);font-size:12px}
+  .node code{font-family:var(--mono);font-size:11.5px;background:var(--fill);padding:1px 5px;border-radius:5px;color:#334}
+  .kids{margin-left:22px;padding-left:18px;border-left:2px solid var(--hair)}
+  .branch{position:relative}
+  .branch::before{content:"";position:absolute;left:-18px;top:23px;width:16px;height:2px;background:var(--hair)}
+  .lbl{display:inline-block;font:600 10.5px/1 var(--mono);letter-spacing:.04em;padding:3px 7px;border-radius:6px;
+       margin:8px 0 -2px;background:var(--fill);color:var(--muted);text-transform:uppercase}
+  .lbl.yes{background:var(--say-bg);color:var(--say)} .lbl.no{background:var(--hold-bg);color:var(--hold)}
+  .pill{display:inline-flex;align-items:center;gap:5px;font:600 10.5px/1 var(--mono);
+        padding:3px 8px;border-radius:20px;white-space:nowrap}
+  .t0{background:var(--det-bg);color:var(--det)} .t1{background:var(--allude-bg);color:var(--allude)}
+  .t2{background:var(--signal-bg);color:var(--signal)} .t3{background:var(--llm-bg);color:var(--llm)}
+  .leaf{border-left:3px solid var(--hair)}
+  .leaf.l0{border-left-color:#9aa3af} .leaf.l1{border-left-color:var(--allude)}
+  .leaf.l2{border-left-color:var(--signal)} .leaf.l3{border-left-color:var(--llm)}
+  .leaf .out{font-size:12px;color:var(--muted);margin-top:3px}
+  .flag{font-family:var(--mono);font-size:11px;color:var(--hold)}
+  .note{font-size:12px;color:var(--muted);margin-top:5px;padding-left:2px}
+  .note b{color:var(--ink)}
+  .default{border:1px dashed var(--act);background:var(--act-bg);border-radius:var(--r);
+           padding:10px 14px;margin:10px 0 2px;font-size:12.5px;color:#0a5564}
+  .default b{color:#063e49}
+
+  /* ---- confidence ladder ---- */
+  .ladder{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .rung{border:1px solid var(--hair);border-radius:var(--r);padding:14px;background:#fff}
+  .rung h4{margin:0 0 4px;font-size:13px;display:flex;align-items:center;gap:8px}
+  .rung .when{font-size:12px;color:var(--muted);min-height:46px}
+  .rung .does{font-size:12.5px;margin-top:9px;padding-top:9px;border-top:1px dashed var(--hair)}
+  .tag{font:600 10px/1 var(--mono);padding:3px 7px;border-radius:6px;text-transform:uppercase}
+  .tag.say{background:var(--say-bg);color:var(--say)} .tag.allude{background:var(--allude-bg);color:var(--allude)}
+  .tag.hold{background:var(--hold-bg);color:var(--hold)}
+
+  /* ---- play map (permission × play) ---- */
+  .play{border:1px solid var(--hair);border-radius:var(--r);background:#fff;margin:9px 0;overflow:hidden}
+  .play .ph{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--hair);background:var(--fill)}
+  .play .ph .pq{font-size:12px;color:var(--muted)}
+  .play .pb{display:grid;grid-template-columns:1.35fr 1.65fr;gap:0}
+  .play .pcell{padding:11px 14px}
+  .play .pcell + .pcell{border-left:1px solid var(--hair)}
+  .play .plabel{font:600 10px/1 var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+  .play .pmove{font-size:12.5px} .play .pmove b{color:var(--ink)}
+  .play .pex{font-size:12px;color:#0a5564;background:var(--act-bg);border-radius:7px;padding:8px 10px;margin-top:7px;
+             font-family:var(--mono);line-height:1.5}
+  .play .pmeta{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px;font-size:11.5px;color:var(--muted)}
+  .play .pmeta code{font-family:var(--mono);font-size:11px;background:var(--fill);padding:1px 5px;border-radius:5px}
+  .pr{font:600 9.5px/1 var(--mono);color:var(--act);background:var(--act-bg);padding:2px 6px;border-radius:5px}
+
+  /* ---- CTA ladder (the ask, by temperature) ---- */
+  .cta{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  .crung{border:1px solid var(--hair);border-radius:var(--r);padding:12px;background:#fff;position:relative}
+  .crung .ctemp{font:600 9.5px/1 var(--mono);text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  .crung h5{margin:7px 0 5px;font-size:12.5px}
+  .crung .cex{font-size:11.5px;color:#0a5564;font-family:var(--mono);line-height:1.45}
+  .crung .cwhen{font-size:11px;color:var(--muted);margin-top:7px;padding-top:7px;border-top:1px dashed var(--hair)}
+  .fric{position:absolute;top:10px;right:10px;font:600 9px/1 var(--mono);padding:2px 5px;border-radius:4px;background:var(--fill);color:var(--muted)}
+  .ctabar{font-size:11.5px;color:var(--muted);margin:4px 0 14px;display:flex;align-items:center;gap:8px}
+  .ctabar b{color:var(--ink)}
+
+  /* ---- interactive agent graph (node-link directed graph) ---- */
+  .agctl{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin:4px 0 12px}
+  .agtrace,.agzoom{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .agtl{font:600 10px/1 var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-right:3px}
+  .agctl button{font:600 11.5px/1 var(--sans);padding:7px 11px;border:1px solid var(--hair);border-radius:8px;
+    background:#fff;color:var(--ink);cursor:pointer;transition:.12s}
+  .agctl button:hover{border-color:#c2c8d0;background:var(--fill)}
+  .agctl button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .agzoom button{font-family:var(--mono);min-width:34px;text-align:center}
+
+  .agstage{position:relative;height:560px;border:1px solid var(--hair);border-radius:12px;overflow:hidden;
+    background:radial-gradient(circle at 1px 1px,#e6e9ee 1px,transparent 0) 0 0/22px 22px,var(--fill);
+    cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none}
+  .agstage.grab{cursor:grabbing}
+  .agcanvas{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform}
+  .agedges{position:absolute;top:0;left:0;overflow:visible;pointer-events:none}
+  .agedges path{fill:none;stroke:#b3bbc5;stroke-width:1.7;transition:stroke .15s,opacity .15s,stroke-width .15s}
+  .agedges path.cache{stroke:#2f9e6f;stroke-dasharray:6 4}
+  .agedges path.fallback{stroke:var(--hold);stroke-dasharray:6 4}
+  .agedges path.loop{stroke:#aeb6c0;stroke-dasharray:2 6}
+  .agedges path.hot{stroke:var(--signal);stroke-width:2.5;opacity:1}
+  .agedges path.dim{opacity:.13}
+
+  .agelabel{position:absolute;transform:translate(-50%,-50%);font:600 9px/1 var(--mono);
+    color:var(--muted);background:rgba(255,255,255,.94);border:1px solid var(--hair);
+    padding:2px 6px;border-radius:5px;white-space:nowrap;pointer-events:none;transition:.15s}
+  .agelabel.dim{opacity:.15}
+  .agelabel.hot{color:var(--signal);border-color:#b9c8f3}
+
+  .agnode{position:absolute;border:1px solid var(--hair);border-radius:10px;background:#fff;
+    padding:9px 11px;text-align:left;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04);font-family:var(--sans);
+    transition:box-shadow .15s,border-color .15s,opacity .15s;overflow:hidden}
+  .agnode:hover{box-shadow:0 4px 14px rgba(0,0,0,.1)}
+  .agnode:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+  .agnode .nh{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+  .agnode .nt{font:600 9px/1 var(--mono);padding:2px 5px;border-radius:5px;text-transform:uppercase;letter-spacing:.03em}
+  .agnode .nl{font-size:12.5px;font-weight:650;letter-spacing:-.01em}
+  .agnode .nd{font-size:10.5px;color:var(--muted);line-height:1.3}
+  .agnode.sel{border-color:var(--signal);box-shadow:0 0 0 2px var(--signal-bg),0 6px 18px rgba(59,91,219,.18)}
+  .agnode.dim{opacity:.3}
+  .t-io .nt{background:var(--det-bg);color:var(--det)} .t-io{border-left:3px solid #9aa3af}
+  .t-det .nt{background:var(--det-bg);color:var(--det)} .t-det{border-left:3px solid var(--det)}
+  .t-cache .nt{background:#e7f3ee;color:#0f6b4f} .t-cache{border-left:3px solid #2f9e6f}
+  .t-llm .nt{background:var(--llm-bg);color:var(--llm)} .t-llm{border-left:3px solid var(--llm)}
+  .t-gate .nt{background:var(--hold-bg);color:var(--hold)} .t-gate{border-left:3px solid var(--hold);box-shadow:0 0 0 1px var(--hold) inset}
+  .t-term .nt{background:var(--act-bg);color:var(--act)} .t-term{border-left:3px solid var(--act)}
+
+  .aghint{position:absolute;left:12px;bottom:10px;font:500 11px/1 var(--sans);color:var(--muted);
+    background:rgba(255,255,255,.86);padding:5px 9px;border-radius:7px;border:1px solid var(--hair);pointer-events:none}
+
+  .aglegend{display:flex;flex-wrap:wrap;gap:9px 22px;margin-top:13px;font-size:11.5px;color:var(--muted)}
+  .aglegend .grp{display:flex;flex-wrap:wrap;gap:9px 13px;align-items:center}
+  .aglegend span.it{display:inline-flex;align-items:center;gap:6px}
+  .aglegend .nt{font:600 8.5px/1 var(--mono);padding:2px 5px;border-radius:4px;text-transform:uppercase}
+  .aglegend .ed{width:22px;height:0;border-top:2px solid #b3bbc5;display:inline-block}
+  .aglegend .ed.cache{border-top-style:dashed;border-color:#2f9e6f}
+  .aglegend .ed.fallback{border-top-style:dashed;border-color:var(--hold)}
+  .aglegend .ed.loop{border-top-style:dotted;border-color:#aeb6c0}
+
+  /* the selected node, as a spec */
+  .agdetail{margin-top:14px;border:1px solid var(--hair);border-radius:12px;background:#fff;overflow:hidden;min-height:128px}
+  .agd-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--hair);background:var(--fill)}
+  .agd-head .nt{font:600 9px/1 var(--mono);padding:3px 6px;border-radius:5px;text-transform:uppercase}
+  .agd-head h4{margin:0;font-size:14.5px}
+  .agd-head .st{margin-left:auto;font:600 9px/1 var(--mono);padding:3px 7px;border-radius:5px;text-transform:uppercase;letter-spacing:.04em;background:var(--say-bg);color:var(--say)}
+  .agd-grid{display:grid;grid-template-columns:repeat(3,1fr)}
+  @media(max-width:760px){.agd-grid{grid-template-columns:1fr}}
+  .agd-cell{padding:11px 16px;border-right:1px solid var(--hair);border-top:1px solid var(--hair)}
+  .agd-cell:nth-child(-n+3){border-top:0}
+  .agd-cell .k{font:600 9px/1 var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:5px}
+  .agd-cell .v{font-size:12px;line-height:1.45}
+  .agd-cell.def .v{color:#0a5564}
+  .agd-cell code{font-family:var(--mono);font-size:11px;background:var(--fill);padding:1px 5px;border-radius:5px;color:#334}
+  .agd-empty{padding:30px 18px;text-align:center;color:var(--muted);font-size:13px}
+
+  @keyframes ex6flash{0%{background:var(--signal-bg)}100%{background:transparent}}
+  .maptable tr.flash td{animation:ex6flash 1.4s ease-out}
+
+  /* fallback note (kept from the prior exhibit) */
+  .feedback{font-size:12px;color:var(--muted);margin-top:2px}
+  .feedback code{font-family:var(--mono);font-size:11px;background:var(--fill);padding:1px 5px;border-radius:5px}
+
+  /* ---- gate two-axis list ---- */
+  .gax{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+  .gcol{border:1px solid var(--hair);border-radius:var(--r);padding:13px 15px;background:#fff}
+  .gcol h4{margin:0 0 8px;font-size:12.5px;display:flex;align-items:center;gap:8px}
+  .gcol ul{margin:0;padding-left:0;list-style:none;font-size:12px}
+  .gcol li{padding:5px 0;border-top:1px dashed var(--hair);display:flex;gap:8px;align-items:flex-start}
+  .gcol li:first-child{border-top:0}
+  .gcol li code{font-family:var(--mono);font-size:11px;background:var(--fill);padding:1px 5px;border-radius:5px}
+
+  /* ---- node-by-node mapping table ---- */
+  .maptable{width:100%;border-collapse:collapse;font-size:12px}
+  .maptable th{text-align:left;font:600 10px/1.3 var(--mono);letter-spacing:.04em;text-transform:uppercase;
+               color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--hair);vertical-align:bottom}
+  .maptable td{padding:9px 10px;border-bottom:1px solid var(--hair);vertical-align:top}
+  .maptable tr:last-child td{border-bottom:0}
+  .maptable td:first-child{font-weight:600;white-space:nowrap}
+  .maptable code{font-family:var(--mono);font-size:11px;background:var(--fill);padding:1px 5px;border-radius:5px;color:#334}
+  .maptable .def{color:#0a5564}
+  .maptable td .tp{font:600 9px/1 var(--mono);padding:2px 5px;border-radius:4px;margin-right:5px}
+  .maptable td .tp.w{background:var(--say-bg);color:var(--say)} .maptable td .tp.p{background:var(--act-bg);color:var(--act)}
+
+  /* ---- legend / footer ---- */
+  .legend{display:flex;flex-wrap:wrap;gap:18px;font-size:12px;color:var(--muted);margin-top:4px}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .sw{width:13px;height:13px;border-radius:4px;display:inline-block}
+  footer{padding:18px 32px;background:var(--fill);font-size:12px;color:var(--muted)}
+  footer b{color:var(--ink)}
+  .caveat{border-left:3px solid var(--hold);background:var(--hold-bg);padding:10px 14px;border-radius:0 8px 8px 0;
+          color:#7a1d1d;font-size:13px;margin-top:6px}
+  .illus{border-left:3px solid var(--allude);background:var(--allude-bg);padding:9px 14px;border-radius:0 8px 8px 0;
+         color:#7a4a0c;font-size:12.5px;margin-top:10px}
+  @media(max-width:820px){.ladder,.gax{grid-template-columns:1fr}.cta{grid-template-columns:1fr 1fr}
+    .play .pb{grid-template-columns:1fr}.play .pcell+.pcell{border-left:0;border-top:1px solid var(--hair)}
+    .gnode:after{content:"↓";right:auto;left:50%;top:auto;bottom:-15px;transform:translateX(-50%)}}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <header>
+    <div class="kicker">Provenance · personalization router + action layer</div>
+    <h1>Two decisions, one tree: <b>what you may say</b> — gated by the identity you can prove — and <i>what makes them act</i>, the play that tier permits. The router proposes; <b>the Gate disposes</b> — now on persuasion too.</h1>
+    <p class="sub">The research is blunt: <b>relevance you can’t verify reads as spam, and nothing else fires</b> — which is this product’s whole thesis. So the tree runs in two passes. <b>Pass 1 (permission):</b> classify the identity key, score per-field confidence, route to a personalization tier — assert an industry <i>only</i> at high confidence, else fall to a true neutral default. <b>Pass 2 (action):</b> the tier hands the copy agent exactly one provable hook, and the action layer turns it into a move that drives a reply — then the Gate verifies both the claim <i>and</i> the persuasion hygiene before a line ships.</p>
+    <div class="axes">
+      <div class="axis say"><b>Axis 1 — Permission · “what may I say?”</b><div class="d">Provable identity → Tier 0·1·2·3 · say / allude / hold. Deterministic, cheap, itself provable. <span class="mk w">wired</span></div></div>
+      <div class="axis act"><b>Axis 2 — Action · “what makes them act?”</b><div class="d">One trigger → loss-frame → matched-peer proof → one soft CTA. The copy research, encoded as the play each tier earns. <span class="mk w">partly wired now</span></div></div>
+    </div>
+    <div class="statuskey" style="margin-top:16px">
+      <span><i class="dot w"></i> <b style="color:var(--ink)">wired</b> — live in <code style="font-family:var(--mono)">scene.py</code> / <code style="font-family:var(--mono)">creative.py</code> today</span>
+      <span><i class="dot p"></i> <b style="color:var(--ink)">proposed</b> — the research integration designed here; code target named, not yet merged</span>
+    </div>
+    <p style="margin:14px 0 0;font-size:12.5px"><a href="/guide" style="color:var(--signal);font-weight:600;text-decoration:none">▸ Read the full engineering writeup</a> — how the 15-agent research swarm became this wired, tested Gate.</p>
+  </header>
+
+  <!-- ============ EXHIBIT 1 — PERMISSION ROUTER ============ -->
+  <section>
+    <p class="ex">Exhibit 1 — <span>Pass 1 · the permission router: identity key → personalization tier</span> <span class="mk w" style="margin-left:6px">wired</span></p>
+    <p class="exsub">Unchanged spine, one rule made explicit: when the company won’t resolve, <b>default down the identity ladder to the individual</b> — never sideways to a guessed sector.</p>
+    <div class="tree">
+
+      <div class="node" style="border-color:var(--say);background:var(--say-bg)">
+        <span class="q">① Identity key: <b>work email</b> (first-party)</span>
+        <span class="meta">· <code>resolve_email()</code> → domain → PDL company + person</span></div>
+      <div class="kids">
+        <div class="branch"><div class="node leaf l2">
+          <span class="pill t2">TIER 2 · FIRMOGRAPHIC <span style="opacity:.7">· SAY</span></span>
+          <span><b>Works for any company size.</b> A startup’s domain IDs the company even when reverse-IP only sees a CDN (gauntletai.com → Fastly). The visitor told us — so these facts are <b>say</b> (recitable), not allude.<div class="out">email → company (high conf) + title / seniority (PDL person). A consumer mailbox (gmail.com) → no company → drop to the individual default ↓.</div></span>
+        </div></div>
+      </div>
+
+      <div class="node" style="margin-top:15px"><span class="q">② Identity key: <b>IP only</b> (involuntary) — classify it</span>
+        <span class="meta">· <code>reverse_ip()</code> → ip-api.com (cached): geo + org + <code>mobile/proxy/hosting</code>. Everything below is <b>allude</b>.</span></div>
+
+      <div class="kids">
+        <div class="lbl no">IP private / loopback / unreachable</div>
+        <div class="branch"><div class="node leaf l0">
+          <span class="pill t0">TIER 0 · NEUTRAL</span>
+          <span><b>Product-thesis landing</b>, brand wash.<div class="out">No signal → assert nothing. <code>General</code> default.</div></span>
+        </div></div>
+
+        <div class="lbl yes">IP resolves → classify the network (priority order, as in code)</div>
+
+        <div class="branch"><div class="node"><span class="q">① <code>mobile</code> = true?</span>
+          <span class="meta">cellular gateway — geo coarse, no company</span></div>
+          <div class="kids"><div class="branch"><div class="node leaf l1">
+            <span class="pill t1">TIER 1 · LOCATION-AWARE NEUTRAL</span>
+            <span>Region framing only. <span class="flag">company void</span><div class="out">Carrier IP geolocates to the gateway metro — treat location as low-precision.</div></span>
+          </div></div></div>
+        </div>
+
+        <div class="branch"><div class="node"><span class="q">② <code>proxy</code> = true?</span>
+          <span class="meta">VPN / proxy / Tor — the IP describes the exit node, not the visitor</span></div>
+          <div class="kids">
+            <div class="lbl">…but does <code>org</code> still look corporate? (not a VPN-provider / hosting / ISP name)</div>
+            <div class="branch"><div class="node leaf l2">
+              <span class="pill t2">TIER 2 · FIRMOGRAPHIC <span style="opacity:.7">(med-conf)</span></span>
+              <span><b>Corporate-VPN exception.</b> Employee on the company VPN → exits via the company netblock = a real B2B signal.<div class="out">Personalize, but cap industry confidence at MEDIUM (the netblock, not a clean office IP).</div></span>
+            </div></div>
+            <div class="branch"><div class="node leaf l0">
+              <span class="pill t0">TIER 0/1 · NEUTRAL + BEHAVIORAL</span>
+              <span>Commercial VPN → the IP signal is <b>void</b>. There is no other firmographic variable hiding in it.<div class="out">Pivot to a different signal <i>class</i>: referrer / UTM / landing-path, language, or first-party (known cookie/email). Never fabricate firmographics.</div></span>
+            </div></div>
+          </div>
+        </div>
+
+        <div class="branch"><div class="node"><span class="q">③ <code>hosting</code> = true?</span>
+          <span class="meta">datacenter / cloud — bot, scraper, or VPN exit</span></div>
+          <div class="kids"><div class="branch"><div class="node leaf l0">
+            <span class="pill t0">TIER 0 · NEUTRAL</span>
+            <span>Not a human office IP.<div class="out">Serve neutral; this is also where bot traffic lands — don’t spend enrichment on it.</div></span>
+          </div></div></div>
+        </div>
+
+        <div class="branch"><div class="node"><span class="q">④ <code>is_isp</code> — consumer ISP / carrier name?</span>
+          <span class="meta">name heuristic (AT&amp;T, Comcast…) — ip-api’s flags miss residential</span></div>
+          <div class="kids"><div class="branch"><div class="node leaf l1">
+            <span class="pill t1">TIER 1 · LOCATION-AWARE NEUTRAL</span>
+            <span>The org is the <b>provider</b>, not the visitor’s company. <span class="flag">company void</span><div class="out">Location generally OK → region-aware copy, <b>neutral backdrop, no industry/company claim</b>. ← this is the AT&amp;T / Tailscale-egress case.</div></span>
+          </div></div></div>
+        </div>
+
+        <div class="lbl yes">⑤ none of the above → <code>is_corporate</code> = true · clean corporate office IP</div>
+        <div class="branch"><div class="node"><span class="q">Company resolved → <code>PDL company-enrich</code> → industry</span>
+          <span class="meta">does PDL return an industry that maps to a known sector?</span></div>
+          <div class="kids">
+            <div class="lbl yes">industry resolved · high confidence</div>
+            <div class="branch"><div class="node leaf l2">
+              <span class="pill t2">TIER 2 · FIRMOGRAPHIC</span>
+              <span>Industry-tailored copy + curated backdrop, region-aware. <b>Allude</b> — tailored, never recites “we detected you”.<div class="out">+ if a competitive category is known → escalates to Tier 3 ↓</div></span>
+            </div></div>
+            <div class="branch"><div class="node leaf l3">
+              <span class="pill t3">TIER 3 · FIRMOGRAPHIC + COMPETITIVE</span>
+              <span><b>The gauntletai.com case.</b> Competitor-research sub-agent → a brief of <i>provable</i> differentiators for the visitor’s category → copy agent drafts the comparative angle → <b>the Gate verifies every comparative claim</b> → unproven lines fall back to category value.<div class="out">Allude the edge, don’t name the enemy. No “your current tool can’t…” — that recites an inferred vendor.</div></span>
+            </div></div>
+            <div class="lbl no">company resolved, but PDL industry sparse / no bucket match</div>
+            <div class="branch"><div class="node leaf l0">
+              <span class="pill t0">TIER 1 · NEUTRAL (company-aware)</span>
+              <span>Hold the industry specialization — don’t guess a sector.<div class="out">Region + company-shape tone only; backdrop stays neutral. Falls to the individual default ↓ for the hook.</div></span>
+            </div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="default">
+        <b>Default rule (the practical fallback):</b> can’t resolve the company → <b>don’t guess a sector, step DOWN the identity ladder to the individual.</b>
+        Firmographic (reverse-IP company) fails → try the <b>person lane</b> (<code>resolve_email()</code> → PDL person: role / seniority you <i>can</i> prove) →
+        if no person either → honest <b>segment / neutral</b> default (<code>General</code>). A confident-looking sector on a guess is the exact failure mode this removes.
+        <b>Industry is opt-in by proof; identity degrades gracefully — it never fabricates upward.</b>
+      </div>
+    </div>
+    <div class="legend" style="margin-top:18px">
+      <span><i class="sw" style="background:#9aa3af"></i> Tier 0 — neutral (no provable signal)</span>
+      <span><i class="sw" style="background:var(--allude)"></i> Tier 1 — location-aware neutral</span>
+      <span><i class="sw" style="background:var(--signal)"></i> Tier 2 — firmographic (B2B)</span>
+      <span><i class="sw" style="background:var(--llm)"></i> Tier 3 — + competitive (LLM + Gate)</span>
+    </div>
+  </section>
+
+  <!-- ============ EXHIBIT 2 — CONFIDENCE LADDER ============ -->
+  <section>
+    <p class="ex">Exhibit 2 — <span>Industry needs a confidence gate — assertion is earned, not defaulted</span> <span class="mk w" style="margin-left:6px">wired</span></p>
+    <div class="ladder">
+      <div class="rung">
+        <h4><span class="tag allude">ALLUDE</span> HIGH</h4>
+        <div class="when">Clean corporate IP · PDL returns an industry · it maps to a known sector (optionally corroborated by the company domain).</div>
+        <div class="does"><b>Ship industry-tailored</b> copy + backdrop. Still <i>allude</i> — shape to the sector, never recite that we detected it.</div>
+      </div>
+      <div class="rung">
+        <h4><span class="tag allude">ALLUDE</span> MEDIUM</h4>
+        <div class="when">Company resolved but industry is sparse/ambiguous, or a corporate-VPN netblock (not a clean office IP).</div>
+        <div class="does"><b>Shape tone only</b> — region + company-aware framing, <b>neutral backdrop</b>. Hold the sector claim.</div>
+      </div>
+      <div class="rung">
+        <h4><span class="tag hold">HOLD</span> LOW / UNKNOWN</h4>
+        <div class="when">No company resolved (consumer ISP, mobile, VPN, bot) — nothing to attribute an industry to.</div>
+        <div class="does"><b>Never assert a sector.</b> Fall to the <code>General</code> neutral default. ← the fix for “why is my industry <i>mining</i>?”</div>
+      </div>
+    </div>
+    <p class="note" style="margin-top:14px"><b>Why this matters:</b> location is ~city-accurate on fixed-line broadband, so we treat it as generally correct (and still <i>allude</i>, never recite). Industry is a second-order inference (IP→company→PDL→sector) — each hop loses confidence, so it must clear a bar before it changes the page. A confident-looking sector on a guess is the failure mode we just removed.</p>
+  </section>
+
+  <!-- ============ EXHIBIT 3 — PERMISSION × PLAY ============ -->
+  <section>
+    <p class="ex">Exhibit 3 — <span>Pass 2 · permission × play: what drives action at each tier</span> <span class="mk p" style="margin-left:6px">proposed integration</span></p>
+    <p class="exsub">Each tier is a <b>budget of provable facts</b>. The play spends exactly that budget — no more (that’s creepy/unprovable), no less (that’s a wasted send). One trigger, a loss-framed implication, matched-peer proof, one soft ask. <span class="pr">loss angle + AI-tell Gate now wired in creative.py · full play orchestration proposed</span></p>
+
+    <div class="play">
+      <div class="ph"><span class="pill t0">TIER 0 · NEUTRAL</span><span class="pq">budget: nothing provable about <i>this</i> visitor</span></div>
+      <div class="pb">
+        <div class="pcell"><div class="plabel">The play</div>
+          <div class="pmove"><b>Honest segment copy — don’t fake 1:1.</b> Lead with the category pain + a <b>matched-peer</b> proof at <i>segment</i> level, label it segment-level. No merge tags pretending to be personal.</div>
+          <div class="pmeta"><span class="pr">P#1 relevance-gate</span><span class="pr">P#8 matched-peer</span><span>angle <code>default</code>/<code>peer</code></span></div>
+        </div>
+        <div class="pcell"><div class="plabel">Example line</div>
+          <div class="pex">“Most RevOps leads at 200–300-person SaaS shops tell me the data’s in five tools and none of them agree.”</div>
+          <div class="pmeta"><span><b>CTA:</b> lowest-friction permission — “Worth a look, or not a priority?”</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="play">
+      <div class="ph"><span class="pill t1">TIER 1 · LOCATION-AWARE</span><span class="pq">budget: region (allude) only</span></div>
+      <div class="pb">
+        <div class="pcell"><div class="plabel">The play</div>
+          <div class="pmove"><b>Region framing, zero company/sector claim.</b> Shape tone to the locale; never imply we know the employer. Region is a backdrop, not a hook.</div>
+          <div class="pmeta"><span class="pr">P#2 one real anchor</span><span>angle <code>local</code></span></div>
+        </div>
+        <div class="pcell"><div class="plabel">Example line</div>
+          <div class="pex">“Built for the way {region} teams actually run pipeline.”</div>
+          <div class="pmeta"><span><b>CTA:</b> soft interest — “Is that worth two minutes this quarter?”</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="play">
+      <div class="ph"><span class="pill t2">TIER 2 · FIRMOGRAPHIC</span><span class="pq">budget: industry + region + (person: role/seniority)</span></div>
+      <div class="pb">
+        <div class="pcell"><div class="plabel">The play</div>
+          <div class="pmove"><b>One provable trigger → loss-frame → matched-peer proof → one personal-value line.</b> ≤20-word opener from a public fact; convert the upside into the <i>cost of inaction</i> (only if the loss is real); proof from the visitor’s own segment with a sharp, non-round number; one line aimed at <i>their</i> standing.</div>
+          <div class="pmeta"><span class="pr">P#2 trigger</span><span class="pr">P#6 loss-frame</span><span class="pr">P#7 personal value</span><span class="pr">P#8 sharp peer</span></div>
+        </div>
+        <div class="pcell"><div class="plabel">Example line</div>
+          <div class="pex">“Saw {company} is scaling the SDR team — when outbound ramps that fast, account research usually becomes the choke point before headcount pays off.”</div>
+          <div class="pmeta"><span><b>CTA:</b> one soft interest question — never a calendar link cold (see Exhibit 4)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="play">
+      <div class="ph"><span class="pill t3">TIER 3 · + COMPETITIVE</span><span class="pq">budget: + a provable category differentiator (Gate-verified)</span></div>
+      <div class="pb">
+        <div class="pcell"><div class="plabel">The play</div>
+          <div class="pmove"><b>Allude the edge, loss-frame the status quo — never name the enemy.</b> Lead with a <i>structural</i> differentiator of our own product (provable by construction); frame the cost of the current approach. The Gate blocks any superiority claim or recited competitor.</div>
+          <div class="pmeta"><span class="pr">P#6 loss-frame</span><span class="pr">P#9 don’t pitch first</span><span>fn <code>competitor_brief()</code></span></div>
+        </div>
+        <div class="pcell"><div class="plabel">Example line</div>
+          <div class="pex">“Most tools personalize on guesses you can’t audit. Here, every line ships with its source — so nothing goes out you can’t defend.”</div>
+          <div class="pmeta"><span><b>CTA:</b> offer-based, named asset — “Want the 1-page teardown? No call needed.” (once warm)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="note" style="margin-top:6px"><b>Mapping back to your one-liner:</b> “can’t figure out the company → default to individual” is the spine of Pass 2 too — Tier&nbsp;2’s play degrades to Tier&nbsp;1/0’s the instant the firmographic budget empties. The play <b>always has a provable fallback move</b>, so the page never blocks; it spends a smaller, honest budget.</p>
+  </section>
+
+  <!-- ============ EXHIBIT 4 — THE ASK, BY TEMPERATURE ============ -->
+  <section>
+    <p class="ex">Exhibit 4 — <span>The ask, by temperature: drive action with one CTA, friction-matched to trust</span> <span class="mk p" style="margin-left:6px">proposed integration</span></p>
+    <p class="ctabar"><b>Rule:</b> exactly ONE ask per message · ≤15 words · escalate commitment only as the lead warms · <b>never a calendar link in a cold first touch.</b></p>
+    <div class="cta">
+      <div class="crung"><span class="fric">friction ▁</span><div class="ctemp">Cold · 1st touch</div>
+        <h5>Permission / one-word</h5>
+        <div class="cex">“Worth a look, or not a priority right now?”</div>
+        <div class="cwhen">Max reply volume; busy senior buyers; breakup touches.</div></div>
+      <div class="crung"><span class="fric">friction ▂</span><div class="ctemp">Cold · default</div>
+        <h5>Interest question</h5>
+        <div class="cex">“Is keeping ramp under 60 days on your plate this quarter?”</div>
+        <div class="cwhen">The default cold first ask. Costs the reader nothing = a micro-yes.</div></div>
+      <div class="crung"><span class="fric">friction ▃</span><div class="ctemp">Hook present</div>
+        <h5>Offer (named asset)</h5>
+        <div class="cex">“Want the 1-page teardown? No call needed.”</div>
+        <div class="cwhen">When you hold a real, relevant asset + any personalization.</div></div>
+      <div class="crung"><span class="fric">friction ▅</span><div class="ctemp">Engaged · touch 3+</div>
+        <h5>Soft conversation</h5>
+        <div class="cex">“Worth 15 minutes to compare notes?”</div>
+        <div class="cwhen">After light engagement, not before.</div></div>
+      <div class="crung"><span class="fric">friction ▇</span><div class="ctemp">In eval · replied</div>
+        <h5>Two-option time</h5>
+        <div class="cex">“Tue 2pm or Thu 10am ET — or a time that’s easier?”</div>
+        <div class="cwhen"><b>Only</b> after a positive reply. Include timezone + one link.</div></div>
+    </div>
+    <p class="note" style="margin-top:14px"><b>Sequence, not single-touch:</b> default 4–7 total touches, each carrying a <i>new</i> angle (never “just bumping this”), and reuse the <b>same anchor signal</b> across email · voicemail · call so the channels reinforce one identity. The CTA is the only place the message asks for a finite resource — so it’s the last thing to escalate. <b>Wired:</b> the no-cold-calendar-link veto (<code>verify_message</code>) and the never-single-touch / no-repeat rules (<code>verify_sequence</code>) are enforced; the staged escalation itself is the lead-temperature policy layered on top.</p>
+  </section>
+
+  <!-- ============ EXHIBIT 5 — THE AGENT GRAPH (interactive) ============ -->
+  <section id="ex5">
+    <p class="ex">Exhibit 5 — <span>The agent graph: a deterministic router, LLM leaves, one Gate</span> <span class="mk w" style="margin-left:6px">wired spine</span></p>
+    <p class="exsub">Every visit runs this graph. The spine is <b>deterministic and reproducible</b>; only two nodes call an LLM (Research · Copy agent); <b style="color:var(--hold)">the Gate is the single point of disposition</b>; and any blocked line falls back to provable copy — so the page degrades, never blocks. <b>Drag to pan · ⌘/Ctrl-scroll to zoom · click a node for its spec · trace a tier.</b></p>
+
+    <div class="agctl">
+      <div class="agtrace" id="agtrace">
+        <span class="agtl">Trace the path</span>
+        <button type="button" data-tier="all" class="on">All</button>
+        <button type="button" data-tier="0">Tier 0</button>
+        <button type="button" data-tier="1">Tier 1</button>
+        <button type="button" data-tier="2">Tier 2</button>
+        <button type="button" data-tier="3">Tier 3</button>
+      </div>
+      <div class="agzoom" id="agzoom">
+        <button type="button" data-z="out" aria-label="Zoom out">−</button>
+        <button type="button" data-z="in" aria-label="Zoom in">+</button>
+        <button type="button" data-z="fit">Fit</button>
+      </div>
+    </div>
+
+    <div class="agstage" id="agstage" role="img" aria-label="Agent graph. Flow: detect the identity key, then either the first-party email lane or the IP lane (reverse-IP, then the classify router), into score and route-to-tier. Tiers 0 and 1 take deterministic angle copy; tiers 2 and 3 take the LLM cache, optional Tier-3 competitor research, and the copy agent. All copy converges on the Gate, which ships it or falls back to deterministic copy, then renders with a provenance receipt — looping every navigation. The same graph is given as a table in Exhibit 6 below.">
+      <div class="agcanvas" id="agcanvas">
+        <svg class="agedges" id="agedges"><defs>
+          <marker id="agar" markerWidth="7.5" markerHeight="7.5" refX="6" refY="3.2" orient="auto"><path d="M0,0 L7,3.2 L0,6.4 Z" fill="#b3bbc5"/></marker>
+          <marker id="agarh" markerWidth="7.5" markerHeight="7.5" refX="6" refY="3.2" orient="auto"><path d="M0,0 L7,3.2 L0,6.4 Z" fill="#3b5bdb"/></marker>
+        </defs></svg>
+      </div>
+      <div class="aghint">Drag to pan · ⌘/Ctrl-scroll to zoom · click a node</div>
+    </div>
+
+    <div class="aglegend">
+      <div class="grp">
+        <span class="it"><span class="nt" style="background:var(--det-bg);color:var(--det)">det</span> deterministic</span>
+        <span class="it"><span class="nt" style="background:#e7f3ee;color:#0f6b4f">cache</span> LLM cache</span>
+        <span class="it"><span class="nt" style="background:var(--llm-bg);color:var(--llm)">llm</span> agent (LLM)</span>
+        <span class="it"><span class="nt" style="background:var(--hold-bg);color:var(--hold)">gate</span> the Gate</span>
+        <span class="it"><span class="nt" style="background:var(--act-bg);color:var(--act)">out</span> render</span>
+      </div>
+      <div class="grp">
+        <span class="it"><span class="ed"></span> control flow</span>
+        <span class="it"><span class="ed cache"></span> cache hit (skip LLM)</span>
+        <span class="it"><span class="ed fallback"></span> Gate block → fallback</span>
+        <span class="it"><span class="ed loop"></span> loop · every navigation</span>
+      </div>
+    </div>
+
+    <div class="agdetail" id="agdetail"><div class="agd-empty">Click any node — or trace a tier — to see what it reads, how it branches, what it outputs, its provable default, and the code it maps to. The full table is Exhibit 6 below.</div></div>
+
+    <div class="gax">
+      <div class="gcol">
+        <h4><span class="mk w">wired</span> Axis A — provability (<code>verify_copy()</code>)</h4>
+        <ul>
+          <li><span>✓</span> blocks unprovable <b>superlatives</b> (<code>#1</code>, best, leading)</li>
+          <li><span>✓</span> blocks <b>comparative</b> superiority it can’t source (better/faster than, vs)</li>
+          <li><span>✓</span> blocks <b>reciting an inferred competitor</b> (Clay, Apollo…)</li>
+          <li><span>✓</span> blocks a <b>number not in the facts</b> (<code>\d+% / \dx / $\d</code>)</li>
+          <li><span>✓</span> blocks <b>reciting the company</b> under an <code>allude</code> policy</li>
+        </ul>
+      </div>
+      <div class="gcol">
+        <h4><span class="mk w">+ wired</span> Axis B — persuasion hygiene (<code>verify_copy</code> + <code>verify_message</code>)</h4>
+        <ul>
+          <li><span style="color:var(--say)">●</span> per-line: blocks <b>AI-tell phrases/words</b> (delve / leverage / “hope this finds you well” …) <span class="mk w">wired</span></li>
+          <li><span style="color:var(--say)">●</span> per-line: blocks <b>&gt;1 em-dash</b> (one is fine) <span class="mk w">wired</span></li>
+          <li><span style="color:var(--say)">●</span> offers the <code>loss</code> cost-of-inaction angle, provable by construction <span class="mk w">wired</span></li>
+          <li><span style="color:var(--say)">●</span> <b>message Gate</b> — one CTA · ≤125 words · no cold calendar link · no spam-promise, in <code>verify_message()</code>; enforced where variants enter the action pool + on <code>/policies</code> <span class="mk w">wired</span></li>
+          <li><span style="color:var(--say)">●</span> <b>sequence Gate</b> — never single-touch · no repeated step, in <code>verify_sequence()</code> <span class="mk w">wired</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="feedback" style="margin-top:14px">↩ <b>Fallback path:</b> any line the Gate rejects — on either axis — → the deterministic angle template ships instead (<code>angle_copy</code>). The page never blocks; it degrades to what’s provable <i>and</i> clean. Only two nodes are LLM (Research, Copy); the spine is deterministic, and the Gate stays the single point of disposition. <b>Axis B keeps Provenance’s rule intact: a line that can’t be proven OR can’t be defended as non-spam is structurally unable to ship — never hand-excluded (Constitution Art. II).</b></p>
+  </section>
+
+  <!-- ============ EXHIBIT 6 — EVERY NODE EXPLAINED ============ -->
+  <section>
+    <p class="ex">Exhibit 6 — <span>Every node explained: input → branches → output → default → code</span></p>
+    <p class="exsub">The same agent graph as a table — the accessible, printable form of the diagram above. Click a node in Exhibit 5 and its row flashes here.</p>
+    <table class="maptable">
+      <thead><tr><th style="width:15%">Node</th><th style="width:18%">Reads (input)</th><th style="width:24%">Branches</th><th style="width:21%">Output</th><th style="width:22%">Default / fallback</th></tr></thead>
+      <tbody>
+        <tr id="ex6-identity"><td><span class="tp w">wired</span>Identity key</td>
+          <td>work email <i>or</i> visitor IP</td>
+          <td>email present → first-party lane · else → IP lane</td>
+          <td>company + person (email) or raw IP to classify</td>
+          <td class="def">consumer mailbox / no email → <b>IP lane</b></td></tr>
+        <tr id="ex6-classify"><td><span class="tp w">wired</span>Network classify</td>
+          <td><code>mobile/proxy/hosting</code> + <code>org</code> name</td>
+          <td>mobile · proxy · hosting · is_isp · is_corporate (priority order)</td>
+          <td>which signal class the IP actually carries</td>
+          <td class="def">unreachable/private → <b>Tier 0 neutral</b></td></tr>
+        <tr id="ex6-company"><td><span class="tp w">wired</span>Company enrich</td>
+          <td>corporate domain / netblock → PDL</td>
+          <td>company resolves? · industry maps to a sector?</td>
+          <td>firmographic facts (industry, region)</td>
+          <td class="def">no company → <b>person lane</b>, then neutral</td></tr>
+        <tr id="ex6-score"><td><span class="tp w">wired</span>Confidence score</td>
+          <td>per-field: location / company / industry</td>
+          <td>HIGH · MEDIUM · LOW/UNKNOWN</td>
+          <td>the bar each claim must clear to surface</td>
+          <td class="def">below bar → <b>hold the claim</b> (don’t assert sector)</td></tr>
+        <tr id="ex6-route"><td><span class="tp w">wired</span>Tier route</td>
+          <td>classify + score</td>
+          <td>Tier 0 · 1 · 2 · 3</td>
+          <td>the permission budget + surface policy (say/allude/hold)</td>
+          <td class="def">always resolves to a tier — <b>0 is the floor</b></td></tr>
+        <tr><td><span class="tp p">proposed</span>Play select</td>
+          <td>the tier’s provable budget</td>
+          <td>segment · region · trigger+loss+peer · differentiator</td>
+          <td>the action move (Exhibit 3)</td>
+          <td class="def">budget empties → <b>step down a tier’s play</b></td></tr>
+        <tr><td><span class="tp p">proposed</span>CTA / temperature</td>
+          <td>lead stage (cold → replied)</td>
+          <td>permission · interest · offer · soft-talk · two-option time</td>
+          <td>exactly one ask, friction-matched</td>
+          <td class="def">cold/unknown → <b>soft interest question</b></td></tr>
+        <tr id="ex6-gate"><td><span class="tp w">wired</span><span class="tp p">+B</span>The Gate</td>
+          <td>every proposed line + facts + policy</td>
+          <td>provable & clean? → ship · else → block</td>
+          <td>verdict + reason per line</td>
+          <td class="def">any block → <b>deterministic <code>angle_copy</code></b> ships</td></tr>
+      </tbody>
+    </table>
+    <p class="note" style="margin-top:12px">Read top-to-bottom, the tree never widens a claim it can’t back and never asks for more than trust earned: <b>identity gates permission, permission gates the play, the play gates the ask, and the Gate gates the send.</b> Every branch has a provable default, so the worst case is always honest, never broken.</p>
+  </section>
+
+  <footer>
+    <div class="caveat"><b>Can ≠ should.</b> Every signal here carries a say / allude / hold surface policy. Geo + firmographic are <b>allude</b> (involuntary — shape, don’t recite). “Creepy mode” is this exact same data with the policy turned off — reciting the company, the precise location, an inferred competitor, <b>or stacking unrelated/behavioral signals to fake intimacy</b>. The action layer caps relevance at <b>one provable, professional point</b>; the Gate makes the surveillance arm <b>provably never selected</b>, not merely discouraged.</div>
+    <div class="illus"><b>Illustrative figures.</b> The persuasion principles (one trigger, soft CTA, loss-frame, matched-peer proof, follow up, don’t sound like a bot) are cross-source robust. The reply/booking <i>magnitudes</i> behind them are <b>illustrative external benchmarks</b>, not Provenance’s own computed metrics — the research fact-check dropped the inflated single-vendor stats (the “5.2× signal lift”, “287% multichannel”). Per Constitution Art. I, no demo number here is hand-typed as fact.</div>
+    <p style="margin:12px 0 0">Grounded in <b>pipeline/personalization/scene.py</b> (<code>reverse_ip</code> + <code>resolve_ip</code> classification, <code>resolve_email</code> first-party lane, PDL enrich) and <b>creative.py</b> (<code>ANGLES</code>, <code>ai_copy</code> + <code>competitor_brief</code> + the Gate <code>verify_copy</code> + LLMCache). <b>Pass 1 (permission)</b> and <b>Axis A of the Gate</b> have always been wired. As of this pass the copy research is <b>merged</b>: the <code>loss</code> cost-of-inaction angle and Axis B’s per-line hygiene run in <code>verify_copy()</code>, and the message + sequence Gate (one CTA · ≤125 words · no cold calendar link · no spam-promise · never single-touch) runs in <code>verify_message()</code> / <code>verify_sequence()</code> — enforced where outbound variants enter the action pool (<code>build_action_pool</code>) and published as a locked standard on <code>/policies</code> (Voice &amp; hygiene). Locked by added tests (<b>full suite: 144 passed</b>). Real fields only — no fabricated provider claims.</p>
+  </footer>
+</div>
+
+<script>
+/* ===== Exhibit 5 — interactive agent graph (node-link directed graph) =====
+   Faithful to pipeline/personalization/scene.py (detect → reverse_ip/resolve_email →
+   _classify → tier) + creative.py (LLMCache, competitor_brief, ai_copy, the Gate,
+   angle_copy fallback). Dependency-free: HTML node cards + an SVG edge layer, both
+   pan/zoom transformed. Click a node for its spec; trace a tier; the Gate is the
+   single point of disposition; a blocked line loops back to angle_copy. */
+(function(){
+  var stage=document.getElementById('agstage');
+  if(!stage) return;
+  var canvas=document.getElementById('agcanvas'),
+      svg=document.getElementById('agedges'),
+      detail=document.getElementById('agdetail'),
+      trace=document.getElementById('agtrace'),
+      zoom=document.getElementById('agzoom');
+  var CW=1812, CH=600, NS='http://www.w3.org/2000/svg';
+
+  var TYPE={io:{l:'in',bg:'var(--det-bg)',fg:'var(--det)'},det:{l:'det',bg:'var(--det-bg)',fg:'var(--det)'},
+    cache:{l:'cache',bg:'#e7f3ee',fg:'#0f6b4f'},llm:{l:'llm',bg:'var(--llm-bg)',fg:'var(--llm)'},
+    gate:{l:'gate',bg:'var(--hold-bg)',fg:'var(--hold)'},term:{l:'out',bg:'var(--act-bg)',fg:'var(--act)'}};
+
+  var NODES=[
+   {id:'detect',t:'io',x:24,y:250,w:128,h:74,l:'Detect',d:'identity key: IP or email',row:'ex6-identity',
+    reads:'the request → client IP, or a first-party work email (known cookie / token)',br:'email present → first-party lane · else → IP lane',out:'the identity key to resolve',def:'no email → IP lane',code:'detect() · client_ip()'},
+   {id:'resolve_email',t:'det',x:196,y:120,w:164,h:88,l:'Resolve email',d:'first-party · PDL company + person',row:'ex6-company',
+    reads:'work email → domain → PDL company + person',br:'company resolves → Tier 2 · consumer mailbox (gmail) → drop to the individual',out:'company (HIGH confidence — self-declared) + title / seniority',def:'no company → person lane, then neutral',code:'resolve_email() · _pdl_person()'},
+   {id:'reverse_ip',t:'cache',x:196,y:372,w:164,h:88,l:'Reverse-IP',d:'ip-api (cached) · geo · org · flags',row:'ex6-classify',
+    reads:'the visitor IP → ip-api.com (cached)',br:'returns geo · org · mobile / proxy / hosting flags',out:'network facts to classify (surface policy: allude)',def:'private / unreachable → Tier 0 neutral',code:'reverse_ip() · LLMCache'},
+   {id:'classify',t:'det',x:400,y:372,w:164,h:88,l:'Classify',d:'router · 6-way network fork',row:'ex6-classify',
+    reads:'mobile / proxy / hosting flags + the org name',br:'private · mobile · proxy · hosting · is_isp · is_corporate (priority order)',out:'network_type → which signal class the IP carries',def:'unreachable → Tier 0 neutral',code:'_classify() · resolve_ip()'},
+   {id:'score',t:'det',x:604,y:250,w:150,h:82,l:'Score',d:'per-field confidence gate',row:'ex6-score',
+    reads:'per-field: location / company / industry',br:'HIGH · MEDIUM · LOW / UNKNOWN',out:'the bar each claim must clear to surface',def:'below the bar → hold the claim (never assert a sector)',code:'confidence in resolve_ip() / resolve_email()'},
+   {id:'route',t:'det',x:800,y:244,w:158,h:96,l:'Route → tier',d:'Tier 0 · 1 · 2 · 3',row:'ex6-route',
+    reads:'classify + score',br:'Tier 0 neutral · 1 location · 2 firmographic · 3 + competitive',out:'the permission budget + surface policy (say / allude / hold)',def:'always resolves — Tier 0 is the floor',code:'TIER_LABELS · tier (scene.py)'},
+   {id:'cache',t:'cache',x:998,y:138,w:152,h:76,l:'LLM cache',d:'industry×region×angle×policy',row:'',
+    reads:'key = industry × region × angle × policy',br:'hit → skip the LLM (~0 ms) · miss → call the agent',out:'cached creative, or a miss',def:'—',code:'LLMCache (creative.py)'},
+   {id:'angle_copy',t:'det',x:998,y:372,w:166,h:88,l:'Angle copy',d:'deterministic · the fallback',row:'',
+    reads:'industry · angle · region · company',br:'the ANGLES templates — provable by construction',out:'deterministic copy that always clears the Gate',def:'this IS the fallback — always available',code:'angle_copy() · ANGLES'},
+   {id:'competitor_brief',t:'llm',x:1200,y:44,w:172,h:80,l:'Research',d:'Tier 3 · category brief',row:'',
+    reads:"the visitor's competitive category",br:'Tier 3 only',out:'a brief of provable category differentiators',def:'no brief → fall back to category value',code:'competitor_brief() · _llm_brief()'},
+   {id:'ai_copy',t:'llm',x:1200,y:152,w:172,h:86,l:'Copy agent',d:'Claude Haiku · inert offline',row:'',
+    reads:'the brief + the one provable hook + the facts',br:'—',out:'proposed headline / sub / CTA',def:'offline / empty → deterministic angle copy',code:'ai_copy() · _llm_draft()'},
+   {id:'gate',t:'gate',x:1416,y:246,w:152,h:100,l:'The Gate',d:'disposes · provable + clean',row:'ex6-gate',
+    reads:'every proposed line + facts + policy',br:'Axis A provable? AND Axis B clean? → ship · else → block',out:'a verdict + reason, per line',def:'any block → deterministic angle copy ships',code:'verify_copy() · verify_message() · verify_sequence()'},
+   {id:'render',t:'term',x:1612,y:250,w:176,h:88,l:'Render',d:'+ provenance receipt',row:'',
+    reads:'the gated lines + design',br:'design_select → backdrop / accent / tone',out:"the page + a receipt: every line's source · basis · policy",def:'neutral backdrop',code:'design_select() · build_scene() + receipt'}
+  ];
+  var EDGES=[
+   ['detect','resolve_email','cond','email'],['detect','reverse_ip','cond','IP only'],
+   ['resolve_email','score','solid',''],['reverse_ip','classify','solid',''],['classify','score','solid',''],
+   ['score','route','solid',''],
+   ['route','angle_copy','cond','Tier 0·1'],['route','cache','cond','Tier 2·3'],['route','competitor_brief','cond','Tier 3'],
+   ['competitor_brief','ai_copy','solid','brief'],['cache','ai_copy','cond','miss'],['cache','gate','cache','hit · skip LLM'],
+   ['ai_copy','gate','solid',''],['angle_copy','gate','solid',''],
+   ['gate','render','cond','pass'],['gate','angle_copy','fallback','block → fallback'],
+   ['render','detect','loop','↺ every navigation']
+  ];
+  var TIERSET={
+   '0':['detect','reverse_ip','classify','score','route','angle_copy','gate','render'],
+   '1':['detect','reverse_ip','classify','score','route','angle_copy','gate','render'],
+   '2':['detect','reverse_ip','classify','score','route','cache','ai_copy','gate','render'],
+   '3':['detect','reverse_ip','classify','score','route','competitor_brief','cache','ai_copy','gate','render']
+  };
+  var TIERNOTE={
+   '0':['Tier 0 · neutral','#6b7280','No provable signal about this visitor. Deterministic angle copy only — no LLM, no sector claim. The floor every visit can always reach.'],
+   '1':['Tier 1 · location-aware','var(--allude)','Region framing only (allude). Still deterministic copy; company and sector are held.'],
+   '2':['Tier 2 · firmographic','var(--signal)','Company resolved (first-party email or a clean corporate IP). The copy agent drafts from real facts via the cache; the Gate verifies; angle copy is always the fallback.'],
+   '3':['Tier 3 · + competitive','var(--llm)','Adds the competitor-research brief before the copy agent. Every comparative line gets the Gate’s highest scrutiny — unproven lines fall back to category value.']
+  };
+
+  var byId={}, nodeEl={}, edgeRec=[];
+  NODES.forEach(function(n){byId[n.id]=n;});
+  function box(id){var n=byId[id];return{x:n.x,y:n.y,w:n.w,h:n.h,cx:n.x+n.w/2,cy:n.y+n.h/2,
+    rx:n.x+n.w,ry:n.y+n.h/2,lx:n.x,ly:n.y+n.h/2,bx:n.x+n.w/2,by:n.y+n.h,tx:n.x+n.w/2,ty:n.y};}
+  function cmid(p0,p1,p2,p3){return{x:.125*p0.x+.375*p1.x+.375*p2.x+.125*p3.x,y:.125*p0.y+.375*p1.y+.375*p2.y+.125*p3.y};}
+
+  function geom(e){
+    var a=box(e[0]),b=box(e[1]),kind=e[2],d,mid;
+    if(kind==='loop'){var s={x:a.bx,y:a.by},t={x:b.bx,y:b.by};
+      d='M'+s.x+','+s.y+' C'+s.x+',575 '+t.x+',575 '+t.x+','+t.y;mid=cmid(s,{x:s.x,y:575},{x:t.x,y:575},t);}
+    else if(kind==='fallback'){var s2={x:a.bx,y:a.by},t2={x:b.rx,y:b.ry},c1={x:s2.x,y:s2.y+72},c2={x:t2.x+96,y:t2.y};
+      d='M'+s2.x+','+s2.y+' C'+c1.x+','+c1.y+' '+c2.x+','+c2.y+' '+t2.x+','+t2.y;mid=cmid(s2,c1,c2,t2);}
+    else if(Math.abs(a.cx-b.cx)<24 && b.ty>a.by){ // vertical (same column, b below a)
+      var s3={x:a.bx,y:a.by},t3={x:b.tx,y:b.ty};d='M'+s3.x+','+s3.y+' L'+t3.x+','+t3.y;mid={x:(s3.x+t3.x)/2,y:(s3.y+t3.y)/2};}
+    else{var s4={x:a.rx,y:a.ry},t4={x:b.lx,y:b.ly},dx=Math.max(26,Math.min(150,(t4.x-s4.x)*0.5));
+      var p1={x:s4.x+dx,y:s4.y},p2={x:t4.x-dx,y:t4.y};
+      d='M'+s4.x+','+s4.y+' C'+p1.x+','+p1.y+' '+p2.x+','+p2.y+' '+t4.x+','+t4.y;mid=cmid(s4,p1,p2,t4);}
+    return{d:d,mid:mid};
+  }
+
+  // ---- build edges + labels ----
+  svg.setAttribute('width',CW);svg.setAttribute('height',CH);svg.setAttribute('viewBox','0 0 '+CW+' '+CH);
+  EDGES.forEach(function(e){
+    var g=geom(e),kind=e[2],cls=(kind==='cache'?'cache':kind==='fallback'?'fallback':kind==='loop'?'loop':'');
+    var p=document.createElementNS(NS,'path');p.setAttribute('d',g.d);if(cls)p.setAttribute('class',cls);
+    p.setAttribute('marker-end','url(#agar)');svg.appendChild(p);
+    var lab=null;
+    if(e[3]){lab=document.createElement('div');lab.className='agelabel';lab.textContent=e[3];
+      lab.style.left=g.mid.x+'px';lab.style.top=g.mid.y+'px';canvas.appendChild(lab);}
+    edgeRec.push({from:e[0],to:e[1],kind:kind,path:p,label:lab});
+  });
+
+  // ---- build nodes ----
+  NODES.forEach(function(n){
+    var b=document.createElement('button');b.type='button';b.className='agnode t-'+n.t;b.setAttribute('data-id',n.id);
+    b.style.left=n.x+'px';b.style.top=n.y+'px';b.style.width=n.w+'px';b.style.height=n.h+'px';
+    b.setAttribute('aria-label',n.l+' — '+n.d);
+    b.innerHTML='<div class="nh"><span class="nt">'+TYPE[n.t].l+'</span> <span class="nl">'+n.l+'</span></div><div class="nd">'+n.d+'</div>';
+    b.addEventListener('click',function(ev){ev.stopPropagation();selectNode(n.id);});
+    b.addEventListener('mouseenter',function(){hoverNode(n.id);});
+    b.addEventListener('mouseleave',function(){hoverNode(null);});
+    canvas.appendChild(b);nodeEl[n.id]=b;
+  });
+
+  // ---- highlight engine ----
+  function setEdge(rec,st){var p=rec.path,l=rec.label;p.classList.remove('hot','dim');if(l)l.classList.remove('hot','dim');
+    if(st==='hot'){p.classList.add('hot');p.setAttribute('marker-end','url(#agarh)');if(l)l.classList.add('hot');}
+    else{p.setAttribute('marker-end','url(#agar)');if(st==='dim'){p.classList.add('dim');if(l)l.classList.add('dim');}}}
+  function clearHL(){Object.keys(nodeEl).forEach(function(k){nodeEl[k].classList.remove('sel','dim');});
+    edgeRec.forEach(function(r){setEdge(r,'normal');});}
+  function applyHL(litN,litE,sel){
+    Object.keys(nodeEl).forEach(function(k){nodeEl[k].classList.toggle('dim',litN&&litN.indexOf(k)<0&&k!==sel);
+      nodeEl[k].classList.toggle('sel',k===sel);});
+    edgeRec.forEach(function(r){var on=litE?litE.indexOf(r.from+'>'+r.to)>=0:(r.from===sel||r.to===sel);
+      setEdge(r,on?'hot':(litN?'dim':'dim'));});
+  }
+
+  // ---- detail panel ----
+  function escapeOpen(){detail.innerHTML='<div class="agd-empty">Click any node — or trace a tier — to see what it reads, how it branches, what it outputs, its provable default, and the code it maps to. The full table is Exhibit 6 below.</div>';}
+  function nodeDetail(n){
+    var tm=TYPE[n.t];
+    detail.innerHTML='<div class="agd-head"><span class="nt" style="background:'+tm.bg+';color:'+tm.fg+'">'+tm.l+'</span>'+
+      '<h4>'+n.l+'</h4><span class="st">wired</span></div>'+
+      '<div class="agd-grid">'+
+        '<div class="agd-cell"><div class="k">Reads · input</div><div class="v">'+n.reads+'</div></div>'+
+        '<div class="agd-cell"><div class="k">Branches</div><div class="v">'+n.br+'</div></div>'+
+        '<div class="agd-cell"><div class="k">Output</div><div class="v">'+n.out+'</div></div>'+
+        '<div class="agd-cell def"><div class="k">Default · fallback</div><div class="v">'+n.def+'</div></div>'+
+        '<div class="agd-cell"><div class="k">Code</div><div class="v"><code>'+n.code+'</code></div></div>'+
+        '<div class="agd-cell"><div class="k">In the graph</div><div class="v">click another node, or use <b>Trace the path</b> to follow a tier end-to-end</div></div>'+
+      '</div>';
+  }
+  function tierDetail(t){var n=TIERNOTE[t];
+    detail.innerHTML='<div class="agd-head"><span class="nt" style="background:'+n[1]+';color:#fff">tier '+t+'</span>'+
+      '<h4>'+n[0]+'</h4></div><div class="agd-empty" style="text-align:left;padding:14px 16px;color:var(--ink)">'+n[2]+'</div>';
+  }
+
+  function flashRow(id){if(!id)return;var tr=document.getElementById(id);if(!tr)return;
+    tr.classList.remove('flash');void tr.offsetWidth;tr.classList.add('flash');}
+
+  // ---- modes ----
+  var selected=null;
+  function selectNode(id){
+    selected=id;setTier('all',true);
+    var n=byId[id];applyHL(null,null,id);nodeDetail(n);flashRow(n.row);notifyParent();
+  }
+  function hoverNode(id){
+    if(selected)return; // don't fight an active selection
+    if(activeTier!=='all'){return;}
+    if(!id){clearHL();return;}
+    applyHL(null,null,id); // hot the incident edges, no detail change
+  }
+  var activeTier='all';
+  function setTier(t,silent){
+    activeTier=t;selected=(t==='all'&&silent)?selected:null;
+    [].forEach.call(trace.querySelectorAll('button'),function(b){b.classList.toggle('on',b.getAttribute('data-tier')===t);});
+    if(silent)return;
+    if(t==='all'){clearHL();escapeOpen();notifyParent();return;}
+    var litN=TIERSET[t],litE=[];
+    EDGES.forEach(function(e){if(litN.indexOf(e[0])>=0&&litN.indexOf(e[1])>=0)litE.push(e[0]+'>'+e[1]);});
+    applyHL(litN,litE,null);tierDetail(t);notifyParent();
+  }
+  [].forEach.call(trace.querySelectorAll('button'),function(b){b.addEventListener('click',function(){setTier(b.getAttribute('data-tier'),false);});});
+
+  // ---- pan / zoom ----
+  var view={x:0,y:0,k:1};
+  function apply(){canvas.style.transform='translate('+view.x+'px,'+view.y+'px) scale('+view.k+')';}
+  function clampK(k){return Math.max(0.3,Math.min(2.2,k));}
+  function zoomAt(f,px,py){var nk=clampK(view.k*f);var wx=(px-view.x)/view.k,wy=(py-view.y)/view.k;
+    view.k=nk;view.x=px-wx*nk;view.y=py-wy*nk;apply();}
+  function fit(){var r=stage.getBoundingClientRect(),pad=26;
+    var k=Math.min((r.width-2*pad)/CW,(r.height-2*pad)/CH);k=Math.max(0.32,Math.min(1.1,k));
+    view.k=k;view.x=(r.width-CW*k)/2;view.y=(r.height-CH*k)/2;apply();}
+  zoom.querySelector('[data-z="in"]').addEventListener('click',function(){var r=stage.getBoundingClientRect();zoomAt(1.25,r.width/2,r.height/2);});
+  zoom.querySelector('[data-z="out"]').addEventListener('click',function(){var r=stage.getBoundingClientRect();zoomAt(0.8,r.width/2,r.height/2);});
+  zoom.querySelector('[data-z="fit"]').addEventListener('click',fit);
+
+  var drag=null;
+  stage.addEventListener('pointerdown',function(e){
+    if(e.target.closest('.agnode'))return; // let node clicks through
+    drag={x:e.clientX,y:e.clientY,vx:view.x,vy:view.y,moved:false};stage.classList.add('grab');
+    try{stage.setPointerCapture(e.pointerId);}catch(_){}
+  });
+  stage.addEventListener('pointermove',function(e){if(!drag)return;
+    view.x=drag.vx+(e.clientX-drag.x);view.y=drag.vy+(e.clientY-drag.y);drag.moved=true;apply();});
+  function endDrag(){drag=null;stage.classList.remove('grab');}
+  stage.addEventListener('pointerup',endDrag);stage.addEventListener('pointercancel',endDrag);
+  stage.addEventListener('click',function(e){ // click empty space → clear selection
+    if(drag&&drag.moved)return;if(e.target.closest('.agnode'))return;
+    if(selected){selected=null;clearHL();escapeOpen();notifyParent();}
+  });
+  stage.addEventListener('wheel',function(e){if(!(e.ctrlKey||e.metaKey))return; // plain wheel scrolls the page
+    e.preventDefault();var r=stage.getBoundingClientRect();zoomAt(e.deltaY<0?1.12:0.893,e.clientX-r.left,e.clientY-r.top);},{passive:false});
+  stage.addEventListener('dblclick',function(e){if(e.target.closest('.agnode'))return;
+    var r=stage.getBoundingClientRect();zoomAt(1.3,e.clientX-r.left,e.clientY-r.top);});
+
+  function notifyParent(){try{if(window.parent&&window.parent!==window)window.parent.postMessage('prov-graph-refit','*');}catch(_){}}
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(fit,120);});
+
+  fit();setTimeout(fit,80);
+})();
+</script>
+</body>
+</html>

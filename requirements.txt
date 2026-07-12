@@ -7,5 +7,8 @@ pydantic
 numpy
 pyyaml
 httpx
+Pillow
 rank-bm25
+segno
 pytest
+anthropic   # optional LLM layer (Gate + /demo/live copy agent); inert without ANTHROPIC_API_KEY

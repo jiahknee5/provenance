@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}apt{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz@0,16..72;1,16..72&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="/static/quiet.css">
+  <link rel="icon" type="image/svg+xml" href="/static/brand/apt-favicon.svg">
+</head>
+<body>
+<a class="q-skip" href="#q-main">Skip to content</a>
+{% set p = request.url.path %}
+<div class="q-app">
+  <!-- sidebar -->
+  <aside class="q-side">
+    <div class="q-ws"><span class="av"><img src="/static/brand/apt-mark-dark.svg" alt="" width="15" height="15"></span>apt<i class="ph ph-caret-up-down ch"></i></div>
+    <nav class="q-nav">
+      <a class="q-ni {{ 'on' if p in ['/workspace','/'] else '' }}" href="/workspace"><i class="ph ph-house"></i>Home</a>
+      <a class="q-ni {{ 'on' if p.startswith('/records') or p=='/workspace' else '' }}" href="/records"><i class="ph ph-table"></i>Records</a>
+      <a class="q-ni {{ 'on' if p.startswith('/composer') else '' }}" href="/composer"><i class="ph ph-pen-nib"></i>Composer</a>
+      <a class="q-ni {{ 'on' if p.startswith('/optimizer') else '' }}" href="/optimizer"><i class="ph ph-trend-up"></i>Optimizer</a>
+      <a class="q-ni {{ 'on' if p.startswith('/agent') else '' }}" href="/agent"><i class="ph ph-sparkle"></i>Agent</a>
+      <div class="q-sect q-label">Trust</div>
+      <a class="q-ni {{ 'on' if p.startswith('/assurance') else '' }}" href="/assurance"><i class="ph ph-shield-check"></i>Assurance</a>
+      <a class="q-ni {{ 'on' if p.startswith('/policies') else '' }}" href="/policies"><i class="ph ph-scroll"></i>Policies</a>
+      <a class="q-ni {{ 'on' if p.startswith('/graph') else '' }}" href="/graph"><i class="ph ph-tree-structure"></i>Agent graph</a>
+      <a class="q-ni {{ 'on' if p.startswith('/sources') else '' }}" href="/sources"><i class="ph ph-database"></i>Sources</a>
+      <div class="q-sect q-label">Showcase</div>
+      <a class="q-ni {{ 'on' if p.startswith('/demo') else '' }}" href="/demo"><i class="ph ph-monitor-play"></i>Live demo</a>
+      <a class="q-ni {{ 'on' if p == '/showcase' else '' }}" href="/showcase"><i class="ph ph-squares-four"></i>Use cases</a>
+      <a class="q-ni {{ 'on' if p == '/showcase/gauntletai' else '' }}" href="/showcase/gauntletai" style="padding-left:30px;font-size:12.5px"><i class="ph ph-caret-right" style="font-size:11px"></i>1 · GauntletAI</a>
+      <a class="q-ni {{ 'on' if p == '/showcase/skyfi' else '' }}" href="/showcase/skyfi" style="padding-left:30px;font-size:12.5px"><i class="ph ph-caret-right" style="font-size:11px"></i>2 · SkyFi</a>
+      <a class="q-ni {{ 'on' if p == '/showcase/known' else '' }}" href="/showcase/known" style="padding-left:30px;font-size:12.5px"><i class="ph ph-caret-right" style="font-size:11px"></i>3 · Known customer</a>
+      <a class="q-ni {{ 'on' if p == '/showcase/optimizer' else '' }}" href="/showcase/optimizer" style="padding-left:30px;font-size:12.5px"><i class="ph ph-caret-right" style="font-size:11px"></i>4 · Optimizer (RL)</a>
+    </nav>
+    <div class="q-side-foot">
+      <a class="q-ni {{ 'on' if p == '/help/whats-new' else '' }}" href="/help/whats-new"><i class="ph ph-megaphone"></i>What&rsquo;s new</a>
+      <a class="q-ni {{ 'on' if p.startswith('/help') and p != '/help/whats-new' else '' }}" href="/help"><i class="ph ph-question"></i>Help</a>
+      <a class="q-ni {{ 'on' if p.startswith('/archive') else '' }}" href="/archive"><i class="ph ph-archive"></i>Archive</a>
+      <div class="q-ver">apt · v{{ APP_VERSION }} · {{ APP_BUILT }}</div>
+    </div>
+  </aside>
+
+  <!-- main -->
+  <div class="q-main">
+    <header class="q-top">
+      <div class="crumb">{% block crumb %}<i class="ph ph-house"></i> Home{% endblock %}</div>
+      <button class="q-cmd" id="cmdk-btn" type="button"><i class="ph ph-magnifying-glass"></i> Ask or jump to&hellip; <kbd>⌘K</kbd></button>
+    </header>
+    <main class="q-body" id="q-main">{% block content %}{% endblock %}</main>
+  </div>
+</div>
+
+<!-- ⌘K command palette · Z-50 floating, light (quiet.css .q-cmdk) -->
+<div class="q-cmdk-scrim" id="cmdk" role="dialog" aria-modal="true" aria-label="Command palette">
+  <div class="q-cmdk" role="listbox">
+    <div class="qf"><i class="ph ph-magnifying-glass"></i>
+      <input id="cmdk-input" type="text" placeholder="Search surfaces or ask the agent&hellip;" autocomplete="off" spellcheck="false" aria-label="Command">
+    </div>
+    <div class="qlist" id="cmdk-list">
+      <a class="qi ask" data-kind="ask" data-keep="1" href="/agent"><i class="ph ph-sparkle"></i><span class="lab">Ask the agent&hellip;</span><span class="hint">⏎</span></a>
+      <a class="qi" data-label="home workspace records pipeline" href="/workspace"><i class="ph ph-house"></i>Home<span class="hint">go</span></a>
+      <a class="qi" data-label="records people companies deals table" href="/records"><i class="ph ph-table"></i>Records<span class="hint">go</span></a>
+      <a class="qi" data-label="composer message copy outreach gate write" href="/composer"><i class="ph ph-pen-nib"></i>Composer<span class="hint">go</span></a>
+      <a class="qi" data-label="optimizer bandit experiment variant winner lift" href="/optimizer"><i class="ph ph-trend-up"></i>Optimizer<span class="hint">go</span></a>
+      <a class="qi" data-label="agent navigator ask deterministic" href="/agent"><i class="ph ph-sparkle"></i>Agent<span class="hint">go</span></a>
+      <a class="qi" data-label="assurance trust drift watch monitor traps" href="/assurance"><i class="ph ph-shield-check"></i>Assurance<span class="hint">go</span></a>
+      <a class="qi" data-label="policies surface say allude hold company product personal what the llm can say" href="/policies"><i class="ph ph-scroll"></i>Policies<span class="hint">go</span></a>
+      <a class="qi" data-label="agent graph decision tree router tiers classify" href="/graph"><i class="ph ph-tree-structure"></i>Agent graph<span class="hint">go</span></a>
+      <a class="qi" data-label="sources data provenance connectors catalog" href="/sources"><i class="ph ph-database"></i>Sources<span class="hint">go</span></a>
+      <a class="qi" data-label="live demo personalization clone variant receipt" href="/demo"><i class="ph ph-monitor-play"></i>Live demo<span class="hint">go</span></a>
+      <a class="qi" data-label="kpi monitor control tower metrics rl" href="/demo/monitor"><i class="ph ph-gauge"></i>KPI monitor<span class="hint">go</span></a>
+      <a class="qi" data-label="showcase use cases gallery personalized demo sites" href="/showcase"><i class="ph ph-squares-four"></i>Use cases<span class="hint">go</span></a>
+      <a class="qi" data-label="gauntletai anonymous firmographic personalization ai training use case 1" href="/showcase/gauntletai"><i class="ph ph-caret-right"></i>1 · GauntletAI<span class="hint">go</span></a>
+      <a class="qi" data-label="skyfi geo location satellite imagery mining use case 2" href="/showcase/skyfi"><i class="ph ph-caret-right"></i>2 · SkyFi<span class="hint">go</span></a>
+      <a class="qi" data-label="known customer email magic link close sale persuasion use case 3" href="/showcase/known"><i class="ph ph-caret-right"></i>3 · Known customer<span class="hint">go</span></a>
+      <a class="qi" data-label="optimizer reinforcement learning bandit a/b test lie use case 4" href="/showcase/optimizer"><i class="ph ph-caret-right"></i>4 · Optimizer (RL)<span class="hint">go</span></a>
+      <a class="qi" data-label="lab personalize tiers creepy super-personalization" href="/personalize"><i class="ph ph-magic-wand"></i>Personalize<span class="hint">archive</span></a>
+      <a class="qi" data-label="lab inspector claim ledger regret" href="/inspector"><i class="ph ph-magnifying-glass-plus"></i>Inspector<span class="hint">archive</span></a>
+      <a class="qi" data-label="lab observatory pipeline run node graph" href="/observatory"><i class="ph ph-graph"></i>Observatory<span class="hint">archive</span></a>
+      <a class="qi" data-label="lab funnel customer journey paths" href="/funnel"><i class="ph ph-funnel"></i>Funnel<span class="hint">archive</span></a>
+      <a class="qi" data-label="lab cohort gallery seed users landings" href="/admin/landings"><i class="ph ph-users-three"></i>Cohort<span class="hint">archive</span></a>
+      <a class="qi" data-label="lab google sign-in oauth dossier" href="/google"><i class="ph ph-google-logo"></i>Google sign-in<span class="hint">archive</span></a>
+      <a class="qi" data-label="lab enrichment catalog sources cost basis" href="/enrichment-catalog"><i class="ph ph-stack"></i>Enrichment catalog<span class="hint">archive</span></a>
+      <a class="qi" data-label="lead capture form helix" href="/lead"><i class="ph ph-textbox"></i>Lead form<span class="hint">archive</span></a>
+      <a class="qi" data-label="home landing marketing site" href="/"><i class="ph ph-house-line"></i>Home (landing)<span class="hint">site</span></a>
+      <a class="qi" data-label="help docs guide how it works explain research methodology glossary" href="/help"><i class="ph ph-question"></i>Help<span class="hint">go</span></a>
+      <a class="qi" data-label="archive demo lab views superseded personalize inspector funnel cohort observatory google enrichment lead deck" href="/archive"><i class="ph ph-archive"></i>Archive<span class="hint">go</span></a>
+      <a class="qi" data-label="whats new updates changelog version release latest" href="/help/whats-new"><i class="ph ph-megaphone"></i>What's new<span class="hint">go</span></a>
+    </div>
+    <div class="qfoot"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>⏎</kbd> open</span><span><kbd>esc</kbd> close</span></div>
+  </div>
+</div>
+<script>
+(function(){
+  var scrim=document.getElementById('cmdk'),input=document.getElementById('cmdk-input'),
+      list=document.getElementById('cmdk-list'),ask=list.querySelector('.qi.ask'),
+      items=[].slice.call(list.querySelectorAll('.qi'));
+  function vis(){return items.filter(function(el){return el.style.display!=='none';});}
+  function sel(el){items.forEach(function(i){i.classList.remove('sel');});if(el){el.classList.add('sel');el.scrollIntoView({block:'nearest'});}}
+  function filter(){
+    var q=input.value.trim(),ql=q.toLowerCase();
+    ask.querySelector('.lab').textContent=q?('Ask the agent: “'+q+'”'):'Ask the agent…';
+    ask.setAttribute('href',q?('/agent?q='+encodeURIComponent(q)):'/agent');
+    items.forEach(function(el){
+      if(el.getAttribute('data-keep')){el.style.display='';return;}
+      var hay=(el.getAttribute('data-label')||el.textContent).toLowerCase();
+      el.style.display=(!ql||hay.indexOf(ql)>-1)?'':'none';
+    });
+    sel(vis()[0]);
+  }
+  function open(){scrim.classList.add('open');input.value='';filter();setTimeout(function(){input.focus();},0);}
+  function close(){scrim.classList.remove('open');}
+  document.addEventListener('keydown',function(e){
+    if((e.metaKey||e.ctrlKey)&&(e.key==='k'||e.key==='K')){e.preventDefault();scrim.classList.contains('open')?close():open();return;}
+    if(!scrim.classList.contains('open'))return;
+    if(e.key==='Escape'){e.preventDefault();close();}
+    else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();var v=vis(),i=v.indexOf(list.querySelector('.qi.sel'));
+      i=e.key==='ArrowDown'?Math.min(i+1,v.length-1):Math.max(i-1,0);sel(v[i]);}
+    else if(e.key==='Enter'){var s=list.querySelector('.qi.sel');if(s){e.preventDefault();window.location.href=s.getAttribute('href');}}
+  });
+  input.addEventListener('input',filter);
+  scrim.addEventListener('click',function(e){if(e.target===scrim)close();});
+  items.forEach(function(el){el.addEventListener('mousemove',function(){sel(el);});});
+  var btn=document.getElementById('cmdk-btn');if(btn)btn.addEventListener('click',open);
+})();
+</script>
+</body>
+</html>

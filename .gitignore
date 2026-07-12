@@ -9,15 +9,12 @@ __pycache__/
 data/demo/cache/
 data/demo/runs/
 data/demo/observe/
+data/demo/eval_history.jsonl
+data/demo/users.jsonl
 data/demo/*.sqlite
 data/demo/*.sqlite-*
 data/demo/ledgers/
-# verification artifacts
+data/demo/api_cost_ledger.jsonl
+# verification artifacts (root-level QA/demo screenshots — never committed)
 .playwright-mcp/
-/form.png
-/site.png
-/inspector.png
-/observatory-full.png
-/observatory-enrichment.png
-/site-personalized.png
-/enrichment-catalog.png
+/*.png

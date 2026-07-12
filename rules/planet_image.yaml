@@ -1,0 +1,404 @@
+# Planet (planet.com) — action-driven hero image personalization (tenant config).
+# Loaded by pipeline.personalization.image_intents.load_image_config("planet").
+# Built from docs/research/planet-market-segments.md — the satellite-view aesthetic is
+# the brand: regional landforms at landscape scale, one "change made visible" motif.
+# Framework: docs/04-workflow/ACTION-IMAGE-PERSONALIZATION.md
+
+tenant: planet
+product_context: "daily satellite Earth-imagery platform marketing site"
+
+# NEvo-style generate → score → select via Tribe v2 simulator (proxy_v1 when backend absent).
+brain_simulator:
+  enabled: true
+
+# Multi-frame timelapse hero loops — honest change-over-time storytelling (not neuro-stimulation).
+motion:
+  enabled: true
+  frames: 4
+  duration_ms: 3000
+  loop: true
+  assembly: animated_webp
+  framing: >-
+    Simulated satellite change-over-time timelapse — multi-frame loop for demo storytelling.
+    Not measured visitor brain stimulation; frames show region-scale change detection only.
+
+brand:
+  accent_color: "#3ba1ff"
+  name: Planet
+  must_avoid_additions:
+    - "NO street-level or property-scale detail — region/landscape scale only"
+    - "NO identifiable private homes, vehicles, or individual people seen from above"
+    - "NO crosshairs, targeting reticles on civilian areas, or weapon imagery"
+
+# Industry → environment type (allude only — never company names). Keys match
+# scene.py's reverse-IP industry buckets; values are satellite-view descriptors.
+industry_env:
+  technology: "satellite view of a metro tech corridor — campus grids and green belts"
+  energy: "high-oblique satellite view of an energy basin — corridors crossing open terrain"
+  agriculture: "satellite quilt of field polygons and center-pivot circles in seasonal color"
+  mining: "satellite view of a terraced open pit and tailings ponds in mineral tones"
+  logistics: "satellite view of a port and intermodal yard — containers as texture"
+  healthcare: "satellite view of a river city grid at dawn — calm civic geometry"
+  manufacturing: "satellite view of an industrial district beside rail lines"
+  construction: "satellite view of a growing urban edge — new blocks mid-build"
+  general: "cloud-free satellite mosaic of varied terrain — coast, fields, mountains"
+
+# Visual metaphors for objection themes — abstract, region-scale, never literal text.
+objection_metaphors:
+  tasked_competitor: "a single tasked frame beside an unbroken daily strip of the same coast — the archive advantage"
+  sovereignty: "ground-station dish under a satellite pass arc — dedicated capacity, direct downlink"
+  resolution_doubt: "same river bend at monitoring scale and tasking scale — broader then closer"
+  procurement_risk: "steady constellation tracks over a continent — reliability as geometry"
+  data_overload: "vast mosaic with three clean analytic flags — triage, not torrent"
+  cloud_cover: "cloud shadow sliding off a field grid as the next daily pass clears it"
+  verification_trust: "before/after pair with a clean analytic seam — evidence, not estimate"
+  integration_cost: "imagery tiles flowing into a clean map interface — data landing in a workflow"
+  price_opacity: "one crisply outlined AOI subscribed within a larger mosaic — pay for your acres"
+  aoi_small: "a small watershed AOI highlighted inside a continental mosaic"
+  proof_before_buy: "the visitor-scale region already rendered in the archive — go look"
+  free_data_enough: "coarse faded tile dissolving into dense daily 3 m detail of the same ground"
+  academic_budget: "a campus-adjacent study area gridded for science — open, accessible"
+  licensing_fear: "time-series tiles arranged like journal figures — publication-ready"
+  temporal_density: "sixteen sparse frames versus a dense daily filmstrip of one meander"
+  switching_effort: "free-archive tiles and daily tiles side by side in one viewer"
+
+# Ad variant → message-match visual metaphor (satellite-view, per research doc §2).
+ad_metaphors:
+  x-agriculture: "satellite quilt of crop-belt fields with an NDVI-style health gradient sweeping emerald to amber"
+  x-defense: "dusk-lit littoral theater with faint vessel wakes and a calm telemetry grid — map-room, not spy-cam"
+  x-insurance: "split-frame coastal township — intact left, post-storm right with analytic damage-grade tints"
+  x-forestry: "tree-scale canopy texture with a one-year time seam revealing a small new clearing"
+  x-energy: "pipeline corridor crossing desert terrain, ROW buffer softly highlighted, one flagged change"
+  x-government: "regional landscape with a translucent change-detection wipe — burn scar rendered in analytic color"
+  x-maritime: "deep-blue seascape with vessel wakes as white commas, one unmarked wake implying a dark vessel"
+  x-disaster: "dawn river valley with a calm analytic flood overlay and visible high-ground routes"
+  x-docs: "aesthetic time-lapse strip of a meandering river across five sequential satellite tiles"
+  x-broad: "cloud-free global mosaic curving to a horizon — the whole landmass, daily"
+  x-age: "study-area tiles arranged as a dense daily time series — the archive as instrument"
+  x-gender: "one crisply outlined trial AOI glowing inside a vast daily mosaic"
+
+# Intent taxonomy — each maps visitor context to a visual strategy supporting the page CTA.
+intents:
+  - id: regional_truth
+    motion_metaphor: pan_left
+    brain_target: attention
+    brain_regions: [v1, v4, intraparietal, ppa]
+    conversion_goal: "Trust → primary CTA"
+    design_principles:
+      - "The visitor's regional landform type at landscape scale — never street scale"
+      - "Daily-coverage confidence: the ground already in the archive"
+      - "Single focal point — processing fluency"
+      - "Deep-space navy base; bright blue accent zone for headline legibility"
+    sales_technique: "truthful message-match on geography (daily-coverage claim)"
+    allowed_signals: [region_mood, industry, audience_route, ad_variant]
+    blocked_signals: [exact_city, street_scale, visitor_name, company_name, PII]
+    composition_template: >-
+      Wide cinematic satellite view: {environment}, cloud-free, softly lit from orbit —
+      empty upper third for headline overlay, bright blue accent glow along one edge.
+    color_rules: "Deep navy-space base, bright blue accent ({accent_color}), true-color terrain"
+    visual_metaphor: "the visitor's kind of ground, already imaged today — capability implied by coverage"
+    mood: "calm, planetary, quietly confident"
+
+  - id: change_proof
+    motion_metaphor: change_wipe
+    brain_target: change_legibility
+    brain_regions: [mt, v3a, intraparietal, amygdala_threat_proxy]
+    conversion_goal: "Urgency → act while change is small"
+    design_principles:
+      - "Before/after seam or change-detection wipe — change made visible"
+      - "Loss frame without fear-mongering: the clearing, the stall, the missed window"
+      - "Analytic color for the delta, true color for the base"
+      - "Supports headline; does not compete for attention"
+    sales_technique: "loss aversion / cost of not watching (prospect theory)"
+    allowed_signals: [top_objection, audience_route, ad_variant, region_mood]
+    blocked_signals: [invented_urgency, surveillance, literal_objection_text, disaster_porn]
+    composition_template: >-
+      Split-tone satellite backdrop: {objection_metaphor} — one clean seam between the
+      before state and the after state, analytic accent on the change only.
+    color_rules: "Muted true-color base, analytic bright blue delta ({accent_color})"
+    visual_metaphor: "{objection_metaphor}"
+    mood: "urgent but dignified — the window is open, not closing in panic"
+
+  - id: mission_authority
+    motion_metaphor: orbit_pass
+    brain_target: authority
+    brain_regions: [ppa, intraparietal, dlpfc_structure, amygdala_threat_proxy]
+    conversion_goal: "Enterprise / mission-scale decision"
+    design_principles:
+      - "Map-room gravitas: theater-scale littoral or border region at dusk"
+      - "Theater-of-interest register — NEVER the visitor's own location"
+      - "Subtle telemetry grid implies automated detection, not surveillance"
+      - "Enterprise seriousness without weapon or targeting imagery"
+    sales_technique: "authority + sovereign-capability framing (mission committee buy-in)"
+    allowed_signals: [audience_route_enterprise, ad_defense, ad_maritime, tier_2+]
+    blocked_signals: [visitor_location, crosshairs, weapons, named_installations, company_names]
+    composition_template: >-
+      Dusk-lit satellite view of a strategic littoral region — abstract vessel wakes and
+      port geometry, faint telemetry grid overlay, blue accent on the analytic layer.
+    color_rules: "Deep dusk navy, bright blue analytic overlay ({accent_color}), warm horizon rim"
+    visual_metaphor: "the theater under daily watch — map-room, not spy-cam"
+    mood: "evaluative, strategic, composed"
+
+  - id: archive_advantage
+    motion_metaphor: filmstrip_scroll
+    brain_target: trust
+    brain_regions: [ppa, ofc_stability, amygdala_threat_proxy, v4]
+    conversion_goal: "Claims / compliance buy-in"
+    design_principles:
+      - "The before-picture already exists — time machine framing"
+      - "Filmstrip or stacked-tiles motif: daily history as depth"
+      - "Evidence aesthetic: clean seams, analytic bins, no drama"
+      - "Blue accent zone for headline support"
+    sales_technique: "proof-of-record framing (the archive nobody can backfill)"
+    allowed_signals: [ad_insurance, ad_forestry, audience_route, top_objection]
+    blocked_signals: [property_scale, dollar_amounts, company_name, PII]
+    composition_template: >-
+      Layered satellite tiles of one region receding in time like a filmstrip — the
+      newest tile crisp, history stacked softly behind, blue accent on the top seam.
+    color_rules: "True-color tiles over deep navy, bright blue seam accent ({accent_color})"
+    visual_metaphor: "a decade of before-pictures — history no tasked constellation can rebuild"
+    mood: "assured, evidentiary, patient"
+
+  - id: aspiration_research
+    motion_metaphor: seasonal_shift
+    brain_target: approach
+    brain_regions: [ventral_striatum, ofc_warmth, ppa_depth, fusiform]
+    conversion_goal: "Research program application"
+    design_principles:
+      - "Science-poster beauty: a natural feature changing across sequential tiles"
+      - "The archive as instrument — cadence made visible"
+      - "Open, accessible tone (free academic program)"
+      - "One hero focal point, generous negative space"
+    sales_technique: "identity aspiration + accessibility (Education & Research route)"
+    allowed_signals: [audience_route_research, ad_docs, ad_age, region_mood]
+    blocked_signals: [age_recitation, gender, income, employer]
+    composition_template: >-
+      Aesthetic time-lapse strip: a meandering river or retreating shoreline across five
+      sequential satellite tiles, subtle date-progression implied by light, blue accent rail.
+    color_rules: "Luminous true-color tiles, deep navy field, bright blue rail ({accent_color})"
+    visual_metaphor: "daily Earth data as a scientific instrument — the time series is the beauty"
+    mood: "curious, luminous, generous"
+
+  - id: retarget_warm
+    motion_metaphor: orbit_pass
+    brain_target: approach
+    brain_regions: [ventral_striatum, ofc_warmth, ppa, intraparietal]
+    conversion_goal: "Post-engager continuation"
+    design_principles:
+      - "Familiar brand moment — continuation not restart"
+      - "Warm welcome-back energy without naming the visitor"
+      - "Milestone-path motif: the pass continues, the archive kept filling"
+      - "Single focal point, deep navy base"
+    sales_technique: "consistency + continuation (Cialdini commitment)"
+    allowed_signals: [ad_disaster, hubspot_abandoned, channel_ad]
+    blocked_signals: [behavioral_surveillance, visit_count, abandoned_step_text]
+    composition_template: >-
+      Warm continuation scene — a satellite ground-track arc resuming across a familiar
+      regional mosaic, path forward lit in brand blue, progress implied by light not text.
+    color_rules: "Warm-dawn mosaic anchored on brand blue ({accent_color})"
+    visual_metaphor: "the constellation kept passing — pick up where you left off"
+    mood: "welcoming, familiar, low-friction"
+
+  - id: message_match
+    motion_metaphor: pan_left
+    brain_target: message_match
+    brain_regions: [clip_alignment, fusiform, v4, intraparietal]
+    conversion_goal: "Ad click-through continuity"
+    design_principles:
+      - "Visual echoes the ad promise (Cialdini consistency)"
+      - "Segment-matched satellite metaphor — crop quilt, dark wake, canopy seam"
+      - "No text in image — promise via landform and analytic accent only"
+      - "Headline-supporting hierarchy"
+    sales_technique: "message-match / consistency principle"
+    allowed_signals: [ad_variant, utm_campaign, ad_targeting_type, region_mood]
+    blocked_signals: [ad_copy_literal, company_names, PII, street_scale]
+    composition_template: >-
+      Visual continuation of the ad promise: {ad_metaphor} — landscape-scale satellite
+      aesthetic, bright blue accent linking ad click to landing headline zone.
+    color_rules: "Ad-aligned regional palette with Planet blue bridge ({accent_color})"
+    visual_metaphor: "{ad_metaphor}"
+    mood: "consistent, expected, trust-building"
+
+# Deterministic intent selection — primary_rules = elif chain; fallback_rules = additive.
+selection:
+  loss_avoidance_objections:
+    - tasked_competitor
+    - temporal_density
+    - proof_before_buy
+    - cloud_cover
+
+  primary_rules:
+    - when:
+        ad_variant_id: x-agriculture
+        top_objection: cloud_cover
+      picks:
+        - intent_id: message_match
+          rank: 1
+          why: "crop-belt ad promise + #1 objection cloud_cover → NDVI quilt continuity"
+          signals_used: [ad_agriculture, objection_cloud_cover]
+        - intent_id: regional_truth
+          rank: 2
+          why: "agriculture IS geography — the visitor's crop belt is in today's take"
+          signals_used: [region_mood, audience_route_enterprise]
+
+    - when:
+        ad_variant_id: x-defense
+      picks:
+        - intent_id: mission_authority
+          rank: 1
+          why: "defense audience → theater-of-interest register, never visitor location"
+          signals_used: [ad_defense, audience_route_enterprise]
+
+    - when:
+        ad_variant_id: x-maritime
+      picks:
+        - intent_id: mission_authority
+          rank: 1
+          why: "maritime enforcement → dark-vessel seascape, map-room register"
+          signals_used: [ad_maritime, audience_route_enterprise]
+
+    - when:
+        ad_variant_id: x-insurance
+        top_objection: verification_trust
+      picks:
+        - intent_id: archive_advantage
+          rank: 1
+          why: "insurance event ad + evidence objection → before-picture filmstrip"
+          signals_used: [ad_insurance, objection_verification_trust]
+
+    - when:
+        ad_variant_id: x-disaster
+      picks:
+        - intent_id: retarget_warm
+          rank: 1
+          why: "crisis post-engager retarget → continuation not restart"
+          signals_used: [ad_disaster]
+
+    - when:
+        ad_variant_id: x-docs
+        audience_route: research
+      picks:
+        - intent_id: aspiration_research
+          rank: 1
+          why: "documentary-viewer ad + research route → archive-as-instrument beauty"
+          signals_used: [ad_docs, audience_route_research]
+
+    - when:
+        ad_variant_id: x-age
+        audience_route: research
+      picks:
+        - intent_id: aspiration_research
+          rank: 1
+          why: "early-career researcher ad → study-area time-series aspiration"
+          signals_used: [ad_age, audience_route_research]
+
+  fallback_rules:
+    - when:
+        ad_variant_id: $present
+      picks:
+        - intent_id: message_match
+          rank: 1
+          why: "paid ad variant {ad_variant_id} → message-match visual continuity"
+          signals_used: ["ad_{ad_variant_suffix}", channel_ad]
+
+    - when:
+        audience_route: enterprise
+      picks:
+        - intent_id: mission_authority
+          rank: $next
+          why: "enterprise route → mission-scale gravitas"
+          signals_used: [audience_route_enterprise]
+
+    - when:
+        audience_route: selfserve
+      picks:
+        - intent_id: regional_truth
+          rank: $next
+          why: "self-serve route → your-ground-already-imaged trust"
+          signals_used: [audience_route_selfserve]
+
+    - when:
+        audience_route: research
+      picks:
+        - intent_id: aspiration_research
+          rank: $next
+          why: "research route → archive-as-instrument aspiration"
+          signals_used: [audience_route_research]
+
+    - when:
+        top_objection: $present
+      picks:
+        - intent_id: change_proof
+          rank: $next
+          why: "top objection {top_objection} → change-made-visible loss frame"
+          signals_used: ["objection_{top_objection}"]
+          when_objection_loss: true
+        - intent_id: archive_advantage
+          rank: $next
+          why: "top objection {top_objection} → evidence/archive reassurance"
+          signals_used: ["objection_{top_objection}"]
+          when_objection_loss: false
+
+    - when: {}
+      picks:
+        - intent_id: regional_truth
+          rank: 1
+          why: "neutral context → the daily-coverage truth is the default story"
+          signals_used: [default_regional_truth]
+
+# Intent → page CTA linkage (pairs with build_page hero CTAs).
+action_map:
+  default: platform_overview
+  cta_keywords:
+    sales: sales_cta
+    tasking: sales_cta
+    trial: trial_cta
+    research: research_cta
+    access: research_cta
+  route_defaults:
+    enterprise: sales_cta
+    selfserve: trial_cta
+    research: research_cta
+  objection_pairs:
+    tasked_competitor: sales_cta
+    sovereignty: sales_cta
+    resolution_doubt: sales_cta
+    procurement_risk: sales_cta
+    data_overload: sales_cta
+    cloud_cover: trial_cta
+    verification_trust: sales_cta
+    integration_cost: trial_cta
+    price_opacity: trial_cta
+    aoi_small: trial_cta
+    proof_before_buy: trial_cta
+    free_data_enough: trial_cta
+    academic_budget: research_cta
+    licensing_fear: research_cta
+    temporal_density: research_cta
+    switching_effort: trial_cta
+
+# Prompt assembly defaults (merged with intent templates).
+prompt_defaults:
+  must_include:
+    - "cinematic wide 16:9 hero backdrop"
+    - "satellite-view aesthetic at region/landscape scale"
+    - "dark deep-space atmosphere supporting headline overlay"
+    - "bright blue accent lighting ({accent_color})"
+    - "single clear focal point — processing fluency"
+  must_avoid:
+    - "NO faces of real people or identifiable individuals"
+    - "NO company logos or brand marks"
+    - "NO text, words, letters, or numbers in the image"
+    - "NO visitor names, employer names, or PII"
+    - "NO surveillance, creepy, or behavioral-tracking imagery"
+    - "NO street-level or property-scale detail — region/landscape scale only"
+    - "NO identifiable private homes, vehicles, or individual people seen from above"
+    - "NO crosshairs, targeting reticles, or weapon imagery"
+    - "NO literal objection quotes or ad copy as text overlay"
+    - "NO maps with addresses or exact city landmarks"
+
+# Tier gates for personalization layers (surface policy alignment).
+guardrails:
+  tier_gates:
+    industry: 2
+    region_mood: 1

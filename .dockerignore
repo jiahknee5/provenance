@@ -6,7 +6,14 @@
 .pytest_cache
 .playwright-mcp
 data/
+# ship the pre-generated hero image cache — Railway's FS is ephemeral, so a fresh
+# deploy would otherwise wipe every background and make visitors wait ~30s per state
+!data/demo/image_cache
+!data/demo/image_cache/**
 *.png
+# re-include after *.png: the hero cache holds both .jpg and .png frames
+# (the image model returns either), and all must ship in the deploy image.
+!data/demo/image_cache/**
 .DS_Store
 .env
 # not served by the app — keep the image lean
@@ -15,3 +22,6 @@ architecture/
 team/
 mikhail/
 docs/
+
+# Pregen frames only; ship animated WebP loops for production hero
+data/demo/image_cache/images/motion_frames/

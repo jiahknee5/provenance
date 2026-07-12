@@ -4,6 +4,7 @@ website + inspector route modules.
   GET  /            — the real, working lead-capture form (Helix Analytics)
   POST /submit      — create a Recipient -> SQLite, return a thank-you + magic link
   GET  /site/{token}— the ultra-personalized website channel (app/site.py)
+  GET  /personalize — the provenance-tagged super-personalization demo (app/personalize.py)
   GET  /inspector   — the demo inspector UI (app/inspector.py)
 """
 from __future__ import annotations
@@ -12,7 +13,7 @@ import secrets
 from datetime import datetime, timezone
 
 from fastapi import Form, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app.server import app, templates
 from pipeline.common.schemas import Recipient
@@ -22,6 +23,24 @@ from pipeline.generation import recipients as rec
 
 
 @app.get("/", response_class=HTMLResponse)
+def home(request: Request):
+    """The main page — an Attio-landing-style home featuring the live demo (the front door)."""
+    return templates.TemplateResponse(request, "home.html", {})
+
+
+@app.get("/talk")
+def talk():
+    """Internal enablement deck (GTM-is-engineering / trust-is-the-last-edge), served from static."""
+    return RedirectResponse("/static/talk/deck.html")
+
+
+@app.get("/guide")
+def guide():
+    """Engineering writeup: the copy-research swarm → the two-axis Gate (verify_copy/message/sequence)."""
+    return RedirectResponse("/static/mockups/copy-research-guide.html")
+
+
+@app.get("/lead", response_class=HTMLResponse)
 def form(request: Request):
     return templates.TemplateResponse(request, "form.html", {
         "roles": rec.ROLE_TITLES, "sizes": rec.SIZES,
@@ -54,7 +73,29 @@ def submit(request: Request,
     })
 
 
-# attach the website + inspector + observatory routes
+# attach the website + inspector + observatory + assurance routes
 from app import site as _site  # noqa: E402,F401
 from app import inspector as _inspector  # noqa: E402,F401
 from app import observatory as _observatory  # noqa: E402,F401
+from app import assurance as _assurance  # noqa: E402,F401
+from app import optimizer as _optimizer  # noqa: E402,F401
+from app import persuasion as _persuasion  # noqa: E402,F401
+from app import showcase as _showcase  # noqa: E402,F401
+from app import funnel as _funnel  # noqa: E402,F401
+from app import personalize as _personalize  # noqa: E402,F401
+from app import cohort as _cohort  # noqa: E402,F401
+from app import google_login as _google_login  # noqa: E402,F401
+from app import demo as _demo  # noqa: E402,F401
+from app import workspace as _workspace  # noqa: E402,F401
+from app import agent as _agent  # noqa: E402,F401
+from app import sources as _sources  # noqa: E402,F401
+from app import composer as _composer  # noqa: E402,F401
+from app import policies as _policies  # noqa: E402,F401
+from app import graph as _graph  # noqa: E402,F401
+from app import help as _help  # noqa: E402,F401
+from app import archive as _archive  # noqa: E402,F401
+from app import gauntlet as _gauntlet  # noqa: E402,F401
+from app import planet as _planet  # noqa: E402,F401
+from app import apt_dev as _apt_dev  # noqa: E402,F401
+from app import apt_demo as _apt_demo  # noqa: E402,F401
+from app import mockups as _mockups  # noqa: E402,F401
