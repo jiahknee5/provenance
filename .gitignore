@@ -18,3 +18,6 @@ data/demo/api_cost_ledger.jsonl
 # verification artifacts (root-level QA/demo screenshots — never committed)
 .playwright-mcp/
 /*.png
+
+# video build artifacts (1.5GB hyperframes projects)
+video/

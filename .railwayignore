@@ -31,3 +31,7 @@ data/demo/eval_history.jsonl
 data/demo/image_cache/images/motion_frames/
 .venv-local/
 /*.png
+
+# HyperFrames video projects — never ship in the app upload context (1.5GB+)
+video/
+.claude/
