@@ -169,6 +169,26 @@
       border-radius:20px;padding:7px 13px;backdrop-filter:blur(8px)}
     .aptchip .d{width:7px;height:7px;border-radius:50%;background:var(--yel);box-shadow:0 0 8px rgba(252,194,25,.8)}
     .aptchip:hover{color:#fff;border-color:var(--yel)}
+    /* ---- motion, captured from the live site (2026-07-13):
+       slide-up-fade-in .4s ease-out (entrances) · fade-in .8s ease-out
+       (imagery) · carousel 41.2s linear infinite (marquee) ---- */
+    @keyframes slide-up-fade-in{0%{opacity:0;transform:translateY(40px)}100%{opacity:1;transform:translateY(0)}}
+    @keyframes fade-in{0%{opacity:0}100%{opacity:1}}
+    @keyframes carousel{0%{transform:translateX(0)}100%{transform:translateX(calc(-1*var(--carousel-offset,50%)))}}
+    .anim-rise{animation:slide-up-fade-in .4s ease-out both}
+    .anim-rise.d1{animation-delay:.08s}.anim-rise.d2{animation-delay:.16s}.anim-rise.d3{animation-delay:.24s}
+    html.js .rv{opacity:0}
+    html.js .rv.rv-in{animation:slide-up-fade-in .4s ease-out both;opacity:1}
+    .hero .orb.has-img{animation:fade-in .8s ease-out both}
+    .trustbar{overflow:hidden}
+    .trustbar .in{display:flex;gap:64px;white-space:nowrap;max-width:none;width:max-content;
+      animation:carousel 41.2s linear infinite;--carousel-offset:50%}
+    .trustbar .in span{flex:none}
+    @media (prefers-reduced-motion:reduce){
+      .anim-rise,html.js .rv.rv-in,.hero .orb.has-img{animation:none;opacity:1;transform:none}
+      html.js .rv{opacity:1}
+      .trustbar .in{animation:none}
+    }
     /* mobile containment only — desktop brand-clone layout untouched */
     @media(max-width:900px){
       .gnav .in{grid-template-columns:auto 1fr auto;padding-left:16px}
@@ -233,26 +253,29 @@
     <div class="brackets"><i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i></div>
     <span class="deg">29°</span>
     <div class="in">
-      <div class="eyebrow">{% if S.hero.eyebrow %}{{ S.hero.eyebrow }}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="personalized — see why on {{ g.dev }}"></a></sup>{% endif %}</div>
-      <h1>{{ S.hero.h1_pre }}<span class="au">{{ S.hero.h1_blue }}</span></h1>
-      <div class="ctas">
+      <div class="eyebrow anim-rise">{% if S.hero.eyebrow %}{{ S.hero.eyebrow }}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="personalized — see why on {{ g.dev }}"></a></sup>{% endif %}</div>
+      <h1 class="anim-rise d1">{{ S.hero.h1_pre }}<span class="au">{{ S.hero.h1_blue }}</span></h1>
+      <div class="ctas anim-rise d2">
         <a class="btn ghost" href="#cta">{{ S.hero.cta_secondary }}</a>
         <a class="btn yel" href="#cta">{{ S.hero.cta_primary }}<span class="ar">↗</span></a>
       </div>
     </div>
   </div>
-  <div class="statement">
+  <div class="statement anim-rise d3">
     <p class="sub">{{ S.hero.sub }}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="personalized — see why on {{ g.dev }}"></a></sup></p>
     {% if S.hero.location_line %}
     <span class="loc"><span class="orbdot"></span>{{ S.hero.location_line }}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}#sec-location" title="location × industry — see the decision (and the AOI ceiling) on {{ g.dev }}"></a></sup></span>
     {% endif %}
   </div>
-  <div class="trustbar"><div class="in">Trusted by 10,000+ companies worldwide to monitor, plan, and respond.</div></div>
+  <div class="trustbar" aria-label="Trusted by 10,000+ companies worldwide to monitor, plan, and respond."><div class="in" aria-hidden="false">
+    <span>Trusted by 10,000+ companies worldwide to monitor, plan, and respond.</span><span>Optical · SAR · Hyperspectral · Analytics — one order flow</span>
+    <span aria-hidden="true">Trusted by 10,000+ companies worldwide to monitor, plan, and respond.</span><span aria-hidden="true">Optical · SAR · Hyperspectral · Analytics — one order flow</span>
+  </div></div>
 </header>
 
 {% elif sec == 'how' %}
 <section class="blk" id="how">
-  <div class="sec-h">
+  <div class="sec-h rv">
     <h2>{{ S.how.h_pre }}<span class="au">{{ S.how.h_blue }}</span></h2>
     <p class="intro">{{ S.how.intro }}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="personalized — see why on {{ g.dev }}"></a></sup></p>
   </div>
@@ -267,7 +290,7 @@
 
 {% elif sec == 'pricing' %}
 <section class="white" id="pricing">
-  <div class="chal {{ 'hot' if S.pricing.emphasis else '' }}">
+  <div class="chal rv {{ 'hot' if S.pricing.emphasis else '' }}">
     <div class="l">
       <div class="eye">{{ S.pricing.eyebrow }}</div>
       <h2>{{ S.pricing.heading }}</h2>
@@ -281,7 +304,7 @@
 
 {% elif sec == 'compare' %}
 <section class="blk" id="compare">
-  <div class="sec-h">
+  <div class="sec-h rv">
     <h2>Already Captured. <span class="au">Or Captured For You.</span></h2>
     <p class="intro">Search existing imagery in minutes, or task a new capture from the provider network.</p>
   </div>
@@ -317,7 +340,7 @@
 {% elif sec == 'cta' %}
 <section class="blk" id="cta" style="border-bottom:0;padding:0">
   <div class="wrap">
-    <div class="fin">
+    <div class="fin rv">
       <h2>{{ S.cta.heading }}</h2>
       <p class="sub">{{ S.cta.sub }}<sup class="pv"><a href="{{ g.dev }}{{ dev_qs }}" title="personalized — see why on {{ g.dev }}"></a></sup></p>
       <div class="ctas">
@@ -351,6 +374,18 @@
 
 <a class="aptchip" href="{{ g.dev }}{{ dev_qs }}" title="every decision behind this page"><span class="d"></span> personalized by apt — see {{ g.dev }}</a>
 <script>
+document.documentElement.classList.add('js');
+(function(){
+  /* scroll entrances — the live site plays slide-up-fade-in as blocks enter view */
+  if ('IntersectionObserver' in window) {
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('rv-in'); io.unobserve(e.target); } });
+    },{rootMargin:'0px 0px -60px 0px'});
+    document.querySelectorAll('.rv').forEach(function(el){ io.observe(el); });
+  } else {
+    document.querySelectorAll('.rv').forEach(function(el){ el.classList.add('rv-in'); });
+  }
+})();
 (function(){
   var hero=document.getElementById('skyfi-hero');
   var orb=document.getElementById('hero-orb');
