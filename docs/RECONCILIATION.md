@@ -69,3 +69,25 @@ audience, candidate for a later wave.
   hex in `accent_color`. Stored examples in `rules/design_prompts.yaml`
   refreshed to match (test_design_prompts pins stored == live). Image cache is
   ephemeral per deploy (container FS), so no baked assets were invalidated.
+
+## W9 marketer IA contract (2026-07-12, operator-directed; PRD-MARKETER-IA R40–R45)
+
+- New contract corpus: `docs/01-intake/PRD-MARKETER-IA.md` (R40–R45) +
+  `docs/04-workflow/IA-MAP.md` (LOCKED v1: planes, stages S0–S6, journeys,
+  route table, link contract, exception ledger). `tests/test_ia_map.py`
+  derives nav + crawler assertions from the map and joins the deploy gate.
+- Sidebar is stage-ordered (Home → Your website → Channels → Personalize →
+  Preview → Launch → Results). Channel items land on NEW channel setup pages
+  (`/apt/channel/{ch}` — one data-driven template ×3 tenants, R42); galleries
+  and landing URLs demoted to marked `Preview arrival →` drills. Root cause
+  fixed for "sidebar Search opened a landing page".
+- New stage pages: `/apt/connect` (S1, install status + honest simulated
+  add-website), `/apt/launch` (S5, staged-changes review via localStorage
+  mirror + guardrail summary + clearly-labeled simulated apply, R41).
+  `/apt/demo` reframed as workspace Home with the J1 checklist (R43).
+- Channel "See the decisions →" deep-links target the MARKETER console
+  (engineer console never linked from PRODUCT pages — R45/E1).
+- Test architecture updates (reasons in-file): `test_demo_nav.py::
+  test_wf_demo_001_*` (Home + setup-page hrefs), `::test_demo_sitemap_prompt_
+  reference_count` (engineering foothint left Home per R45 — catalog asserted
+  on the console instead).

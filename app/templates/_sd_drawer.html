@@ -64,6 +64,25 @@
   var copyModule = drawer.getAttribute('data-copy-module');
   var staged = {};   // key -> {title, file, patch}
 
+  /* W9 (R41): mirror the staged set to localStorage so the Launch page
+     (/apt/launch) can review it. In-page state stays the truth — the mirror
+     is a snapshot of the last-edited console for this tenant. */
+  var stagedTenant = (function () {
+    var mm = /rules\/([a-z0-9]+)_sections\.yaml/.exec(sectionsCfg || '');
+    return mm ? mm[1] : 'default';
+  })();
+  function persist() {
+    try {
+      var items = Object.keys(staged).map(function (k) { return staged[k]; });
+      if (items.length) {
+        localStorage.setItem('apt-staged:' + stagedTenant,
+          JSON.stringify({ at: new Date().toISOString(), items: items }));
+      } else {
+        localStorage.removeItem('apt-staged:' + stagedTenant);
+      }
+    } catch (err) { /* storage unavailable — Launch page shows its empty state */ }
+  }
+
   /* ---- sections kind: every designer edit diffs rules/<tenant>_sections.yaml ---- */
   function sectionsPatch(el) {
     var secId = el.getAttribute('data-sd-section');
@@ -184,6 +203,7 @@
       ? Object.keys(byFile).map(function (f) { return byFile[f].join('\n\n'); }).join('\n\n')
       : '# No staged changes yet.';
     document.getElementById('stg-patch').textContent = patch;
+    persist();
   }
 
   function markRow(el) {

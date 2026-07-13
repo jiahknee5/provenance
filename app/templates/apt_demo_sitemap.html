@@ -3,9 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>apt — campaigns</title>
+<title>apt — home</title>
 {% include "_apt_shell.html" %}
 <style>
+  /* J1 checklist — the guided journey across stages (R43) */
+  .jrny{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh);overflow:hidden;margin-bottom:18px}
+  .jrny .jh{padding:11px 16px;border-bottom:1px solid var(--line);font-size:13px;font-weight:700;color:var(--ink);display:flex;gap:8px;align-items:center}
+  .jrny .jh .tag{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:5px;padding:2px 8px;background:var(--line2);color:var(--muted)}
+  .jrny a.step{display:flex;gap:11px;align-items:center;padding:9px 16px;border-top:1px dashed var(--line);text-decoration:none;font-size:12.5px;color:var(--body)}
+  .jrny a.step:first-of-type{border-top:0}
+  .jrny a.step:hover{background:var(--line2)}
+  .jrny .n{width:20px;height:20px;border-radius:6px;background:var(--line2);color:var(--body);font-size:10.5px;font-weight:800;display:grid;place-items:center;flex:none}
+  .jrny .step.done .n{background:#e7f6ee;color:#0a8a4f}
+  .jrny .step b{color:var(--ink);font-weight:700}
+  .jrny .step .st{margin-left:auto;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  .jrny .step.done .st{color:#0a8a4f}
   /* new-website onboarding stub */
   .onboard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:var(--sh);max-width:580px}
   .onboard label{font-size:12px;font-weight:700;color:var(--ink);display:block;margin-bottom:7px}
@@ -51,11 +63,10 @@
   {% include "_apt_sidebar.html" %}
   <div class="main">
     <div class="topbar">
-      <div class="crumb">{{ page_name }} / <b>{{ 'Set up' if is_new else 'Campaigns' }}</b></div>
+      <div class="crumb">{{ page_name }} / <b>{{ 'Set up' if is_new else 'Home' }}</b></div>
       <div class="grow"></div>
-      <div class="searchbox">⌕ Search scenarios</div>
       <div class="pill-live"><span class="dot"></span> Engine live</div>
-      <a class="btn-primary" href="{{ nav.replica }}">Open replica ↗</a>
+      <a class="btn-primary" href="{{ nav.replica }}">Open {{ page_domain or 'your website' }} ↗</a>
     </div>
 
     <div class="content">
@@ -76,19 +87,30 @@
       </div>
       {% else %}
       <div class="hdr">
-        <h1>Launch a demo tour</h1>
-        <p>Pick how a visitor arrives at <b>{{ page_domain }}</b>. Each channel opens the same personalization engine with a different amount of data — and every claim on the page ships with a receipt.</p>
+        <h1>Home — {{ page_name }}</h1>
+        <p>Personalization for <b>{{ page_domain }}</b>, with a receipt behind every claim. Follow the steps in order, or jump to any stage from the sidebar.</p>
+      </div>
+
+      <div class="jrny">
+        <div class="jh">Launch personalization on {{ page_domain }} <span class="tag">the workflow</span></div>
+        <a class="step done" href="/apt/connect?site={{ site }}"><span class="n">✓</span><span><b>Connect your website</b> — snippet installed and verified</span><span class="st">done</span></a>
+        <a class="step" href="/apt/channel/direct?site={{ site }}"><span class="n">2</span><span><b>Understand your channels</b> — what arrives with each kind of visit</span><span class="st">set up</span></a>
+        <a class="step" href="{{ site_view.designer_href }}"><span class="n">3</span><span><b>Scope personalization</b> — pick the sections and text/image targets</span><span class="st">design</span></a>
+        <a class="step" href="{{ site_view.designer_href }}"><span class="n">4</span><span><b>Customize each target</b> — how it's made, what it may say, the strategy</span><span class="st">design</span></a>
+        <a class="step" href="{{ ops_hub_path }}?site={{ site }}"><span class="n">5</span><span><b>Preview as visitors</b> — arrive from each channel, read the decisions</span><span class="st">check</span></a>
+        <a class="step" href="/apt/launch?site={{ site }}"><span class="n">6</span><span><b>Review &amp; launch</b> — staged changes, guardrail-checked</span><span class="st">ship</span></a>
+        <a class="step" href="/observatory?site={{ site }}"><span class="n">7</span><span><b>Watch results</b> — live activity, spend, A/B lift — then tune</span><span class="st">measure</span></a>
       </div>
 
       <div class="kpis">
         <div class="kpi"><div class="n">{{ stats.tenants }}</div><div class="l">Websites</div></div>
         <div class="kpi"><div class="n">{{ stats.channels }}</div><div class="l">Acquisition channels</div></div>
-        <div class="kpi"><div class="n">{{ stats.scenarios }}</div><div class="l">Curated scenarios</div></div>
+        <div class="kpi"><div class="n">{{ stats.scenarios }}</div><div class="l">Mapped arrivals</div></div>
         <div class="kpi"><div class="n">100%</div><div class="l"><b>Claims cleared</b> before ship</div></div>
       </div>
 
       <div class="sec-lbl">
-        <h2>Choose an entry channel</h2>
+        <h2>Channels at a glance</h2>
         <span class="hint">signal strength = how much apt knows at arrival</span>
       </div>
 
@@ -105,16 +127,12 @@
             <div class="signal">{% for i in range(1,5) %}<i class="{{ 'on' if i <= ch.signal else '' }}"></i>{% endfor %}</div>
             <span class="sig-lbl">Signal · {{ ch.signal_label }}</span>
             <span class="cnt">{{ ch.count_label }}</span>
-            <span class="go">Open →</span>
+            <span class="go">Set up →</span>
           </div>
         </a>
         {% endfor %}
       </div>
 
-      <div class="foothint">
-        Curated from <code>rules/demo_scenarios.yaml</code> · Prompt reference:
-        <code>rules/design_prompts.yaml</code> ({{ prompt_reference_count }}) · same query params rebuild the replica and the consoles deterministically.
-      </div>
       {% endif %}
     </div>
   </div>

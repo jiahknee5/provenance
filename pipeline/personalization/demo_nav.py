@@ -262,7 +262,9 @@ def _tenant_section(tenant: str, data: dict[str, Any]) -> dict[str, Any]:
             "icon": _CHANNEL_ICON[ch],
             "signal": _CHANNEL_SIGNAL[ch],
             "signal_label": _CHANNEL_SIGNAL_LABEL[ch],
-            "href": _channel_gallery_href(tenant, ch, m),
+            # PRODUCT plane (R42/R44): channel cards land on the setup page,
+            # never straight on a gallery or landing URL.
+            "href": f"/apt/channel/{ch}?site={tenant}",
             "count_label": count_label,
         })
     return {
@@ -274,6 +276,7 @@ def _tenant_section(tenant: str, data: dict[str, Any]) -> dict[str, Any]:
         "channels": channels,
         "replica_href": m["page"],
         "consoles_href": f"{_OPS_HUB_PATH}?site={tenant}",
+        "designer_href": m["dev_business"],
     }
 
 
@@ -302,7 +305,7 @@ def build_sitemap_view(request: Request) -> dict[str, Any]:
             "logo_bg": logo_bg, "logo_ch": logo_ch,
             "href": f"{_HUB_PATH}?site={t}", "active": (not is_new and t == site),
         })
-    shell = console_shell_ctx(nav_site, "channels",
+    shell = console_shell_ctx(nav_site, "home",
                               active_sub=None if is_new else "start")
     if is_new:
         # The onboarding state shows itself, not a tenant, in the switcher summary.
@@ -352,49 +355,7 @@ def console_shell_ctx(active_site: str, active_nav: str, *,
         })
     # Level 3 under Campaigns → Channels: the tenant's four acquisition channels,
     # named the way a marketer names them (platform hint where one exists).
-    _mk_label = {"direct": "Direct traffic", "search": "Organic search",
-                 "ads": "Paid ads · X", "email": "Email · HubSpot"}
-    def _ads_scenario_href(source: str) -> str | None:
-        """Landing URL of this tenant's seeded ads scenario for a platform, if one exists."""
-        for s in load_scenarios()["scenarios"]:
-            if (s.get("tenant") == active_site
-                    and str(s.get("channel", "")).startswith("ads")
-                    and (s.get("query_params") or {}).get("utm_source") == source):
-                return resolve_scenario_urls(s, m)["landing_url"]
-        return None
-
-    # Channels organized by SIGNAL CLASS (what arrives with the click), not by logo.
-    # Only real destinations are links; unbuilt platforms render as honest "planned" chips.
-    meta_href = _ads_scenario_href("meta")
-    google_ads_href = _ads_scenario_href("google")
-    channel_clusters = [
-        {"label": None, "kids": [
-            {"id": "direct", "label": "Direct traffic",
-             "href": _channel_gallery_href(active_site, "direct", m)},
-        ]},
-        {"label": "Search", "kids": [
-            {"id": "search", "label": "Organic search",
-             "href": _channel_gallery_href(active_site, "search", m)},
-        ] + ([{"id": "search-paid", "label": "Paid search · Google Ads",
-               "href": google_ads_href}] if google_ads_href else
-             [{"id": "search-paid", "label": "Paid search · Google Ads", "planned": True}])},
-        {"label": "Social ads", "kids": [
-            {"id": "ads", "label": "X Ads",
-             "href": _channel_gallery_href(active_site, "ads", m)},
-        ] + ([{"id": "ads-meta", "label": "Meta (FB · IG)", "href": meta_href}]
-             if meta_href else
-             [{"id": "ads-meta", "label": "Meta (FB · IG)", "planned": True}])
-          + [{"id": "ads-linkedin", "label": "LinkedIn", "planned": True}]},
-        {"label": "Other ads", "kids": [
-            {"id": "ads-display", "label": "Display / retargeting", "planned": True},
-            {"id": "ads-video", "label": "YouTube / video", "planned": True},
-        ]},
-        {"label": None, "kids": [
-            {"id": "email", "label": "Email · HubSpot",
-             "href": _channel_gallery_href(active_site, "email", m)},
-        ]},
-    ]
-    # Level 3 under Personalization → Page sections: the sections this website's
+    # Level 3 under Personalize → Page sections: the sections this website's
     # registry actually declares — the nav mirrors the designer, per tenant.
     from pipeline.personalization import sections as SEC
     section_children = [
@@ -402,19 +363,30 @@ def console_shell_ctx(active_site: str, active_nav: str, *,
          "href": f"{m['dev_business']}#sd-{s['id']}"}
         for s in SEC.list_sections(active_site)
     ]
+    # Stage-ordered marketer IA (IA-MAP §2, R40): S0 Home → S1 Connect →
+    # S2 Channels → S3 Personalize → S4 Preview → S5 Launch → S6 Results.
+    # Channel items land on PRODUCT setup pages (R42) — galleries and landing
+    # pages are reachable only as marked Preview drills ON those pages.
     nav_tree = [
-        {"group": "Campaigns", "key": "channels", "items": [
-            {"id": "start", "icon": "◧", "label": "Overview", "href": f"{_HUB_PATH}?site={active_site}"},
-            {"id": "channel-galleries", "icon": "▤", "label": "Channels",
-             "href": f"{_HUB_PATH}?site={active_site}", "clusters": channel_clusters},
+        {"group": "Home", "key": "home", "items": [
+            {"id": "start", "icon": "◧", "label": "Home", "href": f"{_HUB_PATH}?site={active_site}"},
         ]},
-        {"group": "Personalization", "key": "consoles", "items": [
+        {"group": "Your website", "key": "live", "items": [
+            {"id": "connect", "icon": "⛓", "label": "Websites & install", "href": f"/apt/connect?site={active_site}"},
+            {"id": "replica", "icon": "↗", "label": f"Open {meta['domain']} ↗", "href": m["page"]},
+        ]},
+        {"group": "Channels", "key": "channels", "items": [
+            {"id": "direct", "icon": "⌁", "label": "Direct traffic", "href": f"/apt/channel/direct?site={active_site}"},
+            {"id": "search", "icon": "⌕", "label": "Search", "href": f"/apt/channel/search?site={active_site}"},
+            {"id": "ads", "icon": "◎", "label": "Social & paid ads", "href": f"/apt/channel/ads?site={active_site}"},
+            {"id": "email", "icon": "✉", "label": "Email · HubSpot", "href": f"/apt/channel/email?site={active_site}"},
+        ]},
+        {"group": "Personalize", "key": "consoles", "items": [
             {"id": "designer", "icon": "◨", "label": "Page sections",
              "href": m["dev_business"], "children": section_children},
             # "Decision trace" (engineer console) left out of the marketer nav on
             # purpose (W8-A menu merge): it stays one click away via the console's
             # Developer/audit toggle and "Technical view →" link (R32).
-            {"id": "hub", "icon": "◑", "label": "Preview as visitor", "href": f"{_OPS_HUB_PATH}?site={active_site}"},
             {"id": "playbook", "icon": "?", "label": "Playbook",
              "href": f"/apt/playbook?site={active_site}",
              "children": [
@@ -428,12 +400,15 @@ def console_shell_ctx(active_site: str, active_nav: str, *,
                   "href": f"/apt/playbook?site={active_site}#aeo"},
              ]},
         ]},
+        {"group": "Preview", "key": "preview", "items": [
+            {"id": "hub", "icon": "◑", "label": "Preview as visitor", "href": f"{_OPS_HUB_PATH}?site={active_site}"},
+        ]},
+        {"group": "Launch", "key": "launch", "items": [
+            {"id": "launch", "icon": "⏏", "label": "Review & launch", "href": f"/apt/launch?site={active_site}"},
+        ]},
         {"group": "Results", "key": "measure", "items": [
             {"id": "observatory", "icon": "◔", "label": "Live activity", "href": f"/observatory?site={active_site}"},
             {"id": "costs", "icon": "$", "label": "Spend", "href": f"/costs?site={active_site}"},
-        ]},
-        {"group": "Your website", "key": "live", "items": [
-            {"id": "replica", "icon": "↗", "label": f"Open {meta['domain']}", "href": m["page"]},
         ]},
     ]
     # Each branch knows its descendant ids so the sidebar can open ONLY the
@@ -445,7 +420,8 @@ def console_shell_ctx(active_site: str, active_nav: str, *,
                 sub_ids.extend(k["id"] for k in cl["kids"])
             it["sub_ids"] = sub_ids
     # Back-compat: pages pass observatory/costs as active_nav.
-    group_of = {"channels": "channels", "consoles": "consoles",
+    group_of = {"home": "home", "channels": "channels", "consoles": "consoles",
+                "preview": "preview", "launch": "launch", "live": "live",
                 "observatory": "measure", "costs": "measure"}
     active_group = group_of.get(active_nav, active_nav)
     if active_sub is None and active_nav in ("observatory", "costs"):
@@ -457,7 +433,7 @@ def console_shell_ctx(active_site: str, active_nav: str, *,
         "active_sub": active_sub,
         "active": active,
         "tenants": tenants,
-        "add_new_href": f"{_HUB_PATH}?site=new",
+        "add_new_href": f"/apt/connect?site={active_site}#add",
         "nav": {
             "channels": f"{_HUB_PATH}?site={active_site}",
             "consoles": f"{_OPS_HUB_PATH}?site={active_site}",

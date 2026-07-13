@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>apt — websites &amp; install</title>
+{% include "_apt_shell.html" %}
+<style>
+  .cn-sec{border:1px solid var(--line);border-radius:13px;background:var(--surface);box-shadow:var(--sh);overflow:hidden;margin-bottom:14px}
+  .cn-sec .h{padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px;font-weight:700;color:var(--ink)}
+  .cn-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-top:1px dashed var(--line);flex-wrap:wrap}
+  .cn-row:first-of-type{border-top:0}
+  .cn-row .lg{width:30px;height:30px;border-radius:8px;color:#fff;font-weight:800;font-size:13px;display:grid;place-items:center;flex:none}
+  .cn-row .nm{min-width:170px}
+  .cn-row .nm b{display:block;font-size:13px;color:var(--ink)}
+  .cn-row .nm span{font-size:11.5px;color:var(--muted)}
+  .cn-status{font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#0a8a4f;background:#e7f6ee;border-radius:5px;padding:3px 8px}
+  .cn-meta{font-size:11.5px;color:var(--muted)}
+  .cn-acts{margin-left:auto;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .cn-acts a{font-size:12px;font-weight:700;text-decoration:none}
+  .cn-acts a.go{color:var(--brand)}
+  .cn-acts a.live{color:var(--body)}
+  .cn-add{display:flex;gap:10px;align-items:center;padding:12px 14px;flex-wrap:wrap}
+  .cn-add input{flex:1;min-width:200px;font-size:13px;border:1px solid var(--line);border-radius:9px;padding:8px 11px;background:var(--surface);color:var(--ink)}
+  .cn-add button{font-size:12.5px;font-weight:700;border:0;border-radius:9px;padding:9px 16px;background:var(--brand);color:#fff;cursor:pointer}
+  .cn-note{padding:0 14px 12px;font-size:11.5px;color:var(--muted);line-height:1.5}
+  .cn-how{padding:11px 14px;font-size:12.5px;line-height:1.6;color:var(--body)}
+  .cn-how b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="app">
+{% include "_apt_sidebar.html" %}
+<div class="main">
+<div class="topbar"><div class="crumb">{{ active.name }} / <b>Websites &amp; install</b></div><div class="grow"></div></div>
+<div class="content">
+
+<div class="hdr">
+  <h1>Websites &amp; install</h1>
+  <p>Every website apt personalizes in this workspace. Installed means the snippet is live and verified — sections are ready to design.</p>
+</div>
+
+<div class="cn-sec">
+  <div class="h">Connected websites</div>
+  {% for w in websites %}
+  <div class="cn-row">
+    <span class="lg" style="background:{{ w.logo_bg }}">{{ w.logo_ch }}</span>
+    <span class="nm"><b>{{ w.name }}</b><span>{{ w.domain }}</span></span>
+    <span class="cn-status">Installed · verified</span>
+    <span class="cn-meta">{{ w.sections }} page sections registered</span>
+    <span class="cn-acts">
+      <a class="go" href="{{ w.channels_href }}">Set up channels →</a>
+      <a class="live" href="{{ w.live_href }}">Open {{ w.domain }} ↗</a>
+    </span>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="cn-sec" id="add">
+  <div class="h">Add a website</div>
+  <div class="cn-add">
+    <input type="text" placeholder="your-domain.com" aria-label="Website domain">
+    <button type="button" onclick="this.textContent='Demo workspace — connection simulated';this.disabled=true">Connect</button>
+  </div>
+  <div class="cn-note">Demo workspace — the three demo websites are pre-installed and connecting a new domain is simulated. In production this verifies your snippet and imports your page sections.</div>
+</div>
+
+<div class="cn-sec">
+  <div class="h">How install works</div>
+  <div class="cn-how">
+    <b>1.</b> Add one script tag to your site. &nbsp;<b>2.</b> apt detects your page sections and registers them (you refine the list in <b>Page sections</b>). &nbsp;<b>3.</b> Every personalized element ships with a receipt — nothing renders un-proven.
+  </div>
+</div>
+
+</div>
+</div>
+</div>
+</body>
+</html>

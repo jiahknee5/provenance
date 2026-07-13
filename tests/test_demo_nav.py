@@ -41,27 +41,26 @@ def test_resolve_scenario_magic_token_in_urls():
 
 
 def test_wf_demo_001_sitemap_tour_gauntlet_channels():
+    # W9 (R42/R43): /apt/demo is the workspace Home; channel cards land on
+    # PRODUCT setup pages, never straight on galleries or landing URLs.
     r = c.get("/apt/demo")
     assert r.status_code == 200
     t = r.text
     assert "/apt/demo" in t
-    assert "demo tour" in t.lower() or "visitor demo" in t.lower()
+    assert "Launch personalization on" in t     # J1 checklist
     assert "GauntletAI" in t
     assert "Planet" in t
-    # Default active site = gauntlet → its four channel entries link out.
-    assert 'href="/gauntletapt/ad-lp"' in t
-    assert 'href="/gauntletapt/direct"' in t
-    assert 'href="/gauntletapt/email"' in t
-    assert 'href="/gauntletapt?ref=google"' in t
+    # Default active site = gauntlet → its four channel cards → setup pages.
+    for ch in ("direct", "search", "ads", "email"):
+        assert f'href="/apt/channel/{ch}?site=gauntlet"' in t, ch
+    assert 'href="/gauntletapt/ad-lp"' not in t  # no raw landing links on Home
     assert 'href="/apt/dev' in t
     # The sidebar website selector switches the active tenant.
     assert 'href="/apt/demo?site=planet"' in t
-    # …and ?site=planet surfaces planet's four channel entries.
+    # …and ?site=planet surfaces planet's four channel setup pages.
     p = c.get("/apt/demo?site=planet").text
-    assert 'href="/planetapt/ads"' in p
-    assert 'href="/planetapt/direct"' in p
-    assert 'href="/planetapt/email"' in p
-    assert 'href="/planetapt?ref=google"' in p
+    for ch in ("direct", "search", "ads", "email"):
+        assert f'href="/apt/channel/{ch}?site=planet"' in p, ch
 
 
 def test_direct_email_galleries_return_200():
@@ -178,9 +177,12 @@ def test_apt_dev_hub_links_demo_sitemap():
 
 
 def test_demo_sitemap_prompt_reference_count():
+    # W9 (R45): engineering vocabulary left the Home page — the prompt catalog
+    # lives on the marketer console (and the file itself stays the SSOT).
     t = c.get("/apt/demo").text
-    assert "design_prompts.yaml" in t
-    assert "Prompt reference" in t
+    assert "design_prompts.yaml" not in t
+    t2 = c.get("/gauntletapt/dev/business?as=anon").text
+    assert "Prompt reference" in t2 and "design_prompts.yaml" in t2
 
 
 def test_wf_demo_007_sales_demo_urls_all_return_200():

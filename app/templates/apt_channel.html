@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>apt — {{ channel_label|lower }} channel</title>
+{% include "_apt_shell.html" %}
+<style>
+  .ch-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+  .ch-head h1{font-size:22px;margin:0}
+  .ch-badge{font-size:11px;font-weight:800;letter-spacing:.03em;border-radius:6px;padding:3px 10px;background:var(--line2);color:var(--body)}
+  .ch-signal{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--muted)}
+  .ch-signal .bars{display:inline-flex;gap:2px;align-items:flex-end}
+  .ch-signal .bars i{width:4px;border-radius:2px;background:var(--line);display:block}
+  .ch-signal .bars i.on{background:var(--brand)}
+  .ch-lede{font-size:13px;line-height:1.55;color:var(--body);max-width:76ch;margin-bottom:14px}
+  .ch-sec{border:1px solid var(--line);border-radius:13px;background:var(--surface);box-shadow:var(--sh);overflow:hidden;margin-bottom:14px}
+  .ch-sec .h{padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .ch-sec .h .tag{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:5px;padding:2px 8px;background:var(--line2);color:var(--muted)}
+  .ch-sec .bd{padding:11px 14px;font-size:12.5px;line-height:1.55;color:var(--body)}
+  .ch-sec ul{margin:0;padding-left:18px}
+  .ch-sec ul li{padding:2px 0}
+  .ch-plat{display:flex;gap:6px;flex-wrap:wrap;padding:10px 14px;border-top:1px dashed var(--line)}
+  .ch-plat .p{font-size:11px;font-weight:700;border:1px solid var(--line);border-radius:7px;padding:4px 10px;color:var(--ink);background:var(--surface)}
+  .ch-plat .p.off{color:var(--muted);border-style:dashed}
+  .ch-plat .p.off em{font-style:normal;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-left:5px;color:var(--muted)}
+  .arr{border-top:1px dashed var(--line);padding:10px 14px;display:flex;gap:12px;flex-wrap:wrap;align-items:baseline}
+  .arr:first-of-type{border-top:0}
+  .arr .t{min-width:230px;flex:1}
+  .arr .t b{font-size:12.5px;color:var(--ink);display:block}
+  .arr .t span{font-size:12px;color:var(--body);line-height:1.5}
+  .arr .aud{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:2px 7px;align-self:center}
+  .arr .acts{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-left:auto}
+  .arr .acts a{font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap}
+  .arr .acts a.prev{color:var(--brand)}
+  .arr .acts a.dec{color:var(--ink)}
+  .ch-guard li{color:var(--body)}
+  .ch-foot{display:flex;gap:12px;flex-wrap:wrap;align-items:center;padding:12px 14px;border-top:1px solid var(--line);background:var(--line2);font-size:12.5px}
+  .ch-foot a{font-weight:700;text-decoration:none;color:var(--brand)}
+  .ch-foot .live{margin-left:auto;color:var(--muted)}
+  .ch-foot .live a{color:var(--body)}
+</style>
+</head>
+<body>
+<div class="app">
+{% include "_apt_sidebar.html" %}
+<div class="main">
+<div class="topbar"><div class="crumb">{{ active.name }} / Channels / <b>{{ channel_label }}</b></div><div class="grow"></div></div>
+<div class="content">
+
+<div class="ch-head">
+  <h1>{{ channel_label }} — {{ channel_sub|lower }}</h1>
+  <span class="ch-badge">{{ platform }}</span>
+  <span class="ch-signal"><span class="bars">{% for i in range(4) %}<i class="{{ 'on' if i < signal_strength else '' }}" style="height:{{ 5 + i * 3 }}px"></i>{% endfor %}</span> signal · {{ signal_label }}</span>
+</div>
+<p class="ch-lede">{{ channel_long }}</p>
+
+<div class="ch-sec">
+  <div class="h">What arrives with this click</div>
+  <div class="bd"><ul>{% for s in signals %}<li>{{ s }}</li>{% endfor %}</ul></div>
+</div>
+
+<div class="ch-sec">
+  <div class="h">How message-match works here</div>
+  <div class="bd">{{ message_match }}</div>
+  {% if platforms %}
+  <div class="ch-plat">
+    {% for p in platforms %}
+    <span class="p {{ '' if p.live else 'off' }}">{{ p.label }}{% if not p.live %}<em>planned</em>{% endif %}</span>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+
+<div class="ch-sec">
+  <div class="h">Guardrails on this channel <span class="tag">enforced before render</span></div>
+  <div class="bd ch-guard"><ul>{% for g in guardrails %}<li>{{ g }}</li>{% endfor %}</ul></div>
+</div>
+
+<div class="ch-sec">
+  <div class="h">Mapped arrivals — expected vs live <span class="tag">{{ scenarios|length }} configured</span></div>
+  {% if scenarios %}
+  {% for r in scenarios %}
+  <div class="arr">
+    <div class="t"><b>{{ r.title }}</b><span>{{ r.story }}</span></div>
+    {% if r.audience %}<span class="aud">{{ r.audience }}</span>{% endif %}
+    <span class="acts">
+      <a class="prev" href="{{ r.preview_url }}">Preview arrival →</a>
+      <a class="dec" href="{{ r.decisions_url }}">See the decisions →</a>
+    </span>
+  </div>
+  {% endfor %}
+  {% else %}
+  <div class="bd">No arrivals configured for this channel yet.</div>
+  {% endif %}
+  <div class="ch-foot">
+    {% if ads_grid_href %}<a href="{{ ads_grid_href }}">Browse all ad variants →</a>{% endif %}
+    <a href="{{ gallery_href }}">See example arrivals →</a>
+    <a href="{{ designer_href }}">Design the page sections →</a>
+    <span class="live">Live site: <a href="{{ live_href }}">Open {{ site_domain }} ↗</a></span>
+  </div>
+</div>
+
+</div>
+</div>
+</div>
+</body>
+</html>

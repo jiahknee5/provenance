@@ -97,7 +97,7 @@ def build_hub_view(request: Request) -> dict:
         s["id"]: _HUB_PATH + _qs(request, site=s["id"], as_state=as_state, drop=("as",))
         for s in _SITES
     }
-    shell = NAV.console_shell_ctx(site["id"], "consoles", switch_hrefs=switch_hrefs, active_sub="hub")
+    shell = NAV.console_shell_ctx(site["id"], "preview", switch_hrefs=switch_hrefs, active_sub="hub")
     sample_email = site["sample_email"]()
     return {
         **shell,

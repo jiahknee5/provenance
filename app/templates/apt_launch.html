@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>apt — review &amp; launch</title>
+{% include "_apt_shell.html" %}
+<style>
+  .ln-sec{border:1px solid var(--line);border-radius:13px;background:var(--surface);box-shadow:var(--sh);overflow:hidden;margin-bottom:14px}
+  .ln-sec .h{padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px}
+  .ln-sec .h .tag{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:5px;padding:2px 8px;background:var(--line2);color:var(--muted)}
+  .ln-item{padding:9px 14px;border-top:1px dashed var(--line);font-size:12.5px;line-height:1.5}
+  .ln-item:first-of-type{border-top:0}
+  .ln-item b{color:var(--ink)}
+  .ln-item .f{color:var(--muted);font-size:11px;font-family:ui-monospace,Menlo,monospace}
+  .ln-empty{padding:14px;font-size:12.5px;color:var(--muted);line-height:1.6}
+  .ln-empty a{font-weight:700;color:var(--brand);text-decoration:none}
+  .ln-guard{padding:11px 14px;font-size:12.5px;line-height:1.6;color:var(--body)}
+  .ln-guard ul{margin:0;padding-left:18px}
+  .ln-cta{display:flex;gap:12px;align-items:center;padding:12px 14px;border-top:1px solid var(--line);background:var(--line2);flex-wrap:wrap}
+  .ln-cta button{font-size:13px;font-weight:700;border:0;border-radius:9px;padding:10px 18px;background:var(--brand);color:#fff;cursor:pointer}
+  .ln-cta button:disabled{background:var(--line);color:var(--muted);cursor:default}
+  .ln-cta .note{font-size:11.5px;color:var(--muted)}
+  .ln-done{display:none;padding:12px 14px;font-size:12.5px;color:#0a8a4f;background:#e7f6ee;border-top:1px solid var(--line);line-height:1.5}
+  .ln-demo{font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border-radius:5px;padding:2px 8px;background:#fdf3dc;color:#946200}
+  pre#ln-patch{margin:0;padding:12px 14px;border-top:1px dashed var(--line);font-size:10.5px;line-height:1.55;font-family:ui-monospace,Menlo,monospace;color:var(--body);white-space:pre-wrap;word-break:break-word;max-height:300px;overflow:auto;background:var(--line2)}
+</style>
+</head>
+<body>
+<div class="app">
+{% include "_apt_sidebar.html" %}
+<div class="main">
+<div class="topbar"><div class="crumb">{{ active.name }} / <b>Review &amp; launch</b></div><div class="grow"></div><span class="ln-demo">demo — apply is simulated</span></div>
+<div class="content">
+
+<div class="hdr">
+  <h1>Review &amp; launch</h1>
+  <p>Everything you staged in <b>Page sections</b> for <b>{{ site_domain }}</b>, reviewed against the guardrails before it ships. Nothing goes live un-proven.</p>
+</div>
+
+<div class="ln-sec">
+  <div class="h">Staged changes <span class="tag" id="ln-count">0 staged</span></div>
+  <div id="ln-items"></div>
+  <div class="ln-empty" id="ln-empty">
+    Nothing staged yet. Stage changes in <a href="{{ designer_href }}">Page sections →</a> — every control edit becomes a reviewable diff here.
+  </div>
+  <pre id="ln-patch" hidden></pre>
+</div>
+
+<div class="ln-sec">
+  <div class="h">Guardrail check <span class="tag">always on</span></div>
+  <div class="ln-guard">
+    <ul>
+      <li>Only Gate-cleared variants can serve — a staged change re-enters verification before it ships.</li>
+      <li>Say / allude / hold policies apply per element; hold never renders.</li>
+      <li>Drift monitoring re-verifies affected variants after launch and pauses them surgically.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ln-sec">
+  <div class="h">Launch</div>
+  <div class="ln-cta">
+    <button id="ln-apply" disabled>Launch to {{ site_domain }}</button>
+    <span class="note">Demo workspace: apply is <b>simulated</b> — in production this writes your section registry and redeploys. Same inputs keep rendering the same page.</span>
+  </div>
+  <div class="ln-done" id="ln-done"></div>
+</div>
+
+</div>
+</div>
+</div>
+<script>
+(function () {
+  var site = {{ site | tojson }};
+  var key = 'apt-staged:' + site;
+  var items = [];
+  try {
+    var raw = localStorage.getItem(key);
+    if (raw) items = (JSON.parse(raw).items || []);
+  } catch (e) { items = []; }
+
+  var list = document.getElementById('ln-items');
+  var patchEl = document.getElementById('ln-patch');
+  document.getElementById('ln-count').textContent = items.length + ' staged';
+  if (items.length) {
+    document.getElementById('ln-empty').style.display = 'none';
+    document.getElementById('ln-apply').disabled = false;
+    var patches = [];
+    items.forEach(function (c) {
+      var div = document.createElement('div');
+      div.className = 'ln-item';
+      div.innerHTML = '<b></b> <span class="f"></span>';
+      div.querySelector('b').textContent = c.title;
+      div.querySelector('.f').textContent = c.file || '';
+      list.appendChild(div);
+      if (c.patch) patches.push(c.patch);
+    });
+    patchEl.textContent = patches.join('\n\n');
+    patchEl.hidden = false;
+  }
+
+  document.getElementById('ln-apply').addEventListener('click', function () {
+    try {
+      localStorage.setItem('apt-launched:' + site,
+        JSON.stringify({ at: new Date().toISOString(), count: items.length }));
+      localStorage.removeItem(key);
+    } catch (e) {}
+    this.disabled = true;
+    this.textContent = 'Launched (simulated)';
+    var done = document.getElementById('ln-done');
+    done.style.display = 'block';
+    done.textContent = items.length + ' change' + (items.length === 1 ? '' : 's') +
+      ' applied — simulated in this demo workspace. In production the registry is updated and the page re-renders with receipts.';
+  });
+})();
+</script>
+</body>
+</html>
