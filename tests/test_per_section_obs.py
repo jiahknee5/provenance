@@ -64,7 +64,16 @@ def _cards(tenant: str) -> dict[str, str]:
     starts = [t.find(_tid(f"sd-section-{s['id']}")) for s in secs]
     out = {}
     for i, sec in enumerate(secs):
-        end = starts[i + 1] if i + 1 < len(secs) else t.find("sd-devfold", starts[i])
+        if i + 1 < len(secs):
+            end = starts[i + 1]
+        else:
+            # W10-D: each card now carries its own sd-devfold (engineering
+            # panels fold, R32), so "first devfold after start" would cut the
+            # last card short. The Proof zone cap follows the card list on
+            # every console.
+            end = t.find('zone-cap">Proof', starts[i])
+            if end == -1:
+                end = len(t)
         out[sec["id"]] = t[starts[i]:end]
     return out
 

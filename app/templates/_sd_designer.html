@@ -29,20 +29,21 @@
   .sd-badge.lat.blocking{color:#c0354b;background:#fcebed}
   .sd-badge.cost{color:#1d4ed8;background:#e8efff;text-transform:none;letter-spacing:0}
   .sd-badge.drift{color:var(--muted);background:#F1F3F5;text-transform:none;letter-spacing:0}
-  .sd-ctls{display:flex;gap:10px;flex-wrap:wrap;padding:8px 14px;border-top:1px dashed var(--line)}
+  .sd-zcap{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:9px 14px 3px;border-top:1px dashed var(--line)}
+  .sd-ctls{display:flex;gap:10px;flex-wrap:wrap;padding:6px 14px 9px}
   .sd-ctl{display:flex;flex-direction:column;gap:3px;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
   .sd-ctl select,.sd-ctl textarea{font-size:11.5px;font-weight:600;border:1px solid var(--line);border-radius:7px;padding:3px 6px;background:#fff;color:var(--ink);font-family:inherit}
   .sd-livewarn{font-size:10.5px;color:#c0354b;font-weight:700;align-self:center}
   .sd-promptwrap{padding:8px 14px;border-top:1px dashed var(--line)}
   .sd-promptwrap .cap{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:4px}
   .sd-promptwrap textarea{width:100%;font-size:11.5px;border:1px solid var(--line);border-radius:8px;padding:7px 9px;font-family:inherit;color:var(--ink)}
-  .sd-copy{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px dashed var(--line)}
+  .sd-copy{display:grid;grid-template-columns:1fr 1fr;gap:0}
   @media(max-width:760px){.sd-copy{grid-template-columns:1fr}}
   .sd-copy .col{padding:7px 14px;font-size:12px;line-height:1.5}
   .sd-copy .col.gen{color:#475569;border-right:1px solid var(--line)}
   @media(max-width:760px){.sd-copy .col.gen{border-right:0;border-bottom:1px dashed var(--line)}}
   .sd-copy .col .cap{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:3px}
-  .sd-panels{display:flex;gap:8px;flex-wrap:wrap;padding:8px 14px;border-top:1px dashed var(--line);align-items:flex-start}
+  .sd-panels{display:flex;gap:8px;flex-wrap:wrap;padding:6px 14px 10px;align-items:flex-start}
   details.sd-panel{border:1px solid var(--line);border-radius:8px;background:#fff;font-size:11.5px;min-width:180px;flex:1 1 200px}
   details.sd-panel summary{cursor:pointer;padding:6px 10px;font-size:11px;font-weight:700;color:var(--ink);list-style-position:inside}
   details.sd-panel[open] summary{border-bottom:1px dashed var(--line)}
@@ -147,6 +148,12 @@
       <span class="sd-badge drift" data-testid="sd-drift-{{ t.slot_id }}" title="{{ t.drift.note }}">drift: {{ t.drift.status }} · rules {{ t.drift.rules_version[:8] }}</span>
       {% if loop.first %}<a class="sd-how" href="/apt/playbook?site={{ SD.tenant }}#copy">How this works →</a>{% endif %}
     </div>
+    <div class="sd-zcap" style="border-top:0">What ships — this visit vs the generic site</div>
+    <div class="sd-copy">
+      <div class="col gen"><div class="cap">Generic site</div>{{ t.generic }}</div>
+      <div class="col"><div class="cap">Shipped this visit{{ ' · changed' if t.changed else ' · default' }}</div>{{ t.shipped }}</div>
+    </div>
+    <div class="sd-zcap">How it&#39;s made</div>
     <div class="sd-ctls">
       <label class="sd-ctl">How the words are made
         <select data-testid="sd-mode-{{ t.slot_id }}" data-stage="sections" data-sd-section="{{ s.id }}"
@@ -185,10 +192,7 @@
                 data-sd-target="{{ t.slot_id }}" data-sd-field="prompt" data-original="{{ t.prompt }}"
                 placeholder="Describe what the AI may write — every candidate still passes the Gate before it can ship.">{{ t.prompt }}</textarea>
     </div>
-    <div class="sd-copy">
-      <div class="col gen"><div class="cap">Generic site</div>{{ t.generic }}</div>
-      <div class="col"><div class="cap">Shipped this visit{{ ' · changed' if t.changed else ' · default' }}</div>{{ t.shipped }}</div>
-    </div>
+    <div class="sd-zcap">Proof &amp; performance</div>
     <div class="sd-panels">
       <details class="sd-panel" data-testid="sd-receipt-{{ t.slot_id }}">
         <summary>Receipt — where this came from</summary>
@@ -247,6 +251,7 @@
         {% if t.intent %}<div class="st">visual strategy: {{ t.intent.replace('_', ' ') }}</div>{% endif %}
       </div>
       <div class="bd">
+        <div class="sd-zcap" style="border-top:0">How it&#39;s made</div>
         <div class="sd-ctls" style="border-top:0">
           <label class="sd-ctl">When it's built
             <select data-testid="sd-workflow-{{ t.surface_id }}" data-stage="sections" data-sd-section="{{ s.id }}"
@@ -258,6 +263,7 @@
           </label>
           <span class="sd-livewarn"{{ '' if t.workflow == 'live' else ' hidden' }}>⚠ live blocks first paint — discouraged; prefer realtime</span>
         </div>
+        <div class="sd-zcap">Proof &amp; performance</div>
         <div class="sd-panels">
           <details class="sd-panel" data-testid="sd-receipt-{{ t.surface_id }}">
             <summary>Receipt — where this came from</summary>
@@ -295,7 +301,11 @@
     <span class="hint">adding a target stages a registry stub — edit the YAML in review before it ships</span>
   </div>
 
-  <div class="sd-panels" style="border-top:1px solid var(--line)">
+  {# engineer trace panels — folded behind the Developer/audit toggle (R32/W10-D);
+     testids stay in the DOM, so the pinned contract + E2E harness are unaffected #}
+  <div class="sd-devfold">
+  <div class="sd-zcap" style="border-top:1px solid var(--line)">Engineering — trace &amp; audit</div>
+  <div class="sd-panels">
     <details class="sd-panel" data-testid="sd-graph-{{ s.id }}">
       <summary>Agent graph — how this section decided</summary>
       <div class="bd sd-graph-nodes">
@@ -332,6 +342,7 @@
         <div class="sd-note">event rows derived from this request's real build — seq is monotonic across the visit's sections; cost is the api-cost ledger summed by this section's cache keys</div>
       </div>
     </details>
+  </div>
   </div>
 </details>
 {% endfor %}

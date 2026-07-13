@@ -227,7 +227,16 @@ def test_section_card_contains_all_its_target_controls(tenant):
     starts = [t.find(_tid(f"sd-section-{s['id']}")) for s in secs]
     for i, sec in enumerate(secs):
         start = starts[i]
-        end = starts[i + 1] if i + 1 < len(secs) else t.find("sd-devfold", start)
+        if i + 1 < len(secs):
+            end = starts[i + 1]
+        else:
+            # W10-D: cards now carry their own sd-devfold (engineering panels
+            # fold, R32), so "first devfold after start" lands inside the last
+            # card. The Proof zone cap is the first thing after the card list
+            # on every console.
+            end = t.find('zone-cap">Proof', start)
+            if end == -1:
+                end = len(t)
         card = t[start:end]
         for tt in sec.get("text_targets") or []:
             for name in (f"sd-mode-{tt['slot_id']}", f"sd-policy-{tt['slot_id']}",
