@@ -92,6 +92,13 @@
   .hdr{margin-bottom:18px}
   .hdr h1{font-size:24px;font-weight:800;letter-spacing:-.02em}
   .hdr p{font-size:13.5px;color:var(--body);margin-top:5px;max-width:66ch;line-height:1.5}
+  /* shared console text roles (W10 visual QA) — single source so per-template
+     styles can't drift (skyfi/planet consoles once rendered .sub descriptions
+     at the 14px body default because only gauntlet styled them).
+     Scale: h1 24/800 · section-h 13/700 · body 12.5 · note 12 · micro-cap 9.5 */
+  .gb-head h1{font-weight:800}
+  .sec .sub{padding:8px 14px;font-size:12.5px;line-height:1.5;color:var(--muted);border-bottom:1px solid var(--line);background:#FAFBFC}
+  .sec .empty{padding:12px 14px;font-size:12.5px;color:var(--muted)}
   .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:26px}
   .kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--sh)}
   .kpi .n{font-size:24px;font-weight:800;letter-spacing:-.02em;line-height:1}
