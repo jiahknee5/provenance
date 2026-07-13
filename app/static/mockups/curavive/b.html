@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CuraVive mock B — Email-mirror</title>
+<style>
+  :root{--green:#2f7d3a;--green-d:#26682f;--lime:#8cc63f;--lime-d:#79b62f;--ink:#1c2b1f;--body:#5f6b60;--line:#e2e8e0;--bg:#fff}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font:16px/1.6 Helvetica,Arial,sans-serif;color:var(--body);background:var(--bg)}
+  a{color:inherit;text-decoration:none}
+  .tut{position:fixed;left:14px;bottom:14px;z-index:60;max-width:330px;background:#12261a;color:#dfeede;border:1px solid #2f7d3a;border-radius:10px;padding:12px 14px;font-size:12px;line-height:1.5;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+  .tut b{color:#8cc63f}
+  nav{background:var(--green);display:flex;align-items:center;padding:0 40px;height:72px;gap:28px}
+  nav .wm{font:700 26px Helvetica,Arial,sans-serif;color:#fff}nav .wm .v{color:var(--lime)}
+  nav .links{margin-left:auto;display:flex;gap:26px}nav .links a{color:#fff;font-size:14px}
+  /* the email ribbon: the page opens by mirroring the email subject line */
+  .ribbon{background:#eef5ea;border-bottom:1px solid var(--line);padding:14px 40px;display:flex;align-items:center;gap:14px;font-size:13.5px;color:#3a4a3c}
+  .ribbon .ic{width:30px;height:30px;border-radius:7px;background:var(--green);color:#fff;display:grid;place-items:center;font-size:15px;flex:none}
+  .ribbon b{color:#1c2b1f}
+  .ribbon .pv{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 3px rgba(140,198,63,.25);flex:none}
+  .hero{display:grid;grid-template-columns:1.1fr 1fr;gap:0;align-items:stretch;min-height:520px}
+  @media(max-width:900px){.hero{grid-template-columns:1fr}}
+  .hero .l{padding:70px 56px;display:flex;flex-direction:column;justify-content:center}
+  .hero .eyebrow{font:700 12px Helvetica,Arial,sans-serif;text-transform:uppercase;letter-spacing:.14em;color:var(--green);margin-bottom:18px}
+  .hero h1{font:400 44px/1.12 Helvetica,Arial,sans-serif;color:#111;margin-bottom:22px}
+  .hero h1 em{font-style:normal;color:var(--green)}
+  .hero p{font-size:18px;line-height:1.6;color:#3a4a3c;max-width:34ch;margin-bottom:30px}
+  .cta{align-self:flex-start;background:var(--lime);color:#fff;font:600 17px Helvetica,Arial,sans-serif;border-radius:40px;padding:15px 32px}
+  .cta:hover{background:var(--lime-d)}
+  .pvd{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--lime);vertical-align:super;margin-left:6px;box-shadow:0 0 0 3px rgba(140,198,63,.25)}
+  .hero .r{background:linear-gradient(150deg,#1c3a22,#0c1a10);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .hero .r::before{content:"";position:absolute;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(140,198,63,.5),transparent 65%);filter:blur(6px)}
+  .hero .r .card{position:relative;z-index:2;background:rgba(255,255,255,.06);border:1px solid rgba(140,198,63,.4);border-radius:14px;padding:26px;width:280px;backdrop-filter:blur(6px);color:#dfeede}
+  .hero .r .card .k{font:700 10.5px Helvetica,Arial,sans-serif;text-transform:uppercase;letter-spacing:.1em;color:#8cc63f;margin-bottom:6px}
+  .hero .r .card .row{display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid rgba(255,255,255,.1);font-size:13px}
+  .hero .r .card .row:first-of-type{border-top:0}
+  .proof{background:#fafcf9;border-top:1px solid var(--line);padding:66px 40px}
+  .proof .in{max-width:1120px;margin:0 auto}
+  .proof .h{font:700 12px Helvetica,Arial,sans-serif;text-transform:uppercase;letter-spacing:.12em;color:var(--green);text-align:center;margin-bottom:8px}
+  .proof h2{font:400 30px Helvetica,Arial,sans-serif;color:#333;text-align:center;margin-bottom:40px}
+  .proof .rows{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:900px){.proof .rows{grid-template-columns:1fr}}
+  .proof .r{background:#fff;border:1px solid var(--line);border-radius:10px;padding:24px}
+  .proof .r.on{border-color:var(--lime);box-shadow:0 6px 22px rgba(140,198,63,.13)}
+  .proof .r h3{font:600 17px Helvetica,Arial,sans-serif;color:#1c2b1f;margin-bottom:8px}
+  .proof .r p{font-size:13.5px}
+  footer{background:var(--green-d);color:#cfe3cf;text-align:center;padding:30px;font-size:13px}
+</style>
+</head>
+<body>
+<nav><span class="wm">Cura<span class="v">V</span>ive</span><span class="links"><a>Home</a><a>Technology</a><a>Products</a><a>Contact</a></span></nav>
+<div class="ribbon"><span class="ic">✉</span><span>Continuing from your email — <b>“Egg-free lysozyme for your cheese line”</b></span><span class="pv"></span><span style="margin-left:auto;font-size:12px;color:#7a887c">personalized landing · sent to a dairy formulator segment</span></div>
+<section class="hero">
+  <div class="l">
+    <div class="eyebrow">LysoSure · the ask from your inbox</div>
+    <h1>You asked about <em>egg-free lysozyme</em> for cheese. Here it is.</h1>
+    <p>The same promise from the email, proven on the page: plant-derived lysozyme that drops into your cheese make with no egg-allergen risk.<span class="pvd"></span></p>
+    <a class="cta">See the cheese spec ›</a>
+  </div>
+  <div class="r"><div class="card">
+    <div class="k">Matched to your email</div>
+    <div class="row"><span>Segment</span><span>Cheese &amp; Dairy</span></div>
+    <div class="row"><span>Use case</span><span>Egg replacement</span></div>
+    <div class="row"><span>Certs asked for</span><span>Kosher · Halal</span></div>
+    <div class="row"><span>Lead time</span><span>Ready to ship</span></div>
+  </div></div>
+</section>
+<section class="proof"><div class="in">
+  <div class="h">Same claim, proven</div>
+  <h2>Why this email led here</h2>
+  <div class="rows">
+    <div class="r on"><h3>Egg-free, allergen-safe</h3><p>Derived solely from plants — the exact concern your email opened with.</p></div>
+    <div class="r"><h3>Kosher &amp; Halal certified</h3><p>The certifications your segment screens for, documented.</p></div>
+    <div class="r"><h3>Consistent activity</h3><p>Reliable lysozyme activity, batch to batch, at cheese-make scale.</p></div>
+  </div>
+</div></section>
+<footer>Developed and Manufactured in Kansas, USA · © CuraVive</footer>
+<div class="tut"><b>B · Email-mirror (message-match)</b><br>The page <b>opens by echoing the email</b> that brought them — subject-line ribbon + a "matched to your email" card + proof reordered to that use case. The strongest expression of email→page continuity. Green dots = personalized slots.</div>
+</body>
+</html>

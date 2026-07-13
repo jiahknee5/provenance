@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CuraVive mock E — Sample-request conversion</title>
+<style>
+  :root{--green:#2f7d3a;--green-d:#26682f;--lime:#8cc63f;--lime-d:#79b62f;--ink:#1a241c;--body:#57625b;--line:#e0e6df}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font:16px/1.6 Helvetica,Arial,sans-serif;color:var(--body);background:#fff;padding-bottom:70px}
+  a{color:inherit;text-decoration:none}
+  .tut{position:fixed;left:14px;bottom:78px;z-index:60;max-width:330px;background:#12261a;color:#dfeede;border:1px solid #2f7d3a;border-radius:10px;padding:12px 14px;font-size:12px;line-height:1.5;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+  .tut b{color:#8cc63f}
+  nav{background:var(--green);display:flex;align-items:center;padding:0 40px;height:70px;gap:24px}
+  nav .wm{font:700 25px Helvetica,Arial,sans-serif;color:#fff}nav .wm .v{color:var(--lime)}
+  nav .links{margin-left:auto;display:flex;gap:22px}nav .links a{color:#fff;font-size:14px}
+  nav .top{background:var(--lime);color:#12261a;font:600 13px Helvetica,Arial,sans-serif;border-radius:20px;padding:8px 18px}
+  .hero{display:grid;grid-template-columns:1.2fr .9fr;gap:40px;max-width:1180px;margin:0 auto;padding:56px 40px}
+  @media(max-width:900px){.hero{grid-template-columns:1fr}}
+  .hero .eyebrow{font:700 12px Helvetica,Arial,sans-serif;text-transform:uppercase;letter-spacing:.14em;color:var(--green);margin-bottom:14px}
+  .hero h1{font:400 42px/1.12 Helvetica,Arial,sans-serif;color:var(--ink);margin-bottom:18px}
+  .hero .lede{font-size:18px;line-height:1.6;color:#3a453e;max-width:36ch;margin-bottom:22px}
+  .hero .pv{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--lime);vertical-align:super;margin-left:6px;box-shadow:0 0 0 3px rgba(140,198,63,.28)}
+  .ship{display:inline-flex;align-items:center;gap:8px;background:#eef5ea;border:1px solid #cfe3cf;border-radius:20px;padding:7px 15px;font:600 13px Helvetica,Arial,sans-serif;color:var(--green-d)}
+  .ship .dot{width:8px;height:8px;border-radius:50%;background:var(--lime)}
+  /* the sample-request card — pre-filled from the email/CRM */
+  .form{background:#fafcf9;border:1px solid var(--line);border-radius:14px;padding:26px;box-shadow:0 10px 30px rgba(20,40,25,.06)}
+  .form h3{font:600 18px Helvetica,Arial,sans-serif;color:var(--ink);margin-bottom:4px}
+  .form .sc{font-size:12.5px;color:#8a938c;margin-bottom:18px}
+  .form label{display:block;font:700 10.5px Helvetica,Arial,sans-serif;text-transform:uppercase;letter-spacing:.08em;color:#8a938c;margin:12px 0 5px}
+  .form input,.form select{width:100%;font:14px Helvetica,Arial,sans-serif;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:7px;padding:11px 12px}
+  .form .pref{border-color:var(--lime);background:#f4fbee}
+  .form button{width:100%;margin-top:18px;background:var(--lime);color:#12261a;font:600 16px Helvetica,Arial,sans-serif;border:0;border-radius:8px;padding:14px;cursor:pointer}
+  .form button:hover{background:var(--lime-d)}
+  .form .hint{font-size:11px;color:#8a938c;margin-top:10px;text-align:center}
+  .tiers{background:#fafcf9;border-top:1px solid var(--line);padding:56px 40px}
+  .tiers .in{max-width:1120px;margin:0 auto}
+  .tiers h2{font:400 28px Helvetica,Arial,sans-serif;color:#333;text-align:center;margin-bottom:34px}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:900px){.cards{grid-template-columns:1fr}}
+  .tier{background:#fff;border:1px solid var(--line);border-radius:10px;padding:24px;text-align:center}
+  .tier.on{border-color:var(--lime);box-shadow:0 8px 24px rgba(140,198,63,.14)}
+  .tier .t{font:700 11px Helvetica,Arial,sans-serif;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:8px}
+  .tier .v{font:400 26px Helvetica,Arial,sans-serif;color:var(--ink)}
+  .tier .d{font-size:13px;margin-top:6px}
+  .stickycta{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--green);color:#fff;display:flex;align-items:center;gap:16px;padding:12px 40px}
+  .stickycta b{color:#fff}.stickycta .sp{margin-left:auto}
+  .stickycta a{background:var(--lime);color:#12261a;font:600 14px Helvetica,Arial,sans-serif;border-radius:22px;padding:10px 22px}
+  footer{background:var(--green-d);color:#cfe3cf;text-align:center;padding:30px;font-size:13px}
+</style>
+</head>
+<body>
+<nav><span class="wm">Cura<span class="v">V</span>ive</span><span class="links"><a>Home</a><a>Technology</a><a>Products</a><a>Contact</a></span><a class="top">Request a Sample</a></nav>
+<section class="hero">
+  <div>
+    <div class="eyebrow">LysoSure · egg-free lysozyme</div>
+    <h1>Get a LysoSure sample for your cheese line.<span class="pv"></span></h1>
+    <p class="lede">You told us cheese &amp; dairy — so this is pre-filled for it. Confirm the volume and we'll ship a sample and a quote.</p>
+    <span class="ship"><span class="dot"></span> In stock — ready to ship now</span>
+  </div>
+  <form class="form">
+    <h3>Request a sample</h3>
+    <div class="sc">Pre-filled from your email — edit anything.</div>
+    <label>Use case</label><input class="pref" value="Cheese &amp; dairy — egg replacement">
+    <label>Estimated volume</label>
+    <select class="pref"><option>Pilot (1–5 kg)</option><option selected>Production trial (25–100 kg)</option><option>Commercial (500 kg+)</option></select>
+    <label>Work email</label><input value="formulator@dairyco.com">
+    <button type="button">Send my sample request ›</button>
+    <div class="hint">No egg allergens · Kosher &amp; Halal · Kansas-made</div>
+  </form>
+</section>
+<section class="tiers"><div class="in"><h2>Priced by the volume you actually run</h2>
+  <div class="cards">
+    <div class="tier"><div class="t">Pilot</div><div class="v">1–5 kg</div><div class="d">Bench + first trials</div></div>
+    <div class="tier on"><div class="t">Production trial · your fit</div><div class="v">25–100 kg</div><div class="d">Line validation runs</div></div>
+    <div class="tier"><div class="t">Commercial</div><div class="v">500 kg+</div><div class="d">Ongoing supply, quoted</div></div>
+  </div>
+</div></section>
+<footer>Developed and Manufactured in Kansas, USA · © CuraVive</footer>
+<div class="stickycta"><b>LysoSure is in stock.</b><span>Egg-free lysozyme, ready to ship for cheese &amp; dairy.</span><span class="sp"></span><a>Request a Sample ›</a></div>
+<div class="tut"><b>E · Sample-request conversion</b><br>Procurement-forward — sticky CTA, <b>pre-filled sample form</b> (use case + volume from the email/CRM), and a volume tier highlighted for the recipient. For buyers ready to act. Green dot = personalized slot.</div>
+</body>
+</html>

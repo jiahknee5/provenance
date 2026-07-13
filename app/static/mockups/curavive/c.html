@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CuraVive mock C — Segment vertical</title>
+<style>
+  :root{--green:#2f7d3a;--green-d:#26682f;--lime:#8cc63f;--lime-d:#79b62f;--body:#5f6b60;--line:#e2e8e0}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font:16px/1.6 Helvetica,Arial,sans-serif;color:var(--body);background:#fff}
+  a{color:inherit;text-decoration:none}
+  .tut{position:fixed;left:14px;bottom:14px;z-index:60;max-width:330px;background:#12261a;color:#dfeede;border:1px solid #2f7d3a;border-radius:10px;padding:12px 14px;font-size:12px;line-height:1.5;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+  .tut b{color:#8cc63f}
+  nav{background:var(--green);display:flex;align-items:center;padding:0 40px;height:72px;gap:26px}
+  nav .wm{font:700 26px Helvetica,Arial,sans-serif;color:#fff}nav .wm .v{color:var(--lime)}
+  nav .links{margin-left:auto;display:flex;gap:24px}nav .links a{color:#fff;font-size:14px}
+  /* segment switcher (in the real replica this is set by the email/CRM; here it's clickable) */
+  .seg{display:flex;gap:8px;padding:14px 40px;background:#0e1a12;border-bottom:1px solid #1f3524;flex-wrap:wrap}
+  .seg span.l{font:700 11px Helvetica,Arial,sans-serif;text-transform:uppercase;letter-spacing:.1em;color:#7fae62;align-self:center;margin-right:6px}
+  .seg button{font:600 13px Helvetica,Arial,sans-serif;color:#cfe3cf;background:transparent;border:1px solid #2f5138;border-radius:20px;padding:7px 16px;cursor:pointer}
+  .seg button.on{background:var(--lime);color:#0e1a12;border-color:var(--lime)}
+  .hero{position:relative;min-height:520px;display:flex;align-items:center;padding:0 40px;color:#fff;overflow:hidden;transition:background .4s}
+  .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,rgba(6,16,10,.82) 40%,rgba(6,16,10,.35))}
+  .hero .in{position:relative;z-index:2;max-width:640px}
+  .hero .eyebrow{font:700 12px Helvetica,Arial,sans-serif;text-transform:uppercase;letter-spacing:.14em;color:var(--lime);margin-bottom:16px}
+  .hero h1{font:400 46px/1.12 Helvetica,Arial,sans-serif;margin-bottom:20px}
+  .hero p{font-size:19px;line-height:1.55;color:#e0ece0;max-width:32ch;margin-bottom:30px}
+  .cta{display:inline-block;background:var(--lime);color:#0e1a12;font:600 17px Helvetica,Arial,sans-serif;border-radius:40px;padding:15px 34px}
+  .cta:hover{background:#fff}
+  .pv{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--lime);vertical-align:super;margin-left:7px;box-shadow:0 0 0 3px rgba(140,198,63,.3)}
+  .metrics{display:grid;grid-template-columns:repeat(3,1fr);max-width:1120px;margin:0 auto;padding:56px 40px;gap:30px;text-align:center}
+  @media(max-width:900px){.metrics{grid-template-columns:1fr}}
+  .metrics .m .n{font:400 44px Helvetica,Arial,sans-serif;color:var(--green)}
+  .metrics .m .l{font-size:14px}
+  .band{background:#fafcf9;border-top:1px solid var(--line);padding:60px 40px;text-align:center}
+  .band h2{font:400 30px Helvetica,Arial,sans-serif;color:#333;margin-bottom:12px}
+  .band p{max-width:640px;margin:0 auto}
+  footer{background:var(--green-d);color:#cfe3cf;text-align:center;padding:30px;font-size:13px}
+  /* per-segment palettes */
+  .hero.cheese{background:linear-gradient(135deg,#b8862f,#6b4a10)}
+  .hero.brew{background:linear-gradient(135deg,#3a4a52,#12181c)}
+  .hero.bake{background:linear-gradient(135deg,#a5702f,#4a2f10)}
+  .hero.supp{background:linear-gradient(135deg,#2f6d5a,#123028)}
+</style>
+</head>
+<body>
+<nav><span class="wm">Cura<span class="v">V</span>ive</span><span class="links"><a>Home</a><a>Technology</a><a>Products</a><a>Contact</a></span></nav>
+<div class="seg"><span class="l">Recipient segment (from email)</span>
+  <button class="on" data-s="cheese">Cheese &amp; Dairy</button>
+  <button data-s="brew">Brewing &amp; Ferment</button>
+  <button data-s="bake">Baking</button>
+  <button data-s="supp">Supplements</button>
+</div>
+<section class="hero cheese" id="hero">
+  <div class="in">
+    <div class="eyebrow" id="eyebrow">LysoSure for Cheese &amp; Dairy</div>
+    <h1 id="h1">Egg-free lysozyme, built for the cheese vat.<span class="pv"></span></h1>
+    <p id="sub">Replace egg-derived lysozyme with a plant source — no allergen risk, Kosher and Halal, consistent at make scale.</p>
+    <a class="cta" id="cta">See the dairy spec ›</a>
+  </div>
+</section>
+<section class="metrics">
+  <div class="m"><div class="n">0</div><div class="l">egg allergens introduced</div></div>
+  <div class="m"><div class="n">20+ yrs</div><div class="l">plant-protein expertise</div></div>
+  <div class="m"><div class="n" id="ship">Ready</div><div class="l">to ship now</div></div>
+</section>
+<section class="band"><h2>One ingredient, proven per industry</h2><p id="band">From cheese and cultured dairy to brewing, baking, and supplements — the same egg-free lysozyme, framed for the make you actually run.</p></section>
+<footer>Developed and Manufactured in Kansas, USA · © CuraVive</footer>
+<div class="tut"><b>C · Segment vertical</b><br>The <b>entire page reskins</b> to the recipient's industry — hero image, headline, eyebrow, and CTA all swap. Click the segment chips to see it (in the real replica the email/CRM sets it). Boldest personalization. Green dot = personalized slot.</div>
+<script>
+  var D={cheese:{cls:'cheese',eye:'LysoSure for Cheese & Dairy',h:'Egg-free lysozyme, built for the cheese vat.',sub:'Replace egg-derived lysozyme with a plant source — no allergen risk, Kosher and Halal, consistent at make scale.',cta:'See the dairy spec ›',band:'From cheese and cultured dairy to every other make — the same egg-free lysozyme, framed for your line.'},
+  brew:{cls:'brew',eye:'LysoSure for Brewing & Fermentation',h:'Control spoilage bacteria without the egg allergen.',sub:'Plant-derived lysozyme for fermented beverages — stable, allergen-safe, and scalable to production volumes.',cta:'See the fermentation spec ›',band:'From wild-ferment control to packaged stability — egg-free lysozyme for the brewhouse.'},
+  bake:{cls:'bake',eye:'LysoSure for Baking',h:'Extend shelf life, drop the egg allergen.',sub:'A plant lysozyme that preserves baked goods and clean-label formulations — Kosher and Halal certified.',cta:'See the bakery spec ›',band:'From par-baked to packaged — egg-free preservation for the bakery.'},
+  supp:{cls:'supp',eye:'LysoSure for Supplements',h:'Functional lysozyme, egg-free and clean-label.',sub:'A plant-sourced active for nutritional and functional products where egg allergens are a non-starter.',cta:'See the supplement spec ›',band:'From capsules to functional foods — egg-free lysozyme for the supplement aisle.'}};
+  var hero=document.getElementById('hero');
+  document.querySelectorAll('.seg button').forEach(function(b){b.onclick=function(){
+    document.querySelectorAll('.seg button').forEach(function(x){x.classList.remove('on');});b.classList.add('on');
+    var d=D[b.dataset.s];hero.className='hero '+d.cls;
+    document.getElementById('eyebrow').textContent=d.eye;
+    document.getElementById('h1').innerHTML=d.h+'<span class="pv"></span>';
+    document.getElementById('sub').textContent=d.sub;
+    document.getElementById('cta').textContent=d.cta;
+    document.getElementById('band').textContent=d.band;
+  };});
+</script>
+</body>
+</html>

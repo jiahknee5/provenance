@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CuraVive mock D — Technical dossier</title>
+<style>
+  :root{--green:#2f7d3a;--green-d:#26682f;--lime:#8cc63f;--ink:#1a241c;--body:#55605a;--line:#e0e6df;--paper:#fbfcfa}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font:15px/1.6 Helvetica,Arial,sans-serif;color:var(--body);background:var(--paper)}
+  a{color:inherit;text-decoration:none}
+  .tut{position:fixed;left:14px;bottom:14px;z-index:60;max-width:330px;background:#12261a;color:#dfeede;border:1px solid #2f7d3a;border-radius:10px;padding:12px 14px;font-size:12px;line-height:1.5;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+  .tut b{color:#8cc63f}
+  nav{background:var(--green);display:flex;align-items:center;padding:0 40px;height:66px;gap:24px}
+  nav .wm{font:700 24px Helvetica,Arial,sans-serif;color:#fff}nav .wm .v{color:var(--lime)}
+  nav .links{margin-left:auto;display:flex;gap:22px}nav .links a{color:#fff;font-size:13.5px}
+  .doc{max-width:960px;margin:0 auto;padding:54px 40px}
+  .docmeta{display:flex;gap:14px;flex-wrap:wrap;font:600 11px Helvetica,Arial,sans-serif;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:20px}
+  .docmeta .pv{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 3px rgba(140,198,63,.25);align-self:center}
+  h1{font:400 34px/1.2 Helvetica,Arial,sans-serif;color:var(--ink);margin-bottom:14px}
+  .lede{font-size:17px;line-height:1.6;color:#3a453e;max-width:62ch;margin-bottom:8px}
+  .certrow{display:flex;gap:10px;flex-wrap:wrap;margin:26px 0 8px}
+  .cert{border:1px solid var(--line);background:#fff;border-radius:6px;padding:8px 14px;font:600 12px Helvetica,Arial,sans-serif;color:var(--ink)}
+  .cert b{color:var(--green)}
+  h2{font:600 13px Helvetica,Arial,sans-serif;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin:44px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+  table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line)}
+  th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--line);font-size:14px}
+  th{font:600 11px Helvetica,Arial,sans-serif;text-transform:uppercase;letter-spacing:.08em;color:#8a938c;background:#f4f7f2}
+  td.k{color:var(--ink);font-weight:600;width:38%}
+  tr.on td{background:rgba(140,198,63,.1);box-shadow:inset 3px 0 0 var(--lime)}
+  tr.on td.k{color:var(--green-d)}
+  .cmp td.win{color:var(--green-d);font-weight:600}
+  .cmp td.lose{color:#b04a3a}
+  .cta{display:inline-block;margin-top:30px;background:var(--lime);color:#12261a;font:600 15px Helvetica,Arial,sans-serif;border-radius:6px;padding:13px 26px}
+  .cta.ghost{background:transparent;border:1px solid var(--green);color:var(--green);margin-left:10px}
+  footer{background:var(--green-d);color:#cfe3cf;text-align:center;padding:30px;font-size:13px;margin-top:40px}
+</style>
+</head>
+<body>
+<nav><span class="wm">Cura<span class="v">V</span>ive</span><span class="links"><a>Home</a><a>Technology</a><a>Products</a><a>Contact</a></span></nav>
+<div class="doc">
+  <div class="docmeta"><span>LysoSure · Technical Data Sheet</span><span class="pv"></span><span style="color:#8a938c">prepared for a cheese-&amp;-dairy R&amp;D contact</span></div>
+  <h1>LysoSure™ — plant-derived lysozyme</h1>
+  <p class="lede">The only egg-free lysozyme, produced from plants with 20+ years of protein-production process control. This sheet highlights the parameters your dairy formulation team flagged.</p>
+  <div class="certrow"><span class="cert"><b>✓</b> Egg-free</span><span class="cert"><b>✓</b> Kosher</span><span class="cert"><b>✓</b> Halal</span><span class="cert"><b>✓</b> Made in Kansas, USA</span></div>
+
+  <h2>Specification</h2>
+  <table>
+    <tbody>
+      <tr class="on"><td class="k">Source</td><td>Plant (non-egg) — zero egg allergen</td></tr>
+      <tr><td class="k">Activity</td><td>High, consistent lysozyme activity batch-to-batch</td></tr>
+      <tr class="on"><td class="k">Allergen profile</td><td>No egg; suitable for allergen-controlled lines</td></tr>
+      <tr><td class="k">Certifications</td><td>Kosher · Halal</td></tr>
+      <tr><td class="k">Form / handling</td><td>Standard dry ingredient handling</td></tr>
+      <tr class="on"><td class="k">Availability</td><td>In stock — ready to ship now</td></tr>
+    </tbody>
+  </table>
+
+  <h2>LysoSure vs. egg-derived lysozyme</h2>
+  <table class="cmp">
+    <thead><tr><th>Parameter</th><th>LysoSure (plant)</th><th>Egg-derived</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Egg allergen</td><td class="win">None</td><td class="lose">Present</td></tr>
+      <tr><td class="k">Kosher / Halal</td><td class="win">Certified</td><td>Varies</td></tr>
+      <tr><td class="k">Supply consistency</td><td class="win">Controlled process</td><td>Egg-supply dependent</td></tr>
+    </tbody>
+  </table>
+
+  <a class="cta">Download full spec (PDF)</a><a class="cta ghost">Request a formulation call</a>
+</div>
+<footer>Developed and Manufactured in Kansas, USA · © CuraVive</footer>
+<div class="tut"><b>D · Technical dossier</b><br>Spec-sheet direction for <b>R&amp;D formulators</b> — data table, cert badges, head-to-head vs egg lysozyme. Email personalization = <b>which spec rows are highlighted</b> (here: allergen + availability, for a dairy contact). Restrained, credibility-first. Green dot = personalized slot.</div>
+</body>
+</html>

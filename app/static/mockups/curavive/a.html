@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CuraVive mock A — Faithful clone</title>
+<style>
+  :root{--green:#2f7d3a;--green-d:#26682f;--lime:#8cc63f;--lime-d:#79b62f;--ink:#222;--body:#6a6a6a;--line:#e4e8e2;--bg:#fff}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font:16px/1.6 Helvetica,Arial,sans-serif;color:var(--body);background:var(--bg)}
+  a{color:inherit;text-decoration:none}
+  .tut{position:fixed;left:14px;bottom:14px;z-index:60;max-width:320px;background:#12261a;color:#dfeede;border:1px solid #2f7d3a;border-radius:10px;padding:12px 14px;font-size:12px;line-height:1.5;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+  .tut b{color:#8cc63f}
+  nav{background:var(--green);display:flex;align-items:center;padding:0 40px;height:80px;gap:28px}
+  nav .wm{font:700 30px Helvetica,Arial,sans-serif;color:#fff;letter-spacing:-.5px}
+  nav .wm .v{color:var(--lime)}
+  nav .links{margin-left:auto;display:flex;gap:30px}
+  nav .links a{color:#fff;font-size:15px}
+  nav .links a.on{color:var(--lime)}
+  .hero{position:relative;padding:70px 40px 88px;background:linear-gradient(105deg,#f4f7f1 0%,#e8f1e2 42%,#2f7d3a 100%);overflow:hidden}
+  .hero .plate{max-width:1180px;margin:0 auto}
+  .hero .badge{font:italic 800 40px Helvetica,Arial,sans-serif;color:#111;letter-spacing:-1px;margin-bottom:26px}
+  .hero .badge .m{color:var(--green)}
+  .hero h1{font:400 40px/1.15 Helvetica,Arial,sans-serif;color:#111;max-width:14ch;margin-bottom:26px}
+  .hero p{font-size:22px;line-height:1.5;color:#2a2a2a;max-width:20ch;margin-bottom:34px}
+  .hero .pv{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--lime);vertical-align:super;margin-left:6px;box-shadow:0 0 0 3px rgba(140,198,63,.25)}
+  .cta{display:inline-flex;align-items:center;gap:10px;background:var(--lime);color:#fff;font:600 18px Helvetica,Arial,sans-serif;border-radius:40px;padding:16px 34px}
+  .cta:hover{background:var(--lime-d)}
+  .feat{max-width:1180px;margin:0 auto;padding:80px 40px;display:grid;grid-template-columns:repeat(4,1fr);gap:40px;text-align:center}
+  @media(max-width:900px){.feat{grid-template-columns:1fr 1fr}}
+  .feat h2{font:400 26px Helvetica,Arial,sans-serif;color:#333;margin-bottom:14px}
+  .feat p{font-size:14px}
+  .apps{background:#fafcf9;border-top:1px solid var(--line);padding:80px 40px}
+  .apps .h{text-align:center;max-width:820px;margin:0 auto 48px}
+  .apps h2{font:400 40px Helvetica,Arial,sans-serif;color:#333;margin-bottom:18px}
+  .grid{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr 1fr}}
+  .app{border-radius:8px;overflow:hidden;position:relative;height:200px;display:flex;align-items:flex-end;color:#fff;font:600 18px Helvetica,Arial,sans-serif;padding:18px}
+  .app.on{outline:3px solid var(--lime);outline-offset:-3px}
+  .app .lbl{position:relative;z-index:2}
+  .app .tag{position:absolute;top:12px;left:12px;z-index:2;background:var(--lime);color:#fff;font:700 10px Helvetica,Arial,sans-serif;text-transform:uppercase;letter-spacing:.06em;border-radius:4px;padding:3px 8px}
+  .app::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.7))}
+  .a1{background:linear-gradient(135deg,#3a4a52,#1c2429)}.a2{background:linear-gradient(135deg,#5c7b3a,#2f4a1c)}
+  .a3{background:linear-gradient(135deg,#b8862f,#6b4a10)}.a4{background:linear-gradient(135deg,#4a5560,#232a31)}
+  .contact{text-align:center;padding:80px 40px}
+  .contact h2{font:400 36px Helvetica,Arial,sans-serif;color:#333;margin-bottom:16px}
+  footer{background:var(--green-d);color:#cfe3cf;text-align:center;padding:30px;font-size:13px}
+</style>
+</head>
+<body>
+<nav><span class="wm">Cura<span class="v">V</span>ive</span><span class="links"><a class="on">Home</a><a>Technology</a><a>Products</a><a>Contact</a></span></nav>
+<section class="hero"><div class="plate">
+  <div class="badge">Lyso<span class="m">Sure</span></div>
+  <h1>The Only Egg-free Lysozyme</h1>
+  <p>Egg-free lysozyme, ready for your cheese make<span class="pv"></span></p>
+  <a class="cta">View Available Products ›</a>
+</div></section>
+<section class="feat">
+  <div><h2>Egg-Free</h2><p>Derived solely from plants — Kosher and Halal certified.</p></div>
+  <div><h2>Safety</h2><p>Eliminates the risks of egg allergies in your formulation.</p></div>
+  <div><h2>Consistency</h2><p>Highly active plant-lysozyme delivers reliable results.</p></div>
+  <div><h2>Quality</h2><p>20+ years of plant-protein production expertise.</p></div>
+</section>
+<section class="apps"><div class="h"><h2>Applications</h2><p>LysoSure’s proven safety, scalability, and egg-free status make it ideal across food production — ready to ship now.</p></div>
+  <div class="grid">
+    <div class="app a1 on"><span class="tag">your segment</span><span class="lbl">Cheese &amp; Dairy</span></div>
+    <div class="app a2"><span class="lbl">Fermentation</span></div>
+    <div class="app a3"><span class="lbl">Baking</span></div>
+    <div class="app a4"><span class="lbl">Supplements</span></div>
+  </div>
+</section>
+<section class="contact"><h2>Have Questions?</h2><p>Connect and our team will reach out about products and applications.</p></section>
+<footer>Developed and Manufactured in Kansas, USA · © CuraVive</footer>
+<div class="tut"><b>A · Faithful clone</b><br>Matches curavive.com. Email personalization is light-touch: the hero subhead and one highlighted <b>application card</b> swap to the recipient's segment (here: Cheese &amp; Dairy). Safest, most on-brand. Green dot = a personalized slot.</div>
+</body>
+</html>
