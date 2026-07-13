@@ -698,6 +698,7 @@ def _designer_view(page: dict) -> dict:
             "id": sec["id"],
             "label": sec.get("label") or sec["id"],
             "region": sec.get("region", sec["id"]),
+            "placement": sec.get("placement", ""),
             "personalize": bool(sec.get("personalize")),
             "goal": sec.get("goal", ""),
             "channels": sec.get("channels") or [],

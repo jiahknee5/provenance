@@ -27,6 +27,7 @@ RULES_DIR = Path(__file__).resolve().parents[2] / "rules"
 # --------------------------------------------------------------------------- #
 _TOP_KEYS = {"version", "tenant", "sections"}
 _SECTION_KEYS = {"id", "label", "region", "personalize", "goal", "channels",
+                 "placement",  # optional, W10: plain-English "where it sits on the page"
                  "text_targets", "image_targets", "guardrails", "evals"}
 _TEXT_TARGET_KEYS = {"slot_id", "label", "mode", "workflow", "strategy", "policy",
                      "source", "claims", "prompt", "gate"}

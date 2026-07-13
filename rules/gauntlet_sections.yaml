@@ -19,6 +19,7 @@ tenant: gauntlet
 sections:
   - id: hero
     label: "Hero"
+    placement: "Top of the page — the first screen every visitor sees"
     region: hero
     personalize: true
     goal: "Message-match the first screen to the arrival — campaign creative, identity, or firmographics."
@@ -78,6 +79,7 @@ sections:
     evals: [gate_pass, hold_never_ships, brain_score]
   - id: prove
     label: "How We Prove"
+    placement: "Mid-page — the 'How We Prove' evidence band"
     region: prove
     personalize: true
     goal: "Frame the proof model for the visitor's industry or the ad promise they clicked."
@@ -102,6 +104,7 @@ sections:
     evals: [gate_pass, hold_never_ships]
   - id: challenger
     label: "Challenger callout"
+    placement: "Mid-page — the challenger callout under the proof band"
     region: challenger
     personalize: true
     goal: "Meet the individual-track visitor's objection in the callout body."
@@ -121,6 +124,7 @@ sections:
     evals: [gate_pass, hold_never_ships]
   - id: compare
     label: "Hire vs Catalyst comparison"
+    placement: "Lower page — the Hire vs Catalyst comparison table"
     region: compare
     personalize: true
     goal: "Emphasize the column and stat that match the audience — same facts for everyone."
@@ -149,6 +153,7 @@ sections:
     evals: [gate_pass, hold_never_ships]
   - id: cta
     label: "Final CTA"
+    placement: "Bottom of the page — the final call-to-action banner"
     region: cta
     personalize: true
     goal: "Steer the close with behavioral context — alluded to, never itemized."

@@ -11,6 +11,7 @@ sections:                   # ordered = page order
     region: hero            # existing page region: hero|prove|challenger|compare|cta|location
     personalize: true       # master toggle (Q1); false = section ships generic
     goal: ""                # Q2 — why this section personalizes (free text, shown on card)
+    placement: ""           # OPTIONAL (W10, additive) — plain-English "where it sits on the page"; feeds the designer's Page map table
     channels: [direct, search, ads, email]   # Q3 — which arrivals may personalize here
     text_targets:           # 0..n
       - slot_id: hero_headline        # unique per tenant; existing slot ids preserved

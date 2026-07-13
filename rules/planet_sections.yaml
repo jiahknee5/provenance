@@ -20,6 +20,7 @@ tenant: planet
 sections:
   - id: hero
     label: "Hero"
+    placement: "Top of the page — the first screen every visitor sees"
     region: hero
     personalize: true
     goal: "Message-match the first screen to the arrival — campaign creative, identity, or firmographics."
@@ -69,6 +70,7 @@ sections:
     evals: [gate_pass, hold_never_ships, brain_score]
   - id: location
     label: "Location line"
+    placement: "Inside the hero — the location line under the headline"
     region: location
     personalize: true
     goal: "The daily-coverage claim at region scale — never street or property scale; defense gets the theater register."
@@ -94,6 +96,7 @@ sections:
     evals: [gate_pass, hold_never_ships]
   - id: prove
     label: "How we prove"
+    placement: "Mid-page — the 'How we prove' evidence band"
     region: prove
     personalize: true
     goal: "Frame the proof model for the visitor's industry, region archive, or the ad promise they clicked."
@@ -128,6 +131,7 @@ sections:
     evals: [gate_pass, hold_never_ships]
   - id: research
     label: "Research callout"
+    placement: "Mid-page — the research callout under the proof band"
     region: research
     personalize: true
     goal: "Meet the research-track visitor's objection in the callout body."
@@ -147,6 +151,7 @@ sections:
     evals: [gate_pass, hold_never_ships]
   - id: compare
     label: "Task vs Monitor comparison"
+    placement: "Lower page — the Task vs Monitor comparison table"
     region: compare
     personalize: true
     goal: "Emphasize the column and stat that match the audience — same facts for everyone."
@@ -175,6 +180,7 @@ sections:
     evals: [gate_pass, hold_never_ships]
   - id: cta
     label: "Final CTA"
+    placement: "Bottom of the page — the final call-to-action banner"
     region: cta
     personalize: true
     goal: "Steer the close with behavioral or location context — alluded to, never itemized."

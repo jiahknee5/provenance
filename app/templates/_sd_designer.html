@@ -92,12 +92,26 @@
 </style>
 
 <div class="sec" id="sd-designer">
-  <div class="h">Sections — design every personalized element
+  <div class="h">Page map — every personalized section, top to bottom
     <span class="tag">{{ SD.sections|length }} sections · registry v {{ SD.rules_version[:8] }}</span></div>
-  <div class="sub">One card per page section from
-    <span style="font-family:ui-monospace,Menlo,monospace">{{ SD.config.sections }}</span>.
-    Values come from the registry and this visit; every edit stages a YAML diff to the
-    registry in the drawer below — nothing saves live.</div>
+  <div class="sub">Each row is one section of the live page, in page order. Open a card to
+    design it; every edit stages a change for review — nothing saves live.</div>
+  {# W10: the "where is Hero / hero sub?" answer — one consistent table (R45) #}
+  <table class="ops" data-testid="sd-pagemap">
+    <thead><tr><th style="width:26px">#</th><th>Section</th><th>Where it sits on the page</th><th>Personalized elements</th><th>Personalize</th><th></th></tr></thead>
+    <tbody>
+      {% for s in SD.sections %}
+      <tr>
+        <td class="k">{{ loop.index }}</td>
+        <td><b>{{ s.label }}</b></td>
+        <td class="note">{{ s.placement or '—' }}</td>
+        <td class="note">{{ s.text_targets|length }} text · {{ s.image_targets|length }} image</td>
+        <td><span class="chg {{ 'yes' if s.personalize else 'no' }}">{{ 'on' if s.personalize else 'off' }}</span></td>
+        <td><a href="#sd-{{ s.id }}" style="font-weight:700;text-decoration:none">Design →</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 
 {% for s in SD.sections %}
@@ -115,7 +129,7 @@
     <span class="stg-mark">staged</span>
     <span class="tag">{{ s.text_targets|length }} text · {{ s.image_targets|length }} image</span>
   </summary>
-  <div class="sub" data-testid="sd-goal-{{ s.id }}">Goal: {{ s.goal or '— no goal recorded yet' }}</div>
+  <div class="sub" data-testid="sd-goal-{{ s.id }}">{% if s.placement %}<b>Where:</b> {{ s.placement }} · {% endif %}<b>Goal:</b> {{ s.goal or '— no goal recorded yet' }}</div>
   <div class="sd-chips" data-testid="sd-channels-{{ s.id }}">
     <span class="cap">Channels</span>
     {% for ch in s.channels %}<span class="sd-chip{{ ' on' if ch == SD.active_channel else '' }}">{{ ch }}{{ ' — this visit' if ch == SD.active_channel else '' }}</span>{% endfor %}

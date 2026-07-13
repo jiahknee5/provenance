@@ -98,6 +98,23 @@ def test_connect_and_launch_pages_serve():
         assert "simulated" in rl.text  # R41: apply is honestly labeled
 
 
+def test_designer_page_map_locates_every_section():
+    # W10: the Page map table answers "where is Hero / hero sub on the page" —
+    # one row per registry section with a placement string (registry-schema.md,
+    # optional `placement` field).
+    from pipeline.personalization import sections as SEC
+    for t in TENANTS:
+        m = NAV._mounts_for(t)
+        r = c.get(f"{m['dev_business']}?as=anon")
+        assert r.status_code == 200
+        assert 'data-testid="sd-pagemap"' in r.text, t
+        assert "Where it sits on the page" in r.text, t
+        for s in SEC.list_sections(t):
+            assert s.get("placement"), (t, s["id"], "registry missing placement")
+            escaped = html.escape(s["placement"], quote=True).replace("&#x27;", "&#39;")
+            assert s["placement"] in r.text or escaped in r.text, (t, s["id"])
+
+
 def test_unknown_channel_redirects_home():
     r = c.get("/apt/channel/bogus?site=skyfi", follow_redirects=False)
     assert r.status_code == 302

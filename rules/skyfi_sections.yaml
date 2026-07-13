@@ -18,6 +18,7 @@ tenant: skyfi
 sections:
   - id: hero
     label: "Hero"
+    placement: "Top of the page — the first screen every visitor sees"
     region: hero
     personalize: true
     goal: "Message-match the first screen to the arrival — campaign creative, identity, or firmographics."
@@ -77,6 +78,7 @@ sections:
     evals: [gate_pass, hold_never_ships]
   - id: location
     label: "Location line (AOI policy)"
+    placement: "Inside the hero — the coverage line under the headline"
     region: location
     personalize: true
     goal: "Location × industry at basin/region scale — exact-AOI is hold (arm Ex) unless declared first-party, then say with the 'you told us' receipt (S09)."
@@ -96,6 +98,7 @@ sections:
     evals: [gate_pass, hold_never_ships]
   - id: how
     label: "How it works"
+    placement: "Mid-page — the three-step 'AOI to answer' band"
     region: how
     personalize: true
     goal: "Frame the AOI-to-answer flow for the visitor's sector, region archive, or the ad promise they clicked."
@@ -120,6 +123,7 @@ sections:
     evals: [gate_pass, hold_never_ships]
   - id: pricing
     label: "Pricing / AOI callout"
+    placement: "Mid-page — the pricing callout under 'how it works'"
     region: pricing
     personalize: true
     goal: "Meet the budget-conscious where they are; a declared AOI may be referenced because they told us."
@@ -139,6 +143,7 @@ sections:
     evals: [gate_pass, hold_never_ships]
   - id: compare
     label: "Existing imagery vs new tasking"
+    placement: "Lower page — the existing-imagery vs new-tasking table"
     region: compare
     personalize: true
     goal: "Emphasize the column that matches the audience or sector — same facts for everyone."
@@ -168,6 +173,7 @@ sections:
     evals: [gate_pass, hold_never_ships]
   - id: cta
     label: "Final CTA"
+    placement: "Bottom of the page — the final call-to-action banner"
     region: cta
     personalize: true
     goal: "Steer the close with behavioral or location context — alluded to, never itemized; a declared AOI may be recited."
