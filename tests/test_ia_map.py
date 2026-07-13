@@ -115,6 +115,18 @@ def test_designer_page_map_locates_every_section():
             assert s["placement"] in r.text or escaped in r.text, (t, s["id"])
 
 
+def test_demo_markers_present_where_simulation_happens():
+    # R46 (IA-MAP §9): every simulated/seeded surface carries the standard
+    # demo chip; the workspace-level chip rides the sidebar on every page.
+    assert "demo-chip" in c.get("/apt/demo?site=gauntlet").text
+    t = c.get("/apt/connect?site=skyfi").text
+    assert "demo data" in t and "simulated" in t
+    assert "demo — apply is simulated" in c.get("/apt/launch?site=skyfi").text
+    assert "demo scenarios" in c.get("/apt/channel/direct?site=planet").text
+    t = c.get("/skyfiapt/dev/business?as=known").text
+    assert "demo cohort" in t and "seeded (demo)" in t
+
+
 def test_unknown_channel_redirects_home():
     r = c.get("/apt/channel/bogus?site=skyfi", follow_redirects=False)
     assert r.status_code == 302

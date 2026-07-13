@@ -57,6 +57,19 @@ ahead"): the corrections in R40 below.
   (YAML, registry, cache key, deterministic) appear only behind the
   Developer/audit fold or on PRODUCT-dev exception surfaces (IA-MAP E1).
 
+- **R46 — Demo vs real is always declared.** (Operator, 2026-07-12: "we are
+  only doing demos right now… disable anything or call out if it is for a real
+  full implementation or just the demo.") One standard amber `demo` chip
+  (`.demo-chip`, `_apt_shell.html`) marks every surface that simulates or
+  seeds what a full implementation would do: the workspace itself (sidebar
+  footer chip on every page), Connect statuses + add-website, Launch apply,
+  channel-page mapped arrivals (curated scenarios), seeded A/B posteriors,
+  synthetic CRM cohort. Chip tooltips say what the real implementation does
+  instead. Real surfaces (live cost ledger, per-section event rows, realtime
+  image generation, the Gate) carry NO chip — the absence is the claim.
+  Replicas stay chip-free (R36: they must look like the real brands; they ARE
+  the demo). Inventory table: IA-MAP §9.
+
 ## 3. Out of scope (this wave)
 
 Real registry writes on Launch (see R41) · LinkedIn ads platform (roadmap) ·

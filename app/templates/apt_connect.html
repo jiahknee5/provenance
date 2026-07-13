@@ -41,7 +41,7 @@
 </div>
 
 <div class="cn-sec">
-  <div class="h">Connected websites</div>
+  <div class="h">Connected websites <span class="demo-chip" style="margin-left:auto" title="Synthetic demo brands — a full implementation lists your real domains with live install checks">demo data</span></div>
   {% for w in websites %}
   <div class="cn-row">
     <span class="lg" style="background:{{ w.logo_bg }}">{{ w.logo_ch }}</span>
@@ -57,7 +57,7 @@
 </div>
 
 <div class="cn-sec" id="add">
-  <div class="h">Add a website</div>
+  <div class="h">Add a website <span class="demo-chip" style="margin-left:auto" title="Simulated in the demo — a full implementation verifies your edge rewrite and imports your sections">simulated</span></div>
   <div class="cn-add">
     <input type="text" placeholder="your-domain.com" aria-label="Website domain">
     <button type="button" onclick="this.textContent='Demo workspace — connection simulated';this.disabled=true">Connect</button>

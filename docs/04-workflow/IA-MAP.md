@@ -124,3 +124,20 @@ Enforced by tests (to build, wired into the deploy gate):
   localStorage so the Launch page can read it; real apply is a future call.
 - **D3 → R42**: channel setup = one data-driven template, no per-tenant forks.
 - **D4 → R43**: `/apt/demo` is the workspace Home with the J1 checklist.
+
+## 9. Demo vs real (R46) — marker inventory
+
+One standard chip (`.demo-chip`); tooltip states what the full implementation
+does instead. No chip on a surface = it is real in this workspace.
+
+| Surface | Marker | Real implementation |
+|---|---|---|
+| Every page (sidebar footer) | `demo` | customer workspace, real operator identity |
+| Connect — website list | `demo data` | real domains + live install checks |
+| Connect — add a website | `simulated` | verifies edge rewrite, imports sections |
+| Launch — apply | `demo — apply is simulated` | writes section registry + redeploys |
+| Channel pages — mapped arrivals | `demo scenarios` | live campaign integrations (X/Google/Meta/HubSpot) |
+| Designer — A/B panels | `seeded (demo)` in panel title | live Thompson posteriors from real traffic |
+| Consoles — CRM / lead context | `demo cohort` | real CRM sync (HubSpot, Salesforce) |
+| Observatory | banner: seeded engine replay | live per-visit activity board (W11 rec) |
+| REAL, unmarked | — | Gate verdicts, receipts, per-section event rows, cost ledger, realtime image generation are the live engine |

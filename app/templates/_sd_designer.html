@@ -209,7 +209,7 @@
         </div>
       </details>
       <details class="sd-panel" data-testid="sd-ab-{{ t.slot_id }}">
-        <summary>A/B — posteriors per route{{ ' · seeded' if t.ab.seeded else '' }}</summary>
+        <summary>A/B — posteriors per route{{ ' · seeded (demo)' if t.ab.seeded else '' }}</summary>
         <div class="bd">
           {% if t.ab.seeded %}
           {% for r in t.ab.rows %}
