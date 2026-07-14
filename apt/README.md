@@ -25,6 +25,7 @@ Start at **[`index.html`](./index.html)** — the hub with live previews of ever
 | [`mock-3-conversion.html`](./mock-3-conversion.html) | **The Performance Play** — lime-on-black, leaking-funnel, "lower my CAC" |
 | [`mock-4-provable.html`](./mock-4-provable.html) | **The Trust Layer** — teal, live claim-ledger (verified / held / killed) |
 | [`mock-5-interactive.html`](./mock-5-interactive.html) | **The Live Demo** — pick a visitor, the page morphs in real time |
+| [`mock-6-elite.html`](./mock-6-elite.html) | **The Signature** — motion-forward flagship: interactive constellation canvas, custom spring cursor, magnetic CTAs, self-decoding hero, scroll-pinned stepper (all `prefers-reduced-motion`-safe) |
 
 ## Brand &amp; logo
 
