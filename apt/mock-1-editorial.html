@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="brand/favicon.svg">
+<title>Apt — Mock 1 · Editorial</title>
+<style>
+  :root{
+    --ink:#12100e; --paper:#f7f4ee; --card:#fffdf9; --muted:#6b6357;
+    --line:#e5ded1; --accent:#b23a2e; --accent-ink:#7c2419; --gold:#a9791f;
+    --serif:"Iowan Old Style","Palatino Linotype",Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:960px;margin:0 auto;padding:0 28px}
+  a{color:var(--accent-ink)}
+  /* nav */
+  nav.top{display:flex;justify-content:space-between;align-items:center;padding:22px 28px;max-width:960px;margin:0 auto}
+  .brand{font-family:var(--serif);font-weight:700;font-size:22px;letter-spacing:-.01em}
+  .brand .dot{color:var(--accent)}
+  nav.top .links a{font-family:var(--sans);font-size:13px;color:var(--muted);margin-left:22px;text-decoration:none}
+  nav.top .links a:hover{color:var(--ink)}
+  .btn{display:inline-block;font-family:var(--sans);font-weight:600;font-size:14px;background:var(--ink);color:var(--paper);
+    padding:11px 20px;border-radius:2px;text-decoration:none;border:1px solid var(--ink)}
+  .btn:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.ghost{background:transparent;color:var(--ink)}
+  .btn.ghost:hover{background:var(--ink);color:var(--paper)}
+  /* hero */
+  .hero{padding:40px 0 20px}
+  .pron{font-family:var(--sans);font-size:13px;color:var(--muted);letter-spacing:.02em;margin-bottom:10px}
+  .pron b{color:var(--ink)}
+  h1{font-size:clamp(64px,13vw,140px);line-height:.9;margin:0;letter-spacing:-.04em;font-weight:700}
+  h1 .stop{color:var(--accent)}
+  .hero-tag{font-family:var(--sans);font-size:clamp(17px,2.4vw,22px);font-weight:600;color:var(--muted);margin:14px 0 0;letter-spacing:-.01em}
+  .hero-tag b{color:var(--ink)} .hero-tag i{color:var(--accent-ink);font-style:italic}
+  .defs{border-top:2px solid var(--ink);margin-top:26px}
+  .def{display:grid;grid-template-columns:44px 1fr;gap:18px;padding:22px 0;border-bottom:1px solid var(--line)}
+  .def .num{font-family:var(--sans);font-weight:700;font-size:15px;color:var(--accent);padding-top:6px}
+  .def .word{font-size:26px;line-height:1.35}
+  .def .word i{color:var(--muted)}
+  .def .ex{font-family:var(--sans);font-size:14px;color:var(--muted);margin-top:8px}
+  .def .ex mark{background:linear-gradient(transparent 55%, #f3d9a8 55%);color:inherit;padding:0 1px}
+  .thesis{font-size:clamp(22px,3.6vw,32px);line-height:1.35;max-width:24ch;margin:40px 0 18px;letter-spacing:-.01em}
+  .thesis b{color:var(--accent-ink);font-style:italic}
+  .cta-row{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:8px}
+  .cta-note{font-family:var(--sans);font-size:12.5px;color:var(--muted)}
+  /* section frame */
+  section{padding:64px 0;border-top:1px solid var(--line)}
+  .eyebrow{font-family:var(--sans);text-transform:uppercase;letter-spacing:.2em;font-size:11px;font-weight:700;color:var(--accent);margin:0 0 14px}
+  h2{font-size:clamp(30px,5vw,42px);line-height:1.08;margin:0 0 14px;letter-spacing:-.02em}
+  .lede{font-size:19px;color:var(--muted);max-width:56ch;margin:0 0 8px}
+  /* problem */
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:30px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:24px}
+  .panel.bad{border-left:4px solid #9a9284}
+  .panel.good{border-left:4px solid var(--accent)}
+  .panel .tag{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .panel.good .tag{color:var(--accent)}
+  .panel h3{font-size:22px;margin:6px 0 12px}
+  .panel ul{margin:0;padding-left:18px;font-size:15.5px}
+  .panel li{margin:9px 0}
+  .panel .stale{color:#9a9284}
+  /* metrics */
+  .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:34px;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--card)}
+  .metric{padding:28px 24px;border-right:1px solid var(--line)}
+  .metric:last-child{border-right:0}
+  .metric .big{font-size:52px;line-height:1;letter-spacing:-.03em;color:var(--accent-ink)}
+  .metric .big .arw{font-size:26px;color:var(--gold)}
+  .metric .lbl{font-family:var(--sans);font-size:13px;color:var(--muted);margin-top:8px}
+  /* how */
+  .steps{counter-reset:step;margin-top:30px}
+  .step{display:grid;grid-template-columns:64px 1fr;gap:22px;padding:26px 0;border-bottom:1px solid var(--line);align-items:start}
+  .step:last-child{border-bottom:0}
+  .step .n{counter-increment:step;font-size:52px;line-height:1;color:var(--line);font-weight:700;letter-spacing:-.03em}
+  .step .n::before{content:counter(step,decimal-leading-zero)}
+  .step h3{font-size:23px;margin:2px 0 8px}
+  .step p{margin:0;font-size:16px;color:var(--muted);max-width:60ch}
+  .step .prov{font-family:var(--sans);font-size:12px;color:var(--accent);margin-top:8px;font-weight:600}
+  /* closing */
+  .close{text-align:center;padding:80px 0}
+  .close h2{max-width:20ch;margin:0 auto 20px}
+  footer{font-family:var(--sans);font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding:26px 0}
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  @media(max-width:720px){.split,.metrics{grid-template-columns:1fr}.metric{border-right:0;border-bottom:1px solid var(--line)}.def{grid-template-columns:32px 1fr;gap:12px}}
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="brand">apt<span class="dot">.</span></div>
+  <div class="links">
+    <a href="#problem">Problem</a>
+    <a href="#solution">Solution</a>
+    <a href="#how">How it works</a>
+    <a class="btn" href="#cta" style="margin-left:22px">Book a fitting</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header class="hero">
+    <p class="pron">apt <b>| apt |</b> &nbsp;adjective &nbsp;·&nbsp; from Latin <i>aptus</i>, “fitted, suited”</p>
+    <h1>apt<span class="stop">.</span></h1>
+    <p class="hero-tag">Hyper-personalized landing pages — <i>apter</i> for every visitor you pay to reach.</p>
+
+    <div class="defs">
+      <div class="def">
+        <div class="num">1.</div>
+        <div class="word">
+          appropriate or exactly <i>suitable</i> in the circumstances.
+          <div class="ex">“a landing page <mark>apt</mark> for this one visitor, in this one moment.”</div>
+        </div>
+      </div>
+      <div class="def">
+        <div class="num">2.</div>
+        <div class="word">
+          having a tendency to; <i>inclined or likely</i> to do something.
+          <div class="ex">“a visitor <mark>apt</mark> to click, to trust, to convert.”</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="thesis">Make a page <b>apt</b> for every visitor,<br>and every visitor becomes <b>apt</b> to convert.</p>
+    <div class="cta-row">
+      <a class="btn" href="#cta">Make my pages apt</a>
+      <a class="btn ghost" href="#how">See how it works</a>
+      <span class="cta-note">Powered by the Provenance engine — every claim proven before it ships.</span>
+    </div>
+  </header>
+</div>
+
+<section id="problem">
+  <div class="wrap">
+    <p class="eyebrow">The problem</p>
+    <h2>One static page. Every audience.<br>Nobody feels spoken to.</h2>
+    <p class="lede">You spend to send traffic, then land all of it on the same frozen page written for an average person who doesn’t exist. It doesn’t reach the visitor in front of it — so it doesn’t reach your numbers either.</p>
+
+    <div class="split">
+      <div class="panel bad">
+        <span class="tag">A static page is…</span>
+        <h3>inapt</h3>
+        <ul>
+          <li class="stale">Written once, for “everyone” — fitted to no one.</li>
+          <li class="stale">Blind to who’s reading, where they came from, what they want.</li>
+          <li class="stale">Edited by committee, quarterly, if ever.</li>
+          <li class="stale">Paying full CAC to bounce your best-fit buyers.</li>
+        </ul>
+      </div>
+      <div class="panel good">
+        <span class="tag">An apt page is…</span>
+        <h3>fitted &amp; likely</h3>
+        <ul>
+          <li>Assembled per visitor from what you actually know about them.</li>
+          <li>Speaks their industry, their intent, their moment.</li>
+          <li>Rewrites and re-optimizes itself — continuously.</li>
+          <li>Turns the same traffic into more action for less spend.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="solution">
+  <div class="wrap">
+    <p class="eyebrow">The solution</p>
+    <h2>Hyper-personalized landing pages that fit — and prove — every claim.</h2>
+    <p class="lede">Apt generates a landing page tailored to each visitor and each segment, tuned to the message they’re most apt to act on. Sharpen your targeting, lift your CTA, and lower what every customer costs to acquire.</p>
+
+    <div class="metrics">
+      <div class="metric">
+        <div class="big"><span class="arw">▲</span> CTA</div>
+        <div class="lbl">Higher click-through — the page argues the case each visitor actually cares about.</div>
+      </div>
+      <div class="metric">
+        <div class="big"><span class="arw">▼</span> CAC</div>
+        <div class="lbl">Lower cost of acquisition — the traffic you already pay for converts more often.</div>
+      </div>
+      <div class="metric">
+        <div class="big"><span class="arw">▲</span> ROI</div>
+        <div class="lbl">More return per landing page — effectiveness compounds as it self-optimizes.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <p class="eyebrow">How it works</p>
+    <h2>Understand the apt. Build to fit. Prove it. Optimize it.</h2>
+    <p class="lede">Four steps turn a segment and a signal into a page that’s apt on both counts — perfectly suited, and likely to convert.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="n"></div>
+        <div>
+          <h3>Understand the apt</h3>
+          <p>Resolve who’s arriving — firmographics, referral source, campaign, intent signals, and your CRM — into a living segment profile. We model what this visitor is <i>apt</i> to want, fear, and respond to.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n"></div>
+        <div>
+          <h3>Assemble the apt page</h3>
+          <p>From your claims library, Apt drafts a page fitted to that profile: the headline, proof, offer, and CTA most suited to them — not one static template stretched over everyone.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n"></div>
+        <div>
+          <h3>Gate every claim</h3>
+          <p>Before it ships, the Provenance Gate decomposes each claim and demands a cited source. Anything it can’t prove is killed, not published. Personalized <i>and</i> defensible.</p>
+          <div class="prov">Cited or killed — nothing goes live unproven.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n"></div>
+        <div>
+          <h3>Optimize inside the truth</h3>
+          <p>A truth-bounded optimizer tests variants and keeps what lifts CTA — but only among claims that already passed the Gate. It learns which message each segment is apt to convert on, and re-verifies when sources change.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  <section id="cta" class="close" style="border:0">
+    <p class="eyebrow" style="text-align:center">Ready when you are</p>
+    <h2>Give every visitor a page that was apt for them all along.</h2>
+    <div class="cta-row" style="justify-content:center">
+      <a class="btn" href="#">Make my pages apt</a>
+      <a class="btn ghost" href="#">Talk to the team</a>
+    </div>
+    <p class="cta-note" style="margin-top:16px">No “average visitor.” No unproven claims. Just the right page, for the right person, that they were apt to act on.</p>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="brand" style="font-size:16px">apt<span class="dot">.</span> <span style="color:var(--muted);font-weight:400;font-family:var(--sans);font-size:12px">by Provenance</span></div>
+    <div>Marketing you can prove · © 2026 · Mock 1 — Editorial</div>
+  </div>
+</footer>
+
+</body>
+</html>

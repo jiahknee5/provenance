@@ -29,6 +29,15 @@ deck reconciliation: **[docs/RECONCILIATION.md](./docs/RECONCILIATION.md)**.
 
 ---
 
+## ▶ The "Apt" landing concept
+
+A startup-style landing concept for Provenance — branded **Apt** (a page *apt* for
+every visitor; every visitor *apt* to convert) — lives in [`apt/`](./apt/):
+five landing-page mocks, a startup pitch deck, and a full logo/brand sheet. It's
+served by the app at **`/apt/`** (see [`apt/README.md`](./apt/README.md)).
+
+---
+
 ## Start here
 
 | You are… | Go to |

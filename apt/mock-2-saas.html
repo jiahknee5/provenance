@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="brand/favicon.svg">
+<title>Apt — Mock 2 · SaaS</title>
+<style>
+  :root{
+    --bg:#0b1020; --bg2:#0f1730; --card:#141d38; --card2:#18234a;
+    --ink:#eaf0ff; --muted:#9aa8c8; --line:#25315a;
+    --brand:#6ea8fe; --brand2:#8b7dff; --cyan:#3ee0c8; --amber:#ffcf6b;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55;-webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(1200px 600px at 78% -8%, rgba(139,125,255,.20), transparent 60%),
+      radial-gradient(900px 500px at 8% 4%, rgba(62,224,200,.12), transparent 55%);}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px}
+  /* nav */
+  nav{display:flex;justify-content:space-between;align-items:center;padding:20px 0;max-width:1120px;margin:0 auto;padding-left:28px;padding-right:28px}
+  .brand{font-weight:800;font-size:21px;letter-spacing:-.02em;display:flex;align-items:center;gap:9px}
+  .brand .mk{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--brand),var(--brand2));display:grid;place-items:center;color:#0b1020;font-weight:900;font-size:15px}
+  nav .links a{color:var(--muted);font-size:14px;margin-left:26px}
+  nav .links a:hover{color:var(--ink)}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:14px;border-radius:10px;padding:11px 18px;cursor:pointer;border:1px solid transparent}
+  .btn.primary{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#0b1020}
+  .btn.primary:hover{filter:brightness(1.08)}
+  .btn.ghost{background:rgba(255,255,255,.04);border-color:var(--line);color:var(--ink)}
+  .btn.ghost:hover{background:rgba(255,255,255,.08)}
+  /* hero */
+  .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:44px;align-items:center;padding:54px 0 60px}
+  .pill{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--cyan);
+    background:rgba(62,224,200,.09);border:1px solid rgba(62,224,200,.28);padding:6px 13px;border-radius:999px;margin-bottom:22px}
+  h1{font-size:clamp(40px,6vw,62px);line-height:1.02;margin:0 0 18px;letter-spacing:-.03em;font-weight:800}
+  h1 .grad{background:linear-gradient(120deg,var(--brand),var(--brand2) 60%,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{font-size:19px;color:var(--muted);max-width:52ch;margin:0 0 26px}
+  .sub b{color:var(--ink)}
+  .heroactions{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .microcopy{font-size:12.5px;color:var(--muted);margin-top:16px}
+  .defchip{display:flex;gap:10px;margin-top:26px;flex-wrap:wrap}
+  .defchip div{flex:1;min-width:200px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .defchip .k{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--brand)}
+  .defchip .d{font-size:13.5px;color:var(--muted);margin-top:5px}
+  .defchip .d b{color:var(--ink)}
+  /* hero demo card */
+  .demo{background:linear-gradient(180deg,var(--card),var(--bg2));border:1px solid var(--line);border-radius:20px;padding:16px;
+    box-shadow:0 40px 80px -30px rgba(0,0,0,.7)}
+  .demo .bar{display:flex;gap:6px;padding:4px 6px 12px}
+  .demo .bar span{width:11px;height:11px;border-radius:50%;background:#33406b}
+  .frame{background:#0a1128;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .frame .toolbar{display:flex;gap:6px;padding:9px 12px;border-bottom:1px solid var(--line);font-size:11px;color:var(--muted)}
+  .seg{display:flex;gap:6px;padding:12px 14px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+  .seg b{font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;background:rgba(110,168,254,.12);color:var(--brand);cursor:default}
+  .seg b.on{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#0b1020}
+  .page{padding:18px 16px 20px}
+  .page .h{font-size:19px;font-weight:800;letter-spacing:-.01em;line-height:1.2;margin-bottom:8px}
+  .page .p{font-size:13px;color:var(--muted);margin-bottom:12px}
+  .page .cta{display:inline-block;font-size:12.5px;font-weight:800;background:var(--cyan);color:#062018;padding:9px 15px;border-radius:9px}
+  .page .proof{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--cyan);margin-top:13px}
+  .page .proof .dotp{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+  /* logos */
+  .trust{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:20px 0;margin-top:8px}
+  .trust .wrap{display:flex;align-items:center;gap:22px;flex-wrap:wrap;justify-content:center;color:var(--muted);font-size:12.5px}
+  .trust b{opacity:.7;font-weight:800;letter-spacing:.04em}
+  /* sections */
+  section{padding:76px 0}
+  .eyebrow{font-size:12px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--brand);margin:0 0 14px;text-align:center}
+  h2{font-size:clamp(30px,4.5vw,46px);line-height:1.06;margin:0 auto 16px;letter-spacing:-.02em;text-align:center;max-width:20ch}
+  .lede{font-size:18px;color:var(--muted);max-width:60ch;margin:0 auto;text-align:center}
+  /* problem split */
+  .vs{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:44px}
+  .vscard{border-radius:18px;padding:26px;border:1px solid var(--line)}
+  .vscard.old{background:rgba(255,255,255,.02)}
+  .vscard.new{background:linear-gradient(180deg,rgba(110,168,254,.10),rgba(139,125,255,.05));border-color:rgba(139,125,255,.4)}
+  .vscard .lab{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .vscard.new .lab{color:var(--brand)}
+  .vscard h3{font-size:24px;margin:8px 0 16px;letter-spacing:-.01em}
+  .vscard .item{display:flex;gap:11px;padding:11px 0;border-top:1px solid var(--line);font-size:15px;color:var(--muted)}
+  .vscard .item i{font-style:normal;width:20px;flex-shrink:0}
+  .vscard.new .item{color:var(--ink)}
+  /* metric band */
+  .band{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:44px}
+  .mcard{background:linear-gradient(180deg,var(--card),var(--bg2));border:1px solid var(--line);border-radius:18px;padding:30px 26px;text-align:center}
+  .mcard .big{font-size:56px;font-weight:800;letter-spacing:-.03em;line-height:1;background:linear-gradient(120deg,var(--brand),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .mcard .lbl{font-weight:700;margin-top:10px;font-size:16px}
+  .mcard .desc{font-size:13.5px;color:var(--muted);margin-top:6px}
+  /* how it works */
+  .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:44px}
+  .fcard{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:16px;padding:24px;position:relative}
+  .fcard .n{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#0b1020;font-weight:900;display:grid;place-items:center;margin-bottom:14px}
+  .fcard h3{font-size:17px;margin:0 0 8px;letter-spacing:-.01em}
+  .fcard p{font-size:13.5px;color:var(--muted);margin:0}
+  .fcard .badge{display:inline-block;margin-top:12px;font-size:11px;font-weight:700;color:var(--cyan);background:rgba(62,224,200,.1);border:1px solid rgba(62,224,200,.28);padding:3px 9px;border-radius:999px}
+  /* cta */
+  .final{margin:40px auto 90px;max-width:1120px;padding:0 28px}
+  .finalbox{background:linear-gradient(135deg,rgba(110,168,254,.16),rgba(139,125,255,.12));border:1px solid rgba(139,125,255,.4);
+    border-radius:26px;padding:56px 40px;text-align:center}
+  .finalbox h2{margin-bottom:10px}
+  .finalbox .heroactions{justify-content:center;margin-top:26px}
+  footer{border-top:1px solid var(--line);padding:26px 0;color:var(--muted);font-size:13px}
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  @media(max-width:860px){.hero,.vs,.band,.flow{grid-template-columns:1fr}h1{font-size:clamp(34px,9vw,48px)}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="brand"><span class="mk"><svg width="16" height="16" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#0b1020" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 34 L26 44 L48 17"/><path d="M38 15 L48 17 L46 27"/></g></svg></span> Apt</div>
+  <div class="links">
+    <a href="#problem">Problem</a>
+    <a href="#solution">Solution</a>
+    <a href="#how">How it works</a>
+    <a class="btn ghost" href="#cta" style="margin-left:26px">Get a demo</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <span class="pill">◆ apt · perfectly fitted, and likely to convert</span>
+      <h1>Landing pages that are <span class="grad">apt</span> for the person reading them.</h1>
+      <p class="sub">Static pages are written for an average visitor who doesn’t exist. <b>Apt</b> builds a hyper-personalized page for each real one — <b>lifting CTA, lowering CAC,</b> and multiplying the ROI of traffic you already pay for.</p>
+      <div class="heroactions">
+        <a class="btn primary" href="#cta">Personalize my pages →</a>
+        <a class="btn ghost" href="#how">See how it works</a>
+      </div>
+      <p class="microcopy">◆ Every claim proven before it ships — powered by the Provenance engine.</p>
+      <div class="defchip">
+        <div><div class="k">apt · def. 1</div><div class="d">appropriate, <b>perfectly fitted</b> to the circumstances.</div></div>
+        <div><div class="k">apt · def. 2</div><div class="d">having a tendency; <b>inclined &amp; likely</b> to act.</div></div>
+      </div>
+    </div>
+
+    <div class="demo" aria-hidden="true">
+      <div class="bar"><span></span><span></span><span></span></div>
+      <div class="frame">
+        <div class="toolbar">◆ live · rebuilt per visitor</div>
+        <div class="seg">
+          <b>Fintech CFO</b><b class="on">Ag-biotech VP</b><b>Founder</b><b>Returning</b>
+        </div>
+        <div class="page">
+          <div class="h">Cut field-trial reporting from 6 weeks to 6 days.</div>
+          <div class="p">Built for ag-biotech ops teams like yours — the metric your VP of R&amp;D asked about last quarter.</div>
+          <span class="cta">Book an ag-biotech walkthrough</span>
+          <div class="proof"><span class="dotp"></span> Every claim on this page is cited &amp; verified</div>
+        </div>
+      </div>
+    </div>
+  </header>
+</div>
+
+<div class="trust">
+  <div class="wrap">
+    <span>Trusted by teams that can’t afford to be wrong:</span>
+    <b>NORTHWIND</b><b>HELIXBIO</b><b>MERIDIAN</b><b>CADENCE</b><b>OAKLINE</b>
+  </div>
+</div>
+
+<section id="problem">
+  <div class="wrap">
+    <p class="eyebrow">The problem</p>
+    <h2>Your page speaks to everyone, so it reaches no one.</h2>
+    <p class="lede">You pay to send a fintech CFO, a lab director, and a solo founder to the exact same words. It can’t be apt for all three — so it’s apt for none, and your spend leaks out the bottom of the funnel.</p>
+    <div class="vs">
+      <div class="vscard old">
+        <div class="lab">Static page</div>
+        <h3>One size fits no one</h3>
+        <div class="item"><i>✕</i> Same headline for every source, segment, and intent.</div>
+        <div class="item"><i>✕</i> Can’t reference who the visitor is or why they came.</div>
+        <div class="item"><i>✕</i> Changes require a designer, a sprint, and a meeting.</div>
+        <div class="item"><i>✕</i> Full CAC spent to bounce well-matched buyers.</div>
+      </div>
+      <div class="vscard new">
+        <div class="lab">Apt page</div>
+        <h3>One page per person</h3>
+        <div class="item"><i>◆</i> Headline, proof &amp; CTA assembled for each visitor.</div>
+        <div class="item"><i>◆</i> Reads source, firmographics, intent &amp; CRM signals.</div>
+        <div class="item"><i>◆</i> Rewrites and re-optimizes itself, continuously.</div>
+        <div class="item"><i>◆</i> Same traffic, more conversions, lower CAC.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="solution" style="background:rgba(255,255,255,.015);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+  <div class="wrap">
+    <p class="eyebrow">The solution</p>
+    <h2>Hyper-personalized landing pages, engineered for return.</h2>
+    <p class="lede">Apt tailors every page to the visitor most apt to act on it — then proves each claim so personalization never costs you trust. Customize your targeting, lift your CTA, lower your CAC.</p>
+    <div class="band">
+      <div class="mcard"><div class="big">▲</div><div class="lbl">Higher CTA</div><div class="desc">The page makes the argument each visitor came to hear.</div></div>
+      <div class="mcard"><div class="big">▼</div><div class="lbl">Lower CAC</div><div class="desc">Traffic you already bought converts more often.</div></div>
+      <div class="mcard"><div class="big">▲</div><div class="lbl">Higher ROI</div><div class="desc">Effectiveness compounds as pages self-optimize.</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <p class="eyebrow">How it works</p>
+    <h2>Understand the apt. Build to fit. Prove it. Optimize it.</h2>
+    <p class="lede">A four-stage pipeline turns a visitor and a signal into a page that’s apt on both counts — perfectly suited, and likely to convert.</p>
+    <div class="flow">
+      <div class="fcard"><div class="n">1</div><h3>Understand</h3><p>Resolve the visitor into a segment — source, firmographics, intent, CRM — and model what they’re apt to want.</p></div>
+      <div class="fcard"><div class="n">2</div><h3>Assemble</h3><p>Draft the page from your claims library: the headline, proof, and CTA most fitted to that segment.</p></div>
+      <div class="fcard"><div class="n">3</div><h3>Prove</h3><p>The Provenance Gate cites or kills every claim. Nothing personalized ships unproven.<span class="badge">◆ cited or killed</span></p></div>
+      <div class="fcard"><div class="n">4</div><h3>Optimize</h3><p>A truth-bounded optimizer keeps what lifts CTA — only among claims that already passed the Gate.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="final">
+  <div class="finalbox">
+    <p class="eyebrow">Ready when you are</p>
+    <h2 style="max-width:24ch">Stop paying full price to land on the wrong page.</h2>
+    <p class="lede">Give every visitor a page that’s apt for them — and watch how apt they become.</p>
+    <div class="heroactions">
+      <a class="btn primary" href="#">Personalize my pages →</a>
+      <a class="btn ghost" href="#">Book a demo</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="brand" style="font-size:16px"><span class="mk" style="width:22px;height:22px"><svg width="14" height="14" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#0b1020" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 34 L26 44 L48 17"/><path d="M38 15 L48 17 L46 27"/></g></svg></span> Apt <span style="color:var(--muted);font-weight:400;font-size:12px">by Provenance</span></div>
+    <div>Personalized. Provable. Profitable. · © 2026 · Mock 2 — SaaS</div>
+  </div>
+</footer>
+
+</body>
+</html>

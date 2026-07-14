@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Apt mark (monochrome)">
+  <title>Apt — monochrome mark (uses currentColor)</title>
+  <g fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 34 L25 46 L50 14"/>
+    <path d="M39 12 L50 14 L48 25"/>
+  </g>
+</svg>
